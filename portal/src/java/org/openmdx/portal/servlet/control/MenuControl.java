@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: MenuControl.java,v 1.23 2008/05/02 15:42:56 wfro Exp $
+ * Name:        $Id: MenuControl.java,v 1.24 2008/08/12 16:38:06 wfro Exp $
  * Description: MenuControl
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/02 15:42:56 $
+ * Date:        $Date: 2008/08/12 16:38:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 

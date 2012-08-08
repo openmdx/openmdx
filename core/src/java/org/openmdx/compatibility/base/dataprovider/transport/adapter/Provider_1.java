@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Provider_1.java,v 1.24 2008/03/28 01:24:12 hburger Exp $
+ * Name:        $Id: Provider_1.java,v 1.26 2008/09/10 08:55:29 hburger Exp $
  * Description: Dataprovider Adapter: Provider
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/28 01:24:12 $
+ * Date:        $Date: 2008/09/10 08:55:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -99,7 +99,7 @@ import org.openmdx.kernel.log.SysLog;
 //---------------------------------------------------------------------------
 @SuppressWarnings("unchecked")
 public class Provider_1
-    implements Provider_1_3, Serializable {
+implements Provider_1_3, Serializable {
 
     /**
      * 
@@ -151,7 +151,7 @@ public class Provider_1
     ) throws ServiceException {
         return UNIVERSE;
     }
-    
+
     /**
      *
      */
@@ -164,7 +164,7 @@ public class Provider_1
     //------------------------------------------------------------------------
     // Life cycle management
     //------------------------------------------------------------------------
-    
+
     /**
      * Close the connection.
      * <p>
@@ -187,8 +187,8 @@ public class Provider_1
     ){
         return getChannel() == null;
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Query
     //------------------------------------------------------------------------
@@ -226,8 +226,8 @@ public class Provider_1
         boolean useExtent = referenceFilter.isLike(EXTENT_PATTERN);
         if(useExtent) { 
             if(
-                attributeFilter == null || 
-                attributeFilter.length == 0
+                    attributeFilter == null || 
+                    attributeFilter.length == 0
             ) return Collections.EMPTY_LIST;
             keys = getKey(attributeFilter, attributeSpecifier, 1);
         } else {
@@ -235,15 +235,15 @@ public class Provider_1
             Path identities = referenceFilter.getChild(":*");
             Map mappings = keys == null ? null : (Map)this.extents.get(keys);
             if(mappings != null) for (
-                Iterator i = mappings.entrySet().iterator();
-                i.hasNext();
+                    Iterator i = mappings.entrySet().iterator();
+                    i.hasNext();
             ){
                 Map.Entry e = (Map.Entry)i.next();
                 if(identities.isLike((Path)e.getKey())){
                     ArrayList result = new ArrayList();
                     for(
-                        Iterator j = ((List)e.getValue()).iterator();
-                        j.hasNext();
+                            Iterator j = ((List)e.getValue()).iterator();
+                            j.hasNext();
                     ){
                         Path candidate = (Path)j.next();
                         if(candidate.isLike(identities)) result.add(candidate);
@@ -278,8 +278,8 @@ public class Provider_1
                 mappings = new HashMap()
             );
             for(
-                Iterator i = identities.iterator();
-                i.hasNext();
+                    Iterator i = identities.iterator();
+                    i.hasNext();
             ) mappings.put(
                 new Path(i.next().toString()), 
                 findResult
@@ -302,15 +302,15 @@ public class Provider_1
         List key = new ArrayList();
         Set filterProperties = new HashSet();
         if(attributeFilter != null) for(
-            int i = 0; 
-            i < attributeFilter.length; 
-            i++
+                int i = 0; 
+                i < attributeFilter.length; 
+                i++
         ){
             if(SystemAttributes.OBJECT_IDENTITY.equals(attributeFilter[i].name())){
                 if(
-                    attributeFilter[i].quantor() != Quantors.THERE_EXISTS ||
-                    attributeFilter[i].operator() != FilterOperators.IS_LIKE 
-                 ) return null;
+                        attributeFilter[i].quantor() != Quantors.THERE_EXISTS ||
+                        attributeFilter[i].operator() != FilterOperators.IS_LIKE 
+                ) return null;
                 key.add(attributeFilter[i].values());
             } else {
                 filterProperties.add(attributeFilter[i]);
@@ -319,15 +319,15 @@ public class Provider_1
         if(key.size() != identityCount) return null;
         key.add(filterProperties);
         if(attributeSpecifier != null) for(
-            int i = 0; 
-            i < attributeSpecifier.length;
-            i++
+                int i = 0; 
+                i < attributeSpecifier.length;
+                i++
         ) if (
-            attributeSpecifier[i].order() != Orders.ANY
+                attributeSpecifier[i].order() != Orders.ANY
         ) key.add(attributeSpecifier[i]);
         return key;
     }
-    
+
     /**
      * Reconstruct the list.
      *
@@ -406,19 +406,19 @@ public class Provider_1
             AttributeSpecifier[] attributeSpecifiers = null;
             if(requiredSet != null) {
                 attributeSpecifiers = new AttributeSpecifier[
-                    requiredSet.size()
-                ];
+                                                             requiredSet.size()
+                                                             ];
                 int j = 0;
                 for(
-                    Iterator i = requiredSet.iterator(); 
-                    i.hasNext();
-                    j++ 
+                        Iterator i = requiredSet.iterator(); 
+                        i.hasNext();
+                        j++ 
                 ) attributeSpecifiers[j]=new AttributeSpecifier(
                     (String)i.next()
                 );
             }
             getChannel().addGetRequest(
-              path,
+                path,
                 AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
                 attributeSpecifiers,
                 object
@@ -468,13 +468,13 @@ public class Provider_1
             source.getValues(name)
         );
         for(
-            Iterator i = source.attributeNames().iterator();
-            i.hasNext();
+                Iterator i = source.attributeNames().iterator();
+                i.hasNext();
         ){
             Object attributeName = i.next();
             if(
-                !target.containsKey(attributeName) &&
-                !SystemAttributes.OBJECT_CLASS.equals(attributeName)
+                    !target.containsKey(attributeName) &&
+                    !SystemAttributes.OBJECT_CLASS.equals(attributeName)
             ) {
                 target.put(
                     attributeName, 
@@ -645,7 +645,7 @@ public class Provider_1
             target
         );
     }  
-        
+
 
     //------------------------------------------------------------------------
     // Implements Provider_1_1
@@ -663,7 +663,7 @@ public class Provider_1
         return this.persistentNewObjectsBecomeTransientUponRollback;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Synchronization_1_0
     //------------------------------------------------------------------------
@@ -678,7 +678,7 @@ public class Provider_1
         this.unitOfWorkChannel.clear();
         this.extents.clear();
     } 
-       
+
     /**
      * The beforeCompletion method notifies a provider or plug-in that a
      * unit of work is about to be committed 
@@ -688,7 +688,7 @@ public class Provider_1
         this.unitOfWorkChannel.beginUnitOfWork(this.transactionPolicyIsNew);
         this.completing = true;
     } 
-         
+
     /**
      * TO DO: Replace by a more appropriate method name
      * <p>
@@ -710,13 +710,11 @@ public class Provider_1
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ROLLBACK,
-                    null,
                     "Transactional unit of work rolled back"
                 ) : new ServiceException(
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ABORT,
-                    null,
                     "Non-transactional or container-managed unit of work aborted"
                 );
             } finally {
@@ -760,20 +758,17 @@ public class Provider_1
             throw new ServiceException (
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                null,
                 "View context is null"
             );
         } else {
             throw new ServiceException (
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("class", viewContext.getClass().getName())
-                },
-                "View context class is not among {" + DateStateContext.class.getName() + "}"
+                "View context class is not among {" + DateStateContext.class.getName() + "}",
+                new BasicException.Parameter("class", viewContext.getClass().getName())
             );
         }
-            
+
     }
 
     /**
@@ -820,8 +815,8 @@ public class Provider_1
     ){
         return source == null ? null : DateFormat.getInstance().format(source);
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Connection_1Factory
     //------------------------------------------------------------------------
@@ -858,7 +853,7 @@ public class Provider_1
         );
     }
 
-    
+
     //------------------------------------------------------------------------
     // Instance members
     //------------------------------------------------------------------------
@@ -867,20 +862,20 @@ public class Provider_1
     ){
         return this.completing ? 
             this.unitOfWorkChannel : 
-            this.shareableChannel; 
+                this.shareableChannel; 
     }
-    
-    
+
+
     /**
      * 
      */
     private RequestCollection unitOfWorkChannel, shareableChannel;  
-    
+
     /**
      * 
      */
     private final boolean transactionPolicyIsNew;
-    
+
     /**
      * 
      */
@@ -895,12 +890,12 @@ public class Provider_1
      * 
      */
     private Map extents = new HashMap();
-    
-    
+
+
     //------------------------------------------------------------------------
     // Class Members
     //------------------------------------------------------------------------
-    
+
     /**
      * The fallback provider forwards all requests to the delegate
      */
@@ -908,16 +903,16 @@ public class Provider_1
         new Path("")
     };
 
-    private static final String[] FINAL_CLASSES = new String[]{
+    private static final String[] FINAL_CLASSES = {
         "org:openmdx:base:Authority",
         "org:openmdx:base:Provider"
     };
-    
+
     /**
      * 
      */
     static final Path EXTENT_PATTERN = new Path(
-    	new String[]{":*","provider",":*","segment",":*","extent"}
+        new String[]{":*","provider",":*","segment",":*","extent"}
     );
 
 }

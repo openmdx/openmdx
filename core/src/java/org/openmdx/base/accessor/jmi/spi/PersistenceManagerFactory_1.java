@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceManagerFactory_1.java,v 1.23 2008/07/01 08:29:44 hburger Exp $
+ * Name:        $Id: PersistenceManagerFactory_1.java,v 1.28 2008/09/18 16:17:25 wfro Exp $
  * Description: Persistence Manager Factory 
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/01 08:29:44 $
+ * Date:        $Date: 2008/09/18 16:17:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,7 @@ import javax.jdo.PersistenceManagerFactory;
 import javax.security.auth.Subject;
 
 import org.openmdx.base.accessor.generic.view.Manager_1;
-import org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_2;
+import org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_3;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.spi.AbstractManagerFactory;
 import org.openmdx.base.persistence.spi.OptimisticTransaction_2_0;
@@ -80,7 +80,7 @@ import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
  * @since openMDX 1.13
  */
 public class PersistenceManagerFactory_1 
-    extends AbstractManagerFactory 
+extends AbstractManagerFactory 
 {
 
     /**
@@ -109,7 +109,7 @@ public class PersistenceManagerFactory_1
      * @param refPackageFactory
      */
     PersistenceManagerFactory_1(
-        RefPackageFactory_1_2 refPackageFactory        
+        RefPackageFactory_1_3 refPackageFactory        
     ) {
         super(EMPTY_CONFIGURATION);
         this.refPackageFactory = refPackageFactory;
@@ -121,17 +121,17 @@ public class PersistenceManagerFactory_1
      * This constant avoids type casting
      */
     private static final Map<String,Object> EMPTY_CONFIGURATION = Collections.emptyMap();
-    
+
     /**
      * 
      */
-    private final RefPackageFactory_1_2 refPackageFactory;
+    private final RefPackageFactory_1_3 refPackageFactory;
 
     /**
      * 
      */
     private final OptimisticTransaction_2_0 optimisticTransaction;
-    
+
     /**
      * 
      */
@@ -148,7 +148,7 @@ public class PersistenceManagerFactory_1
         Map<String,Object> properties
     ){
         PersistenceManagerFactory_1 persistenceManagerFactory = new PersistenceManagerFactory_1(
-           properties
+            properties
         );
         if (properties.containsKey(ConfigurableProperty.ConnectionFactory.qualifiedName())) {
             //
@@ -171,44 +171,11 @@ public class PersistenceManagerFactory_1
         return persistenceManagerFactory;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Extends AbstractPersistenceManagerFactory
     //------------------------------------------------------------------------
 
-    /**
-     * Create a service header populated with a principal list encoded as 
-     * user name.
-     * 
-     * @param connectionUsername a principal or the stringified principal list 
-     * 
-     * @return a principal array
-     * @deprecated Use {@link #newServiceHeader(String,String)} instead
-     */
-    public static ServiceHeader newServiceHeader(
-        String connectionUsername
-    ){
-        return newServiceHeader(connectionUsername, null);
-    }
-
-    /**
-     * Create a service header populated with a principal list encoded as 
-     * user name.
-     * 
-     * @param connectionUsername a principal or the stringified principal list 
-     * @param connectionPassword the correlation id
-     * 
-     * @return a principal array
-     * @deprecated Use {@link #toServiceHeader(String,String)} instead
-     */
-    public static ServiceHeader newServiceHeader(
-        String connectionUsername, 
-        String connectionPassword
-    ){
-        return toServiceHeader(connectionUsername, connectionPassword);
-    }
-
-    
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManagerFactory#getPersistenceManagerProxy()
      */
@@ -219,7 +186,7 @@ public class PersistenceManagerFactory_1
     /**
      * 
      */
-    private synchronized Dataprovider_1_1Connection getConnection(
+    private Dataprovider_1_1Connection getConnection(
     ) throws ServiceException{
         if(this.connection == null) {
             Dataprovider_1ConnectionFactory connectionFactory = (Dataprovider_1ConnectionFactory) this.getConnectionFactory();
@@ -242,9 +209,11 @@ public class PersistenceManagerFactory_1
     }
 
     /**
+     * Create a new persistence manager for legacy delegation
      * 
      * @param serviceHeader
-     * @return
+     * 
+     * @return a new persistence manager for legacy delegation
      */
     protected PersistenceManager newPersistenceManager(
         ServiceHeader serviceHeader
@@ -270,7 +239,8 @@ public class PersistenceManagerFactory_1
                 ),
                 this,
                 getBindingPackageSuffix(), 
-                this.optimisticTransaction
+                this.optimisticTransaction,
+                this.refPackageFactory == null ? null : this.refPackageFactory.getUserObjects()
             ).refPersistenceManager();  
         } catch (ServiceException exception) {
             throw new JDOFatalUserException(
@@ -279,7 +249,7 @@ public class PersistenceManagerFactory_1
             );
         }
     }
-    
+
     /**
      * Create a new persistence manager
      * <p>
@@ -309,7 +279,7 @@ public class PersistenceManagerFactory_1
             }
         }
     }
-    
+
     /**
      * Create a new persistence manager
      * <p>

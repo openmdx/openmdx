@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsAutocompleter.java,v 1.23 2008/04/04 11:55:48 hburger Exp $
+ * Name:        $Id: FindObjectsAutocompleter.java,v 1.24 2008/08/12 16:38:05 wfro Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:55:48 $
+ * Date:        $Date: 2008/08/12 16:38:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 

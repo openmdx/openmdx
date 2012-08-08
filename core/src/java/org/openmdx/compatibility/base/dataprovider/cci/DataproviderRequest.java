@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderRequest.java,v 1.18 2008/06/11 17:08:17 hburger Exp $
+ * Name:        $Id: DataproviderRequest.java,v 1.19 2008/09/10 08:55:22 hburger Exp $
  * Description: Dataprovider Cursor
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/11 17:08:17 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,8 +73,8 @@ import org.openmdx.kernel.log.SysLog;
  */
 @SuppressWarnings("unchecked")
 public class DataproviderRequest
-    extends DataproviderContext
-    implements MappedRecord
+extends DataproviderContext
+implements MappedRecord
 {
 
     /**
@@ -125,7 +125,7 @@ public class DataproviderRequest
         this.attributeSelector = that.attributeSelector;
         this.attributeSpecifier = that.attributeSpecifier;
     }
-    
+
     /**
      * Creates DataproviderRequest object setting all supplied parameters.
      * This ensures that all access methods would return non null values and
@@ -154,7 +154,7 @@ public class DataproviderRequest
         );
 
     }
-    
+
     /**
      * Constructor
      * 
@@ -184,60 +184,55 @@ public class DataproviderRequest
             if(object.path() == null) throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.ASSERTION_FAILURE,
-                null,
                 "A request's path must not be null"
             );
             this.object = object;
             if(
-                operation < DataproviderOperations.min() ||
-                operation > DataproviderOperations.max()
+                    operation < DataproviderOperations.min() ||
+                    operation > DataproviderOperations.max()
             ) throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("operation", operation)
-                },
-                "Illegal value for parameter 'operation'"
+                "Illegal value for parameter 'operation'",
+                new BasicException.Parameter("operation", operation)
             );        
             this.attributeSpecifier =
                 attributeSpecifier == null
                 ? NO_ATTRIBUTE_SPECIFIERS
-                : attributeSpecifier;
+                    : attributeSpecifier;
             this.operation = operation;
             this.filter = 
                 filter == null
                 ? NO_FILTER_PROPERTIES
-                : filter;
+                    : filter;
             this.position = position;
             this.size = size;
             this.direction = direction;
             this.attributeSelector = attributeSelector;
-                
+
             // Check that no name is repeating in the array of AttributeSpecifier
             for(
-                int i = 0;
-                i < this.attributeSpecifier.length - 1;
-                i++
+                    int i = 0;
+                    i < this.attributeSpecifier.length - 1;
+                    i++
             ){
                 for(
-                    int j = i + 1;
-                    j < this.attributeSpecifier.length;
-                    j++
+                        int j = i + 1;
+                        j < this.attributeSpecifier.length;
+                        j++
                 ){
                     if(
-                        this.attributeSpecifier[i].name().equals(this.attributeSpecifier[j].name())
+                            this.attributeSpecifier[i].name().equals(this.attributeSpecifier[j].name())
                     ){
                         new RuntimeServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.ASSERTION_FAILURE,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("name", this.attributeSpecifier[i].name()),
-                                new BasicException.Parameter("context", that),
-                                new BasicException.Parameter("request", object),
-                                new BasicException.Parameter("filter", Arrays.asList(this.filter)),
-                                new BasicException.Parameter("attributeSpecifier", Arrays.asList(this.attributeSpecifier))
-                            },
-                            "Different attribute specifiers with the same name found"
+                            "Different attribute specifiers with the same name found",
+                            new BasicException.Parameter("name", this.attributeSpecifier[i].name()),
+                            new BasicException.Parameter("context", that),
+                            new BasicException.Parameter("request", object),
+                            new BasicException.Parameter("filter", Arrays.asList(this.filter)),
+                            new BasicException.Parameter("attributeSpecifier", Arrays.asList(this.attributeSpecifier))
                         ).log();
                         break;
                     }
@@ -252,7 +247,7 @@ public class DataproviderRequest
         }
     }
 
-    
+
     //------------------------------------------------------------------------
     // Members
     //------------------------------------------------------------------------
@@ -266,7 +261,7 @@ public class DataproviderRequest
     ){
         return this.object.path();
     }
-    
+
     /**
      * Get the object
      *
@@ -276,7 +271,7 @@ public class DataproviderRequest
     ){
         return this.object;
     }
-    
+
     /**
      * Get the operation
      *
@@ -286,7 +281,7 @@ public class DataproviderRequest
     ){
         return this.operation;
     }
-    
+
     /**
      * Get the filter
      *
@@ -296,24 +291,24 @@ public class DataproviderRequest
     ){
         return this.filter;
     }
-    
+
     /**
      * Add a filter property to the current set of properties
      *
      * @return array of the current FilterProperties.
      */
     public FilterProperty[] addAttributeFilterProperty(
-      FilterProperty filterProperty
+        FilterProperty filterProperty
     ) {
-      FilterProperty[] newFilter = new FilterProperty[filter.length+1];
-      System.arraycopy(
-        filter, 0,
-        newFilter, 0,
-        filter.length
-      );
-      newFilter[filter.length] = filterProperty;
-      this.filter = newFilter;
-      return newFilter;
+        FilterProperty[] newFilter = new FilterProperty[filter.length+1];
+        System.arraycopy(
+            filter, 0,
+            newFilter, 0,
+            filter.length
+        );
+        newFilter[filter.length] = filterProperty;
+        this.filter = newFilter;
+        return newFilter;
     }
 
     /**
@@ -324,7 +319,7 @@ public class DataproviderRequest
     public int position() {
         return this.position; 
     }
-    
+
     /**
      * Get the maximum size of the extraction
      *
@@ -334,7 +329,7 @@ public class DataproviderRequest
     ){
         return this.size;
     }
-    
+
     /**
      * Get the direction of the extraction
      *
@@ -344,7 +339,7 @@ public class DataproviderRequest
     ){
         return this.direction;
     }
-    
+
     /**
      * Get the attribute selector
      *
@@ -354,7 +349,7 @@ public class DataproviderRequest
     ){
         return this.attributeSelector;
     }
-    
+
     /**
      * Get the attribute specifier
      *
@@ -364,7 +359,7 @@ public class DataproviderRequest
     ){
         return this.attributeSpecifier;
     }
-    
+
     /**
      * Get the attribute specifier corresponding to the 
      * name string parameter supplied.
@@ -377,9 +372,9 @@ public class DataproviderRequest
     ){
         AttributeSpecifier result = null;
         for(
-            int index = 0;
-            index < attributeSpecifier.length;
-            index++
+                int index = 0;
+                index < attributeSpecifier.length;
+                index++
         ){
             if(attributeSpecifier[index].name().equals(name)) {
                 result = attributeSpecifier[index];
@@ -388,25 +383,25 @@ public class DataproviderRequest
         }
         return result;
     }
-    
+
     /**
      * Get the attribute specifiers as Map. The key of
      * the entries are attribute.name(), the value is the
      * attribute itself.
      */
     public Map<String,AttributeSpecifier> attributeSpecifierAsMap() {
-      if(this.attributeSpecifierAsMap == null) {
-        this.attributeSpecifierAsMap = new HashMap();
-        if(attributeSpecifier != null) {
-          for(int i = 0; i < this.attributeSpecifier.length; i++) {
-            this.attributeSpecifierAsMap.put(
-              this.attributeSpecifier[i].name(),
-              this.attributeSpecifier[i]
-            );
-          }
+        if(this.attributeSpecifierAsMap == null) {
+            this.attributeSpecifierAsMap = new HashMap();
+            if(attributeSpecifier != null) {
+                for(int i = 0; i < this.attributeSpecifier.length; i++) {
+                    this.attributeSpecifierAsMap.put(
+                        this.attributeSpecifier[i].name(),
+                        this.attributeSpecifier[i]
+                    );
+                }
+            }
         }
-      }
-      return this.attributeSpecifierAsMap;
+        return this.attributeSpecifierAsMap;
     }
 
     //------------------------------------------------------------------------
@@ -427,29 +422,29 @@ public class DataproviderRequest
         try {
             return "object".equals(key) ?
                 object():
-            "operation".equals(key) ?
-                DataproviderOperations.toString(operation()):
-            "attributeFilter".equals(key) ?
-                Records.getRecordFactory().asIndexedRecord(
-                    "set", 
-                    null, 
-                    attributeFilter()
-                ):
-            "position".equals(key) ?
-                new Integer(position) :
-            "size".equals(key) ?
-                new Integer(size()) :
-            "direction".equals(key) ?
-                Directions.toString(direction()) :
-            "attributeSelector".equals(key) ?
-                AttributeSelectors.toString(attributeSelector()):
-            "attributeSpecifier".equals(key) ?
-                Records.getRecordFactory().asIndexedRecord(
-                    "list", 
-                    null, 
-                    attributeSpecifier()
-                ):
-                super.get(key);
+                    "operation".equals(key) ?
+                        DataproviderOperations.toString(operation()):
+                            "attributeFilter".equals(key) ?
+                                Records.getRecordFactory().asIndexedRecord(
+                                    "set", 
+                                    null, 
+                                    attributeFilter()
+                                ):
+                                    "position".equals(key) ?
+                                        new Integer(position) :
+                                            "size".equals(key) ?
+                                                new Integer(size()) :
+                                                    "direction".equals(key) ?
+                                                        Directions.toString(direction()) :
+                                                            "attributeSelector".equals(key) ?
+                                                                AttributeSelectors.toString(attributeSelector()):
+                                                                    "attributeSpecifier".equals(key) ?
+                                                                        Records.getRecordFactory().asIndexedRecord(
+                                                                            "list", 
+                                                                            null, 
+                                                                            attributeSpecifier()
+                                                                        ):
+                                                                            super.get(key);
         } catch (ResourceException e) {
             throw new RuntimeServiceException(e);
         }
@@ -476,37 +471,37 @@ public class DataproviderRequest
      * Dataprovider object
      */
     private final DataproviderObject object;
-    
+
     /**
      * Operation
      */
     private final short operation;
-    
+
     /**
      * Filter
      */
     private FilterProperty[] filter;
-    
+
     /**
      * The start position of the extraction
      */
     private final int position;
-    
+
     /**
      * The maximum size of the extraction
      */
     private final int size;
-    
+
     /**
      * The direction of the extraction
      */
     private final short direction;
-    
+
     /**
      * Attribute selector
      */
     private final short attributeSelector;
-    
+
     /**
      * Attribute specifier
      */

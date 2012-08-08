@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Plugin_1.java,v 1.42 2008/05/05 13:54:50 hburger Exp $
+ * Name:        $Id: Plugin_1.java,v 1.43 2008/09/10 08:55:21 hburger Exp $
  * Description: Plugin_1
- * Revision:    $Revision: 1.42 $
+ * Revision:    $Revision: 1.43 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/05 13:54:50 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -85,7 +85,7 @@ import org.openmdx.kernel.log.SysLog;
  * ObjectFactory_1_0 object requests.
  */
 abstract public class Plugin_1
-    extends OperationAwarePlugin_1 
+extends OperationAwarePlugin_1 
 {
 
     /**
@@ -93,7 +93,7 @@ abstract public class Plugin_1
      */
     protected final static Integer UNKNOWN_TOTAL = new Integer(Integer.MAX_VALUE);
 
-    
+
     //---------------------------------------------------------------------------
     // Layer_1_0
     //---------------------------------------------------------------------------
@@ -108,9 +108,9 @@ abstract public class Plugin_1
             requests
         );
         for(
-            int i = 0;
-            i < requests.length;
-            i++
+                int i = 0;
+                i < requests.length;
+                i++
         ) {
             DataproviderRequest request = requests[i];
             switch(request.operation()) {
@@ -127,9 +127,9 @@ abstract public class Plugin_1
                     this.retrieveObject(request, true);
                     break;
             }
-       }
+        }
     }
-    
+
     //---------------------------------------------------------------------------
     // Layer_1
     //---------------------------------------------------------------------------
@@ -152,9 +152,9 @@ abstract public class Plugin_1
                 )        
             );           
             for(
-                int i = 1;
-                i < this.retrievalSize && i < batch.size();
-                i++
+                    int i = 1;
+                    i < this.retrievalSize && i < batch.size();
+                    i++
             ) {
                 try {
                     Path path = batch.get(i);
@@ -175,11 +175,9 @@ abstract public class Plugin_1
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.GENERIC,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("requested", request.path()),
-                            new BasicException.Parameter("referenced", batch.get(i))
-                        },
-                        "Retrieval of referenced object failed"
+                        "Retrieval of referenced object failed",
+                        new BasicException.Parameter("requested", request.path()),
+                        new BasicException.Parameter("referenced", batch.get(i))
                     ).log(); 
                 }
             }
@@ -231,20 +229,18 @@ abstract public class Plugin_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter(
-                            "operation",
-                            DataproviderOperations.toString(request.operation())
-                        )
-                    },
-                    "Unexpected operation"
+                    "Unexpected operation",
+                    new BasicException.Parameter(
+                        "operation",
+                        DataproviderOperations.toString(request.operation())
+                    )
                 );
         }
 
         // complete and return as DataproviderObject
         List result = new ArrayList();
         int replySize = paths instanceof FetchSize 
-            ?  ((FetchSize)paths).getFetchSize() 
+        ?  ((FetchSize)paths).getFetchSize() 
             : FetchSize.DEFAULT_FETCH_SIZE; 
         if(replySize <= 0) replySize = this.batchSize;
         if(replySize > request.size()) replySize = request.size();
@@ -256,9 +252,9 @@ abstract public class Plugin_1
         int ii = 0;
         ListIterator iterator = null;
         for(
-            iterator = paths.listIterator(replyPosition);
-            iterator.hasNext() && ii < replySize;
-            ii++
+                iterator = paths.listIterator(replyPosition);
+                iterator.hasNext() && ii < replySize;
+                ii++
         ) {
             Object element = iterator.next();
             Path path;
@@ -298,11 +294,11 @@ abstract public class Plugin_1
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC,
+                "Reply context population failure",
                 new BasicException.Parameter []{
                     new BasicException.Parameter("path", request.path()),
                     new BasicException.Parameter("context", DataproviderReplyContexts.HAS_MORE)                    
-                },
-                "Reply context population failure"
+                }
             ).log();
         }
         // TOTAL
@@ -317,11 +313,11 @@ abstract public class Plugin_1
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC,
+                "Reply context population failure",
                 new BasicException.Parameter []{
                     new BasicException.Parameter("path", request.path()),
                     new BasicException.Parameter("context", DataproviderReplyContexts.TOTAL)                    
-                },
-                "Reply context population failure"
+                }
             ).log();
         }
         /**
@@ -342,12 +338,10 @@ abstract public class Plugin_1
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.TOO_LARGE_RESULT_SET,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("size", paths.size()),
-                            new BasicException.Parameter("limit", String.valueOf(replySize))
-                        },
                         "A list exceeding the given limit " +
-                        "could not be prepared for reconstruction"
+                        "could not be prepared for reconstruction",
+                        new BasicException.Parameter("size", paths.size()),
+                        new BasicException.Parameter("limit", String.valueOf(replySize))
                     );
                 }
             } 
@@ -355,12 +349,10 @@ abstract public class Plugin_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.TOO_LARGE_RESULT_SET,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("size", paths.size()),
-                        new BasicException.Parameter("limit",String.valueOf(replySize)),
-                        new BasicException.Parameter("class",paths.getClass().getName())
-                    },
-                    "A non-reconstructable list's size exceeds the given limit"
+                    "A non-reconstructable list's size exceeds the given limit",
+                    new BasicException.Parameter("size", paths.size()),
+                    new BasicException.Parameter("limit",String.valueOf(replySize)),
+                    new BasicException.Parameter("class",paths.getClass().getName())
                 );
             }
         }
@@ -481,8 +473,8 @@ abstract public class Plugin_1
     ) throws ServiceException {
         Boolean objectIsNew = (Boolean)this.objectIsNew.get(request.path());
         if(
-            (objectIsNew != null && objectIsNew.booleanValue()) || 
-            this.retrieveObject(request, false) == null
+                (objectIsNew != null && objectIsNew.booleanValue()) || 
+                this.retrieveObject(request, false) == null
         ){
             DataproviderObject_1_0 object = request.object();
             // exclude Authority, Provider, Segment
@@ -558,7 +550,7 @@ abstract public class Plugin_1
             object.length()
         );
     }
-        
+
 }
 
 //--- End of File -----------------------------------------------------------

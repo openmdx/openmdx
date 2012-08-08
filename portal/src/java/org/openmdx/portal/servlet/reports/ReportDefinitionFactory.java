@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportDefinitionFactory.java,v 1.15 2008/04/04 17:01:11 hburger Exp $
+ * Name:        $Id: ReportDefinitionFactory.java,v 1.18 2008/09/19 20:54:23 wfro Exp $
  * Description: TextsFactory
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:11 $
+ * Date:        $Date: 2008/09/19 20:54:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.reports;
 
@@ -74,44 +71,44 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
 public class ReportDefinitionFactory
-    implements Serializable {
-  
-   //-------------------------------------------------------------------------
-   public static ReportDefinition createReportDefinition(
-       String path,
-       String locale,
-       short localeIndex,
-       InputStream is
-   ) throws ServiceException {
-       if(path.endsWith(".rptdesign")) {
-           return new BirtReportDefinition(
+implements Serializable {
+
+    //-------------------------------------------------------------------------
+    public static ReportDefinition createReportDefinition(
+        String path,
+        String locale,
+        short localeIndex,
+        InputStream is
+    ) throws ServiceException {
+        if(path.endsWith(".rptdesign")) {
+            return new BirtReportDefinition(
                 path,
                 locale,
                 localeIndex,
                 is
             );
-       }
-       else if(path.endsWith(".jsp")) {
-           return new JspReportDefinition(
+        }
+        else if(path.endsWith(".jsp")) {
+            return new JspReportDefinition(
                 path,
                 locale,
                 localeIndex,
                 is
             );
-       }
-       else {
-           throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.NOT_SUPPORTED, 
-               new BasicException.Parameter[]{
-                   new BasicException.Parameter("name", path)
-               },
-               "Unsupported report definition format. Supported formats are [.rptdesign,.jsp]"
-           );
-       }
-   }
-   
-   //-------------------------------------------------------------------------
+        }
+        else {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                new BasicException.Parameter[]{
+                    new BasicException.Parameter("name", path)
+                },
+                "Unsupported report definition format. Supported formats are [.rptdesign,.jsp]"
+            );
+        }
+    }
+
+    //-------------------------------------------------------------------------
     public ReportDefinitionFactory(
         Map reports,
         Model_1_0 model
@@ -121,7 +118,7 @@ public class ReportDefinitionFactory
         this.model = model;
         AppLog.info("loaded reports=" + this.reportDefinitions.keySet());
     }
-  
+
     //-------------------------------------------------------------------------
     public List getReportDefinitions(
         String locale
@@ -130,7 +127,7 @@ public class ReportDefinitionFactory
             locale
         );
     }
-  
+
     //-------------------------------------------------------------------------
     public ReportDefinition[] findReportDefinitions(
         String forClass,
@@ -151,15 +148,15 @@ public class ReportDefinitionFactory
 
         int ii = 0;
         for(
-            Iterator i = reportDefinitions.iterator();
-            i.hasNext();
-            ii++
+                Iterator i = reportDefinitions.iterator();
+                i.hasNext();
+                ii++
         ) {
             ReportDefinition reportDefinition = (ReportDefinition)i.next();
             try {
                 for(
-                    Iterator j = reportDefinition.getForClass().iterator(); 
-                    j.hasNext(); 
+                        Iterator j = reportDefinition.getForClass().iterator(); 
+                        j.hasNext(); 
                 ) {
                     String reportClass = (String)j.next();
                     /**
@@ -171,9 +168,9 @@ public class ReportDefinitionFactory
                      */
                     List order = reportDefinition.getOrder();
                     if(
-                        model.isSubtypeOf(forClass, reportClass) &&
-                        ((orderPattern == null) && !customizedDefinitions.contains(reportDefinition.getName()) || 
-                        ((orderPattern != null) && (order != null) && order.contains(orderPattern)))
+                            model.isSubtypeOf(forClass, reportClass) &&
+                            ((orderPattern == null) && !customizedDefinitions.contains(reportDefinition.getName()) || 
+                                    ((orderPattern != null) && (order != null) && order.contains(orderPattern)))
                     ) {
                         matchingReportDefinitions.put(
                             order + ":" + ii,
@@ -196,14 +193,14 @@ public class ReportDefinitionFactory
         }
         return (ReportDefinition[])matchingReportDefinitions.values().toArray(new ReportDefinition[matchingReportDefinitions.size()]);
     }
-  
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 53793339941479036L;
 
     private final Map reportDefinitions;
-    
+
     /**
      * The factory manages a set of customized definitions for each 
      * forClass and locale. This allows to put all non or wrong customized 

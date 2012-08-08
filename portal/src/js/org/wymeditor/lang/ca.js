@@ -1,6 +1,4 @@
-﻿if(!WYM_STRINGS) var WYM_STRINGS = new Array();
-
-var WYM_STRINGS_CA = {
+WYMeditor.STRINGS['ca'] = {
     Strong:           'Ressaltar',
     Emphasis:         'Emfatitzar',
     Superscript:      'Superindex', 
@@ -44,4 +42,3 @@ var WYM_STRINGS_CA = {
     Source_Code:      'Codi font'
 };
 
-WYM_STRINGS['ca'] = WYM_STRINGS_CA;

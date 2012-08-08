@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.5-properties.xml,v 1.7 2007/01/22 15:41:04 hburger Exp $
+= Name:        $Id: jre-1.5-properties.xml,v 1.8 2008/09/08 15:40:23 hburger Exp $
 = Description: openMDX/Core jre-1.3 Platform Properties
-= Revision:    $Revision: 1.7 $
-= Date:        $Date: 2007/01/22 15:41:04 $
+= Revision:    $Revision: 1.8 $
+= Date:        $Date: 2008/09/08 15:40:23 $
 = Copyright:   (c) 2006 OMEX AG
 =======================================================================
 =
@@ -46,5 +46,5 @@
 -->
 <project name="openmdx-test-core-jre-1.5-properties">
 	<property name="project.build.exclude.1" value="org/openmdx/test/compatibility/base/dataprovider/exporter/*"/>
-	<property name="project.build.preprocess.tag1" value="OPENMDX1"/>
+	<property name="project.build.exclude.2" value="org/openmdx/test/base/transport/http/**"/>
 </project>

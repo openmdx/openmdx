@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AccessorFactory_2.java,v 1.8 2008/06/30 15:41:09 hburger Exp $
+ * Name:        $Id: AccessorFactory_2.java,v 1.11 2008/09/18 16:14:59 wfro Exp $
  * Description: AccessorFactory_2 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/30 15:41:09 $
+ * Date:        $Date: 2008/09/18 16:14:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -113,8 +113,8 @@ public class AccessorFactory_2
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = -3442827664670646249L;
-    
-    
+
+
     /**
      * JDO's standard factory method
      * 
@@ -130,11 +130,11 @@ public class AccessorFactory_2
         return new AccessorFactory_2(configuration);
     }
 
-    
+
     //------------------------------------------------------------------------
     // Extends AbstractPersistenceManagerFactory
     //------------------------------------------------------------------------
-    
+
     /**
      * Retrieve the manager factory
      * 
@@ -154,7 +154,7 @@ public class AccessorFactory_2
      * @see org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory#newPersistenceManager()
      */
     @Override
-    protected PersistenceManager newManager(
+    protected synchronized PersistenceManager newManager(
     ) {
         try {
             return new RefRootPackage_1(
@@ -178,7 +178,7 @@ public class AccessorFactory_2
      * @see org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory#newPersistenceManager(javax.security.auth.Subject)
      */
     @Override
-    protected PersistenceManager newManager(
+    protected synchronized PersistenceManager newManager(
         Subject subject
     ) {
         try {

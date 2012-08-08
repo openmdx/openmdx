@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TabControl.java,v 1.13 2008/04/04 17:01:09 hburger Exp $
+ * Name:        $Id: TabControl.java,v 1.14 2008/08/12 16:38:06 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:09 $
+ * Date:        $Date: 2008/08/12 16:38:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 

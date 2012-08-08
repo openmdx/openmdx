@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: GridControl.java,v 1.37 2008/05/01 21:43:56 wfro Exp $
+ * Name:        $Id: GridControl.java,v 1.38 2008/08/12 16:38:06 wfro Exp $
  * Description: GridControlDef
- * Revision:    $Revision: 1.37 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:56 $
+ * Date:        $Date: 2008/08/12 16:38:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 

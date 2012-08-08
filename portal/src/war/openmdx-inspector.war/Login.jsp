@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Login.jsp,v 1.36 2007/11/21 04:38:35 cmu Exp $
+ * Name:        $Id: Login.jsp,v 1.44 2008/09/19 12:54:26 cmu Exp $
  * Description: Login.jsp
- * Revision:    $Revision: 1.36 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/21 04:38:35 $
+ * Date:        $Date: 2008/09/19 12:54:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -117,7 +117,9 @@ java.io.PrintWriter"%>
      !locale.equals("nl_NL") &&
      !locale.equals("pl_PL") &&
      !locale.equals("pt_BR") &&
+     !locale.equals("ro_RO") &&
      !locale.equals("ru_RU") &&
+     !locale.equals("sk_SK") &&
      !locale.equals("sv_SE") &&
      !locale.equals("tr_TR") &&
      !locale.equals("zh_CN") )) {
@@ -138,7 +140,9 @@ java.io.PrintWriter"%>
   textsJavaScript.put("nl_NL", "Waarschuwing: Javascript moet geactiveerd zijn");
   textsJavaScript.put("pl_PL", "Uwaga: Javascript musi byc aktywowany");
   textsJavaScript.put("pt_BR", "Atenção: Javascript deve estar habilitado");
+  textsJavaScript.put("ro_RO", "Avertizare: trebuie acceptate Javascript");
   textsJavaScript.put("ru_RU", "Внимание: должна быть включена поддержка Javascript");
+  textsJavaScript.put("sk_SK", "Varovanie: Javascript musí byť povolený");
   textsJavaScript.put("sv_SE", "Varning: Javascript måste vara aktiverat");
   textsJavaScript.put("tr_TR", "Uyarı: Javascript betikleri etkinleştirilmelidir");
   textsJavaScript.put("zh_CN", "警告： Javascript 功能必须启用");
@@ -156,7 +160,9 @@ java.io.PrintWriter"%>
   textsSessionCookie.put("nl_NL", "Waarschuwing: Browser moet cookies accepteren");
   textsSessionCookie.put("pl_PL", "Uwaga: Przeglodarka musi akceptowac cookies");
   textsSessionCookie.put("pt_BR", "Atenção: O Navegador deve aceitar sessões de cook");
+  textsSessionCookie.put("ro_RO", "Avertizare: trebuie acceptate cookie-urile de sesiune");
   textsSessionCookie.put("ru_RU", "Внимание: Браузер должен поддерживать session cookies");
+  textsSessionCookie.put("sk_SK", "Varovanie: Prehliadač musí umožňovať sekcie cookies");
   textsSessionCookie.put("sv_SE", "Varning: Webbläsaren måste acceptera session cookies");
   textsSessionCookie.put("tr_TR", "Uyarı: Internet tarayıcısı oturum çerezlerini kabul etmelidir");
   textsSessionCookie.put("zh_CN", "警告： 浏览器必须允许使用 session cookies");
@@ -174,7 +180,9 @@ java.io.PrintWriter"%>
   textsLoginFailed.put("nl_NL", "Aanmelden niet gelukt. Probeert u het opnieuw");
   textsLoginFailed.put("pl_PL", "Logowanie nieudane. Prosze sprobowac jeszcze raz");
   textsLoginFailed.put("pt_BR", "Falha ao entrar. Favor tentar novamente");
+  textsLoginFailed.put("ro_RO", "Autentificare esuata. Reâncearcã");
   textsLoginFailed.put("ru_RU", "Не правильный вход в систему. Пожалуйста попробуйте еще раз");
+  textsLoginFailed.put("sk_SK", "Prihlásenie zlyhalo. Prosím skúste znova");
   textsLoginFailed.put("sv_SE", "Inloggning misslyckades. Var god försök igen.");
   textsLoginFailed.put("tr_TR", "Kayıt başarısızlığa uğradı. Lütfen yeniden deneyiniz");
   textsLoginFailed.put("zh_CN", "登录失败，请再试一次");
@@ -192,7 +200,9 @@ java.io.PrintWriter"%>
   textsUsername.put("nl_NL", "Gebruikersnaam");
   textsUsername.put("pl_PL", "Uzytkownik");
   textsUsername.put("pt_BR", "Usuário");
+  textsUsername.put("ro_RO", "Utilizator");
   textsUsername.put("ru_RU", "Имя пользователя");
+  textsUsername.put("sk_SK", "Meno používateľa");
   textsUsername.put("sv_SE", "Användarnamn");
   textsUsername.put("tr_TR", "Kullanıcı");
   textsUsername.put("zh_CN", "用户");
@@ -210,7 +220,9 @@ java.io.PrintWriter"%>
   textsPassword.put("nl_NL", "Wachtwoord");
   textsPassword.put("pl_PL", "Haslo");
   textsPassword.put("pt_BR", "Senha");
+  textsPassword.put("ro_RO", "Parola");
   textsPassword.put("ru_RU", "Пароль");
+  textsPassword.put("sk_SK", "Heslo");
   textsPassword.put("sv_SE", "Lösenord");
   textsPassword.put("tr_TR", "Parola");
   textsPassword.put("zh_CN", "密码");
@@ -228,7 +240,9 @@ java.io.PrintWriter"%>
   textsLogin.put("nl_NL", "Aanmelden");
   textsLogin.put("pl_PL", "Logowanie");
   textsLogin.put("pt_BR", "Entrar");
+  textsLogin.put("ro_RO", "Acces");
   textsLogin.put("ru_RU", "Вход в систему");
+  textsLogin.put("sk_SK", "Prihlásiť sa");
   textsLogin.put("sv_SE", "Inloggning");
   textsLogin.put("tr_TR", "Kayıt Girişi");
   textsLogin.put("zh_CN", "登录");
@@ -246,7 +260,9 @@ java.io.PrintWriter"%>
   textsLocale.put("nl_NL", "Nederlands (Nederland)");
   textsLocale.put("pl_PL", "Polski (Polska)");
   textsLocale.put("pt_BR", "Português (Brasil)");
+  textsLocale.put("ro_RO", "Românã (România)");
   textsLocale.put("ru_RU", "Русский (Россия)");
+  textsLocale.put("sk_SK", "Slovensky (Slovensko)");
   textsLocale.put("sv_SE", "Svenska (Sverige)");
   textsLocale.put("tr_TR", "Türkçe (Türkiye)");
   textsLocale.put("zh_CN", "中文 (中国)");
@@ -265,6 +281,7 @@ java.io.PrintWriter"%>
   activeLocales.add("pl_PL");
   activeLocales.add("pt_BR");
   activeLocales.add("ru_RU");
+  activeLocales.add("sk_SK");
   activeLocales.add("sv_SE");
   activeLocales.add("tr_TR");
   activeLocales.add("zh_CN");
@@ -283,57 +300,60 @@ java.io.PrintWriter"%>
   dir .put("pl_PL", "ltr");
   dir .put("pt_BR", "ltr");
   dir .put("ru_RU", "ltr");
+  dir .put("sk_SK", "ltr");
   dir .put("sv_SE", "ltr");
   dir .put("tr_TR", "ltr");
   dir .put("zh_CN", "ltr");
 
 %>
-<!--[if IE]><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><![endif]-->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html dir="<%= dir.get(locale) %>" style="overflow:auto;">
+<html dir="<%= dir.get(locale) %>" style="background:white;">
 <head>
   <title>openCRX - Login</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta http-equiv="Expires" content="0">
   <link href="<%=request.getContextPath()%>/_style/colors.css" rel="stylesheet" type="text/css">
   <script language="javascript" type="text/javascript" src="<%=request.getContextPath()%>/javascript/portal-all.js"></script>
-  <link href="<%=request.getContextPath()%>/_style/ssf.css" rel="stylesheet" type="text/css">
   <!--[if lt IE 7]><script type="text/javascript" src="<%=request.getContextPath()%>/javascript/iehover-fix.js"></script><![endif]-->
+  <link href="<%=request.getContextPath()%>/_style/ssf.css" rel="stylesheet" type="text/css">
   <link href="<%=request.getContextPath()%>/_style/n2default.css" rel="stylesheet" type="text/css">
+  <link href="<%=request.getContextPath()%>/javascript/yui/build/assets/skins/sam/container.css" rel="stylesheet" type="text/css">
   <link rel='shortcut icon' href='<%=request.getContextPath()%>/images/favicon.ico' />
 </head>
-<body onLoad="javascript: document.forms.formLogin.j_username.focus();" style="overflow:visible;">
-  <%@ include file="login-header.html" %>
-  <div id="header" style="padding:10px 0px 10px 0px;">
-    <table dir="ltr" id="headerlayout" style="position:relative;">
-      <tr id="headRow">
-        <td id="head" colspan="2">
-          <table id="info">
-            <tr>
-              <td id="headerCellLeft"><img id="logoLeft" src="<%=request.getContextPath()%>/images/logoLeft.gif" alt="openCRX - limitless relationship management" title="" /></td>
-              <td id="headerCellMiddle"></td>
-              <td id="headerCellRight"><img id="logoRight" src="<%=request.getContextPath()%>/images/logoRight.gif" alt="" title="" /></td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
+<body class="yui-skin-sam" style="border:0px solid white;" onLoad="javascript:document.forms.formLogin.j_username.focus();">
+  <div id="header" style="height:90px;">
+    <div id="logoTable" style="padding-left:10px;">
+      <table dir="ltr" id="headerlayout" style="position:relative;">
+        <tr id="headRow">
+          <td id="head" colspan="2">
+            <table id="info">
+              <tr>
+                <td id="headerCellLeft"><img id="logoLeft" src="<%=request.getContextPath()%>/images/logoLeft.gif" alt="openCRX - limitless relationship management" title="openCRX - limitless relationship management" /></td>
+                <td id="headerCellMiddle"></td>
+                <td id="headerCellRight"><img id="logoRight" src="<%=request.getContextPath()%>/images/logoRight.gif" alt="" title="" /></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
   </div>
-  <div style="text-align:center;padding-top:100px;">
+  <div id="login" style="position:relative;text-align:center;margin-left:auto;margin-right:auto;padding-top:15em;">
+  <%@ include file="login-header.html" %>
   <form name="formLogin" method="POST" action="j_security_check">
     <table style="text-align:left;border-collapse:collapse;margin-left:auto;margin-right:auto;width:550px;border:solid 1px #DDDDDD;">
-      <tr class="objectTitle">
+      <tr>
         <td colspan="2" width="100%" style="vertical-align: middle;padding:8px;white-space:nowrap;">
-          <span style="font-size:18px;"><%= textsLogin.get(locale) %></span>
+          <span style="font-size:14pt;font-weight:bold;"><%= textsLogin.get(locale) %></span>
         </td>
         <td style="vertical-align: middle; padding-right:5px;white-space:nowrap;">
           <ul dir="ltr" id="nav" class="nav" style="width:220px;" onmouseover="sfinit(this);">
-            <li id="flyout" style="border-top: solid 1px #DDDDDD;border-bottom: solid 1px #DDDDDD;"><a href="#"><img src="<%=request.getContextPath()%>/images/panel_down.gif" alt="" style="border:none 0px white;float:right;top:-20px;" /><%= locale %> - <%= textsLocale.get(locale) %></a>
+            <li id="flyout" style="border-top: solid 1px #DDDDDD;border-bottom: solid 1px #DDDDDD;"><a href="#"><img src="<%=request.getContextPath()%>/images/panel_down.gif" alt="" style="border:none 0px white;float:right;top:-20px;" /><%= locale %> - <%= textsLocale.get(locale) %>&nbsp;</a>
               <ul onclick="this.style.left='-999em';" onmouseout="this.style.left='';">
 <%
                 for (int i = 0; i < activeLocales.size(); i++) {
 %>
-                  <li><a href="#" onclick="javascript:window.location.href='Login?locale=<%= activeLocales.get(i).toString() %>&timezone=<%= URLEncoder.encode(timezone) %>';"><%= activeLocales.get(i).toString() %> - <%= textsLocale.get(activeLocales.get(i)).toString() %></a></li>
+                  <li><a href="#" onclick="javascript:window.location.href='Login?locale=<%= activeLocales.get(i).toString() %>&timezone=<%= URLEncoder.encode(timezone) %>';"><span style="font-family:courier;"><%= activeLocales.get(i).toString() %>&nbsp;&nbsp;</span><%= textsLocale.get(activeLocales.get(i)).toString() %></a></li>
 <%
                 }
 %>
@@ -355,7 +375,7 @@ java.io.PrintWriter"%>
         </td>
       </tr>
       <tr>
-        <td style="height:30px;"></td>
+        <td colspan="3"><div style="height:30px;"></div></td>
       </tr>
       <tr>
         <td style="vertical-align: middle;padding-left:8px;padding-right:5px;" nowrap>
@@ -368,7 +388,7 @@ java.io.PrintWriter"%>
 	      </td>
       </tr>
       <tr>
-        <td style="height:2px;"></td>
+        <td colspan="3" style="height:2px;"></td>
       </tr>
       <tr>
         <td style="vertical-align: middle;padding-left:8px;padding-right:5px;" nowrap>
@@ -382,24 +402,24 @@ java.io.PrintWriter"%>
 	      </td>
       </tr>
       <tr>
-        <td colspan="3" style="height:10px;"></td>
-      </tr>
-      <tr>
-        <td colspan="3">
-          <%@ include file="login-note.html" %>
-        </td>
+        <td colspan="3" style="height:30px;"></td>
       </tr>
 <%
       if(loginFailed) {
 %>
       <tr>
         <td colspan="3" class="cellErrorRight" style="padding:5px;">
-          &nbsp;<b>Error</b>: <%= textsLoginFailed.get(locale) %>
+          &nbsp;<b><%= textsLoginFailed.get(locale) %></b>
         </td>
       </tr>
 <%
       }
 %>
+      <tr>
+        <td colspan="3">
+          <%@ include file="login-note.html" %>
+        </td>
+      </tr>
     </table>
   </form>
   </div>
@@ -412,7 +432,13 @@ java.io.PrintWriter"%>
       }
     }
     var fullRequest = '<%= request.getRequestURL()%>' + '<%= request.getQueryString() == null ? "" : "?" + request.getQueryString() %>';
-    if (fullRequest != location.href) {window.location.href = fullRequest;} // never embed the login page in another page
+<%
+    if (!loginFailed) {
+%>
+      if (fullRequest != location.href) {window.location.href = fullRequest;} // never embed the login page in another page
+<%
+    }
+%>
   </script>
 </body>
 </html>

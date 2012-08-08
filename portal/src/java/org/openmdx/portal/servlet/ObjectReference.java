@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReference.java,v 1.24 2008/06/14 00:00:14 wfro Exp $
+ * Name:        $Id: ObjectReference.java,v 1.26 2008/08/15 12:14:05 wfro Exp $
  * Description: ObjectReference 
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/14 00:00:14 $
+ * Date:        $Date: 2008/08/15 12:14:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -452,32 +449,6 @@ public class ObjectReference
         }
     }
 
-  //-------------------------------------------------------------------------
-  public int getGridRowNestingLevel(
-  ) {
-      if(this.application == null) {
-          return 0;
-      }
-      else {
-          return this.application.getPortalExtension().getGridRowNestingLevel(
-              this.object
-          );
-      }
-  }
-  
-  //-------------------------------------------------------------------------
-  public String getGridRowLevelId(
-  ) {
-      if(this.application == null) {
-          return null;
-      }
-      else {
-          return this.application.getPortalExtension().getGridRowLevelId(
-              this.object
-          );
-      }
-  }
-  
   //-------------------------------------------------------------------------
   public String toString(
   ) {

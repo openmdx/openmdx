@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CachingMarshaller.java,v 1.7 2008/06/13 09:34:19 hburger Exp $
+ * Name:        $Id: CachingMarshaller.java,v 1.9 2008/09/03 17:27:36 hburger Exp $
  * Description: Caching Marshaller 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/13 09:34:19 $
+ * Date:        $Date: 2008/09/03 17:27:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,6 +54,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.openmdx.base.exception.ServiceException;
 
@@ -99,7 +100,7 @@ public abstract class CachingMarshaller
     /**
      * 
      */
-    private final boolean multithreaded;
+    protected final boolean multithreaded;
     
     /**
      * The unmarshalled objects
@@ -142,10 +143,34 @@ public abstract class CachingMarshaller
         Object unmarshalled,
         Object marshalled
     ){
-        Object oldValue = this.mapping.put(unmarshalled, marshalled);
-        boolean modify = oldValue == null;
-        if(!modify)this.mapping.put(unmarshalled, oldValue); // undo
-        return modify;
+        Object oldValue;
+        if(this.multithreaded) {
+            //
+            // Intrinsic Put Of Absent
+            //
+            oldValue = ((ConcurrentMap<Object,Object>)this.mapping).putIfAbsent(
+                unmarshalled, 
+                marshalled
+            );
+        } else {
+            //
+            // Optimistic Put If Absent
+            //
+            oldValue = this.mapping.put(
+                unmarshalled, 
+                marshalled
+            );
+            if(oldValue != null) {
+                //
+                // Undo
+                //
+                this.mapping.put(
+                    unmarshalled, 
+                    oldValue
+                );
+            }
+        }
+        return oldValue == null;
     }
 
     /**

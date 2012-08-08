@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSequentialList.java,v 1.18 2008/03/06 19:03:26 hburger Exp $
+ * Name:        $Id: MarshallingSequentialList.java,v 1.19 2008/09/10 08:55:27 hburger Exp $
  * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/06 19:03:26 $
+ * Date:        $Date: 2008/09/10 08:55:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,8 +67,8 @@ import org.openmdx.kernel.exception.BasicException;
  * A Marshalling Sequential List
  */
 public class MarshallingSequentialList<E>
-    extends AbstractSequentialList<E>
-    implements Reconstructable, Serializable
+extends AbstractSequentialList<E>
+implements Reconstructable, Serializable
 {
 
     /**
@@ -99,7 +99,7 @@ public class MarshallingSequentialList<E>
         this.marshaller = marshaller;
         this.list = (List<Object>) list;
     }
-  
+
     /**
      * Constructor
      * 
@@ -112,7 +112,7 @@ public class MarshallingSequentialList<E>
     ) {
         this(new CollectionMarshallerAdapter(marshaller), list);
     }
-  
+
     /* (non-Javadoc)
      * @see java.util.List#add(int, java.lang.Object)
      */
@@ -131,7 +131,7 @@ public class MarshallingSequentialList<E>
      * @see java.util.Collection#clear()
      */
     public void clear() {
-    	getDelegate().clear();
+        getDelegate().clear();
     }
 
     /* (non-Javadoc)
@@ -192,7 +192,7 @@ public class MarshallingSequentialList<E>
             getDelegate().listIterator()
         );
     }
-           
+
     public ListIterator<E> listIterator(
         int index
     ) {
@@ -224,10 +224,10 @@ public class MarshallingSequentialList<E>
     @SuppressWarnings("unchecked")
     public E set(int index, E arg1) {
         return (E) this.marshaller.marshal(
-        	getDelegate().set(index, this.marshaller.unmarshal(arg1))
+            getDelegate().set(index, this.marshaller.unmarshal(arg1))
         );
     }
-    
+
 
     //------------------------------------------------------------------------
     // Extends AbstractSequentialList 
@@ -237,12 +237,12 @@ public class MarshallingSequentialList<E>
     ) {
         return getDelegate().size();
     }
-    
- 
+
+
     //------------------------------------------------------------------------
     // Implements Reconstructable
     //------------------------------------------------------------------------
-    
+
     /**
      * Write part of a reconstructable object's state to an OutputStream
      * (optional operation).
@@ -266,10 +266,8 @@ public class MarshallingSequentialList<E>
             throw new ServiceException(
                 StackedException.DEFAULT_DOMAIN, 
                 StackedException.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("class",list.getClass().getName())
-                },
-                "List to delegate to is not reconstructable"
+                "List to delegate to is not reconstructable",
+                new BasicException.Parameter("class",list.getClass().getName())
             );
         }
     }
@@ -295,7 +293,7 @@ public class MarshallingSequentialList<E>
     //------------------------------------------------------------------------
 
     protected class MarshallingIterator
-        implements ListIterator<E> 
+    implements ListIterator<E> 
     {
 
         @SuppressWarnings("unchecked")
@@ -304,7 +302,7 @@ public class MarshallingSequentialList<E>
         ) {
             this.iterator = (ListIterator<Object>) iterator;
         }
-        
+
         public void add(
             Object o
         ) {
@@ -315,7 +313,7 @@ public class MarshallingSequentialList<E>
         ) {
             return this.iterator.hasNext();
         }
-        
+
         public boolean hasPrevious(
         ) {
             return this.iterator.hasPrevious();
@@ -331,13 +329,13 @@ public class MarshallingSequentialList<E>
         ) {
             return this.iterator.nextIndex();
         }
-        
+
         @SuppressWarnings("unchecked")
         public E previous(
         ) {
             return (E) marshaller.marshal(this.iterator.previous());
         }
-        
+
         public int previousIndex(
         ) {
             return this.iterator.previousIndex();
@@ -347,13 +345,13 @@ public class MarshallingSequentialList<E>
         ) {
             this.iterator.remove();
         }
-        
+
         public void set(
             Object o
         ) {
             this.iterator.set(marshaller.unmarshal(o));
         }
-    
+
         private final ListIterator<Object> iterator;
 
     }

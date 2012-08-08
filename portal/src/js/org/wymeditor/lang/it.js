@@ -1,6 +1,4 @@
-﻿if(!WYM_STRINGS) var WYM_STRINGS = new Array();
-
-var WYM_STRINGS_IT = {
+WYMeditor.STRINGS['it'] = {
     Strong:           'Grassetto',
     Emphasis:         'Corsetto',
     Superscript:      'Apice',
@@ -44,4 +42,3 @@ var WYM_STRINGS_IT = {
     Source_Code:      'Codice Sorgente'
 };
 
-WYM_STRINGS['it'] = WYM_STRINGS_IT;

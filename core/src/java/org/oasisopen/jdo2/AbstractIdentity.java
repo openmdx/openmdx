@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractIdentity.java,v 1.6 2008/04/04 01:11:49 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AbstractIdentity.java,v 1.7 2008/08/21 20:15:26 hburger Exp $
  * Description: Abstract Identity 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 01:11:49 $
+ * Date:        $Date: 2008/08/21 20:15:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -59,6 +59,7 @@ import org.ietf.jgss.Oid;
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.cci2.Identity;
 import org.oasisopen.spi2.XRISegments;
+import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 
 /**
  * Abstract Identity
@@ -130,7 +131,7 @@ public abstract class AbstractIdentity
         Identity parent = parent();
         String referenceName = referenceName();
         StringBuilder xri = referenceName == null ? new StringBuilder(
-            "xri://@openmdx"
+            XRI_2Protocols.OPENMDX_PREFIX
         ) : new StringBuilder(
             parent instanceof AbstractIdentity ? ((AbstractIdentity)parent).toXRI(objectClass) : parent.toString()
         ).append(

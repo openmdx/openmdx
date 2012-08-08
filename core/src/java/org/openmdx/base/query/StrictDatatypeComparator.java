@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StrictDatatypeComparator.java,v 1.2 2008/03/21 18:30:56 hburger Exp $
+ * Name:        $Id: StrictDatatypeComparator.java,v 1.4 2008/09/10 08:55:30 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:30:56 $
+ * Date:        $Date: 2008/09/10 08:55:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -91,8 +91,8 @@ public class StrictDatatypeComparator extends LenientNumberComparator {
      * 
      */
     private static final Comparator instance = new StrictDatatypeComparator(null);
-            
-    
+
+
     //------------------------------------------------------------------------
     // Implements Comparator
     //------------------------------------------------------------------------
@@ -110,55 +110,45 @@ public class StrictDatatypeComparator extends LenientNumberComparator {
             if(!first.getClass().isInstance(second)) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter(
-                        "classes",
-                        new String[]{
-                            first == null ? null : first.getClass().getName(),
-                            second == null ? null : second.getClass().getName()    
-                        }
-                    )
-                },
-                "The two classes are not comparable"
+                "The two classes are not comparable",
+                new BasicException.Parameter(
+                    "classes",
+                    first == null ? null : first.getClass().getName(),
+                        second == null ? null : second.getClass().getName()    
+                )
             );
             int result = duration ?   
-                    ((Duration)first).compare((Duration)second) :
+                ((Duration)first).compare((Duration)second) :
                     ((XMLGregorianCalendar)first).compare((XMLGregorianCalendar)second); 
-            switch (result) {
-                case DatatypeConstants.LESSER: return -1;
-                case DatatypeConstants.EQUAL: return 0;
-                case DatatypeConstants.GREATER: return 1;
-                case DatatypeConstants.INDETERMINATE: throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_QUERY_CRITERIA,
-                    new BasicException.Parameter[]{
+                switch (result) {
+                    case DatatypeConstants.LESSER: return -1;
+                    case DatatypeConstants.EQUAL: return 0;
+                    case DatatypeConstants.GREATER: return 1;
+                    case DatatypeConstants.INDETERMINATE: throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_QUERY_CRITERIA,
+                        "The relationship between the two given values is indeterminate", 
                         new BasicException.Parameter(
                             "values",
-                            new String[]{
-                                first.toString(),
-                                second.toString()    
-                            }
+                            first.toString(),
+                            second.toString()    
                         )
-                    }, 
-                    "The relationship between the two given values is indeterminate"
-                );
-                default: throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[]{
+                    );
+                    default: throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "Unexpected compare result", 
                         new BasicException.Parameter(
                             "result",
                             result
                         )
-                    }, 
-                    "Unexpected compare result"
-                );
-            }
+                    );
+                }
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         } else {
             return super.compare(first, second); 
         }            
     }
-     
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReferenceValue.java,v 1.51 2008/04/04 17:01:11 hburger Exp $
+ * Name:        $Id: ObjectReferenceValue.java,v 1.54 2008/09/19 20:54:22 wfro Exp $
  * Description: ObjectReferenceValue 
- * Revision:    $Revision: 1.51 $
+ * Revision:    $Revision: 1.54 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:11 $
+ * Date:        $Date: 2008/09/19 20:54:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 
@@ -79,10 +76,10 @@ import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.view.View;
 
 public class ObjectReferenceValue
-    extends AttributeValue
-    implements Serializable {
-  
-  //-------------------------------------------------------------------------
+extends AttributeValue
+implements Serializable {
+
+    //-------------------------------------------------------------------------
     public static AttributeValue createObjectReferenceValue(
         Object object,
         FieldDef fieldDef,
@@ -90,25 +87,25 @@ public class ObjectReferenceValue
     ) {
         // Return user defined attribute value class or ObjectReferenceValue as default
         String valueClassName = fieldDef == null
-            ? null
+        ? null
             : (String)application.getMimeTypeImpls().get(fieldDef.mimeType);
         AttributeValue attributeValue = valueClassName == null
-            ? null
+        ? null
             : AttributeValue.createAttributeValue(
                 valueClassName,
                 object,
                 fieldDef,
                 application
-              );
+            );
         return attributeValue != null
-            ? attributeValue
+        ? attributeValue
             : new ObjectReferenceValue(
                 object,
                 fieldDef,
                 application
             );
     }
-    
+
     //-------------------------------------------------------------------------
     protected ObjectReferenceValue(
         Object object,
@@ -141,7 +138,7 @@ public class ObjectReferenceValue
             }
         }
     }
-  
+
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     public Object getValue(
@@ -156,12 +153,12 @@ public class ObjectReferenceValue
         Object value = 
             this.object instanceof RefObject_1_0 && 
             this.fieldDef.qualifiedFeatureName.equals("org:openmdx:base:ExtentCapable:identity")
-                ? this.object
+            ? this.object
                 : super.getValue(shortFormat);
         if(value == null) {
             return new ObjectReference(
-               (RefObject_1_0)null,
-               this.application
+                (RefObject_1_0)null,
+                this.application
             );
         }
         else if(value instanceof BasicException) {
@@ -196,7 +193,7 @@ public class ObjectReferenceValue
     ) {      
         return this.fieldDef.defaultValue;
     }
-  
+
     //-------------------------------------------------------------------------
     public String getBackColor(
     ) {
@@ -216,7 +213,7 @@ public class ObjectReferenceValue
         }
         return null;
     }
-    
+
     //-------------------------------------------------------------------------
     public String toString(
     ) {
@@ -238,7 +235,7 @@ public class ObjectReferenceValue
             return value.toString();
         }
     }
-  
+
     //-------------------------------------------------------------------------
     /**
      * Prepares a single stringified value to append.
@@ -263,53 +260,53 @@ public class ObjectReferenceValue
             Action action = ((ObjectReference)v).getSelectObjectAction();
             String title = action.getTitle();
             return action.getEvent() == Action.EVENT_NONE
-                ? title
+            ? title
                 : "<a href=\"\" onclick=\"javascript:this.href=" + p.getEvalHRef(action) + ";\">" + this.application.getHtmlEncoder().encode(title, false) + "</a>";
         }
     }
 
     //-------------------------------------------------------------------------
     public static class ObjectReferenceMarshaller
-        implements Marshaller, Serializable {
+    implements Marshaller, Serializable {
 
         public ObjectReferenceMarshaller(
             ApplicationContext application
         ) {
-          this.application = application;
+            this.application = application;
         }
-        
+
         public Object marshal(Object source) throws ServiceException {
-          if(source instanceof RefObject_1_0) {
-              return new ObjectReference(
-                  (RefObject_1_0)source,
-                  this.application
-              );
-          }
-          else if(source == null) {
-              return new ObjectReference(
-                  new BasicException(
-                      BasicException.Code.DEFAULT_DOMAIN,
-                      BasicException.Code.NOT_FOUND, 
-                      new BasicException.Parameter[]{
-                          new BasicException.Parameter("path", null)
-                      },
-                      "Null object can not be marshalled"
-                  ),
-                  this.application
-              );
-          }
-          else {
-              return source;
-          }
+            if(source instanceof RefObject_1_0) {
+                return new ObjectReference(
+                    (RefObject_1_0)source,
+                    this.application
+                );
+            }
+            else if(source == null) {
+                return new ObjectReference(
+                    new BasicException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_FOUND,
+                        new BasicException.Parameter[]{
+                            new BasicException.Parameter("path")
+                        },
+                        "Null object can not be marshalled"
+                    ),
+                    this.application
+                );
+            }
+            else {
+                return source;
+            }
         }
-    
+
         public Object unmarshal(Object source) throws ServiceException {
-          if(source instanceof ObjectReference) {
-            return ((ObjectReference)source).getObject();
-          }
-          else {
-            return source;
-          }
+            if(source instanceof ObjectReference) {
+                return ((ObjectReference)source).getObject();
+            }
+            else {
+                return source;
+            }
         }
 
         private static final long serialVersionUID = 3257289132211778355L;
@@ -345,14 +342,14 @@ public class ObjectReferenceValue
             String feature = this.getName();
             ObjectReference objectReference = (ObjectReference)this.getValue(false);
             id = (id == null) || (id.length() == 0)
-                ? feature + "[" + tabIndex + "]"
+            ? feature + "[" + tabIndex + "]"
                 : id;
             p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             p.write("<td ", rowSpanModifier, ">");
             // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
             // Show drop-down instead of input field
             Autocompleter_1_0 autocompleter = this.isChangeable()
-                ? this.getAutocompleter(lookupObject)
+            ? this.getAutocompleter(lookupObject)
                 : null;
             if(autocompleter == null) {
                 p.write("  <input id=\"", id, ".Title\" name=\"", id, ".Title\" type=\"text\" class=\"valueL", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\"");
@@ -378,8 +375,8 @@ public class ObjectReferenceValue
             p.write("<td class=\"addon\" ", rowSpanModifier, ">");
             if(this.isChangeable()) {
                 if(
-                    (autocompleter == null) || 
-                    !autocompleter.hasFixedSelectableValues()
+                        (autocompleter == null) || 
+                        !autocompleter.hasFixedSelectableValues()
                 ) {
                     String lookupId = org.openmdx.kernel.id.UUIDs.getGenerator().next().toString();
                     Action findObjectAction = view.getFindObjectAction(
@@ -412,14 +409,14 @@ public class ObjectReferenceValue
             );
         }
     }
-        
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3617855270202519606L;
 
     private ObjectReferenceMarshaller objectReferenceMarshaller = null;
-    
+
 }
 
 //--- End of File -----------------------------------------------------------

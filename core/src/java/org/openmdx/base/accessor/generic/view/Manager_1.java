@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Manager_1.java,v 1.25 2008/04/29 14:54:19 hburger Exp $
+ * Name:        $Id: Manager_1.java,v 1.35 2008/09/18 12:46:43 hburger Exp $
  * Description: SPICE Object Layer: Manager implementation
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/29 14:54:19 $
+ * Date:        $Date: 2008/09/18 12:46:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +62,7 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.transaction.UnitOfWork_1_0;
 import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1Factory;
+import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_1;
 import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_2;
 import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_4;
 import org.openmdx.compatibility.base.event.InstanceCallbackEvent;
@@ -70,7 +71,6 @@ import org.openmdx.compatibility.base.marshalling.CachingMarshaller;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.resource.cci.Connection_1_0;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
 /**
@@ -85,37 +85,42 @@ public class Manager_1
 {
 
     /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = 4121130329538180151L;
-
-
-    /**
      * Constructs a Manager.
      *
      * @param   interaction
      *          the interaction object to be used by this manager
      */
     public Manager_1(
-        Connection_1_0 interaction
+        Connection_1_1 interaction
     ) throws ServiceException{
-        super();
         this.connection = interaction;
     }
 
     /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 4121130329538180151L;
+
+    /**
+     * Aspects replace former view and role patterns
+     */
+    private static final String ASPECTS_ONLY = "Support for " +
+        "org::openmdx::compatibility::view1 and " +
+        "org::openmdx::compatibility::role1 has been removed"; 
+
+    /**
      *  
      */
-    private Connection_1_0 connection;
-    
+    private Connection_1_1 connection;
+
     /**
      * Return connection assigned to this manager.
      */
     public Connection_1_0 getConnection(
     ) {
-      return this.connection;
+        return this.connection;
     }
-    
+
 
     //------------------------------------------------------------------------
     // Implements ModelHolder_1_0
@@ -127,17 +132,17 @@ public class Manager_1
      * @param model The model to set.
      */
     public final void setModel(Model_1_0 model) {
-        ((ModelHolder_1_0)this.connection).setModel(model);
+        this.connection.setModel(model);
     }    
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0#getModel()
      */
     public Model_1_0 getModel() {
-        return ((ModelHolder_1_0)this.connection).getModel();
+        return this.connection.getModel();
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements ObjectFactory_1_2
     //------------------------------------------------------------------------
@@ -148,7 +153,7 @@ public class Manager_1
     public Connection_1Factory getConnectionFactory() {
         return this.connection instanceof Connection_1_2 ?
             ((Connection_1_2)this.connection).getConnectionFactory() :
-            null;
+                null;
     }
 
     /**
@@ -160,15 +165,57 @@ public class Manager_1
     public Boolean hasContainerManagedUnitOfWork(
     ){
         return this.connection instanceof Connection_1_2 ? Boolean.valueOf(
-                ((Connection_1_2)this.connection).hasContainerManagedUnitOfWork()
+            ((Connection_1_2)this.connection).hasContainerManagedUnitOfWork()
         ) : null;
+    }
+
+
+    //------------------------------------------------------------------------
+    // Implements ObjectFactory_1_1
+    //------------------------------------------------------------------------
+
+    /**
+     * This method is deprecated and will throw a NOT_SUPPORTED exception
+     * 
+     * @deprecated
+     * 
+     * @exception   ServiceException    NOT_SUPPORTED
+     */
+    public Object_1_0 createObject(
+      String roleClass,
+      String roleId,
+      Object_1_0 roleCapable
+    ) throws ServiceException {
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            ASPECTS_ONLY
+        );
     }
 
     
     //------------------------------------------------------------------------
     // Implements ObjectFactory_1_0
     //------------------------------------------------------------------------
-    
+
+    /**
+     * This method is deprecated and will throw a NOT_SUPPORTED exception
+     * 
+     * @deprecated
+     * 
+     * @exception   ServiceException    NOT_SUPPORTED
+     */
+    public Object_1_0 createObject(
+        String objectClass, 
+        Object_1_0 initialValues
+    ) throws ServiceException {
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            ASPECTS_ONLY
+        );
+    }
+
     /**
      * Close the basic accessor.
      * <p>
@@ -182,12 +229,17 @@ public class Manager_1
         this.connection = null;
         super.clear();
     }
-    
-    private boolean isClosed(
+
+    /**
+     * Tells whether the object factory has been closed.
+     * 
+     * @return <code>true</code> if the object factory has been closed
+     */
+    public boolean isClosed(
     ){
         return this.connection == null;
     }
-    
+
     /**
      * 
      * @throws ServiceException
@@ -197,18 +249,18 @@ public class Manager_1
         if(isClosed()) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "The manager is closed"
         ); 
     }
-    
+
     /**
      * Return the unit of work associated with the current basic accessor.
      *
      * @return  the unit of work
+     * @throws ServiceException 
      */
     public UnitOfWork_1_0 getUnitOfWork(
-    ) throws ServiceException {
+    ) throws ServiceException{
         validateState();
         return this.connection.getUnitOfWork();
     }
@@ -229,11 +281,11 @@ public class Manager_1
     ) throws ServiceException{
         validateState();
         return (Object_1_0)(
-            accessPath.size() > 2 && "view".equals(accessPath.get(accessPath.size()-2)) ? 
-            getObject(
-                accessPath.getPrefix(accessPath.size()-2)
-            ).objGetContainer("view").get(accessPath.getBase()) :
-            marshal(this.connection.getObject(accessPath))
+                accessPath.size() > 2 && "view".equals(accessPath.get(accessPath.size()-2)) ? 
+                    getObject(
+                        accessPath.getPrefix(accessPath.size()-2)
+                    ).objGetContainer("view").get(accessPath.getBase()) :
+                        marshal(this.connection.getObject(accessPath))
         );
     }
 
@@ -256,9 +308,9 @@ public class Manager_1
     ) throws ServiceException {
         return accessPath == null ?
             null :
-        accessPath instanceof Path ?
-            getObject((Path)accessPath) :
-            getObject(new Path(accessPath.toString()));
+                accessPath instanceof Path ?
+                    getObject((Path)accessPath) :
+                        getObject(new Path(accessPath.toString()));
     }
 
     /**
@@ -302,11 +354,6 @@ public class Manager_1
         );
     }
 
-
-    //------------------------------------------------------------------------
-    // Implements ObjectFactory_1_0
-    //------------------------------------------------------------------------
-    
     /**
      * Test whether there is no layer mismatch.
      * 
@@ -314,77 +361,34 @@ public class Manager_1
      * 
      * @return the initialValues' delegate
      */
-    private Object_1_0 getDelegate(
+    Object_1_0 getDelegate(
         Object_1_0 initialValues
     ) throws ServiceException {
         try {
-            return ((Object_1) initialValues).getDelegate();
+            return ((AbstractObject_1) initialValues).getDelegate();
         } catch (ClassCastException exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "class", 
-                        initialValues == null ? null : initialValues.getClass().getName())
-                },
                 "object extension requires an object instanceof '" +
-                Object_1.class.getName() + 
-                "'. This problem is likely to occur in JMI plugins when using extend<X>(refObject)."
+                AbstractObject_1.class.getName() + 
+                "'. This problem is likely to occur in JMI plugins when using extend<X>(refObject).",
+                new BasicException.Parameter(
+                    "class", 
+                    initialValues == null ? null : initialValues.getClass().getName()
+                )
             );
         }
     }
-    
-    /**
-     * This method creates a new object with the initial values.
-     * <p>
-     * This method method and its org::openmdx::compatibility::role1 model
-     * are deprecated in favour of the org::openmdx::base::RoleCapable class
-     * and the $link{ObjectFactory_1_1#createObject(java.lang.String,
-     * java.lang.String,Object_1_0) createObject(String,String,Object_1_0)}
-     * method.
-     * 
-     * @see org.openmdx.compatibility.role1.cci.Role
-     */
-    public Object_1_0 createObject(
-      String objectClass,
-      Object_1_0 initialValues
-    ) throws ServiceException {
-        validateState();
-        return (Object_1_0)marshal(
-            this.connection.createObject(
-                objectClass,
-                getDelegate(initialValues)
-            )
-        );
-    }
 
-    /**
-     * This method creates a new role of a RoleCapable object.
-     * 
-     * @see org.openmdx.base.cci.RoleCapable
-     */
-    public Object_1_0 createObject(
-      String roleClass,
-      String roleId,
-      Object_1_0 roleCapable
-    ) throws ServiceException {
-        return ((Object_1)roleCapable).addRole(roleId, roleClass);
-    }
-
-    
-    //------------------------------------------------------------------------
-    // Implements ObjectFactory_1_3
-    //------------------------------------------------------------------------
-    
     /**
      * This method clones an object
      */
     public Object_1_0 cloneObject(
-      Path target, 
-      Object_1_0 initialValues, 
-      boolean completelyDirty
+        Path target, 
+        Object_1_0 initialValues, 
+        boolean completelyDirty
     ) throws ServiceException {
         validateState();
         return this.connection instanceof Connection_1_4 ? (Object_1_0)marshal(
@@ -416,7 +420,7 @@ public class Manager_1
         }
     }
 
-    
+
     //------------------------------------------------------------------------
     // Extends CachingMarshaller
     //------------------------------------------------------------------------
@@ -435,8 +439,8 @@ public class Manager_1
         Object source
     ) throws ServiceException{
         validateState();
-        return new Object_1(
-            (Object_1_0)source,
+        return new StandardObject_1(
+            (Object_1_0) source,
             this
         );
     }
@@ -472,12 +476,10 @@ public class Manager_1
         Object source
     ) throws ServiceException{
         validateState();
-        return source instanceof Object_1 ? 
-            ((Object_1)source).getDelegate() : 
-            source;
+        return source instanceof AbstractObject_1 ? ((AbstractObject_1)source).getDelegate() : source;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements InstanceCallbackListener
     //------------------------------------------------------------------------
@@ -505,15 +507,17 @@ public class Manager_1
      */
     public void preClear(
         InstanceCallbackEvent event
-     ) throws ServiceException {
+    ) throws ServiceException {
         Object key = event.getSource();        
         if(key instanceof Object_1_2) {
             Object_1_2 delegate = (Object_1_2) key;
             if(delegate.objIsInaccessable()) {
                 Object value = super.mapping.remove(key);
-                if(value instanceof Object_1) ((Object_1)value).setInaccessabilityReason(
-                    delegate.getInaccessabilityReason()
-                );
+                if(value instanceof AbstractObject_1) {
+                    ((AbstractObject_1)value).setInaccessabilityReason(
+                        delegate.getInaccessabilityReason()
+                    );
+                }
             }
         }
     }

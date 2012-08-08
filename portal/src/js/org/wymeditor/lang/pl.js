@@ -1,6 +1,4 @@
-﻿if(!WYM_STRINGS) var WYM_STRINGS = new Array();
-
-var WYM_STRINGS_PL = {
+WYMeditor.STRINGS['pl'] = {
     Strong:           'Nacisk',
     Emphasis:         'Emfaza',
     Superscript:      'Indeks górny',
@@ -44,4 +42,3 @@ var WYM_STRINGS_PL = {
     Source_Code:      'Kod źródłowy'
 };
 
-WYM_STRINGS['pl'] = WYM_STRINGS_PL;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingLayer_0.java,v 1.9 2008/03/04 14:21:12 hburger Exp $
+ * Name:        $Id: DelegatingLayer_0.java,v 1.11 2008/09/10 08:55:25 hburger Exp $
  * Description: DelegatingLayer_0 class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/04 14:21:12 $
+ * Date:        $Date: 2008/09/10 08:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,7 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
 public class DelegatingLayer_0
-    implements Layer_1_0
+implements Layer_1_0
 {
 
     /**
@@ -91,7 +91,7 @@ public class DelegatingLayer_0
     //------------------------------------------------------------------------
     // The methods to be reviewed>>>
     //------------------------------------------------------------------------
-    
+
     /**
      * This method allows the dataprovider layers to set up the working units'
      * contexts.
@@ -107,7 +107,7 @@ public class DelegatingLayer_0
     ){
         //
     }
-        
+
     /**
      * This method allows the dataprovider layers to verify the integrity of a 
      * collection of requests as a whole before the actual processing of the 
@@ -127,9 +127,9 @@ public class DelegatingLayer_0
     ) throws ServiceException {
         DataproviderRequest[] requests = unitOfWork.getRequests();
         for (
-            int index = 0;
-            index < requests.length;
-            index++
+                int index = 0;
+                index < requests.length;
+                index++
         ) prolog(
             header, 
             context,
@@ -156,16 +156,14 @@ public class DelegatingLayer_0
         if (this.id == DataproviderLayers.PERSISTENCE) new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ASSERTION_FAILURE,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("class", getClass().getName()),
-                new BasicException.Parameter(
-                    "namespace",
-                    getConfiguration().getValues(
-                        SharedConfigurationEntries.NAMESPACE_ID
-                    )
+            "DelegatingLayer_0 used as PERSISTENCE layer!",
+            new BasicException.Parameter("class", getClass().getName()),
+            new BasicException.Parameter(
+                "namespace",
+                (Object[])getConfiguration().getValues(
+                    SharedConfigurationEntries.NAMESPACE_ID
                 )
-            },
-            "DelegatingLayer_0 used as PERSISTENCE layer!"
+            )
         ).log();
         SysLog.trace(
             DataproviderLayers.toString(this.id), 
@@ -177,48 +175,48 @@ public class DelegatingLayer_0
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_CREATION:
                 createProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_SETTING:
                 setProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_MODIFICATION:
             case DataproviderOperations.OBJECT_REPLACEMENT:
                 updateProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_REMOVAL:
                 removeProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.ITERATION_START:
             case DataproviderOperations.ITERATION_CONTINUATION:
                 findProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_RETRIEVAL:
                 getProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
         }
     }
-    
+
     /**
      * This method allows the dataprovider layer to verify the integrity of a 
      * single request before its actual processing.
@@ -256,7 +254,7 @@ public class DelegatingLayer_0
     ) throws ServiceException {
         //
     }
-        
+
     /**
      * This method allows the dataprovider layer to verify the integrity of a 
      * single request before its actual processing.
@@ -378,9 +376,9 @@ public class DelegatingLayer_0
         DataproviderRequest[] requests = unitOfWork.getRequests();
         DataproviderReply[] replies = reply.getReplies();
         for (
-            int index = 0;
-            index < requests.length;
-            index++
+                int index = 0;
+                index < requests.length;
+                index++
         ) epilog(
             header, 
             context,
@@ -416,21 +414,21 @@ public class DelegatingLayer_0
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_CREATION:
                 createEpilog(
                     header, context,
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_SETTING:
                 setEpilog(
                     header, context,
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_MODIFICATION:
             case DataproviderOperations.OBJECT_REPLACEMENT:
                 updateEpilog(
@@ -438,14 +436,14 @@ public class DelegatingLayer_0
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_REMOVAL:
                 removeEpilog(
                     header, context,
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.ITERATION_START:
             case DataproviderOperations.ITERATION_CONTINUATION:
                 findEpilog(
@@ -453,14 +451,14 @@ public class DelegatingLayer_0
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_RETRIEVAL:
                 getEpilog(
                     header, context,
                     request,
                     reply
                 );
-            break;
+                break;
         }
     }
 
@@ -507,7 +505,7 @@ public class DelegatingLayer_0
     ) throws ServiceException {
         //
     }
-        
+
     /**
      * This method allows the dataprovider layer to verify the integrity of a 
      * single reply after the actual processing of the request.
@@ -618,27 +616,27 @@ public class DelegatingLayer_0
         //
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Layer_1_0
     //------------------------------------------------------------------------
-    
+
     public void activate(
         short id,
         Configuration configuration,
         Layer_1_0 delegation
     ) throws Exception {
 //      this.statistics = (LayerStatistics_1_0)configuration.values(
-//          SharedConfigurationEntries.LAYER_STATISTICS
+//      SharedConfigurationEntries.LAYER_STATISTICS
 //      ).get(
-//          id
+//      id
 //      );
         this.configuration = configuration;
         this.delegation = delegation;
         this.id = id;
         SysLog.detail(
             "Activating " + DataproviderLayers.toString(id) + " layer ",
-             configuration
+            configuration
         );
     }
 
@@ -829,7 +827,7 @@ public class DelegatingLayer_0
     ) throws ServiceException {
         throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
     }
-        
+
     /**
      * This method allows the dataprovider layers postprocessing of a 
      * collection of requests as a whole after the actual processing of the 
@@ -854,10 +852,10 @@ public class DelegatingLayer_0
         throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
     }
 
-          
-  //--------------------------------------------------------------------------
-  // Implements Operation_1_0
-  //--------------------------------------------------------------------------
+
+    //--------------------------------------------------------------------------
+    // Implements Operation_1_0
+    //--------------------------------------------------------------------------
 
     /**
      * Execute an operation
@@ -880,117 +878,117 @@ public class DelegatingLayer_0
     }
 
 
-  //--------------------------------------------------------------------------
-  // Implements Dataprovider_1_0
-  //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // Implements Dataprovider_1_0
+    //--------------------------------------------------------------------------
 
-  /**
-   * Process a set of working units
-   *
-   * @param header          the service header
-   * @param workingUnits    a collection of working units
-   *
-   * @return    a collection of working unit replies
-   */
-  public UnitOfWorkReply[] process(
-    ServiceHeader header,
-    UnitOfWorkRequest[] workingUnits
-  ){
-    try {
-        ServiceException[] stati = new ServiceException[workingUnits.length];
-        Object[] contexts = new Object[workingUnits.length];
-        contextInitialization(
-            header,
-            contexts
-        );
-        for (
-            int index = 0;
-            index < workingUnits.length;
-            index++
-        ) try {
-            prolog(
-                header, 
-                contexts[index],
-                workingUnits[index]
+    /**
+     * Process a set of working units
+     *
+     * @param header          the service header
+     * @param workingUnits    a collection of working units
+     *
+     * @return    a collection of working unit replies
+     */
+    public UnitOfWorkReply[] process(
+        ServiceHeader header,
+        UnitOfWorkRequest[] workingUnits
+    ){
+        try {
+            ServiceException[] stati = new ServiceException[workingUnits.length];
+            Object[] contexts = new Object[workingUnits.length];
+            contextInitialization(
+                header,
+                contexts
             );
-        } catch (ServiceException exception) {
-            stati[index] = exception;
-            workingUnits[index] = NULL_WORKING_UNIT;
-        }
-        UnitOfWorkReply[] result = delegation.process(
-          header, 
-          workingUnits
-        );
-        for (
-            int index = 0;
-            index < workingUnits.length;
-            index++
-        ) if (stati[index] == null) try {
-            epilog(
+            for (
+                    int index = 0;
+                    index < workingUnits.length;
+                    index++
+            ) try {
+                prolog(
+                    header, 
+                    contexts[index],
+                    workingUnits[index]
+                );
+            } catch (ServiceException exception) {
+                stati[index] = exception;
+                workingUnits[index] = NULL_WORKING_UNIT;
+            }
+            UnitOfWorkReply[] result = delegation.process(
                 header, 
-                contexts[index],
-                workingUnits[index],
-                result[index]
+                workingUnits
             );
-//          if (this.statistics != null) this.statistics.update(
-//            workingUnits[index].getRequests(),
-//            result[index].getReplies()
-//          );
-        } catch (ServiceException exception) {
-            result[index] = new UnitOfWorkReply(exception);
-    //      if (this.statistics != null) this.statistics.update(
-    //          requests,
-    //          null
-    //      );
-        } else {
-            result[index] = new UnitOfWorkReply(stati[index]);
-    //      if (this.statistics != null) this.statistics.update(
-    //          requests,
-    //          null
-    //      );
+            for (
+                    int index = 0;
+                    index < workingUnits.length;
+                    index++
+            ) if (stati[index] == null) try {
+                epilog(
+                    header, 
+                    contexts[index],
+                    workingUnits[index],
+                    result[index]
+                );
+//              if (this.statistics != null) this.statistics.update(
+//              workingUnits[index].getRequests(),
+//              result[index].getReplies()
+//              );
+            } catch (ServiceException exception) {
+                result[index] = new UnitOfWorkReply(exception);
+                //      if (this.statistics != null) this.statistics.update(
+                //          requests,
+                //          null
+                //      );
+            } else {
+                result[index] = new UnitOfWorkReply(stati[index]);
+                //      if (this.statistics != null) this.statistics.update(
+                //          requests,
+                //          null
+                //      );
+            }
+            return result;
+        } catch (RuntimeException exception) {
+            throw new RuntimeServiceException(exception).log();
         }
-        return result;
-    } catch (RuntimeException exception) {
-        throw new RuntimeServiceException(exception).log();
     }
-  }
 
 
-  //------------------------------------------------------------------------
-  // Constants
-  //------------------------------------------------------------------------
+    //------------------------------------------------------------------------
+    // Constants
+    //------------------------------------------------------------------------
 
-  final static private String DATAPROVIDER_ONLY = 
-    DelegatingLayer_0.class.getName()
-    + " supports Datatprovider_1_0 processing methods only";
-    
-    
-  final static private UnitOfWorkRequest NULL_WORKING_UNIT = 
-    new UnitOfWorkRequest(false,new DataproviderRequest[]{});
-  
-  
-  //------------------------------------------------------------------------
-  // Variables
-  //------------------------------------------------------------------------
-  
+    final static private String DATAPROVIDER_ONLY = 
+        DelegatingLayer_0.class.getName()
+        + " supports Datatprovider_1_0 processing methods only";
+
+
+    final static private UnitOfWorkRequest NULL_WORKING_UNIT = 
+        new UnitOfWorkRequest(false,new DataproviderRequest[]{});
+
+
+    //------------------------------------------------------------------------
+    // Variables
+    //------------------------------------------------------------------------
+
     /**
      * The layer's id
      */
     private short id;
-    
+
     /**
      *
      */
     private Dataprovider_1_0 delegation;
-    
+
     /**
      *
      */
     private Configuration configuration;
 
 //  /**
-//   * statistics object
-//   */
+//  * statistics object
+//  */
 //  private LayerStatistics_1_0 statistics;
 
 }

@@ -9,11 +9,6 @@
 	<classpathentry excluding="**/jre/before1_4/**|**/jre/before1_5/**|**/jre/since1_6/**|org/openmdx/test/compatibility/base/dataprovider/exporter/*" kind="src" path="build/jre-1.5/src/java"/>
 	<classpathentry exported="true" kind="lib" path="src/resource"/>
 	<classpathentry exported="true" kind="lib" path="build/jre-1.5/model/openmdx-test-core.openmdx-xmi.zip"/>
-	<classpathentry kind="lib" path="/openMDX Thirdparty ~ Apache Logging (jre-1.2)/lib/log4j.jar" sourcepath="/openMDX Thirdparty ~ Apache Logging (jre-1.2)/src/log4j.java.zip">
-		<attributes>
-			<attribute name="javadoc_location" value="http://logging.apache.org/log4j/docs/api/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Oracle 10 (jre-1.5)"/>
 	<classpathentry kind="lib" path="build/jre-1.5/src/resource"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Microsoft SQLServer 2005 (jre-1.5)"/>

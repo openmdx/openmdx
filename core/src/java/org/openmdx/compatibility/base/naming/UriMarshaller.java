@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UriMarshaller.java,v 1.17 2008/03/21 18:48:02 hburger Exp $
+ * Name:        $Id: UriMarshaller.java,v 1.18 2008/09/10 08:55:28 hburger Exp $
  * Description: Marshaller 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:48:02 $
+ * Date:        $Date: 2008/09/10 08:55:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,19 +65,19 @@ import org.openmdx.kernel.uri.scheme.OpenMDXSchemes;
  */
 @SuppressWarnings("unchecked")
 public final class UriMarshaller
-    implements Marshaller
+implements Marshaller
 {
 
     private UriMarshaller(
     ){
         // Avoid external instantiation
     }
-    
+
     /**
      * Memorize the singleton
      */ 
     final static private Marshaller instance = new UriMarshaller();
-    
+
     /**
      * Return the singleton
      */ 
@@ -86,19 +86,19 @@ public final class UriMarshaller
         return UriMarshaller.instance;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Marshaller
     //------------------------------------------------------------------------
 
     /**
      * Marshal a CharSequence[] into a CharSequence
-   * 
+     * 
      * @param     charSequences
      *            The array of CharSequences to be marshalled.
      * 
      * @return      A CharSequence containing the marshalled objects.
-   */
+     */
     public Object marshal (
         Object charSequences
     ) throws ServiceException {
@@ -106,8 +106,8 @@ public final class UriMarshaller
         Object[]source = (Object[])charSequences;
         StringBuilder target = new StringBuilder(URI_PREFIX);
         for(
-          int i=0;
-          i < source.length;
+                int i=0;
+                i < source.length;
         )encode(
             source[i],
             target.append(COMPONENT_DELIMITER),
@@ -116,17 +116,17 @@ public final class UriMarshaller
         return target;
     }
 
-    
+
     /**
      * Unmarshal a CharSequence into a CharSequence[].
-   * 
+     * 
      * @param         marshalledObjects
      *            A string containing a marshalled sequence of objects
      * 
      * @return    A String array containing the unmarshaled sequence
      *                  of objects.
      * @exception ServiceException ILLEGAL_ARGUMENT
-   */
+     */
     public Object unmarshal (
         Object charSequence
     ) throws ServiceException {
@@ -137,14 +137,12 @@ public final class UriMarshaller
             if(source.length() > URI_PREFIX.length()){
                 source = source.substring(URI_PREFIX.length());
                 if (
-                    source.charAt(0) != '/'
+                        source.charAt(0) != '/'
                 ) throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("uri",source)
-                    },
-                    "Relative URIs are not supported"
+                    "Relative URIs are not supported",
+                    new BasicException.Parameter("uri",source)
                 );
                 int fromIndex = 0;
                 int toIndex = -1;
@@ -170,10 +168,8 @@ public final class UriMarshaller
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("charSequence", charSequence)
-                },
-                "CharSequence can't be transformed into an URI"
+                "CharSequence can't be transformed into an URI",
+                new BasicException.Parameter("charSequence", charSequence)
             );
         }
     }
@@ -197,31 +193,31 @@ public final class UriMarshaller
         } else try {
             byte[]source=UnicodeTransformation.toByteArray(string);
             for (
-                int index = 0;
-                index < source.length;
-                index++
+                    int index = 0;
+                    index < source.length;
+                    index++
             ){
                 byte octet = source[index];
                 if ( 
-                    (octet >= '0' && octet <= '9') || // Numeric character
-                    (octet >= '@' && octet <= 'Z') || // pchar and Alphanumeric character
-                    (octet >= 'a' && octet <= 'z') || // Alphanumeric characer
-                    (octet >= '&' && octet <= '.') || // Mark character and pchar
-                    octet == '_' || // Mark character
-                    octet == '~' || // Mark character
-                    octet == '!' || // Mark character
-                    octet == '=' || // Mark character
-                    octet == '$' || // Mark character
-                    octet == ';' || // Parameter delimiter
-                    ( // recognize lonley field delimiters
-                        octet == FIELD_DELIMITER && (
-                            index + 1 == source.length ||
-                            source[index+1] != FIELD_DELIMITER 
-                        ) && (
-                            index == 0 ||
-                            source[index-1] != FIELD_DELIMITER
+                        (octet >= '0' && octet <= '9') || // Numeric character
+                        (octet >= '@' && octet <= 'Z') || // pchar and Alphanumeric character
+                        (octet >= 'a' && octet <= 'z') || // Alphanumeric characer
+                        (octet >= '&' && octet <= '.') || // Mark character and pchar
+                        octet == '_' || // Mark character
+                        octet == '~' || // Mark character
+                        octet == '!' || // Mark character
+                        octet == '=' || // Mark character
+                        octet == '$' || // Mark character
+                        octet == ';' || // Parameter delimiter
+                        ( // recognize lonley field delimiters
+                                octet == FIELD_DELIMITER && (
+                                        index + 1 == source.length ||
+                                        source[index+1] != FIELD_DELIMITER 
+                                ) && (
+                                        index == 0 ||
+                                        source[index-1] != FIELD_DELIMITER
+                                )
                         )
-                    )
                 ){ 
                     target.append((char) octet);
                 } else { // Characters to be escaped
@@ -254,28 +250,28 @@ public final class UriMarshaller
         byte[] target = new byte[source.length()];
         int targetIndex = 0;
         for (
-            int sourceIndex = 0;
-            sourceIndex < target.length;
+                int sourceIndex = 0;
+                sourceIndex < target.length;
         ) target[targetIndex++] = source.charAt(sourceIndex) == ESCAPE && sourceIndex + 2 < target.length ?
             (byte)Integer.parseInt( // Parse as int to cope with f0 to ff
                 source.substring(++sourceIndex, sourceIndex+=2),
                 RADIX
             ) :
-            (byte)source.charAt(sourceIndex++);
-        try {
-            return UnicodeTransformation.toString(target,0, targetIndex);
-        } catch (RuntimeException exception) {
-            throw new ServiceException(exception);
-        }
+                (byte)source.charAt(sourceIndex++);
+                try {
+                    return UnicodeTransformation.toString(target,0, targetIndex);
+                } catch (RuntimeException exception) {
+                    throw new ServiceException(exception);
+                }
     }
 
-    
+
     //------------------------------------------------------------------------
     // Constants
     //------------------------------------------------------------------------
-    
+
     final static public String ROOT = "/";
-    
+
     final static public char COMPONENT_DELIMITER = '/';
 
     final static public char FIELD_DELIMITER = ':';
@@ -285,5 +281,5 @@ public final class UriMarshaller
     final static int RADIX = 16;
 
     final static String URI_PREFIX = OpenMDXSchemes.URI_SCHEME + ":/";
-    
+
 }

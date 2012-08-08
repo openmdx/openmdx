@@ -1,6 +1,4 @@
-﻿if(!WYM_STRINGS) var WYM_STRINGS = new Array();
-
-var WYM_STRINGS_HU = {
+WYMeditor.STRINGS['hu'] = {
     Strong:           'Félkövér',
     Emphasis:         'Kiemelt',
     Superscript:      'Felső index',
@@ -44,4 +42,3 @@ var WYM_STRINGS_HU = {
     Source_Code:      'Forráskód'
 };
 
-WYM_STRINGS['hu'] = WYM_STRINGS_HU;

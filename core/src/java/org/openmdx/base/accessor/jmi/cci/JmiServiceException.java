@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JmiServiceException.java,v 1.16 2008/03/24 20:11:28 hburger Exp $
+ * Name:        $Id: JmiServiceException.java,v 1.17 2008/09/10 08:55:27 hburger Exp $
  * Description: JmiServiceException class
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/24 20:11:28 $
+ * Date:        $Date: 2008/09/10 08:55:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,8 +67,8 @@ import org.openmdx.kernel.log.SysLog;
  * embeds a ServiceExeption and is thrown by the openMDX implementation.
  */
 public class JmiServiceException 
-	extends JmiException 
-	implements BasicException.Wrapper
+extends JmiException 
+implements BasicException.Wrapper
 {
 
     /**
@@ -92,22 +92,22 @@ public class JmiServiceException
     }
 
     /**
-	 * Constructor
-	 * 
-	 * @param cause a <code>BasicException</code> wrapper
-	 * @param elementInError
-	 */
-	public JmiServiceException(
-		Throwable cause,
-		RefObject elementInError
-	) {
-		super(null, elementInError, cause.getMessage());
-		this.exceptionStack = BasicException.toStackedException(
-			cause,
-			this,
+     * Constructor
+     * 
+     * @param cause a <code>BasicException</code> wrapper
+     * @param elementInError
+     */
+    public JmiServiceException(
+        Throwable cause,
+        RefObject elementInError
+    ) {
+        super(null, elementInError, cause.getMessage());
+        this.exceptionStack = BasicException.toStackedException(
+            cause,
+            this,
             getParameters(elementInError)
-		);
-	}
+        );
+    }
 
     /**
      * Retrieve attributes of the element in error
@@ -133,7 +133,7 @@ public class JmiServiceException
                 ),
                 new BasicException.Parameter(
                     "object.mof.class", 
-                     refClass == null ? null : refClass.refMofId()
+                    refClass == null ? null : refClass.refMofId()
                 )
             };
         } catch (RuntimeException exception) {
@@ -145,7 +145,7 @@ public class JmiServiceException
             };
         }
     }
-    
+
     /**
      * Log the exception at warning level.
      *
@@ -163,7 +163,7 @@ public class JmiServiceException
         Throwable cause
     ){
         (
-            (BasicException)this.exceptionStack.getExceptionStack().get(0)
+                (BasicException)this.exceptionStack.getExceptionStack().get(0)
         ).initCause(cause);
         return this;
     }
@@ -202,7 +202,7 @@ public class JmiServiceException
     {
         return this.exceptionStack == null ? 
             BasicException.Code.DEFAULT_DOMAIN : 
-            this.exceptionStack.getExceptionDomain();
+                this.exceptionStack.getExceptionDomain();
     }
 
     /**
@@ -214,33 +214,33 @@ public class JmiServiceException
     {
         return this.exceptionStack == null ? 
             BasicException.Code.GENERIC : 
-            this.exceptionStack.getExceptionCode();
+                this.exceptionStack.getExceptionCode();
     }
-    
-	/**
-	 * Returns the cause belonging to a specific exception domain.
-	 * 
-	 * @param 	exceptionDomain
-	 * 			the desired exception domain,
-	 *          or <code>null</code> to retrieve the initial cause.
-	 *
-	 * @return  Either the cause belonging to a specific exception domain
-	 *          or the initial cause if <code>exceptionDomain</code> is
-	 * 			<code>null</code>.  
-	 */
-	public BasicException getCause(
-	    String exceptionDomain
-	){
+
+    /**
+     * Returns the cause belonging to a specific exception domain.
+     * 
+     * @param 	exceptionDomain
+     * 			the desired exception domain,
+     *          or <code>null</code> to retrieve the initial cause.
+     *
+     * @return  Either the cause belonging to a specific exception domain
+     *          or the initial cause if <code>exceptionDomain</code> is
+     * 			<code>null</code>.  
+     */
+    public BasicException getCause(
+        String exceptionDomain
+    ){
         return this.exceptionStack == null ? 
             null : 
-            this.exceptionStack.getCause(exceptionDomain);
-	}
+                this.exceptionStack.getCause(exceptionDomain);
+    }
 
     /**
      * The exception stack
      */
     private BasicException exceptionStack;
-         
+
 
     //------------------------------------------------------------------------
     // Extends Throwable
@@ -253,10 +253,10 @@ public class JmiServiceException
     ){
         return this.exceptionStack == null ?
             super.getMessage() : 
-            this.exceptionStack.getMessage() + ": " +
-            this.exceptionStack.getDescription();
+                this.exceptionStack.getMessage() + ": " +
+                this.exceptionStack.getDescription();
     }
-    
+
     /**
      * A String consisting of the class of this exception, the exception 
      * domain, the exception code, the exception description and the exception
@@ -266,9 +266,9 @@ public class JmiServiceException
      */     
     public String toString(){
         return 
-            this.exceptionStack == null ?
+        this.exceptionStack == null ?
             super.toString() : 
-            super.toString() + '\n' + this.exceptionStack;
+                super.toString() + '\n' + this.exceptionStack;
     }
 
     /**

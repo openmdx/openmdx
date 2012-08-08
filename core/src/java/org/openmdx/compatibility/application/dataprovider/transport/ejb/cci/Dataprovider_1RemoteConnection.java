@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1RemoteConnection.java,v 1.3 2008/06/24 16:17:21 hburger Exp $
+ * Name:        $Id: Dataprovider_1RemoteConnection.java,v 1.4 2008/09/10 08:55:24 hburger Exp $
  * Description: Dataprovider_1_0RemoteConnection class
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/24 16:17:21 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,7 +70,7 @@ import org.openmdx.kernel.log.SysLog;
  * Dataprovider_1_0RemoteConnection
  */
 public class Dataprovider_1RemoteConnection<D extends Dataprovider_1_0Remote>
-    implements Dataprovider_1_1Connection, Serializable
+implements Dataprovider_1_1Connection, Serializable
 {
 
     /**
@@ -91,7 +91,6 @@ public class Dataprovider_1RemoteConnection<D extends Dataprovider_1_0Remote>
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.ACTIVATION_FAILURE,
-                null,
                 "Could not acquire the provider's EJB handle"
             );
         }
@@ -106,31 +105,30 @@ public class Dataprovider_1RemoteConnection<D extends Dataprovider_1_0Remote>
      * The delegation object.
      */
     private transient D ejbObject;
-    
+
     /**
      * The delegation object handle.
      */
     private Handle ejbHandle;
 
     /**
-    * Retrieve the underlying EJB accessor
-    * 
-    * @return the underlying EJB accessor
-    */
+     * Retrieve the underlying EJB accessor
+     * 
+     * @return the underlying EJB accessor
+     */
     @SuppressWarnings("unchecked")
     protected D getDelegate() throws RemoteException, BasicException {
         if(this.ejbHandle == null) throw new BasicException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "Attempt to use removed dataprovider connection"
         );
         return this.ejbObject == null ?
             this.ejbObject = (D)this.ejbHandle.getEJBObject() :
-            this.ejbObject;
+                this.ejbObject;
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0
     //------------------------------------------------------------------------
@@ -164,7 +162,7 @@ public class Dataprovider_1RemoteConnection<D extends Dataprovider_1_0Remote>
                         this.ejbObject = null;
                     }
                 } else {
-	                throw exception;
+                    throw exception;
                 }
             }
             SysLog.detail("Processed units of work", Integer.valueOf(replies.length));
@@ -187,14 +185,13 @@ public class Dataprovider_1RemoteConnection<D extends Dataprovider_1_0Remote>
      */
     public void remove(
     ) throws ServiceException {
-         try {
-             if (this.ejbObject != null) this.ejbObject.remove();
+        try {
+            if (this.ejbObject != null) this.ejbObject.remove();
         } catch (Exception exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.DEACTIVATION_FAILURE,
-                null,
                 "Failure during deactivation of dataprovider connection"
             );
         } finally {

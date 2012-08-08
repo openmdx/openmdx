@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: NumberValue.java,v 1.39 2008/04/04 17:01:10 hburger Exp $
+ * Name:        $Id: NumberValue.java,v 1.42 2008/08/27 13:21:45 wfro Exp $
  * Description: NumberValue
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:10 $
+ * Date:        $Date: 2008/08/27 13:21:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 
@@ -141,16 +138,6 @@ public class NumberValue
     protected Locale getLocaleByName(
         String localeAsString
     ) {
-        if(availableLocales == null) {
-            Locale[] locales = DecimalFormat.getAvailableLocales();
-            availableLocales = new HashMap<String,Locale>();
-            for(int i = 0; i < locales.length; i++) {
-                availableLocales.put(
-                    locales[i].toString(),
-                    locales[i]
-                );
-            }            
-        }
         return availableLocales.get(localeAsString);
     }
     
@@ -311,7 +298,7 @@ public class NumberValue
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
                 if(this.isChangeable()) {
-                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\"" + p.getOnClick("multiValuedHigh=", this.getUpperBound("10"), "; return editnumbers_showPopup(this.id, '", EditObjectControl.POPUP_EDIT_NUMBERS, "', $('", id, "'), new Array());")));
+                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\"" + p.getOnClick("multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_NUMBERS, " = ", EditObjectControl.EDIT_NUMBERS, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_NUMBERS, ", 'popup_", EditObjectControl.EDIT_NUMBERS, "', $('", id, "'), new Array());")));
                 }
                 p.write("</td>");
             }
@@ -337,13 +324,24 @@ public class NumberValue
             );
         }
     }
-    
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3256439222591238964L;
-    private static Map<String,Locale> availableLocales = null;
     
+    private static Map<String,Locale> availableLocales = new HashMap<String,Locale>();
+
+    static {        
+        Locale[] locales = DecimalFormat.getAvailableLocales();
+        for(int i = 0; i < locales.length; i++) {
+            availableLocales.put(
+                locales[i].toString(),
+                locales[i]
+            );
+        }                    
+    }
+        
     private final BigDecimal defaultValue;
     private final BigDecimal minValue;
     private final BigDecimal maxValue;

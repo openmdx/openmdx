@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ManagedDataproviderConnectionFactory.java,v 1.7 2008/03/19 17:08:05 hburger Exp $
+ * Name:        $Id: ManagedDataproviderConnectionFactory.java,v 1.8 2008/09/09 14:32:16 hburger Exp $
  * Description: ManagedConnectionFactory class
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:08:05 $
+ * Date:        $Date: 2008/09/09 14:32:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -174,9 +174,12 @@ class ManagedDataproviderConnectionFactory {
         return this.registrationId;
     }
     
+    
     //------------------------------------------------------------------------
     // Classes
     //------------------------------------------------------------------------
+    
+    static final String[] ROOT = {};
     
     class LocalConfigurationProvider
         implements ConfigurationProvider_1_0 {
@@ -199,7 +202,7 @@ class ManagedDataproviderConnectionFactory {
             Map specification
         ) throws ServiceException {
             Configuration configuration = new Configuration();
-            String[] section = _section == null ? new String[]{} : _section;
+            String[] section = _section == null ? ROOT : _section;
             for(
                 int index = 0;
                 index < this.standardProperties.length;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatatypeFormat.java,v 1.6 2008/03/21 18:32:18 hburger Exp $
+ * Name:        $Id: DatatypeFormat.java,v 1.7 2008/09/10 08:55:24 hburger Exp $
  * Description: DatatypeFormat 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:32:18 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -116,18 +116,17 @@ public class DatatypeFormat implements Marshaller {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                null,
                 "DatatypeFactory acquisition failed"
             );
         }
     }
-    
+
     /**
      * Use ISO 8601 basic format if <code>true</code>;
      * ISO 8601 extended format otherwise.
      */
     private final boolean basicFormat;
-    
+
     /**
      * The formatter's datatype factory
      */
@@ -177,14 +176,14 @@ public class DatatypeFormat implements Marshaller {
         if(source instanceof String) {
             String value = (String)source;
             return 
-                value.startsWith("P") || value.startsWith("-P") ? parseDuration(value) :
+            value.startsWith("P") || value.startsWith("-P") ? parseDuration(value) :
                 value.indexOf('T') < 0 ? parseDate(value) :
-                (Object) parseDateTime(value);
+                    (Object) parseDateTime(value);
         } else {
             return source;
         }
     }
-    
+
     /**
      * Parse a duration <code>String</code>
      * 
@@ -197,7 +196,7 @@ public class DatatypeFormat implements Marshaller {
     ){
         return this.datatypeFactory.newDuration(duration);
     }
-    
+
     /**
      * Parse a date <code>String</code>
      * 

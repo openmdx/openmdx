@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StandardDbObject.java,v 1.45 2008/06/11 17:05:32 hburger Exp $
+ * Name:        $Id: StandardDbObject.java,v 1.47 2008/09/10 08:55:19 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.45 $
+ * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/11 17:05:32 $
+ * Date:        $Date: 2008/09/10 08:55:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,394 +68,391 @@ import org.openmdx.kernel.log.SysLog;
 
 @SuppressWarnings("unchecked")
 public abstract class StandardDbObject 
-  extends DbObject {
-  
-  //-------------------------------------------------------------------------
-  protected StandardDbObject(
-    AbstractDatabase_1 database, 
-    Connection conn,
-    DbObjectConfiguration dbObjectConfiguration,
-    Path accessPath, 
-    boolean isExtent,
-    boolean isQuery
-  ) throws ServiceException {
-    
-    super(
-        database, 
-        conn, 
-        dbObjectConfiguration, 
-        accessPath, 
-        isExtent
-    );
+extends DbObject {
 
-    // reference selectors
-    this.referenceColumn = new ArrayList();
-    this.referenceColumn.add(this.database.OBJECT_RID);
-    
-    // index column
-    this.indexColumn = this.database.OBJECT_IDX;
+    //-------------------------------------------------------------------------
+    protected StandardDbObject(
+        AbstractDatabase_1 database, 
+        Connection conn,
+        DbObjectConfiguration dbObjectConfiguration,
+        Path accessPath, 
+        boolean isExtent,
+        boolean isQuery
+    ) throws ServiceException {
 
-    // parse objectId into its components
-    this.objectIdValues = new ArrayList();
-    DbObjectConfiguration typeConfiguration = this.getConfiguration();
-    if(
-      (typeConfiguration != null) && 
-      (typeConfiguration.getObjectIdPattern() != null) &&
-      (this.getObjectId() != null)
-    ) {
-      Matcher_1_0 matcher = typeConfiguration.getObjectIdPatternMatcher().matcher(this.getObjectId());
-      if(matcher.matches()) {
-        for(int i = 1; i <= matcher.groupCount(); i++) {
-          this.objectIdValues.add(matcher.group(i));
+        super(
+            database, 
+            conn, 
+            dbObjectConfiguration, 
+            accessPath, 
+            isExtent
+        );
+
+        // reference selectors
+        this.referenceColumn = new ArrayList();
+        this.referenceColumn.add(this.database.OBJECT_RID);
+
+        // index column
+        this.indexColumn = this.database.OBJECT_IDX;
+
+        // parse objectId into its components
+        this.objectIdValues = new ArrayList();
+        DbObjectConfiguration typeConfiguration = this.getConfiguration();
+        if(
+                (typeConfiguration != null) && 
+                (typeConfiguration.getObjectIdPattern() != null) &&
+                (this.getObjectId() != null)
+        ) {
+            Matcher_1_0 matcher = typeConfiguration.getObjectIdPatternMatcher().matcher(this.getObjectId());
+            if(matcher.matches()) {
+                for(int i = 1; i <= matcher.groupCount(); i++) {
+                    this.objectIdValues.add(matcher.group(i));
+                }
+            }
+            else {
+                this.objectIdValues.add(this.getObjectId());
+            }
         }
-      }
-      else {
-        this.objectIdValues.add(this.getObjectId());
-      }
-    }
-    else {
-      this.objectIdValues.add(this.getObjectId());
-    }
+        else {
+            this.objectIdValues.add(this.getObjectId());
+        }
 
-    // object selectors
-    this.objectIdColumn = new ArrayList();
-    if((this.dbObjectConfiguration == null) || (this.dbObjectConfiguration.getObjectIdComponents() == 0)) {
-      this.objectIdColumn.add(this.database.OBJECT_OID);        
-    }
-    else {
-      for(int i = 0; i < this.dbObjectConfiguration.getObjectIdComponents(); i++) {
-        this.objectIdColumn.add(
-          this.database.privateAttributesPrefix + this.database.OBJECT_OID + "$" + i
-        );
-      }
-    }
+        // object selectors
+        this.objectIdColumn = new ArrayList();
+        if((this.dbObjectConfiguration == null) || (this.dbObjectConfiguration.getObjectIdComponents() == 0)) {
+            this.objectIdColumn.add(this.database.OBJECT_OID);        
+        }
+        else {
+            for(int i = 0; i < this.dbObjectConfiguration.getObjectIdComponents(); i++) {
+                this.objectIdColumn.add(
+                    this.database.privateAttributesPrefix + this.database.OBJECT_OID + "$" + i
+                );
+            }
+        }
 
-    // objectQualifierClause
-    String objectIdClause = "";
-    for(int i = 0; i < this.getObjectIdColumn().size(); i++) {
-      objectIdClause += i == 0 ? "" : " AND ";
-      objectIdClause += "(v." + this.getObjectIdColumn().get(i) + " = ?)";
-    } 
-    this.objectIdClause = objectIdClause;
-    
-    // referenceClause
-    String selectReferenceIdsStatement = null;
-    if(isExtent) {
-        this.referenceValues = new ArrayList();
-        selectReferenceIdsStatement = this.database.getSelectReferenceIdsClause(
-            conn,
-            this.reference,
-            this.referenceValues
-        );
-    }
-    else {
-        this.referenceValues = new ArrayList();
-        this.referenceValues.add(
-            this.database.getReferenceId(
-                conn, 
+        // objectQualifierClause
+        String objectIdClause = "";
+        for(int i = 0; i < this.getObjectIdColumn().size(); i++) {
+            objectIdClause += i == 0 ? "" : " AND ";
+            objectIdClause += "(v." + this.getObjectIdColumn().get(i) + " = ?)";
+        } 
+        this.objectIdClause = objectIdClause;
+
+        // referenceClause
+        String selectReferenceIdsStatement = null;
+        if(isExtent) {
+            this.referenceValues = new ArrayList();
+            selectReferenceIdsStatement = this.database.getSelectReferenceIdsClause(
+                conn,
                 this.reference,
-                !isQuery || (typeConfiguration.getDbObjectForQuery1() != null)
-            )                    
+                this.referenceValues
+            );
+        }
+        else {
+            this.referenceValues = new ArrayList();
+            this.referenceValues.add(
+                this.database.getReferenceId(
+                    conn, 
+                    this.reference,
+                    !isQuery || (typeConfiguration.getDbObjectForQuery1() != null)
+                )                    
+            );
+            selectReferenceIdsStatement = "= ?";
+        }
+        this.referenceClause = "(v." + this.database.OBJECT_RID + " " + selectReferenceIdsStatement + ")";
+    }
+
+    //-------------------------------------------------------------------------
+    protected StandardDbObject(
+        AbstractDatabase_1 database, 
+        Connection conn,
+        DbObjectConfiguration typeConfiguration
+    ) {
+        super(
+            database, 
+            conn, 
+            typeConfiguration
         );
-        selectReferenceIdsStatement = "= ?";
     }
-    this.referenceClause = "(v." + this.database.OBJECT_RID + " " + selectReferenceIdsStatement + ")";
-  }
 
-  //-------------------------------------------------------------------------
-  protected StandardDbObject(
-    AbstractDatabase_1 database, 
-    Connection conn,
-    DbObjectConfiguration typeConfiguration
-  ) {
-    super(
-        database, 
-        conn, 
-        typeConfiguration
-    );
-  }
-  
-  //---------------------------------------------------------------------------  
-  public String getReferenceClause(
-  ) throws ServiceException {
-    return this.referenceClause;
-  }
-
-  //---------------------------------------------------------------------------  
-  public List<Object> getReferenceValues(
-  ) {
-    return this.referenceValues;
-  }
-  
-  //---------------------------------------------------------------------------  
-  public String getObjectIdClause(
-  ) throws ServiceException {
-    return this.objectIdClause;
-  }
-
-  //---------------------------------------------------------------------------
-  public List<String> getObjectIdValues(
-  ) throws ServiceException {
-    return this.objectIdValues;
-  }
-
-  //-------------------------------------------------------------------------
-  public String getIndexColumn(
-  ) {
-    return this.indexColumn;
-  }
-
-  //-------------------------------------------------------------------------
-  public void remove(
-  ) throws ServiceException {
-      
-      PreparedStatement ps = null;
-      String currentStatement = null;
-      Path accessPath = this.reference.getChild(this.objectId);
-      Path type = this.getConfiguration().getType();
-      List dbObjects = new ArrayList();
-      if(this.getConfiguration().getDbObjectForUpdate1() != null) {
-          dbObjects.add(
-              this.getConfiguration().getDbObjectForUpdate1()
-          );
-      }
-      if(this.getConfiguration().getDbObjectForUpdate2() != null) {
-          dbObjects.add(
-              this.getConfiguration().getDbObjectForUpdate2()
-          );
-      }
-      try {
-          
-          // Object (only if dbObject (=table) is configured)
-          if(
-              ((type.size() == 1) || // catch all type
-              (type.size() == accessPath.size() && accessPath.isLike(type))) &&
-              (this.getConfiguration().getDbObjectForUpdate1().length() > 0)
-          ) {
-              List statementParameters = new ArrayList();
-              String selectReferenceIdsClause = this.database.getSelectReferenceIdsClause(
-                  conn, 
-                  this.reference, 
-                  statementParameters
-              );
-              statementParameters.add(this.objectId);
-              for(
-                  Iterator i = dbObjects.iterator();
-                  i.hasNext();
-              ) {
-                  String dbObject = (String)i.next();
-                  String statement =
-                      "DELETE FROM " + dbObject + 
-                      " WHERE " + this.database.OBJECT_RID + " " + selectReferenceIdsClause + " AND " + this.database.OBJECT_OID + " IN (?)";
-                  ps = this.database.prepareStatement(
-                      conn,
-                      currentStatement = statement
-                  );
-                  for(int j = 0; j < statementParameters.size(); j++) {
-                      this.database.setPreparedStatementValue(
-                          this.conn,
-                          ps, 
-                          j+1, 
-                          statementParameters.get(j)
-                      );
-                  }
-                  SysLog.detail("statement", currentStatement);
-                  SysLog.detail("parameters", statementParameters);
-                  ps.executeUpdate();
-                  this.database.executeBatch(ps);
-                  ps.close(); ps = null;
-              }
-          }
-          
-          // Composite objects (only if dbObject (=table) is configured)
-          if(
-              ((type.size() == 1) || // catch all type
-              ((type.size() > accessPath.size()) && accessPath.isLike(type.getPrefix(accessPath.size())))) &&
-              (this.getConfiguration().getDbObjectForUpdate1() != null) &&
-              (this.getConfiguration().getDbObjectForUpdate1().length() > 0)        
-          ) {
-              List statementParameters = new ArrayList();
-              String selectReferenceIdsClause = this.database.getSelectReferenceIdsClause(
-                  conn, 
-                  accessPath.getDescendant(type.getSuffix(accessPath.size())),
-                  statementParameters
-              );
-              for(
-                  Iterator i = dbObjects.iterator();
-                  i.hasNext();
-              ) {
-                  String dbObject = (String)i.next();
-                  String statement =
-                      "DELETE FROM " + dbObject + 
-                      " WHERE " + this.database.OBJECT_RID + " " + selectReferenceIdsClause;
-                  ps = this.database.prepareStatement(
-                      conn,
-                      currentStatement = statement
-                  );
-                  for(int j = 0; j < statementParameters.size(); j++) {
-                      this.database.setPreparedStatementValue(
-                          this.conn,
-                          ps, 
-                          j+1, 
-                          statementParameters.get(j)
-                      );
-                  }
-                  SysLog.detail("statement", currentStatement);
-                  SysLog.detail("parameters", statementParameters);
-                  ps.executeUpdate();
-                  this.database.executeBatch(ps);
-                  ps.close(); ps = null;
-              }
-          }
-      }
-      catch(SQLException ex) {
-          throw new ServiceException(
-              ex, 
-              StackedException.DEFAULT_DOMAIN,
-              StackedException.MEDIA_ACCESS_FAILURE, 
-              new BasicException.Parameter[]{
-                  new BasicException.Parameter("path", accessPath),
-                  new BasicException.Parameter("statement", currentStatement)
-              },
-              null
-          );
-      }
-      catch(ServiceException e) {
-          throw e;
-      }
-      catch(Exception ex) {
-          throw new ServiceException(
-              ex, 
-              StackedException.DEFAULT_DOMAIN,
-              StackedException.GENERIC, 
-              null, 
-              ex.toString()
-          );
-      }
-      finally {
-          try {
-              if(ps != null) ps.close();
-          } catch(Throwable ex) {
-              // ignore
-          }
-      }
-  }
-  
-  //---------------------------------------------------------------------------  
-  public Path getObjectReference(
-    FastResultSet frs
-  ) throws SQLException, ServiceException {
-      
-      Object rid = frs.getObject(this.database.OBJECT_RID);
-      if(rid == null) {
-          throw new SQLException(
-              "column " + 
-              this.database.OBJECT_RID + 
-              " in result set not found"
-          );
-      }
-      // Map rid to reference
-      else {
-          // If rid is undefined or set to 0 map to this.reference.
-          // E.g. rid is undefined in case of format slicedParentRidOnly
-          if((rid == null) || ((rid instanceof Number) && (((Number)rid).longValue() == 0))) {
-              return this.reference;
-          }
-          else {
-              return this.database.getReference(
-                  conn,
-                  rid
-              );
-          }
-      }
-  }
-  
-  //---------------------------------------------------------------------------  
-  public String getObjectId(
-    FastResultSet frs
-  ) throws SQLException {
-    String objectId = null;
-    try {
-      objectId = frs.getObject(this.database.OBJECT_OID).toString();
+    //---------------------------------------------------------------------------  
+    public String getReferenceClause(
+    ) throws ServiceException {
+        return this.referenceClause;
     }
-    catch(NullPointerException e) {
-      throw new SQLException(
-        "column " + 
-        this.database.OBJECT_OID + 
-        " in result set not found"
-      );
+
+    //---------------------------------------------------------------------------  
+    public List<Object> getReferenceValues(
+    ) {
+        return this.referenceValues;
     }
-    return objectId;
-  }
-  
-  //---------------------------------------------------------------------------  
-  public int getIndex(
-    FastResultSet frs
-  ) throws SQLException {
-    int idx = 0;
-    try {
-      idx = ((Number)frs.getObject(this.database.OBJECT_IDX)).intValue();
+
+    //---------------------------------------------------------------------------  
+    public String getObjectIdClause(
+    ) throws ServiceException {
+        return this.objectIdClause;
     }
-    catch(NullPointerException e) {
-      throw new SQLException(
-        "column " + 
-        this.database.OBJECT_IDX + 
-        " in result set not found"
-      );
-    }    
-    return idx;
-  }
-  
-  //---------------------------------------------------------------------------  
-  public boolean includeColumn(
-    String columnName
-  ) {
-    return 
-      !this.database.OBJECT_RID.equalsIgnoreCase(columnName) &&
-      !this.database.OBJECT_OID.equalsIgnoreCase(columnName) &&
-      !this.database.OBJECT_IDX.equalsIgnoreCase(columnName) &&
-      !columnName.toLowerCase().startsWith(this.database.privateAttributesPrefix) &&
-      !columnName.endsWith("_");
-  }
-  
-  //---------------------------------------------------------------------------  
-  public String getTableName(
-  ) {
-    return this.dbObjectConfiguration.getDbObjectForUpdate1();
-  }
-  
-  //---------------------------------------------------------------------------  
-  public String[] getJoinCriteria(
-  ) {
-      return this.dbObjectConfiguration.getJoinCriteria();
-  }
-  
-  //---------------------------------------------------------------------------
-  public String getHint(
-  ) throws ServiceException {
-      return this.dbObjectConfiguration == null
-          ? ""
-          : this.dbObjectConfiguration.getDbObjectHint() == null
-              ? ""
-              : this.dbObjectConfiguration.getDbObjectHint();
-  }
-  
+
+    //---------------------------------------------------------------------------
+    public List<String> getObjectIdValues(
+    ) throws ServiceException {
+        return this.objectIdValues;
+    }
+
+    //-------------------------------------------------------------------------
+    public String getIndexColumn(
+    ) {
+        return this.indexColumn;
+    }
+
+    //-------------------------------------------------------------------------
+    public void remove(
+    ) throws ServiceException {
+
+        PreparedStatement ps = null;
+        String currentStatement = null;
+        Path accessPath = this.reference.getChild(this.objectId);
+        Path type = this.getConfiguration().getType();
+        List dbObjects = new ArrayList();
+        if(this.getConfiguration().getDbObjectForUpdate1() != null) {
+            dbObjects.add(
+                this.getConfiguration().getDbObjectForUpdate1()
+            );
+        }
+        if(this.getConfiguration().getDbObjectForUpdate2() != null) {
+            dbObjects.add(
+                this.getConfiguration().getDbObjectForUpdate2()
+            );
+        }
+        try {
+
+            // Object (only if dbObject (=table) is configured)
+            if(
+                    ((type.size() == 1) || // catch all type
+                            (type.size() == accessPath.size() && accessPath.isLike(type))) &&
+                            (this.getConfiguration().getDbObjectForUpdate1().length() > 0)
+            ) {
+                List statementParameters = new ArrayList();
+                String selectReferenceIdsClause = this.database.getSelectReferenceIdsClause(
+                    conn, 
+                    this.reference, 
+                    statementParameters
+                );
+                statementParameters.add(this.objectId);
+                for(
+                        Iterator i = dbObjects.iterator();
+                        i.hasNext();
+                ) {
+                    String dbObject = (String)i.next();
+                    String statement =
+                        "DELETE FROM " + dbObject + 
+                        " WHERE " + this.database.OBJECT_RID + " " + selectReferenceIdsClause + " AND " + this.database.OBJECT_OID + " IN (?)";
+                    ps = this.database.prepareStatement(
+                        conn,
+                        currentStatement = statement
+                    );
+                    for(int j = 0; j < statementParameters.size(); j++) {
+                        this.database.setPreparedStatementValue(
+                            this.conn,
+                            ps, 
+                            j+1, 
+                            statementParameters.get(j)
+                        );
+                    }
+                    SysLog.detail("statement", currentStatement);
+                    SysLog.detail("parameters", statementParameters);
+                    ps.executeUpdate();
+                    this.database.executeBatch(ps);
+                    ps.close(); ps = null;
+                }
+            }
+
+            // Composite objects (only if dbObject (=table) is configured)
+            if(
+                    ((type.size() == 1) || // catch all type
+                            ((type.size() > accessPath.size()) && accessPath.isLike(type.getPrefix(accessPath.size())))) &&
+                            (this.getConfiguration().getDbObjectForUpdate1() != null) &&
+                            (this.getConfiguration().getDbObjectForUpdate1().length() > 0)        
+            ) {
+                List statementParameters = new ArrayList();
+                String selectReferenceIdsClause = this.database.getSelectReferenceIdsClause(
+                    conn, 
+                    accessPath.getDescendant(type.getSuffix(accessPath.size())),
+                    statementParameters
+                );
+                for(
+                        Iterator i = dbObjects.iterator();
+                        i.hasNext();
+                ) {
+                    String dbObject = (String)i.next();
+                    String statement =
+                        "DELETE FROM " + dbObject + 
+                        " WHERE " + this.database.OBJECT_RID + " " + selectReferenceIdsClause;
+                    ps = this.database.prepareStatement(
+                        conn,
+                        currentStatement = statement
+                    );
+                    for(int j = 0; j < statementParameters.size(); j++) {
+                        this.database.setPreparedStatementValue(
+                            this.conn,
+                            ps, 
+                            j+1, 
+                            statementParameters.get(j)
+                        );
+                    }
+                    SysLog.detail("statement", currentStatement);
+                    SysLog.detail("parameters", statementParameters);
+                    ps.executeUpdate();
+                    this.database.executeBatch(ps);
+                    ps.close(); ps = null;
+                }
+            }
+        }
+        catch(SQLException ex) {
+            throw new ServiceException(
+                ex, 
+                StackedException.DEFAULT_DOMAIN,
+                StackedException.MEDIA_ACCESS_FAILURE, 
+                null,
+                new BasicException.Parameter("path", accessPath),
+                new BasicException.Parameter("statement", currentStatement)
+            );
+        }
+        catch(ServiceException e) {
+            throw e;
+        }
+        catch(Exception ex) {
+            throw new ServiceException(
+                ex, 
+                StackedException.DEFAULT_DOMAIN,
+                StackedException.GENERIC, 
+                ex.toString()
+            );
+        }
+        finally {
+            try {
+                if(ps != null) ps.close();
+            } catch(Throwable ex) {
+                // ignore
+            }
+        }
+    }
+
+    //---------------------------------------------------------------------------  
+    public Path getObjectReference(
+        FastResultSet frs
+    ) throws SQLException, ServiceException {
+
+        Object rid = frs.getObject(this.database.OBJECT_RID);
+        if(rid == null) {
+            throw new SQLException(
+                "column " + 
+                this.database.OBJECT_RID + 
+                " in result set not found"
+            );
+        }
+        // Map rid to reference
+        else {
+            // If rid is undefined or set to 0 map to this.reference.
+            // E.g. rid is undefined in case of format slicedParentRidOnly
+            if((rid == null) || ((rid instanceof Number) && (((Number)rid).longValue() == 0))) {
+                return this.reference;
+            }
+            else {
+                return this.database.getReference(
+                    conn,
+                    rid
+                );
+            }
+        }
+    }
+
+    //---------------------------------------------------------------------------  
+    public String getObjectId(
+        FastResultSet frs
+    ) throws SQLException {
+        String objectId = null;
+        try {
+            objectId = frs.getObject(this.database.OBJECT_OID).toString();
+        }
+        catch(NullPointerException e) {
+            throw new SQLException(
+                "column " + 
+                this.database.OBJECT_OID + 
+                " in result set not found"
+            );
+        }
+        return objectId;
+    }
+
+    //---------------------------------------------------------------------------  
+    public int getIndex(
+        FastResultSet frs
+    ) throws SQLException {
+        int idx = 0;
+        try {
+            idx = ((Number)frs.getObject(this.database.OBJECT_IDX)).intValue();
+        }
+        catch(NullPointerException e) {
+            throw new SQLException(
+                "column " + 
+                this.database.OBJECT_IDX + 
+                " in result set not found"
+            );
+        }    
+        return idx;
+    }
+
+    //---------------------------------------------------------------------------  
+    public boolean includeColumn(
+        String columnName
+    ) {
+        return 
+        !this.database.OBJECT_RID.equalsIgnoreCase(columnName) &&
+        !this.database.OBJECT_OID.equalsIgnoreCase(columnName) &&
+        !this.database.OBJECT_IDX.equalsIgnoreCase(columnName) &&
+        !columnName.toLowerCase().startsWith(this.database.privateAttributesPrefix) &&
+        !columnName.endsWith("_");
+    }
+
+    //---------------------------------------------------------------------------  
+    public String getTableName(
+    ) {
+        return this.dbObjectConfiguration.getDbObjectForUpdate1();
+    }
+
+    //---------------------------------------------------------------------------  
+    public String[] getJoinCriteria(
+    ) {
+        return this.dbObjectConfiguration.getJoinCriteria();
+    }
+
+    //---------------------------------------------------------------------------
+    public String getHint(
+    ) throws ServiceException {
+        return this.dbObjectConfiguration == null
+        ? ""
+            : this.dbObjectConfiguration.getDbObjectHint() == null
+            ? ""
+                : this.dbObjectConfiguration.getDbObjectHint();
+    }
+
     //---------------------------------------------------------------------------
     protected Path toPath(
         Object filterValue
     ) {
         return filterValue instanceof Path ? 
             (Path) filterValue :
-            new Path(filterValue.toString());
+                new Path(filterValue.toString());
     }
 
     //---------------------------------------------------------------------------
     protected String toObjectIdQuery (
-      Path path
+        Path path
     ) throws ServiceException {
         String pathComponentQuery = path.getBase();
         return pathComponentQuery.startsWith(":") && pathComponentQuery.endsWith("*") 
-            ? pathComponentQuery.substring(1, pathComponentQuery.length() - 1) + '%' 
+        ? pathComponentQuery.substring(1, pathComponentQuery.length() - 1) + '%' 
             : pathComponentQuery;
     }
 
@@ -466,34 +463,34 @@ public abstract class StandardDbObject
         Object[] identityValues = p.getValues();
         String[] filterValues = new String[identityValues.length];
         for(
-            int j = 0;
-            j < identityValues.length;
-            j++
+                int j = 0;
+                j < identityValues.length;
+                j++
         ) {
             Path filterPath = this.toPath(identityValues[j]);
             boolean referencePathMatches =
                 this.reference.isLike(filterPath.getParent()); 
             filterValues[j] = referencePathMatches ?
                 this.toObjectIdQuery(filterPath) :
-                (filterPath.compareTo(this.reference) < 0 ? IDENTITY_UNDERFLOW : IDENTITY_OVERFLOW);
+                    (filterPath.compareTo(this.reference) < 0 ? IDENTITY_UNDERFLOW : IDENTITY_OVERFLOW);
         }
         return
-            new FilterProperty(
-                p.quantor(),
-                this.database.getAttributeName(
-                    (String)this.getObjectIdColumn().get(0)
-                ),
-                p.operator(),
-                filterValues
-            );
+        new FilterProperty(
+            p.quantor(),
+            this.database.getAttributeName(
+                (String)this.getObjectIdColumn().get(0)
+            ),
+            p.operator(),
+            (Object[])filterValues
+        );
     }
-    
+
     //---------------------------------------------------------------------------
     /**
      * Works fine provided that no object id is less than this value...
      */  
     protected static final String IDENTITY_UNDERFLOW = "        ;underflow";
-  
+
     /**
      * Works fine provided that no object id is greater than this value...
      */  

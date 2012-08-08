@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractExplorer_1.java,v 1.6 2008/06/28 00:21:20 hburger Exp $
+ * Name:        $Id: AbstractExplorer_1.java,v 1.7 2008/09/10 08:55:20 hburger Exp $
  * Description: Abstract Explorer Plug-In
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:20 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -93,37 +93,37 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
      * 
      */
     private Path[] scopes;
-    
+
     /**
      * 
      */
     private Integer[] mapping;
-    
+
     /**
      * 
      */
     private Path domainReference;
-    
+
     /**
      * 
      */
     private SparseList dataproviders;
-    
+
     /**
      * 
      */
     private SparseList ignoreSuffix;
-    
+
     /**
      * 
      */
     private SparseList ignorePrefix;
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Layer_1_0
     //------------------------------------------------------------------------
-    
+
     /**
      * 
      */
@@ -149,29 +149,27 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
             SharedConfigurationEntries.DATAPROVIDER_CONNECTION
         );
         if(
-            this.dataproviders.isEmpty() == 
-            (jndiContext.isEmpty() && serviceLocatorContext.isEmpty())
+                this.dataproviders.isEmpty() == 
+                    (jndiContext.isEmpty() && serviceLocatorContext.isEmpty())
         ) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.INVALID_CONFIGURATION,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter(
-                    SharedConfigurationEntries.DATAPROVIDER_CONNECTION,
-                    this.dataproviders
-                ),
-                new BasicException.Parameter(
-                    LayerConfigurationEntries.JNDI_CONTEXT,
-                    jndiContext
-                ),
-                new BasicException.Parameter(
-                    LayerConfigurationEntries.SERVICE_LOCATOR_CONTEXT,
-                    serviceLocatorContext
-                ),
-            },
             "Either " + SharedConfigurationEntries.DATAPROVIDER_CONNECTION + 
             " or " + LayerConfigurationEntries.JNDI_CONTEXT + " and " +
             LayerConfigurationEntries.SERVICE_LOCATOR_CONTEXT + 
-            " must be empty, but not all of them"
+            " must be empty, but not all of them",
+            new BasicException.Parameter(
+                SharedConfigurationEntries.DATAPROVIDER_CONNECTION,
+                this.dataproviders
+            ),
+            new BasicException.Parameter(
+                LayerConfigurationEntries.JNDI_CONTEXT,
+                jndiContext
+            ),
+            new BasicException.Parameter(
+                LayerConfigurationEntries.SERVICE_LOCATOR_CONTEXT,
+                serviceLocatorContext
+            )
         );
         if (! this.dataproviders.isEmpty()) {
             List scopes = configuration.values(
@@ -179,21 +177,21 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
             );
             this.scopes = new Path[scopes.size()];
             for(
-                int i = 0;
-                i < this.scopes.length;
-                i++
+                    int i = 0;
+                    i < this.scopes.length;
+                    i++
             ){ 
                 Object exposedPath = scopes.get(i);
                 this.scopes[i] = exposedPath instanceof Path ?
                     (Path)exposedPath : 
-                    new Path(exposedPath.toString())
-                ;
+                        new Path(exposedPath.toString())
+                    ;
             }
             this.mapping = new Integer[this.scopes.length];
             for(
-                int i = 0;
-                i < this.scopes.length;
-                i++
+                    int i = 0;
+                    i < this.scopes.length;
+                    i++
             ) this.mapping[i] = new Integer(i);
         } else {
             SysLog.detail("jndiContext", jndiContext);
@@ -208,7 +206,6 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
             if(runtimeSegment == null) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                null,
                 LayerConfigurationEntries.RUNTIME_SEGMENT + 
                 " configuration missing"
             );
@@ -222,8 +219,8 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
                 Context initialContext = new InitialContext();
                 String context = null;
                 for( 
-                    Iterator i = jndiContext.populationIterator();
-                    i.hasNext();
+                        Iterator i = jndiContext.populationIterator();
+                        i.hasNext();
                 ) try {
                     context = (String)i.next();
                     processBindings(
@@ -239,31 +236,31 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
             if(!serviceLocatorContext.isEmpty()){// Lookup in ServiceLocator
                 org.openmdx.compatibility.base.application.cci.ServiceLocator_1_0 serviceLocator = org.openmdx.compatibility.base.application.j2ee.StandardServiceLocator.getInstance();
                 for( 
-                    Iterator i = serviceLocatorContext.populationIterator();
-                    i.hasNext();
+                        Iterator i = serviceLocatorContext.populationIterator();
+                        i.hasNext();
                 ) processBindings(
                     header,
                     serviceLocator.listBindings((String)i.next()),
                     scopes, mapping
                 );
             }
-            
+
             this.scopes = new Path[scopes.size()];
             for(
-                int i = 0;
-                i < this.scopes.length;
-                i++
+                    int i = 0;
+                    i < this.scopes.length;
+                    i++
             ){ 
                 Object exposedPath = scopes.get(i);
                 this.scopes[i] = exposedPath instanceof Path ?
                     (Path)exposedPath : 
-                    new Path(exposedPath.toString())
-                ;
+                        new Path(exposedPath.toString())
+                    ;
             }
             this.mapping = (Integer[])mapping.toArray(
                 new Integer[mapping.size()]
             );
-            
+
             SysLog.detail(
                 "Exposed paths", 
                 Arrays.asList(this.scopes)
@@ -291,8 +288,8 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
         String name = binding.getName();
         String pattern = null;
         for(
-            Iterator i = this.ignorePrefix.populationIterator();
-            i.hasNext();
+                Iterator i = this.ignorePrefix.populationIterator();
+                i.hasNext();
         ) if(name.startsWith(pattern = (String)i.next())){
             SysLog.detail(
                 "Ignore binding starting with '" + pattern + "'", 
@@ -301,8 +298,8 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
             return true;
         }
         for(
-            Iterator i = this.ignoreSuffix.populationIterator();
-            i.hasNext();
+                Iterator i = this.ignoreSuffix.populationIterator();
+                i.hasNext();
         ) if(name.endsWith(pattern = (String)i.next())){
             SysLog.detail(
                 "Ignore binding ending with '" + pattern + "'", 
@@ -312,7 +309,7 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
         }
         return false;   
     }
-        
+
     /**
      * 
      * @param header
@@ -331,8 +328,8 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
                 SysLog.trace("Binding accepted", binding);
                 Dataprovider_1_1Connection connection = 
                     Dataprovider_1ConnectionFactoryImpl.createGenericConnection(
-                    binding.getObject()
-                );
+                        binding.getObject()
+                    );
                 RequestCollection requests = new RequestCollection(
                     header,
                     connection
@@ -342,7 +339,7 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
                     null
                 );
                 DataproviderObject_1_0 domain = ((DataproviderObject_1_0)
-                    domains.get(0)
+                        domains.get(0)
                 );
                 List namespaces = requests.addFindRequest(
                     domain.path().getChild("namespace"),
@@ -352,7 +349,7 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
                     Directions.ASCENDING
                 );
                 DataproviderObject_1_0 namespace = ((DataproviderObject_1_0)
-                    namespaces.get(0)
+                        namespaces.get(0)
                 );
                 SysLog.info(
                     binding.getName(), 
@@ -361,10 +358,10 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
                 Integer index = new Integer(this.dataproviders.size());
                 this.dataproviders.add(connection);
                 for(
-                    Iterator k = namespace.values(
-                        SharedConfigurationEntries.EXPOSED_PATH
-                    ).populationIterator();
-                    k.hasNext();
+                        Iterator k = namespace.values(
+                            SharedConfigurationEntries.EXPOSED_PATH
+                        ).populationIterator();
+                        k.hasNext();
                 ){
                     scopes.add(k.next());
                     mapping.add(index);
@@ -374,10 +371,8 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.INVALID_CONFIGURATION,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("binding", binding)
-                    },
-                    "Getting a dataprovider's configuration failed"
+                    "Getting a dataprovider's configuration failed",
+                    new BasicException.Parameter("binding", binding)
                 );
                 SysLog.criticalError(
                     serviceException.getMessage(),
@@ -387,7 +382,7 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
         }
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0
     //------------------------------------------------------------------------
@@ -406,13 +401,13 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
     ){
         UnitOfWorkReply[] replies = new UnitOfWorkReply[unitsOfWork.length];
         for(
-            int i=0;
-            i < unitsOfWork.length;
-            i++
+                int i=0;
+                i < unitsOfWork.length;
+                i++
         ) replies[i] = process(header, unitsOfWork[i]);
         return replies;
     }
-    
+
     /**
      * Process a single unit of work
      *
@@ -447,9 +442,9 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
         SysLog.trace("Request order", ArraysExtension.asList(positions));
         DataproviderRequest[] requests = new DataproviderRequest[positions.length];
         for(
-            int i = 0;
-            i < positions.length;
-            i++
+                int i = 0;
+                i < positions.length;
+                i++
         ) requests[i] = unitOfWorkRequest.getRequests()[positions[i]];
         UnitOfWorkRequest subunitOfWorkRequest = new UnitOfWorkRequest(
             unitOfWorkRequest.isTransactionalUnit(),
@@ -467,9 +462,9 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
         )[0];
         if (subunitOfWorkReply.failure()) return subunitOfWorkReply;
         for(
-            int i = 0;
-            i < positions.length;
-            i++
+                int i = 0;
+                i < positions.length;
+                i++
         ) unitOfWorkReply.getReplies()[positions[i]] = subunitOfWorkReply.getReplies()[i];
         return unitOfWorkReply;
     }
@@ -485,20 +480,18 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
     ) throws ServiceException {
         Path path = request.path();
         for (
-            int i = 0;
-            i < this.scopes.length;
-            i++
+                int i = 0;
+                i < this.scopes.length;
+                i++
         ) if (path.startsWith(this.scopes[i])) return this.mapping[i];
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path",path)
-            },
-            "No dataprovider supporting \"" + path + "\" found"
+            "No dataprovider supporting \"" + path + "\" found",
+            new BasicException.Parameter("path",path)
         );
     }
-                
+
     /**
      * The toPath method accepts any input class
      */
@@ -506,11 +499,11 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
         Object path
     ){
         return
-            path == null ? 
-                null : 
-            path instanceof Path ? 
-                (Path)path : 
-                new Path(path.toString());
+        path == null ? 
+            null : 
+                path instanceof Path ? 
+                    (Path)path : 
+                        new Path(path.toString());
     }
 
 }

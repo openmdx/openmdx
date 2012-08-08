@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.28 2008/06/30 22:31:47 wfro Exp $
+ * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.30 2008/09/10 08:55:19 hburger Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/30 22:31:47 $
+ * Date:        $Date: 2008/09/10 08:55:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -77,7 +77,7 @@ import org.openmdx.model1.code.Multiplicities;
  * compared to the calculation of the object_parent columns.
  */
 public class DBOSlicedWithIdAsKey
-  extends SlicedDbObject 
+extends SlicedDbObject 
 {
 
     //-------------------------------------------------------------------------
@@ -92,7 +92,7 @@ public class DBOSlicedWithIdAsKey
             typeConfiguration
         );
     }
-    
+
     //-------------------------------------------------------------------------
     public DBOSlicedWithIdAsKey(
         AbstractDatabase_1 database,
@@ -125,10 +125,11 @@ public class DBOSlicedWithIdAsKey
         this.objectIdColumn.add(database.OBJECT_ID);
         if(isExtent) {
             this.referenceValues.clear();
+            String base = accessPath.getBase();
             this.referenceValues.add(
-                accessPath.endsWith(new String[]{"%"}) || accessPath.endsWith(new String[]{":*"}) 
-                    ? rid + "/%" 
-                    : rid
+                base.equals("%") || base.equals(":*") ? 
+                    rid + "/%" : 
+                        rid
             );
             this.referenceClause = "(v." + database.OBJECT_ID + " LIKE ? " + this.database.getEscapeClause(conn) + ")";
         }
@@ -187,7 +188,7 @@ public class DBOSlicedWithIdAsKey
         this.indexColumn = null;
         this.excludeAttributes.add("objectIdx");        
     }
-    
+
     //---------------------------------------------------------------------------  
     @Override
     public Path getObjectReference(
@@ -207,36 +208,36 @@ public class DBOSlicedWithIdAsKey
             );
         }
     }
-      
+
     //---------------------------------------------------------------------------  
     @Override
     public String getObjectId(
         FastResultSet frs
     ) throws SQLException {
-      String objectId = (String)frs.getObject("object_id");
-      if(objectId == null) {
-          throw new SQLException(
-              "column object_id in result set not found"
-          );
-      }
-      // oid is last component of object_id
-      else {    
-          return objectId.substring(objectId.lastIndexOf("/")+1);
-      }
+        String objectId = (String)frs.getObject("object_id");
+        if(objectId == null) {
+            throw new SQLException(
+                "column object_id in result set not found"
+            );
+        }
+        // oid is last component of object_id
+        else {    
+            return objectId.substring(objectId.lastIndexOf("/")+1);
+        }
     }
-          
+
     //---------------------------------------------------------------------------  
     @Override
     public boolean includeColumn(
         String columnName
     ) {
         return 
-          !"object_id".equalsIgnoreCase(columnName) &&
-          !this.database.OBJECT_IDX.equalsIgnoreCase(columnName) &&
-          !columnName.toLowerCase().startsWith(this.database.privateAttributesPrefix) &&
-          !columnName.endsWith("_");
+        !"object_id".equalsIgnoreCase(columnName) &&
+        !this.database.OBJECT_IDX.equalsIgnoreCase(columnName) &&
+        !columnName.toLowerCase().startsWith(this.database.privateAttributesPrefix) &&
+        !columnName.endsWith("_");
     }
-      
+
     //---------------------------------------------------------------------------  
     @Override
     public int getIndex(
@@ -249,146 +250,143 @@ public class DBOSlicedWithIdAsKey
             return 0;
         }
     }
-          
+
     //-------------------------------------------------------------------------
     @Override
     public void remove(
     ) throws ServiceException {
-      
-      PreparedStatement ps = null;
-      String currentStatement = null;
-      Path accessPath = this.reference.getChild(this.objectId);
-      Path type = this.getConfiguration().getType();
-      List<String> dbObjects = new ArrayList<String>();
-      if(this.getConfiguration().getDbObjectForUpdate1() != null) {
-          dbObjects.add(
-              this.getConfiguration().getDbObjectForUpdate1()
-          );
-      }
-      if(this.getConfiguration().getDbObjectForUpdate2() != null) {
-          dbObjects.add(
-              this.getConfiguration().getDbObjectForUpdate2()
-          );
-      }
-      try {
-          for(
-              Iterator<String> i = dbObjects.iterator();
-              i.hasNext();
-          ) {
-              String dbObject = i.next();          
-              // Object (only if dbObject (=table) is configured)
-              if(
-                  ((type.size() == 1) || // catch all type
-                  (type.size() == accessPath.size() && accessPath.isLike(type)))
-              ) {
-                  List<Object> statementParameters = new ArrayList<Object>();
-                  statementParameters.addAll(
-                      this.getObjectIdValues()
-                  );
-                  String statement =
-                      "DELETE FROM " + dbObject + " WHERE " + this.database.OBJECT_ID + " IN (?)";
-                  ps = this.database.prepareStatement(
-                      conn,
-                      currentStatement = statement
-                  );
-                  for(int j = 0; j < statementParameters.size(); j++) {
-                      this.database.setPreparedStatementValue(
-                          this.conn,
-                          ps, 
-                          j+1, 
-                          statementParameters.get(j)
-                      );
-                  }
-                  SysLog.detail("statement", currentStatement);
-                  ps.executeUpdate();
-                  this.database.executeBatch(ps);
-                  ps.close(); ps = null;
-              }
-              // Composite objects (only if dbObject (=table) is configured)
-              if(
-                  ((type.size() == 1) || // catch all type
-                  ((type.size() > accessPath.size()) && accessPath.isLike(type.getPrefix(accessPath.size()))))
-              ) {
-                  List<Object> statementParameters = new ArrayList<Object>();
-                  Object rid = this.database.getReferenceId(
-                      this.conn,
-                      accessPath.getDescendant(type.getSuffix(accessPath.size())),
-                      false
-                  );
-                  String statement = null;
-                  if((rid instanceof String) && ((String)rid).endsWith("%")) {
-                      statement = "DELETE FROM " + dbObject + " WHERE " + this.database.OBJECT_ID + " LIKE ?"; 
-                      statementParameters.add(rid);
-                  }
-                  else {
-                      statement = "DELETE FROM " + dbObject + " WHERE (" + this.database.OBJECT_ID + " > ?) AND (" + this.database.OBJECT_ID + " < ?)";                       
-                      statementParameters.add(rid  + "/");
-                      statementParameters.add(rid  + "0");
-                  }
-                  ps = this.database.prepareStatement(
-                      conn,
-                      currentStatement = statement
-                  );
-                  for(int j = 0; j < statementParameters.size(); j++) {
-                      this.database.setPreparedStatementValue(
-                          this.conn,
-                          ps, 
-                          j+1, 
-                          statementParameters.get(j)
-                      );
-                  }
-                  SysLog.detail("statement", currentStatement);
-                  SysLog.detail("parameters", statementParameters);
-                  ps.executeUpdate();
-                  this.database.executeBatch(ps);
-                  ps.close(); ps = null;
-              }
-          }
-      }
-      catch(SQLException ex) {
-          throw new ServiceException(
-              ex, 
-              StackedException.DEFAULT_DOMAIN,
-              StackedException.MEDIA_ACCESS_FAILURE, 
-              new BasicException.Parameter[]{
-                  new BasicException.Parameter("path", accessPath),
-                  new BasicException.Parameter("statement", currentStatement)
-              },
-              null
-          );
-      }
-      catch(ServiceException e) {
-          throw e;
-      }
-      catch(Exception ex) {
-          throw new ServiceException(
-              ex, 
-              StackedException.DEFAULT_DOMAIN,
-              StackedException.GENERIC, 
-              null, 
-              ex.toString()
-          );
-      }
-      finally {
-          try {
-              if(ps != null) ps.close();
-          } catch(Throwable ex) {
-              // ignore
-          }
-      }
+
+        PreparedStatement ps = null;
+        String currentStatement = null;
+        Path accessPath = this.reference.getChild(this.objectId);
+        Path type = this.getConfiguration().getType();
+        List<String> dbObjects = new ArrayList<String>();
+        if(this.getConfiguration().getDbObjectForUpdate1() != null) {
+            dbObjects.add(
+                this.getConfiguration().getDbObjectForUpdate1()
+            );
+        }
+        if(this.getConfiguration().getDbObjectForUpdate2() != null) {
+            dbObjects.add(
+                this.getConfiguration().getDbObjectForUpdate2()
+            );
+        }
+        try {
+            for(
+                    Iterator<String> i = dbObjects.iterator();
+                    i.hasNext();
+            ) {
+                String dbObject = i.next();          
+                // Object (only if dbObject (=table) is configured)
+                if(
+                        ((type.size() == 1) || // catch all type
+                                (type.size() == accessPath.size() && accessPath.isLike(type)))
+                ) {
+                    List<Object> statementParameters = new ArrayList<Object>();
+                    statementParameters.addAll(
+                        this.getObjectIdValues()
+                    );
+                    String statement =
+                        "DELETE FROM " + dbObject + " WHERE " + this.database.OBJECT_ID + " IN (?)";
+                    ps = this.database.prepareStatement(
+                        conn,
+                        currentStatement = statement
+                    );
+                    for(int j = 0; j < statementParameters.size(); j++) {
+                        this.database.setPreparedStatementValue(
+                            this.conn,
+                            ps, 
+                            j+1, 
+                            statementParameters.get(j)
+                        );
+                    }
+                    SysLog.detail("statement", currentStatement);
+                    ps.executeUpdate();
+                    this.database.executeBatch(ps);
+                    ps.close(); ps = null;
+                }
+                // Composite objects (only if dbObject (=table) is configured)
+                if(
+                        ((type.size() == 1) || // catch all type
+                                ((type.size() > accessPath.size()) && accessPath.isLike(type.getPrefix(accessPath.size()))))
+                ) {
+                    List<Object> statementParameters = new ArrayList<Object>();
+                    Object rid = this.database.getReferenceId(
+                        this.conn,
+                        accessPath.getDescendant(type.getSuffix(accessPath.size())),
+                        false
+                    );
+                    String statement = null;
+                    if((rid instanceof String) && ((String)rid).endsWith("%")) {
+                        statement = "DELETE FROM " + dbObject + " WHERE " + this.database.OBJECT_ID + " LIKE ?"; 
+                        statementParameters.add(rid);
+                    }
+                    else {
+                        statement = "DELETE FROM " + dbObject + " WHERE (" + this.database.OBJECT_ID + " > ?) AND (" + this.database.OBJECT_ID + " < ?)";                       
+                        statementParameters.add(rid  + "/");
+                        statementParameters.add(rid  + "0");
+                    }
+                    ps = this.database.prepareStatement(
+                        conn,
+                        currentStatement = statement
+                    );
+                    for(int j = 0; j < statementParameters.size(); j++) {
+                        this.database.setPreparedStatementValue(
+                            this.conn,
+                            ps, 
+                            j+1, 
+                            statementParameters.get(j)
+                        );
+                    }
+                    SysLog.detail("statement", currentStatement);
+                    SysLog.detail("parameters", statementParameters);
+                    ps.executeUpdate();
+                    this.database.executeBatch(ps);
+                    ps.close(); ps = null;
+                }
+            }
+        }
+        catch(SQLException ex) {
+            throw new ServiceException(
+                ex, 
+                StackedException.DEFAULT_DOMAIN,
+                StackedException.MEDIA_ACCESS_FAILURE, 
+                null,
+                new BasicException.Parameter("path", accessPath),
+                new BasicException.Parameter("statement", currentStatement)
+            );
+        }
+        catch(ServiceException e) {
+            throw e;
+        }
+        catch(Exception ex) {
+            throw new ServiceException(
+                ex, 
+                StackedException.DEFAULT_DOMAIN,
+                StackedException.GENERIC, 
+                ex.toString()
+            );
+        }
+        finally {
+            try {
+                if(ps != null) ps.close();
+            } catch(Throwable ex) {
+                // ignore
+            }
+        }
     }
-      
+
     //---------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     @Override
     public DataproviderObject[] sliceAndNormalizeObject(
         DataproviderObject object
     ) throws ServiceException {
-    
+
         DbObjectConfiguration dbObjectConfiguration = this.getConfiguration();    
         DataproviderObject normalizedObject = new DataproviderObject(new Path(""));
         int pathNormalizeLevel = dbObjectConfiguration.getPathNormalizeLevel();
-                 
+
         // Add size attributes
         if(this.database.isSetSizeColumns()) {
             ModelElement_1_0 classDef = this.database.model.getElement(
@@ -398,8 +396,8 @@ public class DBOSlicedWithIdAsKey
                 String featureName = (String)feature.values("name").get(0);
                 String featureQualifiedName = (String)feature.values("qualifiedName").get(0);                
                 if(
-                    !this.database.embeddedFeatures.containsKey(featureName) &&
-                    !this.database.nonPersistentFeatures.contains(featureQualifiedName)
+                        !this.database.embeddedFeatures.containsKey(featureName) &&
+                        !this.database.nonPersistentFeatures.contains(featureQualifiedName)
                 ) {                
                     String multiplicity = (String)feature.values("multiplicity").get(0);
                     // multi-valued reference?
@@ -412,10 +410,10 @@ public class DBOSlicedWithIdAsKey
                         }
                     }
                     if(                    
-                        Multiplicities.MULTI_VALUE.equals(multiplicity) ||
-                        Multiplicities.LIST.equals(multiplicity) ||
-                        Multiplicities.SET.equals(multiplicity) ||
-                        Multiplicities.SPARSEARRAY.equals(multiplicity)                    
+                            Multiplicities.MULTI_VALUE.equals(multiplicity) ||
+                            Multiplicities.LIST.equals(multiplicity) ||
+                            Multiplicities.SET.equals(multiplicity) ||
+                            Multiplicities.SPARSEARRAY.equals(multiplicity)                    
                     ) {
                         SparseList<?> source = object.getValues(featureName); 
                         SparseList target = object.clearValues(
@@ -434,130 +432,128 @@ public class DBOSlicedWithIdAsKey
                 String featureName = SystemAttributes.CREATED_BY;
                 object.clearValues(featureName + "_").add(
                     object.getValues(featureName) == null
-                        ? new Integer(0)
-                        : new Integer(object.values(featureName).size())
+                    ? new Integer(0)
+                    : new Integer(object.values(featureName).size())
                 );
                 featureName = SystemAttributes.MODIFIED_BY;
                 object.clearValues(featureName + "_").add(
                     object.getValues(featureName) == null
-                        ? new Integer(0)
-                        : new Integer(object.values(featureName).size())
+                    ? new Integer(0)
+                    : new Integer(object.values(featureName).size())
                 );
             }
         }
-        
+
         // Add parent id 
         if(pathNormalizeLevel > 0) {  
-          Path parentObjectPath = object.path().getPrefix(object.path().size()-2);    
-          if(parentObjectPath.size() >= 5) {
-              normalizedObject.values(this.database.privateAttributesPrefix + "parent").add(
-                  this.database.getReferenceId(
-                      conn, 
-                      parentObjectPath, 
-                      true 
-                  ) + "/" + parentObjectPath.getBase()
-              );
-          }
-    
-          // Add id for all attributes with values of type path
-          if(pathNormalizeLevel > 1) {    
-            for(
-              Iterator<String> i = object.attributeNames().iterator();
-              i.hasNext();
-            ) {
-              String attributeName = i.next();
-              List<Object> values = object.values(attributeName);
-              if((values.size() > 0) && (values.get(0) instanceof Path)) {
+            Path parentObjectPath = object.path().getPrefix(object.path().size()-2);    
+            if(parentObjectPath.size() >= 5) {
+                normalizedObject.values(this.database.privateAttributesPrefix + "parent").add(
+                    this.database.getReferenceId(
+                        conn, 
+                        parentObjectPath, 
+                        true 
+                    ) + "/" + parentObjectPath.getBase()
+                );
+            }
+
+            // Add id for all attributes with values of type path
+            if(pathNormalizeLevel > 1) {    
                 for(
-                  Iterator<Object> j = values.iterator();
-                  j.hasNext();
+                        Iterator<String> i = object.attributeNames().iterator();
+                        i.hasNext();
                 ) {
-                  Object v = j.next();
-                  if(!(v instanceof Path)) {
-                    throw new ServiceException(
-                      StackedException.DEFAULT_DOMAIN,
-                      StackedException.ASSERTION_FAILURE, 
-                      new BasicException.Parameter[]{
-                        new BasicException.Parameter("attribute", attributeName),
-                        new BasicException.Parameter("value class", (v == null ? "null" : v.getClass().getName())),
-                        new BasicException.Parameter("value", v)
-                      },
-                      "value of attribute expected to be instance of path"
-                    );
-                  }
-                  Path objectPath = (Path)v;
-                  normalizedObject.values(attributeName).add(
-                      this.database.getReferenceId(
-                          conn, 
-                          objectPath, 
-                          true
-                      ) + "/" + objectPath.getBase()
-                  );
-                  
-                  // add parent id of path value
-                  if(pathNormalizeLevel > 2) {
-                    Path parentPath = objectPath.getPrefix(objectPath.size()-2);
-                    if(parentPath.size() >= 5) {
-                        normalizedObject.values(this.database.privateAttributesPrefix + attributeName + "Parent").add(
-                            this.database.getReferenceId(
-                                conn, 
-                                parentPath, 
-                                true
-                            ) + "/" + parentPath.getBase()
-                        );
+                    String attributeName = i.next();
+                    List<Object> values = object.values(attributeName);
+                    if((values.size() > 0) && (values.get(0) instanceof Path)) {
+                        for(
+                                Iterator<Object> j = values.iterator();
+                                j.hasNext();
+                        ) {
+                            Object v = j.next();
+                            if(!(v instanceof Path)) {
+                                throw new ServiceException(
+                                    StackedException.DEFAULT_DOMAIN,
+                                    StackedException.ASSERTION_FAILURE, 
+                                    "value of attribute expected to be instance of path",
+                                    new BasicException.Parameter("attribute", attributeName),
+                                    new BasicException.Parameter("value class", (v == null ? "null" : v.getClass().getName())),
+                                    new BasicException.Parameter("value", v)
+                                );
+                            }
+                            Path objectPath = (Path)v;
+                            normalizedObject.values(attributeName).add(
+                                this.database.getReferenceId(
+                                    conn, 
+                                    objectPath, 
+                                    true
+                                ) + "/" + objectPath.getBase()
+                            );
+
+                            // add parent id of path value
+                            if(pathNormalizeLevel > 2) {
+                                Path parentPath = objectPath.getPrefix(objectPath.size()-2);
+                                if(parentPath.size() >= 5) {
+                                    normalizedObject.values(this.database.privateAttributesPrefix + attributeName + "Parent").add(
+                                        this.database.getReferenceId(
+                                            conn, 
+                                            parentPath, 
+                                            true
+                                        ) + "/" + parentPath.getBase()
+                                    );
+                                }
+                            }
+                        }
                     }
-                  }
-                }
-              }
-            } 
-          }
+                } 
+            }
         }
         object.addClones(normalizedObject, false);
-        
+
         /**
          * Slice object
          */
         // get number of partitions
         int maxSize = 0;
         for(
-          Iterator<String> i = object.attributeNames().iterator();
-          i.hasNext();
+                Iterator<String> i = object.attributeNames().iterator();
+                i.hasNext();
         ) {
-          String attributeName = i.next();
-          maxSize = java.lang.Math.max(maxSize, object.values(attributeName).size());
+            String attributeName = i.next();
+            maxSize = java.lang.Math.max(maxSize, object.values(attributeName).size());
         }
-        
+
         // Create partitioned objects
         DataproviderObject[] slices = new DataproviderObject[maxSize];
         for(
-          Iterator<String> i = object.attributeNames().iterator();
-          i.hasNext();
+                Iterator<String> i = object.attributeNames().iterator();
+                i.hasNext();
         ) {
-          String attributeName = i.next();            
-          for(
-            int j = 0; 
-            j < object.values(attributeName).size();
-            j++
-          ) {
-            if(slices[j] == null) {
-                slices[j] = new DataproviderObject(object.path());
+            String attributeName = i.next();            
+            for(
+                    int j = 0; 
+                    j < object.values(attributeName).size();
+                    j++
+            ) {
+                if(slices[j] == null) {
+                    slices[j] = new DataproviderObject(object.path());
+                }
+                // Embedded features are mapped to slice 0
+                if(this.database.embeddedFeatures.containsKey(attributeName)) {
+                    slices[0].values(attributeName + "_" + j).add(
+                        object.values(attributeName).get(j)
+                    );
+                }
+                // Map to slice with corresponding index
+                else {                            
+                    slices[j].values("objectIdx").add(
+                        new Integer(j)
+                    );
+                    slices[j].values(attributeName).add(
+                        object.values(attributeName).get(j)
+                    );
+                }
             }
-            // Embedded features are mapped to slice 0
-            if(this.database.embeddedFeatures.containsKey(attributeName)) {
-                slices[0].values(attributeName + "_" + j).add(
-                    object.values(attributeName).get(j)
-                );
-            }
-            // Map to slice with corresponding index
-            else {                            
-                slices[j].values("objectIdx").add(
-                    new Integer(j)
-                );
-                slices[j].values(attributeName).add(
-                  object.values(attributeName).get(j)
-                );
-            }
-          }
         }
         return slices;
     }
@@ -565,15 +561,15 @@ public class DBOSlicedWithIdAsKey
     //---------------------------------------------------------------------------
     @Override
     protected String toObjectIdQuery (
-      Path path
+        Path path
     ) throws ServiceException {
         Object rid = this.database.getReferenceId(this.conn, path, true);
         String pathComponentQuery = path.getBase();
         return pathComponentQuery.startsWith(":") && pathComponentQuery.endsWith("*") 
-            ? rid + "/" + pathComponentQuery.substring(1, pathComponentQuery.length() - 1) + '%' 
+        ? rid + "/" + pathComponentQuery.substring(1, pathComponentQuery.length() - 1) + '%' 
             : rid + "/" + pathComponentQuery;
     }
-  
+
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 4076702439130733210L;
 

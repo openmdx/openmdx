@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: NotSupportedException.java,v 1.9 2005/02/21 13:08:00 hburger Exp $
+ * Name:        $Id: NotSupportedException.java,v 1.10 2008/09/10 08:55:22 hburger Exp $
  * Description: openMDX Exceptions: Not Supported Exception 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:08:00 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,6 +55,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.BasicException.Parameter;
 
 
 /**
@@ -92,11 +93,27 @@ public class NotSupportedException
      * @param cause
      * @param parameters
      * @param description
+     * @deprecated Use {@link #NotSupportedException(Exception,String,BasicException.Parameter[])} instead
      */
     public NotSupportedException(
         Exception cause,
         BasicException.Parameter[] parameters,
         String description
+    ){
+        this(cause, description, parameters);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param cause
+     * @param description
+     * @param parameters
+     */
+    public NotSupportedException(
+        Exception cause,
+        String description,
+        Parameter... parameters
     ){
         this.exceptionStack = new BasicException(
             cause,

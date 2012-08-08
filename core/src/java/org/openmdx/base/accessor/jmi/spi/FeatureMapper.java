@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FeatureMapper.java,v 1.3 2008/06/28 00:21:32 hburger Exp $
+ * Name:        $Id: FeatureMapper.java,v 1.5 2008/09/10 08:55:23 hburger Exp $
  * Description: FeatureMapper
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:32 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -72,14 +72,14 @@ import org.openmdx.model1.mapping.java.Identifier;
  * Class FeatureMapper
  */
 public class FeatureMapper {
-    
+
     //------------------------------------------------------------------------
     public enum MethodSignature {
-        
+
         DEFAULT, RETURN_IS_VOID, PREDICATE
-        
+
     }
-    
+
     //------------------------------------------------------------------------
     FeatureMapper(
         ModelElement_1_0 classDef,
@@ -110,7 +110,7 @@ public class FeatureMapper {
         }
         return accessor;
     }
-    
+
     //------------------------------------------------------------------------
     Method getAccessor(
         Object feature
@@ -140,11 +140,9 @@ public class FeatureMapper {
                     if(featureDef == null) throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_MEMBER_NAME,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter ("className", this.classDef.path().getBase()),
-                            new BasicException.Parameter ("featureName", featureName)
-                        },
-                        "Feature not found in model repository"
+                        "Feature not found in model repository",
+                        new BasicException.Parameter ("className", this.classDef.path().getBase()),
+                        new BasicException.Parameter ("featureName", featureName)
                     );
                 }                    
                 String multiplicity = (String)featureDef.values("multiplicity").get(0);
@@ -217,9 +215,10 @@ public class FeatureMapper {
                 String mutatorName = Identifier.OPERATION_NAME.toIdentifier(beanSetterName);
                 for(Method method : targetIntf.getMethods()) {
                     if(
-                        method.getName().equals(mutatorName) &&
-                        method.getParameterTypes().length == 1 
-                        // Note: The argument type is ignored for the moment 
+                            method.getName().equals(mutatorName) &&
+                            (method.getParameterTypes().length == 1) &&
+                            (method.getReturnType() == void.class)
+                            // Note: The argument type is ignored for the moment 
                     ){
                         this.mutators.putIfAbsent(featureName, method);
                         return method;
@@ -233,7 +232,7 @@ public class FeatureMapper {
             return mutator;
         }
     }
-    
+
     //------------------------------------------------------------------------
     Method getOperation(
         Object feature
@@ -259,7 +258,7 @@ public class FeatureMapper {
             );
             for(Method method : targetIntf.getMethods()) {
                 if(
-                    method.getName().equals(operationName)
+                        method.getName().equals(operationName)
                 ){
                     this.operations.putIfAbsent(featureName, method);
                     return method;
@@ -281,9 +280,9 @@ public class FeatureMapper {
         if(oldMethod == null) {
             for(Method newMethod : targetIntf.getMethods()) {
                 if(
-                    newMethod.getName().equals(methodName) &&
-                    newMethod.getParameterTypes().length == methodArguments
-                    // Note: The argument types are ignored for the moment 
+                        newMethod.getName().equals(methodName) &&
+                        newMethod.getParameterTypes().length == methodArguments
+                        // Note: The argument types are ignored for the moment 
                 ){
                     oldMethod = this.mapping.putIfAbsent(source, newMethod);
                     return oldMethod == null ? newMethod : oldMethod;
@@ -292,7 +291,7 @@ public class FeatureMapper {
         }
         return oldMethod;
     }
-    
+
     //-----------------------------------------------------------------------        
     @SuppressWarnings("unchecked")
     ModelElement_1_0 getFeature(
@@ -428,17 +427,17 @@ public class FeatureMapper {
                 throw new ServiceException (
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.NOT_FOUND, 
+                    "feature not found in class",
                     new BasicException.Parameter [] {
-                      new BasicException.Parameter("method.name", methodName),
-                      new BasicException.Parameter("class.name", className)
-                    },
-                    "feature not found in class"
+                        new BasicException.Parameter("method.name", methodName),
+                        new BasicException.Parameter("class.name", className)
+                    }
                 );                
             }
         }
         return feature;
     }
-        
+
     //------------------------------------------------------------------------
     // Members
     //------------------------------------------------------------------------
@@ -449,7 +448,7 @@ public class FeatureMapper {
     private final ConcurrentMap<String,Method> collections = new ConcurrentHashMap<String,Method>();
     protected final static ConcurrentMap<String,ConcurrentMap<String,ModelElement_1_0>> allFeatures = 
         new ConcurrentHashMap<String,ConcurrentMap<String,ModelElement_1_0>>();
-    
+
     private final ModelElement_1_0 classDef;    
     private final Class<?> targetIntf;    
 

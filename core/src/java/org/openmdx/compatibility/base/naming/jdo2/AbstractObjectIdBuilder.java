@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractObjectIdBuilder.java,v 1.7 2008/05/16 09:21:43 hburger Exp $
+ * Name:        $Id: AbstractObjectIdBuilder.java,v 1.9 2008/09/10 08:55:21 hburger Exp $
  * Description: AbstractObjectIdBuiler 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/16 09:21:43 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,7 +67,7 @@ import org.openmdx.kernel.id.cci.UUIDGenerator;
  * consists of a single re-assignable sub-segment of type org::w3c::string.
  */
 public abstract class AbstractObjectIdBuilder
-    implements ObjectIdBuilder
+implements ObjectIdBuilder
 {
 
     /**
@@ -80,7 +80,7 @@ public abstract class AbstractObjectIdBuilder
      * The UUID generator
      */
     protected final UUIDGenerator uuidGenerator = UUIDs.getGenerator();
-    
+
     /* (non-Javadoc)
      * @see org.oasisopen.spi2.ObjectIdBuilder#newObjectId(java.lang.Boolean, java.lang.String, java.util.List, java.util.List, java.util.List, java.util.List)
      */
@@ -89,30 +89,28 @@ public abstract class AbstractObjectIdBuilder
         String referenceName,
         List<Boolean> persistentQualifier, List<?> qualifier,
         List<String> baseClass, List<String> objectClass
-     ) {
+    ) {
         String message = persistentQualifier.size() != qualifier.size() ?
             "The arguments qualifier und persistentQualifier must have the same size" :
-          qualifier.size() != 1 ?
-            "This object id builder expects a single qualifier" :
-          !(qualifier.get(0) instanceof String) ?
-            "This object id builder expects the qualifier being of type String" :
-            null;
+                qualifier.size() != 1 ?
+                    "This object id builder expects a single qualifier" :
+                        !(qualifier.get(0) instanceof String) ?
+                            "This object id builder expects the qualifier being of type String" :
+                                null;
         if(message != null) throw new RuntimeServiceException(           
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("ObjectIdBuilder", getClass().getName()),
-                new BasicException.Parameter("mixinParent", mixinParent),
-                new BasicException.Parameter("parentObjectId", parentObjectId),
-                new BasicException.Parameter("qualifier", qualifier),
-                new BasicException.Parameter("persistentQualifier", persistentQualifier),
-                new BasicException.Parameter("baseClass", baseClass),
-                new BasicException.Parameter("objectClass", objectClass)
-            },
-            message
+            message,
+            new BasicException.Parameter("ObjectIdBuilder", getClass().getName()),
+            new BasicException.Parameter("mixinParent", mixinParent),
+            new BasicException.Parameter("parentObjectId", parentObjectId),
+            new BasicException.Parameter("qualifier", qualifier),
+            new BasicException.Parameter("persistentQualifier", persistentQualifier),
+            new BasicException.Parameter("baseClass", baseClass),
+            new BasicException.Parameter("objectClass", objectClass)
         );
         String component = (
-            persistentQualifier.get(0) ? "!" : ""
+                persistentQualifier.get(0) ? "!" : ""
         ) + qualifier.get(0);
         return fromPath(
             mixinParent == null ? new Path(
@@ -138,22 +136,20 @@ public abstract class AbstractObjectIdBuilder
     ) {
         String message = mixinParent == null ?
             "The authority's id can't be generated" :
-          qualifierClass.size() != 1 ?
-            "This object id builder expects a single qualifier" :
-          qualifierClass.get(0) != String.class ?
-            "This object id builder expects the qualifier being of type String" :
-            null;
+                qualifierClass.size() != 1 ?
+                    "This object id builder expects a single qualifier" :
+                        qualifierClass.get(0) != String.class ?
+                            "This object id builder expects the qualifier being of type String" :
+                                null;
         if(message != null) throw new RuntimeServiceException(           
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("ObjectIdBuilder", getClass().getName()),
-                new BasicException.Parameter("mixinParent", mixinParent),
-                new BasicException.Parameter("parentObjectId", parentObjectId),
-                new BasicException.Parameter("qualifierClass", qualifierClass),
-                new BasicException.Parameter("objectClass", objectClass)
-            },
-            message
+            message,
+            new BasicException.Parameter("ObjectIdBuilder", getClass().getName()),
+            new BasicException.Parameter("mixinParent", mixinParent),
+            new BasicException.Parameter("parentObjectId", parentObjectId),
+            new BasicException.Parameter("qualifierClass", qualifierClass),
+            new BasicException.Parameter("objectClass", objectClass)
         );
         String component = UUIDConversion.toUID(this.uuidGenerator.next());
         return fromPath(
@@ -177,7 +173,7 @@ public abstract class AbstractObjectIdBuilder
     abstract protected String fromPath(
         Path path
     );
-    
+
     /**
      * Convert an object id to a path.
      * <p><em>
@@ -193,16 +189,16 @@ public abstract class AbstractObjectIdBuilder
         String objectId
     );
 
-    
+
     //------------------------------------------------------------------------
     // Class AbstractObjectIdParser
     //------------------------------------------------------------------------
-    
+
     /**
      * Abstract Object Id Parser
      */
     public abstract static class AbstractObjectIdParser implements ObjectIdParser {
-        
+
         /**
          * Constructor 
          *
@@ -215,14 +211,12 @@ public abstract class AbstractObjectIdBuilder
             if(path.size() % 2 != 1) throw new RuntimeServiceException(           
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("ObjectIdParser", getClass().getName()),
-                    new BasicException.Parameter("path", path.getSuffix(0))
-                },
-                "An object id requires an odd number of path components"
+                "An object id requires an odd number of path components",
+                new BasicException.Parameter("ObjectIdParser", getClass().getName()),
+                new BasicException.Parameter("path", (Object[])path.getSuffix(0))
             );
         }
-        
+
         /**
          * 
          */
@@ -235,25 +229,23 @@ public abstract class AbstractObjectIdBuilder
         public <E> E getQualifier(
             Class<E> qualifierClass, 
             int index
-         ) {
+        ) {
             String message = qualifierClass != String.class ?
                 "This object id builder expects the qualifier being of type String" :
-              index != 0 ?
-                "This object id builder expects a single qualifier" :
-                null;
+                    index != 0 ?
+                        "This object id builder expects a single qualifier" :
+                            null;
             if(message != null) throw new RuntimeServiceException(           
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("ObjectIdParser", getClass().getName()),
-                    new BasicException.Parameter("qualifierClass", qualifierClass),
-                    new BasicException.Parameter("index", index)
-                },
-                message
+                message,
+                new BasicException.Parameter("ObjectIdParser", getClass().getName()),
+                new BasicException.Parameter("qualifierClass", qualifierClass),
+                new BasicException.Parameter("index", index)
             );
             String value = this.path.getBase();
             return (E) (
-                value.startsWith("!") ? value.substring(1) : value
+                    value.startsWith("!") ? value.substring(1) : value
             );
         }
 
@@ -265,5 +257,5 @@ public abstract class AbstractObjectIdBuilder
         }
 
     }
-    
+
 }

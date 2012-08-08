@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BooleanValue.java,v 1.22 2007/08/10 14:18:58 wfro Exp $
+ * Name:        $Id: BooleanValue.java,v 1.24 2008/08/27 13:21:45 wfro Exp $
  * Description: BooleanValue
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/10 14:18:58 $
+ * Date:        $Date: 2008/08/27 13:21:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 
@@ -195,7 +192,7 @@ public class BooleanValue
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
                 if(this.isChangeable()) {
-                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\"" + p.getOnClick("multiValuedHigh=", this.getUpperBound("10"), "; return editbooleans_showPopup(this.id, '", EditObjectControl.POPUP_EDIT_BOOLEANS, "', $('", id, "'), new Array());")));
+                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\"" + p.getOnClick("multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_BOOLEANS, " = ", EditObjectControl.EDIT_BOOLEANS, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_BOOLEANS, ", 'popup_", EditObjectControl.EDIT_BOOLEANS, "', $('", id, "'), new Array());")));
                 }
                 p.write("</td>");
             }            

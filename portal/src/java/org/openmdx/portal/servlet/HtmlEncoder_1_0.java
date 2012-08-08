@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: HtmlEncoder_1_0.java,v 1.5 2007/01/21 20:45:43 wfro Exp $
+ * Name:        $Id: HtmlEncoder_1_0.java,v 1.6 2008/08/12 16:38:05 wfro Exp $
  * Description: HttpEncoder_1_0 interface 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:45:43 $
+ * Date:        $Date: 2008/08/12 16:38:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 

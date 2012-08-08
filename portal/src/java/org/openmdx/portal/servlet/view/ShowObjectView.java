@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectView.java,v 1.59 2008/04/04 17:01:13 hburger Exp $
+ * Name:        $Id: ShowObjectView.java,v 1.60 2008/08/12 16:38:07 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.59 $
+ * Revision:    $Revision: 1.60 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:13 $
+ * Date:        $Date: 2008/08/12 16:38:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 

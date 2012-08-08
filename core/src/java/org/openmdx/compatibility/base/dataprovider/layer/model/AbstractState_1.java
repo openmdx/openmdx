@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: AbstractState_1.java,v 1.29 2008/06/28 00:21:27 hburger Exp $
+ * Name:        $Id: AbstractState_1.java,v 1.34 2008/09/10 18:10:13 hburger Exp $
  * Description: State_1 plug-in
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:27 $
+ * Date:        $Date: 2008/09/10 18:10:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -149,13 +149,13 @@ import org.openmdx.model1.code.AggregationKind;
  */
 @SuppressWarnings("unchecked")
 public abstract class AbstractState_1 
-  extends Standard_1 
+extends Standard_1 
 {
 
     protected AbstractState_1() {
         super();
     }
-    
+
     protected static class OperationParameter {
 
         public static OperationParameter newInstance(
@@ -167,7 +167,7 @@ public abstract class AbstractState_1
                 validForPattern
             );
         }        
-           
+
         private OperationParameter(
             String operationQualifier, 
             Pattern validForPattern
@@ -182,27 +182,27 @@ public abstract class AbstractState_1
                     "operationQualifier", 
                     operationQualifier
                 );
-            
+
                 parse(operationQualifier);
             }
             else {
                 _parameters.put("qualifier", operationQualifier);
             }
         }
-        
+
         public static boolean hasStateParameter(String operationQualifier) {
-             return hasParameter(operationQualifier, State_1_Attributes.OP_STATE);
+            return hasParameter(operationQualifier, State_1_Attributes.OP_STATE);
         }
-        
+
         public static boolean hasPeriodParameter(String operationQualifier) {
-             return hasParameter(operationQualifier, State_1_Attributes.OP_VALID_FROM) ||
-                hasParameter(operationQualifier, State_1_Attributes.OP_VALID_TO);
+            return hasParameter(operationQualifier, State_1_Attributes.OP_VALID_FROM) ||
+            hasParameter(operationQualifier, State_1_Attributes.OP_VALID_TO);
         }
-        
+
         public boolean isStateOperation() {
             return hasStateParameter(getOperationQualifier());
         }
-        
+
         public boolean isPeriodOperation() {
             return hasPeriodParameter(getOperationQualifier());
         }
@@ -210,23 +210,23 @@ public abstract class AbstractState_1
         public String getQualifier() {
             return (String)_parameters.get("qualifier");
         }
-        
+
         public String getOperationQualifier() {
             return (String)_parameters.get("operationQualifier");
         }
-        
+
         public String getDate() {
             return (String)_parameters.get("stateAtDate");
         }
-        
+
         public String getStateNumber() {
             return (String)_parameters.get("stateNumber");
         }
- 
+
         public boolean isFirst() {
             return _parameters.containsKey(State_1_Attributes.OP_VAL_FIRST);
         }
-        
+
         public boolean isLast() {
             return _parameters.containsKey(State_1_Attributes.OP_VAL_LAST);
         }
@@ -236,15 +236,15 @@ public abstract class AbstractState_1
         public String getValidFrom() {
             return (String)_parameters.get(State_1_Attributes.OP_VALID_FROM);
         }
-        
+
         public String getValidTo() {
             return (String)_parameters.get(State_1_Attributes.OP_VALID_TO);
         }
-        
+
         public boolean skipMissingStates() {
             return _parameters.containsKey(State_1_Attributes.OP_SKIP_MISSING_STATES);
         }
-        
+
         /**
          * Returns a new path cleaned from all known operationParameters.
          * 
@@ -267,11 +267,11 @@ public abstract class AbstractState_1
                             idx1 = component.indexOf(knownOp,idx);
                         }
                         if (idx1!=(idx+1)) {
-                        	// found a knownOp but further down the string or none at all
+                            // found a knownOp but further down the string or none at all
                             pos = idx + 1;
                             newComponent.append(';');
                         } else {
-                        	// found a knownOp; this must be ignored
+                            // found a knownOp; this must be ignored
                             idx = component.indexOf(';',idx1 + knownOp.length());
                             pos = (idx>0) ? idx : component.length();
                         }
@@ -285,8 +285,8 @@ public abstract class AbstractState_1
             }
             return reply;
         }
-        
-        
+
+
         /**
          * Builds a map of the parameters contained in the qualifier.
          * <p>
@@ -302,14 +302,14 @@ public abstract class AbstractState_1
         private void parse(
             String operationQualifier
         ) throws ServiceException {
-            
+
             StringTokenizer tok = new StringTokenizer(operationQualifier, ";=", true);
-        
+
             String paramForAccess = null;
             String paramForUpdate = null;
-        
+
             BasicException.Parameter error = null;
-        
+
             String param = null;
             String token = null;
             String value = null;
@@ -317,21 +317,21 @@ public abstract class AbstractState_1
                 token = tok.nextToken();
                 param = null;
                 value = null;
-            
+
                 if (token.equals(";") && tok.hasMoreTokens()) {
                     param = token = tok.nextToken();
-                
+
                     if (tok.hasMoreTokens()) {
                         token = tok.nextToken();
                     }
-                
+
                     if (token.equals("=") && tok.hasMoreTokens()) {
                         value = token = tok.nextToken();
                     }
-                
+
                     if (param != null ) {
                         // start of next parameter, treat old
-    
+
                         if (param.equals(State_1_Attributes.OP_STATE)) {
                             paramForAccess = State_1_Attributes.OP_STATE;
                             // check value
@@ -357,8 +357,8 @@ public abstract class AbstractState_1
                             paramForUpdate = State_1_Attributes.OP_VALID_FROM;
                             // check value
                             if (
-                                !value.equals(State_1_Attributes.OP_VAL_EVER) && 
-                                !validForPattern.matcher(value).matches()
+                                    !value.equals(State_1_Attributes.OP_VAL_EVER) && 
+                                    !validForPattern.matcher(value).matches()
                             ) {
                                 error = new BasicException.Parameter(State_1_Attributes.OP_VALID_FROM, value);
                             }
@@ -367,8 +367,8 @@ public abstract class AbstractState_1
                             paramForUpdate = State_1_Attributes.OP_VALID_TO;
                             // check value
                             if (
-                                !value.equals(State_1_Attributes.OP_VAL_EVER) && 
-                                !validForPattern.matcher(value).matches()
+                                    !value.equals(State_1_Attributes.OP_VAL_EVER) && 
+                                    !validForPattern.matcher(value).matches()
                             ) {
                                 error = new BasicException.Parameter(State_1_Attributes.OP_VALID_TO, value);
                             }
@@ -381,40 +381,38 @@ public abstract class AbstractState_1
                             }
                         }
                         // don't care for additional params; they are just not ours.
-                        
+
                         if (value != null 
-                            && value.equals(State_1_Attributes.OP_VAL_EVER)
+                                && value.equals(State_1_Attributes.OP_VAL_EVER)
                         ) {
                             value = null;
                         }
                         _parameters.put(param, value);
-                        
+
                     }
                 }
             }
-            
+
             // paramForAccess is not defined, but paramForUpdate is set
             if (paramForAccess == null && paramForUpdate != null) {
                 _parameters.put(OP_STATE_UNDEF, null);
             }
-        
+
             if (error != null 
             ) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER, 
-                    new BasicException.Parameter[]{
-                        error,
-                        new BasicException.Parameter(
-                            "operation", operationQualifier
-                        )
-                    },
-                    "Illegal operation parameter."
+                    "Illegal operation parameter.",
+                    error,
+                    new BasicException.Parameter(
+                        "operation", operationQualifier
+                    )
                 );            
             }
 
         }
-    
+
         /**
          * Check if the operation parameter is present.
          * 
@@ -427,16 +425,16 @@ public abstract class AbstractState_1
             String parameter
         ) {
             return operationQualifier != null 
-                && operationQualifier.indexOf(";" + parameter + "=") > 0;
+            && operationQualifier.indexOf(";" + parameter + "=") > 0;
         }
-        
+
         String _qualifier = null;
         String _operationString = null;
         Map _parameters = new HashMap();
         private final Pattern validForPattern;
-        
+
         static Set _knownOperationParameters = new HashSet();
-        
+
         // static initialisation
         static {
             _knownOperationParameters.add(State_1_Attributes.OP_SKIP_MISSING_STATES);
@@ -444,7 +442,7 @@ public abstract class AbstractState_1
             _knownOperationParameters.add(State_1_Attributes.OP_VALID_FROM + "=");
             _knownOperationParameters.add(State_1_Attributes.OP_VALID_TO + "=");
         }
-        
+
     }
 
     // --------------------------------------------------------------------------
@@ -464,7 +462,7 @@ public abstract class AbstractState_1
                 new HashSet()
             );
         }
-        
+
         public static PathNType newInstance(
             Path path, 
             ModelElement_1_0 type,
@@ -478,37 +476,37 @@ public abstract class AbstractState_1
         }
 
         private PathNType(
-        	Path path, 
-        	ModelElement_1_0 type,
-        	Set visitedElements
+            Path path, 
+            ModelElement_1_0 type,
+            Set visitedElements
         ) {
             this.path = path;
             this.type = type;
             this.visitedElements = visitedElements;
         }
-       
+
         public ModelElement_1_0 type() {
             return this.type;
         }
-      
+
         public Path path() {
             return this.path;
         }
-        
+
         public Set visitedElements() {
-        	return Collections.unmodifiableSet(visitedElements);
+            return Collections.unmodifiableSet(visitedElements);
         }
-      
-      	private Set visitedElements;
+
+        private Set visitedElements;
         private ModelElement_1_0 type;
         private Path path;
-        
+
     }
-    
-    
+
+
     // --------------------------------------------------------------------------
     protected class UpdateSpec {
-        
+
         protected UpdateSpec(
             ServiceHeader header,
             DataproviderRequest request, 
@@ -533,19 +531,19 @@ public abstract class AbstractState_1
                 base, 
                 validForPattern
             );
-            
+
             _objectPath = OperationParameter.removeAllOperationParameters(request.path()); //.getParent().getChild(_operationParameter.getQualifier());
-            
+
             _at = getRequestedAt(header, request);
             if (request.object().getValues(SystemAttributes.MODIFIED_BY) != null &&
-                !request.object().getValues(SystemAttributes.MODIFIED_BY).isEmpty()
+                    !request.object().getValues(SystemAttributes.MODIFIED_BY).isEmpty()
             ) {
                 _by = request.object().getValues(SystemAttributes.MODIFIED_BY);
             }
             else {
                 _by = header.getPrincipalChain();
             }
-            
+
             if (_operationParameter.isPeriodOperation()) {
                 _isValidPeriodSet = true;
                 _validFrom = _operationParameter.getValidFrom();
@@ -557,15 +555,15 @@ public abstract class AbstractState_1
             else {
                 // no settings as operation parameters in the qualifier
                 // try reading validFrom, validTo from attributes:
-            
+
                 if (request.object().getValues(validFromAttribute()) != null) {
                     _isValidPeriodSet = true;
                     if (!request.object().getValues(validFromAttribute()).isEmpty()) {
                         _validFrom = (String) 
-                            request.object().values(validFromAttribute()).get(0);
+                        request.object().values(validFromAttribute()).get(0);
                     }
                 }
-                
+
                 SparseList validToAttribute = request.object().getValues(validToAttribute()); 
                 if (validToAttribute != null) {
                     _isValidPeriodSet = true;
@@ -576,18 +574,18 @@ public abstract class AbstractState_1
                     }
                 }
             }
-            
+
         }
-        
+
         public String getModificationDate() {
             return _at;
         }
-        
+
         public List getModificationPrincipal() {
             return _by;
         }
-        
-        
+
+
         /**
          * 
          * @return
@@ -596,26 +594,26 @@ public abstract class AbstractState_1
             return _operationParameter.skipMissingStates();
         }
 
-       
+
         public boolean isValidPeriodSet() {
             return _isValidPeriodSet;
         }
-        
+
         public boolean isStateOperation() {
             return _operationParameter.isStateOperation();
         } 
-        
+
         public boolean isPeriodOperation() {
             return _operationParameter.isPeriodOperation();
         }
-        
+
         /**
          * @return
          */
         public String getValidFrom() {
             return _validFrom;
         }
-        
+
         /**
          * @return
          */
@@ -623,11 +621,11 @@ public abstract class AbstractState_1
             return _validTo;
         }
 
-        
+
         public OperationParameter getOperationParameter() {
             return _operationParameter;
         }
-        
+
         /**
          * Path to object; without any operation parameters.
          * 
@@ -636,8 +634,8 @@ public abstract class AbstractState_1
         public Path getObjectPath() {
             return _objectPath;
         }
-        
-        
+
+
         /**
          * In case of state operation request, validFrom, validTo is known only
          * after reading the state. It must be set before continuing.
@@ -658,18 +656,16 @@ public abstract class AbstractState_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter(
-                            "qualifier", 
-                            _operationParameter.getOperationQualifier())
-                    },
-                    "setting of valid period is only possible in case of state operation"
+                    "setting of valid period is only possible in case of state operation",
+                    new BasicException.Parameter(
+                        "qualifier", 
+                        _operationParameter.getOperationQualifier())
                 );
             }
         }
 
         private boolean _isValidPeriodSet = false;
-        
+
         private Path _objectPath;
         private String _validFrom;
         private String _validTo;
@@ -681,9 +677,9 @@ public abstract class AbstractState_1
     protected boolean isShowDBEnabled(){
         return this.enableShowDB && SysLog.isTraceOn();
     }
-    
+
     protected abstract Pattern validForPattern();
-    
+
     protected abstract String stateTypeName();
 
     protected abstract String getRequestedFor(
@@ -698,13 +694,13 @@ public abstract class AbstractState_1
         ServiceHeader header,
         DataproviderRequest request
     );
-    
+
     protected abstract boolean excludingEnd();
-    
+
     protected abstract String validFromAttribute();
-    
+
     protected abstract String validToAttribute();
-    
+
     protected abstract String toExclusiveValidTo(
         String validTo
     ) throws ServiceException;
@@ -712,7 +708,7 @@ public abstract class AbstractState_1
     protected abstract String toModelledValidTo(
         String validTo
     ) throws ServiceException;
-    
+
     // --------------------------------------------------------------------------
     protected String getRequestedFor(
         ServiceHeader header,
@@ -736,7 +732,7 @@ public abstract class AbstractState_1
             SysLog.trace("show object", object);
         }
     }
- 
+
     // --------------------------------------------------------------------------
     /**
      * Show the content of the db. 
@@ -751,126 +747,126 @@ public abstract class AbstractState_1
         DataproviderRequest request,
         Path idPath
     ) {
-        
+
         try {          
-        Path findPath = (Path)idPath.clone();
-        String objectId = findPath.remove(idPath.size()-1);
-        int p = objectId.indexOf(';');
-        if (p > 0) {
-            objectId = objectId.substring(0, p);
-        }
-        DataproviderRequest newRequest = 
-            new DataproviderRequest(
-                new DataproviderObject(findPath), 
-                DataproviderOperations.ITERATION_START,
-                new FilterProperty[] {
-                    new FilterProperty( 
-                        Quantors.THERE_EXISTS,
-                        ID_ATTRIBUTE_NAME,
-                        FilterOperators.IS_IN,
-                        new Object[] {objectId}
-                    )
-                },
-                0,
-                Integer.MAX_VALUE, 
-                Directions.ASCENDING,    // direction
-                AttributeSelectors.ALL_ATTRIBUTES,
-                null
-            );
-            
-        newRequest.contexts().putAll(request.contexts());
-        
-        DataproviderReply reply = 
-            super.find(
-                header,
-                newRequest
-            );
-        DataproviderObject[] objects = reply.getObjects();
-        
-        // first print all invalidated
-        for (int i = 0; i < objects.length; i++) {
-            if (objects[i].getValues(State_1_Attributes.INVALIDATED_AT) != null &&
-                !objects[i].getValues(State_1_Attributes.INVALIDATED_AT).isEmpty()
-            ) {
-                showObject(objects[i]);
+            Path findPath = (Path)idPath.clone();
+            String objectId = findPath.remove(idPath.size()-1);
+            int p = objectId.indexOf(';');
+            if (p > 0) {
+                objectId = objectId.substring(0, p);
             }
-        }
-        
-        ArrayList validObjects = new ArrayList();
-        String candFrom = null;
-        List actFromList = null;
-        
-        // now get the ones still valid
-        for (int i = 0; i < objects.length; i++) {
-            if (objects[i].getValues(State_1_Attributes.INVALIDATED_AT) == null ||
-                objects[i].getValues(State_1_Attributes.INVALIDATED_AT).isEmpty()
-            ) {
-                if (objects[i].getValues(validFromAttribute()) == null ||
-                    objects[i].getValues(validFromAttribute()).isEmpty()
+            DataproviderRequest newRequest = 
+                new DataproviderRequest(
+                    new DataproviderObject(findPath), 
+                    DataproviderOperations.ITERATION_START,
+                    new FilterProperty[] {
+                        new FilterProperty( 
+                            Quantors.THERE_EXISTS,
+                            ID_ATTRIBUTE_NAME,
+                            FilterOperators.IS_IN,
+                            objectId
+                        )
+                    },
+                    0,
+                    Integer.MAX_VALUE, 
+                    Directions.ASCENDING,    // direction
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    null
+                );
+
+            newRequest.contexts().putAll(request.contexts());
+
+            DataproviderReply reply = 
+                super.find(
+                    header,
+                    newRequest
+                );
+            DataproviderObject[] objects = reply.getObjects();
+
+            // first print all invalidated
+            for (int i = 0; i < objects.length; i++) {
+                if (objects[i].getValues(State_1_Attributes.INVALIDATED_AT) != null &&
+                        !objects[i].getValues(State_1_Attributes.INVALIDATED_AT).isEmpty()
                 ) {
-                    validObjects.add(0,objects[i]);
+                    showObject(objects[i]);
                 }
-                else {
-                    actFromList = objects[i].getValues(validFromAttribute());
-                    candFrom = (String) objects[i].getValues(validFromAttribute()).get(0);
-                    // search for place to insert
-                    boolean found = false;
-                    int pos = -1;
-                    
-                    for (int j = 0; j < validObjects.size() && !found; j++) {
-                        actFromList = ((DataproviderObject)validObjects.get(j)).getValues(validFromAttribute());
-                        if (
-                            actFromList != null 
-                            &&
-                            !actFromList.isEmpty()
-                            &&
-                            candFrom.compareTo((String) actFromList.get(0)) < 0
-                        ) {
-                             found = true;
-                             pos = j;
-                        }
-                    }
-                    if (pos == -1) {
-                        validObjects.add(objects[i]); // add at end
+            }
+
+            ArrayList validObjects = new ArrayList();
+            String candFrom = null;
+            List actFromList = null;
+
+            // now get the ones still valid
+            for (int i = 0; i < objects.length; i++) {
+                if (objects[i].getValues(State_1_Attributes.INVALIDATED_AT) == null ||
+                        objects[i].getValues(State_1_Attributes.INVALIDATED_AT).isEmpty()
+                ) {
+                    if (objects[i].getValues(validFromAttribute()) == null ||
+                            objects[i].getValues(validFromAttribute()).isEmpty()
+                    ) {
+                        validObjects.add(0,objects[i]);
                     }
                     else {
-                        validObjects.add(pos, objects[i]);
+                        actFromList = objects[i].getValues(validFromAttribute());
+                        candFrom = (String) objects[i].getValues(validFromAttribute()).get(0);
+                        // search for place to insert
+                        boolean found = false;
+                        int pos = -1;
+
+                        for (int j = 0; j < validObjects.size() && !found; j++) {
+                            actFromList = ((DataproviderObject)validObjects.get(j)).getValues(validFromAttribute());
+                            if (
+                                    actFromList != null 
+                                    &&
+                                    !actFromList.isEmpty()
+                                    &&
+                                    candFrom.compareTo((String) actFromList.get(0)) < 0
+                            ) {
+                                found = true;
+                                pos = j;
+                            }
+                        }
+                        if (pos == -1) {
+                            validObjects.add(objects[i]); // add at end
+                        }
+                        else {
+                            validObjects.add(pos, objects[i]);
+                        }
                     }
                 }
             }
-        }
-        
-        // now print the objects:
-        for (int j = 0; j < validObjects.size(); j++) {
-            showObject((DataproviderObject)validObjects.get(j));
-        }
 
-        // now get the root:
-        newRequest = 
-            new DataproviderRequest(
-                new DataproviderObject(idPath), 
-                DataproviderOperations.OBJECT_RETRIEVAL,
-                null,
-                0,
-                Integer.MAX_VALUE, 
-                Directions.ASCENDING,    // direction
-                AttributeSelectors.ALL_ATTRIBUTES,
-                null
-            );
-        newRequest.contexts().putAll(request.contexts());
-        
+            // now print the objects:
+            for (int j = 0; j < validObjects.size(); j++) {
+                showObject((DataproviderObject)validObjects.get(j));
+            }
 
-        reply = super.get(header, newRequest);
-        
-        showObject(reply.getObject());
-        
+            // now get the root:
+            newRequest = 
+                new DataproviderRequest(
+                    new DataproviderObject(idPath), 
+                    DataproviderOperations.OBJECT_RETRIEVAL,
+                    null,
+                    0,
+                    Integer.MAX_VALUE, 
+                    Directions.ASCENDING,    // direction
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    null
+                );
+            newRequest.contexts().putAll(request.contexts());
+
+
+            reply = super.get(header, newRequest);
+
+            showObject(reply.getObject());
+
         } 
         catch (Exception e) {
             // just to avoid exceptions here
         }
     }
-        
-        
+
+
 
     // --------------------------------------------------------------------------
     /**
@@ -886,20 +882,19 @@ public abstract class AbstractState_1
         Layer_1_0 delegation
     ) throws Exception {       
         super.activate(id, configuration, delegation);
-        
+
         List models = configuration.values(SharedConfigurationEntries.MODEL);
         if(models.size() > 0) {
-          _model = (Model_1_0)models.get(0);
+            _model = (Model_1_0)models.get(0);
         }
         else {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.INVALID_CONFIGURATION, 
-            null,
-            "A model must be configured with options 'modelPackage' and 'packageImpl'"
-          );
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION, 
+                "A model must be configured with options 'modelPackage' and 'packageImpl'"
+            );
         }
-        
+
         if (configuration.containsEntry(LayerConfigurationEntries.ENABLE_HOLES_IN_OBJECT_VALIDITY)) {
             enableHolesInValidity = configuration.isOn(
                 LayerConfigurationEntries.ENABLE_HOLES_IN_OBJECT_VALIDITY
@@ -920,7 +915,7 @@ public abstract class AbstractState_1
             "configuration " + LayerConfigurationEntries.ENABLE_DISJUNCT_STATE_CREATION, 
             Boolean.valueOf(this.enableDisjunctStateCreation)
         );
-        
+
         this.enableShowDB = configuration.isOn(
             LayerConfigurationEntries.ENABLE_SHOW_DB
         );
@@ -928,37 +923,35 @@ public abstract class AbstractState_1
             "configuration " + LayerConfigurationEntries.ENABLE_SHOW_DB, 
             Boolean.valueOf(this.enableShowDB)
         );
-        
+
         String defaultState = configuration.getFirstValue(LayerConfigurationEntries.DEFAULT_STATE);
         if(!DEFAULT_STATE_VALUES.contains(defaultState)) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.INVALID_CONFIGURATION,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter(
-                    "value", 
-                    defaultState
-                ),
-                new BasicException.Parameter(
-                    "acceptable", 
-                    DEFAULT_STATE_VALUES.subList(1, DEFAULT_STATE_VALUES.size() - 1)
-                )
-            },
-            "Invalid " + LayerConfigurationEntries.DEFAULT_STATE + " configuration value"
+            "Invalid " + LayerConfigurationEntries.DEFAULT_STATE + " configuration value",
+            new BasicException.Parameter(
+                "value", 
+                defaultState
+            ),
+            new BasicException.Parameter(
+                "acceptable", 
+                DEFAULT_STATE_VALUES.subList(1, DEFAULT_STATE_VALUES.size() - 1)
+            )
         );
         this.defaultsToInitialState = LayerConfigurationEntries.INITIAL_STATE.equals(defaultState);
         SysLog.info(
             LayerConfigurationEntries.INITIAL_STATE,
             this.defaultsToInitialState ? LayerConfigurationEntries.INITIAL_STATE : LayerConfigurationEntries.CURRENT_STATE
         );
-        
+
         List disableHistoryReferencePatterns = new ArrayList();
         for(
-            Iterator i = configuration.values(LayerConfigurationEntries.DISABLE_HISTORY_REFERENCE_PATTERN).populationIterator();
-            i.hasNext();
+                Iterator i = configuration.values(LayerConfigurationEntries.DISABLE_HISTORY_REFERENCE_PATTERN).populationIterator();
+                i.hasNext();
         ) disableHistoryReferencePatterns.add(new Path((String)i.next()));
         for(
-            Iterator i = configuration.values(LayerConfigurationEntries.COMPATIBILITY_DISABLE_HISTORY_REFERENCE_PATTERN).populationIterator();
-            i.hasNext();
+                Iterator i = configuration.values(LayerConfigurationEntries.COMPATIBILITY_DISABLE_HISTORY_REFERENCE_PATTERN).populationIterator();
+                i.hasNext();
         ) disableHistoryReferencePatterns.add(new Path((String)i.next()));
         this.disableHistoryReferencePatterns = Path.toPathArray(disableHistoryReferencePatterns);
         SysLog.info(
@@ -967,7 +960,7 @@ public abstract class AbstractState_1
         );
 
         this.statefulReferencePaths = null;
-        
+
     }
 
     /**
@@ -982,7 +975,7 @@ public abstract class AbstractState_1
         DataproviderRequest[] requests
     ) throws ServiceException {
         super.prolog(header, requests);
-        
+
         if (this.statefulReferencePaths == null) {
             this.statefulReferencePaths = iterateModelForstatefulReferencePaths(
                 null,
@@ -990,21 +983,21 @@ public abstract class AbstractState_1
             );
         }        
     }
-    
-    
+
+
     /**
      * Test only! 
      * 
      * Test iteration of the model for stateful paths. 
      */
     public Map testModelIteration(Model_1_0 model)throws ServiceException{
-    	_model = model;
-    	Map result = iterateModelForstatefulReferencePaths(
-                null,
-                _model.getDereferencedType(AUTHORITY_TYPE_NAME)
-            );
+        _model = model;
+        Map result = iterateModelForstatefulReferencePaths(
+            null,
+            _model.getDereferencedType(AUTHORITY_TYPE_NAME)
+        );
 
-    	return result;
+        return result;
     }
 
     // --------------------------------------------------------------------------
@@ -1031,8 +1024,8 @@ public abstract class AbstractState_1
     private int compareAtStart(Object a, Object b) {
         return compareStringDate(a, b, true);
     }
-    
-    
+
+
     /** 
      * a < b --> -1
      * a > b --> 1
@@ -1047,7 +1040,7 @@ public abstract class AbstractState_1
     private int compareAtEnd(Object a, Object b) {
         return compareStringDate(a, b, false);
     }
-    
+
     // --------------------------------------------------------------------------
     /**
      * compare two dates in their String representation.
@@ -1070,7 +1063,7 @@ public abstract class AbstractState_1
         Object b = _b;
         String aDate = null;
         String bDate = null;
-        
+
         if (a != null && a instanceof SparseList) {
             SparseList aList = (SparseList) a;
             if (aList.isEmpty()) {
@@ -1119,7 +1112,7 @@ public abstract class AbstractState_1
         if (b instanceof String) {
             bDate = (String) b;
         }
-        
+
         return aDate.compareTo(bDate);
     }
 
@@ -1134,7 +1127,7 @@ public abstract class AbstractState_1
     ) {
         boolean isDerived = false; 
         for (Iterator i = type.values("allSupertype").iterator();
-            i.hasNext() && !isDerived;
+        i.hasNext() && !isDerived;
         ) {
             isDerived = 
                 ((Path) i.next()).getBase().equals(typeName);
@@ -1155,7 +1148,7 @@ public abstract class AbstractState_1
      *                           get added.
      */
     private void reachableClasses(
-    	PathNType startPoint,
+        PathNType startPoint,
         ArrayList reachableClasses
     ) throws ServiceException  {
         Path instancePath                = null;
@@ -1167,60 +1160,60 @@ public abstract class AbstractState_1
         Path nextClassTypePath           = null;
         ModelElement_1_0 nextClassType   = null;
         String pathComponent             = null;
-        
+
         ModelElement_1_0 type = startPoint.type();
         Path path = startPoint.path();
-        
-		// SysLog.trace("starting from path: " + path + " class: " + type.getValues("name"));
-        
+
+        // SysLog.trace("starting from path: " + path + " class: " + type.getValues("name"));
+
         // for each subtype of startClass (this contains also the startClass itself)
         for (Iterator subIter = type.values("allSubtype").iterator();
-            subIter.hasNext();
+        subIter.hasNext();
         ) {
             // Path 
             instancePath = path == null ? null : new Path(path);
             // Path 
             subTypeModelPath = (Path) subIter.next();
-            
+
             //DataproviderObject 
             subTypeObj = this._model.getDereferencedType(subTypeModelPath);
 
             // for each contained (attribute or reference)
             for (Iterator contentIter = subTypeObj.values("feature").iterator();
-                contentIter.hasNext();
+            contentIter.hasNext();
             ) {
                 // DataproviderObject 
                 contentObj = this._model.getElement(contentIter.next());
-//                SysLog.trace("contentObj.identity: ", contentObj.values(SystemAttributes.OBJECT_IDENTITY));
-//                SysLog.trace("contentObj.path: ", contentObj.path());
-       
+//              SysLog.trace("contentObj.identity: ", contentObj.values(SystemAttributes.OBJECT_IDENTITY));
+//              SysLog.trace("contentObj.path: ", contentObj.path());
+
                 // check if it is a reference
                 // and make sure it is the first visited
                 if (contentObj.values(SystemAttributes.OBJECT_CLASS).get(0).
                         equals("org:omg:model1:Reference") 
-                    && !startPoint.visitedElements().contains(contentObj)
+                        && !startPoint.visitedElements().contains(contentObj)
                 ) {
                     // Path 
                     refendPath = (Path) contentObj.values("referencedEnd").get(0);
-                    
+
                     // DataproviderObject 
                     refend = this._model.getElement(refendPath);
-                    
+
                     // only interested in aggregated objects
                     if (AggregationKind.COMPOSITE.equals(
-                            refend.values("aggregation").get(0)
-                        )
-                        ||
-                        // need shared aggregations because they may occur in an
-                        // access path and must be recognized as stated.
-                        AggregationKind.SHARED.equals(
-                            refend.values("aggregation").get(0)
-                        )
+                        refend.values("aggregation").get(0)
+                    )
+                    ||
+                    // need shared aggregations because they may occur in an
+                    // access path and must be recognized as stated.
+                    AggregationKind.SHARED.equals(
+                        refend.values("aggregation").get(0)
+                    )
                     ) {
                         nextClassTypePath = (Path) refend.values("type").get(0);
                         nextClassType = this._model.getDereferencedType(nextClassTypePath);
                         pathComponent = (String) refend.values("name").get(0);
-                        
+
                         // exclude which have self reflective shared relations
                         // TODO: these classes must be removed from models because
                         //       they violate modeling constraints
@@ -1228,23 +1221,23 @@ public abstract class AbstractState_1
                         //       a change in behavior.
                         Object nextClassName = nextClassType.getValues("qualifiedName").get(0);
                         if(
-                          !(ROLE_TYPE_NAME.equals(nextClassName)) &&
-                          !(STATE_TYPE_NAME.equals(nextClassName)) &&
-						  !(VIEW_TYPE_NAME.equals(nextClassName))
+                                !(ROLE_TYPE_NAME.equals(nextClassName)) &&
+                                !(STATE_TYPE_NAME.equals(nextClassName)) &&
+                                !(VIEW_TYPE_NAME.equals(nextClassName))
                         ){         
-							if (!startPoint.visitedElements().contains(nextClassType)) {
-	                            if (path == null) {
-	                                nextClassTypePath = new Path(pathComponent);
-	                            }
-	                            else {
-	                                nextClassTypePath = new Path(instancePath);
-	                                nextClassTypePath.add(pathComponent);
-	                            }
-	                            Set refsVisited = new HashSet(startPoint.visitedElements());
-	                            refsVisited.add(contentObj);
-	                            refsVisited.add(nextClassType);
-	                            reachableClasses.add(PathNType.newInstance(nextClassTypePath, nextClassType, refsVisited));
-	                        }  
+                            if (!startPoint.visitedElements().contains(nextClassType)) {
+                                if (path == null) {
+                                    nextClassTypePath = new Path(pathComponent);
+                                }
+                                else {
+                                    nextClassTypePath = new Path(instancePath);
+                                    nextClassTypePath.add(pathComponent);
+                                }
+                                Set refsVisited = new HashSet(startPoint.visitedElements());
+                                refsVisited.add(contentObj);
+                                refsVisited.add(nextClassType);
+                                reachableClasses.add(PathNType.newInstance(nextClassTypePath, nextClassType, refsVisited));
+                            }  
                         }                  
                     }
                 }
@@ -1252,7 +1245,7 @@ public abstract class AbstractState_1
         }           
     }
 
-    
+
     // --------------------------------------------------------------------------
     /**
      * Prepare a map of reference paths leading to state enabled classes.
@@ -1267,34 +1260,32 @@ public abstract class AbstractState_1
         final Path path,
         final ModelElement_1_0 start
     ) throws ServiceException {
-    	HashMap statePaths = new HashMap();
+        HashMap statePaths = new HashMap();
         ArrayList openClassesAndPaths = new ArrayList();
         HashSet visitedPaths = new HashSet();
         HashSet visitedClasses = new HashSet();
         PathNType startPoint = PathNType.newInstance(path, start);
-        
+
         /* int modelSize = */ _model.getContent().size();
-        
+
         openClassesAndPaths.add(startPoint);
-        
+
         while (openClassesAndPaths.size() > 0) {
             startPoint = (PathNType) openClassesAndPaths.remove(0);
             if (startPoint.path() != null &&
-                startPoint.path().size() > PATHLENGTH_THRESHOLD
+                    startPoint.path().size() > PATHLENGTH_THRESHOLD
             ){
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ILLEGAL_STATE, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("path", startPoint.path()),
-                        new BasicException.Parameter("PATHLENGTH_THRESHOLD", PATHLENGTH_THRESHOLD)
-                    },
                     "Encountered long path while traversing model for stateful paths. Most Probably the algorithm" +
-                    " is looping. Please check your models for potential loops. " 
+                    " is looping. Please check your models for potential loops. ",
+                    new BasicException.Parameter("path", startPoint.path()),
+                    new BasicException.Parameter("PATHLENGTH_THRESHOLD", PATHLENGTH_THRESHOLD)
                 );	            	
             }
-            
-            
+
+
             // can't put the two statements in a single or'ed one, because
             // the evaluation stops after the first true
             boolean pathNotVisited = visitedPaths.add(startPoint.path());
@@ -1306,38 +1297,36 @@ public abstract class AbstractState_1
                 reachableClasses(startPoint, openClassesAndPaths);
             }
         }
-    	
+
         return statePaths;
-     }
-     
-     // -------------------------------------------------------------------------
-     /**
-      * For the operations create, modify, replace, remove validState and 
-      * historyState are not supported.
-      */
-     private void assertValidPathForChanges(
+    }
+
+    // -------------------------------------------------------------------------
+    /**
+     * For the operations create, modify, replace, remove validState and 
+     * historyState are not supported.
+     */
+    private void assertValidPathForChanges(
         Path path
-     ) throws ServiceException {
+    ) throws ServiceException {
         int size = path.size();
         if (path.get(size-2).equals(State_1_Attributes.REF_HISTORY) ||
-            path.get(size-2).equals(State_1_Attributes.REF_VALID) ||
-            path.get(size-2).equals(State_1_Attributes.REF_STATE)
+                path.get(size-2).equals(State_1_Attributes.REF_VALID) ||
+                path.get(size-2).equals(State_1_Attributes.REF_STATE)
         ) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("path", path),
-                    new BasicException.Parameter("component", State_1_Attributes.REF_HISTORY),
-                    new BasicException.Parameter("component", State_1_Attributes.REF_VALID),
-                    new BasicException.Parameter("component", State_1_Attributes.REF_STATE)
-                },
-                "No changes (create, modify, replace or remove) allowed with a path containing those components."
+                "No changes (create, modify, replace or remove) allowed with a path containing those components.",
+                new BasicException.Parameter("path", path),
+                new BasicException.Parameter("component", State_1_Attributes.REF_HISTORY),
+                new BasicException.Parameter("component", State_1_Attributes.REF_VALID),
+                new BasicException.Parameter("component", State_1_Attributes.REF_STATE)
             );
         }
     }
-    
-    
+
+
     /**
      * Assert that the client is aware of states to change data in any way.
      *
@@ -1347,21 +1336,19 @@ public abstract class AbstractState_1
         DataproviderObject requestObject
     ) throws ServiceException {
         if (!spec.isValidPeriodSet() 
-            && !spec.isPeriodOperation()
-            && !spec.isStateOperation()
+                && !spec.isPeriodOperation()
+                && !spec.isStateOperation()
         ) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("path", requestObject.path()),
-                },
-                "Trying to change stated data without state information. (Must set object_validFrom/To or some OperationParameter)" 
+                "Trying to change stated data without state information. (Must set object_validFrom/To or some OperationParameter)",
+                new BasicException.Parameter("path", requestObject.path())
             );            
         }          
     }
-    
-    
+
+
     /**
      * Assert that all the states are within the boundaries of the request. 
      * <p> 
@@ -1378,57 +1365,55 @@ public abstract class AbstractState_1
         boolean allowAdjacent
     ) throws ServiceException {
         boolean inside = true;
-        
+
         for (Iterator s = states.iterator(); s.hasNext();) {
             DataproviderObject state = (DataproviderObject) s.next();
             String stateFrom = readNullableStringValue(state, validFromAttribute());
             String stateTo = toExclusiveValidTo(readNullableStringValue(state, validToAttribute()));
-            
+
             if (allowAdjacent &&
-                (( 
-                    stateTo != null &&   // for ever
-                    compareAtStart(spec.getValidFrom(), stateTo) > 0
-                ) 
-                ||
-                (
-                    stateFrom != null &&  // since ever
-                    compareAtEnd(spec.getValidTo(), stateFrom) < 0
-                ))
+                    (( 
+                            stateTo != null &&   // for ever
+                            compareAtStart(spec.getValidFrom(), stateTo) > 0
+                    ) 
+                    ||
+                    (
+                            stateFrom != null &&  // since ever
+                            compareAtEnd(spec.getValidTo(), stateFrom) < 0
+                    ))
             ) {
                 inside = false;
             }
             else if (!allowAdjacent &&
-                (( 
-                    stateTo != null &&   // for ever
-                    compareAtStart(spec.getValidFrom(), stateTo) > 0
-                ) 
-                ||
-                (
-                    stateFrom != null &&  // since ever
-                    compareAtEnd(spec.getValidTo(), stateFrom) < 0
-                ))
+                    (( 
+                            stateTo != null &&   // for ever
+                            compareAtStart(spec.getValidFrom(), stateTo) > 0
+                    ) 
+                    ||
+                    (
+                            stateFrom != null &&  // since ever
+                            compareAtEnd(spec.getValidTo(), stateFrom) < 0
+                    ))
             ) {
                 inside = false;
             }
-            
+
             if (!inside) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("state", state.path()),
-                        new BasicException.Parameter("request.validFrom", spec.getValidFrom()),
-                        new BasicException.Parameter("request.validTo", spec.getValidTo()),
-                        new BasicException.Parameter("state.validFrom", stateFrom),
-                        new BasicException.Parameter("state.validTo", stateTo)
-                    },
-                    "state outside of requested valid period. This is an internal error." 
+                    "state outside of requested valid period. This is an internal error.",
+                    new BasicException.Parameter("state", state.path()),
+                    new BasicException.Parameter("request.validFrom", spec.getValidFrom()),
+                    new BasicException.Parameter("request.validTo", spec.getValidTo()),
+                    new BasicException.Parameter("state.validFrom", stateFrom),
+                    new BasicException.Parameter("state.validTo", stateTo)
                 );            
             }          
         }
     }
-    
-    
+
+
     // --------------------------------------------------------------------------
     /**
      * Read string value denoted from object and return null if it is not present
@@ -1443,9 +1428,9 @@ public abstract class AbstractState_1
         SparseList values = object.getValues(attribute);
         return values == null ? null : (String)values.get(0);
     }
-    
- 
-        
+
+
+
     // --------------------------------------------------------------------------
     /**
      * Check that validFrom, validTo are are in sequence (validFrom <= validTo)
@@ -1460,24 +1445,22 @@ public abstract class AbstractState_1
     ) throws ServiceException {
         // check validFrom <= validTo               
         if (spec.getValidFrom() != null && 
-            spec.getValidTo() != null  && 
-            spec.getValidFrom().compareTo(spec.getValidTo()) > 0
+                spec.getValidTo() != null  && 
+                spec.getValidFrom().compareTo(spec.getValidTo()) > 0
         ) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("validFrom", spec.getValidFrom()),
-                    new BasicException.Parameter("validTo", spec.getValidTo())
-                },
-                "validFrom after validTo."
+                "validFrom after validTo.",
+                new BasicException.Parameter("validFrom", spec.getValidFrom()),
+                new BasicException.Parameter("validTo", spec.getValidTo())
             );                  
         }
     }
-        
 
-        
-   
+
+
+
     // --------------------------------------------------------------------------
     /**
      * Get the class description for the object.
@@ -1494,32 +1477,30 @@ public abstract class AbstractState_1
     ) throws ServiceException {
         ModelElement_1_0 objClass = null;
         if (object != null &&
-            object.getValues(SystemAttributes.OBJECT_CLASS) != null
+                object.getValues(SystemAttributes.OBJECT_CLASS) != null
         ) {
             String objectClassName = 
                 (String)object.getValues(SystemAttributes.OBJECT_CLASS).get(0);
-            
+
             if (objectClassName != null) {
                 // get the class from model
                 objClass = this._model.getDereferencedType(
                     objectClassName
                 );
             }
-            
+
             if (objClass == null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("object", object)
-                    },
-                    "class not found"
+                    "class not found",
+                    new BasicException.Parameter("object", object)
                 );
             }   
         }
         return objClass;
     }
-    
+
     // --------------------------------------------------------------------------    
     /**
      * Tells whether the find request is for states 
@@ -1532,24 +1513,24 @@ public abstract class AbstractState_1
         DataproviderRequest request
     ){
         for(
-            int i = 0, iLimit = request.attributeFilter().length;
-            i < iLimit;
-            i++
+                int i = 0, iLimit = request.attributeFilter().length;
+                i < iLimit;
+                i++
         ){
             FilterProperty filter = request.attributeFilter()[i];
             if (
-                Quantors.THERE_EXISTS == filter.quantor() &&
-                State_1_Attributes.STATED_OBJECT.equals(filter.name()) &&
-                filter.operator() == (
-                    filter.values().isEmpty() ? FilterOperators.IS_NOT_IN : FilterOperators.IS_IN  
-                )
+                    Quantors.THERE_EXISTS == filter.quantor() &&
+                    State_1_Attributes.STATED_OBJECT.equals(filter.name()) &&
+                    filter.operator() == (
+                            filter.values().isEmpty() ? FilterOperators.IS_NOT_IN : FilterOperators.IS_IN  
+                    )
             ) {
                 if(!filter.values().isEmpty()) request.addAttributeFilterProperty(
                     new FilterProperty(
                         filter.quantor(),
                         SystemAttributes.OBJECT_IDENTITY,
                         filter.operator(),
-                        toXRIs(filter.values())
+                        (Object[])toXRIs(filter.values())
                     )
                 );
                 return true;
@@ -1563,18 +1544,18 @@ public abstract class AbstractState_1
     ){
         String[] xris = new String[paths.size()];
         for(
-            int i = 0;
-            i < xris.length;
-            i++
+                int i = 0;
+                i < xris.length;
+                i++
         ){
             Object path = paths.get(i);
             xris[i] = (
-                path instanceof Path ? (Path)path : new Path(path.toString())
+                    path instanceof Path ? (Path)path : new Path(path.toString())
             ).toXri();
         }
         return xris;
     }
-    
+
     // --------------------------------------------------------------------------    
     /**
      * Tells whether history states are disabled for a given path 
@@ -1589,11 +1570,11 @@ public abstract class AbstractState_1
     ){
         Path reference = path.size() % 2 == 0 ? path : path.getParent();
         for(
-            int i = 0;
-            i < this.disableHistoryReferencePatterns.length;
-            i++
+                int i = 0;
+                i < this.disableHistoryReferencePatterns.length;
+                i++
         ) if (
-            reference.isLike(this.disableHistoryReferencePatterns[i])            
+                reference.isLike(this.disableHistoryReferencePatterns[i])            
         ){
             SysLog.trace("History state disabled", path);
             return true;
@@ -1601,17 +1582,17 @@ public abstract class AbstractState_1
         if(!reference.isEmpty()) {
             String base = reference.getBase();
             if (
-                State_1_Attributes.REF_HISTORY.equals(base) ||
-                State_1_Attributes.REF_VALID.equals(base) ||
-                State_1_Attributes.REF_STATE.equals(base)
+                    State_1_Attributes.REF_HISTORY.equals(base) ||
+                    State_1_Attributes.REF_VALID.equals(base) ||
+                    State_1_Attributes.REF_STATE.equals(base)
             ) {
                 reference = reference.getPrefix(reference.size() - 2);
                 for(
-                    int i = 0;
-                    i < this.disableHistoryReferencePatterns.length;
-                    i++
+                        int i = 0;
+                        i < this.disableHistoryReferencePatterns.length;
+                        i++
                 ) if (
-                    reference.isLike(this.disableHistoryReferencePatterns[i])            
+                        reference.isLike(this.disableHistoryReferencePatterns[i])            
                 ){
                     SysLog.trace("History state disabled", path);
                     return true;
@@ -1621,7 +1602,7 @@ public abstract class AbstractState_1
         SysLog.trace("History state enabled", path);
         return false;
     }
-    
+
     // --------------------------------------------------------------------------
     /** 
      * Is the object derived from State?
@@ -1638,19 +1619,19 @@ public abstract class AbstractState_1
 
         if (objClass != null) {
             for (
-                Iterator i = objClass.values("allSupertype").iterator();
-                i.hasNext() && !isStateful;
+                    Iterator i = objClass.values("allSupertype").iterator();
+                    i.hasNext() && !isStateful;
             ) {
                 isStateful = ((Path)i.next()).getBase().equals(stateTypeName());
             }
         }
-        
+
         // check for invalid attempts to have state enabled and not state
         // enabled classes at the same path:
         Path refPath = new Path(object.path());
         cutStateSpecifiersFromPath(refPath);
         refPath = getReferencePath(refPath);
-        
+
         if(SysLog.isTraceOn()) SysLog.trace(
             "stateful detail. isStateful=" + isStateful + "; refPath=" + refPath, 
             this.statefulReferencePaths.keySet()
@@ -1658,48 +1639,46 @@ public abstract class AbstractState_1
 
         if(this.statefulReferencePaths.containsKey(refPath) != isStateful) {
             throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("object.path", object.path()),
-                        new BasicException.Parameter("class derived from state", isStateful)
-                    },
-                    "Trying to mix state enabled and non enabled classes at the same path."
-                );
-            }   
-             
-        
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE, 
+                "Trying to mix state enabled and non enabled classes at the same path.",
+                new BasicException.Parameter("object.path", object.path()),
+                new BasicException.Parameter("class derived from state", isStateful)
+            );
+        }   
+
+
         return isStateful; 
     }     
-        
+
     // --------------------------------------------------------------------------
     private String cutStateSpecifiersFromPath(
         Path path
     ) {
         int pos = path.size()-1;
-        
+
         if (
-            path.get(pos).equals(State_1_Attributes.REF_HISTORY) ||
-            path.get(pos).equals(State_1_Attributes.REF_VALID) ||
-            path.get(pos).equals(State_1_Attributes.REF_STATE)
+                path.get(pos).equals(State_1_Attributes.REF_HISTORY) ||
+                path.get(pos).equals(State_1_Attributes.REF_VALID) ||
+                path.get(pos).equals(State_1_Attributes.REF_STATE)
         ) {
             path.remove(pos);
             pos--;
         }
         else if (
-            path.get(pos-1).equals(State_1_Attributes.REF_HISTORY) ||
-            path.get(pos-1).equals(State_1_Attributes.REF_VALID) ||
-            path.get(pos-1).equals(State_1_Attributes.REF_STATE)
+                path.get(pos-1).equals(State_1_Attributes.REF_HISTORY) ||
+                path.get(pos-1).equals(State_1_Attributes.REF_VALID) ||
+                path.get(pos-1).equals(State_1_Attributes.REF_STATE)
         ) {
             path.remove(pos);
             path.remove(pos-1);
             pos = pos - 2;
         }
-        
+
         return path.getBase();
     }
-    
-    
+
+
     // --------------------------------------------------------------------------
     /** 
      * It is a lifetime request if the request contains only validFrom, validTo
@@ -1711,23 +1690,23 @@ public abstract class AbstractState_1
         DataproviderObject object
     ) {
         for (
-            Iterator i = object.attributeNames().iterator();
-            i.hasNext(); 
+                Iterator i = object.attributeNames().iterator();
+                i.hasNext(); 
         ){
             Object attributeName = i.next();
             if(
-                !SystemAttributes.OBJECT_CLASS.equals(attributeName) &&
-                !SystemAttributes.CREATED_AT.equals(attributeName) &&
-                !SystemAttributes.CREATED_BY.equals(attributeName) &&
-                !SystemAttributes.MODIFIED_AT.equals(attributeName) &&
-                !SystemAttributes.MODIFIED_BY.equals(attributeName) &&
-                !validFromAttribute().equals(attributeName) &&
-                !validToAttribute().equals(attributeName)
+                    !SystemAttributes.OBJECT_CLASS.equals(attributeName) &&
+                    !SystemAttributes.CREATED_AT.equals(attributeName) &&
+                    !SystemAttributes.CREATED_BY.equals(attributeName) &&
+                    !SystemAttributes.MODIFIED_AT.equals(attributeName) &&
+                    !SystemAttributes.MODIFIED_BY.equals(attributeName) &&
+                    !validFromAttribute().equals(attributeName) &&
+                    !validToAttribute().equals(attributeName)
             ) return false;
         }
         return true;       
     } 
-    
+
     // --------------------------------------------------------------------------
     /** 
      * It is a request which contains its own search criteria for the history 
@@ -1741,15 +1720,15 @@ public abstract class AbstractState_1
         boolean historyFilter = false;
         FilterProperty[] attrFilters = request.attributeFilter();
         for (int i = 0;
-            i < attrFilters.length && historyFilter == false; 
-            i++
+        i < attrFilters.length && historyFilter == false; 
+        i++
         ) {                 
             if (attrFilters[i] != null && 
-                attrFilters[i].name() != null
+                    attrFilters[i].name() != null
             ) {
                 if (attrFilters[i].name().equals(SystemAttributes.CREATED_AT) ||
-                    attrFilters[i].name().equals(SystemAttributes.MODIFIED_AT) ||
-                    attrFilters[i].name().equals(State_1_Attributes.INVALIDATED_AT)
+                        attrFilters[i].name().equals(SystemAttributes.MODIFIED_AT) ||
+                        attrFilters[i].name().equals(State_1_Attributes.INVALIDATED_AT)
                 ) {
                     historyFilter = true;
                 }
@@ -1757,7 +1736,7 @@ public abstract class AbstractState_1
         }
         return historyFilter;
     }
-       
+
     // --------------------------------------------------------------------------
     /** 
      * It is a request which contains its own search criteria for the validity 
@@ -1771,14 +1750,14 @@ public abstract class AbstractState_1
         boolean validityFilter = false;
         FilterProperty[] attrFilters = request.attributeFilter();
         for (int i = 0; 
-            i < attrFilters.length && validityFilter == false; 
-            i++
+        i < attrFilters.length && validityFilter == false; 
+        i++
         ) {                 
             if (attrFilters[i] != null && 
-                attrFilters[i].name() != null
+                    attrFilters[i].name() != null
             ) {
                 if (attrFilters[i].name().equals(validFromAttribute()) ||
-                    attrFilters[i].name().equals(validToAttribute()) 
+                        attrFilters[i].name().equals(validToAttribute()) 
                 ) {
                     validityFilter = true;
                 }
@@ -1786,8 +1765,8 @@ public abstract class AbstractState_1
         }
         return validityFilter;
     }
-   
- 
+
+
     // --------------------------------------------------------------------------
     /**
      * Create the state which is cut from a lifetime adjustment
@@ -1809,12 +1788,12 @@ public abstract class AbstractState_1
         // from the involved states get the one which is cut
         // by the new ValidFrom date
         for (
-            int i = 0; 
-            i < originalStates.length && cutted == null;
-            i++
+                int i = 0; 
+                i < originalStates.length && cutted == null;
+                i++
         ) {
             DataproviderObject state = originalStates[i];
-            
+
             if (atStart) {
                 int j = compareStringDate(
                     state.getValues(validToAttribute()),
@@ -1823,7 +1802,7 @@ public abstract class AbstractState_1
                 );
                 if ( this.excludingEnd() ? j > 0 : j >= 0 ) {
                     // the start of this state has to be reset.
-                	cutted = createSplitState(
+                    cutted = createSplitState(
                         state, 
                         null, 
                         date, 
@@ -1835,21 +1814,21 @@ public abstract class AbstractState_1
             }
             else {
                 if (compareStringDate(
-                        state.getValues(validFromAttribute()),
-                        date,
-                        false
-                    ) < 0
+                    state.getValues(validFromAttribute()),
+                    date,
+                    false
+                ) < 0
                 ) {
                     // the end of this state has to be reset. 
-                	cutted = createSplitState(state, null, readNullableStringValue(state, validFromAttribute()), date, spec, false);
+                    cutted = createSplitState(state, null, readNullableStringValue(state, validFromAttribute()), date, spec, false);
                 }
             }                
 
         }
         return cutted;
     }
-        
-        
+
+
     // --------------------------------------------------------------------------
     /**
      * create the states needed at the object boundary to replace the 
@@ -1884,9 +1863,9 @@ public abstract class AbstractState_1
         // allow the requestData and rootDate to be equal. Because a value must 
         // be returned, just treat it as if it were inside the existing.
         if (
-            (atStart && compareAtStart(requestDateValue, rootDateValue) > 0) 
-            ||
-            (!atStart && compareAtEnd(requestDateValue, rootDateValue) < 0) 
+                (atStart && compareAtStart(requestDateValue, rootDateValue) > 0) 
+                ||
+                (!atStart && compareAtEnd(requestDateValue, rootDateValue) < 0) 
         ) {
             // it is a reduction of lifetime 
             String validFrom = null;
@@ -1899,7 +1878,7 @@ public abstract class AbstractState_1
                 validFrom = requestDateValue;   
                 validTo = rootDateValue;
             }
-            
+
             originalStatesArray = getInvolvedStates(
                 header, 
                 request,
@@ -1908,7 +1887,7 @@ public abstract class AbstractState_1
                 validTo,
                 OP_SET_LIFETIME, INCLUDE_STATE_AT_START, INCLUDE_STATE_AT_END
             );
-            
+
             cut = createLifetimeEdgeState(
                 atStart, 
                 requestDateValue, 
@@ -1926,28 +1905,26 @@ public abstract class AbstractState_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "object",
-                        idPath
-                    ),
-                    new BasicException.Parameter(
-                        "boundary",
-                        atStart ? "start of object" : "end of object"
-                    ),
-                    new BasicException.Parameter(
-                        "existing boundary",
-                         rootDate
-                    ),
-                    new BasicException.Parameter(
-                        "requested boundary",
-                         requestDate
-                    )
-                },
-                "Trying to increase the lifetime at boundary."
+                "Trying to increase the lifetime at boundary.",
+                new BasicException.Parameter(
+                    "object",
+                    idPath
+                ),
+                new BasicException.Parameter(
+                    "boundary",
+                    atStart ? "start of object" : "end of object"
+                ),
+                new BasicException.Parameter(
+                    "existing boundary",
+                    rootDate
+                ),
+                new BasicException.Parameter(
+                    "requested boundary",
+                    requestDate
+                )
             );
         }
-        
+
         if (originalStatesArray != null) {
             for (int i = 0; i < originalStatesArray.length; i++) {
                 originalStates.add(originalStatesArray[i]);
@@ -1977,52 +1954,50 @@ public abstract class AbstractState_1
         object.clearValues(SystemAttributes.CREATED_BY).addAll(
             object.values(SystemAttributes.MODIFIED_BY)
         );
-        
+
         object.values(ID_ATTRIBUTE_NAME).set(
             0,
             pathId
         );
 
         ModelElement_1_0 objClass = getObjectClass(object);
-        
+
         Map modelAttributes = (Map)objClass.values("attribute").get(0);
 
         for(
-            Iterator i = modelAttributes.values().iterator(); 
-            i.hasNext();
+                Iterator i = modelAttributes.values().iterator(); 
+                i.hasNext();
         ) {
             ModelElement_1_0 modelAttribute = (ModelElement_1_0)i.next();
-            
+
             // derived attributes do not have to be part of the request!
             if (modelAttribute.getValues("isDerived") == null ||
-                ! ((Boolean)modelAttribute.getValues("isDerived").get(0)).booleanValue() 
+                    ! ((Boolean)modelAttribute.getValues("isDerived").get(0)).booleanValue() 
             ) {
-            // multiplicity
-            String attributeName = (String)modelAttribute.values("name").get(0);
-            String multiplicity = (String)modelAttribute.values("multiplicity").get(0);
+                // multiplicity
+                String attributeName = (String)modelAttribute.values("name").get(0);
+                String multiplicity = (String)modelAttribute.values("multiplicity").get(0);
 
-            int size = 0;
-            if(object.getValues(attributeName) != null) {
-                size = object.getValues(attributeName).size();
-            }
-            if((multiplicity.startsWith("1..") && (size < 1)) 
-            ) { 
-                ServiceException e = new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE, 
-                    new BasicException.Parameter[]{
+                int size = 0;
+                if(object.getValues(attributeName) != null) {
+                    size = object.getValues(attributeName).size();
+                }
+                if((multiplicity.startsWith("1..") && (size < 1)) 
+                ) { 
+                    ServiceException e = new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE, 
+                        "missing required attribute.",
                         new BasicException.Parameter("path", object.path()),
-                        new BasicException.Parameter("attribute", attributeName),
-                    },
-                    "missing required attribute."
-                );              
-                throw e;
-            }
+                        new BasicException.Parameter("attribute", attributeName)
+                    );              
+                    throw e;
+                }
             }
         }
         SysLog.trace("< assertRequiredAttributes " );    
     }
-        
+
     // --------------------------------------------------------------------------
     /** 
      * Set the identity.
@@ -2034,20 +2009,20 @@ public abstract class AbstractState_1
         super.setIdentity(request, replyObject);
         // in case object contains feature "identity" replace it
         if (replyObject.containsAttributeName(SystemAttributes.OBJECT_IDENTITY)) {
-            
+
             PathComponent comp = new PathComponent(replyObject.path().getBase());
-            
+
             // remove state endings <path>/<id>:<stateNr>:
             if (comp.size() > 2 && comp.isPrivate()) {
                 /*
                 path = replyObject.path().getParent().add(comp.getPrefix(comp.size()-2));
-    
+
                 replyObject.clearValues(SystemAttributes.OBJECT_IDENTITY).add(
                     path.toUri()
                 );
-                */
+                 */
             }
-            
+
             // remove all the OperationParameters for the identity
             Path idPath = new Path(replyObject.path());
             for (int i = 0; i < idPath.size(); i++) {
@@ -2055,8 +2030,8 @@ public abstract class AbstractState_1
 
 
                 if (part.equals(State_1_Attributes.REF_HISTORY) 
-                    || part.equals(State_1_Attributes.REF_STATE)
-                    || part.equals(State_1_Attributes.REF_VALID) 
+                        || part.equals(State_1_Attributes.REF_STATE)
+                        || part.equals(State_1_Attributes.REF_VALID) 
                 ) {
                     idPath.remove(i);
                     if (i < idPath.size()) {
@@ -2067,12 +2042,12 @@ public abstract class AbstractState_1
                     int pos = part.indexOf(';');
                     if (pos > 0) {
                         part = part.substring(0, pos);
-                        
+
                         idPath.remove(i);
                         idPath.add(i, part);
                     }
                 }
-                    
+
             }
             replyObject.clearValues(SystemAttributes.OBJECT_IDENTITY).add(
                 idPath.toUri()
@@ -2085,7 +2060,7 @@ public abstract class AbstractState_1
         }
 
     }
-    
+
     // --------------------------------------------------------------------------
     /**
      * Treat all objects returned; if it is a stateful object: remove attribute
@@ -2116,30 +2091,30 @@ public abstract class AbstractState_1
             String base = null;
             for (int i = 0; i < reply.getObjects().length; i++) {
                 DataproviderObject object = reply.getObjects()[i];
-                
+
                 if (isStateful) {
                     String qualifier = null;
-                    
+
                     //
                     // remove unwanted attributes
                     //
                     object.attributeNames().remove(ID_ATTRIBUTE_NAME);
 
-                                        
+
                     // 
                     // manage path
                     // 
-                    
+
                     // remove state id from path
                     base = object.path().remove(object.path().size()-1);
-                    
+
                     String stateNumber = null;
                     PathComponent comp = new PathComponent(base);
                     // id of object may use path components itself. Thus the 
                     // length of a path component is undefined.
-                    
+
                     if (comp.size() > 2 && 
-                        comp.isPrivate() 
+                            comp.isPrivate() 
                     ) {
                         stateNumber = comp.get(comp.size()-2);
                         //comp = comp.getPrefix(comp.size()-2);
@@ -2150,25 +2125,23 @@ public abstract class AbstractState_1
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.ASSERTION_FAILURE, 
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("path", object.path()),
-                                new BasicException.Parameter("object id segment", base),
-                                new BasicException.Parameter("object id sub-segments", comp.getSuffix(0))
-                            },
-                            "Encountered path of state without state number (should be <id:number:>)."
+                            "Encountered path of state without state number (should be <id:number:>).",
+                            new BasicException.Parameter("path", object.path()),
+                            new BasicException.Parameter("object id segment", base),
+                            new BasicException.Parameter("object id sub-segments", (Object[])comp.getSuffix(0))
                         );      
                     }
-                    
+
                     if (originalRequestPath != null) {
                         // if it is supplied just apply it
                         //if (originalPathWithQualifier) {
-                            object.path().setTo(new Path(originalRequestPath));
+                        object.path().setTo(new Path(originalRequestPath));
                         //}
                         //else {
                         //    object.path().setTo(new Path(originalRequestPath));
                         //}
                     }
-                    
+
                     // add idCompletion in case of several states of the same 
                     // object:
                     if (idCompletion != null) {
@@ -2188,7 +2161,7 @@ public abstract class AbstractState_1
                     else if (!originalPathWithQualifier){
                         object.path().add(qualifier);
                     }
-                        
+
                     // else path is ok
                 }
             }
@@ -2197,12 +2170,12 @@ public abstract class AbstractState_1
             request, 
             reply
         );
-        
+
         //
         // set derived attributes 
         // (empty attribues are removed in super.completeReply())
         //
-        
+
         if (isStateful && reply != null && reply.getObjects() != null) {
             for (int i = 0; i < reply.getObjects().length; i++) {
                 DataproviderObject object = reply.getObjects()[i];
@@ -2225,12 +2198,12 @@ public abstract class AbstractState_1
                 );
             }
         }
-        
+
         SysLog.trace("< completeReply", new Integer(reply.getObjects().length));
-                    
+
         return reply;
     }
-    
+
     // --------------------------------------------------------------------------
     /** 
      * Create the root object which contains for now the instanceNumber. 
@@ -2241,11 +2214,11 @@ public abstract class AbstractState_1
         DataproviderObject object,
         UpdateSpec spec
     ) throws ServiceException {
-        
+
         DataproviderObject root = null;
-        
+
         root = new DataproviderObject(spec.getObjectPath());
-        
+
         root.clearValues(SystemAttributes.OBJECT_CLASS).addAll( 
             object.getValues(SystemAttributes.OBJECT_CLASS));
         root.clearValues(SystemAttributes.CREATED_AT).set(0, spec.getModificationDate());
@@ -2255,13 +2228,13 @@ public abstract class AbstractState_1
         if (spec.getValidFrom() != null) {
             root.clearValues(validFromAttribute()).set(0, spec.getValidFrom());
         }
-            
+
         if (spec.getValidTo() != null) {
             root.clearValues(validToAttribute()).add(toModelledValidTo(spec.getValidTo()));
         }
-        
+
         root.values(STATE_NUMBER).set(0, new Long(0));
-        
+
         DataproviderRequest newRequest = 
             new DataproviderRequest(
                 root, 
@@ -2273,11 +2246,11 @@ public abstract class AbstractState_1
         newRequest.contexts().putAll(request.contexts());
 
         super.create(header, newRequest);
-            
+
         // saved 0 need -1 because the following steps take this number + 1
         // for getting the number to use next.
         root.values(STATE_NUMBER).set(0, new Long(-1));
-        
+
         return root;        
     }
 
@@ -2296,9 +2269,9 @@ public abstract class AbstractState_1
         DataproviderObject state = null;
         DataproviderReply reply = null;
         ArrayList replies = new ArrayList();
-        
+
         long stateNumber = 0;
-        
+
         try {
             stateNumber = ((Number) root.values(STATE_NUMBER).get(0)).longValue();
         } catch (NullPointerException e) {
@@ -2307,28 +2280,28 @@ public abstract class AbstractState_1
         String id = root.path().getBase();
         SysLog.trace("number of states to create", new Integer(objects.size()));
         for (Iterator i = objects.iterator();
-            i.hasNext();
+        i.hasNext();
         ) {
             state = (DataproviderObject) i.next(); 
-            
+
             if(SysLog.isTraceOn()) SysLog.trace(
                 "creating state",
                 "validFrom: " +  state.getValues(validFromAttribute()) + 
                 " validTo: " + state.getValues(validToAttribute())
             );
-            
+
             stateNumber++;
-            
+
             // must change path of state
             state.path().remove(state.path().size()-1); 
-            
+
             // add id for finding object
             state.values(ID_ATTRIBUTE_NAME).set(0,id);
-            
+
             // add FIELD_DELIMINTER directly to avoid parsing for components in PathComponent
             state.path().add( 
                 id + PathComponent.FIELD_DELIMITER + stateNumber + PathComponent.FIELD_DELIMITER);
-            
+
             DataproviderRequest newRequest = 
                 new DataproviderRequest(
                     state, 
@@ -2345,16 +2318,16 @@ public abstract class AbstractState_1
             StopWatch_1.instance().startTimer("createStates-DB");
             reply = super.create(header, newRequest);
             StopWatch_1.instance().stopTimer("createStates-DB");
-                
+
             replies.add(reply);
         }
-        
+
         root.values(STATE_NUMBER).set(0, new Long(stateNumber));
-        
+
         StopWatch_1.instance().stopTimer("createStates");
         return replies;
     }
-    
+
     // --------------------------------------------------------------------------
     /**
      * Direct access to an individual state. 
@@ -2382,7 +2355,7 @@ public abstract class AbstractState_1
         String number
     ) throws ServiceException  {
         String stateNumber = null;
-        
+
         Path requestPath = null;
 
         if (number == null) {
@@ -2395,16 +2368,16 @@ public abstract class AbstractState_1
             requestPath = new Path(objectPath);
             stateNumber = number;
         }
-        
+
         String objectId = requestPath.remove(requestPath.size()-1);
-        
+
         requestPath.add( 
             objectId + 
             PathComponent.FIELD_DELIMITER + 
             stateNumber + 
             PathComponent.FIELD_DELIMITER
         );        
-        
+
         DataproviderRequest newRequest = 
             new DataproviderRequest(
                 new DataproviderObject(requestPath), 
@@ -2422,7 +2395,7 @@ public abstract class AbstractState_1
 
         return super.get(header, newRequest);
     }
-    
+
     /*
      * Get the state which is denoted by the operation parameter state=.
      */
@@ -2438,11 +2411,11 @@ public abstract class AbstractState_1
             reply = getStateDirect(header, request, requestPath, spec.getOperationParameter().getStateNumber());
         }
         else if (spec.getOperationParameter().isFirst() 
-            || spec.getOperationParameter().isLast() 
-            || spec.getOperationParameter().isUndef()
+                || spec.getOperationParameter().isLast() 
+                || spec.getOperationParameter().isUndef()
         ) {
             String objectId = spec.getOperationParameter().getQualifier();
-            
+
             DataproviderReply currentStates = findStates(
                 header, 
                 request, 
@@ -2455,19 +2428,19 @@ public abstract class AbstractState_1
                 INCLUDE_STATE_AT_END,
                 USE_REQUESTED_AT, false, null
             );
-            
+
             TreeMap sorter = new TreeMap();
             for (int i = 0; i < currentStates.getObjects().length; i++) {
                 String validFrom = 
                     readNullableStringValue(currentStates.getObjects()[i], validFromAttribute());
                 sorter.put(
                     validFrom == null ? EARLIEST_DATE : validFrom,
-                    currentStates.getObjects()[i]
+                        currentStates.getObjects()[i]
                 );
             }
             DataproviderObject firstLast = null;
             if ((spec.getOperationParameter().isFirst() 
-                || spec.getOperationParameter().isUndef()) && sorter.size()>0
+                    || spec.getOperationParameter().isUndef()) && sorter.size()>0
             ) {
                 firstLast = (DataproviderObject)sorter.get(sorter.firstKey());              
             }
@@ -2478,11 +2451,9 @@ public abstract class AbstractState_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_FOUND,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("path", request.path()),
-                        new BasicException.Parameter("operationQualifier", spec.getOperationParameter().getOperationQualifier())
-                    },
-                    "no valid state for state=first or state=last operation"
+                    "no valid state for state=first or state=last operation",
+                    new BasicException.Parameter("path", request.path()),
+                    new BasicException.Parameter("operationQualifier", spec.getOperationParameter().getOperationQualifier())
                 );
             }
             reply = new DataproviderReply(firstLast);
@@ -2491,7 +2462,7 @@ public abstract class AbstractState_1
         else if (spec.getOperationParameter().getDate() != null) {
             String requestedFor = spec.getOperationParameter().getDate();
             String objectId = spec.getOperationParameter().getQualifier();
-            
+
             reply = findStates(
                 header, 
                 request, 
@@ -2573,7 +2544,7 @@ public abstract class AbstractState_1
                     Quantors.FOR_ALL,  // include empty validFrom (since ever)
                     validFromAttribute(),
                     excludeObjectsFromEnd ? FilterOperators.IS_LESS : FilterOperators.IS_LESS_OR_EQUAL,
-                    new Object[] {validTo}
+                        validTo
                 )
             );
         }
@@ -2586,7 +2557,7 @@ public abstract class AbstractState_1
                     Quantors.FOR_ALL, // includes empty validTo (for ever)
                     validToAttribute(),
                     excludeObjectsUpToStart ? FilterOperators.IS_GREATER : FilterOperators.IS_GREATER_OR_EQUAL,
-                    new Object[] {toModelledValidTo(validFrom)} 
+                        toModelledValidTo(validFrom) 
                 )
             );
         }
@@ -2597,9 +2568,9 @@ public abstract class AbstractState_1
         boolean stateIdFilter = false;
         boolean invalidatedAtFilter = false;
         for (
-            int i = 0, iLimit = request.attributeFilter().length; 
-            i < iLimit;
-            i++
+                int i = 0, iLimit = request.attributeFilter().length; 
+                i < iLimit;
+                i++
         ) {
             FilterProperty filter = request.attributeFilter()[i];
             //
@@ -2612,9 +2583,9 @@ public abstract class AbstractState_1
                 List stateIdFilterValues = new ArrayList();
                 List identityFilterValues = new ArrayList();
                 for(
-                  int j = 0, jLimit = filter.values().size();
-                  j < jLimit;
-                  j++
+                        int j = 0, jLimit = filter.values().size();
+                        j < jLimit;
+                        j++
                 ) {
                     String filterString = (String)filter.getValue(j);
                     // remove possible wildcard (... like 'a%')
@@ -2628,22 +2599,20 @@ public abstract class AbstractState_1
                             if(wildcardSuffix) throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.NOT_SUPPORTED,
-                                new BasicException.Parameter[] {
-                                    new BasicException.Parameter(SystemAttributes.OBJECT_IDENTITY, filterString),
-                                },
-                                "'%' wildcard not supported if 'extent' operation"
+                                "'%' wildcard not supported if 'extent' operation",
+                                new BasicException.Parameter(SystemAttributes.OBJECT_IDENTITY, filterString)
                             );
                             if(
-                                filter.operator() == FilterOperators.IS_LIKE || 
-                                filter.operator() == FilterOperators.IS_UNLIKE
+                                    filter.operator() == FilterOperators.IS_LIKE || 
+                                    filter.operator() == FilterOperators.IS_UNLIKE
                             ) {
                                 if(filterPath.size() % 2 == 0) filterPath.add(":*");
                                 identityFilterValues.add(filterPath.toXri());
                                 String stateIdFilterValue = filterPath.getBase(); 
                                 stateIdFilterValues.add(
                                     stateIdFilterValue.startsWith(":") && stateIdFilterValue.endsWith("*") ?
-                                    stateIdFilterValue.substring(1, stateIdFilterValue.length() - 1) + '%' :
-                                    stateIdFilterValue
+                                        stateIdFilterValue.substring(1, stateIdFilterValue.length() - 1) + '%' :
+                                            stateIdFilterValue
                                 );
                             } else {
                                 identityFilterValues.add(filterPath.toXri());
@@ -2651,8 +2620,8 @@ public abstract class AbstractState_1
                             }
                             typePath = filterPath;
                         } else if (
-                            filterPath.startsWith(pathToId) &&
-                            filterPath.size() == pathToId.size() + 1
+                                filterPath.startsWith(pathToId) &&
+                                filterPath.size() == pathToId.size() + 1
                         ) { 
                             stateIdFilterValues.add(
                                 filterPath.getBase() + (wildcardSuffix ? "%" : "")
@@ -2666,7 +2635,7 @@ public abstract class AbstractState_1
                             stateIdFilterValues.add(
                                 filterPath.compareTo(pathToId) < 0 ? 
                                     IDENTITY_UNDERFLOW :
-                                    IDENTITY_OVERFLOW
+                                        IDENTITY_OVERFLOW
                             );
                         }
                     } 
@@ -2674,7 +2643,7 @@ public abstract class AbstractState_1
                         stateIdFilterValues.add(
                             filterString.compareTo(pathToId.toUri()) < 0 ? 
                                 IDENTITY_UNDERFLOW :
-                                IDENTITY_OVERFLOW
+                                    IDENTITY_OVERFLOW
                         );
                     }
                 }
@@ -2689,8 +2658,8 @@ public abstract class AbstractState_1
                         )
                     );
                     for(
-                        Iterator j = stateIdFilterValues.iterator();
-                        stateIdFilter && j.hasNext();
+                            Iterator j = stateIdFilterValues.iterator();
+                            stateIdFilter && j.hasNext();
                     ) stateIdFilter = !"%".equals(j.next());
                     if(stateIdFilter) newFilters.add(
                         new FilterProperty(
@@ -2727,7 +2696,7 @@ public abstract class AbstractState_1
                     Quantors.THERE_EXISTS,
                     ID_ATTRIBUTE_NAME,
                     FilterOperators.IS_IN,
-                    new Object[] {objectId}
+                    objectId
                 )
             );
         } else if(!stateIdFilter) {
@@ -2738,12 +2707,11 @@ public abstract class AbstractState_1
                 new FilterProperty(
                     Quantors.THERE_EXISTS,
                     ID_ATTRIBUTE_NAME,
-                    FilterOperators.IS_NOT_IN,
-                    new Object[] {}
+                    FilterOperators.IS_NOT_IN
                 )
             );
         }  
-        
+
         if (useRequestedAt && !isHistoryDisabled(typePath)) {
             if (requestedAt == null) { 
                 // need only the valid filter (invalidatedAt must be null)
@@ -2751,11 +2719,10 @@ public abstract class AbstractState_1
                     new FilterProperty(
                         Quantors.FOR_ALL,    // include empty invalidated_at only
                         State_1_Attributes.INVALIDATED_AT,
-                        FilterOperators.IS_IN,
-                        new Object[] {}
+                        FilterOperators.IS_IN
                     )
                 );
-    
+
                 requestedAt = getRequestedAt(header);
             } else {
                 //
@@ -2767,7 +2734,7 @@ public abstract class AbstractState_1
                         Quantors.FOR_ALL,      // include empty invalidated_at (still valid)
                         State_1_Attributes.INVALIDATED_AT,
                         FilterOperators.IS_GREATER,
-                        new Object[] {requestedAt}
+                        requestedAt
                     )
                 );
             }
@@ -2779,11 +2746,11 @@ public abstract class AbstractState_1
                     Quantors.THERE_EXISTS,
                     SystemAttributes.MODIFIED_AT,  // OBJECT_CREATED_AT 
                     FilterOperators.IS_LESS_OR_EQUAL,
-                    new Object[] {requestedAt}
+                    requestedAt
                 )
             );
         }
-        
+
         AttributeSpecifier[] newSpecifiers = null;
         if (specifiers == null || specifiers.length == 0) {
             newSpecifiers = request.attributeSpecifier();
@@ -2791,18 +2758,18 @@ public abstract class AbstractState_1
         else {        
             AttributeSpecifier[] requestSpecifiers = request.attributeSpecifier();
             newSpecifiers = new AttributeSpecifier[
-                requestSpecifiers.length + specifiers.length];
+                                                   requestSpecifiers.length + specifiers.length];
             int p = 0;
             for (int i = 0; i < requestSpecifiers.length; i++) {
                 newSpecifiers[p++] = requestSpecifiers[i];
             }
-                
+
             for (int i = 0; i < specifiers.length; i++) {
                 newSpecifiers[p++] = specifiers[i];            
             }
         }        
 
-         
+
         DataproviderRequest findRequest = new DataproviderRequest(
             new DataproviderObject(pathToId), 
             DataproviderOperations.ITERATION_START,
@@ -2820,9 +2787,9 @@ public abstract class AbstractState_1
             request.contexts()
         );
         if (
-            !typed &&
-            useDatatypes()
-         ) {
+                !typed &&
+                useDatatypes()
+        ) {
             String objectType = stateTypeName();
             if(objectId != null) try {                    
                 DataproviderObject_1_0 core = getDelegation(
@@ -2851,11 +2818,11 @@ public abstract class AbstractState_1
             );
         }
         SysLog.trace("findStates-DB", findRequest);
-        
+
         StopWatch_1.instance().startTimer("findStates-DB");
         DataproviderReply reply = super.find(header, findRequest);
         StopWatch_1.instance().stopTimer("findStates-DB");
-        
+
         /**
          * Really it's ok as long as the states are passed on to the caller. 
          * But if there are that many states to involved in an update, this
@@ -2866,19 +2833,17 @@ public abstract class AbstractState_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_IMPLEMENTED,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("find path", pathToId),
-                    new BasicException.Parameter("results", reply.getObjects().length)
-                },
                 "Found to many states to treat correctly."
+                new BasicException.Parameter("find path", pathToId),
+                new BasicException.Parameter("results", reply.getObjects().length)
             );
         }
          */
-        
+
         StopWatch_1.instance().stopTimer("findStates");
         return reply;
     }
-        
+
     // --------------------------------------------------------------------------
     /**
      * Sorts the states in the reply ascending using the specified sortAttribute
@@ -2891,30 +2856,30 @@ public abstract class AbstractState_1
         DataproviderReply reply,
         String sortAttribute
     ) {
-        
+
         DataproviderObject[] objects = reply.getObjects();
         DataproviderObject swap = null;
-        
+
         // just a simple sort. 
         for (int i = 0; i < objects.length; i++) {
             int min = i;
             SparseList minDate = objects[min].getValues(sortAttribute);  // may be null
             int j; 
-             
+
             // Find the smallest element in the unsorted list 
             for (j = i + 1; j < objects.length; j++) 
             { 
                 // compare according to sortAttribute
                 if (compareAtStart(
-                        objects[j].getValues(sortAttribute), 
-                        minDate
-                    ) < 0
-                 ) {
+                    objects[j].getValues(sortAttribute), 
+                    minDate
+                ) < 0
+                ) {
                     min = j;
                     minDate = objects[min].getValues(sortAttribute);
-                 }
+                }
             } 
-            
+
             // Swap the smallest unsorted element into the end of the sorted list. 
             swap = objects[min]; 
             objects[min] = objects[i]; 
@@ -2940,26 +2905,26 @@ public abstract class AbstractState_1
         boolean replace
     ) throws ServiceException {
         DataproviderObject object = new DataproviderObject(loaded);
-        
+
         if (requested != null) {
             String attributeName = null;
-                
+
             for (
-                Iterator i = requested.attributeNames().iterator();
-                i.hasNext();
+                    Iterator i = requested.attributeNames().iterator();
+                    i.hasNext();
             ) {
                 attributeName = (String)i.next();
-                                                        
+
                 if (replace) {
                     object.clearValues(attributeName).
-                        addAll(requested.getValues(attributeName));
+                    addAll(requested.getValues(attributeName));
                 }
                 else {
                     SparseList objectValues = object.values(attributeName);
                     SparseList requestedValues = requested.getValues(attributeName);
                     for (
-                        ListIterator valueIter = requestedValues.populationIterator();
-                        valueIter.hasNext();
+                            ListIterator valueIter = requestedValues.populationIterator();
+                            valueIter.hasNext();
                     ) {
                         objectValues.set(valueIter.nextIndex(), valueIter.next());
                     }
@@ -2967,12 +2932,12 @@ public abstract class AbstractState_1
             }
             // set the object_class separately: (invalidated with replace == false)
             object.clearValues(SystemAttributes.OBJECT_CLASS).
-               addAll(requested.getValues(SystemAttributes.OBJECT_CLASS));
-              
+            addAll(requested.getValues(SystemAttributes.OBJECT_CLASS));
+
             object.values(SystemAttributes.CREATED_AT).set(0,spec.getModificationDate());
             object.clearValues(SystemAttributes.CREATED_BY).addAll(spec.getModificationPrincipal());
         }
-        
+
         // now correct validFrom, validTo
         {
             SparseList target = object.clearValues(validFromAttribute());
@@ -2982,10 +2947,10 @@ public abstract class AbstractState_1
             SparseList target = object.clearValues(validToAttribute());
             if (validTo != null) target.add(toModelledValidTo(validTo));            
         }
-        
+
         object.values(SystemAttributes.MODIFIED_AT).set(0,spec.getModificationDate());
         object.clearValues(SystemAttributes.MODIFIED_BY).addAll(spec.getModificationPrincipal());
-        
+
         return object;
     }           
 
@@ -3007,25 +2972,25 @@ public abstract class AbstractState_1
         boolean replace
     ) throws ServiceException {
         ArrayList splitStates = new ArrayList();
-                
+
         String loadedValidFrom = null;
         String loadedValidTo = null;
         String requestedValidFrom = null;
         String requestedValidTo = null;
-        
+
         loadedValidFrom = 
             readNullableStringValue(loaded, validFromAttribute());
         if (loadedValidFrom == null) {
             loadedValidFrom = "0000";  // smallest value
         }
-        
+
         loadedValidTo = toExclusiveValidTo(
             readNullableStringValue(loaded, validToAttribute())
         );
         if (loadedValidTo == null) {
             loadedValidTo = "9999";  // biggest value
         }        
-        
+
         requestedValidFrom = 
             (spec.getValidFrom() == null ? "0000": spec.getValidFrom());
 
@@ -3035,12 +3000,12 @@ public abstract class AbstractState_1
         // we are only interested in the time span inside the loaded 
         // the other loaded ones will fill the rest of the time
         if (requestedValidFrom.compareTo(loadedValidTo) == 0 
-            || loadedValidFrom.compareTo(requestedValidTo) == 0
+                || loadedValidFrom.compareTo(requestedValidTo) == 0
         ) {
             // the loaded state is immediately before or after the 
             // requested update period. This is ok and does not require any 
             // splitting!
-            
+
             // The loaded should be removed from the set of states to invalidate
             // (because it is still needed). This is achieved by returning an 
             // empty splitStates list.
@@ -3053,9 +3018,9 @@ public abstract class AbstractState_1
                         loaded, 
                         requested, 
                         loadedValidFrom.equals("0000") ? null : loadedValidFrom, 
-                        loadedValidTo.equals("9999") ? null : loadedValidTo, 
-                        spec,
-                        replace
+                            loadedValidTo.equals("9999") ? null : loadedValidTo, 
+                                spec,
+                                replace
                     )
                 );
             }
@@ -3066,9 +3031,9 @@ public abstract class AbstractState_1
                         loaded, 
                         requested, 
                         loadedValidFrom.equals("0000") ? null : loadedValidFrom, 
-                        requestedValidTo.equals("9999") ? null : requestedValidTo, 
-                        spec,
-                        replace
+                            requestedValidTo.equals("9999") ? null : requestedValidTo, 
+                                spec,
+                                replace
                     )
                 );
                 if (!requestedValidTo.equals("9999")) {
@@ -3076,10 +3041,10 @@ public abstract class AbstractState_1
                         createSplitState(
                             loaded,
                             null, 
-                          requestedValidTo, 
+                            requestedValidTo, 
                             loadedValidTo.equals("9999") ? null : loadedValidTo,
-                          spec,
-                          replace
+                                spec,
+                                replace
                         )
                     );
                 }
@@ -3088,30 +3053,30 @@ public abstract class AbstractState_1
         else if (requestedValidFrom.compareTo(loadedValidTo) < 0) {
             if (requestedValidTo.compareTo(loadedValidTo) <= 0) {
                 // requested is fully inside the loaded
-                
+
                 splitStates.add(
                     createSplitState(
                         loaded,
                         null,
                         loadedValidFrom.equals("0000") ? null : loadedValidFrom, 
-                        requestedValidFrom.equals("0000") ? null : requestedValidFrom,
-                        spec,
-                        replace
+                            requestedValidFrom.equals("0000") ? null : requestedValidFrom,
+                                spec,
+                                replace
                     )
                 );
-                
+
                 splitStates.add(
                     createSplitState(
                         loaded, 
                         requested, 
                         requestedValidFrom.equals("0000") ? null : requestedValidFrom, 
-                        requestedValidTo.equals("9999") ? null : requestedValidTo, 
-                        spec,
-                        replace
+                            requestedValidTo.equals("9999") ? null : requestedValidTo, 
+                                spec,
+                                replace
                     )
                 );
                 if (!requestedValidTo.equals("9999") 
-                    && requestedValidTo.compareTo(loadedValidTo) < 0
+                        && requestedValidTo.compareTo(loadedValidTo) < 0
                 ) {
                     splitStates.add(
                         createSplitState(
@@ -3119,8 +3084,8 @@ public abstract class AbstractState_1
                             null,
                             requestedValidTo, 
                             loadedValidTo.equals("9999") ? null : loadedValidTo,
-                            spec,
-                            replace
+                                spec,
+                                replace
                         )
                     );
                 }
@@ -3133,9 +3098,9 @@ public abstract class AbstractState_1
                             loaded,
                             null,
                             loadedValidFrom.equals("0000") ? null : loadedValidFrom,
-                            requestedValidFrom,
-                            spec,
-                            replace
+                                requestedValidFrom,
+                                spec,
+                                replace
                         )
                     );
                 }
@@ -3144,9 +3109,9 @@ public abstract class AbstractState_1
                         loaded, 
                         requested, 
                         requestedValidFrom.equals("0000") ? null : requestedValidFrom, 
-                        loadedValidTo.equals("9999") ? null : loadedValidTo, 
-                        spec,
-                        replace
+                            loadedValidTo.equals("9999") ? null : loadedValidTo, 
+                                spec,
+                                replace
                     )
                 );
             }
@@ -3157,20 +3122,18 @@ public abstract class AbstractState_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("request.validFrom", requestedValidFrom),
-                    new BasicException.Parameter("request.validTo", requestedValidTo),
-                    new BasicException.Parameter("loaded.validFrom", loadedValidFrom),
-                    new BasicException.Parameter("loaded.validTo", loadedValidTo)
-                },
-                "Object loaded is outside request."
+                "Object loaded is outside request.",
+                new BasicException.Parameter("request.validFrom", requestedValidFrom),
+                new BasicException.Parameter("request.validTo", requestedValidTo),
+                new BasicException.Parameter("loaded.validFrom", loadedValidFrom),
+                new BasicException.Parameter("loaded.validTo", loadedValidTo)
             );
 
         }
-        
+
         return splitStates;
     }
-    
+
     // --------------------------------------------------------------------------
     /**
      * compare if the two objects have the same values apart from valid_to
@@ -3187,25 +3150,25 @@ public abstract class AbstractState_1
     ) {
         boolean equal = true; 
         String attributeName = null;
-        
+
         Set deltaAttributeNames = new HashSet(b.attributeNames());
-                    
+
         for (Iterator i = a.attributeNames().iterator();
-            i.hasNext() && equal;
+        i.hasNext() && equal;
         ) {
             attributeName = (String) i.next();
-            
+
             deltaAttributeNames.remove(attributeName);
-            
+
             if (!ignoreAttributeForStateCompare(attributeName)) equal = equal(
                 a.getValues(attributeName),
                 b.getValues(attributeName)
             );
         }
-        
+
         // only ignoring attributes may survive
         for (Iterator i = deltaAttributeNames.iterator(); 
-            i.hasNext() && equal; 
+        i.hasNext() && equal; 
         ) {
             attributeName = (String) i.next();
             equal = 
@@ -3215,7 +3178,7 @@ public abstract class AbstractState_1
 
         return equal;
     }
-    
+
     // --------------------------------------------------------------------------
     /**
      * Compare two dataprovider attributes, treating <code>null</code> and empty 
@@ -3232,7 +3195,7 @@ public abstract class AbstractState_1
     ){
         return left == null || left.isEmpty() ?
             right == null || right.isEmpty() :
-            left.equals(right);
+                left.equals(right);
     }
 
     // --------------------------------------------------------------------------
@@ -3243,19 +3206,18 @@ public abstract class AbstractState_1
      */
     private boolean ignoreAttributeForStateCompare(String attributeName) {
         return 
-            attributeName.equals(validFromAttribute()) ||
-            attributeName.equals(validToAttribute())   || 
-            attributeName.equals(ID_ATTRIBUTE_NAME) ||
-            attributeName.equals(SystemAttributes.CREATED_AT) ||
-            attributeName.equals(SystemAttributes.CREATED_BY) ||
-            attributeName.equals(SystemAttributes.MODIFIED_AT) ||
-            attributeName.equals(SystemAttributes.MODIFIED_BY) ||
-            attributeName.equals(SystemAttributes.OBJECT_INSTANCE_OF) ||
-            attributeName.equals(SystemAttributes.OBJECT_IDENTITY) ||
-            attributeName.startsWith(SystemAttributes.VIEW_PREFIX) || // support for view pattern. Those attributes are removed by persistence layer
-            attributeName.startsWith(SystemAttributes.CONTEXT_PREFIX); // support for context pattern. Those attributes are removed by persistence layer
+        attributeName.equals(validFromAttribute()) ||
+        attributeName.equals(validToAttribute())   || 
+        attributeName.equals(ID_ATTRIBUTE_NAME) ||
+        attributeName.equals(SystemAttributes.CREATED_AT) ||
+        attributeName.equals(SystemAttributes.CREATED_BY) ||
+        attributeName.equals(SystemAttributes.MODIFIED_AT) ||
+        attributeName.equals(SystemAttributes.MODIFIED_BY) ||
+        attributeName.equals(SystemAttributes.OBJECT_INSTANCE_OF) ||
+        attributeName.equals(SystemAttributes.OBJECT_IDENTITY) ||
+        attributeName.startsWith(SystemAttributes.CONTEXT_PREFIX); // support for context pattern. Those attributes are removed by persistence layer
     }
-    
+
 
     // --------------------------------------------------------------------------
     /**
@@ -3274,12 +3236,12 @@ public abstract class AbstractState_1
         boolean extendForward
     ) throws ServiceException {
         boolean extended = false;
-        
+
         if (extendForward) {
             String baseValidTo = toExclusiveValidTo(readNullableStringValue(base, validToAttribute()));
             if (baseValidTo != null &&
-                baseValidTo.equals(readNullableStringValue(extent, validFromAttribute())) &&
-                haveEqualValues(base, extent)
+                    baseValidTo.equals(readNullableStringValue(extent, validFromAttribute())) &&
+                    haveEqualValues(base, extent)
             ) {
                 extended = true;
                 String nextValidTo = toExclusiveValidTo(
@@ -3292,8 +3254,8 @@ public abstract class AbstractState_1
         else {
             String baseValidFrom = readNullableStringValue(base, validFromAttribute());
             if (baseValidFrom != null &&
-                baseValidFrom.equals(toExclusiveValidTo(readNullableStringValue(extent, validToAttribute()))) &&
-                haveEqualValues(base, extent)
+                    baseValidFrom.equals(toExclusiveValidTo(readNullableStringValue(extent, validToAttribute()))) &&
+                    haveEqualValues(base, extent)
             ) {
                 extended = true;
                 String lastValidFrom = 
@@ -3302,12 +3264,12 @@ public abstract class AbstractState_1
                 if (lastValidFrom != null) target.add(lastValidFrom);
             }
         }
-        
+
         return extended;
     }
 
 
-        
+
     // --------------------------------------------------------------------------
     /**
      * Get the states in the range validFrom, validTo from storage.
@@ -3333,7 +3295,7 @@ public abstract class AbstractState_1
     ) throws ServiceException {
         DataproviderReply reply;
         // get all states of the object within the [from, to] range of the object
-        
+
         DataproviderRequest newRequest = 
             new DataproviderRequest(
                 new DataproviderObject(idPath.getParent()),
@@ -3346,7 +3308,7 @@ public abstract class AbstractState_1
                 null
             );
         newRequest.contexts().putAll(request.contexts());
-        
+
         reply = findStates(
             header, 
             newRequest,
@@ -3360,65 +3322,61 @@ public abstract class AbstractState_1
             USE_REQUESTED_AT, // check this! for updates, was USE_REQ...
             false, null
         );
-        
+
         // can not correctly handle that many states of a single object.
         if (((Boolean)reply.context(DataproviderReplyContexts.HAS_MORE).get(0)).booleanValue()) {
             // just to find the problem faster:
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_IMPLEMENTED,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("find path", idPath.getParent()),
-                    new BasicException.Parameter("results", reply.getObjects().length)
-                },
-                "Found to many states to treat correctly."
+                "Found to many states to treat correctly.",
+                new BasicException.Parameter("find path", idPath.getParent()),
+                new BasicException.Parameter("results", reply.getObjects().length)
             );
         }
 
-        
+
         if (!enableHolesInValidity &&
-            (   (operation != OP_REMOVE && reply.getObjects().length == 0)
-                ||
-                (operation == OP_REMOVE && (validFrom != null || validTo != null))
-            )
+                (   (operation != OP_REMOVE && reply.getObjects().length == 0)
+                        ||
+                        (operation == OP_REMOVE && (validFrom != null || validTo != null))
+                )
         ) {
             // For remove requests: setting validFrom, validTo in remove request 
             // is useless if one does not allow holes in validity
             // For update requests: trying to update to a time where no valid 
             // states exist leads to holes.
-            
+
             // NOTE: this prevents holes only if there are none so far, it does 
             // not help if the data already contains holes.
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_FOUND, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "path", 
-                        idPath
-                    ),
-                    new BasicException.Parameter(
-                        "validFrom",
-                        validFrom
-                    ),
-                    new BasicException.Parameter(
-                        "validTo",
-                        validTo
-                    ),
-                    new BasicException.Parameter(
-                        "operation",
-                        (operation == OP_REMOVE ? "remove" : "update")
-                    ),
-                    new BasicException.Parameter(
-                        LayerConfigurationEntries.ENABLE_HOLES_IN_OBJECT_VALIDITY,
-                        enableHolesInValidity
-                    )
-                },
                 "Could not find underlying states for update, or trying to remove with validFrom, validTo set. "
-                + "This is prohibited as holes are not supported by configuration."
+                + "This is prohibited as holes are not supported by configuration.",
+                new BasicException.Parameter(
+                    "path", 
+                    idPath
+                ),
+                new BasicException.Parameter(
+                    "validFrom",
+                    validFrom
+                ),
+                new BasicException.Parameter(
+                    "validTo",
+                    validTo
+                ),
+                new BasicException.Parameter(
+                    "operation",
+                    (operation == OP_REMOVE ? "remove" : "update")
+                ),
+                new BasicException.Parameter(
+                    LayerConfigurationEntries.ENABLE_HOLES_IN_OBJECT_VALIDITY,
+                    enableHolesInValidity
+                )
             );
         }
-        
+
         return reply.getObjects();
     }    
 
@@ -3456,24 +3414,24 @@ public abstract class AbstractState_1
     ) throws ServiceException {
         ArrayList modifyStates = new ArrayList();
         DataproviderObject objectState = null;
-        
+
         TreeMap statePeriods = new TreeMap();
-        
+
         for (Iterator i = originalStates.iterator(); i.hasNext();) {
             objectState = (DataproviderObject) i.next();
-            
+
             String startDate = 
                 readNullableStringValue(objectState, validFromAttribute());
-            
+
             // use EARLIEST_DATE as indicator for smallest date
             statePeriods.put(
                 startDate == null ? EARLIEST_DATE : startDate, 
-                toExclusiveValidTo(readNullableStringValue(objectState, validToAttribute()))
+                    toExclusiveValidTo(readNullableStringValue(objectState, validToAttribute()))
             );
 
             ArrayList newStates = 
                 updateState(objectState, request.object(), spec, replace);
-                
+
             // no new states is only possible if the loaded state is following 
             // the update period immediately. 
             // Remove the loaded state from the originalStates to prevent its 
@@ -3482,12 +3440,12 @@ public abstract class AbstractState_1
                 i.remove();
                 borderingStates.add(objectState);
             }
-            
+
             modifyStates.addAll(newStates);
         }
-        
+
         assertStatesWithinRequest(originalStates, spec, false); 
-        
+
         Map.Entry nextPeriod = null;
         Map.Entry period = null;
         // now check for holes and overlaping states
@@ -3498,30 +3456,30 @@ public abstract class AbstractState_1
             else {
                 period = nextPeriod;
             }
-            
+
             String periodValidFrom = (String) period.getKey();
             String periodValidTo = (String) period.getValue();
-            
+
             // check if the update is overlaping at the start
             if (period.getKey().equals(statePeriods.firstKey()) &&
-                !periodValidFrom.equals(EARLIEST_DATE) &&
-                compareAtStart(spec.getValidFrom(), periodValidFrom) < 0 &&
-                !spec.skipMissingStates()
+                    !periodValidFrom.equals(EARLIEST_DATE) &&
+                    compareAtStart(spec.getValidFrom(), periodValidFrom) < 0 &&
+                    !spec.skipMissingStates()
             ) {
                 // need additional state for the periode from the start of
                 // the request up to the start of the first state
-                
+
                 DataproviderObject early = 
                     createSplitState(request.object(), request.object(), spec.getValidFrom(), periodValidFrom, spec, replace);               
                 assertRequiredAttributes(early, root.path().getBase());
                 modifyStates.add(early);
             }
-            
+
             // check if the update is overlaping at the end
             if (period.getKey().equals(statePeriods.lastKey()) &&
-                periodValidTo != null &&
-                compareAtEnd(spec.getValidTo(), periodValidTo) > 0 &&
-                !spec.skipMissingStates()
+                    periodValidTo != null &&
+                    compareAtEnd(spec.getValidTo(), periodValidTo) > 0 &&
+                    !spec.skipMissingStates()
             ) {
                 // need additional state for the periode from the end of
                 // the last state to the end of the request
@@ -3531,54 +3489,52 @@ public abstract class AbstractState_1
                 assertRequiredAttributes(late, root.path().getBase());
                 modifyStates.add(late);
             }
-            
+
             if (p.hasNext()) {
                 // check if the existing states have a hole in validity
                 nextPeriod = (Map.Entry) p.next();
                 String nextPeriodValidFrom = (String) nextPeriod.getKey();
                 String nextPeriodValidTo = (String) nextPeriod.getValue();
-                
+
                 // check sequence of loaded states
                 if (periodValidTo == null ||
-                    nextPeriodValidFrom == null ||
-                    periodValidTo.compareTo(nextPeriodValidFrom) > 0 ||
-                    (
-                        // non consecutive states while holes are not allowed
-                        periodValidTo.compareTo(nextPeriodValidFrom) < 0 &&
-                        !enableHolesInValidity
-                    )
+                        nextPeriodValidFrom == null ||
+                        periodValidTo.compareTo(nextPeriodValidFrom) > 0 ||
+                        (
+                                // non consecutive states while holes are not allowed
+                                periodValidTo.compareTo(nextPeriodValidFrom) < 0 &&
+                                !enableHolesInValidity
+                        )
                 ) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE, 
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter(
-                                "request.path", request.path()
-                            ),
-                            new BasicException.Parameter(
-                                "period.validFrom", periodValidFrom
-                            ),
-                            new BasicException.Parameter(
-                                "period.validTo", periodValidTo
-                            ),
-                            new BasicException.Parameter(
-                                "nextPeriod.validFrom", nextPeriodValidFrom
-                            ),
-                            new BasicException.Parameter(
-                                "nextPeriod.validTo", nextPeriodValidTo
-                            ),
-                            new BasicException.Parameter(
-                                LayerConfigurationEntries.ENABLE_HOLES_IN_OBJECT_VALIDITY,
-                                enableHolesInValidity
-                            )
-                        },
                         "Mixed up states; State has successor which starts before state ends "+
-                        "or next state is not adjacent to previous, even though config demands it." 
+                        "or next state is not adjacent to previous, even though config demands it.",
+                        new BasicException.Parameter(
+                            "request.path", request.path()
+                        ),
+                        new BasicException.Parameter(
+                            "period.validFrom", periodValidFrom
+                        ),
+                        new BasicException.Parameter(
+                            "period.validTo", periodValidTo
+                        ),
+                        new BasicException.Parameter(
+                            "nextPeriod.validFrom", nextPeriodValidFrom
+                        ),
+                        new BasicException.Parameter(
+                            "nextPeriod.validTo", nextPeriodValidTo
+                        ),
+                        new BasicException.Parameter(
+                            LayerConfigurationEntries.ENABLE_HOLES_IN_OBJECT_VALIDITY,
+                            enableHolesInValidity
+                        )
                     );
                 }
                 else if (periodValidTo.compareTo(nextPeriodValidFrom) < 0) {
                     // non consecutive states
-                    
+
                     if (!spec.skipMissingStates()) {
                         // need additional state for the periode from the end of
                         // the last state to the start of the next state
@@ -3591,9 +3547,9 @@ public abstract class AbstractState_1
                 }
                 // else periodValidTo.compareTo(nextPeriodValidFrom) == 0 --> they are equal
             }
-               
+
         }
-        
+
         if (originalStates.size() == 0) {
             // creating a new state where no states existed
             DataproviderObject filler = 
@@ -3603,10 +3559,10 @@ public abstract class AbstractState_1
         }
 
         assertStatesWithinRequest(modifyStates, spec, true);
-        
+
         return modifyStates;
     }
-    
+
     // --------------------------------------------------------------------------
     /**
      * merges states which are following each other and have the same values.
@@ -3629,57 +3585,57 @@ public abstract class AbstractState_1
         TreeMap fromMap = new TreeMap();
 
         String stateValidFrom = null;   
-        
+
         DataproviderObject state = null;
         ArrayList reducedStates = new ArrayList();
-        
+
         // order states
         for (Iterator i = states.iterator(); i.hasNext(); ) {
             state = (DataproviderObject)i.next();
-            
+
             stateValidFrom = readNullableStringValue(state, validFromAttribute());
-            
+
             fromMap.put(
                 stateValidFrom == null ? EARLIEST_DATE : stateValidFrom,
-                state
+                    state
             );
         }
-        
+
         DataproviderObject nextState = null;       
         state = null;
         for (Iterator p = fromMap.values().iterator(); p.hasNext(); ) {
             if (state == null) {
                 // first state
                 state = (DataproviderObject) p.next();
-                
+
                 boolean extended = false;
                 // try extending the bordering states at start. Don't know the
                 // sequence of the states, just try both
                 if (borderingStates.size() > 0) {
                     DataproviderObject bordering = (DataproviderObject) 
-                        borderingStates.get(0);
+                    borderingStates.get(0);
                     if (extendValidity(state, bordering, false)) {
                         // make sure that the bordering state gets invalidated
                         originalStates.add(bordering);
                         extended = true;
                     }
                 }
-                
+
                 if (borderingStates.size() == 2 && 
-                    !extended                       // only one can match at the beginning
+                        !extended                       // only one can match at the beginning
                 ) {
                     DataproviderObject bordering = (DataproviderObject) 
-                        borderingStates.get(1);
+                    borderingStates.get(1);
                     if (extendValidity(state, bordering, false)) {
                         // make sure that the bordering state gets invalidated
                         originalStates.add(bordering);
                     }
                 }                    
             }
-            
+
             if (p.hasNext()) {
                 nextState = (DataproviderObject) p.next();
-                
+
                 if (extendValidity(state, nextState, true)) {
                     // nothing to do; nextState was merged and is no longer needed
                 }
@@ -3689,34 +3645,34 @@ public abstract class AbstractState_1
                 }
             }
         }
-            
+
         // last state
         reducedStates.add(state);
-        
+
         boolean extended = false;
         // try extending the bordering states at end. Don't know the
         // sequence of the states, just try both
         if (borderingStates.size() > 0) {
             DataproviderObject bordering = (DataproviderObject) 
-                borderingStates.get(0);
+            borderingStates.get(0);
             if (extendValidity(state, bordering, true)) {
                 // make sure that the bordering state gets invalidated
                 originalStates.add(bordering);
                 extended = true;
             }
         }
-        
+
         if (borderingStates.size() == 2 && 
-            !extended                       // only one can match at the end
+                !extended                       // only one can match at the end
         ) {
             DataproviderObject bordering = (DataproviderObject) 
-                borderingStates.get(1);
+            borderingStates.get(1);
             if (extendValidity(state, bordering, true)) {
                 // make sure that the bordering state gets invalidated
                 originalStates.add(bordering);
             }
         }
-        
+
         return reducedStates;
     }                 
 
@@ -3762,12 +3718,12 @@ public abstract class AbstractState_1
                 // normal update, validFrom, validTo show only validity of request.
                 String requestDate = spec.getValidFrom(); 
                 String rootDate = readNullableStringValue(root, validFromAttribute());
-                    
+
                 if (compareAtStart(requestDate, rootDate) < 0) {
                     SparseList target = root.clearValues(validFromAttribute()); 
                     if (requestDate != null) target.add(requestDate);
                 }
-                
+
                 requestDate = spec.getValidTo();
                 rootDate = readNullableStringValue(root, validToAttribute());
                 if (compareAtEnd(requestDate, rootDate) > 0) {
@@ -3787,33 +3743,31 @@ public abstract class AbstractState_1
             default: throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("operationCode", rootAction),
-                },
-                "Unknown operation code in updateRoot."
+                "Unknown operation code in updateRoot.",
+                new BasicException.Parameter("operationCode", rootAction)
             );
         }
-        
+
         // maintain consistent times
         root.clearValues(SystemAttributes.MODIFIED_AT).add(spec.getModificationDate());        
         root.clearValues(SystemAttributes.MODIFIED_BY).addAll(spec.getModificationPrincipal());
-        
+
         if(SysLog.isTraceOn()) SysLog.trace(
             removeRoot ? "remove" : "update",
-            "Root: " + root.path() + 
-            " validFrom: " + root.getValues(validFromAttribute()) +
-            " validTo: " + root.getValues(validToAttribute()) +
-            " invalidated: " + root.getValues(State_1_Attributes.INVALIDATED_AT) 
+                "Root: " + root.path() + 
+                " validFrom: " + root.getValues(validFromAttribute()) +
+                " validTo: " + root.getValues(validToAttribute()) +
+                " invalidated: " + root.getValues(State_1_Attributes.INVALIDATED_AT) 
         );
         DataproviderRequest newRequest = new DataproviderRequest(
             root, 
             removeRoot ? DataproviderOperations.OBJECT_REMOVAL : DataproviderOperations.OBJECT_REPLACEMENT, 
-            AttributeSelectors.NO_ATTRIBUTES,
-            null
+                AttributeSelectors.NO_ATTRIBUTES,
+                null
         );
-        
+
         newRequest.contexts().putAll(request.contexts());
-            
+
         if(removeRoot) {
             super.remove(
                 header,
@@ -3871,27 +3825,27 @@ public abstract class AbstractState_1
                         AttributeSelectors.NO_ATTRIBUTES,
                         null
                     );
-                    newRequest.contexts().putAll(request.contexts());                    
-                    newRequest.context(
-                        DataproviderRequestContexts.OBJECT_TYPE
-                    ).set(
-                        0,
-                        state.values(SystemAttributes.OBJECT_CLASS).get(0)
-                    );
-                    replies.add(
-                        super.remove(
-                            header,
-                            newRequest
-                        )        
-                    ); 
-                    StopWatch_1.instance().stopTimer("removeStates-DB");
+                        newRequest.contexts().putAll(request.contexts());                    
+                        newRequest.context(
+                            DataproviderRequestContexts.OBJECT_TYPE
+                        ).set(
+                            0,
+                            state.values(SystemAttributes.OBJECT_CLASS).get(0)
+                        );
+                        replies.add(
+                            super.remove(
+                                header,
+                                newRequest
+                            )        
+                        ); 
+                        StopWatch_1.instance().stopTimer("removeStates-DB");
                 }
             } else {
                 DataproviderObject update = new DataproviderObject(path);
                 update.values(State_1_Attributes.INVALIDATED_AT).set(
                     0,
                     spec.getModificationDate()
-//                    request.object().getValues(SystemAttributes.MODIFIED_AT).get(0)
+//                  request.object().getValues(SystemAttributes.MODIFIED_AT).get(0)
                 );
                 SysLog.trace("invalidating state", update.path());
                 StopWatch_1.instance().startTimer("invalidateStates-DB");
@@ -3906,27 +3860,27 @@ public abstract class AbstractState_1
                     AttributeSelectors.NO_ATTRIBUTES,
                     null
                 );
-                newRequest.contexts().putAll(request.contexts());
-                newRequest.context(
-                    DataproviderRequestContexts.OBJECT_TYPE
-                ).set(
-                    0,
-                    state.values(SystemAttributes.OBJECT_CLASS).get(0)
-                );
-                replies.add(
-                    super.replace(
-                        header,   
-                        newRequest
-                    )        
-                );
-                StopWatch_1.instance().stopTimer("invalidateStates-DB");
+                    newRequest.contexts().putAll(request.contexts());
+                    newRequest.context(
+                        DataproviderRequestContexts.OBJECT_TYPE
+                    ).set(
+                        0,
+                        state.values(SystemAttributes.OBJECT_CLASS).get(0)
+                    );
+                    replies.add(
+                        super.replace(
+                            header,   
+                            newRequest
+                        )        
+                    );
+                    StopWatch_1.instance().stopTimer("invalidateStates-DB");
             }
         }
         StopWatch_1.instance().stopTimer("invalidateStates");
 
         return replies;
     }
-        
+
     // --------------------------------------------------------------------------
     /** 
      * Get the root of the dataprovider object.
@@ -3950,17 +3904,17 @@ public abstract class AbstractState_1
                 Quantors.THERE_EXISTS,
                 SystemAttributes.OBJECT_IDENTITY,
                 FilterOperators.IS_IN,
-                new String[] { spec.getObjectPath().toUri() } 
+                spec.getObjectPath().toUri() 
             )
         );
         newRequest.contexts().putAll(request.contexts());
-        
+
         DataproviderReply reply = 
             super.find(
                 header,
                 newRequest
             );
-            
+
         StopWatch_1.instance().stopTimer("getRoot");
         if (reply.getObjects().length == 0) {
             return null;
@@ -3968,8 +3922,8 @@ public abstract class AbstractState_1
         else {
             return reply.getObject(); 
         }       
-        
-        
+
+
         /*p find rather then get to avoid exception
         DataproviderRequest newRequest = 
             new DataproviderRequest(
@@ -3978,21 +3932,21 @@ public abstract class AbstractState_1
                 AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
                 null
             );
-        
+
         newRequest.contexts().putAll(request.contexts());
-        
+
         DataproviderReply reply = 
             super.get(
                 header,
                 newRequest
             );
-            
+
         return reply.getObject();
-        */
+         */
 
 
     }  
-              
+
     //---------------------------------------------------------------------------
     /**
      * same as getRoot(), but assure that the root has not been invalidated.
@@ -4003,36 +3957,34 @@ public abstract class AbstractState_1
         UpdateSpec spec
     ) throws ServiceException {
         DataproviderObject root = getRoot(header, request, spec);
-        
+
         if (root == null ||
-            (
-            root.getValues(State_1_Attributes.INVALIDATED_AT) != null &&
-            !root.getValues(State_1_Attributes.INVALIDATED_AT).isEmpty()
-            )
+                (
+                        root.getValues(State_1_Attributes.INVALIDATED_AT) != null &&
+                        !root.getValues(State_1_Attributes.INVALIDATED_AT).isEmpty()
+                )
         ) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_FOUND, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "request.path", 
-                        request.path()
-                    ),
-                    new BasicException.Parameter(
-                        "object.invalidatedAt", 
-                        (root == null ?
-                            "non existing object" :
+                "Accessing invalidated or non existing object for changing its state.",
+                new BasicException.Parameter(
+                    "request.path", 
+                    request.path()
+                ),
+                new BasicException.Parameter(
+                    "object.invalidatedAt", 
+                    (root == null ?
+                        "non existing object" :
                             root.getValues(State_1_Attributes.INVALIDATED_AT).toString()
-                        )
                     )
-                },
-                "Accessing invalidated or non existing object for changing its state." 
+                )
             );
         }
-            
+
         return root;
     }
-   
+
     //---------------------------------------------------------------------------
     /** 
      * Get the path consisting of the references in the path supplied and remove
@@ -4047,7 +3999,7 @@ public abstract class AbstractState_1
      */ 
     private Path getReferencePath(Path path) {
         Path result = new Path(path);
-        
+
         for (int i = 0; i < result.size(); i++) {
             result.remove(i);
             if (i < result.size() && result.get(i).equals(RoleAttributes.REF_ROLE)){
@@ -4057,11 +4009,11 @@ public abstract class AbstractState_1
                 }
             }
         }
-        
+
         return result;
     }
 
-    
+
     // --------------------------------------------------------------------------
     /** 
      * Determine if the path specified leads to stateful classes.
@@ -4071,16 +4023,16 @@ public abstract class AbstractState_1
      */
     protected boolean leadsTostatefulClass(Path path) {
         Path refPath = getReferencePath(path);
-        
+
         if (refPath.getBase().equals(State_1_Attributes.REF_VALID) ||
-            refPath.getBase().equals(State_1_Attributes.REF_HISTORY) ||
-            refPath.getBase().equals(State_1_Attributes.REF_STATE)
+                refPath.getBase().equals(State_1_Attributes.REF_HISTORY) ||
+                refPath.getBase().equals(State_1_Attributes.REF_STATE)
         ) {
             refPath.remove(refPath.size()-1);
         }
         return this.statefulReferencePaths.containsKey(refPath);        
     }
-   
+
     // --------------------------------------------------------------------------
     /**
      * Common method for replace and modify. Behaviour can be adjusted by 
@@ -4097,35 +4049,35 @@ public abstract class AbstractState_1
         ArrayList modifyStates = null;
         ArrayList stateReplies = null;
         boolean isLifetimeAdjust = false; 
-        
+
         assertValidPathForChanges(request.path());
         cutStateSpecifiersFromPath(request.path());
-            
+
         UpdateSpec spec = new UpdateSpec(
             header, 
             request, 
             validForPattern()
         );
-        
+
         // TODO rework path treatment
         request.path().setTo(
             OperationParameter.removeAllOperationParameters(request.path()));
 
-        
+
         assertStateAwareRequest(spec, request.object());
         assertValidDates(spec);
 
         // get Root for instanceNumber 
         root = getValidRoot(header, request, spec);
-        
+
         if (isLifetimeRequest(request.object())) {
             SysLog.trace("lifetime request");
             isLifetimeAdjust = true;
             modifyStates = new ArrayList();
             boolean needExistingReturnState = false;
-            
+
             if (readNullableStringValue(root, validFromAttribute()) == null &&
-                readNullableStringValue(root, validToAttribute()) == null
+                    readNullableStringValue(root, validToAttribute()) == null
             ) {
                 // both are null which means that no changes at the lifetime 
                 // should occur
@@ -4136,38 +4088,38 @@ public abstract class AbstractState_1
                 DataproviderObject cutInValidTo = null; 
                 // first at the start
                 cutInValidFrom = createObjectBoundaryStates( 
-                  header,
-                  request,
-                  request.object().path(),
-                  root.getValues(validFromAttribute()),
-                  request.object().getValues(validFromAttribute()),
-                  true,
-                  spec,
-                  originalStates
+                    header,
+                    request,
+                    request.object().path(),
+                    root.getValues(validFromAttribute()),
+                    request.object().getValues(validFromAttribute()),
+                    true,
+                    spec,
+                    originalStates
                 );
-              
+
                 // then at the end
                 cutInValidTo = createObjectBoundaryStates( 
-                  header,
-                  request,
-                  request.object().path(),
-                  root.getValues(validToAttribute()),
-                  request.object().getValues(validToAttribute()),
-                  false,
-                  spec,
-                  originalStates
+                    header,
+                    request,
+                    request.object().path(),
+                    root.getValues(validToAttribute()),
+                    request.object().getValues(validToAttribute()),
+                    false,
+                    spec,
+                    originalStates
                 );
-              
+
                 // check if it was the same state
                 if (cutInValidFrom != null && 
-                  cutInValidTo != null && 
-                  cutInValidFrom.path().equals(cutInValidTo.path())
+                        cutInValidTo != null && 
+                        cutInValidFrom.path().equals(cutInValidTo.path())
                 ) {
-                  cutInValidFrom.values(validToAttribute()).set(0, 
-                      cutInValidTo.values(validToAttribute()).get(0)
-                  );
-                  cutInValidTo = null;
-                  modifyStates.add(cutInValidFrom);
+                    cutInValidFrom.values(validToAttribute()).set(0, 
+                        cutInValidTo.values(validToAttribute()).get(0)
+                    );
+                    cutInValidTo = null;
+                    modifyStates.add(cutInValidFrom);
                 }
                 else if (cutInValidFrom == null && cutInValidTo == null) {
                     // both are null: no cutting took place; the old and the new
@@ -4178,16 +4130,16 @@ public abstract class AbstractState_1
                     if (cutInValidFrom != null) {
                         modifyStates.add(cutInValidFrom);
                     }
-                  
+
                     if (cutInValidTo != null) {
                         modifyStates.add(cutInValidTo);
                     }
-  
+
                 }
-           }
-            
-           if (needExistingReturnState) {
-              
+            }
+
+            if (needExistingReturnState) {
+
                 // both are null which means that no changes at the lifetime should occur
                 // need an object to return      
                 DataproviderObject[] originalStatesArray = getInvolvedStates(
@@ -4208,37 +4160,34 @@ public abstract class AbstractState_1
         }
         else {
             // normal update
-            
+
             if (spec.getOperationParameter().isStateOperation() && 
-                !spec.getOperationParameter().isPeriodOperation()
+                    !spec.getOperationParameter().isPeriodOperation()
             ) {
                 // update of a single state only if validFrom= , validTo= are 
                 // not set. Otherwise its a normal update, based on another state.
-                
+
                 // get the required state to find the update period
                 DataproviderObject stateToUpdate = 
                     getStateForStateOperationParameter(header, request, spec).getObject();
-                
+
                 if(readNullableStringValue(stateToUpdate, State_1_Attributes.INVALIDATED_AT) != null) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE, 
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("path", request.path()),
-                            new BasicException.Parameter("state", stateToUpdate.path()),
-                            new BasicException.Parameter("invalidatedAt", stateToUpdate.values(State_1_Attributes.INVALIDATED_AT).get(0))
-                            
-                        },
-                        "Updates of states are only allowed for valid states."
+                        "Updates of states are only allowed for valid states.",
+                        new BasicException.Parameter("path", request.path()),
+                        new BasicException.Parameter("state", stateToUpdate.path()),
+                        new BasicException.Parameter("invalidatedAt", stateToUpdate.values(State_1_Attributes.INVALIDATED_AT).get(0))
                     );
                 }
-                
+
                 spec.setValidPeriod(
                     readNullableStringValue(stateToUpdate, validFromAttribute()),
                     readNullableStringValue(stateToUpdate, validToAttribute())
                 );
             }
-       
+
             DataproviderObject[] originalStatesArray = null;
             originalStatesArray = getInvolvedStates(
                 header,
@@ -4248,12 +4197,12 @@ public abstract class AbstractState_1
                 spec.getValidTo(),   // validTo,
                 OP_UPDATE_NORMAL, INCLUDE_STATE_AT_START, INCLUDE_STATE_AT_END
             );
-            
+
             for (int i = 0; i < originalStatesArray.length; i++) {
                 originalStates.add(originalStatesArray[i]);
             }
             ArrayList borderingStates = new ArrayList();
-            
+
             modifyStates = 
                 prepareInvolvedStates(request, root, originalStates, spec, isReplace, borderingStates);
             modifyStates = 
@@ -4269,19 +4218,19 @@ public abstract class AbstractState_1
                 request,
                 false
             );             
-                                
+
             // write root
             updateRoot(header, request, root, spec, isLifetimeAdjust ? OP_SET_LIFETIME : OP_UPDATE_NORMAL);
         }
         reply = findReply(header, request, stateReplies, spec);    
-        
+
         if (isShowDBEnabled()) {
             showDB(header, request, request.path());
         }
-        
+
         return reply;
     }
-   
+
     // --------------------------------------------------------------------------
     /** 
      * find the correct reply to return according to the requestedAt. requestedFor 
@@ -4308,9 +4257,9 @@ public abstract class AbstractState_1
                 new DataproviderObject(
                     replies.isEmpty() ? 
                         request.path() :
-                        ((DataproviderReply)replies.get(0)).getObject().path()
+                            ((DataproviderReply)replies.get(0)).getObject().path()
                 )
-           );
+            );
         } else {
             if (spec.isStateOperation() || spec.isPeriodOperation()) {
                 // TODO for now just select the reply object from the set of replies
@@ -4336,7 +4285,7 @@ public abstract class AbstractState_1
                             replies, EARLIEST_DATE, true);
                     }
                     else if (spec.getOperationParameter().isLast() ||
-                        spec.getOperationParameter().isUndef()
+                            spec.getOperationParameter().isUndef()
                     ) {
                         theReply = searchReplyAtDate(
                             replies, LATEST_DATE, true);
@@ -4347,51 +4296,47 @@ public abstract class AbstractState_1
                 // no operation, normal behavior
                 String requestedFor = getRequestedFor(header, request);             
                 // Date requstedAt must be checked tbd
-                        
+
                 theReply = searchReplyAtDate(replies, requestedFor, false);
-                
+
                 if (theReply == null) {
                     if (replies.size() > 0) {
                         // this is only true for the old behavior
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_SUPPORTED, 
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("object", request.path()),
-                                new BasicException.Parameter("requestedFor", requestedFor),
-                                new BasicException.Parameter("request.validFrom", request.object().values(validFromAttribute())),
-                                new BasicException.Parameter("request.validTo", request.object().values(validToAttribute()))
-                            },
-                            "requestedFor must be inside the period of the update"
+                            "requestedFor must be inside the period of the update",
+                            new BasicException.Parameter("object", request.path()),
+                            new BasicException.Parameter("requestedFor", requestedFor),
+                            new BasicException.Parameter("request.validFrom", request.object().values(validFromAttribute())),
+                            new BasicException.Parameter("request.validTo", request.object().values(validToAttribute()))
                         );
                     }
                 }
             }
-            
+
             if (theReply == null) { 
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter(
-                            "request", request),
+                    "no reply to return found.",
+                    new BasicException.Parameter(
+                        "request", request),
                         new BasicException.Parameter(
                             "OperationQualifier", spec.getOperationParameter().getOperationQualifier()),
-                        new BasicException.Parameter(
-                            "replies.size", replies.size())
-                    },
-                    "no reply to return found."
+                            new BasicException.Parameter(
+                                "replies.size", replies.size())
                 );
             }
-            
+
             // the objects may contain an invalidatedAt entry if they were reused
             // from the invalidateStates() as used in remove()
             theReply.getObject().attributeNames().remove(State_1_Attributes.INVALIDATED_AT);
-            
+
         }
         return theReply;            
     }
-    
+
     /**
      * Search  Reply which lies at the date specified. Date may also be 
      * EARLIEST_DATE, LATEST_DATE or a real date. If EARLIEST_DATE or LATEST_DATE
@@ -4415,44 +4360,44 @@ public abstract class AbstractState_1
     ) throws ServiceException {
         DataproviderReply reply;
         DataproviderReply theReply = null;
-        
+
         String earliestFrom = LATEST_DATE;
         String latestFrom = EARLIEST_DATE;
         DataproviderReply earliestReply = null;
         DataproviderReply latestReply = null;
-        
+
         String objectValidFrom;
         String objectValidTo;
         for (Iterator i = replies.iterator();
-            i.hasNext() && theReply == null;
+        i.hasNext() && theReply == null;
         ) {
             reply = (DataproviderReply) i.next();
-            
+
             objectValidFrom = (String) reply.getObject().
-                values(validFromAttribute()).get(0);
+            values(validFromAttribute()).get(0);
             objectValidTo = toExclusiveValidTo(
                 (String) reply.getObject().values(validToAttribute()).get(0)
             );
-            
+
             if (
-                (
-                    objectValidFrom == null  // valid since ever
-                    ||
-                    date == null
-                    ||
                     (
-                        date != null &&
-                        date.compareTo(objectValidFrom) >= 0 
+                            objectValidFrom == null  // valid since ever
+                            ||
+                            date == null
+                            ||
+                            (
+                                    date != null &&
+                                    date.compareTo(objectValidFrom) >= 0 
+                            )
                     )
-                )
-                &&
-                (
-                    objectValidTo == null   // valid for ever
-                    ||
-                    date == null    // every validTo is larger than that
-                    ||
-                    date.compareTo(objectValidTo) < 0 
-                )
+                    &&
+                    (
+                            objectValidTo == null   // valid for ever
+                            ||
+                            date == null    // every validTo is larger than that
+                            ||
+                            date.compareTo(objectValidTo) < 0 
+                    )
             ) {
                 // found the one with matching date
                 theReply = reply;
@@ -4460,7 +4405,7 @@ public abstract class AbstractState_1
             else {
                 objectValidFrom = (objectValidFrom == null ? EARLIEST_DATE : objectValidFrom);
                 objectValidTo = (objectValidTo == null ? LATEST_DATE : objectValidTo);
-                
+
                 if (objectValidFrom.compareTo(earliestFrom) <= 0) {
                     earliestFrom = objectValidFrom;
                     earliestReply = reply;
@@ -4471,16 +4416,16 @@ public abstract class AbstractState_1
                 }
             }
         } 
-            
+
         if (theReply == null && date != null) {
             // if date == null and none was found, then there is no matching
             if (date.equals(EARLIEST_DATE) 
-                || (searchNearest && date.compareTo(earliestFrom) <= 0)
+                    || (searchNearest && date.compareTo(earliestFrom) <= 0)
             ) {
                 theReply = earliestReply;
             }
             else if (date.equals(LATEST_DATE)
-                || (searchNearest && date.compareTo(latestFrom) >= 0)
+                    || (searchNearest && date.compareTo(latestFrom) >= 0)
             ) {
                 theReply = latestReply;
             }
@@ -4490,13 +4435,13 @@ public abstract class AbstractState_1
             }
             // else reply stays null
         }
-                    
+
         return theReply;
     }
-            
-        
-    
-    
+
+
+
+
     /**
      * Take the decision to create a new object or to replace an existing 
      * object based on the existence of the object, regardless of the valid 
@@ -4518,7 +4463,7 @@ public abstract class AbstractState_1
         DataproviderReply reply = null;
         DataproviderObject root = null;
         boolean doCreate = false;
-        
+
         if (isStateful(request.object())) {
             try {
                 UpdateSpec spec = new UpdateSpec(
@@ -4531,13 +4476,13 @@ public abstract class AbstractState_1
             catch (ServiceException se) {
                 // ignore
             }
-    
+
             if (root != null 
-                && 
-                (root.getValues(State_1_Attributes.INVALIDATED_AT) == null 
-                 ||
-                 root.getValues(State_1_Attributes.INVALIDATED_AT).isEmpty()
-                ) 
+                    && 
+                    (root.getValues(State_1_Attributes.INVALIDATED_AT) == null 
+                            ||
+                            root.getValues(State_1_Attributes.INVALIDATED_AT).isEmpty()
+                    ) 
             ) {
                 // if the root is still valid, the object can be modified
                 doCreate = false;
@@ -4561,17 +4506,17 @@ public abstract class AbstractState_1
                     Quantors.THERE_EXISTS,
                     SystemAttributes.OBJECT_IDENTITY,
                     FilterOperators.IS_IN,
-                    new String[] { request.path().toUri()}
+                    request.path().toUri()
                 )
             );
             newRequest.contexts().putAll(request.contexts());
-        
+
             DataproviderObject[] existingObjs =
                 super.find(
                     header,
                     newRequest
                 ).getObjects();
-            
+
             if (existingObjs.length == 0) {
                 doCreate = true;
             }
@@ -4580,7 +4525,7 @@ public abstract class AbstractState_1
                 request.object().setDigest(existingObjs[0].getDigest());    
             }
             StopWatch_1.instance().stopTimer("state1SetSearch");
-         
+
             /*p find rather then get to avoid exception
             try {
                 DataproviderObject existing = get(
@@ -4600,10 +4545,10 @@ public abstract class AbstractState_1
             catch (ServiceException exception) {
                 doCreate = true;
             }
-            */
+             */
         }
-        
-        
+
+
         if (doCreate) {
             request.object().clearValues(
                 SystemAttributes.CREATED_BY
@@ -4615,18 +4560,18 @@ public abstract class AbstractState_1
             ).addAll(
                 request.object().values(SystemAttributes.MODIFIED_AT)
             );
-            
+
             reply = this.create(header, request); 
         }
         else {
             reply = this.replace(header, request);
         }
-        
+
         StopWatch_1.instance().stopTimer("State_1.set");
 
         return reply;
     }
-   
+
     // --------------------------------------------------------------------------
     /**
      * Enable getting objects which are stated. Either objects or
@@ -4677,19 +4622,19 @@ public abstract class AbstractState_1
         DataproviderReply reply = null;
         boolean isStateful = false; 
         Path originalRequestPath = null;
-        
+
         if (leadsTostatefulClass(request.path())) {
             // there are state enabled classes
-            
+
             originalRequestPath = new Path(request.path());
-            
+
             isStateful = true;
             UpdateSpec spec = new UpdateSpec(
                 header, 
                 request, 
                 validForPattern()
             );
-            
+
             // TODO rework path treatment
             request.path().setTo(
                 OperationParameter.removeAllOperationParameters(request.path())
@@ -4763,14 +4708,14 @@ public abstract class AbstractState_1
                 }
             }
             else if (spec.getOperationParameter().isPeriodOperation()  // OperationParameter.hasStateParameter(request.path().getBase())
-                || spec.getOperationParameter().isStateOperation()      // OperationParameter.hasPeriodParameter(request.path().getBase())
+                    || spec.getOperationParameter().isStateOperation()      // OperationParameter.hasPeriodParameter(request.path().getBase())
             ) {
                 SysLog.trace("operation", request.path().getBase());
                 // get the required state
                 reply = getStateForStateOperationParameter(header, request, spec);
             } else if (
-                this.defaultsToInitialState &&
-                header.getRequestedFor() == null
+                    this.defaultsToInitialState &&
+                    header.getRequestedFor() == null
             ) {
                 String base = request.path().getBase() + (";" + State_1_Attributes.OP_STATE + "=0");
                 SysLog.trace("initial state", base);
@@ -4787,7 +4732,7 @@ public abstract class AbstractState_1
             } else {
                 String requestedFor = getRequestedFor(header); 
                 String objectId = cutStateSpecifiersFromPath(request.path());
-                
+
                 reply = findStates(
                     header, 
                     request, 
@@ -4800,19 +4745,17 @@ public abstract class AbstractState_1
                     INCLUDE_STATE_AT_END,
                     USE_REQUESTED_AT, 
                     false
-, null // attribute specifiers
+                    , null // attribute specifiers
                 );
             }            
-                            
+
             // there should be found exactly one
             if (reply.getObjects().length < 1) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_FOUND, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("request", request)
-                    },
-                    "Object not found. Perhaps no valid state at requested_at, requested_for."
+                    "Object not found. Perhaps no valid state at requested_at, requested_for.",
+                    new BasicException.Parameter("request", request)
                 );
             }
             else if (reply.getObjects().length > 1) {
@@ -4821,16 +4764,14 @@ public abstract class AbstractState_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("header.requestedAt", header.getRequestedAt()),
-                        new BasicException.Parameter("header.requestedFor", header.getRequestedFor()),
-                        new BasicException.Parameter("request", request),
-                        new BasicException.Parameter("objects received", reply.getObjects())
-                    },
-                    "Request should lead to only one state."
+                    "Request should lead to only one state.",
+                    new BasicException.Parameter("header.requestedAt", header.getRequestedAt()),
+                    new BasicException.Parameter("header.requestedFor", header.getRequestedFor()),
+                    new BasicException.Parameter("request", request),
+                    new BasicException.Parameter("objects received", (Object[])reply.getObjects())
                 );
             } 
-            
+
             if (isShowDBEnabled()) {
                 showDB(header, request, request.path());
             }
@@ -4838,7 +4779,7 @@ public abstract class AbstractState_1
         else {
             reply = super.get(header, request);
         }
-        
+
         StopWatch_1.instance().stopTimer("State_1.get");
         SysLog.trace("< State_1.get", request.path());
 
@@ -4944,10 +4885,10 @@ public abstract class AbstractState_1
                         )
                     }
                 );
-                
+
                 sortStates(reply, SystemAttributes.MODIFIED_AT);
                 idCompletion = State_1_Attributes.REF_HISTORY;
-                
+
             } else if (requestPath.getBase().equals(State_1_Attributes.REF_VALID)) {
                 // a find for different states of a single object.
                 // Request for entire object which has been valid at a certain
@@ -4980,10 +4921,10 @@ public abstract class AbstractState_1
                 // a find for different states of a single object
                 // Request for all states. Can be further narrowed by
                 // attributeFilters on modifiedAt, invalidatedAt, valid_from, valid_to
-                
+
                 String objectId = cutStateSpecifiersFromPath(requestPath);
                 requestPath.remove(requestPath.size() -1 );
-                
+
                 reply = findStates(
                     header,
                     request, 
@@ -5015,19 +4956,19 @@ public abstract class AbstractState_1
                 // a find for different states of a single object
                 // Request for all states. Can be further narrowed by
                 // attributeFilters on modifiedAt, invalidatedAt, valid_from, valid_to
-                
+
                 reply = findStates(
                     header,
                     request, 
                     requestPath,
                     requestPath.size() % 2 == 0 ? null : requestPath.getBase(),
-                    null,
-                    null,
-                    null,
-                    EXCLUDE_STATE_AT_START,
-                    INCLUDE_STATE_AT_END,
-                    OMIT_REQUESTED_AT, 
-                    useExtent, new AttributeSpecifier[] { 
+                        null,
+                        null,
+                        null,
+                        EXCLUDE_STATE_AT_START,
+                        INCLUDE_STATE_AT_END,
+                        OMIT_REQUESTED_AT, 
+                        useExtent, new AttributeSpecifier[] { 
                         new AttributeSpecifier(
                             SystemAttributes.MODIFIED_AT, 
                             0, 
@@ -5047,7 +4988,7 @@ public abstract class AbstractState_1
                 //
                 // find for states of different objects:
                 //
-                
+
                 boolean historyFilter  = hasHistoryFilter(request);
                 boolean validityFilter = hasValidityFilter(request);
                 String requestedFor = validityFilter ? null : getRequestedFor(header);
@@ -5062,7 +5003,7 @@ public abstract class AbstractState_1
                     EXCLUDE_STATE_AT_START,
                     INCLUDE_STATE_AT_END,
                     historyFilter ? OMIT_REQUESTED_AT : USE_REQUESTED_AT, 
-                    useExtent, new AttributeSpecifier[] { 
+                        useExtent, new AttributeSpecifier[] { 
                         new AttributeSpecifier(
                             ID_ATTRIBUTE_NAME, 
                             0, 
@@ -5081,32 +5022,32 @@ public abstract class AbstractState_1
                         )
                     }
                 );
-                
+
                 if (validityFilter || historyFilter) {
                     // anything, just make it differ from REF_STATE
                     idCompletion = OP_STATE_EXTENDED; 
                 }
             }
-            
+
         } else {
             if (request.operation() == DataproviderOperations.ITERATION_CONTINUATION) {
                 originalRequestPath = new Path(request.path());
-                
+
                 State_1Iterator iterator = (State_1Iterator) AbstractIterator.deserialize(
                     (byte[])request.context(DataproviderReplyContexts.ITERATOR).get(0)
                 );
                 // replace my context by the old one
                 request.context(DataproviderReplyContexts.ITERATOR)
-                    .set(0, iterator.getIterator());
+                .set(0, iterator.getIterator());
                 isStateful = iterator.isStateful();
                 idCompletion = iterator.getIdCompletion();
                 requestPath = iterator.getInternalRequestPath();
                 request.object().path().setTo(requestPath);
-                
+
             }
             reply = super.find(header, request);
         }
-        
+
         // add my context containing the old one
         reply.context(DataproviderReplyContexts.ITERATOR).set(0,
             AbstractIterator.serialize(
@@ -5118,16 +5059,16 @@ public abstract class AbstractState_1
                 )
             )
         );
-        
+
         DataproviderReply finalReply = completeReply(
             request,
             reply, 
             isStateful, 
             idCompletion, 
             useExtent ? null : originalRequestPath, 
-            false
+                false
         );
-            
+
         SysLog.trace("reply count", new Integer(finalReply.getObjects().length));
         StopWatch_1.instance().stopTimer("State_1.find");
         SysLog.trace("< State_1.find", request.path());
@@ -5159,7 +5100,7 @@ public abstract class AbstractState_1
             );
         }
     }
-    
+
     /**
      * Retrieves the extent request's identity filter
      * 
@@ -5174,18 +5115,16 @@ public abstract class AbstractState_1
     ) throws ServiceException{
         FilterProperty[] filters = request.attributeFilter();
         for(
-            int i = 0;
-            i < filters.length;
-            i++
+                int i = 0;
+                i < filters.length;
+                i++
         ) if(SystemAttributes.OBJECT_IDENTITY.equals(filters[i].name())) {
             List values = filters[i].values();
             if(values == null || values.isEmpty()) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("path", request.path())
-                },
-                "An extent request's identity filter is empty"
+                "An extent request's identity filter is empty",
+                new BasicException.Parameter("path", request.path())
             ); 
             Object identity = values.get(0);
             try {
@@ -5195,26 +5134,20 @@ public abstract class AbstractState_1
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("path", request.path()),
-                        new BasicException.Parameter(SystemAttributes.OBJECT_IDENTITY, identity)
-                        
-                    },
-                    "An extent request's identity filter value can't be interpreted as path"
+                    "An extent request's identity filter value can't be interpreted as path",
+                    new BasicException.Parameter("path", request.path()),
+                    new BasicException.Parameter(SystemAttributes.OBJECT_IDENTITY, identity)
                 );
             }
         }
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path", request.path())
-                
-            },
-            "An extent request has no identity filter"
+            "An extent request has no identity filter",
+            new BasicException.Parameter("path", request.path())
         );
     }
-    
+
     // --------------------------------------------------------------------------
     public DataproviderReply create(
         ServiceHeader header,
@@ -5222,11 +5155,11 @@ public abstract class AbstractState_1
     ) throws ServiceException {
         StopWatch_1.instance().startTimer("State_1.create");
         SysLog.trace("> State_1.create", request.path());
-        
+
         DataproviderReply reply = null;
         boolean isStateful = isStateful(request.object());
         Path originalRequestPath = null;
-        
+
         if (isStateful) {
             //
             // is it a stateful object
@@ -5236,18 +5169,18 @@ public abstract class AbstractState_1
             ArrayList replies = null;
             boolean mustUpdateRoot = false; 
             originalRequestPath = new Path(request.path());
-            
+
             assertValidPathForChanges(request.path());
-            
+
             UpdateSpec spec = new UpdateSpec(
                 header, 
                 request, 
                 validForPattern()
             );
-            
+
             // allow creation for non stated clients!
             // assertStateAwareRequest(spec, request.object());
-            
+
             assertValidDates(spec);
             try {
                 // create root object containing instanceNumber 
@@ -5256,32 +5189,30 @@ public abstract class AbstractState_1
             catch (ServiceException se) {
                 if (se.getExceptionCode() == BasicException.Code.DUPLICATE) {
                     // assume it was created and removed before. Try getting 
-                	// all the valid states. If there are none it can be recreated
-                	
-                	DataproviderObject[] existingStates = getInvolvedStates(
-            	       header,
-            	       request,
-            	       spec.getObjectPath(),
-            	       enableDisjunctStateCreation ? spec.getValidFrom() : null, 
-        	           enableDisjunctStateCreation ? spec.getValidTo() : null,
-            	       OP_CREATE, 
-            	       enableDisjunctStateCreation ? EXCLUDE_STATE_AT_START : INCLUDE_STATE_AT_START, 
-                       enableDisjunctStateCreation ? EXCLUDE_STATE_AT_END : INCLUDE_STATE_AT_END
-                	);
-                	
-                	if (existingStates.length > 0) {
-                	    throw new ServiceException(
+                    // all the valid states. If there are none it can be recreated
+
+                    DataproviderObject[] existingStates = getInvolvedStates(
+                        header,
+                        request,
+                        spec.getObjectPath(),
+                        enableDisjunctStateCreation ? spec.getValidFrom() : null, 
+                            enableDisjunctStateCreation ? spec.getValidTo() : null,
+                                OP_CREATE, 
+                                enableDisjunctStateCreation ? EXCLUDE_STATE_AT_START : INCLUDE_STATE_AT_START, 
+                                    enableDisjunctStateCreation ? EXCLUDE_STATE_AT_END : INCLUDE_STATE_AT_END
+                    );
+
+                    if (existingStates.length > 0) {
+                        throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.DUPLICATE, 
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("request.path", request.path()),
-                            },
-                            "Trying to create object which exists and is still valid."
+                            "Trying to create object which exists and is still valid.",
+                            new BasicException.Parameter("request.path", request.path())
                         );
-                	}
-                	
-                	root = getRoot(header, request, spec);
-                	
+                    }
+
+                    root = getRoot(header, request, spec);
+
                     mustUpdateRoot = true;
                 }
                 else {
@@ -5291,28 +5222,28 @@ public abstract class AbstractState_1
             }
             DataproviderObject firstState = new DataproviderObject(request.object());
             // create object with name id#instanceNumber
-            
+
             // set the path to get rid of operationParameter if any
             firstState.path().setTo(spec.getObjectPath());
-                
+
             // set validFrom/To regardless if it is set in the object or the 
             // request's operation parameters.
             firstState.clearValues(validFromAttribute()).add(spec.getValidFrom());
             firstState.clearValues(validToAttribute()).add(toModelledValidTo(spec.getValidTo()));
-            
+
             states.add(firstState);
             replies = createStates(header, request, states, root);
-            
+
             if (mustUpdateRoot) {
                 updateRoot(header, request,  root, spec, OP_UPDATE_NORMAL);
             }
             // else 
-                // can leave it out because there is just one state created,
-                // which is taken into account in creation of root.
-            
+            // can leave it out because there is just one state created,
+            // which is taken into account in creation of root.
+
             //
             reply = findReply(header, request, replies, spec); 
-            
+
             if (isShowDBEnabled()) {
                 showDB(header, request, spec.getObjectPath());
             }
@@ -5320,7 +5251,7 @@ public abstract class AbstractState_1
         else {
             reply = super.create(header,request);
         }
-        
+
         StopWatch_1.instance().stopTimer("State_1.create");
         SysLog.trace("< State_1.create", request.path());
         return completeReply(
@@ -5332,7 +5263,7 @@ public abstract class AbstractState_1
             true
         );
     }
-    
+
     // --------------------------------------------------------------------------
     public DataproviderReply modify(
         ServiceHeader header,
@@ -5340,16 +5271,16 @@ public abstract class AbstractState_1
     ) throws ServiceException {
         StopWatch_1.instance().startTimer("State_1.modify");
         SysLog.trace("> State_1.modify", request.path());
-        
+
         DataproviderReply reply = null;
         boolean isStateful = false;
         // no matter what, the reply path must always be the same as the request path
         Path originalRequestPath = new Path(request.path());
-                
+
         // is it a stateful object
         if (isStateful(request.object())) {
             isStateful = true;
-            
+
             reply = update(header, request, false);
         }      
         else {
@@ -5382,7 +5313,7 @@ public abstract class AbstractState_1
 
         if (isStateful(request.object())) {
             isStateful = true;
-            
+
             reply = update(header, request, true);
         }      
         else {
@@ -5390,7 +5321,7 @@ public abstract class AbstractState_1
         }
         StopWatch_1.instance().stopTimer("State_1.replace");
         SysLog.trace("< State_1.replace", request.path());
-        
+
         return completeReply(
             request,
             reply, 
@@ -5412,24 +5343,24 @@ public abstract class AbstractState_1
         DataproviderReply reply = null;
         boolean isStateful = false;
         Path originalRequestPath = new Path(request.path());
-        
+
         if (leadsTostatefulClass(request.path())) {
             // there may be stateful classes but also non stateful
-            
+
             assertValidPathForChanges(request.path());
-            
+
             UpdateSpec spec = new UpdateSpec(
                 header, 
                 request, 
                 validForPattern()
             );
-            
+
             // not possible with remove requests (they do not have any data)
             // assertStateAwareRequest(spec, request.object());
             assertValidDates(spec);
 
             DataproviderObject root = getValidRoot(header, request, spec);
-            
+
             if (isStateful(root)) {
                 isStateful = true;
                 ArrayList invalidationReplies = null;
@@ -5437,25 +5368,24 @@ public abstract class AbstractState_1
                 DataproviderObject[] originalStatesArray = null;
                 // no matter what, the reply path must always be the same as the request path
                 originalRequestPath = new Path(request.path());
-                
+
                 if (spec.isStateOperation() && !spec.isPeriodOperation()) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_IMPLEMENTED,
-                        null,
                         "remove request for operation state= is not implemented, so far."
                     );
                 }
-                       
+
                 originalStatesArray = 
                     getInvolvedStates(header, request, spec.getObjectPath(), spec.getValidFrom(), spec.getValidTo(), OP_REMOVE, INCLUDE_STATE_AT_START, INCLUDE_STATE_AT_END);
 
                 for (int i = 0; i < originalStatesArray.length; i++) {
                     originalStates.add(originalStatesArray[i]);
                 }
-                
+
                 if (spec.getValidFrom() == null &&
-                    spec.getValidTo() == null
+                        spec.getValidTo() == null
                 ) {
                     // the whole object is removed
                     invalidationReplies = invalidateStates(
@@ -5465,22 +5395,22 @@ public abstract class AbstractState_1
                         request,
                         true
                     );
-                                    
+
                     // write root
                     updateRoot(header, request, root, spec, OP_REMOVE);
-                    
+
                     reply = findReply(header, request, invalidationReplies, spec);  
                 }
                 else {
                     // only part of the object is removed
                     if (originalStatesArray.length == 0) {
                         // no valid states at the time to invalidate were found
-                        
+
                         // TODO: What now?
                         // must execute a search to find a state to return?
                         // or throw an exception because there couldn't be found
                         // any involved States ?
-                        
+
                         // I think it fits more to return any state
                         DataproviderObject[] states = 
                             getInvolvedStates(
@@ -5491,7 +5421,7 @@ public abstract class AbstractState_1
                                 null, 
                                 OP_REMOVE, INCLUDE_STATE_AT_START, INCLUDE_STATE_AT_END
                             );
-                        
+
                         if (states.length == 0) {
                             // TODO how to handle this?
                             // deleting all valid states of an object with an 
@@ -5500,54 +5430,52 @@ public abstract class AbstractState_1
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.ASSERTION_FAILURE,
-                                new BasicException.Parameter[] {
-                                    new BasicException.Parameter("object path", spec.getObjectPath()),
-                                    new BasicException.Parameter("operationQualifier", spec.getOperationParameter().getOperationQualifier())
-                                },
-                                "no more valid states for object to return."
+                                "no more valid states for object to return.",
+                                new BasicException.Parameter("object path", spec.getObjectPath()),
+                                new BasicException.Parameter("operationQualifier", spec.getOperationParameter().getOperationQualifier())
                             );
                         }
-                        
+
                         // return any of the states found
                         reply = new DataproviderReply(states[0]);
-   
+
                     }
                     else  {
                         // found existing states to invalidate, must create 
                         // new edges by cutting existing states
-                        
+
                         List modifyStates = new ArrayList();
                         // note: need inverse setting for atStart as in 
                         // with lifetime setting
                         DataproviderObject edge = createLifetimeEdgeState(
                             false, spec.getValidFrom(), originalStatesArray, spec);
-                        
+
                         if (edge != null) {
                             modifyStates.add(edge);
                         }
-                        
+
                         edge = createLifetimeEdgeState(
                             true, spec.getValidTo(), originalStatesArray, spec);
-                        
+
                         if (edge != null) {
                             modifyStates.add(edge);
                         }
-                            
+
                         // now create the two new states:
-                        createStates(header, request, modifyStates, root);
-                        
-                        invalidationReplies = invalidateStates(
-                            header, 
-                            originalStates,
-                            spec,
-                            request,
-                            true
-                        );
-                                            
-                        updateRoot(header, request, root, spec, OP_UPDATE_NORMAL);
-                        
-                        reply = findReply(header, request, invalidationReplies, spec); 
-                        /*
+                            createStates(header, request, modifyStates, root);
+
+                            invalidationReplies = invalidateStates(
+                                header, 
+                                originalStates,
+                                spec,
+                                request,
+                                true
+                            );
+
+                            updateRoot(header, request, root, spec, OP_UPDATE_NORMAL);
+
+                            reply = findReply(header, request, invalidationReplies, spec); 
+                            /*
                         // create empty reply object 
                         DataproviderObject replyObject = 
                             new DataproviderObject(
@@ -5557,16 +5485,16 @@ public abstract class AbstractState_1
                         replyObject.values(SystemAttributes.OBJECT_CLASS).addAll(
                             ((DataproviderObject)modifyStates.get(0)).getValues(SystemAttributes.OBJECT_CLASS)
                         );
-                        */
+                             */
                     }
                 }
-                
+
                 if (isShowDBEnabled()) {
                     showDB(header, request, request.path());
                 }
             }
         }
-        
+
         if (!isStateful) {
             reply = super.remove(header,request);
         }
@@ -5587,52 +5515,52 @@ public abstract class AbstractState_1
     // Variables
     // --------------------------------------------------------------------------
     private Model_1_0 _model = null;
-    
+
     // reference paths leading to objects with state enabled
     private HashMap statefulReferencePaths = null;
     private Path[] disableHistoryReferencePatterns;
-    
+
     /**
      * longest path which is allowed before the search for stated path exits.
      * Only reference elements (not identifiers) are counted.
      */
     private static final int PATHLENGTH_THRESHOLD = 10; 
-    
+
     private static final int OP_SET_LIFETIME = 0;
     private static final int OP_UPDATE_NORMAL = 1;
     private static final int OP_REMOVE = 2;
     private static final int OP_CREATE = 3;
-        
+
     // undef is set to the operation Parameter if no other setting is present
     // for state=
     private static final String OP_STATE_UNDEF = "undef";
     private static final String OP_STATE_EXTENDED = ";"+ State_1_Attributes.OP_STATE + "=";
-        
+
     // for readability in calls to findStates()
     private static final boolean USE_REQUESTED_AT = true;
     private static final boolean OMIT_REQUESTED_AT = false;
-    
+
     private static final boolean EXCLUDE_STATE_AT_START = true;
     private static final boolean INCLUDE_STATE_AT_START = false;
 
     private static final boolean EXCLUDE_STATE_AT_END = true;
     private static final boolean INCLUDE_STATE_AT_END = false;
-    
+
     // need those in Standard
     protected static final String STATE_NUMBER = "object_stateNumber";
     protected static final String ID_ATTRIBUTE_NAME = "object_stateId";
-    
+
     private static final String AUTHORITY_TYPE_NAME = "org:openmdx:base:Authority";
     protected static final String STATE_TYPE_NAME = "org:openmdx:compatibility:state1:State";
     private static final String ROLE_TYPE_NAME = "org:openmdx:compatibility:role1:Role";
     private static final String VIEW_TYPE_NAME = "org:openmdx:compatibility:view1:View";
-    
+
     // earliest date can be used in some places for null start date
     private static final String EARLIEST_DATE = "0000";
-    
+
     // latest date can be used in some places for null end date
     private static final String LATEST_DATE = "9999";
-    
+
     // dummy string for identity search which shouldn't be found
     /**
      * Dummy strings for identity search, providing a minimal and a maximal 
@@ -5642,12 +5570,12 @@ public abstract class AbstractState_1
      */  
     private static final String IDENTITY_UNDERFLOW = "        ;underflow;State_1";
     private static final String IDENTITY_OVERFLOW = "~~~~~~~~;overflow;State_1";
-    
+
     private boolean defaultsToInitialState = false;
     private boolean enableDisjunctStateCreation = false;
     private boolean enableHolesInValidity = true;
     private boolean enableShowDB = false;
-    
+
     protected static final Path EXTENT_PATTERN = new Path(
         new String[]{":*","provider",":*","segment",":*","extent"}
     );
@@ -5667,7 +5595,7 @@ public abstract class AbstractState_1
     protected static final Pattern AT_FOR_PATTERN = Pattern.compile(
         "^[0-9]{8}+T[0-9]{6}\\.[0-9]{3}Z:[0-9]{8}+T[0-9]{6}\\.[0-9]{3}Z$"
     );
-    
+
     protected static final DateFormat DATE_TIME_FORMAT = DateFormat.getInstance();
 
     /**
@@ -5682,5 +5610,5 @@ public abstract class AbstractState_1
             LayerConfigurationEntries.INITIAL_STATE
         }
     );
-    
+
 }

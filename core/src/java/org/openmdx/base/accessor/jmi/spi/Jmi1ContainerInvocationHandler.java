@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.4 2008/06/24 16:17:21 hburger Exp $
+ * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.5 2008/09/18 12:12:48 hburger Exp $
  * Description: ContainerInvocationHandler 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/24 16:17:21 $
+ * Date:        $Date: 2008/09/18 12:12:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,6 +67,7 @@ import org.w3c.cci2.Container;
 /**
  * ContainerInvocationHandler
  */
+@SuppressWarnings("unchecked")
 public class Jmi1ContainerInvocationHandler
     implements InvocationHandler
 {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: IriMarshaller.java,v 1.2 2007/10/10 16:06:03 hburger Exp $
+ * Name:        $Id: IriMarshaller.java,v 1.3 2008/08/21 20:15:57 hburger Exp $
  * Description: Path/ObjectId Marshaller 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:03 $
+ * Date:        $Date: 2008/08/21 20:15:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,6 +53,7 @@ package org.openmdx.compatibility.base.naming;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.kernel.url.protocol.XriAuthorities;
 
 
 /**
@@ -123,7 +124,7 @@ public final class IriMarshaller
             charSequence.toString(
             ).replaceAll(
                 "@\\*openmdx",
-                "@openmdx"
+                XriAuthorities.OPENMDX_AUTHORITY
             ).replaceAll(
                 "/\\*",
                 "/"

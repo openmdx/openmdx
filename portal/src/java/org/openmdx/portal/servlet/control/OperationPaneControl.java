@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationPaneControl.java,v 1.75 2008/05/01 21:43:57 wfro Exp $
+ * Name:        $Id: OperationPaneControl.java,v 1.77 2008/08/21 21:51:17 wfro Exp $
  * Description: UiBasedOperationPaneControl class
- * Revision:    $Revision: 1.75 $
+ * Revision:    $Revision: 1.77 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:57 $
+ * Date:        $Date: 2008/08/21 21:51:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -259,7 +256,7 @@ public class OperationPaneControl
                                 stringifiedValue = valueHolder instanceof TextValue
                                 ? ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue
                                     : stringifiedValue;
-                                String widthModifier = v > 0 ? "" : "width=\"" + (100/nCols) + "%\"";                                    
+                                String widthModifier = "";                                    
                                 String readonlyModifier = valueHolder.isChangeable() ? "" : "readonly";
                                 String disabledModifier = valueHolder.isChangeable() ? "" : "disabled";                        
                                 String lockedModifier = valueHolder.isChangeable() ? "" : "Locked";
@@ -268,7 +265,7 @@ public class OperationPaneControl
                                 if(value instanceof ObjectReference) {
                                     Action selectAction = ((ObjectReference)value).getSelectObjectAction();
                                     Action selectAndEditAction = ((ObjectReference)value).getSelectAndEditObjectAction();
-                                    p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
+                                    p.write("<td class=\"label\"><span class=\"nw\">", label, ":</span></td>");
                                     p.write("<td class=\"valueL\" ", widthModifier, "><div class=\"field\" title=\"", selectAction.getToolTip(), "\"><a href=\"\"" + p.getOnClick("javascript:this.href=", p.getEvalHRef(selectAction), ";") + ">", selectAction.getTitle(), "</a> [<a href=\"\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(selectAndEditAction), ";") + ">", texts.getEditTitle(), "</a>]</div></td>");
                                 }
                                 // other types

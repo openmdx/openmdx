@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Duration.java,v 1.8 2006/08/11 09:24:08 hburger Exp $
+ * Name:        $Id: Duration.java,v 1.9 2008/09/10 08:55:25 hburger Exp $
  * Description: Duration class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:08 $
+ * Date:        $Date: 2008/09/10 08:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -118,95 +118,93 @@ public final class Duration {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("value", value),
-                },
-                "A duration must be specified in either months ('PnM') or ('PTn.uS')"
+                "A duration must be specified in either months ('PnM') or ('PTn.uS')",
+                new BasicException.Parameter("value", value)
             );
         }
     }
 
-  /**
-   * Create a duration specfied by a specific number of months
-   *
-   * @param months  The duration expressed in months
-   */
-  public Duration(
-    int months
-  ) {
-    this(months,0);
-  }
+    /**
+     * Create a duration specfied by a specific number of months
+     *
+     * @param months  The duration expressed in months
+     */
+    public Duration(
+        int months
+    ) {
+        this(months,0);
+    }
 
-  /**
-   * Create a duration specfied by a specific number of milliseconds
-   *
-   * @param milliseconds    The duration expressed in milliseconds
-   */
-  public Duration(
-    long milliseconds
-  ) {
-    this(0,milliseconds);
-  }
+    /**
+     * Create a duration specfied by a specific number of milliseconds
+     *
+     * @param milliseconds    The duration expressed in milliseconds
+     */
+    public Duration(
+        long milliseconds
+    ) {
+        this(0,milliseconds);
+    }
 
-  /**
-   * This constructor is private as a combination of months and milliseconds
-   * is not supported at the Moment
-   */
-  private Duration(
-    int months,
-    long milliseconds
-  ) {
-    this.months = months;
-    this.milliseconds = milliseconds;
-  }
- 
-  public int hashCode() {
-    int hash = (int)milliseconds;
-    return 31 * hash + months;
-  }
+    /**
+     * This constructor is private as a combination of months and milliseconds
+     * is not supported at the Moment
+     */
+    private Duration(
+        int months,
+        long milliseconds
+    ) {
+        this.months = months;
+        this.milliseconds = milliseconds;
+    }
 
-  public boolean equals(
-    Object object
-  ){
-    if (! (object instanceof Duration)) return false;
-    final Duration that = (Duration)object;
-    return 
+    public int hashCode() {
+        int hash = (int)milliseconds;
+        return 31 * hash + months;
+    }
+
+    public boolean equals(
+        Object object
+    ){
+        if (! (object instanceof Duration)) return false;
+        final Duration that = (Duration)object;
+        return 
         this.getMonths() == that.getMonths() && 
         this.getMilliseconds() == that.getMilliseconds();
-  }
+    }
 
-  public String toString(
-  ){
-    final CharSequence target = StringBuilders.newStringBuilder("P");
-    if(getMonths() != 0) StringBuilders.asStringBuilder(
-        target
-    ).append(
-        getMonths()
-    ).append(
-        'M'
-    ); 
-    if(getMilliseconds() != 0) StringBuilders.asStringBuilder(
-        target
-    ).append(
-        'T'
-    ).append(
-        getMilliseconds()
-    ).insert(
-        target.length()-3, '.'
-    ).append('S');
-    return target.toString();
-  }
-    
-  public long getMilliseconds(){
-    return this.milliseconds;
-  }
+    public String toString(
+    ){
+        final CharSequence target = StringBuilders.newStringBuilder("P");
+        if(getMonths() != 0) StringBuilders.asStringBuilder(
+            target
+        ).append(
+            getMonths()
+        ).append(
+            'M'
+        ); 
+        if(getMilliseconds() != 0) StringBuilders.asStringBuilder(
+            target
+        ).append(
+            'T'
+        ).append(
+            getMilliseconds()
+        ).insert(
+            target.length()-3, '.'
+        ).append('S');
+        return target.toString();
+    }
 
-  public long getMonths(){
-    return this.months;
-  }
-      
-  private final int months;
-  private final long milliseconds;
+    public long getMilliseconds(){
+        return this.milliseconds;
+    }
+
+    public long getMonths(){
+        return this.months;
+    }
+
+    private final int months;
+    private final long milliseconds;
 
 }
 

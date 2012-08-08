@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JMIAbstractMapper.java,v 1.14 2008/04/21 16:57:12 hburger Exp $
+ * Name:        $Id: JMIAbstractMapper.java,v 1.15 2008/09/09 14:20:00 hburger Exp $
  * Description: JMITemplate 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/21 16:57:12 $
+ * Date:        $Date: 2008/09/09 14:20:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -590,17 +590,15 @@ public abstract class JMIAbstractMapper
     //-----------------------------------------------------------------------
     private static final Set RESERVED_WORDS = new HashSet(
         Arrays.asList(
-            new String[]{
-                "abstract", "assert", "boolean", "break", "byte", "case", "catch", 
-                "char", "class", "const", "continue", "default", "do", "double", 
-                "else", "extends", "false", "final", "finally", "float", "for", 
-                "goto", "if", "implements", "import", "instanceof", "int", "interface", 
-                "long", "native", "new", "null", "package", "private", "protected", 
-                "public", "return", "short", "static", "strictfp", "super", "switch", 
-                "synchronized", "this", "throw", "throws", "transient", "true", "try", 
-                "void", "volatile", "while", "hashCode", "notify", "toString", "wait",
-                "notifyAll", "finalize", "clone"
-            }
+            "abstract", "assert", "boolean", "break", "byte", "case", "catch", 
+            "char", "class", "const", "continue", "default", "do", "double", 
+            "else", "extends", "false", "final", "finally", "float", "for", 
+            "goto", "if", "implements", "import", "instanceof", "int", "interface", 
+            "long", "native", "new", "null", "package", "private", "protected", 
+            "public", "return", "short", "static", "strictfp", "super", "switch", 
+            "synchronized", "this", "throw", "throws", "transient", "true", "try", 
+            "void", "volatile", "while", "hashCode", "notify", "toString", "wait",
+            "notifyAll", "finalize", "clone"
         )
     );
     

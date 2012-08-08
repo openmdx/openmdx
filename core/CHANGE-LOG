@@ -4,6 +4,185 @@
                     =====================================
 
 ==============================================================================
+Version 2.2.0+                                                      2008-09-20
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20015500
+      ServiceException & RuntimeServiceException Constructors      
+      BasicException.Parameter... arguments may be put at the end of the 
+      argument list.
+        
+      CR20013920
+      base & state2
+      
+      The following model classes have been added
+      * org::openmdx::base::Creatable 
+      * org::openmdx::base::Modifiable
+      * org::openmdx::base::Removable
+      * org::openmdx::base::Aspect 
+      * org::openmdx::state2::BasicState
+      * org::openmdx::state2::DateState
+      * org::openmdx::state2::DateTimeState
+      
+      CR20013920
+      Deployment_1
+      
+      The class org.openmdx.compatibility.base.application.cci.Deployment_1
+      simplifies JUnit set-up.
+           
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20016103
+      PersistenceManagerFactory
+      
+      The PersistenceManagerFactory shall keep week references only to its 
+      PersistenceManagers
+       
+      CR20013920
+      ObjectFactory 1 API
+      
+      The following method has been added to the object factory 1.1 API:
+      * Object_1_0 createAspect(
+          String objectClass,
+          Object_1_0 aspectCapable
+        ) throws ServiceException;
+      
+      CR20013920
+      JMI Context container
+      
+      contextCapable.refGetValue(SystemAttributes.CONTEXT_CAPABLE_CONTEXT)
+      
+2.1.  FIXED BUGS
+
+      CR20016202
+      XRI URL Handler
+      
+      Parse correctly according to the chapter "Relative XRI References" in
+      
+        OASIS
+        Extensible Resource Identifier (XRI) Syntax V2.0
+        Committee Specification, 14 November 2005
+        (http://docs.oasis-open.org/xri/V2.0)
+            
+      CR20015902
+      refRemove
+      
+      NullPointerException in case of non-existent entry.
+      
+      refRemove should silently return instead of throwing a NullPointerException.
+
+2.2.  DEPRECATED FEATURES
+
+      CR20013920
+      ObjectFactory 1 API
+      
+      The following Object Factory 1 methods have been deprecated and
+      throw a NOT_SUPPORTED ServiceException upon invocation:
+      * createObject() for views
+      * createObject() for roles
+
+2.3.  REMOVED FEATURES
+      
+      CR20013920
+      view1 & state1
+      
+      The following compatibility mode model packages have been removed:
+      * org::openmdx::compatibility::view1
+      * org::openmdx::compatibility::role1 
+      
+      CR20013920
+      Object Cloning
+      
+      * The class org.openmdx.base.accessor.jmi.spi.CloneObject_1 has been 
+        removed.
+      * The method refCloneObject has been removed from the RefPackage 1.2 API.
+        
+
+==============================================================================
+Version 2.2.0                                                       2008-09-10
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20015500
+      ServiceException & RuntimeServiceException Constructors
+      
+      BasicException.Paramter... arguments may be put at the end of the 
+      argument list.
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20015400
+      Optimize Path. Do not use String[].
+      
+      CR20015500
+      Minimize use of new Object[]. Minimize allocation of Object arrays.
+      
+      CR20015600
+      ObjectFactory_1_0.getUnitOfWork
+      
+      Change the behaviour when the object factory is closed.
+      
+      Throw an ILLEGAL_STATE ServiceException instead of returning null when 
+      the object factory is closed. 
+       
+      CR20014301
+      Read committed only 
+      
+      * Goal
+        The prefix '^' for Object_1_0's feature names excludes transient 
+        values from being returned.
+      * Implementation
+        Only commited values are visible to by Transactional Object 1.0 
+        implementations. 
+
+      20013949
+      Optimized EJB Remote Invocations 
+
+      * Strings and Numbers are no longer serialized and deserialized during
+        intra-VM remote method invocations.
+      * The byte arrays used for serialization and deserialization are
+        re-used on a thread basis. 
+      
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      
+      CR20015500
+      Dataprovider_1TracingBean
+      
+      The Dataprovider_1TracingBean has been deprecated because the Dataprovider_1Bean
+      logs requests and replies at the same level (the debug level, formerly known as
+      detail level)      
+
+2.3.  REMOVED FEATURES
+      
+      CR20015500
+      MappedRecordFormatter
+      
+      The deprecated class MappedRecordFormatter has been removed.
+
+      CR20015500
+      InProcessDeployment
+      
+      The deprecated class 
+      org.openmdx.kernel.application.client.InProcessDeployment has been removed.
+      
+      CR20015601
+      PersistenceCapable_1_1
+      
+      Unused interface 
+      org.openmdx.base.accessor.generic.spi.PersistenceCapable_1_1 removed.
+      
+
+==============================================================================
 Version 2.1.0                                                       2008-07-10
 ==============================================================================
 

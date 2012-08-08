@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ObjectFactory_1_1.java,v 1.3 2006/05/12 20:08:52 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ObjectFactory_1_1.java,v 1.7 2008/09/18 12:46:43 hburger Exp $
  * Description: SPICE Object Layer: Object Factory Interface
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/05/12 20:08:52 $
+ * Date:        $Date: 2008/09/18 12:46:43 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,45 +45,28 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.accessor.generic.cci;
 
 import org.openmdx.base.exception.ServiceException;
 
 /**
- * SPICE Object Layer: Object Factory Interface.
- * <p>
- * The object factory returns the same object for a given object id as long
- * as it is not garbage collected.
+ * Role support replaced by aspect support.
  * 
- * @since 1.3
+ * @since 2.2
  */
 public interface ObjectFactory_1_1 
     extends ObjectFactory_1_0
 {
 
     /**
-     * This method creates a new object with the initial values.
-     * <p>
-     * This method method and its org::openmdx::compatibility::role1 model
-     * are deprecated in favour of the org::openmdx::base::RoleCapable class
-     * and the $link{ObjectFactory_1_1#createObject(java.lang.String,
-     * java.lang.String,Object_1_0) createObject(String,String,Object_1_0)}
-     * method.
+     * This method is deprecated and will throw a NOT_SUPPORTED exception
      * 
-     * @see org.openmdx.compatibility.role1.cci.Role
-     */
-    Object_1_0 createObject(
-      String objectClass,
-      Object_1_0 initialValues
-    ) throws ServiceException;
-
-    /**
-     * This method creates a new role of a RoleCapable object.
+     * @deprecated
      * 
-     * @see org.openmdx.base.cci.RoleCapable
+     * @exception   ServiceException    NOT_SUPPORTED
      */
     Object_1_0 createObject(
       String roleClass,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractContainer.java,v 1.4 2008/01/08 16:16:31 hburger Exp $
+ * Name:        $Id: AbstractContainer.java,v 1.5 2008/09/04 06:49:13 hburger Exp $
  * Description: Abstract Container
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2008/09/04 06:49:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,16 +55,15 @@ import java.io.Serializable;
 import java.util.AbstractCollection;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.Container;
 
 
 /**
  * Abstract Container
  */
-
+@SuppressWarnings("deprecation")
 abstract class AbstractContainer<E>
     extends AbstractCollection<E>
-    implements Container<E>, Serializable
+    implements org.openmdx.compatibility.base.collection.Container<E>, Serializable
 
 
 

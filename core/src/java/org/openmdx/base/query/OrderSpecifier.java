@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OrderSpecifier.java,v 1.6 2008/04/25 23:34:30 wfro Exp $
+ * Name:        $Id: OrderSpecifier.java,v 1.7 2008/09/09 10:52:22 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 23:34:30 $
+ * Date:        $Date: 2008/09/09 10:52:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -101,10 +101,7 @@ public OrderSpecifier(
       return Records.getRecordFactory().asMappedRecord(
         getClass().getName(), 
         this.feature + ' ' + Orders.toString(this.order),
-        new String[]{
-          "feature",
-          "order"
-        }, 
+        TO_STRING_FIELDS,
         new Object[]{
           feature,
           Orders.toString(this.order)
@@ -121,5 +118,10 @@ public OrderSpecifier(
   private static final long serialVersionUID = 3258134635077645875L;
   private String feature;
   private short order;
+  private static final String[] TO_STRING_FIELDS = {
+      "feature",
+      "order"
+  };
+
   
 }

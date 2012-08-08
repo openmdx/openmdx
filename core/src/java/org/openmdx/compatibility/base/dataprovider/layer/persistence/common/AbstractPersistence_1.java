@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractPersistence_1.java,v 1.11 2008/06/28 00:21:27 hburger Exp $
+ * Name:        $Id: AbstractPersistence_1.java,v 1.12 2008/09/10 08:55:21 hburger Exp $
  * Description: Abstract persistence layer
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:27 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -85,7 +85,7 @@ import org.openmdx.kernel.exception.BasicException;
  */
 
 abstract public class AbstractPersistence_1
-  extends StreamOperationAwareLayer_1 
+extends StreamOperationAwareLayer_1 
 {
 
     /* (non-Javadoc)
@@ -112,9 +112,9 @@ abstract public class AbstractPersistence_1
             String pathname = value == null ? null : value.toString().trim();
             this.streamBufferDirectory = pathname == null || pathname.length() == 0 ? 
                 null :
-                new File(pathname);
+                    new File(pathname);
         }
-	    this.sequenceSupported = configuration.isOn(
+        this.sequenceSupported = configuration.isOn(
             SharedConfigurationEntries.SEQUENCE_SUPPORTED
         );
     }
@@ -133,12 +133,12 @@ abstract public class AbstractPersistence_1
      * The chunk size defines the large objects' buffer size
      */
     private int chunkSize;
-    
+
     /**
      * 
      */
     private File streamBufferDirectory;
-    
+
     /**
      * Remembers whether sequences should be supported.
      */
@@ -162,7 +162,7 @@ abstract public class AbstractPersistence_1
     protected int getChunkSize() {
         return this.chunkSize;
     }
-    
+
 
     /**
      * Retrieve streamBufferDirectory.
@@ -172,7 +172,7 @@ abstract public class AbstractPersistence_1
     protected File getStreamBufferDirectory() {
         return this.streamBufferDirectory;
     }
-    
+
 
     /**
      * Return an attribute's binary stream value
@@ -207,63 +207,57 @@ abstract public class AbstractPersistence_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("identitiy", objectPath),
-                    new BasicException.Parameter("feature", feature),
-                },
-                "Database should return an instance of InputStream"
+                "Database should return an instance of InputStream",
+                new BasicException.Parameter("identitiy", objectPath),
+                new BasicException.Parameter("feature", feature)
             );
         } 
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.OutputStream, long)
      */
-  	protected DataproviderObject getStreamOperation(
-	    ServiceHeader header,
-	    Path objectPath,
-	    String feature,
-	    OutputStream value, 
-	    long position, 
-	    Path replyPath
-  	) throws ServiceException {
-	    try {
-	        InputStream source = getBinaryStream(header, objectPath, feature);
-	        source.skip(position);
-	        byte[] buffer = new byte[this.chunkSize];
-	        long objectSize = position;
-	        int chunkSize;
-	        while((chunkSize = source.read(buffer)) > 0) {
-	            objectSize += chunkSize;
-	            value.write(buffer, 0, chunkSize);
-	        }
+    protected DataproviderObject getStreamOperation(
+        ServiceHeader header,
+        Path objectPath,
+        String feature,
+        OutputStream value, 
+        long position, 
+        Path replyPath
+    ) throws ServiceException {
+        try {
+            InputStream source = getBinaryStream(header, objectPath, feature);
+            source.skip(position);
+            byte[] buffer = new byte[this.chunkSize];
+            long objectSize = position;
+            int chunkSize;
+            while((chunkSize = source.read(buffer)) > 0) {
+                objectSize += chunkSize;
+                value.write(buffer, 0, chunkSize);
+            }
             value.flush();
-	        return createResponse(replyPath, objectSize);
-	    } catch (NullPointerException exception) {
-	        throw new ServiceException(
-	            exception,
-		        BasicException.Code.DEFAULT_DOMAIN,
-		        BasicException.Code.ASSERTION_FAILURE,
-		        new BasicException.Parameter[]{
-		            new BasicException.Parameter("identitiy", objectPath),
-		            new BasicException.Parameter("feature", feature),
-		        },
-		        "Binary content transfer failed"
-		    );
-	    } catch (IOException exception) {
-	        throw new ServiceException(
-	            exception,
-		        BasicException.Code.DEFAULT_DOMAIN,
-		        BasicException.Code.GENERIC,
-		        new BasicException.Parameter[]{
-		            new BasicException.Parameter("identitiy", objectPath),
-		            new BasicException.Parameter("feature", feature)
-		        },
-		        "Returning binary content failed"
-		    );
-	    }
-  	}
-  
+            return createResponse(replyPath, objectSize);
+        } catch (NullPointerException exception) {
+            throw new ServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "Binary content transfer failed",
+                new BasicException.Parameter("identitiy", objectPath),
+                new BasicException.Parameter("feature", feature)
+            );
+        } catch (IOException exception) {
+            throw new ServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.GENERIC,
+                "Returning binary content failed",
+                new BasicException.Parameter("identitiy", objectPath),
+                new BasicException.Parameter("feature", feature)
+            );
+        }
+    }
+
     /**
      * Return an attribute's character stream value
      * 
@@ -297,11 +291,9 @@ abstract public class AbstractPersistence_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("identitiy", objectPath),
-                    new BasicException.Parameter("feature", feature),
-                },
-                "Database should return an instance of Reader"
+                "Database should return an instance of Reader",
+                new BasicException.Parameter("identitiy", objectPath),
+                new BasicException.Parameter("feature", feature)
             );
         }
     }
@@ -309,48 +301,44 @@ abstract public class AbstractPersistence_1
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.Writer, long)
      */
-  	protected DataproviderObject getStreamOperation(
-  	    ServiceHeader header,
-  	    Path objectPath,
-  	    String feature,
-  	    Writer value, 
-  	    long position, Path replyPath
-  	) throws ServiceException {
-      	try {
-      	    Reader source = getCharacterStream(header, objectPath, feature);
-      	    source.skip(position);
-      	    char[] buffer = new char[this.chunkSize];
-      	    long objectSize = position;
-      	    int chunkSize;
-      	    while((chunkSize = source.read(buffer)) > 0) {
-      	        objectSize += chunkSize;
-      	        value.write(buffer, 0, chunkSize);
-      	    }
+    protected DataproviderObject getStreamOperation(
+        ServiceHeader header,
+        Path objectPath,
+        String feature,
+        Writer value, 
+        long position, Path replyPath
+    ) throws ServiceException {
+        try {
+            Reader source = getCharacterStream(header, objectPath, feature);
+            source.skip(position);
+            char[] buffer = new char[this.chunkSize];
+            long objectSize = position;
+            int chunkSize;
+            while((chunkSize = source.read(buffer)) > 0) {
+                objectSize += chunkSize;
+                value.write(buffer, 0, chunkSize);
+            }
             value.flush();
-	        return createResponse(replyPath, objectSize);
+            return createResponse(replyPath, objectSize);
         } catch (NullPointerException exception) {
             throw new ServiceException(
                 exception,
-    	        BasicException.Code.DEFAULT_DOMAIN,
-    	        BasicException.Code.ASSERTION_FAILURE,
-    	        new BasicException.Parameter[]{
-    	            new BasicException.Parameter("identitiy", objectPath),
-    	            new BasicException.Parameter("feature", feature),
-    	        },
-    	        "Character content transfer failed"
-    	    );
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "Character content transfer failed",
+                new BasicException.Parameter("identitiy", objectPath),
+                new BasicException.Parameter("feature", feature)
+            );
         } catch (IOException exception) {
             throw new ServiceException(
                 exception,
-    	        BasicException.Code.DEFAULT_DOMAIN,
-    	        BasicException.Code.GENERIC,
-    	        new BasicException.Parameter[]{
-    	            new BasicException.Parameter("identitiy", objectPath),
-    	            new BasicException.Parameter("feature", feature)
-    	        },
-    	        "Returning character content failed"
-    	    );
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.GENERIC,
+                "Returning character content failed",
+                new BasicException.Parameter("identitiy", objectPath),
+                new BasicException.Parameter("feature", feature)
+            );
         }
-  	}
+    }
 
 }

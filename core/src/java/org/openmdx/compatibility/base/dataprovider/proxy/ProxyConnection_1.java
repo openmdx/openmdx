@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ProxyConnection_1.java,v 1.7 2004/08/23 12:46:29 hburger Exp $
+ * Name:        $Id: ProxyConnection_1.java,v 1.8 2008/09/10 08:55:29 hburger Exp $
  * Description: ProxyConnection_1 class
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/08/23 12:46:29 $
+ * Date:        $Date: 2008/09/10 08:55:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,91 +69,89 @@ import org.openmdx.kernel.exception.BasicException;
  * requests to 'dataprovider'.
  */
 public class ProxyConnection_1
-  implements Dataprovider_1_1Connection {
+implements Dataprovider_1_1Connection {
 
-  public ProxyConnection_1(
-    Layer_1_0 layer,
-    Dataprovider_1_0 dataprovider
-  ) throws ServiceException {
+    public ProxyConnection_1(
+        Layer_1_0 layer,
+        Dataprovider_1_0 dataprovider
+    ) throws ServiceException {
 
-    try {
-      this.layer = layer;
-      Delegation_1 proxy = new Delegation_1();
-      proxy.activate(
-        DataproviderLayers.PERSISTENCE,
-        dataprovider
-      );
-      layer.activate(
-        DataproviderLayers.APPLICATION,
-        new Configuration(),
-        proxy
-      );
+        try {
+            this.layer = layer;
+            Delegation_1 proxy = new Delegation_1();
+            proxy.activate(
+                DataproviderLayers.PERSISTENCE,
+                dataprovider
+            );
+            layer.activate(
+                DataproviderLayers.APPLICATION,
+                new Configuration(),
+                proxy
+            );
+        }
+        catch(Exception e) {
+            throw new ServiceException(
+                e,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ACTIVATION_FAILURE,
+                "Establishment of dataprovider proxy connection failed"
+            );
+        }
     }
-    catch(Exception e) {
-      throw new ServiceException(
-        e,
-        BasicException.Code.DEFAULT_DOMAIN,
-        BasicException.Code.ACTIVATION_FAILURE,
-        null,
-        "Establishment of dataprovider proxy connection failed"
-      );
-    }
-  }
 
-  /**
-   * Process a set of working units
-   *
-   * @param header          the service header
-   * @param workingUnits    a collection of working units
-   *
-   * @return    a collection of working unit replies
-   */
-  public UnitOfWorkReply[] process(
-    ServiceHeader header,
-    UnitOfWorkRequest[] workingUnits
-  ){
-    return layer.process(header,workingUnits);
-  }
-
-  /* (non-Javadoc)
-   * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_0Connection#remove()
-   */
-  public void remove(
-  ) throws ServiceException {
-
-    try {
-      layer.deactivate();
+    /**
+     * Process a set of working units
+     *
+     * @param header          the service header
+     * @param workingUnits    a collection of working units
+     *
+     * @return    a collection of working unit replies
+     */
+    public UnitOfWorkReply[] process(
+        ServiceHeader header,
+        UnitOfWorkRequest[] workingUnits
+    ){
+        return layer.process(header,workingUnits);
     }
-    catch(Exception e) {
-      throw new ServiceException(
-        e,
-        BasicException.Code.DEFAULT_DOMAIN,
-        BasicException.Code.DEACTIVATION_FAILURE,
-        null,
-        "Removal of dataprovider proxy connection failed"
-      );
-    }
-  }
 
-  /* (non-Javadoc)
-   * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_0Connection#close()
-   */
-  public void close() {
-    try {
-      remove();
-    } catch (ServiceException e) {
-      throw new RuntimeServiceException(e);
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_0Connection#remove()
+     */
+    public void remove(
+    ) throws ServiceException {
+
+        try {
+            layer.deactivate();
+        }
+        catch(Exception e) {
+            throw new ServiceException(
+                e,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.DEACTIVATION_FAILURE,
+                "Removal of dataprovider proxy connection failed"
+            );
+        }
     }
-  }
-    
-  //------------------------------------------------------------------------
-  // Variables
-  //------------------------------------------------------------------------
-  
-  /**
-   *
-   */
-  private Layer_1_0 layer;
+
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_0Connection#close()
+     */
+    public void close() {
+        try {
+            remove();
+        } catch (ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }
+    }
+
+    //------------------------------------------------------------------------
+    // Variables
+    //------------------------------------------------------------------------
+
+    /**
+     *
+     */
+    private Layer_1_0 layer;
 
 }
 

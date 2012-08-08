@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectEventHandler.java,v 1.29 2008/05/31 23:40:08 wfro Exp $
+ * Name:        $Id: ShowObjectEventHandler.java,v 1.32 2008/09/17 12:06:39 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/31 23:40:08 $
+ * Date:        $Date: 2008/09/17 12:06:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.eventhandler;
 
@@ -370,36 +367,6 @@ public class ShowObjectEventHandler {
                 }
                 break;
     
-            case Action.EVENT_SELECT_GUI_MODE: {
-                try {
-                    String guiLookName = Action.getParameter(parameter, Action.PARAMETER_NAME);
-                    AppLog.trace("setting gui look", guiLookName);
-                    application.setCurrentGuiMode(guiLookName);
-                    nextView = new ShowObjectView(
-                        currentView.getId(),
-                        currentView.getContainerElementId(),
-                        currentView.getRefObject().refGetPath(),
-                        application,
-                        currentView.getHistoryActions(),
-                        currentView.getLookupType(),
-                        currentView.getRestrictToElements(),
-                        currentView.getControlFactory()
-                    );
-                    ShowObjectView view = (ShowObjectView) nextView;
-                    for (int i = 0; i < currentView.getReferencePane().length; i++) {
-                        view.getReferencePane()[i].selectReference(currentView.getReferencePane()[i].getSelectedReference());
-                    }
-                }
-                catch (Exception e) {
-                    ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
-                    application.addErrorMessage(
-                        application.getTexts().getErrorTextCannotSetLocale(),
-                        new String[] { parameter, e.getMessage() });
-                }
-                break;
-            }
-    
             case Action.EVENT_DELETE: {
                 try {
                     pm.currentTransaction().begin();
@@ -571,7 +538,7 @@ public class ShowObjectEventHandler {
                                     Arrays.asList(new Object[]{param})
                                 );
                                 pm.currentTransaction().commit();
-                                // Test whether object is still accessable. If not
+                                // Test whether object is still accessible. If not
                                 // go back to previous view. Notify other views about object update
                                 try {
                                     currentView.getRefObject().refRefresh();
@@ -822,7 +789,6 @@ public class ShowObjectEventHandler {
             (event == Action.EVENT_DELETE) ||
             (event == Action.EVENT_MULTI_DELETE) ||
             (event == Action.EVENT_INVOKE_OPERATION) ||
-            (event == Action.EVENT_SELECT_GUI_MODE) ||
             (event == Action.EVENT_MACRO) ||
             (event == Action.EVENT_OBJECT_GET_ATTRIBUTES) ||
             (event == Action.EVENT_SAVE_GRID);

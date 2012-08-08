@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PagePrologControl.java,v 1.25 2008/05/01 21:43:57 wfro Exp $
+ * Name:        $Id: PagePrologControl.java,v 1.26 2008/08/12 16:38:07 wfro Exp $
  * Description: PagePrologControl
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:57 $
+ * Date:        $Date: 2008/08/12 16:38:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,9 +53,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 

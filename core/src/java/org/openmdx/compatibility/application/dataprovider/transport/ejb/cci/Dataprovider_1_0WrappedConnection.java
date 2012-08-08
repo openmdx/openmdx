@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1_0WrappedConnection.java,v 1.1 2005/06/13 04:57:43 hburger Exp $
+ * Name:        $Id: Dataprovider_1_0WrappedConnection.java,v 1.2 2008/09/10 08:55:24 hburger Exp $
  * Description: Wrapped Dataprovider Local Connection
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/13 04:57:43 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,7 +67,7 @@ import org.openmdx.kernel.exception.BasicException;
  * Wrapped Dataprovider Local Connection
  */
 public class Dataprovider_1_0WrappedConnection
-    implements Dataprovider_1_1Connection
+implements Dataprovider_1_1Connection
 {
 
     /**
@@ -85,12 +85,12 @@ public class Dataprovider_1_0WrappedConnection
      * The wrapper EJB.
      */
     private DataproviderWrapper_1_0Local wrapper;
-    
+
     /**
      * The dataprovider.
      */
     private Dataprovider_1_0 processor;
-    
+
 
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0
@@ -111,7 +111,6 @@ public class Dataprovider_1_0WrappedConnection
         if(this.processor == null || this.wrapper == null) throw new RuntimeServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "Attempt to use removed dataprovider connection"
         );
         try {
@@ -121,7 +120,7 @@ public class Dataprovider_1_0WrappedConnection
         }
     }
 
-        
+
     //------------------------------------------------------------------------
     // Implements LifeCycleObject_1_0
     //------------------------------------------------------------------------
@@ -143,7 +142,6 @@ public class Dataprovider_1_0WrappedConnection
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.DEACTIVATION_FAILURE,
-                null,
                 "Failure during deactivation of dataprovider connection"
             );
         } finally {

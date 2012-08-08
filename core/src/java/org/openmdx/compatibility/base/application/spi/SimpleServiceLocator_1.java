@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SimpleServiceLocator_1.java,v 1.5 2008/03/21 18:45:22 hburger Exp $
+ * Name:        $Id: SimpleServiceLocator_1.java,v 1.6 2008/09/10 08:55:25 hburger Exp $
  * Description: SimpleServiceLocator_1 class 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:45:22 $
+ * Date:        $Date: 2008/09/10 08:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,7 +71,7 @@ import org.openmdx.kernel.naming.initial.ContextFactory;
  */
 @SuppressWarnings("unchecked")
 public class SimpleServiceLocator_1 
-    extends JndiServiceLocator_1 
+extends JndiServiceLocator_1 
 {
 
     /**
@@ -90,7 +90,6 @@ public class SimpleServiceLocator_1
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
-                null,
                 "Initial context creation failed"
             );
         }
@@ -109,7 +108,7 @@ public class SimpleServiceLocator_1
     ) throws ServiceException {
         super.bind(toJndiName(registrationId), object);
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.kernel.application.cci.ServiceLocator_1_0#listBindings(java.lang.String)
      */
@@ -118,7 +117,7 @@ public class SimpleServiceLocator_1
     ) throws ServiceException {
         return super.listBindings(toJndiName(registrationId));
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.kernel.application.cci.ServiceLocator_1_0#lookup(java.lang.String)
      */
@@ -127,7 +126,7 @@ public class SimpleServiceLocator_1
     ) throws ServiceException {
         return super.lookup(toJndiName(registrationId));
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.kernel.application.cci.ServiceLocator_1_0#unbind(java.lang.String)
      */
@@ -171,21 +170,21 @@ public class SimpleServiceLocator_1
     ){
         StringBuilder target = new StringBuilder(source);
         for (
-            int i = source.length();
-            (i = source.lastIndexOf(pattern,i-1)) >= 0;
+                int i = source.length();
+                (i = source.lastIndexOf(pattern,i-1)) >= 0;
         ){
             target.replace(i, i+pattern.length(), replacement);
         }
         return target.toString();
     }
-    
-	
+
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.kernel.application.spi.JndiServiceLocator_1#initialContext()
      */
     public Context initialContext(
     ){
-    	return this.initialContext;
+        return this.initialContext;
     }
 
     /**

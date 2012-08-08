@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: BooleanMarshaller.java,v 1.3 2007/05/11 23:31:28 wfro Exp $
+ * Name:        $Id: BooleanMarshaller.java,v 1.4 2008/09/10 08:55:19 hburger Exp $
  * Description: Boolean Marshaller 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/05/11 23:31:28 $
+ * Date:        $Date: 2008/09/10 08:55:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -82,7 +82,7 @@ public class BooleanMarshaller {
             sqlDataTypes
         );
     }
-    
+
     /**
      * Constructor 
      *
@@ -119,35 +119,33 @@ public class BooleanMarshaller {
         } 
         else if (LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER.equals(booleanType)) {
             return this.configuredBooleanFalse == null
-                ? "##false##"
+            ? "##false##"
                 : this.configuredBooleanFalse;
         } 
         else if(LayerConfigurationEntries.BOOLEAN_TYPE_NUMERIC.equals(booleanType)) {
             return this.configuredBooleanFalse == null
-                ? new Integer(0)
-                : Integer.valueOf(this.configuredBooleanFalse);
+            ? new Integer(0)
+            : Integer.valueOf(this.configuredBooleanFalse);
         } 
         else {
             throw new ServiceException(
                 StackedException.DEFAULT_DOMAIN,
                 StackedException.INVALID_CONFIGURATION, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "supported", 
-                        "[" +
-                            LayerConfigurationEntries.BOOLEAN_TYPE_BOOLEAN + ", " +
-                            LayerConfigurationEntries.BOOLEAN_TYPE_YN + ", " +
-                            LayerConfigurationEntries.BOOLEAN_TYPE_NUMERIC + ", " +
-                            LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER + 
-                        "]"
-                    ),    
-                    new BasicException.Parameter("requested", booleanType)
-                },
-                "Unsupported booleanType"
+                "Unsupported booleanType",
+                new BasicException.Parameter(
+                    "supported", 
+                    "[" +
+                    LayerConfigurationEntries.BOOLEAN_TYPE_BOOLEAN + ", " +
+                    LayerConfigurationEntries.BOOLEAN_TYPE_YN + ", " +
+                    LayerConfigurationEntries.BOOLEAN_TYPE_NUMERIC + ", " +
+                    LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER + 
+                    "]"
+                ),    
+                new BasicException.Parameter("requested", booleanType)
             );
         }
     }
-        
+
     /**
      * The value corresponding to Boolean.TRUE, e.g.<ul>
      * <li><code>true</code> <i>(fix in case of <code>booleanType BOOLEAN</code>
@@ -166,35 +164,33 @@ public class BooleanMarshaller {
         } 
         else if (LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER.equals(booleanType)) {
             return this.configuredBooleanTrue == null
-                ? "##true##"
+            ? "##true##"
                 : this.configuredBooleanTrue;
         } 
         else if(LayerConfigurationEntries.BOOLEAN_TYPE_NUMERIC.equals(booleanType)) {
             return this.configuredBooleanTrue == null
-                ? new Integer(1)
-                : Integer.valueOf(this.configuredBooleanTrue);
+            ? new Integer(1)
+            : Integer.valueOf(this.configuredBooleanTrue);
         } 
         else {
             throw new ServiceException(
                 StackedException.DEFAULT_DOMAIN,
                 StackedException.INVALID_CONFIGURATION, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "supported", 
-                        "[" +
-                            LayerConfigurationEntries.BOOLEAN_TYPE_BOOLEAN + ", " +
-                            LayerConfigurationEntries.BOOLEAN_TYPE_YN + ", " +
-                            LayerConfigurationEntries.BOOLEAN_TYPE_NUMERIC + ", " +
-                            LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER + 
-                        "]"
-                    ),    
-                    new BasicException.Parameter("requested", booleanType)
-                },
-                "Unsupported booleanType"
+                "Unsupported booleanType",
+                new BasicException.Parameter(
+                    "supported", 
+                    "[" +
+                    LayerConfigurationEntries.BOOLEAN_TYPE_BOOLEAN + ", " +
+                    LayerConfigurationEntries.BOOLEAN_TYPE_YN + ", " +
+                    LayerConfigurationEntries.BOOLEAN_TYPE_NUMERIC + ", " +
+                    LayerConfigurationEntries.BOOLEAN_TYPE_CHARACTER + 
+                    "]"
+                ),    
+                new BasicException.Parameter("requested", booleanType)
             );
         }        
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.marshalling.Marshaller#marshal(java.lang.Object)
      */
@@ -207,7 +203,7 @@ public class BooleanMarshaller {
         Object booleanTrue = this.getBooleanTrue(booleanType);
         return source instanceof Boolean ?
             (((Boolean)source).booleanValue() ? booleanTrue : booleanFalse) :
-            source;
+                source;
     }
 
     /* (non-Javadoc)
@@ -222,18 +218,18 @@ public class BooleanMarshaller {
         return source instanceof Boolean ? source : Boolean.valueOf(
             source instanceof Number && booleanTrue instanceof Number ?
                 ((Number)source).intValue() == ((Number)booleanTrue).intValue() :
-            source instanceof String && booleanTrue instanceof String ?
-                ((String)source).startsWith((String)booleanTrue) :
-            source instanceof String && booleanTrue instanceof Boolean ? 
-                ((String)source).startsWith("1") || ((String)source).startsWith(booleanTrue.toString()) :
-            ((String)source).startsWith(booleanTrue.toString())
+                    source instanceof String && booleanTrue instanceof String ?
+                        ((String)source).startsWith((String)booleanTrue) :
+                            source instanceof String && booleanTrue instanceof Boolean ? 
+                                ((String)source).startsWith("1") || ((String)source).startsWith(booleanTrue.toString()) :
+                                    ((String)source).startsWith(booleanTrue.toString())
         );
-                
+
     }
 
     //-----------------------------------------------------------------------
     private final DataTypes sqlDataTypes;
     private final String configuredBooleanFalse;
     private final String configuredBooleanTrue;
-        
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: IntegerMarshaller.java,v 1.9 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: IntegerMarshaller.java,v 1.10 2008/09/10 08:55:23 hburger Exp $
  * Description: IntegerMarshaller class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -92,11 +92,11 @@ public class IntegerMarshaller
             e,
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.TRANSFORMATION_FAILURE, 
+            "Could not marshal source to Integer",
             new BasicException.Parameter [] {
               new BasicException.Parameter("source", source),
               new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Could not marshal source to Integer"
+            }
         );
     }
   }
@@ -116,11 +116,11 @@ public class IntegerMarshaller
             e,
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.TRANSFORMATION_FAILURE, 
+            "Could not unmarshal Integer",
             new BasicException.Parameter [] {
               new BasicException.Parameter("source", source),
               new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Could not unmarshal Integer"
+            }
         );
     }
   }

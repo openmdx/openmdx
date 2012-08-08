@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RequestedObject.java,v 1.7 2008/03/21 18:45:25 hburger Exp $
+ * Name:        $Id: RequestedObject.java,v 1.8 2008/09/10 08:55:22 hburger Exp $
  * Description: spice: dataprovider object proxy
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:45:25 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,9 +66,9 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 public class RequestedObject
-    implements DataproviderReplyListener, Serializable, DataproviderObject_1_0
+implements DataproviderReplyListener, Serializable, DataproviderObject_1_0
 {
-        
+
     /**
      * 
      */
@@ -82,12 +82,11 @@ public class RequestedObject
         if (this.object == null) throw new RuntimeServiceException(
             this.exception == null ?
                 new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN, 
-                BasicException.Code.ILLEGAL_STATE,
-                    null,
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.ILLEGAL_STATE,
                     "The corresponding request has not been processed yet"
                 ) :
-                this.exception
+                    this.exception
         );
         return this.object;
     }
@@ -96,7 +95,7 @@ public class RequestedObject
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0
     //------------------------------------------------------------------------
-        
+
     /**
      * Returns the dataprovider object's path object.
      */
@@ -104,7 +103,7 @@ public class RequestedObject
     ){
         return getObject().path(); 
     }
-    
+
     /**
      * Returns the attribute value list.
      *
@@ -157,7 +156,7 @@ public class RequestedObject
     ){
         getObject().clear();
     }
-    
+
     /**
      * Get a set view of the dataprovider object's attribute names
      */
@@ -165,7 +164,7 @@ public class RequestedObject
     ){
         return getObject().attributeNames();
     }
-        
+
     /**
      * Checks whether the dataprovider object contains an attribute with the
      * given name.
@@ -192,7 +191,7 @@ public class RequestedObject
     ){
         getObject().setDigest(digest);
     }
-    
+
 
     //------------------------------------------------------------------------
     // Implements DataproviderReplyListener
@@ -207,7 +206,7 @@ public class RequestedObject
         this.object = reply.getObject();
         this.exception = null;
     }
-            
+
     /**
      * Called if the work unit processing failed
      */
@@ -218,7 +217,7 @@ public class RequestedObject
         this.exception = exception;
     }
 
-        
+
     //------------------------------------------------------------------------
     // Extends Object
     //------------------------------------------------------------------------
@@ -236,10 +235,10 @@ public class RequestedObject
     ){
         return this.object != null ? this.object.toString() :
             this.exception != null ? this.exception.toString() :
-            "n/a";
+                "n/a";
     }
 
-    
+
     //------------------------------------------------------------------------
     // Variables
     //------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection_2.java,v 1.5 2008/06/27 13:56:09 hburger Exp $
+ * Name:        $Id: Connection_2.java,v 1.6 2008/09/18 15:17:03 hburger Exp $
  * Description: PersistenceManager_2_0 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 13:56:09 $
+ * Date:        $Date: 2008/09/18 15:17:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -124,5 +124,16 @@ public abstract class Connection_2 implements PersistenceManager {
         }
         this.persistenceManagerFactory = null;
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#finalize()
+     */
+    @Override
+    protected void finalize(
+    ) throws Throwable {
+        close();
+    }
+    
+    
     
 }

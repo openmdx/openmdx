@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: JmiHelper.java,v 1.9 2008/03/25 23:20:21 hburger Exp $
+ * Name:        $Id: JmiHelper.java,v 1.10 2008/09/10 08:55:26 hburger Exp $
  * Description: JmiHelper class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/25 23:20:21 $
+ * Date:        $Date: 2008/09/10 08:55:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -108,15 +108,15 @@ public class JmiHelper {
             this.model = model;
             this.typeName = typeName;
         }
-    
+
         public Object marshal(
             Object source
         ) throws ServiceException {
             if(this.model.isClassType(this.typeName)) {
                 return source instanceof Path ? (
-                    this.objectCache.containsKey(source) 
+                        this.objectCache.containsKey(source) 
                         ? this.objectCache.get(source) 
-                        : this.pm.getObjectById(source)
+                            : this.pm.getObjectById(source)
                 ) : source;
             }
             else if(PrimitiveTypes.DATETIME.equals(this.typeName)) {
@@ -135,13 +135,13 @@ public class JmiHelper {
                 return source;
             }            
         }
-    
+
         public Object unmarshal(
             Object source
         ) throws ServiceException {
             throw new UnsupportedOperationException("Unmarshal is not supported");
         }
-        
+
         private final Map<Path,RefObject> objectCache;    
         private final PersistenceManager pm;
         private final Model_1_0 model;
@@ -156,15 +156,15 @@ public class JmiHelper {
         if(v1 == null) return v2 == null;
         if(v2 == null) return v1 == null;
         if(
-            (v1 instanceof Comparable) && 
-            (v2 instanceof Comparable) &&
-            (v1.getClass().equals(v2.getClass()))
+                (v1 instanceof Comparable) && 
+                (v2 instanceof Comparable) &&
+                (v1.getClass().equals(v2.getClass()))
         ) {
             return ((Comparable)v1).compareTo(v2) == 0;
         }
         return v1.equals(v2);
     }
-    
+
     //---------------------------------------------------------------------------
     @SuppressWarnings("cast")
     private static boolean setRefObjectValues(
@@ -182,8 +182,8 @@ public class JmiHelper {
                     ((List)targetValues).clear();
                 }
                 for(
-                    ListIterator j = sourceValues.listIterator();
-                    j.hasNext();
+                        ListIterator j = sourceValues.listIterator();
+                        j.hasNext();
                 ) {
                     if(j.nextIndex() < ((List)targetValues).size()) {
                         ((List)targetValues).set(
@@ -207,8 +207,8 @@ public class JmiHelper {
                     ((Set)targetValues).clear();
                 }
                 for(
-                    Iterator j = sourceValues.iterator();
-                    j.hasNext();
+                        Iterator j = sourceValues.iterator();
+                        j.hasNext();
                 ) {
                     ((Set)targetValues).add(
                         marshaller.marshal(j.next())
@@ -223,8 +223,8 @@ public class JmiHelper {
                     ((SparseArray)targetValues).clear();
                 }  
                 for(
-                    ListIterator j = sourceValues.populationIterator();
-                    j.hasNext();
+                        ListIterator j = sourceValues.populationIterator();
+                        j.hasNext();
                 ) {
                     ((SparseArray)targetValues).set(
                         j.nextIndex(),
@@ -238,10 +238,8 @@ public class JmiHelper {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("collection.type", targetValues.getClass().getName())
-                },
-                "Unsupported collection type"
+                "Unsupported collection type",
+                new BasicException.Parameter("collection.type", targetValues.getClass().getName())
             );
         }
         return modified;
@@ -262,7 +260,7 @@ public class JmiHelper {
         ModelElement_1_0 classDef = model.getElement(typeName);
         for(String featureName: (Set<String>)source.attributeNames()) {
             if(
-                SystemAttributes.OBJECT_CLASS.equals(featureName)
+                    SystemAttributes.OBJECT_CLASS.equals(featureName)
             ) {
                 continue;
             }
@@ -276,11 +274,9 @@ public class JmiHelper {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_MEMBER_NAME, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("class", classDef),
-                        new BasicException.Parameter("attribute name", featureName)
-                    },
-                    "attribute not found in class"
+                    "attribute not found in class",
+                    new BasicException.Parameter("class", classDef),
+                    new BasicException.Parameter("attribute name", featureName)
                 );
             }
             ModelElement_1_0 featureType = model.getDereferencedType(
@@ -340,17 +336,15 @@ public class JmiHelper {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("multiplicity", multiplicity),
-                        new BasicException.Parameter("attribute name", featureName)
-                    },
-                    "Stream value not supported."
+                    "Stream value not supported.",
+                    new BasicException.Parameter("multiplicity", multiplicity),
+                    new BasicException.Parameter("attribute name", featureName)
                 );        
             }
             // LIST
             else if(
-                Multiplicities.MULTI_VALUE.equals(multiplicity) || 
-                Multiplicities.LIST.equals(multiplicity)
+                    Multiplicities.MULTI_VALUE.equals(multiplicity) || 
+                    Multiplicities.LIST.equals(multiplicity)
             ) {
                 List targetValues = (List)target.refGetValue(featureName);
                 modified |= setRefObjectValues(
@@ -390,11 +384,9 @@ public class JmiHelper {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("multiplicity", multiplicity),
-                        new BasicException.Parameter("attribute name", featureName)
-                    },
-                    "Unsupported multiplicity. Supported are [0..1|1..1|0..n|list|set|sparsearray]"
+                    "Unsupported multiplicity. Supported are [0..1|1..1|0..n|list|set|sparsearray]",
+                    new BasicException.Parameter("multiplicity", multiplicity),
+                    new BasicException.Parameter("attribute name", featureName)
                 );        
             }
         }

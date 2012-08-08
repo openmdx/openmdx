@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ObjectFactory_1_4.java,v 1.2 2007/11/28 13:28:48 hburger Exp $
+ * Name:        $Id: ObjectFactory_1_4.java,v 1.3 2008/09/03 17:28:41 hburger Exp $
  * Description: ObjectFactory_1_4 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/28 13:28:48 $
+ * Date:        $Date: 2008/09/03 17:28:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,5 +58,5 @@ import org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0;
 public interface ObjectFactory_1_4 
     extends ObjectFactory_1_3, ModelHolder_1_0 
 {
-    //
+    // The methods are declared in the super-classes
 }

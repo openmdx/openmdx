@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractTestStateWithHoles_1.jt,v 1.11 2007/12/17 18:33:39 hburger Exp $
+ * Name:        $Id: AbstractTestStateWithHoles_1.jt,v 1.12 2008/09/10 18:10:57 hburger Exp $
  * Description: TestState_1 junit class
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/17 18:33:39 $
+ * Date:        $Date: 2008/09/10 18:10:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -1310,8 +1310,6 @@ public abstract class AbstractTestStateWithHoles_1
                 !SystemAttributes.CREATED_AT.equals(attributeName) &&
                 !SystemAttributes.CREATED_AT.equals(attributeName) &&
                 !SystemAttributes.MODIFIED_AT.equals(attributeName) &&
-                !"roleType".equals(attributeName) &&
-                !attributeName.startsWith(SystemAttributes.VIEW_PREFIX) &&
                 !attributeName.startsWith(SystemAttributes.CONTEXT_PREFIX) &&
                 !attributeName.startsWith(SystemAttributes.OBJECT_IDENTITY) 
 //SOID                 && !attributeName.equals(State_1_Attributes.UNDERLYING_STATE)
@@ -4500,7 +4498,6 @@ System.out.println("createdAt: " + nonStated.getCreatedAt());
         ex = new ServiceException(
           StackedException.DEFAULT_DOMAIN, 
           StackedException.NOT_FOUND, 
-          null, 
           null
         );
         result = (DataproviderObject_1_0) executeOperation(
@@ -4694,7 +4691,7 @@ System.out.println("createdAt: " + nonStated.getCreatedAt());
       result = (DataproviderObject_1_0) executeOperation("get IdOne 2", getOperation, work, null, "01.01.2001", null);       
       checkResult(result, "State 1", new String[] { "firstVal" }, "01.01.2001", null);
       
-      ex = new ServiceException(StackedException.DEFAULT_DOMAIN, StackedException.NOT_FOUND, null, null);
+      ex = new ServiceException(StackedException.DEFAULT_DOMAIN, StackedException.NOT_FOUND, null);
       result = (DataproviderObject_1_0) executeOperation("get IdOne 3", getOperation, work, null, "31.12.2000", ex);       
       
       

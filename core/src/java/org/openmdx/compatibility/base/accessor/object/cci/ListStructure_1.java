@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ListStructure_1.java,v 1.8 2008/03/21 18:44:51 hburger Exp $
+ * Name:        $Id: ListStructure_1.java,v 1.9 2008/09/10 08:55:27 hburger Exp $
  * Description: SPICE Structure_1_0 standard implementation
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:44:51 $
+ * Date:        $Date: 2008/09/10 08:55:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,81 +61,79 @@ import org.openmdx.kernel.exception.BasicException;
 
 @SuppressWarnings("unchecked")
 public class ListStructure_1
-  implements Structure_1_0 {
+implements Structure_1_0 {
 
-  /**
-   * Constructor
-   *
-   * @param structureClass
-   *        The model class of the structure to be created
-   * @param fieldNames
-   *        the structure's field names
-   * @param values
-   *        the structure's values
-   *
-   * @exception NullPointerException
-   *            if either of the arguments is null
-   */
-  public ListStructure_1(
-    String structureType,
-    List fieldNames,
-    List values
-  ){
-    this.structureType = structureType;
-    this.fieldNames = Collections.unmodifiableList(fieldNames);
-    this.values = values;
-  }
+    /**
+     * Constructor
+     *
+     * @param structureClass
+     *        The model class of the structure to be created
+     * @param fieldNames
+     *        the structure's field names
+     * @param values
+     *        the structure's values
+     *
+     * @exception NullPointerException
+     *            if either of the arguments is null
+     */
+    public ListStructure_1(
+        String structureType,
+        List fieldNames,
+        List values
+    ){
+        this.structureType = structureType;
+        this.fieldNames = Collections.unmodifiableList(fieldNames);
+        this.values = values;
+    }
 
-  /**
-   * Constructor
-   *
-   * @param structureClass
-   *        The model class of the structure to be created
-   * @param fieldNames
-   *        the structure's field names
-   * @param values
-   *        the structure's values
-   *
-   * @exception ServiceException BAD_PARAMETER
-   *            if (fieldNames.length != values.length)
-   * @exception NullPointerException
-   *            if either of the arguments is null
-   */
-  public ListStructure_1(
-    String structureClass,
-    String[] fieldNames,
-    Object[] values
-  ) throws ServiceException {
-    this(
-      structureClass,
-      Arrays.asList(fieldNames),
-      Arrays.asList(values)
-    );
-    if(fieldNames.length != values.length) throw new ServiceException(
-    BasicException.Code.DEFAULT_DOMAIN, 
-    BasicException.Code.BAD_SEQUENCE_LENGTH,
-      new BasicException.Parameter[]{
-        new BasicException.Parameter("fieldNames", fieldNames.length),
-        new BasicException.Parameter("values", values.length)
-      },
-      "The lengths of fieldNames and values do not match"
-    );  
-  }
-  
+    /**
+     * Constructor
+     *
+     * @param structureClass
+     *        The model class of the structure to be created
+     * @param fieldNames
+     *        the structure's field names
+     * @param values
+     *        the structure's values
+     *
+     * @exception ServiceException BAD_PARAMETER
+     *            if (fieldNames.length != values.length)
+     * @exception NullPointerException
+     *            if either of the arguments is null
+     */
+    public ListStructure_1(
+        String structureClass,
+        String[] fieldNames,
+        Object[] values
+    ) throws ServiceException {
+        this(
+            structureClass,
+            Arrays.asList(fieldNames),
+            Arrays.asList(values)
+        );
+        if(fieldNames.length != values.length) throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN, 
+            BasicException.Code.BAD_SEQUENCE_LENGTH,
+            "The lengths of fieldNames and values do not match",
+            new BasicException.Parameter("fieldNames", fieldNames.length),
+            new BasicException.Parameter("values", values.length)
+        );  
+    }
 
-  //--------------------------------------------------------------------------
-  // Implements Structure_1_0
-  //--------------------------------------------------------------------------
 
-  /**
-   * Returns the object's model class.
-   *
-   * @return    the object's model class
-   */
-  public String objGetType(
-  ){
-    return this.structureType;
-  }
+    //--------------------------------------------------------------------------
+    // Implements Structure_1_0
+    //--------------------------------------------------------------------------
+
+    /**
+     * Returns the object's model class.
+     *
+     * @return    the object's model class
+     */
+    public String objGetType(
+    ){
+        return this.structureType;
+    }
 
     /**
      * Return the field names in this structure.
@@ -144,62 +142,60 @@ public class ListStructure_1
      */
     public List objFieldNames(
     ){
-      return this.fieldNames;
-  }
-   
-  /**
-   * Get a field.
-   *
-   * @param       field
-   *              the fields's name
-   *
-   * @return      the fields value which may be null.
-   *
-   * @exception   ServiceException BAD_PARAMETER
-   *              if the structure has no such field
-   */
-  public Object objGetValue(
-      String feature
-  ) throws ServiceException {
-    int index = this.fieldNames.indexOf(feature);
-    if(index == -1) throw new ServiceException(
-      BasicException.Code.DEFAULT_DOMAIN, 
-      BasicException.Code.BAD_MEMBER_NAME,
-      new BasicException.Parameter[]{
-        new BasicException.Parameter("feature", feature)
-      },
-      "This structure has no such field"
-    );
-    return this.values.get(index);
-  }
+        return this.fieldNames;
+    }
 
-  //--------------------------------------------------------------------------
-  // Object
-  //--------------------------------------------------------------------------
-  public String toString(
-  ) {
-    return
-      "[structureType=" + this.structureType + ", " +
-      "content=" + values.toString() + "]";
-  }
-  
-  //--------------------------------------------------------------------------
-  // Instance Members
-  //--------------------------------------------------------------------------
+    /**
+     * Get a field.
+     *
+     * @param       field
+     *              the fields's name
+     *
+     * @return      the fields value which may be null.
+     *
+     * @exception   ServiceException BAD_PARAMETER
+     *              if the structure has no such field
+     */
+    public Object objGetValue(
+        String feature
+    ) throws ServiceException {
+        int index = this.fieldNames.indexOf(feature);
+        if(index == -1) throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN, 
+            BasicException.Code.BAD_MEMBER_NAME,
+            "This structure has no such field",
+            new BasicException.Parameter("feature", feature)
+        );
+        return this.values.get(index);
+    }
 
-  /**
-   * The structure's model class
-   */
-  private final String structureType;
-  
-  /**
-   * The structure's values.
-   */
-  protected final List values;
+    //--------------------------------------------------------------------------
+    // Object
+    //--------------------------------------------------------------------------
+    public String toString(
+    ) {
+        return
+        "[structureType=" + this.structureType + ", " +
+        "content=" + values.toString() + "]";
+    }
 
-  /**
-   * The structure's field names.
-   */  
-  private final List fieldNames;
-  
+    //--------------------------------------------------------------------------
+    // Instance Members
+    //--------------------------------------------------------------------------
+
+    /**
+     * The structure's model class
+     */
+    private final String structureType;
+
+    /**
+     * The structure's values.
+     */
+    protected final List values;
+
+    /**
+     * The structure's field names.
+     */  
+    private final List fieldNames;
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DurationMarshaller.java,v 1.14 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: DurationMarshaller.java,v 1.15 2008/09/10 08:55:23 hburger Exp $
  * Description: DurationMarshaller class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -99,11 +99,11 @@ public class DurationMarshaller
             e,
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.TRANSFORMATION_FAILURE,
+            "exception parsing duration",
             new BasicException.Parameter [] {
               new BasicException.Parameter("source", source),
               new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "exception parsing duration"
+            }
         );
       }
     }
@@ -115,11 +115,11 @@ public class DurationMarshaller
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.TRANSFORMATION_FAILURE,
+            "Can only unmarshal objects of type " + Duration.class.getName(),
             new BasicException.Parameter [] {
               new BasicException.Parameter("source", source),
               new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Can only unmarshal objects of type " + Duration.class.getName()
+            }
         );
       }
     }

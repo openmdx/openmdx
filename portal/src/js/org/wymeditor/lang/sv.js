@@ -1,6 +1,4 @@
-﻿if(!WYM_STRINGS) var WYM_STRINGS = new Array();
-
-var WYM_STRINGS_SV = {
+WYMeditor.STRINGS['sv'] = {
     Strong:           'Viktigt',
     Emphasis:         'Betoning',
     Superscript:      'Upphöjt',
@@ -44,4 +42,3 @@ var WYM_STRINGS_SV = {
     Source_Code:      'Källkod'
 };
 
-WYM_STRINGS['sv'] = WYM_STRINGS_SV;

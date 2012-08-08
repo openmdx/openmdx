@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Object_1_0.java,v 1.7 2008/05/27 16:52:29 hburger Exp $
+ * Name:        $Id: Object_1_0.java,v 1.8 2008/09/10 08:55:28 hburger Exp $
  * Description: SPICE Basic Accessor Object interface
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/27 16:52:29 $
+ * Date:        $Date: 2008/09/10 08:55:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -97,7 +97,7 @@ public interface Object_1_0 extends PersistenceCapable_1_0 {
      */
     void objAddToUnitOfWork(
     ) throws ServiceException;
-     
+
     /**
      * After this call the object ignores unit of work boundaries.
      * <p>

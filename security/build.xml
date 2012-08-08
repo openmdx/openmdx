@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.46 2008/02/12 18:03:27 wfro Exp $
+= Name:        $Id: build.xml,v 1.47 2008/09/19 22:30:01 wfro Exp $
 = Description: openMDX/Security Ant Build File
-= Revision:    $Revision: 1.46 $
-= Date:        $Date: 2008/02/12 18:03:27 $
+= Revision:    $Revision: 1.47 $
+= Date:        $Date: 2008/09/19 22:30:01 $
 = Copyright:   (c) 2003-2005 OMEX AG
 =======================================================================
  *
@@ -213,7 +213,6 @@
 			<openmdx:archivemanifest>
 				<attribute name="Specification-Title" value="${project.specification.title} Library security"/>
 				<attribute name="Implementation-Title" value="openmdx-security for ${build.target.platform}"/>
-				<attribute name="Class-Path" value="openmdx-base.jar"/>
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
 				<patternset refid="openmdx-security.jar.content"/>

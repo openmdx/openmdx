@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsEventHandler.java,v 1.16 2008/05/31 23:40:07 wfro Exp $
+ * Name:        $Id: FindObjectsEventHandler.java,v 1.18 2008/09/11 10:50:16 hburger Exp $
  * Description: FindObjectsEventHandler 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/31 23:40:07 $
+ * Date:        $Date: 2008/09/11 10:50:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.eventhandler;
 
@@ -144,7 +141,7 @@ public class FindObjectsEventHandler {
                         Quantors.THERE_EXISTS,
                         SystemAttributes.OBJECT_INSTANCE_OF,
                         FilterOperators.IS_IN,
-                        new String[]{filterByType}
+                        filterByType
                     )
                 );                
             }
@@ -169,9 +166,8 @@ public class FindObjectsEventHandler {
                                 Quantors.THERE_EXISTS,
                                 filterByFeature,
                                 filterOperator,
-                                filterFeatureIsNumeric
-                                    ? new Object[]{new Integer(filterValue)}
-                                    : new Object[]{(filterOperator == FilterOperators.IS_LIKE ? "(?i)%" + filterValue + "%": filterValue)}
+                                filterFeatureIsNumeric ? Integer.valueOf(filterValue) :
+                                filterOperator == FilterOperators.IS_LIKE ? "(?i)%" + filterValue + "%": filterValue
                             )
                         );
                     }

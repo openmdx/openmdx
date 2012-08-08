@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UUIDFormatter.java,v 1.7 2008/01/08 16:16:31 hburger Exp $
+ * Name:        $Id: UUIDFormatter.java,v 1.8 2008/09/09 14:20:01 hburger Exp $
  * Description: UUID Formatter
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2008/09/09 14:20:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,11 +51,11 @@
  */
 package org.openmdx.base.text.format;
 
-import org.openmdx.kernel.collection.ArraysExtension;
-import org.openmdx.kernel.text.format.IndentingFormatter;
-
-
 import java.util.UUID;
+
+import javax.resource.ResourceException;
+
+import org.openmdx.base.resource.Records;
 
 
 
@@ -64,11 +64,6 @@ import java.util.UUID;
  * UUID Formatter
  */
 public class UUIDFormatter {
-
-    /**
-     * 
-     */
-    private final UUID uuid;
 
     /**
      * Constructor
@@ -82,41 +77,59 @@ public class UUIDFormatter {
     }
 
     /**
+     * 
+     */
+    private final UUID uuid;
+
+    /**
+     * 
+     */
+    private static final String[] TIME_BASED_FIELDS = {
+        "variant",
+        "version",
+        "node",
+        "clockSequence",
+        "timestamp"
+    };
+    
+    /**
+     * 
+     */
+    private static final String[] COMMON_FIELDS = {
+        "variant",
+        "version"
+    };
+    
+    /**
      * Returns a string representation of the byte buffer
      *
      * @return  a String
      */
     public String toString()
     {
-        if(this.uuid == null) return null;
+        if(this.uuid == null) {
+            return null;
+        }
         boolean timeBased = this.uuid.version() == 1;
-        return this.uuid.getClass().getName() + " (" + this.uuid + "): " + IndentingFormatter.toString(
-                timeBased ? ArraysExtension.asMap(
-                new String[]{
-                    "variant",
-                    "version",
-                    "node",
-                    "clockSequence",
-                    "timestamp"
-                 },
-                 new Object[]{
-                    new Integer(this.uuid.variant()),
-                    new Integer(this.uuid.version()),
-                    new Long(this.uuid.node()),
-                    new Integer(this.uuid.clockSequence()),
-                    new Long(this.uuid.timestamp())
+        try {
+            return Records.getRecordFactory().asMappedRecord(
+                this.uuid.getClass().getName(), // recordName, 
+                this.uuid.toString(), // recordShortDescription, 
+                timeBased ? TIME_BASED_FIELDS : COMMON_FIELDS, 
+                timeBased ? new Object[]{
+                    Integer.valueOf(this.uuid.variant()),
+                    Integer.valueOf(this.uuid.version()),
+                    Long.valueOf(this.uuid.node()),
+                    Integer.valueOf(this.uuid.clockSequence()),
+                    Long.valueOf(this.uuid.timestamp())
+                 } : new Object[]{
+                        Integer.valueOf(this.uuid.variant()),
+                        Integer.valueOf(this.uuid.version()),
                  }
-            ) : ArraysExtension.asMap(
-                new String[]{
-                    "variant",
-                    "version"
-                },
-                                new Object[]{
-                    new Integer(this.uuid.variant()),
-                    new Integer(this.uuid.version())
-                }
-                )
-        );
+            ).toString();
+        } catch (ResourceException exception) {
+            return this.uuid.toString();
+        }
     }
 
 }

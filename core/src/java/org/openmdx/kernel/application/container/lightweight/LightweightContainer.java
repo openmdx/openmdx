@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightContainer.java,v 1.81 2008/05/05 17:51:20 hburger Exp $
+ * Name:        $Id: LightweightContainer.java,v 1.82 2008/09/10 08:55:27 hburger Exp $
  * Description: Lightweight Container
- * Revision:    $Revision: 1.81 $
+ * Revision:    $Revision: 1.82 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/05 17:51:20 $
+ * Date:        $Date: 2008/09/10 08:55:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -256,8 +256,8 @@ public class LightweightContainer {
             // Auto-Deploy Connectors 
             //
             for(
-                Iterator<String> i = getUrls(DeploymentProperties.CONNECTOR_URLS).iterator();
-                i.hasNext();
+                    Iterator<String> i = getUrls(DeploymentProperties.CONNECTOR_URLS).iterator();
+                    i.hasNext();
             ){
                 String url = i.next();
                 logger.info("Auto-deploying connector {}", url);
@@ -272,8 +272,8 @@ public class LightweightContainer {
             // Auto-Deploy Applications
             //
             for(
-                Iterator<String> i = getUrls(DeploymentProperties.APPLICATION_URLS).iterator();
-                i.hasNext();
+                    Iterator<String> i = getUrls(DeploymentProperties.APPLICATION_URLS).iterator();
+                    i.hasNext();
             ){
                 String url = i.next();
                 logger.info("Auto-deploying application {}", url);
@@ -438,8 +438,8 @@ public class LightweightContainer {
         String urlString = System.getProperty(systemProperty);
         List<String> urlList = new ArrayList<String>();
         if(urlString != null) for (
-            StringTokenizer urlTokens = new StringTokenizer(urlString);
-            urlTokens.hasMoreTokens();
+                StringTokenizer urlTokens = new StringTokenizer(urlString);
+                urlTokens.hasMoreTokens();
         ){
             String url = urlTokens.nextToken();
             if(url.length() > 0) urlList.add(url);
@@ -495,7 +495,7 @@ public class LightweightContainer {
             logger.warn(
                 "LightweightContainer.getInstance() in order to acquire an instance is deprecated. " +
                 "Use getInstance(Mode.ENTERPRISE_APPLICATION_CONTAINER) instead"
-             );
+            );
             return getInstance(Mode.ENTERPRISE_APPLICATION_CONTAINER);
         }
     }
@@ -746,8 +746,8 @@ public class LightweightContainer {
                 ClassLoadertContextFactory.getEnvironment(applicationClassLoader, uri)
             );
             for (
-                Iterator<Deployment.Module> i = application.getModules().iterator();
-                i.hasNext();
+                    Iterator<Deployment.Module> i = application.getModules().iterator();
+                    i.hasNext();
             ) {
                 deploy(
                     uri,
@@ -764,8 +764,8 @@ public class LightweightContainer {
         }
         int successCount=0,failureCount=0;
         for(
-            Iterator<Report> i = reports.listIterator(1);
-            i.hasNext();
+                Iterator<Report> i = reports.listIterator(1);
+                i.hasNext();
         ){
             if(i.next().isSuccess()){
                 successCount++;
@@ -838,9 +838,9 @@ public class LightweightContainer {
                 LightweightClassLoader moduleClassLoader = LightweightClassLoader.newInstance(
                     report.getName(),
                     moduleClassPath.length == 0 ? "" : moduleClassPath[0].toString(),
-                    applicationClassLoader,
-                    moduleClassPath,
-                    report
+                        applicationClassLoader,
+                        moduleClassPath,
+                        report
                 );
                 if (module instanceof Deployment.Connector) {
                     deploy(
@@ -883,8 +883,8 @@ public class LightweightContainer {
                     }
                 } else {
                     for(
-                        Iterator<?> i = module.getComponents().iterator();
-                        i.hasNext();
+                            Iterator<?> i = module.getComponents().iterator();
+                            i.hasNext();
                     ) {
                         deploy(
                             applicationClassLoader,
@@ -933,8 +933,8 @@ public class LightweightContainer {
             );
             Context componentContext = this.componentContextFactory.getInitialContext(
                 ClassLoadertContextFactory.getEnvironment(
-                   componentClassLoader,
-                   componentURI
+                    componentClassLoader,
+                    componentURI
                 )
             );
             if(component instanceof Deployment.Bean){
@@ -1004,7 +1004,7 @@ public class LightweightContainer {
             report.addError(
                 "WebApplicatoion URI could not be determined",
                 exception
-             );
+            );
             return;
         }
         URL webApplicationURL = webApplicationURI.toURL();
@@ -1014,7 +1014,7 @@ public class LightweightContainer {
             //
             // Web Application Staging
             // 
-            
+
             String moduleURI = webApplication.getModuleURI();
             webApplicationFile = new File(
                 stagingDirectory,
@@ -1028,17 +1028,17 @@ public class LightweightContainer {
             URLConnection connection = webApplicationURL.openConnection();
             long sourceModification = connection.getLastModified();
             if(
-                sourceModification == 0L || // source time stamp unknown  
-                webApplicationFile.lastModified() < sourceModification // target is newer
+                    sourceModification == 0L || // source time stamp unknown  
+                    webApplicationFile.lastModified() < sourceModification // target is newer
             ) {
                 report.addInfo("Staging " + webApplicationURI + ": " + webApplicationFile.getAbsolutePath());
                 InputStream input = connection.getInputStream();
                 OutputStream output = new FileOutputStream(webApplicationFile);
                 byte[] buffer = new byte[0x10000];
                 for(
-                    int i = input.read(buffer);
-                    i >= 0;
-                    i = input.read(buffer)
+                        int i = input.read(buffer);
+                        i >= 0;
+                        i = input.read(buffer)
                 ){
                     output.write(buffer, 0, i);
                 }
@@ -1050,7 +1050,7 @@ public class LightweightContainer {
                 }
             } else {
                 report.addInfo("Keeping " + webApplicationURI + ": " + webApplicationFile.getAbsolutePath());
-                
+
             }
         }
         {
@@ -1068,8 +1068,8 @@ public class LightweightContainer {
                 sourceModification = fragmentModification;
             }
             if(
-                sourceModification == 0L || // source time stamp unknown  
-                contextFile.lastModified() < sourceModification // target is newer
+                    sourceModification == 0L || // source time stamp unknown  
+                    contextFile.lastModified() < sourceModification // target is newer
             ) {
                 report.addInfo("Staging " + webApplicationFile + " context: " + contextFile.getAbsolutePath());
                 OutputStream output = new FileOutputStream(contextFile);
@@ -1102,9 +1102,9 @@ public class LightweightContainer {
                     contextWriter.write("<!--source=\"" + VerifyingDeploymentManager.TOMCAT_WEB_XML + "\"-->\n");
                     contextWriter.flush();
                     for(
-                        int i = input.read(buffer);
-                        i >= 0;
-                        i = input.read(buffer)
+                            int i = input.read(buffer);
+                            i >= 0;
+                            i = input.read(buffer)
                     ){
                         output.write(buffer, 0, i);
                     }
@@ -1211,11 +1211,9 @@ public class LightweightContainer {
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_IMPLEMENTED,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("class",sessionBean.getEjbClass()),
-                        new BasicException.Parameter("method","ejbCreate")
-                    },
-                    "Bean class lacks ejbCreate method"
+                    "Bean class lacks ejbCreate method",
+                    new BasicException.Parameter("class",sessionBean.getEjbClass()),
+                    new BasicException.Parameter("method","ejbCreate")
                 )
             );
             return;
@@ -1277,9 +1275,9 @@ public class LightweightContainer {
                     );
                 }
                 for(
-                    int i = sessionBean.getInitialCapacity().intValue();
-                    i > 0;
-                    i--
+                        int i = sessionBean.getInitialCapacity().intValue();
+                        i > 0;
+                        i--
                 ) try {
                     instancePool.addObject();
                 } catch (Exception exception) {
@@ -1460,14 +1458,14 @@ public class LightweightContainer {
                     }
                     credentials = credential == null ? 
                         Collections.emptySet() :
-                        Collections.singleton((Object)credential);
-                    report.addInfo(
-                        "Connection will be established " + (credentials.isEmpty() ?
-                            "without credentials" :
-                                ("as '" + credential.getUserName() + "'")
-                        )
-                    );
-                    break;
+                            Collections.singleton((Object)credential);
+                        report.addInfo(
+                            "Connection will be established " + (credentials.isEmpty() ?
+                                "without credentials" :
+                                    ("as '" + credential.getUserName() + "'")
+                            )
+                        );
+                        break;
                 } else if(
                         "TokenCookie".equals(authenticationMechanism.getAuthenticationMechanismType()) &&
                         PasswordCredential.class.getName().equals(authenticationMechanism.getCredentialInterface())
@@ -1506,13 +1504,13 @@ public class LightweightContainer {
                                         tokenValue
                                     )
                                 );
-                        report.addInfo(
-                            "Connection will be established " + (credentials.isEmpty() ?
-                                "without credentials" :
-                                    ("with '" + cookieName + "' cookie")
-                            )
-                        );
-                        break;
+                            report.addInfo(
+                                "Connection will be established " + (credentials.isEmpty() ?
+                                    "without credentials" :
+                                        ("with '" + cookieName + "' cookie")
+                                )
+                            );
+                            break;
                     }
                 }
             default:
@@ -1523,9 +1521,9 @@ public class LightweightContainer {
             return;
         }
         if(
-            ManagedDatabaseConnectionFactory.class.getName().equals(
-                resourceAdapter.getManagedConnectionFactoryClass()
-            )
+                ManagedDatabaseConnectionFactory.class.getName().equals(
+                    resourceAdapter.getManagedConnectionFactoryClass()
+                )
         ){
             if(resourceAdapter.getReauthenticationSupport()) report.addWarning(
                 "Re-authentication not supported by " +
@@ -1678,9 +1676,9 @@ public class LightweightContainer {
                 return;
             }
         } else if(
-            ManagedDataproviderConnectionFactory.class.getName().equals(
-                resourceAdapter.getManagedConnectionFactoryClass()
-            )
+                ManagedDataproviderConnectionFactory.class.getName().equals(
+                    resourceAdapter.getManagedConnectionFactoryClass()
+                )
         ){
             String connectionURL = (String) configuration.get("ConnectionURL");
             if(! connectionURL.endsWith("/")) {
@@ -1863,7 +1861,7 @@ public class LightweightContainer {
         }
     }
 
-    
+
     /**
      * Create a module id to be included in a report.
      * 
@@ -1884,13 +1882,13 @@ public class LightweightContainer {
         );
         String displayName = module.getDisplayName();
         return (
-            displayName == null ? id : id.append(
-                '('
-            ).append(
-                displayName
-            ).append(
-                ')'
-            )
+                displayName == null ? id : id.append(
+                    '('
+                ).append(
+                    displayName
+                ).append(
+                    ')'
+                )
         ).toString();
     }
 
@@ -1902,13 +1900,13 @@ public class LightweightContainer {
     public static Mode getMode(){
         return LightweightContainer.instance == null ? 
             null :
-            LightweightContainer.instance.mode;
+                LightweightContainer.instance.mode;
     }
-    
+
     //------------------------------------------------------------------------
     // RMI Server
     //------------------------------------------------------------------------
-    
+
     /**
      * Retrieve the local host name
      * 
@@ -2087,7 +2085,7 @@ public class LightweightContainer {
     public String getProviderURL(){
         return this.providerURL;
     }
-    
+
     /**
      * Retrieve the <code>openmdx:container</code> context
      * 
@@ -2096,7 +2094,7 @@ public class LightweightContainer {
     public Context getContainerContext(){
         return this.containerContext;
     }
-    
+
     /**
      * java:comp context factory 
      */
@@ -2111,12 +2109,12 @@ public class LightweightContainer {
      * openmdx:private context factory 
      */
     private  final InitialContextFactory privateContextFactory;
-    
+
     /**
      * openmdx:application context factory 
      */
     private final InitialContextFactory applicationContextFactory;
-    
+
     /**
      * 
      */
@@ -2136,7 +2134,7 @@ public class LightweightContainer {
      * Context Switcher
      */
     private final ContextSwitcher contextSwitcher;
-    
+
     /**
      * Container Class Loader
      */
@@ -2190,7 +2188,7 @@ public class LightweightContainer {
      * The provider URL in case of ENTERPRISE_JAVA_BEAN_SERVER
      */
     private final String providerURL;
-    
+
     /**
      * We have to log in static and instance methods.
      */
@@ -2199,31 +2197,31 @@ public class LightweightContainer {
     //------------------------------------------------------------------------
     // Class Mode
     //------------------------------------------------------------------------
-    
+
     /**
      * The Lightweight Container's Mode
      */
     public static enum Mode {
 
-          /**
-           * Provides Initial Context Factory for local JNDI access
-           */
-          ENTERPRISE_APPLICATION_CONTAINER,
+        /**
+         * Provides Initial Context Factory for local JNDI access
+         */
+        ENTERPRISE_APPLICATION_CONTAINER,
 
-          /**
-           * Provides Initial Context Factory for java:comp access
-           */
-          ENTERPRISE_APPLICATION_CLIENT,
+        /**
+         * Provides Initial Context Factory for java:comp access
+         */
+        ENTERPRISE_APPLICATION_CLIENT,
 
-          /**
-           * Uses Apache's Initial Context Factory
-           */
-          ENTERPRISE_JAVA_BEAN_CONTAINER,
+        /**
+         * Uses Apache's Initial Context Factory
+         */
+        ENTERPRISE_JAVA_BEAN_CONTAINER,
 
-          /**
-           * Provides Initial Context Factory for remote JNDI access
-           */
-          ENTERPRISE_JAVA_BEAN_SERVER
+        /**
+         * Provides Initial Context Factory for remote JNDI access
+         */
+        ENTERPRISE_JAVA_BEAN_SERVER
 
     }
 

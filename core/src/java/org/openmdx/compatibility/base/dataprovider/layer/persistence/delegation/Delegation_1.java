@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Delegation_1.java,v 1.7 2008/03/21 18:47:12 hburger Exp $
+ * Name:        $Id: Delegation_1.java,v 1.8 2008/09/10 08:55:25 hburger Exp $
  * Description: Delegation_1 plugin
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:47:12 $
+ * Date:        $Date: 2008/09/10 08:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,62 +75,62 @@ import org.openmdx.kernel.log.SysLog;
  */
 @SuppressWarnings("unchecked")
 public class Delegation_1
-  implements Layer_1_0 {
+implements Layer_1_0 {
 
-  public void activate(
-    short id,
-    Dataprovider_1_0 delegation
-  ) throws Exception {
-    this.dataprovider = delegation;
-    this.dataproviders = null;
-    SysLog.trace("Use fixed dataprovider connection",delegation);
-  }
+    public void activate(
+        short id,
+        Dataprovider_1_0 delegation
+    ) throws Exception {
+        this.dataprovider = delegation;
+        this.dataproviders = null;
+        SysLog.trace("Use fixed dataprovider connection",delegation);
+    }
 
 
-  //--------------------------------------------------------------------------
-  // Implements Layer_1_0
-  //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // Implements Layer_1_0
+    //--------------------------------------------------------------------------
 
-  public void activate(
-    short id,
-    Configuration configuration,
-    Layer_1_0 delegation
-  ) throws Exception {
-    if (delegation == null) {
-        if (configuration.containsEntry("channel")) {
-            Number channel = (Number)configuration.values("channel").get(0);
+    public void activate(
+        short id,
+        Configuration configuration,
+        Layer_1_0 delegation
+    ) throws Exception {
+        if (delegation == null) {
+            if (configuration.containsEntry("channel")) {
+                Number channel = (Number)configuration.values("channel").get(0);
+                activate(
+                    id,
+                    (Dataprovider_1_0)configuration.values(
+                        SharedConfigurationEntries.DATAPROVIDER_CONNECTION
+                    ).get(channel.intValue())
+                );
+                SysLog.trace("Use dataprovider channel",channel);
+            } else {
+                this.dataproviders = configuration.values(
+                    SharedConfigurationEntries.DATAPROVIDER_CONNECTION
+                );
+                SysLog.trace(
+                    "Use a set of dataprovider connections",
+                    this.dataproviders
+                );
+            }
+        } else {
             activate(
                 id,
-                (Dataprovider_1_0)configuration.values(
-                    SharedConfigurationEntries.DATAPROVIDER_CONNECTION
-                ).get(channel.intValue())
+                delegation
             );
-            SysLog.trace("Use dataprovider channel",channel);
-        } else {
-            this.dataproviders = configuration.values(
-                SharedConfigurationEntries.DATAPROVIDER_CONNECTION
-            );
-            SysLog.trace(
-                "Use a set of dataprovider connections",
-                this.dataproviders
-            );
-        }
-    } else {
-        activate(
-            id,
-            delegation
-        );
-    }   
- }
+        }   
+    }
 
-  public void deactivate(
-  ) throws Exception {
-      //
-  }
+    public void deactivate(
+    ) throws Exception {
+        //
+    }
 
-  public Map configurationSpecification() {
-    return new HashMap();
-  }
+    public Map configurationSpecification() {
+        return new HashMap();
+    }
 
     /**
      * Get the object specified by the requests's path 
@@ -310,8 +310,8 @@ public class Delegation_1
     ) throws ServiceException {
         // Delegation_1 is a terminal layer
     }
-    
-    
+
+
     /**
      * This method allows the dataprovider layers postprocessing of a 
      * collection of requests as a whole after the actual processing of the 
@@ -351,8 +351,7 @@ public class Delegation_1
             workingUnit.getStatus(),
             workingUnit.getStatus().getExceptionDomain(),
             workingUnit.getStatus().getExceptionCode(),
-            null, // Parameters available in next stack element only
-            workingUnit.getStatus().getMessage()
+            workingUnit.getStatus().getMessage() // Parameters available in next stack element only
         );
         return workingUnit.getReplies()[0];
     }
@@ -377,22 +376,18 @@ public class Delegation_1
                 } catch (NullPointerException exception) {
                     throw new ServiceException(
                         exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("dataproviders",this.dataproviders),
-                        },
-                        "Channel missing"
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "Channel missing",
+                        new BasicException.Parameter("dataproviders",this.dataproviders)
                     );      
                 }
                 if (target == null) throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_PARAMETER,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("dataproviders",this.dataproviders),
-                        new BasicException.Parameter("channel",channel)
-                    },
-                    "Not existing channel referenced"
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_PARAMETER,
+                    "Not existing channel referenced",
+                    new BasicException.Parameter("dataproviders",this.dataproviders),
+                    new BasicException.Parameter("channel",channel)
                 );      
             } else {
                 SysLog.trace("Channel","fixed");
@@ -405,10 +400,10 @@ public class Delegation_1
             return new UnitOfWorkReply(exception.log());
         }
     }
-          
-  //--------------------------------------------------------------------------
-  // Implements Operation_1_0
-  //--------------------------------------------------------------------------
+
+    //--------------------------------------------------------------------------
+    // Implements Operation_1_0
+    //--------------------------------------------------------------------------
 
     /**
      * Execute an operation
@@ -431,56 +426,56 @@ public class Delegation_1
     }
 
 
-  //--------------------------------------------------------------------------
-  // Implements Dataprovider_1_0
-  //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // Implements Dataprovider_1_0
+    //--------------------------------------------------------------------------
 
-  /**
-   * Process a set of working units
-   *
-   * @param header          the service header
-   * @param workingUnits    a collection of working units
-   *
-   * @return    a collection of working unit replies
-   */
-  public UnitOfWorkReply[] process(
-    ServiceHeader header,
-    UnitOfWorkRequest[] workingUnits
-  ){
-    try {
-        if (this.dataprovider == null) {
-            UnitOfWorkReply[] replies = new UnitOfWorkReply[workingUnits.length];
-            for (
-                int index = 0;
-                index < workingUnits.length;
-                index++
-            ) replies[index] = process(header, workingUnits[index]);
-            SysLog.trace("Replies",Arrays.asList(replies));
-            return replies;
-        } else {
-            return this.dataprovider.process(
-                header,
-                workingUnits
-            );
+    /**
+     * Process a set of working units
+     *
+     * @param header          the service header
+     * @param workingUnits    a collection of working units
+     *
+     * @return    a collection of working unit replies
+     */
+    public UnitOfWorkReply[] process(
+        ServiceHeader header,
+        UnitOfWorkRequest[] workingUnits
+    ){
+        try {
+            if (this.dataprovider == null) {
+                UnitOfWorkReply[] replies = new UnitOfWorkReply[workingUnits.length];
+                for (
+                        int index = 0;
+                        index < workingUnits.length;
+                        index++
+                ) replies[index] = process(header, workingUnits[index]);
+                SysLog.trace("Replies",Arrays.asList(replies));
+                return replies;
+            } else {
+                return this.dataprovider.process(
+                    header,
+                    workingUnits
+                );
+            }
+        } catch (RuntimeException exception) {
+            throw new RuntimeServiceException(exception).log();
         }
-    } catch (RuntimeException exception) {
-      throw new RuntimeServiceException(exception).log();
     }
-  }
 
 
-  //------------------------------------------------------------------------
-  // Variables
-  //------------------------------------------------------------------------
-  
-  /**
-   *
-   */
-  private Dataprovider_1_0 dataprovider;
-  
-  /**
-   *
-   */
-  private SparseList dataproviders;
+    //------------------------------------------------------------------------
+    // Variables
+    //------------------------------------------------------------------------
+
+    /**
+     *
+     */
+    private Dataprovider_1_0 dataprovider;
+
+    /**
+     *
+     */
+    private SparseList dataproviders;
 
 }

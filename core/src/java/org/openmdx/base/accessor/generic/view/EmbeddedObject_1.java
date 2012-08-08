@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: EmbeddedObject_1.java,v 1.7 2008/04/21 16:53:41 hburger Exp $
- * Description: Embedded View Object
- * Revision:    $Revision: 1.7 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: EmbeddedObject_1.java,v 1.10 2008/09/11 18:01:06 hburger Exp $
+ * Description: Embedded Object
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/21 16:53:41 $
+ * Date:        $Date: 2008/09/11 18:01:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -19,16 +19,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +46,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.accessor.generic.view;
 
@@ -69,7 +69,7 @@ import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
- * Embedded View Object
+ * Embedded Object
  */
 @SuppressWarnings("unchecked")
 abstract class EmbeddedObject_1 
@@ -94,7 +94,18 @@ abstract class EmbeddedObject_1
         this.prefix = prefix;
         this.objectClass = objectClass;
     }
-    
+
+    /**
+     * 
+     */
+    protected final String prefix;
+
+    /**
+     * 
+     */
+    protected final String objectClass;
+
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetPath()
      */
@@ -107,12 +118,12 @@ abstract class EmbeddedObject_1
     public Set objDefaultFetchGroup() throws ServiceException {
         Set defaultFetchGroup = new HashSet();
         for(
-            Iterator i = super.objDefaultFetchGroup().iterator();
-            i.hasNext();
+                Iterator i = super.objDefaultFetchGroup().iterator();
+                i.hasNext();
         ){
             String feature = (String)i.next();
             if(
-                feature.startsWith(prefix)
+                    feature.startsWith(prefix)
             ) defaultFetchGroup.add(
                 feature.substring(prefix.length())
             );
@@ -121,7 +132,7 @@ abstract class EmbeddedObject_1
         return defaultFetchGroup;
     }
 
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetClass()
      */
@@ -136,7 +147,6 @@ abstract class EmbeddedObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_IMPLEMENTED,
-            null,
             "Method not implemented yet"
         );
     }
@@ -151,12 +161,10 @@ abstract class EmbeddedObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path",objGetPath()),
-                new BasicException.Parameter("prefix",prefix),
-                new BasicException.Parameter("criteria",criteria)
-            },
-            "An embedded object can't be moved"
+            "An embedded object can't be moved",
+            new BasicException.Parameter("path",objGetPath()),
+            new BasicException.Parameter("prefix",prefix),
+            new BasicException.Parameter("criteria",criteria)
         );
     }
 
@@ -167,28 +175,28 @@ abstract class EmbeddedObject_1
         String feature, 
         Object to
     ) throws ServiceException{
-        super.objSetValue(qualifiedFeature(feature), to);
+        super.objSetValue((this.prefix + feature), to);
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetValue(java.lang.String)
      */
     public Object objGetValue(String feature) throws ServiceException {
-        return super.objGetValue(qualifiedFeature(feature));
+        return super.objGetValue((this.prefix + feature));
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetList(java.lang.String)
      */
     public List objGetList(String feature) throws ServiceException {
-        return super.objGetList(qualifiedFeature(feature));
+        return super.objGetList((this.prefix + feature));
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetSet(java.lang.String)
      */
     public Set objGetSet(String feature) throws ServiceException {
-        return super.objGetSet(qualifiedFeature(feature));
+        return super.objGetSet((this.prefix + feature));
     }
 
     /* (non-Javadoc)
@@ -197,14 +205,14 @@ abstract class EmbeddedObject_1
     public SortedMap objGetSparseArray(
         String feature
     ) throws ServiceException {
-        return super.objGetSparseArray(qualifiedFeature(feature));
+        return super.objGetSparseArray((this.prefix + feature));
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetContainer(java.lang.String)
      */
     public FilterableMap objGetContainer(String feature) throws ServiceException {
-        return super.objGetContainer(qualifiedFeature(feature));
+        return super.objGetContainer((this.prefix + feature));
     }
 
     /* (non-Javadoc)
@@ -215,7 +223,7 @@ abstract class EmbeddedObject_1
         Structure_1_0 arguments
     ) throws ServiceException {
         return super.objInvokeOperation(
-            qualifiedFeature(operation),
+            (this.prefix + operation),
             arguments
         );
     }
@@ -228,20 +236,10 @@ abstract class EmbeddedObject_1
         Structure_1_0 arguments
     ) throws ServiceException {
         return super.objInvokeOperationInUnitOfWork(
-            qualifiedFeature(operation),
+            (this.prefix + operation),
             arguments
         );
     }
-
-    protected String qualifiedFeature(
-        String feature
-    ){
-        return this.prefix + feature;
-    }
-    
-    protected final String prefix;
-
-    protected final String objectClass;
 
 
     //--------------------------------------------------------------------------
@@ -253,7 +251,7 @@ abstract class EmbeddedObject_1
      */
     public String toString(
     ){
-        return AbstractObject_1.toString(this, this.objGetClass(), "prefix=" + prefix);
+        return AbstractObject_1.toString(this, "prefix=" + prefix);
     }
 
 }

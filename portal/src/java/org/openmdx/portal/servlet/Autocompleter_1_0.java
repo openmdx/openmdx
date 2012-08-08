@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Autocompleter_1_0.java,v 1.12 2007/11/23 00:21:03 wfro Exp $
+ * Name:        $Id: Autocompleter_1_0.java,v 1.13 2008/08/12 16:38:05 wfro Exp $
  * Description: Autocompleter_1_0
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2007/11/23 00:21:03 $
+ * Date:        $Date: 2008/08/12 16:38:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,9 +56,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 

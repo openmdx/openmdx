@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ObjectInvocationHandler.java,v 1.61 2008/06/27 14:15:53 hburger Exp $
+ * Name:        $Id: Jmi1ObjectInvocationHandler.java,v 1.62 2008/09/10 08:55:23 hburger Exp $
  * Description: JMI 1 Object Invocation Handler 
- * Revision:    $Revision: 1.61 $
+ * Revision:    $Revision: 1.62 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 14:15:53 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -117,7 +117,7 @@ import org.w3c.cci2.SparseArray;
  * JMI 1 Object Invocation Handler
  */
 public class Jmi1ObjectInvocationHandler 
-    implements InvocationHandler, Serializable 
+implements InvocationHandler, Serializable 
 {
 
     /**
@@ -155,7 +155,7 @@ public class Jmi1ObjectInvocationHandler
         );
     }
 
-    
+
     /**
      * Constructor 
      *
@@ -208,7 +208,7 @@ public class Jmi1ObjectInvocationHandler
     protected final Map<String,Object> impls;
     protected final Set<ModelElement_1_0> featuresHavingNoImpl;
     protected final FeatureMapper featureMapper;
-    
+
     //-----------------------------------------------------------------------
     private InvocationTarget getInvocationTarget(
         Object object,
@@ -224,16 +224,16 @@ public class Jmi1ObjectInvocationHandler
                     Class<?>[] implementedParameterTypes = implementedMethod.getParameterTypes();
                     if(declaredParameterCount == implementedParameterTypes.length) {
                         for(
-                           int i = 0;
-                           i < declaredParameterCount;
-                           i++
+                                int i = 0;
+                                i < declaredParameterCount;
+                                i++
                         ){
                             boolean matches = lenient ?
                                 declaredParameterTypes[i].isAssignableFrom(implementedParameterTypes[i]) :
-                                declaredParameterTypes[i] == implementedParameterTypes[i];
-                            if(!matches) {
-                                continue ImplementedMethod;
-                            }
+                                    declaredParameterTypes[i] == implementedParameterTypes[i];
+                                if(!matches) {
+                                    continue ImplementedMethod;
+                                }
                         }
                     }
                     return new InvocationTarget(object, implementedMethod);
@@ -242,7 +242,7 @@ public class Jmi1ObjectInvocationHandler
         }
         return null;
     }
-            
+
     //-----------------------------------------------------------------------
     protected InvocationTarget getImpl(
         Object self,
@@ -252,8 +252,8 @@ public class Jmi1ObjectInvocationHandler
         boolean lenient
     ) {
         if(
-            this.ignoreImpls ||
-            this.featuresHavingNoImpl.contains(feature)
+                this.ignoreImpls ||
+                this.featuresHavingNoImpl.contains(feature)
         ) {
             return null;
         }
@@ -261,8 +261,8 @@ public class Jmi1ObjectInvocationHandler
         String instanceQualifiedClassName = this.refClass.refMofId();
         RefPackage_1_4 refPackage = (RefPackage_1_4) refClass.refOutermostPackage();
         if(
-            (this.impls.get(instanceQualifiedClassName) == null) &&
-            !this.impls.containsKey(instanceQualifiedClassName)
+                (this.impls.get(instanceQualifiedClassName) == null) &&
+                !this.impls.containsKey(instanceQualifiedClassName)
         ) {        
             Object userImpl = this.legacyDelegate ? refPackage.refCreateImpl(
                 instanceQualifiedClassName, 
@@ -272,10 +272,10 @@ public class Jmi1ObjectInvocationHandler
                 self,
                 next
             );
-            this.impls.put(
-                instanceQualifiedClassName, 
-                userImpl
-            );
+                this.impls.put(
+                    instanceQualifiedClassName, 
+                    userImpl
+                );
         }
         // Get impl for declaring class
         String qualifiedFeatureName = (String)feature.values("qualifiedName").get(0);
@@ -284,8 +284,8 @@ public class Jmi1ObjectInvocationHandler
             qualifiedFeatureName.lastIndexOf(":")
         );
         if(
-            (this.impls.get(declaredQualifiedClassName) == null) &&
-            !this.impls.containsKey(declaredQualifiedClassName)
+                (this.impls.get(declaredQualifiedClassName) == null) &&
+                !this.impls.containsKey(declaredQualifiedClassName)
         ) {        
             Object userImpl = this.legacyDelegate ? refPackage.refCreateImpl(
                 declaredQualifiedClassName, 
@@ -295,10 +295,10 @@ public class Jmi1ObjectInvocationHandler
                 self,
                 next
             );
-            this.impls.put(
-                declaredQualifiedClassName, 
-                userImpl
-            );
+                this.impls.put(
+                    declaredQualifiedClassName, 
+                    userImpl
+                );
         }
         Object impl = this.impls.get(instanceQualifiedClassName);
         InvocationTarget invocationTarget = getInvocationTarget(impl, method, lenient);
@@ -313,7 +313,7 @@ public class Jmi1ObjectInvocationHandler
         this.featuresHavingNoImpl.add(feature);
         return null;
     }
-    
+
     //-----------------------------------------------------------------------
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
@@ -345,13 +345,13 @@ public class Jmi1ObjectInvocationHandler
                         args
                     );
                 } else if (
-                    declaringClass == RefBaseObject.class ||
-                    declaringClass == RefFeatured.class ||
-                    declaringClass == RefObject.class ||
-                    declaringClass == RefObject_1_0.class ||
-                    declaringClass == RefObject_1_1.class ||
-                    declaringClass == RefObject_1_2.class ||
-                    declaringClass == RefObject_1_3.class
+                        declaringClass == RefBaseObject.class ||
+                        declaringClass == RefFeatured.class ||
+                        declaringClass == RefObject.class ||
+                        declaringClass == RefObject_1_0.class ||
+                        declaringClass == RefObject_1_1.class ||
+                        declaringClass == RefObject_1_2.class ||
+                        declaringClass == RefObject_1_3.class
                 ){
                     return method.invoke(
                         this.refDelegate, 
@@ -361,7 +361,7 @@ public class Jmi1ObjectInvocationHandler
                     ModelElement_1_0 feature = this.featureMapper.getFeature(
                         methodName, 
                         method.getReturnType() == void.class
-                            ? FeatureMapper.MethodSignature.RETURN_IS_VOID
+                        ? FeatureMapper.MethodSignature.RETURN_IS_VOID
                             : FeatureMapper.MethodSignature.DEFAULT
                     );
                     InvocationTarget invocationTarget = this.getImpl(
@@ -377,7 +377,7 @@ public class Jmi1ObjectInvocationHandler
                     }
                     // Generic delegate 
                     else {
-                      boolean isOperation = feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION);
+                        boolean isOperation = feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION);
                         String featureName = (String)feature.values("name").get(0);
                         // Getters
                         if(!isOperation && methodName.startsWith("get")) {
@@ -386,18 +386,18 @@ public class Jmi1ObjectInvocationHandler
                                     featureName
                                 );
                                 return 
-                                    value instanceof InputStream ? new Jmi1BinaryLargeObject(featureName, (InputStream)value) :
+                                value instanceof InputStream ? new Jmi1BinaryLargeObject(featureName, (InputStream)value) :
                                     value instanceof SortedMap ? SortedMaps.asSparseArray((SortedMap<Integer,?>)value) :
-                                    value instanceof RefContainer ? Classes.newProxyInstance(
-                                        new Jmi1ContainerInvocationHandler((RefContainer)value),
-                                        method.getReturnType(), RefContainer.class, Serializable.class, LegacyContainer.class
-                                    ) : 
-                                    value;
+                                        value instanceof RefContainer ? Classes.newProxyInstance(
+                                            new Jmi1ContainerInvocationHandler((RefContainer)value),
+                                            method.getReturnType(), RefContainer.class, Serializable.class, LegacyContainer.class
+                                        ) : 
+                                            value;
                             }
                             // Query
                             else if(args.length == 1 && args[0] instanceof AnyTypePredicate) {
                                 return ((RefContainer)
-                                    this.refDelegate.refGetValue(featureName)
+                                        this.refDelegate.refGetValue(featureName)
                                 ).refGetAll(
                                     args[0]
                                 );
@@ -430,22 +430,22 @@ public class Jmi1ObjectInvocationHandler
                                 this.refDelegate.refSetValue(
                                     featureName,
                                     args[0] instanceof BinaryLargeObject
-                                       ? ((BinaryLargeObject)args[0]).getContent()
-                                       : args[0]
+                                    ? ((BinaryLargeObject)args[0]).getContent()
+                                        : args[0]
                                 );
                                 return null;
                             }
                         }
                         // Adders with signature (boolean idIsPersistent, PrimitiveType qualifier, Object object)
                         else if(
-                            methodName.startsWith("add") &&
-                            args != null && 
-                            args.length == 3 && 
-                            args[0].getClass() == Boolean.class && (
-                                args[1] instanceof String ||
-                                args[1] instanceof Number ||
-                                args[1].getClass().isPrimitive() 
-                            )
+                                methodName.startsWith("add") &&
+                                args != null && 
+                                args.length == 3 && 
+                                args[0].getClass() == Boolean.class && (
+                                        args[1] instanceof String ||
+                                        args[1] instanceof Number ||
+                                        args[1].getClass().isPrimitive() 
+                                )
                         ) {
                             ((RefObject_1_3)this.refDelegate).refAddValue(
                                 Identifier.ATTRIBUTE_NAME.toIdentifier(
@@ -494,10 +494,10 @@ public class Jmi1ObjectInvocationHandler
                         args
                     );
                 } else if(
-                    declaringClass == RefBaseObject.class ||
-                    declaringClass == RefFeatured.class ||
-                    declaringClass == RefObject.class ||
-                    declaringClass == RefObject_1_0.class
+                        declaringClass == RefBaseObject.class ||
+                        declaringClass == RefFeatured.class ||
+                        declaringClass == RefObject.class ||
+                        declaringClass == RefObject_1_0.class
                 ){
                     if("refGetValue" == methodName) {
                         if(args.length == 1) {
@@ -556,18 +556,18 @@ public class Jmi1ObjectInvocationHandler
                     ModelElement_1_0 feature = this.featureMapper.getFeature(
                         methodName,
                         method.getReturnType() == void.class
-                            ? FeatureMapper.MethodSignature.RETURN_IS_VOID
+                        ? FeatureMapper.MethodSignature.RETURN_IS_VOID
                             : FeatureMapper.MethodSignature.DEFAULT
                     );
                     if(
-                        !feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION) &&
-                        methodName.length() > 3 &&
-                        args != null && args.length > 0
-                     ) {
+                            !feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION) &&
+                            methodName.length() > 3 &&
+                            args != null && args.length > 0
+                    ) {
                         boolean makePersistent = methodName.startsWith("add"); 
                         if(
-                             makePersistent ||
-                             methodName.startsWith("get") 
+                                makePersistent ||
+                                methodName.startsWith("get") 
                         ){
                             //
                             // RefContainer operations
@@ -629,7 +629,7 @@ public class Jmi1ObjectInvocationHandler
         }
         throw new UnsupportedOperationException(methodName);
     }
-    
+
     private static Object[] jmiToRef(
         Object[] source
     ){
@@ -638,31 +638,31 @@ public class Jmi1ObjectInvocationHandler
         } else {
             int size = source.length;
             if(
-                size == 1 &&
-                source[0] instanceof String || source[0] instanceof Number
+                    size == 1 &&
+                    source[0] instanceof String || source[0] instanceof Number
             ){
                 return new Object[]{RefContainer.REASSIGNABLE, source[0]};
             }  else if(
-                size == 2 &&
-                source[0] instanceof String
+                    size == 2 &&
+                    source[0] instanceof String
             ){
                 return new Object[]{RefContainer.REASSIGNABLE, source[0], source[1]};
             } else {
                 Object[] target = new Object[size];
                 for(
-                    int i = 0, iLimit = size - 1;
-                    i <= iLimit;
-                    i++
+                        int i = 0, iLimit = size - 1;
+                        i <= iLimit;
+                        i++
                 ){
                     target[i] = 
                         i % 2 == 1 || i == iLimit ? source[i] : 
-                        ((Boolean)source[i]) ? RefContainer.PERSISTENT : RefContainer.REASSIGNABLE; 
+                            ((Boolean)source[i]) ? RefContainer.PERSISTENT : RefContainer.REASSIGNABLE; 
                 }
                 return target;
             }
         }
     }
-    
+
     /**
      * Standard Delegation
      * 
@@ -690,7 +690,7 @@ public class Jmi1ObjectInvocationHandler
         ModelElement_1_0 feature = this.featureMapper.getFeature(
             methodName, 
             method.getReturnType() == void.class
-                ? FeatureMapper.MethodSignature.RETURN_IS_VOID
+            ? FeatureMapper.MethodSignature.RETURN_IS_VOID
                 : FeatureMapper.MethodSignature.DEFAULT
         );
         Object next = ((Entity_2_0)this.refDelegate).openmdxjdoGetDelegate(); 
@@ -726,15 +726,15 @@ public class Jmi1ObjectInvocationHandler
             }
         }
     }
-    
+
     /**
      * MarshallingContainer
      */
     @SuppressWarnings("unchecked")
     static class MarshallingContainer
-        extends MarshallingCollection
-        implements RefContainer
-     {
+    extends MarshallingCollection
+    implements RefContainer
+    {
 
         /**
          * Constructor 
@@ -760,12 +760,12 @@ public class Jmi1ObjectInvocationHandler
          * 
          */
         protected final StandardMarshaller marshaller;
-        
+
         /**
          * 
          */
         protected final RefContainer delegate;
-        
+
         /* (non-Javadoc)
          * @see org.oasisopen.jmi1.RefContainer#refAdd(java.lang.Object[])
          */
@@ -806,11 +806,11 @@ public class Jmi1ObjectInvocationHandler
         }
 
     }
-    
+
     //------------------------------------------------------------------------
     // Class StandardMarshaller
     //------------------------------------------------------------------------
-    
+
     /**
      * Class StandardMarshaller
      */
@@ -821,17 +821,17 @@ public class Jmi1ObjectInvocationHandler
         ){
             this.delegate = delegate;
         }
-        
+
         /**
          * Implements <code>Serializable</code>
          */
         private static final long serialVersionUID = 3399640551686160240L;
-        
+
         /**
          * 
          */
         private final org.openmdx.compatibility.base.marshalling.Marshaller delegate;
-        
+
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.Marshaller#unmarshal(java.lang.Object)
          */
@@ -840,7 +840,7 @@ public class Jmi1ObjectInvocationHandler
         ){
             try {
                 return 
-                    source instanceof Object[] ? unmarshal((Object[])source) :
+                source instanceof Object[] ? unmarshal((Object[])source) :
                     this.delegate.unmarshal(source);
             } catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
@@ -856,17 +856,17 @@ public class Jmi1ObjectInvocationHandler
         ){
             try {
                 return 
-                    source instanceof Object[] ? marshal((Object[])source) :
+                source instanceof Object[] ? marshal((Object[])source) :
                     source instanceof PersistenceCapable ? this.delegate.marshal(source) : 
-                    source instanceof List ? marshal((List)source) :
-                    source instanceof Set ? new MarshallingSet(this, (Set)source) :
-                    source instanceof SparseArray ? SortedMaps.asSparseArray(new MarshallingSortedMap(this, (SparseArray)source)) :
-                    source instanceof Iterator ? new MarshallingIterator((Iterator)source) :
-                    source instanceof Container ? Classes.newProxyInstance(
-                        new Jmi1ContainerInvocationHandler(this, (Container)source),
-                        source.getClass().getInterfaces()[0], RefContainer.class, Serializable.class 
-                    ) :
-                    source;
+                        source instanceof List ? marshal((List)source) :
+                            source instanceof Set ? new MarshallingSet(this, (Set)source) :
+                                source instanceof SparseArray ? SortedMaps.asSparseArray(new MarshallingSortedMap(this, (SparseArray)source)) :
+                                    source instanceof Iterator ? new MarshallingIterator((Iterator)source) :
+                                        source instanceof Container ? Classes.newProxyInstance(
+                                            new Jmi1ContainerInvocationHandler(this, (Container)source),
+                                            source.getClass().getInterfaces()[0], RefContainer.class, Serializable.class 
+                                        ) :
+                                            source;
             } catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
             }
@@ -878,7 +878,7 @@ public class Jmi1ObjectInvocationHandler
         ){
             return new MarshallingList(this, source);
         }
-        
+
         /**
          * Unmarshal an array of objects
          * 
@@ -891,9 +891,9 @@ public class Jmi1ObjectInvocationHandler
         ){
             if(source != null && source.length > 0) {
                 for(
-                    int i = 0, l = source.length;
-                    i < l;
-                    i++
+                        int i = 0, l = source.length;
+                        i < l;
+                        i++
                 ){ 
                     Object s = source[i];
                     Object t = unmarshal(s);
@@ -902,9 +902,9 @@ public class Jmi1ObjectInvocationHandler
                         System.arraycopy(source, 0, target, 0, i);
                         target[i] = t;
                         for(
-                            int j = i + 1;
-                            j < l;
-                            j++
+                                int j = i + 1;
+                                j < l;
+                                j++
                         ){
                             target[j] = unmarshal(source[j]);
                         }
@@ -927,9 +927,9 @@ public class Jmi1ObjectInvocationHandler
         ){
             if(source != null && source.length > 0) {
                 for(
-                    int i = 0, l = source.length;
-                    i < l;
-                    i++
+                        int i = 0, l = source.length;
+                        i < l;
+                        i++
                 ){ 
                     Object s = source[i];
                     Object t = marshal(s);
@@ -938,9 +938,9 @@ public class Jmi1ObjectInvocationHandler
                         System.arraycopy(source, 0, target, 0, i);
                         target[i] = t;
                         for(
-                            int j = i + 1;
-                            j < l;
-                            j++
+                                int j = i + 1;
+                                j < l;
+                                j++
                         ){
                             target[j] = marshal(source[j]);
                         }
@@ -955,7 +955,7 @@ public class Jmi1ObjectInvocationHandler
          * MarshallingIterator
          */
         class MarshallingIterator<T> implements Iterator<T> {
-            
+
             /**
              * Constructor 
              *
@@ -966,7 +966,7 @@ public class Jmi1ObjectInvocationHandler
             ){
                 this.delegate = delegate;
             }
-            
+
             /**
              * 
              */
@@ -993,11 +993,11 @@ public class Jmi1ObjectInvocationHandler
             public void remove() {
                 this.delegate.remove();
             }
-            
+
         }
-        
+
     }
-    
+
     //-----------------------------------------------------------------------
     // Class LegacyRefObject_1
     //-----------------------------------------------------------------------
@@ -1030,16 +1030,16 @@ public class Jmi1ObjectInvocationHandler
 
     }
 
-    
+
     //------------------------------------------------------------------------
     // StandardRefObject_1
     //------------------------------------------------------------------------
-    
+
     /**
      * Standard RefObject Implementation 1
      */
     static class StandardRefObject_1 
-        implements RefObject, RefObject_1_0, Entity_2_0, Serializable {
+    implements RefObject, RefObject_1_0, Entity_2_0, Serializable {
 
         /**
          * Constructor 
@@ -1054,18 +1054,18 @@ public class Jmi1ObjectInvocationHandler
             this.cciDelegate = delegate;
             this.refClass = refClass;
         }
-        
+
         /**
          * Implements <code>Serializable</code>
          */
         private static final long serialVersionUID = 8761679181457452801L;
 
         private Object cciDelegate;
-        
+
         private final RefClass refClass;        
-            
+
         private RefObject metaObject = null;
-        
+
         private final static String REFLECTIVE = 
             "This reflective method should be dispatched by the invocation " +
             "handler to its non-reflective counterpart"; 
@@ -1078,7 +1078,7 @@ public class Jmi1ObjectInvocationHandler
         ){
             return ((RefPackage_1_0)this.refClass.refOutermostPackage()).refObject(objectId.toXri());
         }
-        
+
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refGetPath()
          */
@@ -1132,10 +1132,8 @@ public class Jmi1ObjectInvocationHandler
                 } else throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("objType.refClass", objType.refClass().refMofId()),
-                    },
-                    "objType must be a class type"
+                    "objType must be a class type",
+                    new BasicException.Parameter("objType.refClass", objType.refClass().refMofId())
                 ); 
             } catch (ServiceException e) {
                 throw new JmiServiceException(e, this);
@@ -1273,14 +1271,14 @@ public class Jmi1ObjectInvocationHandler
             return this.cciDelegate;
         }
 
-        
+
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.Entity_2_0#openmdxjdoGetDataObject()
          */
         public Object openmdxjdoGetDataObject() {
             return this.cciDelegate instanceof Entity_2_0 ?
                 ((Entity_2_0)this.cciDelegate).openmdxjdoGetDataObject() :
-                this.cciDelegate;
+                    this.cciDelegate;
         }
 
         /* (non-Javadoc)
@@ -1573,7 +1571,7 @@ public class Jmi1ObjectInvocationHandler
         public void setDelegate(Object delegate) {
             this.cciDelegate = delegate;
         }
-        
+
         private UnsupportedOperationException newUnsupportedOperationException(
             String message,
             String feature
@@ -1602,16 +1600,16 @@ public class Jmi1ObjectInvocationHandler
             Object objectId = JDOHelper.getObjectId(this.cciDelegate);
             return objectId == null ?
                 message :
-                message + " on object " + objectId;
+                    message + " on object " + objectId;
         }
-        
+
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Class Jmi1BinaryLargeObject
     //------------------------------------------------------------------------
-    
+
     /**
      * 
      */
@@ -1630,14 +1628,14 @@ public class Jmi1ObjectInvocationHandler
             this.featureName = featureName;
             this.initialValue = value;
         }
-        
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
         public InputStream getContent(
         ) throws IOException {
             InputStream value = this.initialValue == null
-                ? (InputStream)Jmi1ObjectInvocationHandler.this.refDelegate.refGetValue(this.featureName)
+            ? (InputStream)Jmi1ObjectInvocationHandler.this.refDelegate.refGetValue(this.featureName)
                 : this.initialValue;
             this.initialValue = null;   
             return value;
@@ -1650,11 +1648,11 @@ public class Jmi1ObjectInvocationHandler
         ) throws IOException {
             return this.length;
         }
-        
+
         protected transient InputStream initialValue = null;
         protected final String featureName;
         protected transient Long length = null;
-        
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
          */
@@ -1668,13 +1666,13 @@ public class Jmi1ObjectInvocationHandler
                     stream, 
                     position
                 ) :
-                position + BinaryLargeObjects.streamCopy(
-                    getContent(), 
-                    position,
-                    stream
-                );            
+                    position + BinaryLargeObjects.streamCopy(
+                        getContent(), 
+                        position,
+                        stream
+                    );            
         }
-        
+
     }
 
     //------------------------------------------------------------------------
@@ -1701,12 +1699,12 @@ public class Jmi1ObjectInvocationHandler
          * 
          */
         private final Object object;
-        
+
         /**
          * 
          */
         private final Method method;
-        
+
         /**
          * @param arguments
          * 

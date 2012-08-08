@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseConfiguration.java,v 1.21 2008/03/29 01:22:16 wfro Exp $
+ * Name:        $Id: DatabaseConfiguration.java,v 1.22 2008/09/10 08:55:19 hburger Exp $
  * Description: DatabaseConfiguration 
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/29 01:22:16 $
+ * Date:        $Date: 2008/09/10 08:55:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -79,7 +79,7 @@ import org.openmdx.kernel.log.SysLog;
 
 @SuppressWarnings("unchecked")
 public class DatabaseConfiguration {
-    
+
     //---------------------------------------------------------------------------
     public DatabaseConfiguration(
         String namespaceId,
@@ -106,57 +106,51 @@ public class DatabaseConfiguration {
     ) throws ServiceException {
 
         if(columnNameTo == null) {
-          throw new ServiceException(
-            StackedException.DEFAULT_DOMAIN,
-            StackedException.INVALID_CONFIGURATION, 
-            new BasicException.Parameter[]{
-              new BasicException.Parameter("columnNameFrom", columnNameFrom)
-            },
-            "no columnNameTo defined for columnNameFrom"
-          );
+            throw new ServiceException(
+                StackedException.DEFAULT_DOMAIN,
+                StackedException.INVALID_CONFIGURATION, 
+                "no columnNameTo defined for columnNameFrom",
+                new BasicException.Parameter("columnNameFrom", columnNameFrom)
+            );
         }
-    
+
         // fromToColumnNameMapping
         if(this.fromToColumnNameMapping.containsKey(columnNameFrom)) {
-          throw new ServiceException(
-            StackedException.DEFAULT_DOMAIN,
-            StackedException.INVALID_CONFIGURATION, 
-            new BasicException.Parameter[]{
-              new BasicException.Parameter("columnNameFrom", columnNameFrom)
-            },
-            "duplicate columnNameFrom defined"
-          );
+            throw new ServiceException(
+                StackedException.DEFAULT_DOMAIN,
+                StackedException.INVALID_CONFIGURATION, 
+                "duplicate columnNameFrom defined",
+                new BasicException.Parameter("columnNameFrom", columnNameFrom)
+            );
         }
         else {
-          this.fromToColumnNameMapping.put(
-            columnNameFrom,
-            columnNameTo
-          );
+            this.fromToColumnNameMapping.put(
+                columnNameFrom,
+                columnNameTo
+            );
         }
-    
+
         // toFromColumnNameMapping
         if(
-          this.toFromColumnNameMapping.containsKey(columnNameTo) ||
-          this.toFromColumnNameMapping.containsKey(columnNameTo.toUpperCase())
+                this.toFromColumnNameMapping.containsKey(columnNameTo) ||
+                this.toFromColumnNameMapping.containsKey(columnNameTo.toUpperCase())
         ) {
-          throw new ServiceException(
-            StackedException.DEFAULT_DOMAIN,
-            StackedException.INVALID_CONFIGURATION, 
-            new BasicException.Parameter[]{
-              new BasicException.Parameter("columnNameTo", columnNameFrom)
-            },
-            "duplicate columnNameTo defined"
-          );
+            throw new ServiceException(
+                StackedException.DEFAULT_DOMAIN,
+                StackedException.INVALID_CONFIGURATION, 
+                "duplicate columnNameTo defined",
+                new BasicException.Parameter("columnNameTo", columnNameFrom)
+            );
         }
         else {
-          this.toFromColumnNameMapping.put(
-            columnNameTo,
-            columnNameFrom
-          );
-          this.toFromColumnNameMapping.put(
-            columnNameTo.toUpperCase(),
-            columnNameFrom
-          );
+            this.toFromColumnNameMapping.put(
+                columnNameTo,
+                columnNameFrom
+            );
+            this.toFromColumnNameMapping.put(
+                columnNameTo.toUpperCase(),
+                columnNameFrom
+            );
         }
     }
 
@@ -164,9 +158,9 @@ public class DatabaseConfiguration {
     public void activate(
     ) throws ServiceException {
         if(!this.isActivated) {
-            
+
             this.isActivated = true;
-            
+
             // Read configuration entries from table 'Preferences' if available
             Connection conn = null;
             PreparedStatement ps = null;
@@ -207,9 +201,9 @@ public class DatabaseConfiguration {
                     if("org:openmdx:preferences1:StringPreference".equals(objectClass)) {
                         Object s = rs.getObject("string_value");                        
                         newValue = s == null 
-                            ? null 
+                        ? null 
                             : s instanceof Clob 
-                                ? ((Clob)s).getSubString(1L, (int)((Clob)s).length())
+                            ? ((Clob)s).getSubString(1L, (int)((Clob)s).length())
                                 : (String)s;
                     }
                     else if("org:openmdx:preferences1:IntegerPreference".equals(objectClass)) {
@@ -250,208 +244,200 @@ public class DatabaseConfiguration {
                     // ignore
                 }
             }
-                    
+
             // COLUMN_NAME_FROM, COLUMN_NAME_TO mapping
             for(
-              ListIterator i = configuration.values(LayerConfigurationEntries.COLUMN_NAME_FROM).listIterator();
-              i.hasNext();
+                    ListIterator i = configuration.values(LayerConfigurationEntries.COLUMN_NAME_FROM).listIterator();
+                    i.hasNext();
             ) {
-              int index = i.nextIndex();
-              this.addColumnNameMapping(
-                (String)i.next(),
-                (String)configuration.values(LayerConfigurationEntries.COLUMN_NAME_TO).get(index)
-              );
+                int index = i.nextIndex();
+                this.addColumnNameMapping(
+                    (String)i.next(),
+                    (String)configuration.values(LayerConfigurationEntries.COLUMN_NAME_TO).get(index)
+                );
             }
             SysLog.detail("fromToColumnNameMapping", this.fromToColumnNameMapping);
             SysLog.detail("toFromColumnNameMapping", this.toFromColumnNameMapping);
 
             // Read configuration entries and create DbObjectConfigurations
             for(
-              ListIterator i = this.configuration.values(LayerConfigurationEntries.TYPE).listIterator();
-              i.hasNext();
+                    ListIterator i = this.configuration.values(LayerConfigurationEntries.TYPE).listIterator();
+                    i.hasNext();
             ) {
-              int index = i.nextIndex();
-              
-              Object type = i.next();
-              SysLog.detail("reading configuration for type " + type);
-              
-              // typeName
-              Object typeName = configuration.values(LayerConfigurationEntries.TYPE_NAME).get(index);
-              if(typeName == null) {
-                  // if typeName is not configured calculate as MD5 hash
-                  try {
-                      MessageDigest md = MessageDigest.getInstance("MD5");
-                      md.update(((Path)type).toXri().getBytes("UTF-8"));
-                      typeName = Base64.encode(md.digest());
-                  }
-                  // Set to index of hash can not be calculated for some reason
-                  catch(Exception e) {
-                      typeName = Integer.toString(index);
-                  }
-              }
+                int index = i.nextIndex();
 
-              // dbObject
-              Object dbObject = configuration.values(LayerConfigurationEntries.DB_OBJECT).get(index);
+                Object type = i.next();
+                SysLog.detail("reading configuration for type " + type);
 
-              // dbObject2
-              Object dbObject2 = configuration.values(LayerConfigurationEntries.DB_OBJECT_2).get(index);
-              if("".equals(dbObject2)) dbObject2 = null;
-              
-              // dbObjectFormat
-              Object dbObjectFormat = configuration.values(LayerConfigurationEntries.DB_OBJECT_FORMAT).get(index);
-              
-              // pathNormalizeLevel
-              Object pathNormalizeLevel = configuration.values(LayerConfigurationEntries.PATH_NORMALIZE_LEVEL).get(index);
-              
-              // dbObjectForQuery
-              Object dbObjectForQuery = configuration.values(LayerConfigurationEntries.DB_OBJECT_FOR_QUERY).get(index);
-              if("".equals(dbObjectForQuery)) dbObjectForQuery = null;
-              
-              // dbObjectForQuery2
-              Object dbObjectForQuery2 = configuration.values(LayerConfigurationEntries.DB_OBJECT_FOR_QUERY_2).get(index);
-              if("".equals(dbObjectForQuery2)) dbObjectForQuery2 = null;
-              
-              // dbObjectsForQueryJoinColumn
-              Object dbObjectsForQueryJoinColumn = configuration.values(LayerConfigurationEntries.DB_OBJECTS_FOR_QUERY_JOIN_COLUMN).get(index);
-              if("".equals(dbObjectsForQueryJoinColumn)) dbObjectsForQueryJoinColumn = null;
-              
-              // dbObjectHint
-              Object dbObjectHint = configuration.values(LayerConfigurationEntries.DB_OBJECT_HINT).get(index);
-              if("".equals(dbObjectHint)) dbObjectHint = null;
-              
-              // objectIdPattern
-              Object objectIdPattern = configuration.values(LayerConfigurationEntries.OBJECT_ID_PATTERN).get(index);
-              if("".equals(objectIdPattern)) objectIdPattern = null;
+                // typeName
+                Object typeName = configuration.values(LayerConfigurationEntries.TYPE_NAME).get(index);
+                if(typeName == null) {
+                    // if typeName is not configured calculate as MD5 hash
+                    try {
+                        MessageDigest md = MessageDigest.getInstance("MD5");
+                        md.update(((Path)type).toXri().getBytes("UTF-8"));
+                        typeName = Base64.encode(md.digest());
+                    }
+                    // Set to index of hash can not be calculated for some reason
+                    catch(Exception e) {
+                        typeName = Integer.toString(index);
+                    }
+                }
 
-              // joinTable
-              Object joinTable = configuration.values(LayerConfigurationEntries.JOIN_TABLE).get(index);
-              if("".equals(joinTable)) joinTable = null;
-              
-              // joinColumnEnd1
-              Object joinColumnEnd1 = configuration.values(LayerConfigurationEntries.JOIN_COLUMN_END1).get(index);
-              if("".equals(joinColumnEnd1)) joinColumnEnd1 = null;
-              
-              // joinColumnEnd2
-              Object joinColumnEnd2 = configuration.values(LayerConfigurationEntries.JOIN_COLUMN_END2).get(index);
-              if("".equals(joinColumnEnd2)) joinColumnEnd2 = null;
-                            
-              if(
-                  (type instanceof Path || type instanceof String) &&
-                  (typeName instanceof String) &&
-                  ((dbObject == null) || (dbObject instanceof String)) &&                
-                  ((dbObject2 == null) || (dbObject2 instanceof String)) &&                
-                  ((pathNormalizeLevel == null) || (pathNormalizeLevel instanceof Number)) &&
-                  ((dbObjectForQuery == null) || dbObjectForQuery instanceof String) &&
-                  ((dbObjectForQuery2 == null) || dbObjectForQuery2 instanceof String) &&
-                  ((dbObjectHint == null) || dbObjectHint instanceof String) &&
-                  ((objectIdPattern == null) || objectIdPattern instanceof String) ||
-                  ((joinTable == null) || (joinTable instanceof String)) &&                
-                  ((joinColumnEnd1 == null) || (joinColumnEnd1 instanceof String)) &&                
-                  ((joinColumnEnd2 == null) || (joinColumnEnd2 instanceof String)) 
-              ) {
-                  if(
-                      LayerConfigurationEntries.REFERENCE_ID_FORMAT_TYPE_WITH_PATH_COMPONENTS.equals(this.referenceIdFormat) &&
-                      (pathNormalizeLevel != null) &&
-                      ((Number)pathNormalizeLevel).intValue() < 2
-                  ) {
-                      throw new ServiceException(
-                          StackedException.DEFAULT_DOMAIN,
-                          StackedException.INVALID_CONFIGURATION, 
-                          new BasicException.Parameter[]{
-                              new BasicException.Parameter("index", index),
-                              new BasicException.Parameter("path normalize level", pathNormalizeLevel)
-                          },
-                          "The database plugin option " + LayerConfigurationEntries.REFERENCE_ID_FORMAT + "=" + LayerConfigurationEntries.REFERENCE_ID_FORMAT_TYPE_WITH_PATH_COMPONENTS + " requires path normalize levels >= 2"
-                      );                                                  
-                  }
-                  if(
-                      this.useNormalizedReferences &&
-                      (pathNormalizeLevel != null) &&
-                      ((Number)pathNormalizeLevel).intValue() < 2
-                  ) {
-                      throw new ServiceException(
-                          StackedException.DEFAULT_DOMAIN,
-                          StackedException.INVALID_CONFIGURATION, 
-                          new BasicException.Parameter[]{
-                              new BasicException.Parameter("index", index),
-                              new BasicException.Parameter("path normalize level", pathNormalizeLevel)
-                          },
-                          "The database plugin option " + LayerConfigurationEntries.USE_NORMALIZED_REFERENCES + "=" + Boolean.TRUE + " requires path normalize levels >= 2"
-                      );                                                  
-                  }
-                  // AUTONUM_COLUMN
-                  List autonumColumns = new ArrayList();
-                  String autonumColumnPrefix = (String)dbObject + ".";
-                  for(
-                      ListIterator j = configuration.values(LayerConfigurationEntries.AUTONUM_COLUMN).listIterator();
-                      j.hasNext();
-                  ) {
-                      String autonumColumn = (String)j.next();
-                      if((dbObject != null) && autonumColumn.startsWith(autonumColumnPrefix)) {
-                          autonumColumns.add(
-                              autonumColumn.substring(autonumColumn.indexOf(".") + 1)
-                          );
-                      }
-                  }
-                  // Create db object configuration entry
-                  DbObjectConfiguration entry = new DbObjectConfiguration(
-                      type instanceof Path ? (Path)type : new Path((String)type),
-                      (String)typeName,
-                      (String)dbObject,
-                      (String)dbObject2,
-                      (String)dbObjectFormat,
-                      (String)dbObjectForQuery,
-                      (String)dbObjectForQuery2,
-                      (String)dbObjectsForQueryJoinColumn,
-                      pathNormalizeLevel == null ? -1 : ((Number)pathNormalizeLevel).intValue(),
-                      (String)dbObjectHint,
-                      (String)objectIdPattern,
-                      autonumColumns,
-                      (String)joinTable,
-                      (String)joinColumnEnd1,
-                      (String)joinColumnEnd2
-                  );
-                  // Check that no two entries have the same type name
-                  DbObjectConfiguration entry2 = null;
-                  if((entry2 = (DbObjectConfiguration)this.dbObjectConfigurations.get(entry.getTypeName())) != null) {
-                      throw new ServiceException(
-                          StackedException.DEFAULT_DOMAIN,
-                          StackedException.INVALID_CONFIGURATION, 
-                          new BasicException.Parameter[]{
+                // dbObject
+                Object dbObject = configuration.values(LayerConfigurationEntries.DB_OBJECT).get(index);
+
+                // dbObject2
+                Object dbObject2 = configuration.values(LayerConfigurationEntries.DB_OBJECT_2).get(index);
+                if("".equals(dbObject2)) dbObject2 = null;
+
+                // dbObjectFormat
+                Object dbObjectFormat = configuration.values(LayerConfigurationEntries.DB_OBJECT_FORMAT).get(index);
+
+                // pathNormalizeLevel
+                Object pathNormalizeLevel = configuration.values(LayerConfigurationEntries.PATH_NORMALIZE_LEVEL).get(index);
+
+                // dbObjectForQuery
+                Object dbObjectForQuery = configuration.values(LayerConfigurationEntries.DB_OBJECT_FOR_QUERY).get(index);
+                if("".equals(dbObjectForQuery)) dbObjectForQuery = null;
+
+                // dbObjectForQuery2
+                Object dbObjectForQuery2 = configuration.values(LayerConfigurationEntries.DB_OBJECT_FOR_QUERY_2).get(index);
+                if("".equals(dbObjectForQuery2)) dbObjectForQuery2 = null;
+
+                // dbObjectsForQueryJoinColumn
+                Object dbObjectsForQueryJoinColumn = configuration.values(LayerConfigurationEntries.DB_OBJECTS_FOR_QUERY_JOIN_COLUMN).get(index);
+                if("".equals(dbObjectsForQueryJoinColumn)) dbObjectsForQueryJoinColumn = null;
+
+                // dbObjectHint
+                Object dbObjectHint = configuration.values(LayerConfigurationEntries.DB_OBJECT_HINT).get(index);
+                if("".equals(dbObjectHint)) dbObjectHint = null;
+
+                // objectIdPattern
+                Object objectIdPattern = configuration.values(LayerConfigurationEntries.OBJECT_ID_PATTERN).get(index);
+                if("".equals(objectIdPattern)) objectIdPattern = null;
+
+                // joinTable
+                Object joinTable = configuration.values(LayerConfigurationEntries.JOIN_TABLE).get(index);
+                if("".equals(joinTable)) joinTable = null;
+
+                // joinColumnEnd1
+                Object joinColumnEnd1 = configuration.values(LayerConfigurationEntries.JOIN_COLUMN_END1).get(index);
+                if("".equals(joinColumnEnd1)) joinColumnEnd1 = null;
+
+                // joinColumnEnd2
+                Object joinColumnEnd2 = configuration.values(LayerConfigurationEntries.JOIN_COLUMN_END2).get(index);
+                if("".equals(joinColumnEnd2)) joinColumnEnd2 = null;
+
+                if(
+                        (type instanceof Path || type instanceof String) &&
+                        (typeName instanceof String) &&
+                        ((dbObject == null) || (dbObject instanceof String)) &&                
+                        ((dbObject2 == null) || (dbObject2 instanceof String)) &&                
+                        ((pathNormalizeLevel == null) || (pathNormalizeLevel instanceof Number)) &&
+                        ((dbObjectForQuery == null) || dbObjectForQuery instanceof String) &&
+                        ((dbObjectForQuery2 == null) || dbObjectForQuery2 instanceof String) &&
+                        ((dbObjectHint == null) || dbObjectHint instanceof String) &&
+                        ((objectIdPattern == null) || objectIdPattern instanceof String) ||
+                        ((joinTable == null) || (joinTable instanceof String)) &&                
+                        ((joinColumnEnd1 == null) || (joinColumnEnd1 instanceof String)) &&                
+                        ((joinColumnEnd2 == null) || (joinColumnEnd2 instanceof String)) 
+                ) {
+                    if(
+                            LayerConfigurationEntries.REFERENCE_ID_FORMAT_TYPE_WITH_PATH_COMPONENTS.equals(this.referenceIdFormat) &&
+                            (pathNormalizeLevel != null) &&
+                            ((Number)pathNormalizeLevel).intValue() < 2
+                    ) {
+                        throw new ServiceException(
+                            StackedException.DEFAULT_DOMAIN,
+                            StackedException.INVALID_CONFIGURATION, 
+                            "The database plugin option " + LayerConfigurationEntries.REFERENCE_ID_FORMAT + "=" + LayerConfigurationEntries.REFERENCE_ID_FORMAT_TYPE_WITH_PATH_COMPONENTS + " requires path normalize levels >= 2",
+                            new BasicException.Parameter("index", index),
+                            new BasicException.Parameter("path normalize level", pathNormalizeLevel)
+                        );                                                  
+                    }
+                    if(
+                            this.useNormalizedReferences &&
+                            (pathNormalizeLevel != null) &&
+                            ((Number)pathNormalizeLevel).intValue() < 2
+                    ) {
+                        throw new ServiceException(
+                            StackedException.DEFAULT_DOMAIN,
+                            StackedException.INVALID_CONFIGURATION, 
+                            "The database plugin option " + LayerConfigurationEntries.USE_NORMALIZED_REFERENCES + "=" + Boolean.TRUE + " requires path normalize levels >= 2",
+                            new BasicException.Parameter("index", index),
+                            new BasicException.Parameter("path normalize level", pathNormalizeLevel)
+                        );                                                  
+                    }
+                    // AUTONUM_COLUMN
+                    List autonumColumns = new ArrayList();
+                    String autonumColumnPrefix = (String)dbObject + ".";
+                    for(
+                            ListIterator j = configuration.values(LayerConfigurationEntries.AUTONUM_COLUMN).listIterator();
+                            j.hasNext();
+                    ) {
+                        String autonumColumn = (String)j.next();
+                        if((dbObject != null) && autonumColumn.startsWith(autonumColumnPrefix)) {
+                            autonumColumns.add(
+                                autonumColumn.substring(autonumColumn.indexOf(".") + 1)
+                            );
+                        }
+                    }
+                    // Create db object configuration entry
+                    DbObjectConfiguration entry = new DbObjectConfiguration(
+                        type instanceof Path ? (Path)type : new Path((String)type),
+                            (String)typeName,
+                            (String)dbObject,
+                            (String)dbObject2,
+                            (String)dbObjectFormat,
+                            (String)dbObjectForQuery,
+                            (String)dbObjectForQuery2,
+                            (String)dbObjectsForQueryJoinColumn,
+                            pathNormalizeLevel == null ? -1 : ((Number)pathNormalizeLevel).intValue(),
+                                (String)dbObjectHint,
+                                (String)objectIdPattern,
+                                autonumColumns,
+                                (String)joinTable,
+                                (String)joinColumnEnd1,
+                                (String)joinColumnEnd2
+                    );
+                    // Check that no two entries have the same type name
+                    DbObjectConfiguration entry2 = null;
+                    if((entry2 = (DbObjectConfiguration)this.dbObjectConfigurations.get(entry.getTypeName())) != null) {
+                        throw new ServiceException(
+                            StackedException.DEFAULT_DOMAIN,
+                            StackedException.INVALID_CONFIGURATION, 
+                            "Duplicate type name",
                             new BasicException.Parameter("entry.1", entry.getType()),
                             new BasicException.Parameter("entry.2", entry2.getType())
-                          },
-                          "Duplicate type name"
-                      );                            
-                  }
-                  this.dbObjectConfigurations.put(
-                      entry.getTypeName(),
-                      entry
-                  );
-              }
-              else {
-                throw new ServiceException(
-                  StackedException.DEFAULT_DOMAIN,
-                  StackedException.INVALID_CONFIGURATION, 
-                  new BasicException.Parameter[]{
-                    new BasicException.Parameter("type configuration", "[" + type + "," + dbObject + "," + dbObject2 + "," + dbObjectFormat + "," + dbObjectForQuery + "," + dbObjectForQuery2 + "," + pathNormalizeLevel + "," + dbObjectHint + "," + objectIdPattern + "]")
-                  },
-                  "[type,typeName,dbObject,dbObjectSecondary,dbObjectFormat,dbObjectForQuerySecondary,pathNormalizeLevel,dbObjectHint,objectIdPattern] must be of type [(String|Path),String,String,String,String,String,String,Number,String,String]"
-                );
-              }
+                        );                            
+                    }
+                    this.dbObjectConfigurations.put(
+                        entry.getTypeName(),
+                        entry
+                    );
+                }
+                else {
+                    throw new ServiceException(
+                        StackedException.DEFAULT_DOMAIN,
+                        StackedException.INVALID_CONFIGURATION, 
+                        "[type,typeName,dbObject,dbObjectSecondary,dbObjectFormat,dbObjectForQuerySecondary,pathNormalizeLevel,dbObjectHint,objectIdPattern] must be of type [(String|Path),String,String,String,String,String,String,Number,String,String]",
+                        new BasicException.Parameter("type configuration", "[" + type + "," + dbObject + "," + dbObject2 + "," + dbObjectFormat + "," + dbObjectForQuery + "," + dbObjectForQuery2 + "," + pathNormalizeLevel + "," + dbObjectHint + "," + objectIdPattern + "]")
+                    );
+                }
             }                
             SysLog.detail("typeConfigurationEntry", this.dbObjectConfigurations.values());          
         }
     }
-    
+
     //---------------------------------------------------------------------------
     public DbObjectConfiguration getDbObjectConfiguration(
         Path _path
     ) throws ServiceException {
         Path path = _path.size() % 2 == 0 ? _path.getChild(":*") : _path;
         for(
-            Iterator i = this.dbObjectConfigurations.values().iterator(); 
-            i.hasNext(); 
+                Iterator i = this.dbObjectConfigurations.values().iterator(); 
+                i.hasNext(); 
         ) {
             DbObjectConfiguration dbObjectConfiguration = (DbObjectConfiguration)i.next();
             Path type = dbObjectConfiguration.getType();
@@ -465,13 +451,11 @@ public class DatabaseConfiguration {
         throw new ServiceException(
             StackedException.DEFAULT_DOMAIN,
             StackedException.ASSERTION_FAILURE, 
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path", path)
-            },
-            "No type configuration found for path" 
+            "No type configuration found for path",
+            new BasicException.Parameter("path", path)
         );
     }
-    
+
     //---------------------------------------------------------------------------
     public DbObjectConfiguration getDbObjectConfiguration(
         String typeName
@@ -482,35 +466,33 @@ public class DatabaseConfiguration {
             throw new ServiceException(
                 StackedException.DEFAULT_DOMAIN,
                 StackedException.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("type name", typeName)
-                },
-                "no type configuration found for type name" 
+                "no type configuration found for type name",
+                new BasicException.Parameter("type name", typeName)
             );
         }
         else {
             return dbObjectConfiguration;
         }
     }
-    
+
     //---------------------------------------------------------------------------
     public Collection getDbObjectConfigurations(
     ) {
         return this.dbObjectConfigurations.values();
     }
-    
+
     //---------------------------------------------------------------------------
     public Map getFromToColumnNameMapping(
     ) {
         return this.fromToColumnNameMapping;
     }
-    
+
     //---------------------------------------------------------------------------
     public Map getToFromColumnNameMapping(
     ) {
         return this.toFromColumnNameMapping;
     }
-    
+
     //---------------------------------------------------------------------------
     // Variables
     //---------------------------------------------------------------------------
@@ -527,7 +509,7 @@ public class DatabaseConfiguration {
     // Map containing entries instanceof TypeConfigurationEntry.
     // Key is the type name
     private final Map dbObjectConfigurations;
-      
+
 }
 
 //---End of File -------------------------------------------------------------

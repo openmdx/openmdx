@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TestThreadSafety.java,v 1.7 2008/04/04 11:52:35 hburger Exp $
+ * Name:        $Id: TestThreadSafety.java,v 1.8 2008/08/12 16:38:08 wfro Exp $
  * Description: TestThreadSafety
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:52:35 $
+ * Date:        $Date: 2008/08/12 16:38:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.test.portal.servlet;
 

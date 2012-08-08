@@ -1,27 +1,28 @@
 /*
  * WYMeditor : what you see is What You Mean web-based editor
- * Copyright (C) 2007 H.O.net - http://www.honet.be/
+ * Copyright (c) 2008 Jean-Francois Hovinne, http://www.wymeditor.org/
  * Dual licensed under the MIT (MIT-license.txt)
  * and GPL (GPL-license.txt) licenses.
  *
  * For further information visit:
  *        http://www.wymeditor.org/
- * 
+ *
  * File Name:
  *        wymeditor.css
  *        Main editor css file.
  *        See the documentation for more info.
- * 
+ *
  * File Authors:
- *        Jean-Francois Hovinne (jf.hovinne@wymeditor.org)
- *        Daniel Reszka (d.reszka@wymeditor.org)
+ *        Jean-Francois Hovinne (jf.hovinne a-t wymeditor dotorg)
+ *        Daniel Reszka (d.reszka a-t wymeditor dotorg)
 */
 
 /* VISUAL FEEDBACK */
 
 /* basic */
-  body  { background: #e1e8f1;}
- 
+  body  {background: #e1e8f1;}
+  html, body {margin:0;padding:0;height:100%; /* 100 % height */}
+
 /* make HTML blocs visible */
   p,
   h1,
@@ -51,7 +52,7 @@
   p             { min-height: 1em; } /*min-height is needed under Firefox, because empty parargraphs */
   *+html p      { min-height: auto; } /* but we have to remove it under IE7 because it triggers the 'haslayout' mode */
   td            { height: 1.6em; }
- 
+
 /* labels */
   p         { background-image: url(lbl-p.png); }
   h1        { background-image: url(lbl-h1.png); }

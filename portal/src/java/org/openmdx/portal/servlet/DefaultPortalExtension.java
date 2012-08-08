@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultPortalExtension.java,v 1.39 2008/04/29 18:17:37 wfro Exp $
+ * Name:        $Id: DefaultPortalExtension.java,v 1.42 2008/08/26 23:35:11 wfro Exp $
  * Description: DefaultEvaluator
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/29 18:17:37 $
+ * Date:        $Date: 2008/08/26 23:35:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -202,7 +199,7 @@ public class DefaultPortalExtension
   
     //-------------------------------------------------------------------------
     public boolean isEnabled(
-        String uiElementName, 
+        String elementName, 
         RefObject_1_0 refObj,
         ApplicationContext context
     ) {
@@ -216,20 +213,6 @@ public class DefaultPortalExtension
         return "(" + qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1) + " LIKE ?s0)";
     }
     
-    //-------------------------------------------------------------------------    
-    public int getGridRowNestingLevel(
-        RefObject_1_0 refObj
-    ) {
-        return 0;
-    }
-
-    //-------------------------------------------------------------------------
-    public String getGridRowLevelId(
-        RefObject_1_0 refObj
-    ) {
-        return null;
-    }
-
     //-------------------------------------------------------------------------
     public int getGridPageSize(
         String referencedTypeName

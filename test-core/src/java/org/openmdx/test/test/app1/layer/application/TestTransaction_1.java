@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestTransaction_1.java,v 1.2 2005/04/15 11:35:09 hburger Exp $
+ * Name:        $Id: TestTransaction_1.java,v 1.3 2008/09/10 18:10:56 hburger Exp $
  * Description: TestTransaction_1
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/15 11:35:09 $
+ * Date:        $Date: 2008/09/10 18:10:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,7 +75,7 @@ import org.openmdx.test.kernel.application.container.ejb.cci.Runnable_1LocalHome
  * This plugin rejects empty strings as description
  */
 public class TestTransaction_1
-        extends ProvidingUid_1 {
+extends ProvidingUid_1 {
 
 
     /**
@@ -90,12 +90,12 @@ public class TestTransaction_1
      * Its value is evaluated during prolog and used during epilog 
      */
     private List failures;
-    
+
     /**
      * 
      */
     private Runnable rollbackOnly;
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
      */
@@ -105,7 +105,7 @@ public class TestTransaction_1
     ) throws Exception, ServiceException {
         super.activate(id, configuration, delegation);
         this.rollbackOnly = ((Runnable_1LocalHome)
-            new InitialContext().lookup("java:comp/env/ejb/RollbackOnly")
+                new InitialContext().lookup("java:comp/env/ejb/RollbackOnly")
         ).create();
     }
 
@@ -115,9 +115,9 @@ public class TestTransaction_1
     public void prolog(ServiceHeader header, DataproviderRequest[] requests) throws ServiceException {
         this.failures = new ArrayList();
         for(
-            int i = 0;
-            i < requests.length;
-            i++
+                int i = 0;
+                i < requests.length;
+                i++
         ){
             switch(requests[i].operation()){
                 case DataproviderOperations.OBJECT_CREATION:
@@ -126,8 +126,8 @@ public class TestTransaction_1
                 case DataproviderOperations.OBJECT_SETTING:
                     SparseList description = requests[i].object().getValues("description");
                     if(
-                        description != null && 
-                        "".equals(description.get(0))
+                            description != null && 
+                            "".equals(description.get(0))
                     ) this.failures.add(
                         requests[i].path()
                     );                    
@@ -152,11 +152,9 @@ public class TestTransaction_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("path", this.failures)
-                },
-                TestTransaction_1.class.getName() + " rejects empty strings as description values"
-           );    
+                TestTransaction_1.class.getName() + " rejects empty strings as description values",
+                new BasicException.Parameter("path", this.failures)
+            );    
         }
     }
 

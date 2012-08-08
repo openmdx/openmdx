@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SessionBean_1.java,v 1.14 2008/06/27 16:27:27 wfro Exp $
+ * Name:        $Id: SessionBean_1.java,v 1.16 2008/09/10 08:55:25 hburger Exp $
  * Description: SessionBean_1 class 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 16:27:27 $
+ * Date:        $Date: 2008/09/10 08:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -80,8 +80,8 @@ import org.slf4j.LoggerFactory;
  * Bean_1 is a SessionBean according to EJB 1.1 specification.
  */
 abstract public class SessionBean_1 
-    implements SessionBean, Manageable_1_0, 
-        CommandOptions_1_0, ConfigurationProvider_1_0
+implements SessionBean, Manageable_1_0, 
+CommandOptions_1_0, ConfigurationProvider_1_0
 {
 
     /**
@@ -98,7 +98,7 @@ abstract public class SessionBean_1
      * 
      */
     private Context configurationContext;
-    
+
     /**
      * J-Engine access management
      * 
@@ -112,7 +112,7 @@ abstract public class SessionBean_1
     protected Context getConfigurationContext(){
         return this.configurationContext;
     }
-    
+
     /**
      * To replace the deprecated UIDFactory.create() calls
      * 
@@ -128,7 +128,7 @@ abstract public class SessionBean_1
      */
     protected Logger logger;
 
-    
+
     //------------------------------------------------------------------------
     // Home interface
     //------------------------------------------------------------------------
@@ -158,11 +158,9 @@ abstract public class SessionBean_1
                     exception, 
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.ACTIVATION_FAILURE, 
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("class", getClass().getName()),
-                        new BasicException.Parameter("context", BEAN_ENVIRONMENT)
-                    },
-                    null
+                    null,
+                    new BasicException.Parameter("class", getClass().getName()),
+                    new BasicException.Parameter("context", BEAN_ENVIRONMENT)
                 );
             }
             try {
@@ -175,8 +173,8 @@ abstract public class SessionBean_1
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.ACTIVATION_FAILURE, 
-                    this.options.toExceptionParameters(),
-                    null
+                    null,
+                    this.options.toExceptionParameters()
                 );
             }
         } catch (CreateException exception) {
@@ -190,7 +188,6 @@ abstract public class SessionBean_1
                 error,
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.ASSERTION_FAILURE,
-                null,
                 "Creation of session bean " + this.instanceId + " failed"
             );
             this.logger.error(
@@ -228,7 +225,7 @@ abstract public class SessionBean_1
      * @param ctx   A SessionContext interface for the instance.
      */
     public void setSessionContext(SessionContext ctx) {
-      this.ctx = ctx;
+        this.ctx = ctx;
     }
 
     /**
@@ -303,8 +300,8 @@ abstract public class SessionBean_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.DEACTIVATION_FAILURE, 
-                this.options.toExceptionParameters(),
-                "Removal of session bean " + this.instanceId + " failed"
+                "Removal of session bean " + this.instanceId + " failed",
+                this.options.toExceptionParameters()
             ).log();
         }
     }
@@ -351,11 +348,11 @@ abstract public class SessionBean_1
         //
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements CommandOptions_1_0
     //------------------------------------------------------------------------
-    
+
     /**
      * The JNDI location of the bean's context
      */
@@ -364,7 +361,7 @@ abstract public class SessionBean_1
     /**
      * SessionBeans_1 instances have no parameters
      */
-    final static private String[] BEAN_PARAMETERS = new String[]{}; 
+    final static private String[] BEAN_PARAMETERS = {}; 
 
 
     /**
@@ -381,7 +378,7 @@ abstract public class SessionBean_1
     ) {
         return this.options;
     }
-    
+
     /**
      * Get the parameters.
      * 
@@ -390,7 +387,7 @@ abstract public class SessionBean_1
     public String [] getParameters () {
         return BEAN_PARAMETERS;
     }
-    
+
     /**
      * Define whether the applications task should be executed or not.
      * 
@@ -401,11 +398,11 @@ abstract public class SessionBean_1
         return true;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements ConfigurationProvider_1_0
     //------------------------------------------------------------------------
-    
+
     /**
      * Get a specific configuration
      *
@@ -431,7 +428,7 @@ abstract public class SessionBean_1
             specification
         );      
     }
-    
+
     /**
      * Define a default implementation of configurationSpecifier
      *
@@ -440,12 +437,12 @@ abstract public class SessionBean_1
     protected Map<String,ConfigurationSpecifier> configurationSpecification() {
         return new HashMap<String,ConfigurationSpecifier>();
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Prerequisits
     //------------------------------------------------------------------------
-    
+
     static {
         AbstractApplicationContext_1.getInstance();
     }  	

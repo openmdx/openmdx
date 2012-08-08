@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UIDFactory.java,v 1.6 2008/03/21 20:14:15 hburger Exp $
+ * Name:        $Id: UIDFactory.java,v 1.7 2008/09/10 08:55:31 hburger Exp $
  * Description: Profile Context
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:14:15 $
+ * Date:        $Date: 2008/09/10 08:55:31 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,7 +71,7 @@ import org.openmdx.kernel.text.StringBuilders;
 @SuppressWarnings("unchecked")
 public class UIDFactory
 {
-    
+
     /**
      * Returns a new globally unique ID
      *
@@ -104,9 +104,9 @@ public class UIDFactory
             // Flush and reset the streams for reuse
             outStream.flush();
             byteOutStream.reset();
-    
+
             UID id = new UID();                                 // create a UID
-            
+
             id.write(outStream);                                // stream the UID
             byteOutStream.write(hostAddr);                      // add the host address
             byte[] uidOpaque = byteOutStream.toByteArray();     // get the byte array
@@ -114,7 +114,7 @@ public class UIDFactory
 
             CharSequence   renderedUID = StringBuilders.newStringBuilder();
             String         javaUID     = bigInt.toString(10);   // render the UID
-            
+
             // Prefix with UUID_PREFIX_JAVA_RMI from common.idl
             StringBuilders.asStringBuilder(renderedUID).append(UIDPrefixes.JAVA_RMI);
 
@@ -123,22 +123,20 @@ public class UIDFactory
             for(int ii=javaUID.length(); ii<(UID_RENDER_LEN-1); ii++) {
                 StringBuilders.asStringBuilder(renderedUID).append(PADDING_CHAR);
             }
-            
+
             // Append the rendered UID 
             StringBuilders.asStringBuilder(renderedUID).append(javaUID);
-            
+
             return renderedUID.toString(); 
-                    
+
         }catch(java.io.IOException ex) {
             // This is a critical error condition.
             // Don't throw a ServiceException that can be caught by application code
             BasicException assertionFailure = new BasicException(
-                    ex,
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.ASSERTION_FAILURE,
-                    null,
-                    "UIDFactory: Failure during UID creation"
-            );
+                ex,
+                BasicException.Code.DEFAULT_DOMAIN, 
+                BasicException.Code.ASSERTION_FAILURE,
+                "UIDFactory: Failure during UID creation"            );
             SysLog.error(
                 assertionFailure.getMessage(), 
                 assertionFailure.getCause()
@@ -146,8 +144,8 @@ public class UIDFactory
             throw new Error(assertionFailure.getMessage());
         }
     }
-    
-    
+
+
     /**
      * Initialize the UID Generator
      */
@@ -164,11 +162,10 @@ public class UIDFactory
             // This is a critical error condition.
             // Don't throw a ServiceException that can be caught by application code
             BasicException assertionFailure = new BasicException(
-                    ex,
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.ASSERTION_FAILURE,
-                    null,
-                    "UIDFactory: Failure during initialization"
+                ex,
+                BasicException.Code.DEFAULT_DOMAIN, 
+                BasicException.Code.ASSERTION_FAILURE,
+                "UIDFactory: Failure during initialization"
             );
             SysLog.error(
                 assertionFailure.getMessage(), 
@@ -177,13 +174,13 @@ public class UIDFactory
             throw new Error(assertionFailure.getMessage());
         }
     }
-        
+
     /**
      * The stream objects that convert UUIDs
      */
     private final ByteArrayOutputStream    byteOutStream;
     private final DataOutputStream         outStream;
-        
+
     /**
      * The host address that makes the UIDs global
      */
@@ -200,7 +197,7 @@ public class UIDFactory
      * Keep track of a single UIDFactory per thread.
      */
     private final static WeakHashMap        factories     = new WeakHashMap();
-        
+
 }
 
 

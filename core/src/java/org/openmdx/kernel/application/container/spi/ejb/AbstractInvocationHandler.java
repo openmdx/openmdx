@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractInvocationHandler.java,v 1.3 2008/04/07 18:32:04 hburger Exp $
+ * Name:        $Id: AbstractInvocationHandler.java,v 1.5 2008/09/10 08:55:20 hburger Exp $
  * Description: Abstract Invocation Handler
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/07 18:32:04 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -79,7 +79,7 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
      */
     private final Map<Method,Action> actions = new HashMap<Method,Action>();
 
-    
+
     /**
      * Used to prepare exception messages
      * 
@@ -95,9 +95,9 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
         } else {
             String[] classNames = new String[arguments.length];
             for(
-               int i = 0;
-               i < arguments.length;
-               i++
+                    int i = 0;
+                    i < arguments.length;
+                    i++
             ){
                 classNames[i] = arguments[i] == null ? null : arguments[i].getClass().getName();
             }
@@ -105,7 +105,7 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
         }
     }
 
-    
+
     /**
      * Class array to String array
      * 
@@ -118,11 +118,11 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
     ){
         String[] classNames = new String[classes.length];
         for(
-           int i = 0;
-           i < classes.length;
-           i++
+                int i = 0;
+                i < classes.length;
+                i++
         ){
-           classNames[i] = classes[i].getName();
+            classNames[i] = classes[i].getName();
         }
         return classNames;
     }
@@ -141,20 +141,20 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
     ) throws ClassNotFoundException {
         Class<?>[] classes = new Class<?>[classNames.length];
         for(
-           int i = 0;
-           i < classNames.length;
-           i++
+                int i = 0;
+                i < classNames.length;
+                i++
         ){
-           classes[i] = Classes.getApplicationClass(classNames[i]);
+            classes[i] = Classes.getApplicationClass(classNames[i]);
         }
         return classes;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements InvocationHandler
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
@@ -172,8 +172,8 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
                 );
                 if (interfaces.length > 0) {
                     String interfaceName = interfaces[
-                         interfaces[0] == Remote.class && interfaces.length > 1 ? 1 : 0
-                    ].getName();
+                                                      interfaces[0] == Remote.class && interfaces.length > 1 ? 1 : 0
+                                                          ].getName();
                     reply.append(
                         interfaceName.substring(interfaceName.lastIndexOf('.') + 1)
                     ).append(
@@ -190,18 +190,17 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
             } else if ("equals".equals(methodName)) {
                 Object that = args[0];
                 return proxy == that || (
-                    that != null &&
-                    Proxy.isProxyClass(that.getClass()) &&
-                    equals(Proxy.getInvocationHandler(that))
+                        that != null &&
+                        Proxy.isProxyClass(that.getClass()) &&
+                        equals(Proxy.getInvocationHandler(that))
                 );
             } else throw new BasicException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("object", this),
-                    new BasicException.Parameter("methodName", this)
-                },
-                "Unexpected method for class " + Object.class
+                "Unexpected method for class " + Object.class,
+
+                new BasicException.Parameter("object", this),
+                new BasicException.Parameter("methodName", this)
             );
         } else {
             return getAction(method).invoke(args);
@@ -247,8 +246,8 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
     ) throws BasicException {
         Action action = this.actions.get(method);
         if(action == null) this.actions.put(
-             method,
-             action = getAction(method.getName(), method.getParameterTypes())
+            method,
+            action = getAction(method.getName(), method.getParameterTypes())
         );
         return action;
     }
@@ -271,7 +270,7 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
             name, 
             argumentClasses, 
             getFormalTypes(argumentClasses)
-       );
+        );
     }
 
     /**
@@ -293,20 +292,19 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
         throw new BasicException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("object", this),
-                new BasicException.Parameter("methodName", this),
-                new BasicException.Parameter("argumentClasses", argumentClassNames)
-            },
-            "The requested method is not supported"
+            "The requested method is not supported",
+
+            new BasicException.Parameter("object", this),
+            new BasicException.Parameter("methodName", this),
+            new BasicException.Parameter("argumentClasses", (Object[])argumentClassNames)
         );
     }
 
-    
+
     //------------------------------------------------------------------------
     // Class Action
     //------------------------------------------------------------------------
-    
+
     /**
      * Action
      */
@@ -324,7 +322,7 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
         Object invoke(
             Object[] arguments
         ) throws Exception;
-        
+
     }
 
 }

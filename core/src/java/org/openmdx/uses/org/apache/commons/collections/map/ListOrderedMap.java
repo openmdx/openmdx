@@ -62,7 +62,7 @@ import org.openmdx.uses.org.apache.commons.collections.list.UnmodifiableList;
  * This class is Serializable from Commons Collections 3.1.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.5 $ $Date: 2008/06/28 00:21:22 $
+ * @version $Revision: 1.6 $ $Date: 2008/09/05 23:18:47 $
  * 
  * @author Henri Yandell
  * @author Stephen Colebourne
@@ -392,7 +392,7 @@ public class ListOrderedMap
      * then (2) insert the new key-value mapping at the position it
      * would have been inserted had the remove not ocurred.
      *
-     * @param index  the index at which the mapping should be inserted
+     * @param _index  the index at which the mapping should be inserted
      * @param key  the key
      * @param value  the value
      * @return the value previously mapped to the key

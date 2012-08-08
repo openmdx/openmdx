@@ -1083,4 +1083,45 @@ REM OPENMDX_TEST nostate1_NATIVE
 	p$$state_c__oid VARCHAR2 (256) NULL
 );
 
-    
+REM OPENMDX_TEST aspect
+
+  drop table aspect_Segment
+  ;
+
+  drop table aspect_Object
+  ;
+
+  drop table aspect_Object_
+  ;
+
+ CREATE TABLE aspect_Segment (
+	object_id VARCHAR2 (100) NOT NULL ,
+	object__class VARCHAR2 (100) NULL ,
+	description VARCHAR2 (200) NULL 
+  )
+  ;
+
+  CREATE TABLE aspect_Object (
+	object_id VARCHAR2 (100) NOT NULL ,
+	object__class VARCHAR2 (100) NULL ,
+	core VARCHAR2 (100) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL ,
+	created_by_ NUMBER(10, 0) NULL ,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL ,
+	modified_by_ NUMBER(10, 0) NULL ,
+	string VARCHAR2 (200) NULL ,	
+	prime_ NUMBER(10, 0) NULL ,
+	url VARCHAR2 (200) NULL
+  )
+  ;
+
+  CREATE TABLE aspect_Object_ (
+	object_id VARCHAR2 (100) NOT NULL ,
+	object_idx INTEGER NOT NULL ,
+	object__class VARCHAR2 (100) NULL ,
+	created_by VARCHAR2 (200) NULL ,
+	modified_by VARCHAR2 (200) NULL ,
+	prime NUMBER(10, 0) NULL
+  )
+  ;
+

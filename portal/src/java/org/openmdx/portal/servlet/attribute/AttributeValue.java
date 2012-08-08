@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValue.java,v 1.59 2008/04/04 17:01:09 hburger Exp $
+ * Name:        $Id: AttributeValue.java,v 1.62 2008/09/10 09:31:01 wfro Exp $
  * Description: AttributeValue
- * Revision:    $Revision: 1.59 $
+ * Revision:    $Revision: 1.62 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:09 $
+ * Date:        $Date: 2008/09/10 09:31:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 
@@ -612,7 +609,7 @@ implements Serializable {
                     int maxLength = this instanceof TextValue
                     ? ((TextValue)this).getMaxLength()
                         : Integer.MAX_VALUE;
-                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\"" + p.getOnClick("javascript: editstrings_maxLength=" + maxLength, "; multiValuedHigh=", this.getUpperBound("10"), "; return editstrings_showPopup(this.id, '", EditObjectControl.POPUP_EDIT_STRINGS, "', $('", id, "'), new Array());")));
+                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\"" + p.getOnClick("javascript: editstrings_maxLength=" + maxLength, "; multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_STRINGS, " = ", EditObjectControl.EDIT_STRINGS, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_STRINGS, ", 'popup_", EditObjectControl.EDIT_STRINGS, "', $('", id, "'), new Array());")));
                 }
                 p.write("</td>");
             }
@@ -640,7 +637,6 @@ implements Serializable {
                         else {
                             styleModifier += "height:" + (1.2+(attribute.getSpanRow()-1)*1.5) + "em;\"";
                             p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " ",  styleModifier, ">");
-                            p.write(p.getImg("src=\"", p.getResourcePath("images/inspect_up"), p.getImgType(), "\" border=\"0\" alt=\"o\" title=\"\"", p.getOnClick("javascript:if(document.getElementById('attributeValue')) {document.getElementById('attributeValue').innerHTML=this.nextSibling.innerHTML;}; if (document.getElementById('panelObjX')) {document.getElementById('panelObjX').style.display='block';};"), p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';")));
                             p.write("<div class=\"fieldSpanned\" ", styleModifier, ">");
                             this.application.getPortalExtension().renderTextValue(p, stringifiedValue);
                             p.write("</div>");
@@ -648,9 +644,9 @@ implements Serializable {
                     }
                     else {
                         styleModifier += "\"";
-                        CharSequence iconTag = this.getIconKey() == null
-                            ? ""
-                            : "" + p.getImg("src=\"", p.getResourcePath("images/"), this.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/spacer"), p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");                                                                      
+                        CharSequence iconTag = this.getIconKey() == null ? 
+                            "" : 
+                            "" + p.getImg("src=\"", p.getResourcePath("images/"), this.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/spacer"), p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");                                                                      
                         p.write("<td ",  rowSpanModifier, " class=\"valueL\" ", widthModifier, " ", styleModifier, ">");
                         p.write("<div class=\"field\">", iconTag);
                         this.application.getPortalExtension().renderTextValue(p, stringifiedValue);

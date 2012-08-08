@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StackedException.java,v 1.9 2007/10/10 16:06:03 hburger Exp $
+ * Name:        $Id: StackedException.java,v 1.10 2008/09/10 08:55:22 hburger Exp $
  * Description: Stacked Exceptions
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:03 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -404,7 +404,7 @@ public final class StackedException
         int exceptionCode,
         Parameter[] parameters,
         String description) {
-        super(exceptionDomain, exceptionCode, parameters, description);
+        super(exceptionDomain, exceptionCode, description, parameters);
     }
 
     /**
@@ -424,8 +424,8 @@ public final class StackedException
             throwable,
             exceptionDomain,
             exceptionCode,
-            parameters,
-            description
+            description,
+            parameters
         );
     }
 

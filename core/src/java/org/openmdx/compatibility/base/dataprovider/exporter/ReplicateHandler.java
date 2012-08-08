@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReplicateHandler.java,v 1.17 2008/05/12 10:45:50 wfro Exp $
+ * Name:        $Id: ReplicateHandler.java,v 1.20 2008/09/10 08:55:29 hburger Exp $
  * Description: handler for replicating a target provider to a source
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/12 10:45:50 $
+ * Date:        $Date: 2008/09/10 08:55:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -91,15 +91,15 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
  */
 @SuppressWarnings("unchecked")
 public class ReplicateHandler 
-    implements TraversalHandler, ErrorHandler {
+implements TraversalHandler, ErrorHandler {
 
-  /**
-   * 
-   */
-  public ReplicateHandler() {
-    super();
-    // TODO Auto-generated constructor stub
-  }
+    /**
+     * 
+     */
+    public ReplicateHandler() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
 
     /**
      * Constructor for a ReplicateHandler.
@@ -140,7 +140,7 @@ public class ReplicateHandler
     public boolean startReference(
         String reference
     ) throws ServiceException {
-        
+
         treatCollectedStates();
 
         return true;
@@ -172,35 +172,35 @@ public class ReplicateHandler
         if (this.lastOperation != OPERATION_UNSET) {
             throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
+                "Operation setting was not consumed as expected. Possible violation of protocol.",
                 new Parameter[] {
-                    new Parameter("qualifiedName", qualifiedName),
-                    new Parameter("qualifierName", qualifierName),
-                    new Parameter("id", id),
-                    new Parameter("operation", operation),
-                    new Parameter("last operation", this.lastOperation)
-                },
-                "Operation setting was not consumed as expected. Possible violation of protocol."
+                new Parameter("qualifiedName", qualifiedName),
+                new Parameter("qualifierName", qualifierName),
+                new Parameter("id", id),
+                new Parameter("operation", operation),
+                new Parameter("last operation", this.lastOperation)
+            }
             );
         }
         this.lastOperation = operation;
-        
+
         if (this.objectStates != null) {
             if (!this.objectStatesQualifiedName.equals(qualifiedName) 
-                ||
-                !this.objectStatesId.equals(id)
+                    ||
+                    !this.objectStatesId.equals(id)
             ) {
                 treatCollectedStates();
             }
             // else still same object, different state of it
         }
-        
+
         // the states have been treated, must restart
         if (this.objectStates == null) {
             this.objectStates = new ArrayList();
             this.objectStatesQualifiedName = qualifiedName;
             this.objectStatesId = id;
         }
-        
+
         return true;
     }
 
@@ -220,7 +220,7 @@ public class ReplicateHandler
     ) throws ServiceException {
         return null;
     }
-    
+
     /**
      * Object with all features.
      *
@@ -233,46 +233,46 @@ public class ReplicateHandler
         StopWatch_1.instance().startTimer("featureComplete");
 
         SysLog.detail("featureComplete, op: " + this.lastOperation , object);
-        
+
         // consume operation
         if (this.lastOperation == OPERATION_UNSET) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
+                "Operation was not renewed; possible violation of protocol.",
                 new Parameter[] {
                     new Parameter("last operation", this.lastOperation)
-                },
-                "Operation was not renewed; possible violation of protocol."
+                }
             );
         }
         short operation = this.lastOperation;
         this.lastOperation = OPERATION_UNSET;
-        
+
         if (object.path().toUri().indexOf(this.objectStatesId) <0) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
+                "Object is not the one currently treated.",
                 new Parameter[] {
                     new Parameter("current object id", this.objectStatesId),
                     new Parameter("object.path", object.path())
-                },
-                "Object is not the one currently treated."
+                }
             );
-            
+
         }
 
         if (operation == TraversalHandler.SET_OP 
-            && object.getValues(SystemAttributes.OBJECT_CLASS) != null
-            && !object.getValues(SystemAttributes.OBJECT_CLASS).equals("org:openmdx:base:Authority")
+                && object.getValues(SystemAttributes.OBJECT_CLASS) != null
+                && !object.getValues(SystemAttributes.OBJECT_CLASS).equals("org:openmdx:base:Authority")
         ) {
-            
+
             DataproviderObject syncObject = mapRequestObject(object);
-    
+
             // just collect that state, regardless if is is stated or roled or not at all
             // but leave out empty states, which belong to the currently treated
             // object
             if (object.attributeNames().size() > 2 &&
-                object.path().toUri().indexOf(this.objectStatesId) >= 0
+                    object.path().toUri().indexOf(this.objectStatesId) >= 0
             ) {
                 this.objectStates.add(syncObject);
             }
@@ -303,7 +303,7 @@ public class ReplicateHandler
             this.model.getDereferencedType(objectClassName);
 
         for (Iterator refIter = objectClass.getValues("feature").iterator();
-            refIter.hasNext();
+        refIter.hasNext();
         ) {
             String featureName = ((Path) refIter.next()).getBase();
 
@@ -327,7 +327,7 @@ public class ReplicateHandler
                     Map objectMap = new HashMap();
 
                     for (Iterator objIter = objects.iterator();
-                        objIter.hasNext();
+                    objIter.hasNext();
                     ) {
                         DataproviderObject_1_0 object =
                             (DataproviderObject_1_0) objIter.next();
@@ -338,7 +338,7 @@ public class ReplicateHandler
                     }
 
                     for (Iterator del = objectMap.values().iterator();
-                        del.hasNext();
+                    del.hasNext();
                     ) {
                         DataproviderObject_1_0 targetObject =
                             (DataproviderObject_1_0) del.next();
@@ -365,16 +365,15 @@ public class ReplicateHandler
     ) throws ServiceException {
         // objectStates is always in use.
         StopWatch_1.instance().startTimer("referenceComplete");
-        
+
         treatCollectedStates();
-        
-        if (reference.endsWith(new String[]{RoleAttributes.REF_ROLE})) {
+
+        if (reference.getBase().equals(RoleAttributes.REF_ROLE)) {
             removeSuperfluousRoles(reference, sourceIds);
         }
         else {
             removeSuperfluousObjects(reference, sourceIds);
-        }
-        
+        }        
         StopWatch_1.instance().stopTimer("referenceComplete");
     }
 
@@ -387,7 +386,7 @@ public class ReplicateHandler
      */
     public void startTraversal(List startPaths) throws ServiceException {
         this.writeRequestDispenser.startTraversal();
-        
+
         this.deletedObjects = new HashSet();
     }
 
@@ -427,7 +426,7 @@ public class ReplicateHandler
     ) throws ServiceException {
         // rollback !!
     }
-    
+
     /**
      * Can not handle error and continue; throw exception which should result 
      * in a fatalError.
@@ -438,8 +437,8 @@ public class ReplicateHandler
         SysLog.error("Can not handle error", error);
         throw new ServiceException(error);
     }
-    
-    
+
+
     /**
      * report the warning and continue.
      */
@@ -461,32 +460,32 @@ public class ReplicateHandler
         StopWatch_1.instance().startTimer("treatCollectedStates");
 
         if (this.objectStates != null) {
-        
+
             if (this.objectStates.size() > 0) {
                 // System.out.println("#### Treat states of " + this._objectStatesId);
-                
+
                 boolean isToplevelObject = false;
-                
+
                 DataproviderObject object = (DataproviderObject)
-                    this.objectStates.iterator().next();
-                
+                this.objectStates.iterator().next();
+
                 // every object with one or more states is a top level object,
                 // if there is no top level object starting with the same path
                 if (isToplevelObject = isToplevelObjectPath(object.path())) {
                     ensureExistenceOfParents(object);  
                 }
                 this.writeRequestDispenser.startObject(isToplevelObject);
-                    
+
                 if (this.model.isSubtypeOf(object, "org:openmdx:compatibility:state1:BasicState")) {
                     applyStates(objectStates, new HashMap() /* _rolesPerState*/ );
                 }
                 else {
                     setNonStatedObject(object);
                 }
-                
+
                 this.writeRequestDispenser.endObject(isToplevelObject);
             }
-        
+
             this.objectStatesId = null;
             this.objectStates = null;
             this.objectStatesQualifiedName = null;
@@ -504,7 +503,7 @@ public class ReplicateHandler
      * @return boolean
      */
     protected boolean isCompositeReference(DataproviderObject_1_0 elementType)
-        throws ServiceException {
+    throws ServiceException {
         boolean isComposite = false;
 
         if (elementType.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:omg:model1:Reference")
@@ -521,8 +520,8 @@ public class ReplicateHandler
 
         return isComposite;
     }
-    
-    
+
+
     /** 
      * Returns true if the path has already been identified as leading to a 
      * top level object or there is no top level object for the path supplied.
@@ -545,37 +544,37 @@ public class ReplicateHandler
     protected boolean isToplevelObjectPath(
         Path path
     ) {
-      boolean isToplevel = false;
+        boolean isToplevel = false;
 
-      int size = path.size();
+        int size = path.size();
 
-      if (size == (SEGMENT_PATH_LENGTH)
-          || size == (SEGMENT_PATH_LENGTH + 2)
-      ) {
-          isToplevel = true;
-      } else {
-          isToplevel = true;
-          for (Iterator i = this.mappedStartPaths.iterator();
-              i.hasNext() && isToplevel;
-          ) {
-              Path startPath = (Path) i.next();
-              
-              if (path.startsWith(startPath)) {
-                  isToplevel = false;
-              }
-          }
-          
-          // don't add the ones beeing found based on the length,
-          // to keep the collection small
-          if (isToplevel) {
-              this.mappedStartPaths.add(path);
-          }
-      }
+        if (size == (SEGMENT_PATH_LENGTH)
+                || size == (SEGMENT_PATH_LENGTH + 2)
+        ) {
+            isToplevel = true;
+        } else {
+            isToplevel = true;
+            for (Iterator i = this.mappedStartPaths.iterator();
+            i.hasNext() && isToplevel;
+            ) {
+                Path startPath = (Path) i.next();
 
-      return isToplevel;
-      
+                if (path.startsWith(startPath)) {
+                    isToplevel = false;
+                }
+            }
+
+            // don't add the ones beeing found based on the length,
+            // to keep the collection small
+            if (isToplevel) {
+                this.mappedStartPaths.add(path);
+            }
+        }
+
+        return isToplevel;
+
     }
-    
+
 
     /**
      * Decide if the path is within a segment.
@@ -588,13 +587,13 @@ public class ReplicateHandler
     ) {
         return path.size() > SEGMENT_PATH_LENGTH;
     }
-    
+
     protected boolean isRolePath(
         Path path
     ) {
         return 
-            path.get(path.size()-2).equals(RoleAttributes.REF_ROLE) 
-            || path.get(path.size()-1).equals(RoleAttributes.REF_ROLE);
+        path.get(path.size()-2).equals(RoleAttributes.REF_ROLE) 
+        || path.get(path.size()-1).equals(RoleAttributes.REF_ROLE);
     }
 
 
@@ -623,21 +622,21 @@ public class ReplicateHandler
                 // only in case of noTransaction or OBJECT_TRANSACTION the data
                 // has already been written 
                 if ((this.writeRequestDispenser.getTransactionBehavior() == NO_TRANSACTION 
-                      ||
-                     this.writeRequestDispenser.getTransactionBehavior() == OBJECT_TRANSACTION
-                    ) 
-                    &&
-                    se.getExceptionStack().getExceptionCode() == BasicException.Code.NOT_FOUND
+                        ||
+                        this.writeRequestDispenser.getTransactionBehavior() == OBJECT_TRANSACTION
+                ) 
+                &&
+                se.getExceptionStack().getExceptionCode() == BasicException.Code.NOT_FOUND
                 ) {
                     throw new ServiceException(
                         se,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
+                        "No parent for object.", 
                         new Parameter[] {
                             new Parameter("object path", mappedObject.path()),
                             new Parameter("parent path", parentPath)
-                        }, 
-                        "No parent for object."
+                        }
                     );
                 } 
                 else {
@@ -676,16 +675,16 @@ public class ReplicateHandler
             );
         }
 
-//        List lastValidTo = new ArrayList();
-//        lastValidTo.add(new String("initialDummy")); 
+//      List lastValidTo = new ArrayList();
+//      lastValidTo.add(new String("initialDummy")); 
         for (Iterator s = states.iterator(); s.hasNext();) {
             DataproviderObject reqObj =
                 new DataproviderObject((DataproviderObject_1_0) s.next());
 
             toStatelessPath(reqObj.path());
-//            Path createPath = createCorePath(reqObj.path());
-//
-//            reqObj.path().setTo(createPath);
+//          Path createPath = createCorePath(reqObj.path());
+
+//          reqObj.path().setTo(createPath);
 
             RequestCollection requests =
                 this.writeRequestDispenser.getRequestCollection();
@@ -696,14 +695,14 @@ public class ReplicateHandler
                 + " validTo: " + reqObj.getValues(State_1_Attributes.VALID_TO)
             );
 
-//            if (lastValidTo.equals(reqObj.getValues(State_1_Attributes.VALID_FROM))) {
-//                requests.addReplaceRequest(reqObj);
-//            }
-//            else {
-//                requests.addCreateRequest(reqObj);
-//            }
-//            lastValidTo = reqObj.getValues(State_1_Attributes.VALID_TO);
-            
+//          if (lastValidTo.equals(reqObj.getValues(State_1_Attributes.VALID_FROM))) {
+//          requests.addReplaceRequest(reqObj);
+//          }
+//          else {
+//          requests.addCreateRequest(reqObj);
+//          }
+//          lastValidTo = reqObj.getValues(State_1_Attributes.VALID_TO);
+
             if (count++ == 0 || isRolePath(reqObj.path())) {
                 requests.addCreateRequest(reqObj);
             } else {
@@ -719,7 +718,7 @@ public class ReplicateHandler
      * @param newState
      */
     protected void replaceObjectState(DataproviderObject_1_0 newState)
-        throws ServiceException {
+    throws ServiceException {
         DataproviderObject reqObj =
             new DataproviderObject(newState);
 
@@ -743,7 +742,7 @@ public class ReplicateHandler
      * @throws ServiceException
      */
     private void createRoleOfState(DataproviderObject_1_0 role)
-        throws ServiceException {
+    throws ServiceException {
         String roleName = findRole(role, null);
 
         DataproviderObject reqObj = new DataproviderObject(role);
@@ -770,7 +769,7 @@ public class ReplicateHandler
      * @throws ServiceException
      */
     private void updateRoleOfState(DataproviderObject_1_0 role)
-        throws ServiceException {
+    throws ServiceException {
         String roleName = findRole(role, null);
 
         DataproviderObject reqObj = new DataproviderObject(role);
@@ -803,11 +802,11 @@ public class ReplicateHandler
 
         while (size > 0) {
             if ("role".equals(path.get(size - 1))
-                || "state".equals(path.get(size - 1))
+                    || "state".equals(path.get(size - 1))
             ) {
                 path.remove(--size);
             } else if ("role".equals(path.get(size - 2))
-                || "state".equals(path.get(size - 2))
+                    || "state".equals(path.get(size - 2))
             ) {
                 path.remove(--size);
                 path.remove(--size);
@@ -819,7 +818,7 @@ public class ReplicateHandler
 
         return path;
     }
-    
+
     /**
      * remove state references from the path supplied. 
      *
@@ -828,15 +827,15 @@ public class ReplicateHandler
      */
     protected Path toStatelessPath(Path path) {
         int size = path.size();
-        
+
         while (size > 0) {
             if (State_1_Attributes.REF_VALID.equals(path.get(size - 1))
-                || State_1_Attributes.REF_STATE.equals(path.get(size - 1))
+                    || State_1_Attributes.REF_STATE.equals(path.get(size - 1))
             ) {
                 path.remove(--size);
             } 
             else if (State_1_Attributes.REF_VALID.equals(path.get(size - 2))
-                || State_1_Attributes.REF_STATE.equals(path.get(size - 2))
+                    || State_1_Attributes.REF_STATE.equals(path.get(size - 2))
             ) {
                 path.remove(--size);
                 path.remove(--size);
@@ -845,7 +844,7 @@ public class ReplicateHandler
                 size = 0;
             }
         }
-    
+
         return path;
     }
 
@@ -870,7 +869,7 @@ public class ReplicateHandler
         DataproviderObject_1_0 referencedType = types[2];
 
         for (Iterator i = referencedType.values("allSupertype").iterator();
-            i.hasNext();
+        i.hasNext();
         ) {
             if ("org:openmdx:compatibility:state1:State".equals(((Path) i.next()).getBase())) {
                 leadsToStated = true;
@@ -899,8 +898,8 @@ public class ReplicateHandler
         String roleName = null;
 
         if ((object != null)
-            && (object.getValues(RoleAttributes.IN_ROLE) != null)
-            && (object.getValues(RoleAttributes.IN_ROLE).size() > 0)
+                && (object.getValues(RoleAttributes.IN_ROLE) != null)
+                && (object.getValues(RoleAttributes.IN_ROLE).size() > 0)
         ) {
             roleName = (String) object.getValues(RoleAttributes.IN_ROLE).get(0);
 
@@ -970,7 +969,7 @@ public class ReplicateHandler
                     toStatelessPath(new Path(targetObj.path())),
                     targetObj
                 );
-                
+
             } else {
                 targetIdMap.put(
                     targetObj.path(),
@@ -992,7 +991,7 @@ public class ReplicateHandler
         }
 
         for (Iterator tIter = targetIdMap.entrySet().iterator();
-            tIter.hasNext();
+        tIter.hasNext();
         ) {
             Map.Entry entry = (Map.Entry) tIter.next();
             Path tPath = (Path) entry.getKey();
@@ -1006,21 +1005,21 @@ public class ReplicateHandler
 
             mappedSourcePaths.remove(tPath);
         }
-        
+
         // all objects should be existing in the target by now 
         // only in case of noTransaction the data has already been written 
         if (this.writeRequestDispenser.getTransactionBehavior() == NO_TRANSACTION
-            && mappedSourcePaths.size() > 0
+                && mappedSourcePaths.size() > 0
         ) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new Parameter[] {
+                "Missing objects in target provider.", new Parameter[] {
                     new Parameter("missingObjects", mappedSourcePaths)
-                }, "Missing objects in target provider."
+                }
             );
         }
-        
+
         StopWatch_1.instance().stopTimer("removeSuperfluousObjects");
 
     }
@@ -1039,7 +1038,7 @@ public class ReplicateHandler
         StopWatch_1.instance().startTimer("removeSuperfluousRoles");
 
         Path objectReference = createCorePath(roleReference);
-        
+
         boolean leadsToStatedClass = leadsToStatedClass(objectReference.getParent());
 
         List objects = null; 
@@ -1060,7 +1059,7 @@ public class ReplicateHandler
                             LOCAL_PATH
                         )
                     );
-    
+
                 objects = new ArrayList();
                 objects.add(roleObject);
             } // TODO: is this the correct solution? or would a find for objId/role deliver better results?
@@ -1072,22 +1071,22 @@ public class ReplicateHandler
                 else {
                     throw se;
                 }
-                
+
             }
         }
-        
+
         Set requiredRoles = new HashSet();
         for (Iterator roleIter = objectIds.iterator(); roleIter.hasNext();) {
             requiredRoles.add(((Path) roleIter.next()).getBase());
         }
-        
+
         // search for the roles existing in any one state
         Map existingRoles = new HashMap(); // collect a state for each role
         for (Iterator o = objects.iterator(); o.hasNext();) {
             DataproviderObject_1_0 roleObject = (DataproviderObject_1_0) o.next();
             if (roleObject.getValues(RoleAttributes.HAS_ROLE) != null) {
                 for (Iterator r = roleObject.getValues(RoleAttributes.HAS_ROLE).iterator();
-                    r.hasNext();
+                r.hasNext();
                 ) {
                     String role = (String)r.next();
                     existingRoles.put(role, roleObject);
@@ -1098,30 +1097,30 @@ public class ReplicateHandler
         // check for missing role
         // only in case of noTransaction the data has already been written 
         if (this.writeRequestDispenser.getTransactionBehavior() == NO_TRANSACTION
-            && !existingRoles.keySet().containsAll(requiredRoles)
+                && !existingRoles.keySet().containsAll(requiredRoles)
         ){
             // Error: all roles should be existing in the target by now 
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
+                "Missing roles in target provider.", 
                 new Parameter[] {
                     new Parameter("roleReference", roleReference),
                     new Parameter("existingRoles", existingRoles),
                     new Parameter("requiredRoles", requiredRoles)
-                }, 
-                "Missing roles in target provider."
+                }
             );
         }
-        
+
         // now remove the superfluous roles
         if (!requiredRoles.containsAll(existingRoles.keySet())) {
             existingRoles.keySet().removeAll(requiredRoles);
-            
+
             for (Iterator r = existingRoles.entrySet().iterator(); 
-                r.hasNext();
+            r.hasNext();
             ) {
                 Map.Entry entry = (Map.Entry)r.next();
-                
+
                 deleteExistingObject(
                     (DataproviderObject_1_0)entry.getValue(), 
                     (String)entry.getKey()
@@ -1131,7 +1130,7 @@ public class ReplicateHandler
 
         StopWatch_1.instance().stopTimer("removeSuperfluousRoles");
     }
-    
+
 
     /**
      * Map the object received to a request object.
@@ -1178,7 +1177,7 @@ public class ReplicateHandler
 
         return result;
     }
-    
+
 
     /**
      * Map the path received to a request path. If pathIsLocal is set, the path
@@ -1201,7 +1200,7 @@ public class ReplicateHandler
 
         // search for the mapping path:
         for (Iterator iter = this.pathMap.keySet().iterator();
-            iter.hasNext() && (newPath == null);
+        iter.hasNext() && (newPath == null);
         ) {
             Path mappingPath = (Path) iter.next();
 
@@ -1217,11 +1216,11 @@ public class ReplicateHandler
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
+                "no mapping path for object path.",
                 new Parameter[] {
                     new Parameter("original path", receivedPath),
                     new Parameter("path map", this.pathMap)
-                },
-                "no mapping path for object path."
+                }
             );
         }
 
@@ -1250,7 +1249,7 @@ public class ReplicateHandler
         boolean insideSyncSet = false;
 
         for (Iterator sp = this.mappedStartPaths.iterator();
-            sp.hasNext() && !insideSyncSet;
+        sp.hasNext() && !insideSyncSet;
         ) {
             Path startPath = (Path) sp.next();
 
@@ -1298,9 +1297,9 @@ public class ReplicateHandler
 
         // can not delete RoleTypes
         if (!this.model.isSubtypeOf(
-                object.getValues("object_class").get(0),
-                "org:openmdx:compatibility:role1:RoleType"
-            )
+            object.getValues("object_class").get(0),
+            "org:openmdx:compatibility:role1:RoleType"
+        )
         ) {
             // TODO ev. cast object for the right isSubtypeOf Method...
             //            ServiceHeader header = _header;
@@ -1329,7 +1328,7 @@ public class ReplicateHandler
             //            }
             RequestCollection requests =
                 this.writeRequestDispenser.getRequestCollection();
-            
+
             // only delete the object if it has not already been deleted.
             // Most important in a long transaction and for deletion of roles.
             if (this.deletedObjects.add(createCorePath(object.path()))) {
@@ -1366,7 +1365,7 @@ public class ReplicateHandler
         // not found exception is an error. The object should already exist.
         return object;
     }
-    
+
 
     /**
      * Get existing state within the timespan [validFrom, validTo).
@@ -1387,29 +1386,29 @@ public class ReplicateHandler
         SparseList validTo
     ) throws ServiceException {
         DataproviderObject_1_0 result = null;
-        
+
         // NOTE: find would be possible now with identity filter!
         // must do a get to find the state of exactly that objects role.
         // Find would return the states matching the criteria of all objects.
-        
+
         RequestCollection requests = 
             this.readRequestDispenser.getTimedRequestCollection(
                 (String) (validFrom == null ? 
+                    null : 
+                        (validFrom.size() == 0 ? 
                             null : 
-                            (validFrom.size() == 0 ? 
-                                null : 
                                 validFrom.get(0)
-                            )
+                        )
                 ),
                 (String) (validTo == null ? 
+                    null : 
+                        (validTo.size() == 0 ? 
                             null : 
-                            (validTo.size() == 0 ? 
-                                null : 
                                 validTo.get(0)
-                            )
+                        )
                 )
             );
-        
+
 
         if (role != null) {
             result = requests.addGetRequest(corePath.add("role").add(role));
@@ -1460,15 +1459,14 @@ public class ReplicateHandler
                 // header.requestedAt)
                 FilterProperty dummyFilter =
                     new FilterProperty(Quantors.FOR_ALL,
-                        State_1_Attributes.VALID_TO, FilterOperators.IS_NOT_IN,
-                        new Object[] {  }
+                        State_1_Attributes.VALID_TO, FilterOperators.IS_NOT_IN
                     );
 
                 // and of course we are only interested in valid states
                 FilterProperty validFilter =
                     new FilterProperty(Quantors.FOR_ALL,
                         State_1_Attributes.INVALIDATED_AT,
-                        FilterOperators.IS_IN, new Object[] {  }
+                        FilterOperators.IS_IN
                     );
 
                 filters[0] = dummyFilter;
@@ -1486,7 +1484,7 @@ public class ReplicateHandler
                 );
         }
         // don't care about NOT_FOUND exceptions
-         catch (ServiceException e) {
+        catch (ServiceException e) {
             if (e.getExceptionStack().getExceptionCode() != BasicException.Code.NOT_FOUND
             ) {
                 throw e;
@@ -1547,8 +1545,8 @@ public class ReplicateHandler
             Map rolesToDelete = new HashMap();
 
             for (Iterator t = targetStates.iterator(), s =
-                    sourceStates.iterator();
-                t.hasNext() && s.hasNext() && equalIntervals;
+                sourceStates.iterator();
+            t.hasNext() && s.hasNext() && equalIntervals;
             ) {
                 DataproviderObject_1_0 target =
                     (DataproviderObject_1_0) t.next();
@@ -1557,23 +1555,23 @@ public class ReplicateHandler
 
                 equalIntervals =
                     (((target.getValues(State_1_Attributes.VALID_FROM) == null)
-                    && (source.getValues(State_1_Attributes.VALID_FROM) == null))
-                    || ((target.getValues(State_1_Attributes.VALID_FROM) != null)
-                    && (source.getValues(State_1_Attributes.VALID_FROM) != null)
-                    && target.getValues(State_1_Attributes.VALID_FROM).equals(
-                        source.getValues(State_1_Attributes.VALID_FROM)
-                    )))
-                    && (((target.getValues(State_1_Attributes.VALID_TO) == null)
-                    && (source.getValues(State_1_Attributes.VALID_TO) == null))
-                    || ((target.getValues(State_1_Attributes.VALID_TO) != null)
-                    && (source.getValues(State_1_Attributes.VALID_TO) != null)
-                    && target.getValues(State_1_Attributes.VALID_TO).equals(
-                        source.getValues(State_1_Attributes.VALID_TO)
-                    )));
+                            && (source.getValues(State_1_Attributes.VALID_FROM) == null))
+                            || ((target.getValues(State_1_Attributes.VALID_FROM) != null)
+                                    && (source.getValues(State_1_Attributes.VALID_FROM) != null)
+                                    && target.getValues(State_1_Attributes.VALID_FROM).equals(
+                                        source.getValues(State_1_Attributes.VALID_FROM)
+                                    )))
+                                    && (((target.getValues(State_1_Attributes.VALID_TO) == null)
+                                            && (source.getValues(State_1_Attributes.VALID_TO) == null))
+                                            || ((target.getValues(State_1_Attributes.VALID_TO) != null)
+                                                    && (source.getValues(State_1_Attributes.VALID_TO) != null)
+                                                    && target.getValues(State_1_Attributes.VALID_TO).equals(
+                                                        source.getValues(State_1_Attributes.VALID_TO)
+                                                    )));
 
                 // check the roles:
                 if (equalIntervals
-                    && (target.getValues(RoleAttributes.HAS_ROLE) != null)
+                        && (target.getValues(RoleAttributes.HAS_ROLE) != null)
                 ) {
                     // System.out.println("@@@@ checking equal role intercvals for " + target.path());
                     /*
@@ -1607,19 +1605,19 @@ public class ReplicateHandler
                             rolesToDelete.put(targetRoleName, target);
                         }
                     }
-                    */
+                     */
                 }
             }
 
             if (!equalIntervals) {
                 // delete object entirely and recreate it with new states
                 // cut the state component from path:
-                
+
                 DataproviderObject deleter =
                     new DataproviderObject((DataproviderObject_1_0) targetStates
                         .get(0)
                     );
-                
+
                 toStatelessPath(deleter.path());
 
                 deleteExistingObject(deleter, null);
@@ -1635,8 +1633,8 @@ public class ReplicateHandler
             } else {
                 // check for differing states to update:
                 for (Iterator t = targetStates.iterator(), 
-                              s = sourceStates.iterator(); 
-                      t.hasNext() && s.hasNext();
+                        s = sourceStates.iterator(); 
+                t.hasNext() && s.hasNext();
                 ) {
                     DataproviderObject_1_0 target =
                         (DataproviderObject_1_0) t.next();
@@ -1648,24 +1646,24 @@ public class ReplicateHandler
                             source.attributeNames().size();
 
                     for (Iterator a = source.attributeNames().iterator();
-                        a.hasNext() && equal;
+                    a.hasNext() && equal;
                     ) {
                         String attribute = (String) a.next();
 
                         if (!attribute.equals(
-                                SystemAttributes.CREATED_AT
-                            )
-                            && !attribute.equals(
-                                SystemAttributes.CREATED_BY
-                            )
-                            && !attribute.equals(
-                                SystemAttributes.MODIFIED_AT
-                            )
-                            && !attribute.equals(
-                                SystemAttributes.MODIFIED_BY
-                            )
-                            && !attribute.equals(RoleAttributes.HAS_ROLE)
-                            && !attribute.equals(RoleAttributes.IN_ROLE)
+                            SystemAttributes.CREATED_AT
+                        )
+                        && !attribute.equals(
+                            SystemAttributes.CREATED_BY
+                        )
+                        && !attribute.equals(
+                            SystemAttributes.MODIFIED_AT
+                        )
+                        && !attribute.equals(
+                            SystemAttributes.MODIFIED_BY
+                        )
+                        && !attribute.equals(RoleAttributes.HAS_ROLE)
+                        && !attribute.equals(RoleAttributes.IN_ROLE)
                         ) {
                             equal =
                                 (source.getValues(attribute) != null)
@@ -1688,7 +1686,7 @@ public class ReplicateHandler
             // after that no more roles must be deleted from the states. Still
             // roles must be created or upated.
             for (Iterator delIter = rolesToDelete.entrySet().iterator();
-                delIter.hasNext();
+            delIter.hasNext();
             ) {
                 Map.Entry entry = (Map.Entry) delIter.next();
 
@@ -1709,8 +1707,8 @@ public class ReplicateHandler
                     String validFrom =
                         (target.getValues(State_1_Attributes.VALID_FROM) == null)
                         ? null
-                        : (String) target.getValues(State_1_Attributes.VALID_FROM)
-                                         .get(0);
+                            : (String) target.getValues(State_1_Attributes.VALID_FROM)
+                            .get(0);
 
                     List stateRoles = (List) rolesPerState.get(validFrom);
 
@@ -1730,15 +1728,15 @@ public class ReplicateHandler
                     String validFrom =
                         (state.getValues(State_1_Attributes.VALID_FROM) == null)
                         ? null
-                        : (String) state.getValues(State_1_Attributes.VALID_FROM)
-                                        .get(0);
+                            : (String) state.getValues(State_1_Attributes.VALID_FROM)
+                            .get(0);
 
                     List stateRoles = (List) rolesPerState.get(validFrom);
 
                     if (stateRoles != null) {
                         for (Iterator stateRolesIterator =
-                                stateRoles.iterator();
-                            stateRolesIterator.hasNext();
+                            stateRoles.iterator();
+                        stateRolesIterator.hasNext();
                         ) {
                             createRoleOfState((DataproviderObject_1_0) stateRolesIterator
                                 .next()
@@ -1767,7 +1765,7 @@ public class ReplicateHandler
         Map rolesDeleted
     ) throws ServiceException {
         for (Iterator sourceRolesIter = sourceRoles.iterator();
-            sourceRolesIter.hasNext();
+        sourceRolesIter.hasNext();
         ) {
             DataproviderObject_1_0 sourceRole =
                 (DataproviderObject_1_0) sourceRolesIter.next();
@@ -1789,7 +1787,7 @@ public class ReplicateHandler
                 boolean updateRequired = false;
 
                 for (Iterator attrs = targetRole.attributeNames().iterator();
-                    attrs.hasNext();
+                attrs.hasNext();
                 ) {
                     String attribute = (String) attrs.next();
 
@@ -1797,10 +1795,10 @@ public class ReplicateHandler
                         // attribute of core, not interested in
                         if (sourceRole.containsAttributeName(attribute)) {
                             if (!updateRequired // no need to check for equal otherwise
-                                
-                                && !sourceRole.getValues(attribute).equals(
-                                    targetRole.getValues(attribute)
-                                )
+
+                                    && !sourceRole.getValues(attribute).equals(
+                                        targetRole.getValues(attribute)
+                                    )
                             ) {
                                 updateRequired = true;
                                 SysLog.trace("updateRequired, differing: "
@@ -1823,8 +1821,8 @@ public class ReplicateHandler
 
                 // if sourceRole has more attributes than targetRole
                 if (!targetRole.attributeNames().containsAll(
-                        sourceRole.attributeNames()
-                    )
+                    sourceRole.attributeNames()
+                )
                 ) {
                     updateRequired = true;
                     SysLog.trace("updateRequired, missing attributes: "
@@ -1877,7 +1875,7 @@ public class ReplicateHandler
             _transactionBehavior = NO_TRANSACTION; // default
             _provider = provider;
             _header = header;
-            
+
             _request = new RequestCollection(header, provider);
         }
 
@@ -1929,14 +1927,13 @@ public class ReplicateHandler
                 throw new ServiceException (
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ILLEGAL_STATE,
-                    null,
                     "No transaction open for RequestCollection"
                 );
             }
-            
+
             return _request;
         }
-        
+
         /**
          * Get a RequestCollection which has requestedAt date set which is 
          * between validFrom and validTo. 
@@ -1955,25 +1952,25 @@ public class ReplicateHandler
                 throw new ServiceException (
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ILLEGAL_STATE,
+                    "Timed collections require a transaction behavior of noTransaction",
                     new Parameter [] {
                         new Parameter("transaction behavior", _transactionBehavior),
                         new Parameter("noTransaction would be", NO_TRANSACTION)
-                    },
-                    "Timed collections require a transaction behavior of noTransaction"
+                    }
                 );
             }
-                            
+
             String searchDate = dateWithin(validFrom, validTo);
 
             ServiceHeader header = 
                 new ServiceHeader(_header.getPrincipalChain().toArray(
-                        new String[0]
-                    ),
-                    _header.getCorrelationId(),
-                    false,
-                    _header.getQualityOfService(),
-                    null,
-                    searchDate
+                    new String[0]
+                ),
+                _header.getCorrelationId(),
+                false,
+                _header.getQualityOfService(),
+                null,
+                searchDate
                 );
 
             return new RequestCollection(header, _provider);
@@ -1985,8 +1982,8 @@ public class ReplicateHandler
         public boolean hasOpenTransaction() {
             return _request != null;
         }
-        
-        
+
+
         /**
          * Start the transaction if transactional behaviour is set accordingly.
          */
@@ -2004,7 +2001,7 @@ public class ReplicateHandler
                 commitTransaction();
             }
         }
-        
+
         /**
          * Rollback the current transaction. 
          */
@@ -2020,12 +2017,12 @@ public class ReplicateHandler
             boolean isToplevelObject
         ) throws ServiceException {
             if (isToplevelObject &&
-                _transactionBehavior == TOP_LEVEL_TRANSACTION
+                    _transactionBehavior == TOP_LEVEL_TRANSACTION
             ) {
                 startTransaction();
             }
             else if (
-                _transactionBehavior == OBJECT_TRANSACTION
+                    _transactionBehavior == OBJECT_TRANSACTION
             ) {
                 startTransaction();
             }
@@ -2039,59 +2036,57 @@ public class ReplicateHandler
             boolean isToplevelObject
         ) throws ServiceException {
             if (isToplevelObject &&
-                _transactionBehavior == TOP_LEVEL_TRANSACTION
+                    _transactionBehavior == TOP_LEVEL_TRANSACTION
             ) {
                 commitTransaction();
             }
             else if (
-                _transactionBehavior == OBJECT_TRANSACTION
+                    _transactionBehavior == OBJECT_TRANSACTION
             ) {
                 commitTransaction();
             }
         }
-        
+
         private void startTransaction() throws ServiceException {
             SysLog.trace("startTransaction");
-            
+
             if (_request != null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ILLEGAL_STATE,
-                    null,
                     "Open transaction when starting new one."
                 );                
             }
-            
+
             _request.beginUnitOfWork(false); // TODO must be configurable
         }
-        
+
         private void commitTransaction() throws ServiceException {
             SysLog.trace("commitTransaction");
-            
+
             if (_request == null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ILLEGAL_STATE,
-                    null,
                     "No open transaction to commit."
                 );                
             }            
             _request.endUnitOfWork();
         }
-        
+
         /**
          * Note: no real transaction behavior without appserver
          * @throws ServiceException
          */
         private void rollbackTransaction() throws ServiceException {
             SysLog.trace("rollbackTransaction");
-            
+
             if (_request != null) {
                 _request.clear();
                 _request = null;
             }
         }
-            
+
         /**
          * Find a date between validFrom and validTo.
          * <p>
@@ -2111,9 +2106,9 @@ public class ReplicateHandler
             String now = DateFormat.getInstance().format(new Date());
 
             if (((validFrom == null)
-                || (validFrom.compareTo(now) < 0))
-                && ((validTo == null)
-                || (validTo.compareTo(now) > 0))
+                    || (validFrom.compareTo(now) < 0))
+                    && ((validTo == null)
+                            || (validTo.compareTo(now) > 0))
             ) {
                 // current date is valid
                 searchDate = now;
@@ -2136,8 +2131,8 @@ public class ReplicateHandler
                     } catch (ParseException e) {
                         throw new ServiceException(BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.BAD_PARAMETER,
-                            new Parameter[] { new Parameter("validTo", validTo) },
-                            "validTo is not a date."
+                            "validTo is not a date.",
+                            new Parameter[] { new Parameter("validTo", validTo) }
                         );
                     }
                 }
@@ -2146,22 +2141,22 @@ public class ReplicateHandler
             return searchDate;
         }
     }
-    
+
     private static int SEGMENT_PATH_LENGTH = 5;
-    
+
     /** the datamodel used for the replication data */
     private Model_1_0 model = null;
-    
+
     /** the start paths in their mapped form */
     private List mappedStartPaths = new ArrayList();
-    
+
     /** map source paths to target paths */
     private Map pathMap = null;
-    
+
     /** RequestDispenser for maintaining the transaction behavior. */
     private RequestDispenser writeRequestDispenser;
     private RequestDispenser readRequestDispenser;
-    
+
     /**
      * Collect the states of the current object in this List. Requires that all
      * states of an object are consecutive, within a single state reference.
@@ -2171,40 +2166,40 @@ public class ReplicateHandler
      * Therefore collecting states in a list is not critical regarding memory.
      */
     private List objectStates = null;
-        
+
     /** 
      * qualifier of the object to which the states contained in _objectStates 
      * belong.
      */
     private String objectStatesQualifiedName = null;
     private String objectStatesId = null;
-    
+
     /** Collect the roles within a state */
     //private List _stateRoles = null;
-    
+
     /** preserve the roles per state. The states validFrom serves as key. */
     //private HashMap _rolesPerState = null;
-    
+
     /** statedPath is the first path in a hierarchie containing a stated object.*/
     private String _startingStatedQualifier = null;
     private static boolean LOCAL_PATH = true;
     private static boolean REMOTE_PATH = false;
     private static boolean OMIT_STATE_FILTER = false;
-        
+
     /** 
      *  Value to indicate that the last operation was consumed (helps keeping
      *  track of treating the protocol correctly)
      */
     private static short OPERATION_UNSET = -1; 
     // make sure not to use one of the operations defined in TraversalHandler
-        
+
     /** the last operation received by startObject */
     private short lastOperation = OPERATION_UNSET;
-        
+
     /**
      * Collect the objects deleted to avoid multiple deletes and to avoid 
      * deletes for roles on an object which has already been deleted.
      */
     private Set deletedObjects; 
-        
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicException.java,v 1.16 2008/06/27 16:59:28 hburger Exp $
+ * Name:        $Id: BasicException.java,v 1.18 2008/09/10 08:55:22 hburger Exp $
  * Description: Basic Exception
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 16:59:28 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +62,7 @@ import java.security.PrivilegedActionException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -136,15 +137,15 @@ import java.util.concurrent.TimeUnit;
  */
 @SuppressWarnings("unchecked")
 public class BasicException
-    extends java.lang.Exception
-        implements MultiLineStringRepresentation
+extends java.lang.Exception
+implements MultiLineStringRepresentation
 {
 
     /**
      * 
      */
     public static class Code
-        extends IntegerEnumeration
+    extends IntegerEnumeration
     {
 
         /**
@@ -613,62 +614,62 @@ public class BasicException
      * stack.
      */
     public interface Wrapper
-        extends MultiLineStringRepresentation
+    extends MultiLineStringRepresentation
     {
         /**
-    	 * Retrieves the exception domain for the wrapped 
-    	 * <code>BasicException</code>.
-    	 *
-    	 * @return the domain value
+         * Retrieves the exception domain for the wrapped 
+         * <code>BasicException</code>.
+         *
+         * @return the domain value
          * 
          * @deprecated use org.openmdx.kernel.exception.BasicException#getExceptionDomain()
          * on org.openmdx.kernel.exception.Throwables#getCause(java.lang.Throwable,java.lang.String)'s result
-    	 */
+         */
         String getExceptionDomain();
 
         /**
-    	 * Retrieves the exception code for the wrapped 
-    	 * <code>BasicException</code>.
-    	 *
-    	 * @return the error code
+         * Retrieves the exception code for the wrapped 
+         * <code>BasicException</code>.
+         *
+         * @return the error code
          * 
          * @deprecated use org.openmdx.kernel.exception.BasicException#getExceptionCode()
          * on org.openmdx.kernel.exception.Throwables#getCause(java.lang.Throwable,java.lang.String)'s result
-    	 */
+         */
         int getExceptionCode();
 
         /**
-    	 * Returns the detail message string of this Wrapper exception.
-    	 * 
-    	 * @return the detail message string of this Wrapper exception instance
-    	 * 		     (which may be null).
-    	 */
+         * Returns the detail message string of this Wrapper exception.
+         * 
+         * @return the detail message string of this Wrapper exception instance
+         * 		     (which may be null).
+         */
         String getMessage(
         );
 
         /**
-    	 * Returns the wrapped <code>BasicException</code> exception.
-    	 *
-    	 * @return The wrapped exception.
+         * Returns the wrapped <code>BasicException</code> exception.
+         *
+         * @return The wrapped exception.
          * 
          * @deprecated use java.lang.Throwable#getCause()
-    	 */
+         */
         BasicException getExceptionStack(
         );
 
         /**
-    	 * Returns the cause belonging to a specific exception domain.
-    	 * 
-    	 * @param 	exceptionDomain
-    	 * 			the desired exception domain,
-    	 *          or <code>null</code> to retrieve the initial cause.
-    	 *
-    	 * @return  Either the cause belonging to a specific exception domain
-    	 *          or the initial cause if <code>exceptionDomain</code> is
-    	 * 			<code>null</code>.  
+         * Returns the cause belonging to a specific exception domain.
+         * 
+         * @param 	exceptionDomain
+         * 			the desired exception domain,
+         *          or <code>null</code> to retrieve the initial cause.
+         *
+         * @return  Either the cause belonging to a specific exception domain
+         *          or the initial cause if <code>exceptionDomain</code> is
+         * 			<code>null</code>.  
          * 
          * @deprecated use org.openmdx.kernel.exception.Throwables#getCause(java.lang.Throwable,java.lang.String)'s result
-    	 */
+         */
         BasicException getCause(
             String exceptionDomain
         );
@@ -680,306 +681,324 @@ public class BasicException
      * internally are always of type string.
      */
     public static class Parameter
-      implements Serializable
+    implements Serializable
     {
-        /**
-    	 * Creates a <code>Parameter</code> object. The constructor converts the passed
-    	 * value to a <code>String</code> object.
-    	 * <p>null objects are preserved in that the accessor <code>getValue</code>
-    	 * returns a null object.
-    	 *
-    	 * <p>The constructor accepts various value types as <String>, array of
-    	 * simple java types, array of <Objects> and a null object.
-    	 * <ul>
-    	 * <li>  new Parameter("name", "text")
-    	 * <li>  new Parameter("name", new int[]{1,2,3})
-    	 * <li>  new Parameter("name", new Integer[]{new Integer(1), new Integer(2))
-    	 * <li>  new Parameter("name", null)
-    	 * </ul>
-    	 *
-    	 * @param name The property's name.
-    	 * @param value The property's value converted internally to a
-    	 * <code>String</code>.
-    	 */
-        public Parameter(
-                String name,
-                Object value)
-        {
-                this.name = name;
-
-                if(value == null) {
-                        this.value = null;
-                }else if (value.getClass().isArray()) {
-                        this.value = ArraysExtension.asList(value).toString();
-                }else{
-                        this.value = value.toString();
-                }
-        }
-
 
         /**
-    	 * Creates a <code>Parameter</code> object.
-    	 *
-    	 * @param name The property's name.
-    	 * @param value The property's value converted internally to a
-    	 * <code>String</code>.
-    	 */
+         * Creates a <code>Parameter</code> object. The constructor converts the passed
+         * values to a <code>String</code> object.
+         * <ul>
+         * <li>  new Parameter("name", "text")
+         * <li>  new Parameter("name", Integer.valueOf(1), Integer.valueOf(2))
+         * </ul>
+         *
+         * @param name The property's name.
+         * @param values The property's values are converted internally to a
+         * <code>String</code>.
+         */
         public Parameter(
-                String name,
-                long value)
-        {
-                this.name = name;
-                this.value = String.valueOf(value);
-        }
-
-
-        /**
-    	 * Creates a <code>Parameter</code> object.
-    	 *
-    	 * @param name The property's name.
-    	 * @param value The property's value converted internally to a
-    	 * <code>String</code>.
-    	 */
-        public Parameter(
-                String name,
-                int value)
-        {
-                this.name = name;
-                this.value = String.valueOf(value);
-        }
-
-
-        /**
-    	 * Creates a <code>Parameter</code> object.
-    	 *
-    	 * @param name The property's name.
-    	 * @param value The property's value converted internally to a
-    	 * <code>String</code>.
-    	 */
-        public Parameter(
-                String name,
-                short value)
-        {
-                this.name = name;
-                this.value = String.valueOf(value);
-        }
-
-
-        /**
-    	 * Creates a <code>Parameter</code> object.
-    	 *
-    	 * @param name The property's name.
-    	 * @param value The property's value converted internally to a
-    	 * <code>String</code>.
-    	 */
-        public Parameter(
-                String name,
-                byte value)
-        {
-                this.name = name;
-                this.value = String.valueOf(value);
-        }
-
-
-        /**
-    	 * Creates a <code>Parameter</code> object.
-    	 *
-    	 * @param name The property's name.
-    	 * @param value The property's value converted internally to a
-    	 * <code>String</code>.
-    	 */
-        public Parameter(
-                String name,
-                char value)
-        {
-                this.name = name;
-                this.value = String.valueOf(value);
-        }
-
-
-        /**
-    	 * Creates a <code>Parameter</code> object.
-    	 *
-    	 * @param name The property's name.
-    	 * @param value The property's value converted internally to a
-    	 * <code>String</code>.
-    	 */
-        public Parameter(
-                String name,
-                boolean value)
-        {
-                this.name = name;
-                this.value = String.valueOf(value);
-        }
-
-                /**
-    	 * Creates a <code>Parameter</code> object.
-		 * 
-		 * @param name The parameter's name.
-		 * @param duration The parameter's duration value.
-		 * @param unit The parameter's time unit.
-		 */
-        public Parameter(
-                String name,
-                long duration,
-                TimeUnit unit
+            String name,
+            Object... values
         ){
-                this.name = name;
-                this.value = new StringBuilder(
-                        ).append(
-                                duration
-                        ).append(
-                                ' '
-                        ).append(
-                                unit
-                        ).toString();
+            this.name = name;
+            this.value = values == null || values.length == 0 ? null : Arrays.deepToString(values);
         }
 
         /**
-    	 * Creates a <code>Parameter</code> object.
-    	 *
-    	 * @param name The property's name.
-    	 * @param value The property's value converted internally to a
-    	 * <code>String</code>.
-    	 */
+         * Creates a <code>Parameter</code> object. The constructor converts the passed
+         * value to a <code>String</code> object.
+         * <p>null objects are preserved in that the accessor <code>getValue</code>
+         * returns a null object.
+         *
+         * <p>The constructor accepts various value types as <String>, array of
+         * simple java types and a null object.
+         * <ul>
+         * <li>  new Parameter("name", "text")
+         * <li>  new Parameter("name", new int[]{1,2,3})
+         * <li>  new Parameter("name", new Integer[]{new Integer(1), new Integer(2))
+         * <li>  new Parameter("name", null)
+         * </ul>
+         *
+         * @param name The property's name.
+         * @param value The property's value converted internally to a
+         * <code>String</code>.
+         */
         public Parameter(
-                String name,
-                double value)
-        {
-                this.name = name;
-                this.value = String.valueOf(value);
+            String name,
+            Object value
+        ) {
+            this.name = name;
+            this.value = 
+                value == null ? null :
+                    value instanceof Object[] ? Arrays.deepToString((Object[]) value) :
+                        value.getClass().isArray() ? ArraysExtension.asList(value).toString() :
+                            value.toString();
         }
 
 
         /**
-    	 * Creates a <code>Parameter</code> object.
-    	 *
-    	 * @param name The property's name.
-    	 * @param value The property's value converted internally to a
-    	 * <code>String</code>.
-    	 */
+         * Creates a <code>Parameter</code> object.
+         *
+         * @param name The property's name.
+         * @param value The property's value converted internally to a
+         * <code>String</code>.
+         */
         public Parameter(
-                String name,
-                float value)
+            String name,
+            long value)
         {
-                this.name = name;
-                this.value = String.valueOf(value);
+            this.name = name;
+            this.value = String.valueOf(value);
         }
 
 
         /**
-    	 * Returns the property name
-    	 *
-    	 * @return String
-    	 */
+         * Creates a <code>Parameter</code> object.
+         *
+         * @param name The property's name.
+         * @param value The property's value converted internally to a
+         * <code>String</code>.
+         */
+        public Parameter(
+            String name,
+            int value)
+        {
+            this.name = name;
+            this.value = String.valueOf(value);
+        }
+
+
+        /**
+         * Creates a <code>Parameter</code> object.
+         *
+         * @param name The property's name.
+         * @param value The property's value converted internally to a
+         * <code>String</code>.
+         */
+        public Parameter(
+            String name,
+            short value)
+        {
+            this.name = name;
+            this.value = String.valueOf(value);
+        }
+
+
+        /**
+         * Creates a <code>Parameter</code> object.
+         *
+         * @param name The property's name.
+         * @param value The property's value converted internally to a
+         * <code>String</code>.
+         */
+        public Parameter(
+            String name,
+            byte value)
+        {
+            this.name = name;
+            this.value = String.valueOf(value);
+        }
+
+
+        /**
+         * Creates a <code>Parameter</code> object.
+         *
+         * @param name The property's name.
+         * @param value The property's value converted internally to a
+         * <code>String</code>.
+         */
+        public Parameter(
+            String name,
+            char value)
+        {
+            this.name = name;
+            this.value = String.valueOf(value);
+        }
+
+
+        /**
+         * Creates a <code>Parameter</code> object.
+         *
+         * @param name The property's name.
+         * @param value The property's value converted internally to a
+         * <code>String</code>.
+         */
+        public Parameter(
+            String name,
+            boolean value)
+        {
+            this.name = name;
+            this.value = String.valueOf(value);
+        }
+
+        /**
+         * Creates a <code>Parameter</code> object.
+         * 
+         * @param name The parameter's name.
+         * @param duration The parameter's duration value.
+         * @param unit The parameter's time unit.
+         */
+        public Parameter(
+            String name,
+            long duration,
+            TimeUnit unit
+        ){
+            this.name = name;
+            this.value = new StringBuilder(
+            ).append(
+                duration
+            ).append(
+                ' '
+            ).append(
+                unit
+            ).toString();
+        }
+
+        /**
+         * Creates a <code>Parameter</code> object.
+         *
+         * @param name The property's name.
+         * @param value The property's value converted internally to a
+         * <code>String</code>.
+         */
+        public Parameter(
+            String name,
+            double value)
+        {
+            this.name = name;
+            this.value = String.valueOf(value);
+        }
+
+
+        /**
+         * Creates a <code>Parameter</code> object.
+         *
+         * @param name The property's name.
+         * @param value The property's value converted internally to a
+         * <code>String</code>.
+         */
+        public Parameter(
+            String name,
+            float value)
+        {
+            this.name = name;
+            this.value = String.valueOf(value);
+        }
+
+
+        /**
+         * Returns the property name
+         *
+         * @return String
+         */
         public final String getName()
         {
-                return this.name;
+            return this.name;
         }
 
 
         /**
-    	 * Returns the property value
-    	 *
-    	 * @return String
-    	 */
+         * Returns the property value
+         *
+         * @return String
+         */
         public final String getValue()
         {
-                return this.value;
+            return this.value;
         }
 
 
         /**
-    	 * Indicates whether some other object is "equal to" this one.
-    	 *
-    	 * @param   object	the reference object with which to compare.
-    	 * @return  true if this object is the same as the object argument;
-    	 * false otherwise.
-    	 */
+         * Indicates whether some other object is "equal to" this one.
+         *
+         * @param   object	the reference object with which to compare.
+         * @return  true if this object is the same as the object argument;
+         * false otherwise.
+         */
         public boolean equals (Object object)
         {
-                if (this == object) return true;
-                if (! (object instanceof Parameter)) return false;
-                final Parameter that = (Parameter)object;
-                return (this.name.equals(that.name) && this.value.equals(that.value));
+            if (this == object) return true;
+            if (! (object instanceof Parameter)) return false;
+            final Parameter that = (Parameter)object;
+            return (this.name.equals(that.name) && this.value.equals(that.value));
         }
 
 
         /**
-    	 * Returns a string representation of the <code>Parameter</code> object.
-    	 *
-    	 * <p>Format:  "<name>=<value>"
-    	 *
-    	 * @return a String
-    	 */
+         * Returns a string representation of the <code>Parameter</code> object.
+         *
+         * <p>Format:  "<name>=<value>"
+         *
+         * @return a String
+         */
         public String toString()
         {
-                return this.name + '=' + this.value;
+            return this.name + '=' + this.value;
         }
 
 
         /**
-    	 * Returns a hash code value for the object. This method is supported for
-    	 * the benefit of hashtables such as those provided by
-    	 * java.util.Hashtable.
-    	 *
-    	 * @return a hash code value for this object.
-    	 */
+         * Returns a hash code value for the object. This method is supported for
+         * the benefit of hashtables such as those provided by
+         * java.util.Hashtable.
+         *
+         * @return a hash code value for this object.
+         */
         public int hashCode()
         {
-                return this.name.hashCode();
+            return this.name.hashCode();
         }
 
 
         /**
-    	 * Add an Parameter array to another Parameter array
-    	 *
-    	 * @param first
-    	 * @param second Add this array to the array named 'first'
-    	 * @return Parameter[]
-    	 */
+         * Add an Parameter array to another Parameter array
+         *
+         * @param first
+         * @param second Add this array to the array named 'first'
+         * @return Parameter[]
+         */
         public static Parameter[] add(Parameter[] first, Parameter[] second)
         {
-                if (first == null) {
-                        return second;
+            if (first == null) {
+                return second;
+            }else{
+                if (second == null) {
+                    return first;
                 }else{
-                        if (second == null) {
-                                return first;
-                        }else{
-                                Parameter[] newArr = new Parameter[first.length + second.length];
+                    Parameter[] newArr = new Parameter[first.length + second.length];
 
-                                System.arraycopy(first,0,newArr,0, first.length);
-                                System.arraycopy(second,0,newArr, first.length, second.length);
-                                return newArr;
-                        }
+                    System.arraycopy(first,0,newArr,0, first.length);
+                    System.arraycopy(second,0,newArr, first.length, second.length);
+                    return newArr;
                 }
+            }
         }
 
 
         /**
-    	 * The serial version UID
-    	 */
+         * The serial version UID
+         */
         static final long serialVersionUID = -7161563495226434698L;
 
         /**
-    	 * @serial The parameter name
-    	 */
+         * @serial The parameter name
+         */
         final String name;
 
         /**
-    	 * @serial The parameter value
-    	 */
+         * @serial The parameter value
+         */
         final String value;
 
         /**
-    	 * Name of the parameter representing the excption's java class.
-    	 */
+         * Name of the parameter representing the excption's java class.
+         */
         final static public String EXCEPTION_CLASS = "exception.class";
 
         /**
-    	 * Name of the parameter representing the excption's source set by
-    	 * {link @see BasicException#setSource(java.lang.Object) setSource()}
-    	 */
+         * Name of the parameter representing the excption's source set by
+         * {link @see BasicException#setSource(java.lang.Object) setSource()}
+         */
         final static public String EXCEPTION_SOURCE = "exception.source";
 
     }
@@ -994,26 +1013,48 @@ public class BasicException
      * exception domain.
      * @param parameters  Any exception parameters
      * @param description A readable description
+     * @deprecated Use {@link #BasicException(String,int,String,Parameter[])} instead
      */
     public BasicException(
-            String exceptionDomain,
-            int exceptionCode,
-            Parameter[] parameters,
-            String description)
+        String exceptionDomain,
+        int exceptionCode,
+        Parameter[] parameters,
+        String description)
     {
-                super(
-                        BasicException.getSimpleMessage(exceptionDomain, exceptionCode));
+        this(exceptionDomain, exceptionCode, description, parameters);
+    }
 
-                // BUG: Microsoft J#.
-                // 
-                // There is a bug in Microsoft J# that handles the stack trace of
-                // exceptions not correctly. Actually the excpetion's stack trace 
-                // should be filled in the exception's constructor  but Microsoft J# 
-                // does this on demand when calling printStackTrace() or when
-                // explicitely calling fillInStackTrace().
-                if (isMicrosoftVM) {
-                        fillInStackTrace();
-                }
+
+    /**
+     * Creates a new <code>BasicException</code>.
+     *
+     * @param exceptionDomain An exception domain. A null objects references
+     * the default exception domain with negative exception codes only.
+     * @param exceptionCode  An exception code. Negative codes describe common
+     * exceptions codes. Positive exception codes are specific for a given
+     * exception domain.
+     * @param description A readable description
+     * @param parameters  Any exception parameters
+     */
+    public BasicException(
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        Parameter... parameters
+    ){
+        super(
+            BasicException.getSimpleMessage(exceptionDomain, exceptionCode));
+
+        // BUG: Microsoft J#.
+        // 
+        // There is a bug in Microsoft J# that handles the stack trace of
+        // exceptions not correctly. Actually the excpetion's stack trace 
+        // should be filled in the exception's constructor  but Microsoft J# 
+        // does this on demand when calling printStackTrace() or when
+        // explicitely calling fillInStackTrace().
+        if (isMicrosoftVM) {
+            fillInStackTrace();
+        }
 
         this.backtrace = BasicException.breakupStackTrace(this);
 
@@ -1042,30 +1083,54 @@ public class BasicException
      * exception domain.
      * @param parameters  Any exception parameters
      * @param description A readable description
+     * @deprecated Use {@link #BasicException(Throwable,String,int,String,Parameter[])} instead
      */
     public BasicException(
-            Throwable throwable,
-            String exceptionDomain,
-            int exceptionCode,
-            Parameter[] parameters,
-            String description)
+        Throwable throwable,
+        String exceptionDomain,
+        int exceptionCode,
+        Parameter[] parameters,
+        String description)
     {
-                super(
-                        BasicException.getSimpleMessage(exceptionDomain, exceptionCode));
+        this(throwable, exceptionDomain, exceptionCode, description, parameters);
+    }
 
-                // BUG: Microsoft J#.
-                // 
-                // There is a bug in Microsoft J# that handles the stack trace of
-                // exceptions not correctly. Actually the excpetion's stack trace 
-                // should be filled in the exception's constructor  but Microsoft J# 
-                // does this on demand when calling printStackTrace() or when
-                // explicitely calling fillInStackTrace().
-                //
-                // Actually this fixes only the problem with this exception but not
-                // with the passed throwable.
-                if (isMicrosoftVM) {
-                        fillInStackTrace();
-                }
+
+    /**
+     * Creates a new <code>BasicException</code>.
+     *
+     * @param throwable An embedded exception
+     * @param exceptionDomain An exception domain. A null objects references
+     * the default exception domain with negative exception codes only.
+     * @param exceptionCode  An exception code. Negative codes describe common
+     * exceptions codes. Positive exception codes are specific for a given
+     * exception domain.
+     * @param description A readable description
+     * @param parameters  Any exception parameters
+     */
+    public BasicException(
+        Throwable throwable,
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        Parameter... parameters)
+    {
+        super(
+            BasicException.getSimpleMessage(exceptionDomain, exceptionCode));
+
+        // BUG: Microsoft J#.
+        // 
+        // There is a bug in Microsoft J# that handles the stack trace of
+        // exceptions not correctly. Actually the excpetion's stack trace 
+        // should be filled in the exception's constructor  but Microsoft J# 
+        // does this on demand when calling printStackTrace() or when
+        // explicitely calling fillInStackTrace().
+        //
+        // Actually this fixes only the problem with this exception but not
+        // with the passed throwable.
+        if (isMicrosoftVM) {
+            fillInStackTrace();
+        }
 
         this.backtrace = BasicException.breakupStackTrace(this);
 
@@ -1081,7 +1146,7 @@ public class BasicException
         this.stack = toStackedException(throwable);
         this.timestamp = new Date();
 
-                BasicException.checkAndFixIllegalRecursion(this);
+        BasicException.checkAndFixIllegalRecursion(this);
     }
 
 
@@ -1104,29 +1169,29 @@ public class BasicException
      * @param timestamp
      */
     public BasicException(
-            String className,
-            String methodName,
-            int lineNr,
-            String exceptionDomain,
-            int exceptionCode,
-            Parameter[] parameters,
-            String description,
-            String[] callStack,
-            Date timestamp)
+        String className,
+        String methodName,
+        int lineNr,
+        String exceptionDomain,
+        int exceptionCode,
+        Parameter[] parameters,
+        String description,
+        String[] callStack,
+        Date timestamp)
     {
-                super(
-                        BasicException.getSimpleMessage(exceptionDomain, exceptionCode));
+        super(
+            BasicException.getSimpleMessage(exceptionDomain, exceptionCode));
 
-                // BUG: Microsoft J#.
-                // 
-                // There is a bug in Microsoft J# that handles the stack trace of
-                // exceptions not correctly. Actually the excpetion's stack trace 
-                // should be filled in the exception's constructor  but Microsoft J# 
-                // does this on demand when calling printStackTrace() or when
-                // explicitely calling fillInStackTrace().
-                if (isMicrosoftVM) {
-                        fillInStackTrace();
-                }
+        // BUG: Microsoft J#.
+        // 
+        // There is a bug in Microsoft J# that handles the stack trace of
+        // exceptions not correctly. Actually the excpetion's stack trace 
+        // should be filled in the exception's constructor  but Microsoft J# 
+        // does this on demand when calling printStackTrace() or when
+        // explicitely calling fillInStackTrace().
+        if (isMicrosoftVM) {
+            fillInStackTrace();
+        }
 
         this.className = (className == null) ? "" : className;
         this.methodName = (methodName == null) ? "" : methodName;
@@ -1162,33 +1227,33 @@ public class BasicException
      * @param timestamp
      */
     public BasicException(
-            Throwable throwable,
-            String className,
-            String methodName,
-            int lineNr,
-            String exceptionDomain,
-            int exceptionCode,
-            Parameter[] parameters,
-            String description,
-            String[] callStack,
-            Date timestamp)
+        Throwable throwable,
+        String className,
+        String methodName,
+        int lineNr,
+        String exceptionDomain,
+        int exceptionCode,
+        Parameter[] parameters,
+        String description,
+        String[] callStack,
+        Date timestamp)
     {
-                super(
-                        BasicException.getSimpleMessage(exceptionDomain, exceptionCode));
+        super(
+            BasicException.getSimpleMessage(exceptionDomain, exceptionCode));
 
-                // BUG: Microsoft J#.
-                // 
-                // There is a bug in Microsoft J# that handles the stack trace of
-                // exceptions not correctly. Actually the excpetion's stack trace 
-                // should be filled in the exception's constructor  but Microsoft J# 
-                // does this on demand when calling printStackTrace() or when
-                // explicitely calling fillInStackTrace().
-                //
-                // Actually this fixes only the problem with this exception but not
-                // with the passed throwable.
-                if (isMicrosoftVM) {
-                        fillInStackTrace();
-                }
+        // BUG: Microsoft J#.
+        // 
+        // There is a bug in Microsoft J# that handles the stack trace of
+        // exceptions not correctly. Actually the excpetion's stack trace 
+        // should be filled in the exception's constructor  but Microsoft J# 
+        // does this on demand when calling printStackTrace() or when
+        // explicitely calling fillInStackTrace().
+        //
+        // Actually this fixes only the problem with this exception but not
+        // with the passed throwable.
+        if (isMicrosoftVM) {
+            fillInStackTrace();
+        }
 
         this.className = (className == null) ? "" : className;
         this.methodName = (methodName == null) ? "" : methodName;
@@ -1201,7 +1266,7 @@ public class BasicException
         this.backtrace = (callStack == null) ? new String[0] : callStack;
         this.timestamp = (timestamp == null) ? new Date() : timestamp;
 
-                BasicException.checkAndFixIllegalRecursion(this);
+        BasicException.checkAndFixIllegalRecursion(this);
     }
 
 
@@ -1223,15 +1288,15 @@ public class BasicException
      * <code>this</code> object.
      */
     public BasicException(
-                Throwable throwable,
-                String exceptionDomain,
-                int exceptionCode,
-                Parameter[] parameters,
-                String description,
-                Throwable that)
+        Throwable throwable,
+        String exceptionDomain,
+        int exceptionCode,
+        Parameter[] parameters,
+        String description,
+        Throwable that)
     {
         super(
-                BasicException.getSimpleMessage(exceptionDomain, exceptionCode));
+            BasicException.getSimpleMessage(exceptionDomain, exceptionCode));
 
         // BUG: Microsoft J#.
         // 
@@ -1244,13 +1309,13 @@ public class BasicException
         // Actually this fixes only the problem with this exception but not
         // with the passed throwable or the passed 'that' object.
         if (isMicrosoftVM) {
-                fillInStackTrace();
+            fillInStackTrace();
         }
 
         if (that == null) {
-                this.backtrace = BasicException.breakupStackTrace(this);
+            this.backtrace = BasicException.breakupStackTrace(this);
         }else{
-                this.backtrace = BasicException.breakupStackTrace(that);
+            this.backtrace = BasicException.breakupStackTrace(that);
         }
 
         HashMap map = BasicException.parseStackTraceEntry(this.backtrace, 0);
@@ -1299,18 +1364,18 @@ public class BasicException
     public Throwable initCause(Throwable throwable)
     {
         if (this.stack == null) {
-                if (throwable == this) {
-                        throw new IllegalArgumentException(
-                                                "BasicException: A throwable cannot be its own cause.");
-                }
-                this.stack = toStackedException(throwable);
+            if (throwable == this) {
+                throw new IllegalArgumentException(
+                    "BasicException: A throwable cannot be its own cause.");
+            }
+            this.stack = toStackedException(throwable);
 
-                BasicException.checkAndFixIllegalRecursion(this);
+            BasicException.checkAndFixIllegalRecursion(this);
 
-                return this;
+            return this;
         }else{
-                throw new IllegalStateException(
-                                "A cause has already been set.");
+            throw new IllegalStateException(
+                "A cause has already been set.");
         }
     }
 
@@ -1326,13 +1391,13 @@ public class BasicException
     {
         if (throwable != null) {
 
-                BasicException s = this.stack;
+            BasicException s = this.stack;
 
-                while(s.stack != null) s = s.stack;
+            while(s.stack != null) s = s.stack;
 
-                s.stack = toStackedException(throwable);
+            s.stack = toStackedException(throwable);
 
-                BasicException.checkAndFixIllegalRecursion(this);
+            BasicException.checkAndFixIllegalRecursion(this);
         }
 
         return this;
@@ -1382,6 +1447,7 @@ public class BasicException
                     defaultMapper.map(throwable),
                     Code.DEFAULT_DOMAIN,
                     Code.ASSERTION_FAILURE,
+                    "Caught an exception while mapping exceptions: " + e.getMessage(),
                     new Parameter[] {
                         new Parameter(
                             "mapper.name",
@@ -1391,8 +1457,7 @@ public class BasicException
                             "mapper.exception",
                             throwable.getClass().getName()
                         )
-                    },
-                    "Caught an exception while mapping exceptions: " + e.getMessage()
+                    }
                 );
             }
         }
@@ -1450,20 +1515,20 @@ public class BasicException
             stack,
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.GENERIC,
-                        parameters,
+            parameters,
             wrapper.getMessage(),
             wrapper
         ) : new BasicException(
             stack,
             stack.getExceptionDomain(),
             stack.getExceptionCode(),
-                        BasicException.Parameter.add(stack.getParameters(), parameters),
+            BasicException.Parameter.add(stack.getParameters(), parameters),
             stack.getDescription(),
             wrapper
         );
     }
 
-        /**
+    /**
      * Returns a String representation for the exception's top level object. The
      * string contains the timestamp, class, method, line number, domain, error
      * code, description and the parameters and the exception's stack trace.
@@ -1545,18 +1610,18 @@ public class BasicException
         final List stack = getExceptionStack();
         synchronized(stream){
             stream.println(holder.getClass().getName());
-                for(
+            for(
                     int ii=0, size = stack.size();
                     ii<size;
                     ii++
-                ) printException(
-                    stream,
-                    (BasicException)stack.get(size-1-ii),
-                    ii,
-                    addBacktrace,
-                    formatter
-                );
-            }
+            ) printException(
+                stream,
+                (BasicException)stack.get(size-1-ii),
+                ii,
+                addBacktrace,
+                formatter
+            );
+        }
     }
 
     /**
@@ -1575,17 +1640,17 @@ public class BasicException
         final List stack = getExceptionStack();
         synchronized(writer){
             writer.println(holder.getClass().getName());
-                for(
+            for(
                     int ii=0, size = stack.size();
                     ii<stack.size();
                     ii++
-                ) printException(
-                    writer,
-                    (BasicException)stack.get(size-1-ii),
-                    ii,
-                    addBacktrace,
-                    formatter
-                );
+            ) printException(
+                writer,
+                (BasicException)stack.get(size-1-ii),
+                ii,
+                addBacktrace,
+                formatter
+            );
         }
     }
 
@@ -1621,9 +1686,9 @@ public class BasicException
     public String getParameter(String name)
     {
         for(int ii=0; ii<this.parameters.length; ii++) {
-                if (name.equals(this.parameters[ii].name)) {
-                        return this.parameters[ii].value;
-                }
+            if (name.equals(this.parameters[ii].name)) {
+                return this.parameters[ii].value;
+            }
         }
 
         return null;
@@ -1684,18 +1749,18 @@ public class BasicException
         return (this.exceptionCode);
     }
 
-        /**
-	 * Retrieves the exception code for this <code>BasicException</code>
-	 * toplevel object.
-	 *
-	 * @return the error code
-	 */
-        public String getExceptionCodeString()
-        {
-                return BasicException.toString(
-                                        this.exceptionDomain,
-                                        this.exceptionCode);
-        }
+    /**
+     * Retrieves the exception code for this <code>BasicException</code>
+     * toplevel object.
+     *
+     * @return the error code
+     */
+    public String getExceptionCodeString()
+    {
+        return BasicException.toString(
+            this.exceptionDomain,
+            this.exceptionCode);
+    }
 
     /**
      * Retrieves the timestamp for this <code>BasicException</code> toplevel
@@ -1746,52 +1811,52 @@ public class BasicException
     }
 
 
-        /**
-	 * Breaks up an exception description into simple text lines
-	 *
-	 * @param description A descripion
-	 * @return A list of simple text lines
-	 */
-        public static List breakupDescription(String description)
-        {
-                ArrayList al = new ArrayList();
+    /**
+     * Breaks up an exception description into simple text lines
+     *
+     * @param description A descripion
+     * @return A list of simple text lines
+     */
+    public static List breakupDescription(String description)
+    {
+        ArrayList al = new ArrayList();
 
-                if (description != null) {
-                        // Check for LineFeed characters
-                        if (description.indexOf('\n') < 0) {
-                                al.add(description);
-                                return al;
-                        }
-
-                        // Break the string up into single lines
-                        char strArr[] = description.toCharArray();
-                        char c = '.', last;
-                        int startPos = 0;
-
-                        int ii;
-                        for(ii=0; ii<strArr.length; ii++) {
-                                last = c;
-                                c = strArr[ii];
-                                if (c == '\r' || c == '\n') {
-                                        if (last != '\r') {
-                                                if (ii-startPos > 0) {
-                                                        al.add(new String(strArr, startPos, ii-startPos));
-                                                }else{
-                                                        al.add(new String());
-                                                }
-                                        }
-
-                                        startPos = ii+1;
-                                }
-                        }
-
-                        // Flush last line
-                        if (startPos < ii) {
-                                al.add(new String(strArr, startPos, ii-startPos));
-                        }
-                }
+        if (description != null) {
+            // Check for LineFeed characters
+            if (description.indexOf('\n') < 0) {
+                al.add(description);
                 return al;
+            }
+
+            // Break the string up into single lines
+            char strArr[] = description.toCharArray();
+            char c = '.', last;
+            int startPos = 0;
+
+            int ii;
+            for(ii=0; ii<strArr.length; ii++) {
+                last = c;
+                c = strArr[ii];
+                if (c == '\r' || c == '\n') {
+                    if (last != '\r') {
+                        if (ii-startPos > 0) {
+                            al.add(new String(strArr, startPos, ii-startPos));
+                        }else{
+                            al.add(new String());
+                        }
+                    }
+
+                    startPos = ii+1;
+                }
+            }
+
+            // Flush last line
+            if (startPos < ii) {
+                al.add(new String(strArr, startPos, ii-startPos));
+            }
         }
+        return al;
+    }
 
     private static Parameter[] applyThrowable(
         BasicException.Parameter[] parameters,
@@ -1800,71 +1865,71 @@ public class BasicException
         List target = new ArrayList();
         target.add(
             new Parameter(
-                        Parameter.EXCEPTION_CLASS,
-                        throwable.getClass().getName()
+                Parameter.EXCEPTION_CLASS,
+                throwable.getClass().getName()
             )
         );
         target.add(
             new Parameter(
-                        Parameter.EXCEPTION_SOURCE,
-                        BasicException.source.toString()
-                        )
+                Parameter.EXCEPTION_SOURCE,
+                BasicException.source.toString()
+            )
         );
         if(
                 parameters != null
-                )for(
+        )for(
                 int i = 0;
                 i < parameters.length;
                 i++
-                ){
-                        String name = parameters[i].getName();
-                        if(
-                                !Parameter.EXCEPTION_CLASS.equals(name) &&
-                                !Parameter.EXCEPTION_SOURCE.equals(name)
-                        ) target.add(parameters[i]);
-                }
+        ){
+            String name = parameters[i].getName();
+            if(
+                    !Parameter.EXCEPTION_CLASS.equals(name) &&
+                    !Parameter.EXCEPTION_SOURCE.equals(name)
+            ) target.add(parameters[i]);
+        }
         return (Parameter[]) target.toArray(
             new Parameter[target.size()]
         );
     }
 
-        /**
-	 * Set an exception source object. The exception framework uses the 
-	 * toString() method to determine the exception source for each 
-	 * BasicException event.
-	 * The object may be set at any time.
-	 *
-	 * <p>
-	 * Dynamic exception source example:
-	 * <code>
-	 *
-	 * class ExceptionSource
-	 * {
-	 *   public String toString()
-	 *   {
-	 * 		return "ExceptionSource-" + System.currentTimeMillis();
-	 * 	 }
-	 * }
-	 *
-	 * BasicException.setSource(new ExceptionSource())
-	 *
-	 * </code>
-	 *
-	 * <p>
-	 * Static exception source example:
-	 * <code>
-	 *
-	 * BasicException.setSource("ExceptionSource")
-	 *
-	 * </code>
-	 *
-	 * @param source an exception source object
-	 */
-        public static void setSource(Object source)
-        {
-                if (source == null) return;
-                BasicException.source = source;
-        }
+    /**
+     * Set an exception source object. The exception framework uses the 
+     * toString() method to determine the exception source for each 
+     * BasicException event.
+     * The object may be set at any time.
+     *
+     * <p>
+     * Dynamic exception source example:
+     * <code>
+     *
+     * class ExceptionSource
+     * {
+     *   public String toString()
+     *   {
+     * 		return "ExceptionSource-" + System.currentTimeMillis();
+     * 	 }
+     * }
+     *
+     * BasicException.setSource(new ExceptionSource())
+     *
+     * </code>
+     *
+     * <p>
+     * Static exception source example:
+     * <code>
+     *
+     * BasicException.setSource("ExceptionSource")
+     *
+     * </code>
+     *
+     * @param source an exception source object
+     */
+    public static void setSource(Object source)
+    {
+        if (source == null) return;
+        BasicException.source = source;
+    }
 
 
     /**
@@ -1916,10 +1981,10 @@ public class BasicException
     public static String[] breakupStackTrace(Throwable throwable)
     {
         if (BasicException.isMicrosoftVM) {
-                return breakupStackTraceStandard(throwable);
+            return breakupStackTraceStandard(throwable);
         }
         else {
-                        return breakupStackTraceAtParsing(throwable);
+            return breakupStackTraceAtParsing(throwable);
         }
     }
 
@@ -1950,309 +2015,309 @@ public class BasicException
         if (stackTrace == null) return map;
         if (stackTrace.length <= index) return map;
 
-                String entry = stackTrace[index];
+        String entry = stackTrace[index];
 
-                if (entry != null) {
-                        if (BasicException.isMicrosoftVM) {
-                                parseStackTraceEntryMicrosoftVM(map, entry);
-                        }
-                        else {
-                                parseStackTraceEntryStandardVM(map, entry);
-                        }
-                }
+        if (entry != null) {
+            if (BasicException.isMicrosoftVM) {
+                parseStackTraceEntryMicrosoftVM(map, entry);
+            }
+            else {
+                parseStackTraceEntryStandardVM(map, entry);
+            }
+        }
 
         return map;
     }
 
 
-        /**
-	 * Breaks a stack trace of a throwable up into single entries, removes the
-	 * leading 'at' and trims whitespaces. Stops on a 'Caused by' entry, that
-	 * may be added by JDK 1.4 compliant VMs. 
-	 * 
-	 * <p>Note:
-	 * <p>This strategy of parsing stack traces fails for JDK nested exceptions
-	 * like:
-	 * <ul>
-	 * <li>java.rmi.RemoteException
-	 * <li>javax.ejb.EJBException
-	 * </ul>
-	 *
-	 * @param throwable
-	 * @return String[]
-	 */
-        private static String[] breakupStackTraceStandard(Throwable throwable)
-        {
-                StringWriter sw = new StringWriter();
-                throwable.printStackTrace(new PrintWriter(sw));
+    /**
+     * Breaks a stack trace of a throwable up into single entries, removes the
+     * leading 'at' and trims whitespaces. Stops on a 'Caused by' entry, that
+     * may be added by JDK 1.4 compliant VMs. 
+     * 
+     * <p>Note:
+     * <p>This strategy of parsing stack traces fails for JDK nested exceptions
+     * like:
+     * <ul>
+     * <li>java.rmi.RemoteException
+     * <li>javax.ejb.EJBException
+     * </ul>
+     *
+     * @param throwable
+     * @return String[]
+     */
+    private static String[] breakupStackTraceStandard(Throwable throwable)
+    {
+        StringWriter sw = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(sw));
 
-                String bt = sw.toString();
-                if (bt == null) {
-                        return new String[] { "... No backtrace available" };
-                }
-
-                String tmp = throwable.toString();
-                if (tmp == null) {
-                        return new String[] { "... No backtrace available. Invalid toString()" };
-                }
-
-                if (tmp.length() >= bt.length()) {
-                        // javax.naming.LinkException and others
-                        return new String[] { "... Skipped invalid backtrace info" };
-                }
-
-                String stackTrace = bt.substring(tmp.length());
-
-
-                ArrayList stack = new ArrayList();
-                int posStart=0, posEnd=0;
-                int stackTraceLen = stackTrace.length();
-                String entry;
-
-                while((posEnd != -1) && (posStart < stackTraceLen)) {
-                        posEnd = stackTrace.indexOf('\n', posStart);
-                        if (posEnd != -1) {
-                                entry = stackTrace.substring(posStart, posEnd);
-                                posStart = posEnd + 1;
-                        }
-                        else {
-                                entry = stackTrace.substring(posStart, posEnd);
-                        }
-
-                        // remove leading 'at'
-                        entry = entry.trim();
-                        if (entry.startsWith("at")) {
-                                entry = entry.substring(2).trim();
-                        }
-                        else if (entry.startsWith("Caused by:")) {
-                                // JDK 1.4 nested exceptions, this information is already
-                                // handled by Exception Mappers.
-                                entry = "... Skipped additional 'Caused by' info";
-                                break;
-                        }
-
-                        if (entry.length() > 0) {
-                                stack.add(entry);
-                        }
-                }
-
-                return (String[])stack.toArray(new String[stack.size()]);
+        String bt = sw.toString();
+        if (bt == null) {
+            return new String[] { "... No backtrace available" };
         }
 
-
-        /**
-	 * Breaks a stack trace of a throwable up into single entries, removes the
-	 * leading 'at' and trims whitespaces. 
-	 *
-	 * <p>Note:
-	 * <p>This strategy of parsing stack traces works also for JDK nested 
-	 * exceptions like:
-	 * <ul>
-	 * <li>java.rmi.RemoteException
-	 * <li>javax.ejb.EJBException
-	 * <li>javax.naming.LinkException
-	 * </ul>
-	 * 
-	 * @param throwable
-	 * @return String[]
-	 */
-        private static String[] breakupStackTraceAtParsing(Throwable throwable)
-        {
-                StringWriter sw = new StringWriter();
-                throwable.printStackTrace(new PrintWriter(sw));
-
-                String stackTrace = sw.toString();
-                int stackTraceLen = stackTrace.length();
-
-                ArrayList stack = new ArrayList();
-                int posStart=0, posEnd=0;
-                String entry;
-                boolean lockedIn = false; // initial state
-                boolean backTraceEntry;
-
-
-                while((posEnd != -1) && (posStart < stackTraceLen)) {
-                        posEnd = stackTrace.indexOf('\n', posStart);
-                        if (posEnd != -1) {
-                                entry = stackTrace.substring(posStart, posEnd);
-                                posStart = posEnd + 1;
-                        }
-                        else {
-                                entry = stackTrace.substring(posStart, posEnd);
-                        }
-
-                        entry = entry.trim();
-
-                        // Sample: "at com.ibm.rmi.iiop.ORB.process(ORB.java:396)"
-                        backTraceEntry = entry.startsWith("at") && entry.endsWith(")");
-                        if (backTraceEntry) {
-                                entry = entry.substring(2).trim();
-                                if (entry.length() > 0) {
-                                        stack.add(entry);
-                                }
-                                else {
-                                        backTraceEntry = false; // rejected
-                                }
-                        }
-
-                        // State transition: 
-                        //   1) lockedIn=false => lockedIn=true
-                        //   2) lockedIn=true  => stop
-                        if (!lockedIn) {
-                                if (backTraceEntry) lockedIn = true;
-                        }
-                        else {
-                                if (!backTraceEntry) break;
-                        }
-                }
-
-                return (String[])stack.toArray(new String[stack.size()]);
+        String tmp = throwable.toString();
+        if (tmp == null) {
+            return new String[] { "... No backtrace available. Invalid toString()" };
         }
 
+        if (tmp.length() >= bt.length()) {
+            // javax.naming.LinkException and others
+            return new String[] { "... Skipped invalid backtrace info" };
+        }
 
-        /**
-	 * Parse a single stack trace line into its elements. Supports standard
-	 * non Microsoft Java VMs.
-	 * 
-	 * <p>The SUN VM stack trace format:
-	 * <pre>
-	 *   java.lang.Exception
-	 *      at org.openmdx.X.mX(X.java:1737)
-	 * </pre>
-	 *
-	 * <p>Preconditions:
-	 * <ul>
-	 * <li>The passed <code>map</code> parameter must not be a null object
-	 * <li>The passed <code>entry</code> parameter must not be a null object
-	 * <li>The passed <code>entry</code> has no leading 'at'
-	 * </ul>
-	 * 
-	 * @param map A map for the entrie's elements.
-	 * @param entry An entry to parse.
-	 */
-        private static void parseStackTraceEntryStandardVM(
-                HashMap map,
-                String string)
-        {
+        String stackTrace = bt.substring(tmp.length());
+
+
+        ArrayList stack = new ArrayList();
+        int posStart=0, posEnd=0;
+        int stackTraceLen = stackTrace.length();
+        String entry;
+
+        while((posEnd != -1) && (posStart < stackTraceLen)) {
+            posEnd = stackTrace.indexOf('\n', posStart);
+            if (posEnd != -1) {
+                entry = stackTrace.substring(posStart, posEnd);
+                posStart = posEnd + 1;
+            }
+            else {
+                entry = stackTrace.substring(posStart, posEnd);
+            }
+
+            // remove leading 'at'
+            entry = entry.trim();
+            if (entry.startsWith("at")) {
+                entry = entry.substring(2).trim();
+            }
+            else if (entry.startsWith("Caused by:")) {
+                // JDK 1.4 nested exceptions, this information is already
+                // handled by Exception Mappers.
+                entry = "... Skipped additional 'Caused by' info";
+                break;
+            }
+
+            if (entry.length() > 0) {
+                stack.add(entry);
+            }
+        }
+
+        return (String[])stack.toArray(new String[stack.size()]);
+    }
+
+
+    /**
+     * Breaks a stack trace of a throwable up into single entries, removes the
+     * leading 'at' and trims whitespaces. 
+     *
+     * <p>Note:
+     * <p>This strategy of parsing stack traces works also for JDK nested 
+     * exceptions like:
+     * <ul>
+     * <li>java.rmi.RemoteException
+     * <li>javax.ejb.EJBException
+     * <li>javax.naming.LinkException
+     * </ul>
+     * 
+     * @param throwable
+     * @return String[]
+     */
+    private static String[] breakupStackTraceAtParsing(Throwable throwable)
+    {
+        StringWriter sw = new StringWriter();
+        throwable.printStackTrace(new PrintWriter(sw));
+
+        String stackTrace = sw.toString();
+        int stackTraceLen = stackTrace.length();
+
+        ArrayList stack = new ArrayList();
+        int posStart=0, posEnd=0;
+        String entry;
+        boolean lockedIn = false; // initial state
+        boolean backTraceEntry;
+
+
+        while((posEnd != -1) && (posStart < stackTraceLen)) {
+            posEnd = stackTrace.indexOf('\n', posStart);
+            if (posEnd != -1) {
+                entry = stackTrace.substring(posStart, posEnd);
+                posStart = posEnd + 1;
+            }
+            else {
+                entry = stackTrace.substring(posStart, posEnd);
+            }
+
+            entry = entry.trim();
+
+            // Sample: "at com.ibm.rmi.iiop.ORB.process(ORB.java:396)"
+            backTraceEntry = entry.startsWith("at") && entry.endsWith(")");
+            if (backTraceEntry) {
+                entry = entry.substring(2).trim();
+                if (entry.length() > 0) {
+                    stack.add(entry);
+                }
+                else {
+                    backTraceEntry = false; // rejected
+                }
+            }
+
+            // State transition: 
+            //   1) lockedIn=false => lockedIn=true
+            //   2) lockedIn=true  => stop
+            if (!lockedIn) {
+                if (backTraceEntry) lockedIn = true;
+            }
+            else {
+                if (!backTraceEntry) break;
+            }
+        }
+
+        return (String[])stack.toArray(new String[stack.size()]);
+    }
+
+
+    /**
+     * Parse a single stack trace line into its elements. Supports standard
+     * non Microsoft Java VMs.
+     * 
+     * <p>The SUN VM stack trace format:
+     * <pre>
+     *   java.lang.Exception
+     *      at org.openmdx.X.mX(X.java:1737)
+     * </pre>
+     *
+     * <p>Preconditions:
+     * <ul>
+     * <li>The passed <code>map</code> parameter must not be a null object
+     * <li>The passed <code>entry</code> parameter must not be a null object
+     * <li>The passed <code>entry</code> has no leading 'at'
+     * </ul>
+     * 
+     * @param map A map for the entrie's elements.
+     * @param entry An entry to parse.
+     */
+    private static void parseStackTraceEntryStandardVM(
+        HashMap map,
+        String string)
+    {
+        try {
+            // Simplify parsing by trimming white spaces
+            String entry = string.trim();
+
+
+            // Read filename & line number from the end of the entry
+            int posFile = entry.lastIndexOf("(");
+            if (posFile > -1) {
+                String fileInfo = entry.substring(posFile+1);
+                if (fileInfo.endsWith(")")) {
+                    fileInfo = fileInfo.substring(0, fileInfo.length()-1);
+                }
+
                 try {
-                        // Simplify parsing by trimming white spaces
-                        String entry = string.trim();
-
-
-                        // Read filename & line number from the end of the entry
-                        int posFile = entry.lastIndexOf("(");
-                        if (posFile > -1) {
-                                String fileInfo = entry.substring(posFile+1);
-                                if (fileInfo.endsWith(")")) {
-                                        fileInfo = fileInfo.substring(0, fileInfo.length()-1);
-                                }
-
-                                try {
-                                        int pos = fileInfo.indexOf(':');
-                                        if (pos > -1) {
-                                                String ln = fileInfo.substring(pos+1);
-                                                map.put("line", Integer.valueOf(ln));
-                                                map.put("file", fileInfo.substring(0,pos));
-                                        }
-                                        else {
-                                                map.put("file", fileInfo);
-                                        }
-                                }
-                                catch(Exception ex) {
-                                        // ignore
-                                }
-                        }
-                        else {
-                                posFile = entry.length();
-                        }
-
-                        // Read class/method name
-                        String caller = entry.substring(0,posFile);
-                        int posMethod = caller.lastIndexOf('.');
-                        if (posMethod > -1) {
-                                map.put("class" , caller.substring(0, posMethod));
-                                map.put("method", caller.substring(posMethod + 1));
-                        }
-                        else {
-                                map.put("class" , caller);
-                        }
+                    int pos = fileInfo.indexOf(':');
+                    if (pos > -1) {
+                        String ln = fileInfo.substring(pos+1);
+                        map.put("line", Integer.valueOf(ln));
+                        map.put("file", fileInfo.substring(0,pos));
+                    }
+                    else {
+                        map.put("file", fileInfo);
+                    }
                 }
                 catch(Exception ex) {
-                        // ignore
+                    // ignore
                 }
+            }
+            else {
+                posFile = entry.length();
+            }
+
+            // Read class/method name
+            String caller = entry.substring(0,posFile);
+            int posMethod = caller.lastIndexOf('.');
+            if (posMethod > -1) {
+                map.put("class" , caller.substring(0, posMethod));
+                map.put("method", caller.substring(posMethod + 1));
+            }
+            else {
+                map.put("class" , caller);
+            }
         }
+        catch(Exception ex) {
+            // ignore
+        }
+    }
 
 
-        /**
-	 * Parse a single stack trace line into its elements. Supports the Microsoft
-	 * VM.
-	 * 
-	 * <p>The Microsoft VM stack trace format:
-	 * <pre>
-	 *   java.lang.Exception
-	 *      at org.openmdx.X.mX(Int32 count) in D:\source\ch\omex\X.java:line 695
-	 * </pre>
-	 *
-	 *
-	 * <p>Preconditions:
-	 * <ul>
-	 * <li>The passed <code>map</code> parameter must not be a null object
-	 * <li>The passed <code>entry</code> parameter must not be a null object
-	 * <li>The passed <code>entry</code> has no leading 'at'
-	 * </ul>
-	 * 
-	 * @param map A map for the entrie's elements.
-	 * @param entry An entry to parse.
-	 */
-        private static void parseStackTraceEntryMicrosoftVM(
-                HashMap map,
-                String line)
-        {
+    /**
+     * Parse a single stack trace line into its elements. Supports the Microsoft
+     * VM.
+     * 
+     * <p>The Microsoft VM stack trace format:
+     * <pre>
+     *   java.lang.Exception
+     *      at org.openmdx.X.mX(Int32 count) in D:\source\ch\omex\X.java:line 695
+     * </pre>
+     *
+     *
+     * <p>Preconditions:
+     * <ul>
+     * <li>The passed <code>map</code> parameter must not be a null object
+     * <li>The passed <code>entry</code> parameter must not be a null object
+     * <li>The passed <code>entry</code> has no leading 'at'
+     * </ul>
+     * 
+     * @param map A map for the entrie's elements.
+     * @param entry An entry to parse.
+     */
+    private static void parseStackTraceEntryMicrosoftVM(
+        HashMap map,
+        String line)
+    {
+        try {
+            // Simplify parsing by trimming white spaces
+            String entry = line.trim();
+
+            // Read the line number from the end of the entry
+            int posLineNr = entry.lastIndexOf(":line ");
+            if (posLineNr > -1) {
                 try {
-                        // Simplify parsing by trimming white spaces
-                        String entry = line.trim();
-
-                        // Read the line number from the end of the entry
-                        int posLineNr = entry.lastIndexOf(":line ");
-                        if (posLineNr > -1) {
-                                try {
-                                        String ln = entry.substring(posLineNr+":line ".length());
-                                        map.put("line", Integer.valueOf(ln));
-                                }
-                                catch(Exception ex) {
-                                        // ignore
-                                }
-
-                                // Remove the line number info
-                                entry = entry.substring(0, posLineNr);
-                        }
-
-                        // The filename may contain spaces so continue parsing for 
-                        // class/method from the start of the entry
-                        int posCaller = entry.indexOf('(');
-                        if (posCaller == -1) return;
-                        String caller = entry.substring(0, posCaller);
-                        int posMethod = caller.lastIndexOf('.');
-                        if (posMethod > -1) {
-                                map.put("class" , caller.substring(0, posMethod));
-                                map.put("method", caller.substring(posMethod + 1));
-                        }
-                        else {
-                                map.put("class" , caller);
-                        }
-
-
-                        // Finally read the filname 
-                        int posFile = entry.indexOf(") in ");
-                        if (posFile > -1) {
-                                posFile += ") in ".length();
-                                map.put("file" , entry.substring(posFile));
-                        }
+                    String ln = entry.substring(posLineNr+":line ".length());
+                    map.put("line", Integer.valueOf(ln));
                 }
                 catch(Exception ex) {
-                        // ignore
+                    // ignore
                 }
+
+                // Remove the line number info
+                entry = entry.substring(0, posLineNr);
+            }
+
+            // The filename may contain spaces so continue parsing for 
+            // class/method from the start of the entry
+            int posCaller = entry.indexOf('(');
+            if (posCaller == -1) return;
+            String caller = entry.substring(0, posCaller);
+            int posMethod = caller.lastIndexOf('.');
+            if (posMethod > -1) {
+                map.put("class" , caller.substring(0, posMethod));
+                map.put("method", caller.substring(posMethod + 1));
+            }
+            else {
+                map.put("class" , caller);
+            }
+
+
+            // Finally read the filname 
+            int posFile = entry.indexOf(") in ");
+            if (posFile > -1) {
+                posFile += ") in ".length();
+                map.put("file" , entry.substring(posFile));
+            }
         }
+        catch(Exception ex) {
+            // ignore
+        }
+    }
 
 
     /**
@@ -2290,7 +2355,7 @@ public class BasicException
         stream.println("  Line=" + ex.lineNr);
         stream.println("  ExceptionDomain=" + ex.exceptionDomain);
         stream.println("  ExceptionCode=" + BasicException.toString(
-                                        ex.exceptionDomain, ex.exceptionCode));
+            ex.exceptionDomain, ex.exceptionCode));
 
         if ((ex.parameters != null) && (ex.parameters.length > 0)) {
             for(int ii=0; ii<ex.parameters.length; ii++) {
@@ -2299,18 +2364,18 @@ public class BasicException
         }
 
         if (ex.description != null) {
-                List descr = breakupDescription(ex.description);
-                        if (descr.size() == 0) {
-                                stream.println("  Description=");
-                        }else if (descr.size() == 1) {
-                                stream.println("  Description=" + descr.get(0));
-                        }else{
-                                stream.println("  Description:");
-                                Iterator iter = descr.iterator();
-                                while(iter.hasNext()) {
-                                        stream.println("    " + (String)iter.next());
-                                }
-                        }
+            List descr = breakupDescription(ex.description);
+            if (descr.size() == 0) {
+                stream.println("  Description=");
+            }else if (descr.size() == 1) {
+                stream.println("  Description=" + descr.get(0));
+            }else{
+                stream.println("  Description:");
+                Iterator iter = descr.iterator();
+                while(iter.hasNext()) {
+                    stream.println("    " + (String)iter.next());
+                }
+            }
         }
 
         if (addBacktrace && (ex.backtrace != null)) {
@@ -2357,7 +2422,7 @@ public class BasicException
         w.println("  Line=" + ex.lineNr);
         w.println("  ExceptionDomain=" + ex.exceptionDomain);
         w.println("  ExceptionCode=" + BasicException.toString(
-                                        ex.exceptionDomain, ex.exceptionCode));
+            ex.exceptionDomain, ex.exceptionCode));
 
         if ((ex.parameters != null) && (ex.parameters.length > 0)) {
             for(int ii=0; ii<ex.parameters.length; ii++) {
@@ -2365,20 +2430,20 @@ public class BasicException
             }
         }
 
-                if (ex.description != null) {
-                        List descr = breakupDescription(ex.description);
-                        if (descr.size() == 0) {
-                                w.println("  Description=");
-                        }else if (descr.size() == 1) {
-                                w.println("  Description=" + descr.get(0));
-                        }else{
-                                w.println("  Description:");
-                                Iterator iter = descr.iterator();
-                                while(iter.hasNext()) {
-                                        w.println("    " + (String)iter.next());
-                                }
-                        }
+        if (ex.description != null) {
+            List descr = breakupDescription(ex.description);
+            if (descr.size() == 0) {
+                w.println("  Description=");
+            }else if (descr.size() == 1) {
+                w.println("  Description=" + descr.get(0));
+            }else{
+                w.println("  Description:");
+                Iterator iter = descr.iterator();
+                while(iter.hasNext()) {
+                    w.println("    " + (String)iter.next());
                 }
+            }
+        }
 
         if (addBacktrace && (ex.backtrace != null)) {
             w.println("  Backtrace:");
@@ -2389,87 +2454,87 @@ public class BasicException
         }
     }
 
-        /**
-	 * Returns the cause belonging to a specific exception domain.
-	 * 
-	 * @param 	exceptionDomain
-	 * 			the desired exception domain,
-	 *          or <code>null</code> to retrieve the initial cause.
-	 *
-	 * @return  Either the cause belonging to a specific exception domain
-	 *          or the initial cause if <code>exceptionDomain</code> is
-	 * 			<code>null</code>.  
-	 */
-        public BasicException getCause(
-            String exceptionDomain
-        ){
-            BasicException cursor = this;
-            while(
-                 cursor.stack != null && (
-                     exceptionDomain == null || !exceptionDomain.equals(cursor.exceptionDomain)
-                 )
-            ) cursor = cursor.stack;
-            return cursor;
+    /**
+     * Returns the cause belonging to a specific exception domain.
+     * 
+     * @param 	exceptionDomain
+     * 			the desired exception domain,
+     *          or <code>null</code> to retrieve the initial cause.
+     *
+     * @return  Either the cause belonging to a specific exception domain
+     *          or the initial cause if <code>exceptionDomain</code> is
+     * 			<code>null</code>.  
+     */
+    public BasicException getCause(
+        String exceptionDomain
+    ){
+        BasicException cursor = this;
+        while(
+                cursor.stack != null && (
+                        exceptionDomain == null || !exceptionDomain.equals(cursor.exceptionDomain)
+                )
+        ) cursor = cursor.stack;
+        return cursor;
+    }
+
+    /**
+     * Checks and fixes illegal recursion in the exception stack of the
+     * specified <code>BasicException</code>
+     */
+    private static void checkAndFixIllegalRecursion(BasicException ex)
+    {
+        if (ex == null) return;
+
+        int level = 1;
+        List visitedExceptions = new ArrayList();
+        visitedExceptions.add(ex);
+
+        BasicException tmp = ex;
+
+        while(tmp.stack != null) {
+            int index = visitedExceptions.indexOf(tmp.stack);
+            if (index >= 0) {
+                tmp.stack = new BasicException(
+                    Code.DEFAULT_DOMAIN,
+                    Code.ASSERTION_FAILURE,
+                    "Detected a recursion flaw within the exception stack."
+                    + " The exception is fixed but some information had to be"
+                    + " discarded. The BasicException at the relative level"
+                    + " " + (index - visitedExceptions.size()) + " in the"
+                    + " exception stack caused the recursion.",
+                    new Parameter[0]);
+                break;
+            }
+
+            level++;
+            visitedExceptions.add(tmp.stack);
+            tmp = tmp.stack;
         }
 
-        /**
-	 * Checks and fixes illegal recursion in the exception stack of the
-	 * specified <code>BasicException</code>
-	 */
-        private static void checkAndFixIllegalRecursion(BasicException ex)
-        {
-                if (ex == null) return;
-
-                int level = 1;
-                List visitedExceptions = new ArrayList();
-                visitedExceptions.add(ex);
-
-                BasicException tmp = ex;
-
-                while(tmp.stack != null) {
-                        int index = visitedExceptions.indexOf(tmp.stack);
-                        if (index >= 0) {
-                                tmp.stack = new BasicException(
-                                        Code.DEFAULT_DOMAIN,
-                                        Code.ASSERTION_FAILURE,
-                                        new Parameter[0],
-                                        "Detected a recursion flaw within the exception stack."
-                                        + " The exception is fixed but some information had to be"
-                                        + " discarded. The BasicException at the relative level"
-                                        + " " + (index - visitedExceptions.size()) + " in the"
-                                        + " exception stack caused the recursion.");
-                                break;
-                        }
-
-                        level++;
-                        visitedExceptions.add(tmp.stack);
-                        tmp = tmp.stack;
-                }
-
-                tmp = null;
-                visitedExceptions.clear();
-                visitedExceptions = null;
-        }
+        tmp = null;
+        visitedExceptions.clear();
+        visitedExceptions = null;
+    }
 
 
-        /**
-	 * Returns a simple exception message based on the exception domain and 
-	 * code.
-	 * 
-	 * @param exDomain
-	 * @param exCode
-	 * @return A simple exception message
-	 */
-        private static String getSimpleMessage(
-                String exDomain,
-                int exCode)
-        {
-                return validateExceptionDomain(exDomain)
-                                + "."
-                                + BasicException.toString(
-                                        validateExceptionDomain(exDomain),
-                                        exCode);
-        }
+    /**
+     * Returns a simple exception message based on the exception domain and 
+     * code.
+     * 
+     * @param exDomain
+     * @param exCode
+     * @return A simple exception message
+     */
+    private static String getSimpleMessage(
+        String exDomain,
+        int exCode)
+    {
+        return validateExceptionDomain(exDomain)
+        + "."
+        + BasicException.toString(
+            validateExceptionDomain(exDomain),
+            exCode);
+    }
 
 
     /**
@@ -2505,15 +2570,15 @@ public class BasicException
 
         if (exCode <= 0) {
             mapper = (IntegerEnumeration.Mapper)BasicException.exceptionCodeMapperMap.get(
-                                        Code.DEFAULT_DOMAIN);
+                Code.DEFAULT_DOMAIN);
         }
         else {
             mapper = (IntegerEnumeration.Mapper)BasicException.exceptionCodeMapperMap.get(
-                                        exDomain);
+                exDomain);
 
             if (mapper == null) {
                 mapper = (IntegerEnumeration.Mapper)BasicException.exceptionCodeMapperMap.get(
-                                        Code.DEFAULT_DOMAIN);
+                    Code.DEFAULT_DOMAIN);
             }
         }
         return mapper.toString(exCode);
@@ -2523,84 +2588,84 @@ public class BasicException
      * The default exception mapper
      */
     static class DefaultMapper
-        implements Mapper
+    implements Mapper
     {
         public BasicException map(Throwable throwable)
         {
-                if (throwable == null) {
-                        // This should never happen. So far we're only called from
-                        // BasicException.toStackedException() where a null
-                        // throwable is checked. 
-                                return new BasicException(
-                                                                Code.DEFAULT_DOMAIN,
-                                                                Code.BAD_PARAMETER,
-                                                                new Parameter[0] ,
-                                                                "Got a null throwable to map in the DefaultMapper");
-                }
+            if (throwable == null) {
+                // This should never happen. So far we're only called from
+                // BasicException.toStackedException() where a null
+                // throwable is checked. 
+                return new BasicException(
+                    Code.DEFAULT_DOMAIN,
+                    Code.BAD_PARAMETER,
+                    "Got a null throwable to map in the DefaultMapper" ,
+                    new Parameter[0]);
+            }
 
-                        if (throwable instanceof BasicException) {
-                                // This should never happen. So far we're only called from
-                                // BasicException.toStackedException() where a BasicException
-                                // throwable is checked.
-                                return (BasicException)throwable;
-                        }
+            if (throwable instanceof BasicException) {
+                // This should never happen. So far we're only called from
+                // BasicException.toStackedException() where a BasicException
+                // throwable is checked.
+                return (BasicException)throwable;
+            }
 
-                        if (throwable instanceof Wrapper) {
-                                // unwrap
-                                BasicException se = ((Wrapper)throwable).getExceptionStack();
+            if (throwable instanceof Wrapper) {
+                // unwrap
+                BasicException se = ((Wrapper)throwable).getExceptionStack();
 
-                                if (se != null) {
-                                        return se;
-                                } // else fall through and map the wrapper exception itself
-                        }
+                if (se != null) {
+                    return se;
+                } // else fall through and map the wrapper exception itself
+            }
 
 
-                        String[] backTrace = BasicException.breakupStackTrace(throwable);
+            String[] backTrace = BasicException.breakupStackTrace(throwable);
 
-                        HashMap map = BasicException.parseStackTraceEntry(backTrace, 0);
+            HashMap map = BasicException.parseStackTraceEntry(backTrace, 0);
 
-                        Throwable cause = throwable.getCause();
+            Throwable cause = throwable.getCause();
 
-                        return cause == null ? new BasicException(
-                                (String)map.get("class"),
-                                (String)map.get("method"),
-                                ((Integer)map.get("line")).intValue(),
-                                Code.DEFAULT_DOMAIN,
-                                Code.GENERIC,
-                                new Parameter[] {
-                                        new Parameter(
-                                                Parameter.EXCEPTION_CLASS,
-                                                throwable.getClass().getName()
-                                        ),
-                                        new Parameter(
-                                                Parameter.EXCEPTION_SOURCE,
-                                                BasicException.source.toString()
-                                        )
-                                },
-                                throwable.getMessage(),
-                                backTrace,
-                                new Date()
-                        ) : new BasicException(
-                                        cause,
-                                        (String)map.get("class"),
-                                        (String)map.get("method"),
-                                        ((Integer)map.get("line")).intValue(),
-                                        Code.DEFAULT_DOMAIN,
-                                        Code.GENERIC,
-                                        new Parameter[] {
-                                                new Parameter(
-                                                        Parameter.EXCEPTION_CLASS,
-                                                        throwable.getClass().getName()
-                                                ),
-                                                new Parameter(
-                                                        Parameter.EXCEPTION_SOURCE,
-                                                        BasicException.source.toString()
-                                                )
-                                        },
-                                        throwable.getMessage(),
-                                        backTrace,
-                                        new Date()
-                                );
+            return cause == null ? new BasicException(
+                (String)map.get("class"),
+                (String)map.get("method"),
+                ((Integer)map.get("line")).intValue(),
+                Code.DEFAULT_DOMAIN,
+                Code.GENERIC,
+                new Parameter[] {
+                    new Parameter(
+                        Parameter.EXCEPTION_CLASS,
+                        throwable.getClass().getName()
+                    ),
+                    new Parameter(
+                        Parameter.EXCEPTION_SOURCE,
+                        BasicException.source.toString()
+                    )
+                },
+                throwable.getMessage(),
+                backTrace,
+                new Date()
+            ) : new BasicException(
+                cause,
+                (String)map.get("class"),
+                (String)map.get("method"),
+                ((Integer)map.get("line")).intValue(),
+                Code.DEFAULT_DOMAIN,
+                Code.GENERIC,
+                new Parameter[] {
+                    new Parameter(
+                        Parameter.EXCEPTION_CLASS,
+                        throwable.getClass().getName()
+                    ),
+                    new Parameter(
+                        Parameter.EXCEPTION_SOURCE,
+                        BasicException.source.toString()
+                    )
+                },
+                throwable.getMessage(),
+                backTrace,
+                new Date()
+            );
 
         }
     }
@@ -2697,11 +2762,11 @@ public class BasicException
         BasicException.register(
             Code.DEFAULT_DOMAIN,
             Code.getMapper()
-                );
+        );
         BasicException.register(
             Throwable.class,
             new DefaultMapper()
-                );
+        );
         BasicException.register(
             NamingException.class,
             new NamingExceptionMapper()

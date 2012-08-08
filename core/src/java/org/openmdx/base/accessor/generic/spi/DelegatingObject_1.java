@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingObject_1.java,v 1.10 2008/04/04 01:11:56 hburger Exp $
+ * Name:        $Id: DelegatingObject_1.java,v 1.13 2008/09/18 12:46:43 hburger Exp $
  * Description: DelegatingObject_1 class
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 01:11:56 $
+ * Date:        $Date: 2008/09/18 12:46:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -18,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -63,11 +63,9 @@ import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.naming.Path;
 
-
 /**
- * An abstract delegating object
+ * A delegating object
  */
-@SuppressWarnings("unchecked")
 public class DelegatingObject_1
     implements Object_1_0, Object_1_3, Delegating_1_0 
 {
@@ -90,12 +88,17 @@ public class DelegatingObject_1
     }
     
     /**
+     * The object's identity
+     */
+    private Object_1_0 object;
+
+    /**
      * Retrieve the object's delegate
      * 
      * @return the object's delegate
      */
     protected Object_1_0 getDelegate(
-    ){
+    ) throws ServiceException {
         return this.object;
     }
         
@@ -119,7 +122,11 @@ public class DelegatingObject_1
      * @see org.openmdx.base.accessor.generic.spi.Delegating_1_0#objGetDelegate()
      */
     public Object objGetDelegate() {
-        return getDelegate();
+        try {
+            return getDelegate();
+        } catch (ServiceException exception) {
+            return null;
+        }
     }
 
     
@@ -237,7 +244,11 @@ public class DelegatingObject_1
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetResourceIdentifier()
      */
     public Object objGetResourceIdentifier() {
-        return getDelegate().objGetResourceIdentifier();
+        try {
+            return getDelegate().objGetResourceIdentifier();
+        } catch (ServiceException exception) {
+            return null;
+        }
     }
 
     /**
@@ -249,7 +260,7 @@ public class DelegatingObject_1
      *
      * @return  the names of the features in the default fetch group
      */
-    public Set objDefaultFetchGroup(
+    public Set<String> objDefaultFetchGroup(
     ) throws ServiceException {
         return getDelegate().objDefaultFetchGroup();
     }
@@ -356,7 +367,7 @@ public class DelegatingObject_1
      *            if the copy operation fails.
      */
     public Object_1_0 objCopy(
-        FilterableMap there,
+        FilterableMap<String, Object_1_0> there,
         String criteria
     ) throws ServiceException {
         return getDelegate().objCopy(there,criteria);
@@ -382,7 +393,7 @@ public class DelegatingObject_1
      *            if the move operation fails.
      */
     public void objMove(
-        FilterableMap there,
+        FilterableMap<String, Object_1_0> there,
         String criteria
     ) throws ServiceException {
         getDelegate().objMove(there,criteria);
@@ -544,7 +555,7 @@ public class DelegatingObject_1
      * @exception   ClassCastException
      *              if the feature's value is not a list
      */
-    public List objGetList(
+    public List<Object> objGetList(
         String feature
     ) throws ServiceException {
         return getDelegate().objGetList(feature);
@@ -568,7 +579,7 @@ public class DelegatingObject_1
      * @exception   ClassCastException
      *              if the feature's value is not a set
      */
-    public Set objGetSet(
+    public Set<Object> objGetSet(
         String feature
     ) throws ServiceException {
         return getDelegate().objGetSet(feature);
@@ -592,7 +603,7 @@ public class DelegatingObject_1
      * @exception   ServiceException NOT_SUPPORTED
      *              if the object has no such feature
      */
-    public SortedMap objGetSparseArray(
+    public SortedMap<Integer,Object> objGetSparseArray(
         String feature
     ) throws ServiceException {
         return getDelegate().objGetSparseArray(feature);
@@ -639,7 +650,7 @@ public class DelegatingObject_1
      * @exception   ServiceException NOT_SUPPORTED
      *              if the object has no such feature
      */
-    public FilterableMap objGetContainer(
+    public FilterableMap<String, Object_1_0> objGetContainer(
         String feature
     ) throws ServiceException {
         return getDelegate().objGetContainer(feature);
@@ -741,19 +752,9 @@ public class DelegatingObject_1
      */
     public EventListener[] objGetEventListeners(
         String feature, 
-        Class listenerType
+        Class<? extends EventListener> listenerType
     ) throws ServiceException {
         return getDelegate().objGetEventListeners(feature,listenerType);
     }
-
-
-    //--------------------------------------------------------------------------
-    // Instance Members
-    //--------------------------------------------------------------------------
-
-    /**
-     * The object's identity
-     */
-    private Object_1_0 object;
 
 }

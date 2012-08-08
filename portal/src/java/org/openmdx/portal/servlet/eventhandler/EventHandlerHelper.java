@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: EventHandlerHelper.java,v 1.8 2008/05/05 23:06:13 wfro Exp $
+ * Name:        $Id: EventHandlerHelper.java,v 1.9 2008/09/17 12:06:39 wfro Exp $
  * Description: EventHandlerHelper
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/05/05 23:06:13 $
+ * Date:        $Date: 2008/09/17 12:06:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,16 +58,12 @@ package org.openmdx.portal.servlet.eventhandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
-import javax.jmi.reflect.RefPackage;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.view.ObjectView;
 
@@ -93,23 +89,12 @@ public class EventHandlerHelper {
         ViewsCache notifyViews,
         RefObject_1_0 modifiedObject
     ) {
-        // Update current views. (Re)load the created / edited object in 
-        // object managers of cached views
-        List<RefPackage> processedPackages = new ArrayList<RefPackage>();
-        processedPackages.add(
-            modifiedObject.refOutermostPackage()
-        );
         for(
             Iterator i = notifyViews.getViews().values().iterator(); 
             i.hasNext(); 
         ) {
             ObjectView view = (ObjectView)i.next();
-            RefPackage_1_0 cachedViewPkg = (RefPackage_1_0)view.getRefObject().refOutermostPackage();
-            if(!processedPackages.contains(cachedViewPkg)) {
-                RefObject_1_0 toBeRefreshed = (RefObject_1_0)cachedViewPkg.refObject(modifiedObject.refMofId());
-                toBeRefreshed.refRefresh();
-                processedPackages.add(cachedViewPkg);
-            }
+            view.getPersistenceManager().evictAll();
         }
     }
            

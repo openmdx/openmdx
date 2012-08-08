@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TokenException.java,v 1.2 2005/07/22 15:57:34 hburger Exp $
+ * Name:        $Id: TokenException.java,v 1.3 2008/09/10 08:55:30 hburger Exp $
  * Description: Extended IO Exception 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/07/22 15:57:34 $
+ * Date:        $Date: 2008/09/10 08:55:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -95,7 +95,7 @@ public class TokenException
      */
     public TokenException(
         Exception cause,
-        BasicException.Parameter[] parameters
+        BasicException.Parameter... parameters
     ) {
         super();
         this.exceptionStack = BasicException.toStackedException(

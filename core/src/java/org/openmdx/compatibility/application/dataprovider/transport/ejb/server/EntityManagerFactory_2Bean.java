@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EntityManagerFactory_2Bean.java,v 1.2 2008/07/01 21:54:55 hburger Exp $
+ * Name:        $Id: EntityManagerFactory_2Bean.java,v 1.8 2008/09/10 08:55:26 hburger Exp $
  * Description: Gateway_1Bean 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/01 21:54:55 $
+ * Date:        $Date: 2008/09/10 08:55:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -78,15 +78,13 @@ import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.openmdx.model1.mapping.Names;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Gateway_1Bean
  */
 public class EntityManagerFactory_2Bean
-    extends AbstractDataprovider_1Bean 
-    implements Dataprovider_1_0, ManagerFactory_2_0, OptimisticTransaction_2_0
+extends AbstractDataprovider_1Bean 
+implements Dataprovider_1_0, ManagerFactory_2_0, OptimisticTransaction_2_0
 {
 
     /**
@@ -98,7 +96,7 @@ public class EntityManagerFactory_2Bean
      * 
      */
     private Map<String,Dataprovider_1_3Connection> connections;
-    
+
     /**
      * 
      */    
@@ -107,27 +105,21 @@ public class EntityManagerFactory_2Bean
     /**
      * 
      */
-    private Logger logger;
-    
-    /**
-     * 
-     */
-//    private PersistenceManagerFactory persistenceManagerFactory;
-    
+    private static final String[] PERSISTENCE_MANAGER_SECTION = {
+        "PersistenceManager"
+    };
+
+
     //------------------------------------------------------------------------
     // Extends SessionBean_1
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Dataprovider_1Bean#activate()
      */
     @Override
     public void activate(
     ) throws Exception {
-        //
-        // Logger
-        //
-        this.logger = LoggerFactory.getLogger(EntityManagerFactory_2Bean.class);
         //
         // Connections
         //
@@ -152,7 +144,7 @@ public class EntityManagerFactory_2Bean
         this.connections = null; 
     }
 
-    
+
     //------------------------------------------------------------------------
     // Extends AbstractDataprovider_1Bean
     //------------------------------------------------------------------------
@@ -195,32 +187,12 @@ public class EntityManagerFactory_2Bean
         // Acquire kernel
         //
         this.kernel = new PersistenceManagerFactory_2(
-          configuration,
-          this, 
-          getSelf()
+            configuration,
+            this, 
+            getSelf()
         );
-        //
-        // Persistence Manager Factory
-        //
-//        Dataprovider_1ConnectionFactory connectionFactory = new Dataprovider_1ShareableConnectionHolder(
-//            this.kernel
-//        );
-//        Map<String,Object> persistenceManagerConfiguration = new HashMap<String,Object>();
-//        applyDefaultConfiguration(persistenceManagerConfiguration);
-//        applyExplicitConfiguration(persistenceManagerConfiguration);
-//        persistenceManagerConfiguration.put(
-//            ConfigurableProperty.ConnectionFactory.qualifiedName(), 
-//            connectionFactory
-//        );
-//        persistenceManagerConfiguration.put(
-//            OptimisticTransaction_2_0.class.getName(),
-//            super.getSelf()
-//        );        
-//        this.persistenceManagerFactory = PersistenceManagerFactory_1.getPersistenceManagerFactory(
-//            persistenceManagerConfiguration
-//        );
     }
-    
+
     /**
      * Apply the default values to the persistence manager configuration
      * 
@@ -252,7 +224,7 @@ public class EntityManagerFactory_2Bean
             Boolean.TRUE.toString()
         );
     }
-    
+
     /**
      * Apply the explicitly configured values to the persistence manager configuration
      * 
@@ -264,7 +236,7 @@ public class EntityManagerFactory_2Bean
         Map<String,Object> target
     ) throws ServiceException{
         Configuration source = super.getConfiguration(
-            new String[]{"PersistenceManager"}, // section 
+            PERSISTENCE_MANAGER_SECTION, // section 
             (Map<String,ConfigurationSpecifier>)null // specification
         );
         for(ConfigurableProperty property : ConfigurableProperty.values()) {
@@ -276,8 +248,8 @@ public class EntityManagerFactory_2Bean
             }
         }
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements EntityManagerFactory_2_0
     //------------------------------------------------------------------------
@@ -298,7 +270,7 @@ public class EntityManagerFactory_2Bean
     ) throws ResourceException {
         return this.kernel.createManager();
     }
-    
+
 
     //------------------------------------------------------------------------
     // Implements OptimisticTransaction_2_0
@@ -314,7 +286,6 @@ public class EntityManagerFactory_2Bean
         if(sessionContext.getRollbackOnly()) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ROLLBACK,
-            null,
             "Unit of work was marked for rollback only"
         );  
         try {
@@ -325,13 +296,12 @@ public class EntityManagerFactory_2Bean
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ROLLBACK,
-                null,
                 "Unit of work set to rollback-only during commit"
             );
         }
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0
     //------------------------------------------------------------------------
@@ -356,7 +326,7 @@ public class EntityManagerFactory_2Bean
             );
             this.logger.debug("{} header: {} replies: {}", this.serverId, header, Arrays.asList(replies));
             return replies;
-       } catch (RuntimeException exception) {
+        } catch (RuntimeException exception) {
             new RuntimeServiceException(exception).log();
             throw exception;    
         }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DependencyAwareExplorer_1.java,v 1.7 2008/03/21 20:14:53 hburger Exp $
+ * Name:        $Id: DependencyAwareExplorer_1.java,v 1.8 2008/09/10 08:55:20 hburger Exp $
  * Description: Dependency Aware Explorer Plug-In
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:14:53 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -107,7 +107,7 @@ import org.openmdx.kernel.log.SysLog;
  */
 @SuppressWarnings("unchecked")
 public class DependencyAwareExplorer_1
-    extends Explorer_1
+extends Explorer_1
 {
 
     /**
@@ -161,9 +161,9 @@ public class DependencyAwareExplorer_1
             Map mappingMembers = new HashMap();
             Integer[] mappings = new Integer[requests.length];
             for (
-                int i = 0; 
-                i < mappings.length; 
-                i++
+                    int i = 0; 
+                    i < mappings.length; 
+                    i++
             ) {
                 Integer mapping = getMapping(requests[i]);
                 mappings[i] = mapping;
@@ -189,14 +189,14 @@ public class DependencyAwareExplorer_1
             Set[] requestDependencies = new Set[mappings.length];
             Set[] lenientDependencies = new Set[mappings.length];
             for (
-                int i = 0; 
-                i < mappings.length; 
-                i++
+                    int i = 0; 
+                    i < mappings.length; 
+                    i++
             ) {
                 for (
-                    int j = 0; 
-                    j < mappings.length; 
-                    j++
+                        int j = 0; 
+                        j < mappings.length; 
+                        j++
                 ) {
                     if (i != j) {
                         if(dependsOn(requests[i], requests[j], true)) {
@@ -239,7 +239,7 @@ public class DependencyAwareExplorer_1
                         SysLog.warning(
                             "Circular dependency detected, keeping original request order",
                             unitOfWork
-                       );
+                        );
                         //
                         // I guess there are statedObject features leading to 
                         // circular references of objects not being instances
@@ -247,9 +247,9 @@ public class DependencyAwareExplorer_1
                         //
                         requestOrder = new ArrayList();
                         for (
-                            int i = 0; 
-                            i < mappings.length; 
-                            i++
+                                int i = 0; 
+                                i < mappings.length; 
+                                i++
                         ){
                             requestOrder.add(new Integer(i));
                         }
@@ -257,15 +257,15 @@ public class DependencyAwareExplorer_1
                         SysLog.warning(
                             "Circular dependency detected, ordering by states and children only",
                             unitOfWork
-                       );
+                        );
                     }
                 }
                 int currentPosition = 0;
                 Integer currentMapping = mappings[currentPosition];
                 for (
-                    int nextPosition = 1; 
-                    nextPosition < requests.length; 
-                    nextPosition++
+                        int nextPosition = 1; 
+                        nextPosition < requests.length; 
+                        nextPosition++
                 ) {
                     Integer nextMapping = mappings[nextPosition];
                     if (!nextMapping.equals(currentMapping)) {
@@ -296,8 +296,8 @@ public class DependencyAwareExplorer_1
                 );
             } else {
                 for (
-                    Iterator i = mappingOrder.iterator(); 
-                    i.hasNext();
+                        Iterator i = mappingOrder.iterator(); 
+                        i.hasNext();
                 ) {
                     Integer currentMapping = (Integer) i.next();
                     List requestSequence = (List) mappingMembers.get(currentMapping);
@@ -369,8 +369,8 @@ public class DependencyAwareExplorer_1
         SparseList statedObject = stateCandidate.object().getValues(
             State_1_Attributes.STATED_OBJECT);
         return 
-            statedObject != null && 
-            initialStateCandidate.path().equals(statedObject.get(0));
+        statedObject != null && 
+        initialStateCandidate.path().equals(statedObject.get(0));
     }
 
     private final boolean isChildOf(
@@ -396,24 +396,24 @@ public class DependencyAwareExplorer_1
         boolean referenceAware
     ) {
         return (
-            left.operation() == DataproviderOperations.OBJECT_CREATION && 
-            right.operation() == DataproviderOperations.OBJECT_CREATION && (
-                 isChildOf(left, right) || 
-                 isStateOf(left, right)
-            )
-        ) || (
-            left.operation() == DataproviderOperations.OBJECT_REMOVAL && 
-            isChildOf(right, left)
-        ) || (
-            referenceAware && (
-                (
-                    left.operation() == DataproviderOperations.OBJECT_REMOVAL && 
-                    isReferencedBy(left.path(), right)
-                ) || (
-                    right.operation() == DataproviderOperations.OBJECT_CREATION && 
-                    isReferencedBy(right.path(), left)
+                left.operation() == DataproviderOperations.OBJECT_CREATION && 
+                right.operation() == DataproviderOperations.OBJECT_CREATION && (
+                        isChildOf(left, right) || 
+                        isStateOf(left, right)
                 )
-            )
+        ) || (
+                left.operation() == DataproviderOperations.OBJECT_REMOVAL && 
+                isChildOf(right, left)
+        ) || (
+                referenceAware && (
+                        (
+                                left.operation() == DataproviderOperations.OBJECT_REMOVAL && 
+                                isReferencedBy(left.path(), right)
+                        ) || (
+                                right.operation() == DataproviderOperations.OBJECT_CREATION && 
+                                isReferencedBy(right.path(), left)
+                        )
+                )
         );
     }
 
@@ -427,10 +427,10 @@ public class DependencyAwareExplorer_1
     private boolean isReferencedBy(Path left, DataproviderRequest right) {
         short operation = right.operation();
         return (operation == DataproviderOperations.OBJECT_CREATION
-            || operation == DataproviderOperations.OBJECT_MODIFICATION
-            || operation == DataproviderOperations.OBJECT_OPERATION
-            || operation == DataproviderOperations.OBJECT_REPLACEMENT || operation == DataproviderOperations.OBJECT_SETTING)
-            && isReferencedBy(left, right.object());
+                || operation == DataproviderOperations.OBJECT_MODIFICATION
+                || operation == DataproviderOperations.OBJECT_OPERATION
+                || operation == DataproviderOperations.OBJECT_REPLACEMENT || operation == DataproviderOperations.OBJECT_SETTING)
+                && isReferencedBy(left, right.object());
     }
 
     /**
@@ -442,12 +442,12 @@ public class DependencyAwareExplorer_1
      */
     private boolean isReferencedBy(Path left, DataproviderObject right) {
         for (
-            Iterator a = right.attributeNames().iterator(); 
-            a.hasNext();
+                Iterator a = right.attributeNames().iterator(); 
+                a.hasNext();
         ){
             for (
-                Iterator v = right.getValues((String) a.next()).populationIterator(); 
-                v.hasNext();
+                    Iterator v = right.getValues((String) a.next()).populationIterator(); 
+                    v.hasNext();
             ){
                 if (left.equals(v.next())) {
                     return true;
@@ -480,9 +480,9 @@ public class DependencyAwareExplorer_1
     private Map toMap(Set[] source) {
         Map target = new TreeMap();
         for (
-            int i = 0; 
-            i < source.length; 
-            i++
+                int i = 0; 
+                i < source.length; 
+                i++
         ) {
             target.put(
                 new Integer(i),
@@ -501,8 +501,8 @@ public class DependencyAwareExplorer_1
     private Map toMap(Set[] source, List selection) {
         Map target = new TreeMap();
         for (
-            Iterator i = selection.iterator(); 
-            i.hasNext();
+                Iterator i = selection.iterator(); 
+                i.hasNext();
         ) {
             Integer key = (Integer) i.next();
             Set value = source[key.intValue()];
@@ -526,8 +526,8 @@ public class DependencyAwareExplorer_1
         List order = new ArrayList();
         Set pending = new HashSet();
         for (
-            Iterator i = dependency.keySet().iterator(); 
-            i.hasNext();
+                Iterator i = dependency.keySet().iterator(); 
+                i.hasNext();
         ) {
             if (!resolve(order, i.next(), dependency, pending)) { 
                 return null; 
@@ -560,8 +560,8 @@ public class DependencyAwareExplorer_1
             pending.add(key);
             try {
                 for (
-                    Iterator i = dependents.iterator(); 
-                    i.hasNext();
+                        Iterator i = dependents.iterator(); 
+                        i.hasNext();
                 ) {
                     if (!resolve(order, i.next(), dependency, pending)) {
                         return false;
@@ -574,15 +574,13 @@ public class DependencyAwareExplorer_1
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
-                        new BasicException.Parameter[] {
-                            new BasicException.Parameter("order", order),
-                            new BasicException.Parameter("key", key),
-                            new BasicException.Parameter("dependency", dependency),
-                            new BasicException.Parameter("pending", pending),
-                            new BasicException.Parameter("dependents", dependents)
-                        },
-                        "Unexpected Dependency Resolution Failure"
-                     )
+                        "Unexpected Dependency Resolution Failure",
+                        new BasicException.Parameter("order", order),
+                        new BasicException.Parameter("key", key),
+                        new BasicException.Parameter("dependency", dependency),
+                        new BasicException.Parameter("pending", pending),
+                        new BasicException.Parameter("dependents", dependents)
+                    )
                 );
                 return false;
             }

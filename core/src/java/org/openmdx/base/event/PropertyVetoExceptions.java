@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PropertyVetoExceptions.java,v 1.5 2007/10/10 16:05:53 hburger Exp $
+ * Name:        $Id: PropertyVetoExceptions.java,v 1.6 2008/09/10 08:55:29 hburger Exp $
  * Description: openMDX Events: Runtime Exceptions
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:53 $
+ * Date:        $Date: 2008/09/10 08:55:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -85,14 +85,14 @@ public class PropertyVetoExceptions {
        PropertyChangeEvent event = cause.getPropertyChangeEvent();
        return new BadParameterException(
            cause,
+           "Property change veto",
            event == null ? null : new BasicException.Parameter[]{
                new BasicException.Parameter("source", event.getSource()),
                new BasicException.Parameter("propertyName", event.getPropertyName()),
                new BasicException.Parameter("oldValue", event.getOldValue()),
                new BasicException.Parameter("newValue", event.getNewValue()),
                new BasicException.Parameter("propagationId",event.getPropagationId())
-           },
-           "Property change veto"
+           }
        );
    }
     

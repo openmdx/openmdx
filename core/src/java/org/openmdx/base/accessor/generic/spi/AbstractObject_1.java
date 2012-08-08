@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractObject_1.java,v 1.17 2008/06/27 16:59:27 hburger Exp $
+ * Name:        $Id: AbstractObject_1.java,v 1.22 2008/09/12 17:36:08 hburger Exp $
  * Description: SPICE Object Layer: Abstract Object_1_0 Implementation
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 16:59:27 $
+ * Date:        $Date: 2008/09/12 17:36:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,29 +68,37 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.WeakHashMap;
 
+import javax.resource.ResourceException;
+
 import org.openmdx.base.accessor.generic.cci.JdoStates_1_0;
 import org.openmdx.base.accessor.generic.cci.LargeObject_1_0;
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
+import org.openmdx.base.accessor.generic.cci.Object_1_2;
 import org.openmdx.base.accessor.generic.cci.Structure_1_0;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.resource.Records;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.event.InstanceCallbackEvent;
 import org.openmdx.compatibility.base.event.InstanceCallbackListener;
 import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.format.IndentingFormatter;
 
 /**
  * Abstract Object_1_0 implementation
  */
 @SuppressWarnings("unchecked")
-public class AbstractObject_1 implements 
-    Object_1_0 
+public class AbstractObject_1 
+    implements Object_1_0 
 {
 
+    /**
+     * Constructor 
+     *
+     * @param identity
+     * @param objectClass
+     */
     protected AbstractObject_1(
         Path identity,
         String objectClass
@@ -99,18 +107,32 @@ public class AbstractObject_1 implements
         this.identity = identity;
         this.objectClass = objectClass;
     }
-    
+
     protected short state;        
     protected Path identity;
     protected String objectClass;
     protected final Set dirty = new HashSet();
-    
+
     private Map listeners = new WeakHashMap();
+
+    private static final String[] TO_STRING_KEYES = {
+        "resourceIdentifier",
+        "class",
+        "state",
+        "defaultFetchGroup"
+    };
+
+    private static final String[] INACCESSIBLE_KEYES = {
+        "resourceIdentifier",
+        "exceptionDomain",
+        "exceptionCode"
+    };
+    
     
     //------------------------------------------------------------------------
     // Implements Object_1_0
     //------------------------------------------------------------------------
-    
+
     /** 
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetPath()
      * <p>
@@ -168,8 +190,8 @@ public class AbstractObject_1 implements
         if(objIsDirty()) throw new ServiceException (
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            getExceptionParameters(),
-            "Attempt to remove a dirty object from the unit of work"
+            "Attempt to remove a dirty object from the unit of work",
+            getExceptionParameters()
         );
         this.state &= ~JdoStates_1_0.TRANSACTIONAL;
     }
@@ -225,7 +247,7 @@ public class AbstractObject_1 implements
      * <p>
      * While in general an Object implementing Object_1_0 is allowed to throw 
      * a ServiceException for status requests, the AbstractObject_1 does
-     * not include them in its statsu method declarations.
+     * not include them in its status method declarations.
      */
     public boolean objIsInUnitOfWork(
     ){
@@ -236,13 +258,13 @@ public class AbstractObject_1 implements
     ){
         return new BasicException.Parameter[]{
             new BasicException.Parameter("path",objGetPath()), //...              
-            new BasicException.Parameter("class",new String[]{objGetClass(), getClass().getName()}),
+            new BasicException.Parameter("class",objGetClass(), getClass().getName()),
             new BasicException.Parameter("state",stateToString(this)),
         };
     }
 
     protected BasicException.Parameter[] getExceptionParameters(
-        BasicException.Parameter[] extension
+        BasicException.Parameter... extension
     ){
         return BasicException.Parameter.add(
             getExceptionParameters(),
@@ -276,8 +298,8 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            getExceptionParameters(),
-            "This object is unmodifiable"
+            "This object is unmodifiable",
+            getExceptionParameters()
         );
     }
 
@@ -295,8 +317,8 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            getExceptionParameters(),
-            "This object can't be made volatile"
+            "This object can't be made volatile",
+            getExceptionParameters()
         );
     }
 
@@ -310,8 +332,8 @@ public class AbstractObject_1 implements
         throw new ServiceException (
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_IMPLEMENTED,
-            getExceptionParameters(),
-            "Copy not implemented yet"
+            "Copy not implemented yet",
+            getExceptionParameters()
         ); //... Copy not implemented yet
     }
 
@@ -325,8 +347,8 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            getExceptionParameters(),
-            "This object is unmodifiable"
+            "This object is unmodifiable",
+            getExceptionParameters()
         );
     }
 
@@ -337,8 +359,8 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            getExceptionParameters(),
-            "This object is unmodifiable"
+            "This object is unmodifiable",
+            getExceptionParameters()
         );
     }
 
@@ -349,12 +371,8 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            getExceptionParameters(
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("feature",feature)
-                }
-            ),
-            "This object has no such feature or it is unmodifiable"
+            "This object has no such feature or it is unmodifiable",
+            new BasicException.Parameter("feature",feature)
         );
     }
 
@@ -390,12 +408,10 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
+            "This object has no such feature",
             getExceptionParameters(
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("feature",feature)
-                }
-            ),
-            "This object has no such feature"
+                new BasicException.Parameter("feature",feature)
+            )
         );
     }
 
@@ -408,12 +424,10 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
+            "This object has no such feature",
             getExceptionParameters(
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("feature",feature)
-                }
-            ),
-            "This object has no such feature"
+                new BasicException.Parameter("feature",feature)
+            )
         );
     }
 
@@ -426,12 +440,10 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
+            "This object has no such feature",
             getExceptionParameters(
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("feature",feature)
-                }
-            ),
-            "This object has no such feature"
+                new BasicException.Parameter("feature",feature)
+            )
         );
     }
 
@@ -444,12 +456,10 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
+            "This object has no such feature",
             getExceptionParameters(
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("feature",feature)
-                }
-            ),
-            "This object has no such feature"
+                new BasicException.Parameter("feature",feature)
+            )
         );
     }
 
@@ -462,12 +472,10 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
+            "This object has no such feature",
             getExceptionParameters(
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("feature",feature)
-                }
-            ),
-            "This object has no such feature"
+                new BasicException.Parameter("feature",feature)
+            )
         );
     }
 
@@ -480,13 +488,11 @@ public class AbstractObject_1 implements
         if(SystemAttributes.CONTEXT_CAPABLE_CONTEXT.equals(feature)) return CONTEXT_FREE;
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED,
+            BasicException.Code.BAD_MEMBER_NAME,
+            "This object has no such feature",
             getExceptionParameters(
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("feature",feature)
-                }
-            ),
-            "This object has no such feature"
+                new BasicException.Parameter("feature",feature)
+            )
         );
     }
 
@@ -500,12 +506,10 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
+            "Operation not supported for this object/in this context",
             getExceptionParameters(
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("operation",operation)
-                }
-            ),
-            "Operation not supported for this object/in this context"
+                new BasicException.Parameter("operation",operation)
+            )
         );
     }
 
@@ -519,12 +523,10 @@ public class AbstractObject_1 implements
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
+            "Operation not supported for this object/in this context",
             getExceptionParameters(
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("operation",operation)
-                }
-            ),
-            "Operation not supported for this object/in this context"
+                new BasicException.Parameter("operation",operation)
+            )
         );
     }
 
@@ -545,55 +547,48 @@ public class AbstractObject_1 implements
         if(listenerType == null) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
-            null,
             "The listener argument must not be null"
         );
         if(InstanceCallbackListener.class.isAssignableFrom(listenerType)){
             if(feature != null) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
+                "Instance level events must not be associated with a feature",
                 getExceptionParameters(
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter(
-                            "feature", 
-                            feature
-                        ), 
-                        new BasicException.Parameter(
-                            "listenerType", 
-                            listenerType.getName()
-                        )
-                    }
-                ),
-                "Instance level events must not be associated with a feature"
+                    new BasicException.Parameter(
+                        "feature", 
+                        feature
+                    ), 
+                    new BasicException.Parameter(
+                        "listenerType", 
+                        listenerType.getName()
+                    )
+                )
             );
         } else if (
-            PropertyChangeListener.class.isAssignableFrom(listenerType) ||
-            VetoableChangeListener.class.isAssignableFrom(listenerType)
+                PropertyChangeListener.class.isAssignableFrom(listenerType) ||
+                VetoableChangeListener.class.isAssignableFrom(listenerType)
         ){
             // Feature scope o.k.
         } else throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
+            "Unsupported listener class",
             getExceptionParameters(
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "listenerType", 
-                        listenerType.getName()
-                    ), 
-                    new BasicException.Parameter(
-                        "supported", 
-                        new String[]{
-                            InstanceCallbackListener.class.getName(),
-                            PropertyChangeListener.class.getName(),
-                            VetoableChangeListener.class.getName()
-                        }
-                    ), 
-                }
-            ),
-            "Unsupported listener class"
+                new BasicException.Parameter(
+                    "listenerType", 
+                    listenerType.getName()
+                ), 
+                new BasicException.Parameter(
+                    "supported", 
+                    InstanceCallbackListener.class.getName(),
+                    PropertyChangeListener.class.getName(),
+                    VetoableChangeListener.class.getName()
+                )
+            )
         );
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objAddEventListener(java.lang.String, java.util.EventListener)
      * 
@@ -638,7 +633,7 @@ public class AbstractObject_1 implements
             features.add(feature);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objRemoveEventListener(java.lang.String, java.util.EventListener)
      * 
@@ -709,16 +704,16 @@ public class AbstractObject_1 implements
         verifyListenerArguments(feature,listenerType);
         List matchingListeners = new ArrayList();
         for(
-            Iterator i = this.listeners.entrySet().iterator();
-            i.hasNext();
+                Iterator i = this.listeners.entrySet().iterator();
+                i.hasNext();
         ){
             Map.Entry e = (Map.Entry) i.next();
             EventListener l = (EventListener) e.getKey();
             Set f = (Set) e.getValue();
             if(
-                listenerType.isInstance(l) && (
-                    f == null || f.contains(feature)
-                )
+                    listenerType.isInstance(l) && (
+                            f == null || f.contains(feature)
+                    )
             ) matchingListeners.add(l);
         }
         return (EventListener[]) matchingListeners.toArray(
@@ -770,7 +765,7 @@ public class AbstractObject_1 implements
             }
         }
     }
-    
+
 
     //------------------------------------------------------------------------
     // Implements java.beans.PropertyChangeListener
@@ -789,9 +784,9 @@ public class AbstractObject_1 implements
             );
             if(listeners.length == 0) return;
             for(
-                int i = 0;
-                i < listeners.length;
-                i++
+                    int i = 0;
+                    i < listeners.length;
+                    i++
             ) listeners[i].propertyChange(event);
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
@@ -814,9 +809,9 @@ public class AbstractObject_1 implements
             );
             if(listeners.length == 0) return;
             for(
-                int i = 0;
-                i < listeners.length;
-                i++
+                    int i = 0;
+                    i < listeners.length;
+                    i++
             ) listeners[i].vetoableChange(event);
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
@@ -828,31 +823,31 @@ public class AbstractObject_1 implements
     // Extends Object
     //------------------------------------------------------------------------
     protected static String stateToString(
-    	Object_1_0 source
+        Object_1_0 source
     ){
         try {
             Set state = new HashSet();
-			if(source.objIsDeleted()) state.add("deleted");
-	        if(source.objIsDirty()) state.add("dirty");
-	        if(source.objIsInUnitOfWork()) state.add("inUnitOfWork");
-	        if(source.objIsNew()) state.add("new");
-	        if(source.objIsPersistent()) state.add("persistent");
-	        return state.toString();
-		} catch (ServiceException e) {
-			return '(' + e.getMessage() + ')';
-		}
+            if(source.objIsDeleted()) state.add("deleted");
+            if(source.objIsDirty()) state.add("dirty");
+            if(source.objIsInUnitOfWork()) state.add("inUnitOfWork");
+            if(source.objIsNew()) state.add("new");
+            if(source.objIsPersistent()) state.add("persistent");
+            return state.toString();
+        } catch (ServiceException e) {
+            return '(' + e.getMessage() + ')';
+        }
     }
 
     protected static Object defaultFetchGroupToString(
-    	Object_1_0 source
+        Object_1_0 source
     ){
-    	try {
-			return source.objDefaultFetchGroup().toString();
-		} catch (ServiceException e) {
-			return '(' + e.getMessage() + ')';
-		}
+        try {
+            return source.objDefaultFetchGroup().toString();
+        } catch (ServiceException e) {
+            return '(' + e.getMessage() + ')';
+        }
     }
-    
+
     /**
      * Create a String representation of an Object_1_0 instance
      * 
@@ -863,44 +858,84 @@ public class AbstractObject_1 implements
      * @return
      */
     public static String toString(
-    	Object_1_0 source,
-		String objectClass, 
-		String description
+        Object_1_0 source,
+        String description
     ) {
-    	return source.getClass().getName() + ": " + (
-    		description == null ? "" : '(' + description + ')'
-    	) +	IndentingFormatter.toString(
-    		ArraysExtension.asMap(
-				TO_STRING_KEYES,
-				new Object[]{
-					source.objGetResourceIdentifier(),	
-					objectClass,
-					stateToString(source),
-					defaultFetchGroupToString(source)
-				}
-    		)
-		);
+        try {
+            if(source instanceof Object_1_2) {
+                Object_1_2 object = (Object_1_2) source;
+                if(object.objIsInaccessable()) try {
+                    ServiceException reason = object.getInaccessabilityReason();
+                    return Records.getRecordFactory().asMappedRecord(
+                        source.getClass().getName(), // recordName
+                        reason.getMessage(), // recordShortDescription
+                        INACCESSIBLE_KEYES, // keys, 
+                        new Object[]{
+                            object.objGetResourceIdentifier(),
+                            reason.getExceptionDomain(),
+                            reason.getExceptionCode()
+                        }
+                    ).toString();
+                } catch (ResourceException exception) {
+                    return source.getClass().getName() + '@' + System.identityHashCode(source);
+                }
+            }
+            return toString(
+                source, 
+                source.objGetClass(), 
+                description
+             );
+        } catch (ServiceException exception) {
+            return toString(
+                source, 
+                "n/a", // objectClass
+                exception.getMessage()
+            );
+        }
+    }
+    
+    /**
+     * Create a String representation of an Object_1_0 instance
+     * 
+     * @param source
+     * @param objectClass
+     * @param description
+     * @return
+     */
+    public static String toString(
+        Object_1_0 source,
+        String objectClass, 
+        String description
+    ) {
+        try {
+            return Records.getRecordFactory().asMappedRecord(
+                source.getClass().getName(), // recordName
+                description, // recordShortDescription
+                TO_STRING_KEYES, // keys, 
+                new Object[]{
+                    source.objGetResourceIdentifier(),  
+                    objectClass,
+                    stateToString(source),
+                    defaultFetchGroupToString(source)
+                }
+            ).toString();
+        } catch (ResourceException exception) {
+            return source.getClass().getName() + '@' + System.identityHashCode(source);
+        }
     }
 
-    private static final String[] TO_STRING_KEYES = new String[]{
-    	"resourceIdentifier",
-		"class",
-		"state",
-		"defaultFetchGroup"
-    };
-								
     public String toString(
     ){
-        return toString(this,this.objGetClass(), null);
+        return toString(this, null);
     }
 
-    
+
     //------------------------------------------------------------------------
     // Class ContextFree
     //------------------------------------------------------------------------
 
     final static FilterableMap CONTEXT_FREE = new ContextFree();
-    
+
     /* (non-Javadoc)
      */
     static class ContextFree 
@@ -934,5 +969,5 @@ public class AbstractObject_1 implements
             return Collections.EMPTY_LIST;
         }
     } 
-    
+
 }

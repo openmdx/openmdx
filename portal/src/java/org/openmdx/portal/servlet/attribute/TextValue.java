@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextValue.java,v 1.12 2007/02/19 17:17:38 wfro Exp $
+ * Name:        $Id: TextValue.java,v 1.13 2008/08/12 16:38:06 wfro Exp $
  * Description: TextValue 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/02/19 17:17:38 $
+ * Date:        $Date: 2008/08/12 16:38:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 

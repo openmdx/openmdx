@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SinkConnection_1.java,v 1.28 2008/03/19 17:13:11 hburger Exp $
+ * Name:        $Id: SinkConnection_1.java,v 1.31 2008/09/10 08:55:21 hburger Exp $
  * Description: Propagating Connection
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:13:11 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -169,7 +169,7 @@ public class SinkConnection_1 implements Synchronization_1_0 {
         }
         return container;
     }
-    
+
     void invalidate(
         SinkObject_1 object
     ) throws ServiceException{
@@ -324,8 +324,8 @@ public class SinkConnection_1 implements Synchronization_1_0 {
     ){
         Map container = getContainer(path.getParent(), true);
         return (SinkObject_1) (
-            container == null ? null : container.get(path.getBase())
-         );
+                container == null ? null : container.get(path.getBase())
+        );
     }
 
     SinkObject_1 marshal(
@@ -371,12 +371,12 @@ public class SinkConnection_1 implements Synchronization_1_0 {
     public void beforeCompletion(
     ) throws ServiceException{
         for(
-            Iterator h = this.holders.values().iterator();
-            h.hasNext();
+                Iterator h = this.holders.values().iterator();
+                h.hasNext();
         ){
             for(
-              Iterator i = ((Map)h.next()).values().iterator();
-              i.hasNext();
+                    Iterator i = ((Map)h.next()).values().iterator();
+                    i.hasNext();
             ){
                 SinkObject_1 object = (SinkObject_1) i.next();
                 if(!object.isHollow()) {
@@ -388,8 +388,8 @@ public class SinkConnection_1 implements Synchronization_1_0 {
                         }
                         boolean carryOn = false;
                         for(
-                            Iterator j = object.allStates(null, null).iterator();
-                            j.hasNext();
+                                Iterator j = object.allStates(null, null).iterator();
+                                j.hasNext();
                         ){
                             Object_1_0 state = (Object_1_0) j.next();
                             if(state.objIsDeleted()) {
@@ -411,12 +411,12 @@ public class SinkConnection_1 implements Synchronization_1_0 {
                                     } else {
                                         Path objectPath = object.objGetPath();
                                         Path statePath = state.objGetPath();
-    //                                  state.objSetValue('$' + State_1_Attributes.INVALIDATED_AT, null);
-    //                                  state.objSetValue('$' + SystemAttributes.CREATED_AT, null);
-    //                                  if(!state.objIsNew()) {
-    //                                      state.objSetValue('$' + State_1_Attributes.STATE_VALID_FROM, null);
-    //                                      state.objSetValue('$' + State_1_Attributes.STATE_VALID_TO, null);
-    //                                  }
+                                        //                                  state.objSetValue('$' + State_1_Attributes.INVALIDATED_AT, null);
+                                        //                                  state.objSetValue('$' + SystemAttributes.CREATED_AT, null);
+                                        //                                  if(!state.objIsNew()) {
+                                        //                                      state.objSetValue('$' + State_1_Attributes.STATE_VALID_FROM, null);
+                                        //                                      state.objSetValue('$' + State_1_Attributes.STATE_VALID_TO, null);
+                                        //                                  }
                                         if(!state.objIsDirty()) {
                                             if(state.objIsInUnitOfWork()) {
                                                 state.objRemoveFromUnitOfWork();
@@ -461,12 +461,12 @@ public class SinkConnection_1 implements Synchronization_1_0 {
         boolean committed
     ){
         for(
-            Iterator h = this.holders.values().iterator();
-            h.hasNext();
+                Iterator h = this.holders.values().iterator();
+                h.hasNext();
         ){
             for(
-                Iterator i = ((Map)h.next()).values().iterator();
-                i.hasNext();
+                    Iterator i = ((Map)h.next()).values().iterator();
+                    i.hasNext();
             ){
                 SinkObject_1 object = (SinkObject_1) i.next();
                 object.afterCompletion(committed);
@@ -543,7 +543,7 @@ public class SinkConnection_1 implements Synchronization_1_0 {
          * Tells whether afterBegin() should reset the time.
          */
         private boolean resetTime = true;
-        
+
         /**
          * Constructor
          *
@@ -563,14 +563,12 @@ public class SinkConnection_1 implements Synchronization_1_0 {
             if(this.dateTime == null) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("active", false)
-                },
-                "No unit of work active"
+                "No unit of work active",
+                new BasicException.Parameter("active", false)
             );
             return this.dateTime;
         }
-        
+
         /**
          * @throws ServiceException
          * @see org.openmdx.base.transaction.Synchronization_1_0#afterBegin()

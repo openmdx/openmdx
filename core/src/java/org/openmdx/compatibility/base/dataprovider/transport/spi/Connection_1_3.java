@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Connection_1_3.java,v 1.2 2007/11/04 16:14:56 hburger Exp $
+ * Name:        $Id: Connection_1_3.java,v 1.4 2008/09/11 18:01:06 hburger Exp $
  * Description: Connection interface 1.2 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/04 16:14:56 $
+ * Date:        $Date: 2008/09/11 18:01:06 $
  * ====================================================================
  *
  * This software is published under the BSD license

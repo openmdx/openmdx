@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractIterator.java,v 1.8 2008/03/21 18:46:49 hburger Exp $
+ * Name:        $Id: AbstractIterator.java,v 1.9 2008/09/10 08:55:21 hburger Exp $
  * Description: JDBC Iterator for find requests
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:46:49 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,77 +71,76 @@ import org.openmdx.kernel.exception.BasicException;
  * Supports serialization and deserialization
  */
 public class AbstractIterator
-  implements Serializable {
+implements Serializable {
 
-  /**
+    /**
      * 
      */
     private static final long serialVersionUID = 3834309523048248884L;
 
-public static byte[] serialize(
-    Serializable object
-  ) throws ServiceException {
-    try {
-      CRC32 crc = new CRC32();
-      ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-      CheckedOutputStream checkStream = new CheckedOutputStream(
-        byteStream, 
-        crc
-      );
-      ObjectOutputStream objectStream = new ObjectOutputStream(
-        checkStream
-      );
-      // write the objects
-      objectStream.writeObject(object);
-      // write the checksum
-      objectStream.writeLong(crc.getValue());
-      // release ressources
-      objectStream.close();
-      // save the extende session key
-      return byteStream.toByteArray();
-    } catch (Exception exception) {
-      throw new ServiceException(exception);
+    public static byte[] serialize(
+        Serializable object
+    ) throws ServiceException {
+        try {
+            CRC32 crc = new CRC32();
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            CheckedOutputStream checkStream = new CheckedOutputStream(
+                byteStream, 
+                crc
+            );
+            ObjectOutputStream objectStream = new ObjectOutputStream(
+                checkStream
+            );
+            // write the objects
+            objectStream.writeObject(object);
+            // write the checksum
+            objectStream.writeLong(crc.getValue());
+            // release ressources
+            objectStream.close();
+            // save the extende session key
+            return byteStream.toByteArray();
+        } catch (Exception exception) {
+            throw new ServiceException(exception);
+        }
     }
-  }
 
-  @SuppressWarnings("unchecked")
-public static Serializable deserialize(
-    byte[] object
-  ) throws ServiceException {
-    if(object.length == 0) return new HashMap();
-    CRC32  crc = new CRC32();
-    try {
-      ByteArrayInputStream byteStream = new ByteArrayInputStream(
-        object
-      );
-      CheckedInputStream checkStream = new CheckedInputStream(
-        byteStream,
-        crc
-      );
-      ObjectInputStream objectStream = new ObjectInputStream(
-        checkStream
-      );
-      // read the objects
-      Object target = objectStream.readObject();
-      // remember the checksum
-      long readChecksum = crc.getValue();
-      long writeChecksum = objectStream.readLong();
-      // release ressources
-      objectStream.close();
-      // compare the two checksums
-      if(readChecksum != writeChecksum) {
-        throw new ServiceException( 
-        BasicException.Code.DEFAULT_DOMAIN, 
-        BasicException.Code.TRANSFORMATION_FAILURE,
-          null,
-          "Checksum test failed"
-        );
-      }    
-      // return the extracted value
-      return (Serializable)target;
-    } catch (Exception exception) {
-      throw new ServiceException(exception);
+    @SuppressWarnings("unchecked")
+    public static Serializable deserialize(
+        byte[] object
+    ) throws ServiceException {
+        if(object.length == 0) return new HashMap();
+        CRC32  crc = new CRC32();
+        try {
+            ByteArrayInputStream byteStream = new ByteArrayInputStream(
+                object
+            );
+            CheckedInputStream checkStream = new CheckedInputStream(
+                byteStream,
+                crc
+            );
+            ObjectInputStream objectStream = new ObjectInputStream(
+                checkStream
+            );
+            // read the objects
+            Object target = objectStream.readObject();
+            // remember the checksum
+            long readChecksum = crc.getValue();
+            long writeChecksum = objectStream.readLong();
+            // release ressources
+            objectStream.close();
+            // compare the two checksums
+            if(readChecksum != writeChecksum) {
+                throw new ServiceException( 
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.TRANSFORMATION_FAILURE,
+                    "Checksum test failed"
+                );
+            }    
+            // return the extracted value
+            return (Serializable)target;
+        } catch (Exception exception) {
+            throw new ServiceException(exception);
+        }
     }
-  }
 
 }

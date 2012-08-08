@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractMapper.java,v 1.11 2008/03/19 17:09:41 hburger Exp $
+ * Name:        $Id: AbstractMapper.java,v 1.12 2008/09/10 08:55:21 hburger Exp $
  * Description: AbstractSoapMapper class
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:09:41 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,246 +75,242 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 public abstract class AbstractMapper {
-  
-  protected Writer writer;
-  
-  //-------------------------------------------------------------------------
-  public abstract void mapProlog (
-    String prolog
-  ) throws IOException;
-  
-  //-------------------------------------------------------------------------
-  public abstract void mapEpilog (
-    String epilog
-  ) throws IOException;
-  
-  //-------------------------------------------------------------------------
-  void mapValues(
-    List source
-  ) throws ServiceException {
-    try {
-      if (source.isEmpty()) {
-        // Ignore
-      }
-      else if (source.get(0) instanceof String) {
-        for(int i = 0; i < source.size(); i++) {
-          writer.write("<str>");
-          writer.write(Entities.XML.escape(String.valueOf(source.get(i))));
-          writer.write("</str>");
-        }
-      }
-      else if (source.get(0) instanceof Path) {
-        for(int i = 0; i < source.size(); i++) {
-          writer.write("<path>");
-          writer.write(((Path)source.get(i)).toUri());
-          writer.write("</path>");
-        }
-      }
-      else if(source.get(0) instanceof Number) {
-        for(int i = 0; i < source.size(); i++) {
-          Number number = (Number)source.get(i);
-          if(number instanceof Short) {
-            writer.write("<short>");
-            writer.write(number.toString());
-            writer.write("</short>");
-          }
-          else if(number instanceof Integer) {
-            writer.write("<int>");
-            writer.write(number.toString());
-            writer.write("</int>");
-          }
-          else if(number instanceof Long) {
-            writer.write("<long>");
-            writer.write(number.toString());
-            writer.write("</long>");
-          }
-          else {
-            writer.write("<dec>");
-            writer.write(number.toString());
-            writer.write("</dec>");
-          }
-        }
-      }
-      else if(source.get(0) instanceof Boolean) {
-        for (int i = 0; i < source.size(); i++) {
-          writer.write("<bool>");
-          writer.write(String.valueOf(source.get(i)));
-          writer.write("</bool>");
-        }
-      }
-      else if(source.get(0) instanceof byte[]) {
-        for(int i = 0; i < source.size(); i++) {
-          writer.write("<bin>");
-          writer.write(Base64.encode((byte[])source.get(i)));
-          writer.write("</bin>");
-        }
-      }
-      else {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.TRANSFORMATION_FAILURE,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter("class", '[' + source.get(0).getClass().getName() + ", ...]")
-          },
-          "can not marshal value. Supported are [String, Number, Boolean and byte[]"
-        );
-      }
-    } catch (IOException e) {
-      throw new ServiceException(
-        BasicException.Code.DEFAULT_DOMAIN,
-        BasicException.Code.TRANSFORMATION_FAILURE,
-        new BasicException.Parameter[] {
-          new BasicException.Parameter("class", '[' + source.get(0).getClass().getName() + ", ...]")
-        },
-        "can not marshal value, Error while marshalling to Writer"
-      );
-    }
-    return;
-  }
 
-  //-------------------------------------------------------------------------
-  void mapContext(
-    String contextName,
-    SparseList contextValues
-  ) throws ServiceException, IOException {
-    writer.write("<Context>");
-    List population = contextValues.population();
-    int[] indices = new int[population.size()];
-    int indicesIndex = 0;
-    for(ListIterator j = contextValues.populationIterator();
-      j.hasNext();
-      j.next()
-    ) {
-      indices[indicesIndex++] = j.nextIndex();
-    }
-    writer.write("<name>");
-    writer.write(contextName);
-    writer.write("</name>");
-    writer.write("<Values>");
-    
-    this.mapValues(population);
-    
-    writer.write("</Values>");
-    writer.write("<Indices>");
-    for(int j = 0; j < indices.length; j++) {
-      writer.write("<idx>" + indices[j] + "</idx>");
-    }
-    writer.write("</Indices>");
-    writer.write("</Context>");
-  }
+    protected Writer writer;
 
-  //-------------------------------------------------------------------------
-  void mapContexts(
-    Map context
-  ) throws ServiceException, IOException {
-    writer.write("<ContextList>");
-    for(
-      Iterator i = context.keySet().iterator();
-      i.hasNext();
-    ) {
-      String contextName = (String)i.next();
-      
-      this.mapContext(contextName, (SparseList)context.get(contextName));
-    }      
-    writer.write("</ContextList>");
-  }
+    //-------------------------------------------------------------------------
+    public abstract void mapProlog (
+        String prolog
+    ) throws IOException;
 
-  //-------------------------------------------------------------------------
-  void mapAttribute(
-    String attributeName,
-    SparseList attributeValues
-  ) throws ServiceException, IOException {
-    final List population = attributeValues.population();
-    final int[] indices = new int[population.size()];
-    int indicesIndex = 0;
-    for(ListIterator i = attributeValues.populationIterator();
-      i.hasNext();
-      i.next()
-    ) {
-      indices[indicesIndex++] = i.nextIndex();
-    }
-    writer.write("<Attribute>");
-    writer.write("<name>");
-    writer.write(attributeName);
-    writer.write("</name>");
-    writer.write("<Values>");
-    
-    this.mapValues(population);
-    
-    writer.write("</Values>");
-    writer.write("<Indices>");
-    for(int i = 0; i < indices.length; i++) {
-      writer.write("<idx>" + indices[i] + "</idx>");
-//      target.write(indices[i].toString());
-//      target.write("</idx>");
-    }
-    writer.write("</Indices>");
-    writer.write("</Attribute>");
-  }
+    //-------------------------------------------------------------------------
+    public abstract void mapEpilog (
+        String epilog
+    ) throws IOException;
 
-  //-------------------------------------------------------------------------
-  void mapDataproviderObject(
-    DataproviderObject source
-  ) throws ServiceException, IOException {
-    writer.write("<DataproviderObject>");
-    writer.write("<identity>");
-    writer.write(source.path().toUri());
-    writer.write("</identity>");
-    for(
-      Iterator i = source.attributeNames().iterator(); 
-      i.hasNext();
-    ) {
-      String attributeName = (String)i.next();
-      
-      this.mapAttribute(attributeName, source.values(attributeName));
+    //-------------------------------------------------------------------------
+    void mapValues(
+        List source
+    ) throws ServiceException {
+        try {
+            if (source.isEmpty()) {
+                // Ignore
+            }
+            else if (source.get(0) instanceof String) {
+                for(int i = 0; i < source.size(); i++) {
+                    writer.write("<str>");
+                    writer.write(Entities.XML.escape(String.valueOf(source.get(i))));
+                    writer.write("</str>");
+                }
+            }
+            else if (source.get(0) instanceof Path) {
+                for(int i = 0; i < source.size(); i++) {
+                    writer.write("<path>");
+                    writer.write(((Path)source.get(i)).toUri());
+                    writer.write("</path>");
+                }
+            }
+            else if(source.get(0) instanceof Number) {
+                for(int i = 0; i < source.size(); i++) {
+                    Number number = (Number)source.get(i);
+                    if(number instanceof Short) {
+                        writer.write("<short>");
+                        writer.write(number.toString());
+                        writer.write("</short>");
+                    }
+                    else if(number instanceof Integer) {
+                        writer.write("<int>");
+                        writer.write(number.toString());
+                        writer.write("</int>");
+                    }
+                    else if(number instanceof Long) {
+                        writer.write("<long>");
+                        writer.write(number.toString());
+                        writer.write("</long>");
+                    }
+                    else {
+                        writer.write("<dec>");
+                        writer.write(number.toString());
+                        writer.write("</dec>");
+                    }
+                }
+            }
+            else if(source.get(0) instanceof Boolean) {
+                for (int i = 0; i < source.size(); i++) {
+                    writer.write("<bool>");
+                    writer.write(String.valueOf(source.get(i)));
+                    writer.write("</bool>");
+                }
+            }
+            else if(source.get(0) instanceof byte[]) {
+                for(int i = 0; i < source.size(); i++) {
+                    writer.write("<bin>");
+                    writer.write(Base64.encode((byte[])source.get(i)));
+                    writer.write("</bin>");
+                }
+            }
+            else {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.TRANSFORMATION_FAILURE,
+                    "can not marshal value. Supported are [String, Number, Boolean and byte[]",
+                    new BasicException.Parameter("class", '[' + source.get(0).getClass().getName() + ", ...]")
+                );
+            }
+        } catch (IOException e) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.TRANSFORMATION_FAILURE,
+                "can not marshal value, Error while marshalling to Writer",
+                new BasicException.Parameter("class", '[' + source.get(0).getClass().getName() + ", ...]")
+            );
+        }
+        return;
     }
-    if(source.getDigest() != null) {
-      writer.write("<digest>");
-      writer.write(Base64.encode(source.getDigest()));
-      writer.write("</digest>");
-    }
-    writer.write("</DataproviderObject>");
-  }
-        
-  //-------------------------------------------------------------------------
-  void mapDataproviderObjects(
-    DataproviderObject[] source
-  ) throws ServiceException, IOException {
-    for(int i = 0; i < source.length; i++) {
-      this.mapDataproviderObject(source[i]);
-    }
-  }
 
-  //-------------------------------------------------------------------------
-  void mapFilterProperty(
-    FilterProperty source
-  ) throws ServiceException, IOException {
-    writer.write("<FilterProperty>");
-    writer.write("<quantor>");
-    writer.write(Quantors.toString(source.quantor()));
-    writer.write("</quantor>");
-    writer.write("<name>");
-    writer.write(source.name());
-    writer.write("</name>");
-    writer.write("<operator>");
-    writer.write(FilterOperators.toString(source.operator()));
-    writer.write("</operator>");
-    writer.write("<Values>");
-    this.mapValues(source.values());
-    writer.write("</Values>");
-    writer.write("</FilterProperty>");
-  }
-        
-  //-------------------------------------------------------------------------
-  void mapFilterProperties(
-    FilterProperty[] source
-  ) throws ServiceException, IOException {
-//  StringBuilder target = new StringBuilder(512);
-    for(int i = 0; i < source.length; i++) {
-      this.mapFilterProperty(source[i]);
+    //-------------------------------------------------------------------------
+    void mapContext(
+        String contextName,
+        SparseList contextValues
+    ) throws ServiceException, IOException {
+        writer.write("<Context>");
+        List population = contextValues.population();
+        int[] indices = new int[population.size()];
+        int indicesIndex = 0;
+        for(ListIterator j = contextValues.populationIterator();
+        j.hasNext();
+        j.next()
+        ) {
+            indices[indicesIndex++] = j.nextIndex();
+        }
+        writer.write("<name>");
+        writer.write(contextName);
+        writer.write("</name>");
+        writer.write("<Values>");
+
+        this.mapValues(population);
+
+        writer.write("</Values>");
+        writer.write("<Indices>");
+        for(int j = 0; j < indices.length; j++) {
+            writer.write("<idx>" + indices[j] + "</idx>");
+        }
+        writer.write("</Indices>");
+        writer.write("</Context>");
     }
-  }
-    
+
+    //-------------------------------------------------------------------------
+    void mapContexts(
+        Map context
+    ) throws ServiceException, IOException {
+        writer.write("<ContextList>");
+        for(
+                Iterator i = context.keySet().iterator();
+                i.hasNext();
+        ) {
+            String contextName = (String)i.next();
+
+            this.mapContext(contextName, (SparseList)context.get(contextName));
+        }      
+        writer.write("</ContextList>");
+    }
+
+    //-------------------------------------------------------------------------
+    void mapAttribute(
+        String attributeName,
+        SparseList attributeValues
+    ) throws ServiceException, IOException {
+        final List population = attributeValues.population();
+        final int[] indices = new int[population.size()];
+        int indicesIndex = 0;
+        for(ListIterator i = attributeValues.populationIterator();
+        i.hasNext();
+        i.next()
+        ) {
+            indices[indicesIndex++] = i.nextIndex();
+        }
+        writer.write("<Attribute>");
+        writer.write("<name>");
+        writer.write(attributeName);
+        writer.write("</name>");
+        writer.write("<Values>");
+
+        this.mapValues(population);
+
+        writer.write("</Values>");
+        writer.write("<Indices>");
+        for(int i = 0; i < indices.length; i++) {
+            writer.write("<idx>" + indices[i] + "</idx>");
+//          target.write(indices[i].toString());
+//          target.write("</idx>");
+        }
+        writer.write("</Indices>");
+        writer.write("</Attribute>");
+    }
+
+    //-------------------------------------------------------------------------
+    void mapDataproviderObject(
+        DataproviderObject source
+    ) throws ServiceException, IOException {
+        writer.write("<DataproviderObject>");
+        writer.write("<identity>");
+        writer.write(source.path().toUri());
+        writer.write("</identity>");
+        for(
+                Iterator i = source.attributeNames().iterator(); 
+                i.hasNext();
+        ) {
+            String attributeName = (String)i.next();
+
+            this.mapAttribute(attributeName, source.values(attributeName));
+        }
+        if(source.getDigest() != null) {
+            writer.write("<digest>");
+            writer.write(Base64.encode(source.getDigest()));
+            writer.write("</digest>");
+        }
+        writer.write("</DataproviderObject>");
+    }
+
+    //-------------------------------------------------------------------------
+    void mapDataproviderObjects(
+        DataproviderObject[] source
+    ) throws ServiceException, IOException {
+        for(int i = 0; i < source.length; i++) {
+            this.mapDataproviderObject(source[i]);
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    void mapFilterProperty(
+        FilterProperty source
+    ) throws ServiceException, IOException {
+        writer.write("<FilterProperty>");
+        writer.write("<quantor>");
+        writer.write(Quantors.toString(source.quantor()));
+        writer.write("</quantor>");
+        writer.write("<name>");
+        writer.write(source.name());
+        writer.write("</name>");
+        writer.write("<operator>");
+        writer.write(FilterOperators.toString(source.operator()));
+        writer.write("</operator>");
+        writer.write("<Values>");
+        this.mapValues(source.values());
+        writer.write("</Values>");
+        writer.write("</FilterProperty>");
+    }
+
+    //-------------------------------------------------------------------------
+    void mapFilterProperties(
+        FilterProperty[] source
+    ) throws ServiceException, IOException {
+//      StringBuilder target = new StringBuilder(512);
+        for(int i = 0; i < source.length; i++) {
+            this.mapFilterProperty(source[i]);
+        }
+    }
+
 }
 
 //--- End of File -----------------------------------------------------------

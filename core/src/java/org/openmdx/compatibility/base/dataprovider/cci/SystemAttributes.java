@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SystemAttributes.java,v 1.15 2007/10/19 18:37:29 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: SystemAttributes.java,v 1.17 2008/09/11 18:01:07 hburger Exp $
  * Description: Generated constants for SystemAttributes
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/19 18:37:29 $
+ * Date:        $Date: 2008/09/11 18:01:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -74,11 +74,6 @@ public class SystemAttributes {
    * of the class names.
    */
   static public final String OBJECT_INSTANCE_OF = "object_instanceof";
-
-  /**
-   * @deprecated use OBJECT_INSTANCE_OF instead.
-   */
-  static public final String OBJECT_INSTANCEOF = OBJECT_INSTANCE_OF;
 
   
   //--------------------------------------------------------------------------
@@ -162,36 +157,6 @@ public class SystemAttributes {
 
 
   //--------------------------------------------------------------------------
-  // RoleCapable
-  //--------------------------------------------------------------------------
-
-  /**
-   * The RoleCapables's role reference.
-   */
-  static public final String ROLE_CAPABLE_ROLE = "role";
-
-  /**
-   * The prefix of a DataprviderObject's role attributes.
-   */
-  static public final String ROLE_PREFIX = ROLE_CAPABLE_ROLE + ':';
-
-
-  //--------------------------------------------------------------------------
-  // ViewCapable
-  //--------------------------------------------------------------------------
-
-  /**
-   * The ViewCapables's view reference.
-   */
-  static public final String VIEW_CAPABLE_VIEW = "view";
-
-  /**
-   * The prefix of a DataproviderObject's view attribute.
-   */
-  static public final String VIEW_PREFIX = VIEW_CAPABLE_VIEW + ':';
-
-  
-  //--------------------------------------------------------------------------
   // BasicObject
   //--------------------------------------------------------------------------
 
@@ -201,21 +166,9 @@ public class SystemAttributes {
   static public final String CREATED_BY = "createdBy";
 
   /**
-   * @deprecated use CREATED_BY
-   */
-  static public final String OBJECT_CREATED_BY = CREATED_BY;
-
-
-  /**
    * 
    */
   static public final String CREATED_AT = "createdAt";
-
-  /**
-   * @deprecated use CREATED_AT
-   */
-  static public final String OBJECT_CREATED_AT = CREATED_AT;
-
 
   /**
    * 
@@ -223,19 +176,8 @@ public class SystemAttributes {
   static public final String MODIFIED_BY = "modifiedBy";
 
   /**
-   * @deprecated use MODIFIED_BY
-   */
-  static public final String OBJECT_MODIFIED_BY = MODIFIED_BY;
-
-
-  /**
    * 
    */
   static public final String MODIFIED_AT = "modifiedAt";
-
-  /**
-   * @deprecated use MODIFIED_AT
-   */
-  static public final String OBJECT_MODIFIED_AT = MODIFIED_AT;
 
 }

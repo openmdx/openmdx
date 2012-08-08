@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OperationDef.java,v 1.7 2008/04/02 17:38:40 wfro Exp $
+ * Name:        $Id: OperationDef.java,v 1.8 2008/09/10 08:55:26 hburger Exp $
  * Description: VelocityOperationDef class
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/02 17:38:40 $
+ * Date:        $Date: 2008/09/10 08:55:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,77 +65,75 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 
 @SuppressWarnings("unchecked")
 public class OperationDef 
-  extends FeatureDef {
-  
-  //-------------------------------------------------------------------------
-  public OperationDef(
-    ModelElement_1_0 operationDef,
-    Model_1_0 model, 
-    boolean openmdx1
-  ) throws ServiceException {
-    this(
-      (String)operationDef.values("name").get(0),
-      (String)operationDef.values("qualifiedName").get(0),
-      (String)operationDef.values("annotation").get(0),
-      new HashSet(operationDef.values("stereotype")),
-      (String)operationDef.values("visibility").get(0),
-      getResultParamTypeName(operationDef, (Model_1_3)model, openmdx1),
-      ((Boolean)operationDef.values("isQuery").get(0)).booleanValue(),
-      getInParameters(operationDef, (Model_1_3)model, openmdx1),
-      getExceptions(operationDef, model, openmdx1)
-    );
-  }
-  
-  //-------------------------------------------------------------------------
-  private static List getExceptions(
-    ModelElement_1_0 operationDef,
-    Model_1_0 model, 
-    boolean openmdx1
-  ) throws ServiceException {  
-    List exceptions = new ArrayList();
-    for(
-      Iterator i = operationDef.values("exception").iterator();
-      i.hasNext();
-    ) {
-      exceptions.add(
-        new ExceptionDef(
-          model.getElement(i.next()),
-          model, 
-          openmdx1
-        )
-      );
+extends FeatureDef {
+
+    //-------------------------------------------------------------------------
+    public OperationDef(
+        ModelElement_1_0 operationDef,
+        Model_1_0 model, 
+        boolean openmdx1
+    ) throws ServiceException {
+        this(
+            (String)operationDef.values("name").get(0),
+            (String)operationDef.values("qualifiedName").get(0),
+            (String)operationDef.values("annotation").get(0),
+            new HashSet(operationDef.values("stereotype")),
+            (String)operationDef.values("visibility").get(0),
+            getResultParamTypeName(operationDef, (Model_1_3)model, openmdx1),
+            ((Boolean)operationDef.values("isQuery").get(0)).booleanValue(),
+            getInParameters(operationDef, (Model_1_3)model, openmdx1),
+            getExceptions(operationDef, model, openmdx1)
+        );
     }
-    return exceptions;    
-  }
-  
-  //-------------------------------------------------------------------------
-  private static String getResultParamTypeName(
-    ModelElement_1_0 operationDef,
-    Model_1_3 model, 
-    boolean openmdx1
-  )  throws ServiceException {
-    for(
-      Iterator i = operationDef.values("content").iterator();
-      i.hasNext();
-    ) {
-      ModelElement_1_0 paramDef = model.getElement(i.next());
-      if("result".equals(paramDef.values("name").get(0))) {
-        return (String)model.getDereferencedType(
-          paramDef.values("type").get(0),
-          openmdx1
-        ).values("qualifiedName").get(0);
-      }
+
+    //-------------------------------------------------------------------------
+    private static List getExceptions(
+        ModelElement_1_0 operationDef,
+        Model_1_0 model, 
+        boolean openmdx1
+    ) throws ServiceException {  
+        List exceptions = new ArrayList();
+        for(
+                Iterator i = operationDef.values("exception").iterator();
+                i.hasNext();
+        ) {
+            exceptions.add(
+                new ExceptionDef(
+                    model.getElement(i.next()),
+                    model, 
+                    openmdx1
+                )
+            );
+        }
+        return exceptions;    
     }
-    throw new ServiceException(
-      BasicException.Code.DEFAULT_DOMAIN,
-      BasicException.Code.ASSERTION_FAILURE,
-      new BasicException.Parameter[]{
-        new BasicException.Parameter("operation", operationDef.path())
-      },
-      "no parameter with name \"result\" defined for operation"
-    );
-  }
-  
+
+    //-------------------------------------------------------------------------
+    private static String getResultParamTypeName(
+        ModelElement_1_0 operationDef,
+        Model_1_3 model, 
+        boolean openmdx1
+    )  throws ServiceException {
+        for(
+                Iterator i = operationDef.values("content").iterator();
+                i.hasNext();
+        ) {
+            ModelElement_1_0 paramDef = model.getElement(i.next());
+            if("result".equals(paramDef.values("name").get(0))) {
+                return (String)model.getDereferencedType(
+                    paramDef.values("type").get(0),
+                    openmdx1
+                ).values("qualifiedName").get(0);
+            }
+        }
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.ASSERTION_FAILURE,
+            "no parameter with name \"result\" defined for operation",
+            new BasicException.Parameter("operation", operationDef.path())
+        );
+    }
+
     //-------------------------------------------------------------------------
     private static List<AttributeDef> getInParameters(
         ModelElement_1_0 operationDef,
@@ -144,8 +142,8 @@ public class OperationDef
     ) throws ServiceException {
         List<AttributeDef> inParameters = new ArrayList<AttributeDef>();
         for(
-            Iterator i = operationDef.values("content").iterator();
-            i.hasNext();
+                Iterator i = operationDef.values("content").iterator();
+                i.hasNext();
         ) {
             ModelElement_1_0 param = model.getElement(i.next());
             String direction = (String)param.values("direction").get(0);
@@ -161,62 +159,62 @@ public class OperationDef
         }
         return inParameters;
     }
-  
-  //-------------------------------------------------------------------------
+
+    //-------------------------------------------------------------------------
     public OperationDef(
-    String name,
-    String qualifiedName,
-    String annotation,
-    Set stereotype,
-    String visibility,
-    String qualifiedReturnTypeName,
-    boolean isQuery,
-    List parameters,
-    List exceptions
-  ) {
-    super(
-      name, 
-      qualifiedName, 
-      annotation,
-      stereotype,
-      visibility
-    );
-    this.parameters = parameters;
-    this.exceptions = exceptions;
-    this.qualifiedReturnTypeName = qualifiedReturnTypeName;
-    this.isQuery = isQuery;
+        String name,
+        String qualifiedName,
+        String annotation,
+        Set stereotype,
+        String visibility,
+        String qualifiedReturnTypeName,
+        boolean isQuery,
+        List parameters,
+        List exceptions
+    ) {
+        super(
+            name, 
+            qualifiedName, 
+            annotation,
+            stereotype,
+            visibility
+        );
+        this.parameters = parameters;
+        this.exceptions = exceptions;
+        this.qualifiedReturnTypeName = qualifiedReturnTypeName;
+        this.isQuery = isQuery;
     }
-  
-  //-------------------------------------------------------------------------
-  public String getQualifiedReturnTypeName(
-  ) {
-    return this.qualifiedReturnTypeName;  
-  }
 
-  //-------------------------------------------------------------------------
-  public boolean isQuery(
-  ) {
-    return this.isQuery;
-  }
+    //-------------------------------------------------------------------------
+    public String getQualifiedReturnTypeName(
+    ) {
+        return this.qualifiedReturnTypeName;  
+    }
 
-  //-------------------------------------------------------------------------
-  public List<StructuralFeatureDef> getParameters(
-  ) {
-    return this.parameters;
-  }
+    //-------------------------------------------------------------------------
+    public boolean isQuery(
+    ) {
+        return this.isQuery;
+    }
 
-  //-------------------------------------------------------------------------
-  public List getExceptions(
-  ) {
-    return this.exceptions;
-  }
+    //-------------------------------------------------------------------------
+    public List<StructuralFeatureDef> getParameters(
+    ) {
+        return this.parameters;
+    }
 
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private final List<StructuralFeatureDef> parameters;
-  private final List exceptions;
-  private final String qualifiedReturnTypeName;
-  private final boolean isQuery;
+    //-------------------------------------------------------------------------
+    public List getExceptions(
+    ) {
+        return this.exceptions;
+    }
+
+    //-------------------------------------------------------------------------
+    // Variables
+    //-------------------------------------------------------------------------
+    private final List<StructuralFeatureDef> parameters;
+    private final List exceptions;
+    private final String qualifiedReturnTypeName;
+    private final boolean isQuery;
 
 }

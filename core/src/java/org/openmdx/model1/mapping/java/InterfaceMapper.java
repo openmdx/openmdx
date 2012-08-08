@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InterfaceMapper.java,v 1.4 2008/02/15 17:24:07 hburger Exp $
+ * Name:        $Id: InterfaceMapper.java,v 1.5 2008/09/10 08:55:26 hburger Exp $
  * Description: Interface Mapper
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/15 17:24:07 $
+ * Date:        $Date: 2008/09/10 08:55:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,7 +67,7 @@ import org.openmdx.model1.mapping.MetaData_1_0;
  * Interface Mapper for SPI
  */
 public class InterfaceMapper
-    extends AbstractClassMapper {
+extends AbstractClassMapper {
 
     /**
      * Constructor 
@@ -160,7 +160,7 @@ public class InterfaceMapper
                 MapperUtils.wrapText(
                     "   * ",
                     "Retrieves the " + (
-                        singlevalued ? "value" : "values"
+                            singlevalued ? "value" : "values"
                     ) + "for the attribute <code>" + field.getName() + "</code>."
                 )
             );
@@ -171,9 +171,9 @@ public class InterfaceMapper
                 Identifier.OPERATION_NAME.toIdentifier(
                     field.getName(), 
                     flag ? "is" : null, // removablePrefix 
-                    flag && singlevalued ? "is" : "get", // prependablePrefix
-                    null
-, null // appendableSuffix
+                        flag && singlevalued ? "is" : "get", // prependablePrefix
+                            null
+                            , null // appendableSuffix
                 )
             );
             this.pw.println("(");
@@ -187,7 +187,7 @@ public class InterfaceMapper
                 MapperUtils.wrapText(
                     "   * ",
                     "Sets the " + (
-                        singlevalued ? "value" : "values"
+                            singlevalued ? "value" : "values"
                     ) + "for the attribute <code>" + field.getName() + "</code>."
                 )
             );
@@ -198,22 +198,22 @@ public class InterfaceMapper
                 Identifier.OPERATION_NAME.toIdentifier(
                     field.getName(), 
                     flag ? "is" : null, // removablePrefix 
-                    "set", // prependablePrefix
-                    null
-, null // appendableSuffix
+                        "set", // prependablePrefix
+                        null
+                        , null // appendableSuffix
                 )
             );
             this.pw.println("(");
             this.pw.println(
                 "    " + fieldType + (
-                    singlevalued ? " " : "... "
+                        singlevalued ? " " : "... "
                 ) + field.getName()
             );
             this.pw.println("  );");
             this.pw.println();
         }
     }
-    
+
     /**
      * 
      * @param fieldMetaData
@@ -224,8 +224,8 @@ public class InterfaceMapper
     ){
         String fieldType = fieldMetaData.getFieldType();
         return 
-            fieldType.startsWith("java.util.Set<") ||
-            fieldType.startsWith("java.util.List<");
+        fieldType.startsWith("java.util.Set<") ||
+        fieldType.startsWith("java.util.List<");
     }
 
     /**
@@ -239,17 +239,15 @@ public class InterfaceMapper
         String fieldType = fieldMetaData.getFieldType();
         if(fieldType == null) {
             throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.ASSERTION_FAILURE, 
-              new BasicException.Parameter[]{
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE, 
+                "private field has unknown type. Type of private fields must be declared in meta data file (.openmdxjdo)",
                 new BasicException.Parameter("interface", this.classDef.getQualifiedName()),
                 new BasicException.Parameter("field", fieldMetaData.getName())
-              },
-              "private field has unknown type. Type of private fields must be declared in meta data file (.openmdxjdo)"
             );
         }
         int i = fieldType.indexOf('<');
         return i < 0 ? fieldType : fieldType.substring(i + 1, fieldType.length() - 1);
     }
-    
+
 }

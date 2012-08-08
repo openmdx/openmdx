@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Marshaller.java,v 1.1 2008/03/06 19:03:28 hburger Exp $
+ * Name:        $Id: Marshaller.java,v 1.2 2008/07/23 13:10:54 hburger Exp $
  * Description: Marshaller
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/06 19:03:28 $
+ * Date:        $Date: 2008/07/23 13:10:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,17 +51,30 @@
 package org.openmdx.base.persistence.spi;
 
 /**
-* An implementation of this class is required to handle marshal exceptions.
+* An implementation of this class is required to map marshal exceptions
+* according to the accessor.
 */
 public interface Marshaller {
 
     /**
      * Marshals an object
+     * <p><em>
+     * Note:<br>
+     * Exceptions are no longer mapped to <code>null</code> but passed on as
+     * <code>RuntimeException</code>s!
+     * </em>
+     * 
      *
      * @param  source    The object to be marshalled
      * 
-     * @return           The marshalled object, 
-     *                   or <code>null</code> if a failure is caught
+     * @return           The marshalled object
+     *                   
+     * @throws an accessor specific <code>RuntimeException</code>s such as<ul>
+     * <li><code>javax.jmi.reflect.InvalidObjectException</code>
+     * <li><code>javax.jdo.JDOObjectNotFoundException</code>
+     * <li><code>javax.persistence.EntityNotFoundException</code>
+     * <li>&hellip;
+     * </ul>
      */
     Object marshal (
         Object source

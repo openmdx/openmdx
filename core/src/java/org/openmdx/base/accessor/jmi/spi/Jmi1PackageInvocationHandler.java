@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1PackageInvocationHandler.java,v 1.13 2008/04/09 23:52:18 hburger Exp $
+ * Name:        $Id: Jmi1PackageInvocationHandler.java,v 1.14 2008/09/10 08:55:23 hburger Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 23:52:18 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -180,11 +180,11 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
             throw new ServiceException (
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.NOT_FOUND, 
+                "model element not found with qualified cci name.",
                 new BasicException.Parameter [] {
                   new BasicException.Parameter("package.name", qualifiedPackageName),
                   new BasicException.Parameter("cci.name", cciName)
-                },
-                "model element not found with qualified cci name."
+                }
             );
         }
         return qualifiedMofName;

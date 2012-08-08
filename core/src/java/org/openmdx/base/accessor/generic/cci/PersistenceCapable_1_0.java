@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceCapable_1_0.java,v 1.1 2008/05/27 16:52:29 hburger Exp $
+ * Name:        $Id: PersistenceCapable_1_0.java,v 1.2 2008/09/10 08:55:28 hburger Exp $
  * Description:The Persistence Capable Interface 1.0
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/27 16:52:29 $
+ * Date:        $Date: 2008/09/10 08:55:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -101,7 +101,7 @@ public interface PersistenceCapable_1_0 extends Featured_1_0 {
     Set<String> objDefaultFetchGroup(
     ) throws ServiceException;
 
-    
+
     //------------------------------------------------------------------------
     // Life Cycle Operations
     //------------------------------------------------------------------------
@@ -121,7 +121,7 @@ public interface PersistenceCapable_1_0 extends Featured_1_0 {
      */
     void objRemove(
     ) throws ServiceException;    
-        
+
     /**
      * The copy operation makes a copy of the object. The copy is located in the
      * scope of the container passed as the first parameter and includes the
@@ -145,7 +145,7 @@ public interface PersistenceCapable_1_0 extends Featured_1_0 {
         FilterableMap<String, Object_1_0> there,
         String criteria
     ) throws ServiceException;
-    
+
     /**
      * The move operation moves the object to the scope of the container passed
      * as the first parameter. The object remains valid after move has
@@ -169,8 +169,8 @@ public interface PersistenceCapable_1_0 extends Featured_1_0 {
         FilterableMap<String, Object_1_0> there,
         String criteria
     ) throws ServiceException;
-    
-    
+
+
     //------------------------------------------------------------------------
     // State Queries
     //------------------------------------------------------------------------
@@ -186,7 +186,7 @@ public interface PersistenceCapable_1_0 extends Featured_1_0 {
      *         of work.
      */ 
     boolean objIsDirty(
-  ) throws ServiceException;
+    ) throws ServiceException;
 
     /**
      * Tests whether this object is persistent. Instances that represent

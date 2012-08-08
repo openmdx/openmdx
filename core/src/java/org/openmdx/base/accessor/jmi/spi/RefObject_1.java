@@ -1,10 +1,10 @@
 /*
  * ==================================================================== 
- * Name: $Id: RefObject_1.java,v 1.48 2008/07/04 14:56:01 hburger Exp $ 
+ * Name: $Id: RefObject_1.java,v 1.57 2008/09/18 12:46:43 hburger Exp $ 
  * Description: RefObject_1 class 
- * Revision: $Revision: 1.48 $ 
+ * Revision: $Revision: 1.57 $ 
  * Owner: OMEX AG, Switzerland,
- *        http://www.omex.ch Date: $Date: 2008/07/04 14:56:01 $
+ *        http://www.omex.ch Date: $Date: 2008/09/18 12:46:43 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -74,7 +74,7 @@ import javax.jmi.reflect.RefPackage;
 import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.base.accessor.generic.cci.LargeObject_1_0;
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_3;
+import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_1;
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.accessor.generic.cci.Structure_1_0;
 import org.openmdx.base.accessor.generic.spi.ViewObject_1_0;
@@ -117,7 +117,7 @@ import org.openmdx.model1.code.ModelAttributes;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
 
-// ---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 /**
  * Implementation of RefObject_1_0.
  * <p>
@@ -136,9 +136,9 @@ public abstract class RefObject_1
         this.object = extendObject(refClass, object);
         RefPackage refPackage  = refClass.refOutermostPackage();
         if(
-            object instanceof ViewObject_1_0 &&
-            refPackage instanceof RefPackage_1_2 && 
-            refPackage instanceof RefPackageFactory_1_0
+                object instanceof ViewObject_1_0 &&
+                refPackage instanceof RefPackage_1_2 && 
+                refPackage instanceof RefPackageFactory_1_0
         ) {
             InteractionSpec objContext = ((ViewObject_1_0)object).getViewContext();
             Object refContext = ((RefPackage_1_2)refPackage).refViewContext();
@@ -146,7 +146,7 @@ public abstract class RefObject_1
                 this.refClass = (RefClass_1_0) refClass;
             } else {
                 this.refClass = (RefClass_1_0) (
-                   (RefPackageFactory_1_1) refPackage
+                        (RefPackageFactory_1_1) refPackage
                 ).getRefPackage(
                     objContext
                 ).refClass(
@@ -172,36 +172,35 @@ public abstract class RefObject_1
     ) {
         try {
             return ((RefPackage_1_0) refClass.refOutermostPackage())
-                .refObjectFactory()
-                .createObject(refClass.refMofId());
+            .refObjectFactory()
+            .createObject(refClass.refMofId());
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         }
     }
 
-    // -------------------------------------------------------------------------
+    /**
+     * Extend an object
+     * 
+     * @param refClass
+     * @param base
+     * 
+     * @return the extended object
+     * 
+     * @deprecated
+     */
     final private static Object_1_0 extendObject(
         RefClass refClass,
         Object_1_0 base
     ) {
         try {
-            if (base instanceof CloneableObject_1) {
-                CloneableObject_1 wrapper = (CloneableObject_1) base;
-                return (
-                    (ObjectFactory_1_3) ((RefPackage_1_0) refClass.refOutermostPackage()).refObjectFactory()
-                ).cloneObject(
-                    wrapper.getIdentity(),
-                    (Object_1_0) wrapper.objGetDelegate(),
-                    wrapper.isCompleteyDirty()
-                );
-            } 
-            else if (base.objGetClass().equals(refClass.refMofId())) {
+            if (base.objGetClass().equals(refClass.refMofId())) {
                 return base;
             } 
             else {
-                return ((RefPackage_1_0) refClass.refOutermostPackage())
-                    .refObjectFactory()
-                    .createObject(refClass.refMofId(), base);
+                RefPackage_1_0 refPackage = (RefPackage_1_0) refClass.refOutermostPackage();
+                ObjectFactory_1_1 refObjectFactory = (ObjectFactory_1_1) refPackage.refObjectFactory();
+                return refObjectFactory.createObject(refClass.refMofId(), base);
             }
         } 
         catch (ServiceException exception) {
@@ -217,10 +216,8 @@ public abstract class RefObject_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("model element", elementDef)
-                },
-                "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE
+                "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE,
+                new BasicException.Parameter("model element", elementDef)
             ); 
         }
     }
@@ -230,9 +227,9 @@ public abstract class RefObject_1
         ModelElement_1_0 elementDef
     ) throws ServiceException {
         return 
-            !this.getModel().isOperationType(elementDef) && 
-            (this.getModel().isAttributeType(elementDef) || 
-             this.getModel().referenceIsStoredAsAttribute(elementDef));
+        !this.getModel().isOperationType(elementDef) && 
+        (this.getModel().isAttributeType(elementDef) || 
+                this.getModel().referenceIsStoredAsAttribute(elementDef));
     }
 
     // -------------------------------------------------------------------------
@@ -243,10 +240,8 @@ public abstract class RefObject_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("model element", elementDef)
-                },
-                "model element not of type " + ModelAttributes.OPERATION
+                "model element not of type " + ModelAttributes.OPERATION,
+                new BasicException.Parameter("model element", elementDef)
             ); 
         }
     }
@@ -255,7 +250,7 @@ public abstract class RefObject_1
     final private ModelElement_1_0 getType(
         ModelElement_1_0 elementDef
     )
-        throws ServiceException {
+    throws ServiceException {
         return this.getModel().getDereferencedType(
             elementDef.values("type").get(0));
     }
@@ -283,11 +278,9 @@ public abstract class RefObject_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     StackedException.NOT_FOUND,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("class name", this.refClass().refMofId()),
-                        new BasicException.Parameter("feature", featureName)
-                    },
-                    "feature not found"
+                    "feature not found",
+                    new BasicException.Parameter("class name", this.refClass().refMofId()),
+                    new BasicException.Parameter("feature", featureName)
                 ); 
             }
             return feature;
@@ -317,7 +310,6 @@ public abstract class RefObject_1
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ACTIVATION_FAILURE,
-                    null,
                     "Model_1_2 acquisition failed"
                 );
             }
@@ -352,10 +344,8 @@ public abstract class RefObject_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("model element", featureDef)
-                },
-                "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE
+                "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE,
+                new BasicException.Parameter("model element", featureDef)
             ); 
         }
 
@@ -373,11 +363,9 @@ public abstract class RefObject_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("feature", featureDef),
-                        new BasicException.Parameter("qualifier", qualifier)
-                    },
-                    "qualifier must be null in case of attributes and references stored as attribute"
+                    "qualifier must be null in case of attributes and references stored as attribute",
+                    new BasicException.Parameter("feature", featureDef),
+                    new BasicException.Parameter("qualifier", qualifier)
                 ); 
             }
 
@@ -412,8 +400,8 @@ public abstract class RefObject_1
 
             // SINGLE_VALUE|OPTIONAL_VALUE
             if (
-                Multiplicities.SINGLE_VALUE.equals(multiplicity) || 
-                Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
+                    Multiplicities.SINGLE_VALUE.equals(multiplicity) || 
+                    Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
             ) {
                 Object value = this.object.objGetValue((String) featureDef.values("name").get(0));
                 if (!marshal) { 
@@ -430,6 +418,9 @@ public abstract class RefObject_1
                 } 
                 else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
                     return DateMarshaller.getInstance(true).marshal(value);
+                } 
+                else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                    return URIMarshaller.getInstance(true).marshal(value);
                 } 
                 else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
                     return DurationMarshaller.getInstance(true).marshal(value);
@@ -451,12 +442,12 @@ public abstract class RefObject_1
                 } 
                 else if (this.getModel().isStructureType(type)) {
                     return this
-                        .toRefStructMarshaller(qualifiedTypeName)
-                        .marshal(value);
+                    .toRefStructMarshaller(qualifiedTypeName)
+                    .marshal(value);
                 } 
                 else if (
-                    this.getModel().isClassType(type) || 
-                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                        this.getModel().isClassType(type) || 
+                        PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
                 ) {
                     return ((Marshaller) this.refClass.refOutermostPackage()).marshal(value);
                 } 
@@ -477,18 +468,16 @@ public abstract class RefObject_1
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
-                        new BasicException.Parameter[] {
-                            new BasicException.Parameter("feature", featureDef),
-                            new BasicException.Parameter("type", type)
-                        },
-                        "unsupported stream type. Supported are [string|binary]"
+                        "unsupported stream type. Supported are [string|binary]",
+                        new BasicException.Parameter("feature", featureDef),
+                        new BasicException.Parameter("type", type)
                     );
                 }
             }
             // LIST
             else if (
-                Multiplicities.LIST.equals(multiplicity) || 
-                Multiplicities.MULTI_VALUE.equals(multiplicity)
+                    Multiplicities.LIST.equals(multiplicity) || 
+                    Multiplicities.MULTI_VALUE.equals(multiplicity)
             ) {
                 List values = this.object.objGetList((String) featureDef.values("name").get(0));
                 if (!marshal) { 
@@ -509,6 +498,12 @@ public abstract class RefObject_1
                         values
                     );
                 } 
+                else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                    return new MarshallingList(
+                        URIMarshaller.getInstance(true),
+                        values
+                    );
+                }                 
                 else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
                     return new MarshallingList(DurationMarshaller.getInstance(true), values);
                 } 
@@ -530,8 +525,8 @@ public abstract class RefObject_1
                     return new MarshallingList(this.toRefStructMarshaller(qualifiedTypeName), values);
                 } 
                 else if (
-                    this.getModel().isClassType(type) || 
-                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                        this.getModel().isClassType(type) || 
+                        PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
                 ) {
                     return new MarshallingList((Marshaller) this.refClass.refOutermostPackage(), values);
                 } 
@@ -560,6 +555,12 @@ public abstract class RefObject_1
                         values
                     );
                 } 
+                else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                    return new MarshallingSet(
+                        URIMarshaller.getInstance(true),
+                        values
+                    );
+                } 
                 else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
                     return new MarshallingSet(DurationMarshaller.getInstance(true), values);
                 } 
@@ -585,8 +586,8 @@ public abstract class RefObject_1
                     return new MarshallingSet(this.toRefStructMarshaller(qualifiedTypeName), values);
                 } 
                 else if (
-                    this.getModel().isClassType(type) || 
-                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                        this.getModel().isClassType(type) || 
+                        PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
                 ) {
                     return new MarshallingSet((Marshaller) this.refClass.refOutermostPackage(), values);
                 } 
@@ -612,6 +613,9 @@ public abstract class RefObject_1
                 else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
                     return new MarshallingSortedMap(DateMarshaller.getInstance(true), values);
                 } 
+                else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                    return new MarshallingSortedMap(URIMarshaller.getInstance(true), values);
+                } 
                 else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
                     return new MarshallingSortedMap(DurationMarshaller.getInstance(true), values);
                 } 
@@ -631,8 +635,8 @@ public abstract class RefObject_1
                     return new MarshallingSortedMap(this.toRefStructMarshaller(qualifiedTypeName), values);
                 } 
                 else if (
-                    this.getModel().isClassType(type) || 
-                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                        this.getModel().isClassType(type) || 
+                        PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
                 ) {
                     return new MarshallingSortedMap((Marshaller) this.refClass.refOutermostPackage(), values);
                 } 
@@ -652,11 +656,9 @@ public abstract class RefObject_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("feature", featureDef),
-                        new BasicException.Parameter("type", type)
-                    },
-                    "unsupported multiplicity. Supported are [set|list|sparsearray|map|stream|0..n|0..1|1..1]"
+                    "unsupported multiplicity. Supported are [set|list|sparsearray|map|stream|0..n|0..1|1..1]",
+                    new BasicException.Parameter("feature", featureDef),
+                    new BasicException.Parameter("type", type)
                 );
             }
         }
@@ -681,8 +683,8 @@ public abstract class RefObject_1
                 ).values("qualifierName").get(0);
                 int pos = 0;
                 if (
-                    ((pos = qualifierName.indexOf("Container")) >= 0) || 
-                    ((pos = qualifierName.indexOf("container")) >= 0)
+                        ((pos = qualifierName.indexOf("Container")) >= 0) || 
+                        ((pos = qualifierName.indexOf("container")) >= 0)
                 ) {
                     qualifierName = qualifierName.substring(0, pos);
                 }
@@ -692,9 +694,8 @@ public abstract class RefObject_1
                             Quantors.THERE_EXISTS,
                             exposedEndName,
                             FilterOperators.IS_IN,
-                            new Path[] {
-                                this.object.objGetPath()
-                            })
+                            this.object.objGetPath()
+                        )
                     }
                 );
                 return new RefContainer_1((RefRootPackage_1) this.refClass.refOutermostPackage(), container);
@@ -709,23 +710,21 @@ public abstract class RefObject_1
                 // navigation to parent object is performed locally by removing
                 // the last to object path components
                 if(
-                    AggregationKind.SHARED.equals(referencedEnd.values("aggregation").get(0)) || 
-                    AggregationKind.COMPOSITE.equals(referencedEnd.values("aggregation").get(0))
+                        AggregationKind.SHARED.equals(referencedEnd.values("aggregation").get(0)) || 
+                        AggregationKind.COMPOSITE.equals(referencedEnd.values("aggregation").get(0))
                 ) {
                     return rootPkg.refObject(new Path(this.refMofId()).getParent().getParent().toString());
                 } 
                 else {
                     if(
-                        (qualifier instanceof String) && 
-                        (((String) qualifier).indexOf(';') >= 0)
+                            (qualifier instanceof String) && 
+                            (((String) qualifier).indexOf(';') >= 0)
                     ) {
                         return rootPkg.marshal(
                             rootPkg.refObjectFactory().getObject(
                                 this.refGetPath().getDescendant(
-                                    new String[]{
-                                        (String)featureDef.values("name").get(0), 
-                                        (String) qualifier
-                                    }
+                                    (String)featureDef.values("name").get(0), 
+                                    (String) qualifier
                                 )
                             )
                         );
@@ -734,11 +733,11 @@ public abstract class RefObject_1
                         String feature = (String) featureDef.values("name").get(0);
                         String objectClass = this.refClass().refMofId();
                         if (
-                            this.getModel().isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") && 
-                            this.getModel().isSubtypeOf(objectClass,"org:openmdx:compatibility:state1:BasicState") && 
-                            this.object.objIsPersistent() && 
-                            !this.object.objIsNew() && 
-                            !this.object.objIsDeleted()
+                                this.getModel().isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") && 
+                                this.getModel().isSubtypeOf(objectClass,"org:openmdx:compatibility:state1:BasicState") && 
+                                this.object.objIsPersistent() && 
+                                !this.object.objIsNew() && 
+                                !this.object.objIsDeleted()
                         ) {
                             feature += SystemAttributes.USE_OBJECT_IDENTITY_HINT;
                         }
@@ -746,16 +745,16 @@ public abstract class RefObject_1
                         Object object = null;
                         try {
                             object = qualifier == null 
-                                ? new RefContainer_1(rootPkg, container) 
-                                : rootPkg.marshal(container.get(qualifier.toString()));
+                            ? new RefContainer_1(rootPkg, container) 
+                            : rootPkg.marshal(container.get(qualifier.toString()));
                         } 
                         catch (ServiceException e) {
                             // in case of 0..1 multiplicity allow null as return
                             // value
                             if(
-                                rootPkg.getThrowNotFoundIfNull() || 
-                                (e.getExceptionCode() != StackedException.NOT_FOUND) || 
-                                !Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
+                                    rootPkg.getThrowNotFoundIfNull() || 
+                                    (e.getExceptionCode() != StackedException.NOT_FOUND) || 
+                                    !Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
                             ) { 
                                 throw new JmiServiceException(
                                     e,
@@ -787,10 +786,8 @@ public abstract class RefObject_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("model element", featureDef)
-                },
-                "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE
+                "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE,
+                new BasicException.Parameter("model element", featureDef)
             ); 
         }
 
@@ -816,11 +813,9 @@ public abstract class RefObject_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("feature", featureDef),
-                        new BasicException.Parameter("type", type)
-                    },
-                    "unsupported stream type. Supported are [string|binary]"
+                    "unsupported stream type. Supported are [string|binary]",
+                    new BasicException.Parameter("feature", featureDef),
+                    new BasicException.Parameter("type", type)
                 );
             }
         } 
@@ -828,11 +823,9 @@ public abstract class RefObject_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("feature", featureDef),
-                    new BasicException.Parameter("type", type)
-                },
-                "unsupported multiplicity. Supported are [stream]"
+                "unsupported multiplicity. Supported are [stream]",
+                new BasicException.Parameter("feature", featureDef),
+                new BasicException.Parameter("type", type)
             );
         }
     }
@@ -867,9 +860,9 @@ public abstract class RefObject_1
                 }
             }
             if (
-                Multiplicities.OPTIONAL_VALUE.equals(multiplicity) || 
-                Multiplicities.SINGLE_VALUE.equals(multiplicity) || 
-                Multiplicities.STREAM.equals(multiplicity)
+                    Multiplicities.OPTIONAL_VALUE.equals(multiplicity) || 
+                    Multiplicities.SINGLE_VALUE.equals(multiplicity) || 
+                    Multiplicities.STREAM.equals(multiplicity)
             ) {
                 if (PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName)) {
                     this.object.objSetValue(
@@ -887,6 +880,12 @@ public abstract class RefObject_1
                     this.object.objSetValue(
                         (String) featureDef.values("name").get(0), 
                         DateMarshaller.getInstance(true).unmarshal(value)
+                    );
+                } 
+                else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                    this.object.objSetValue(
+                        (String) featureDef.values("name").get(0), 
+                        URIMarshaller.getInstance(true).unmarshal(value)
                     );
                 } 
                 else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
@@ -951,21 +950,21 @@ public abstract class RefObject_1
             else {
                 Object newValue = null;
                 if (
-                    (value != null) && 
-                    (value.getClass().isArray())
+                        (value != null) && 
+                        (value.getClass().isArray())
                 ) {
                     newValue = new ArrayList();
                     for (int i = 0; i < Array.getLength(value); i++) {
                         ((List) newValue).add(
                             (value instanceof short[]) 
-                                ?  new Short(((short[]) value)[i])
-                                : (value instanceof int[]) 
-                                    ? new Integer(((int[]) value)[i])
-                                    : (value instanceof long[]) 
-                                        ? new Long(((long[]) value)[i])
-                                        : (value instanceof boolean[]) 
-                                            ? Boolean.valueOf(((boolean[]) value)[i])
-                                            : ((Object[]) value)[i]
+                            ?  new Short(((short[]) value)[i])
+                            : (value instanceof int[]) 
+                            ? new Integer(((int[]) value)[i])
+                            : (value instanceof long[]) 
+                            ? new Long(((long[]) value)[i])
+                            : (value instanceof boolean[]) 
+                            ? Boolean.valueOf(((boolean[]) value)[i])
+                                : ((Object[]) value)[i]
                         );
                     }
                 } 
@@ -979,8 +978,8 @@ public abstract class RefObject_1
                         if (newValue instanceof Collection) {
                             int i = 0;
                             for(
-                                Iterator j = ((Collection) newValue).iterator(); 
-                                j.hasNext();
+                                    Iterator j = ((Collection) newValue).iterator(); 
+                                    j.hasNext();
                             ) {
                                 ((SortedMap) values).put(
                                     new Integer(i++), 
@@ -993,8 +992,8 @@ public abstract class RefObject_1
                         }
                     } 
                     else if (
-                        Multiplicities.LIST.equals(multiplicity) || 
-                        Multiplicities.MULTI_VALUE.equals(multiplicity)
+                            Multiplicities.LIST.equals(multiplicity) || 
+                            Multiplicities.MULTI_VALUE.equals(multiplicity)
                     ) {
                         ((List) values).clear();
                         if (newValue != null) {
@@ -1009,11 +1008,9 @@ public abstract class RefObject_1
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.ASSERTION_FAILURE,
-                            new BasicException.Parameter[] {
-                                new BasicException.Parameter("feature", featureDef),
-                                new BasicException.Parameter("multiplicity", multiplicity),
-                            },
-                            "unknown multiplicity"
+                            "unknown multiplicity",
+                            new BasicException.Parameter("feature", featureDef),
+                            new BasicException.Parameter("multiplicity", multiplicity)
                         );
                     }
                 }
@@ -1027,11 +1024,9 @@ public abstract class RefObject_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("feature", featureDef),
-                    new BasicException.Parameter("type", type)
-                },
-                "set supported only for attributes and references stored as attributes"
+                "set supported only for attributes and references stored as attributes",
+                new BasicException.Parameter("feature", featureDef),
+                new BasicException.Parameter("type", type)
             );
         }
     }
@@ -1052,10 +1047,8 @@ public abstract class RefObject_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("model element", featureDef)
-                },
-                "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE
+                "model element not of type " + ModelAttributes.STRUCTURAL_FEATURE,
+                new BasicException.Parameter("model element", featureDef)
             ); 
         }
 
@@ -1082,11 +1075,9 @@ public abstract class RefObject_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("feature", featureDef),
-                        new BasicException.Parameter("type", type)
-                    },
-                    "unsupported stream type. Supported are [string|binary]"
+                    "unsupported stream type. Supported are [string|binary]",
+                    new BasicException.Parameter("feature", featureDef),
+                    new BasicException.Parameter("type", type)
                 );
             }
         } 
@@ -1094,11 +1085,9 @@ public abstract class RefObject_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("feature", featureDef),
-                    new BasicException.Parameter("type", type)
-                },
-                "unsupported multiplicity. Supported are [stream]"
+                "unsupported multiplicity. Supported are [stream]",
+                new BasicException.Parameter("feature", featureDef),
+                new BasicException.Parameter("type", type)
             );
         }
     }
@@ -1122,8 +1111,8 @@ public abstract class RefObject_1
         String qualifiedNameResultType = null;
         String qualifiedNameInParamType = null;
         for (
-            Iterator<?> i = featureDef.values("content").iterator(); 
-            i.hasNext();
+                Iterator<?> i = featureDef.values("content").iterator(); 
+                i.hasNext();
         ) {
             ModelElement_1_0 paramDef = this.getModel().getElement(i.next());
             ModelElement_1_0 paramDefType = this.getType(paramDef);
@@ -1138,28 +1127,24 @@ public abstract class RefObject_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("operation", featureDef)
-                },
-                "no parameter with name \"in\" defined for operation"
+                "no parameter with name \"in\" defined for operation",
+                new BasicException.Parameter("operation", featureDef)
             ); 
         }
         if (qualifiedNameResultType == null) { 
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("operation", featureDef)
-                },
-                "no parameter with name \"result\" defined for operation"
+                "no parameter with name \"result\" defined for operation",
+                new BasicException.Parameter("operation", featureDef)
             ); 
         }
-        
+
         // Create in param as JMI struct
         RefStruct_1_0 param = null;
         if (
-            (args.size() == 1) && 
-            (args.get(0) instanceof RefStruct_1_0)
+                (args.size() == 1) && 
+                (args.get(0) instanceof RefStruct_1_0)
         ) { 
             param = (RefStruct_1_0)args.get(0);
         }
@@ -1169,7 +1154,7 @@ public abstract class RefObject_1
                 args
             );
         }
-        
+
         // invoke operation
         Structure_1_0 unmarshalledParam = (Structure_1_0)this.toRefStructMarshaller(
             qualifiedNameInParamType
@@ -1177,7 +1162,7 @@ public abstract class RefObject_1
         return this.toRefStructMarshaller(qualifiedNameResultType).marshal(
             invokeOperationInUnitOfWork(((Boolean) featureDef.values("isQuery").get(0)).booleanValue()) ? 
                 this.object.objInvokeOperationInUnitOfWork((String) featureDef.values("name").get(0), unmarshalledParam) :
-                this.object.objInvokeOperation((String) featureDef.values("name").get(0), unmarshalledParam) 
+                    this.object.objInvokeOperation((String) featureDef.values("name").get(0), unmarshalledParam) 
         );
     }
 
@@ -1197,7 +1182,7 @@ public abstract class RefObject_1
             return unitOfWork.isTransactional() && unitOfWork.isOptimistic();
         }
     }
-    
+
     // -------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     final public Object refGetValue(
@@ -1215,10 +1200,9 @@ public abstract class RefObject_1
                     new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         StackedException.NOT_SUPPORTED,
-                        new BasicException.Parameter[] {
-                            new BasicException.Parameter("values", values)
-                        },
-                        "operation only supported for features instanceof [List|SparseArray]"),
+                        "operation only supported for features instanceof [List|SparseArray]",
+                        new BasicException.Parameter("values", values)
+                    ),
                     this);
             }
         } catch (ServiceException e) {
@@ -1258,10 +1242,8 @@ public abstract class RefObject_1
                     new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         StackedException.NOT_SUPPORTED,
-                        new BasicException.Parameter[] {
-                            new BasicException.Parameter("value", value)
-                        },
-                        "operation only supported for features instanceof [List|SparseArray]"
+                        "operation only supported for features instanceof [List|SparseArray]",
+                        new BasicException.Parameter("value", value)
                     ),
                     this
                 );
@@ -1279,11 +1261,9 @@ public abstract class RefObject_1
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     StackedException.NOT_SUPPORTED,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("feature", featureName),
-                        new BasicException.Parameter("value", value)
-                    },
-                    "index must be 0 in case of a non-collection value"
+                    "index must be 0 in case of a non-collection value",
+                    new BasicException.Parameter("feature", featureName),
+                    new BasicException.Parameter("value", value)
                 ), this
             );
         }
@@ -1325,11 +1305,9 @@ public abstract class RefObject_1
                 new ServiceException(
                     StackedException.DEFAULT_DOMAIN,
                     StackedException.NOT_SUPPORTED,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("feature", featureName),
-                        new BasicException.Parameter("value", map)
-                    },
-                    "index must be 0 in case of a non-collection value"
+                    "index must be 0 in case of a non-collection value",
+                    new BasicException.Parameter("feature", featureName),
+                    new BasicException.Parameter("value", map)
                 ), 
                 this
             );
@@ -1339,12 +1317,10 @@ public abstract class RefObject_1
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_FOUND,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("object", this.refGetPath()),
-                        new BasicException.Parameter("feature", featureName),
-                        new BasicException.Parameter("qualifier", qualifier)
-                    },
-                    "object not found"
+                    "object not found",
+                    new BasicException.Parameter("object", this.refGetPath()),
+                    new BasicException.Parameter("feature", featureName),
+                    new BasicException.Parameter("qualifier", qualifier)
                 )
             ); 
         }
@@ -1361,8 +1337,8 @@ public abstract class RefObject_1
             ModelElement_1_0 featureDef = this.getFeature(featureName);
             Object value = null;
             if (
-                model.isAttributeType(featureDef) || 
-                model.referenceIsStoredAsAttribute(featureDef)
+                    model.isAttributeType(featureDef) || 
+                    model.referenceIsStoredAsAttribute(featureDef)
             ) {
                 // TODO: check modeled qualifier type instead of qualifier class
                 if (qualifier instanceof String) {
@@ -1417,10 +1393,10 @@ public abstract class RefObject_1
         try {
             RefPackage refPackage = refOutermostPackage();
             Object viewContext = refPackage instanceof RefPackage_1_2 
-                ? ((RefPackage_1_2) refPackage).refViewContext()
+            ? ((RefPackage_1_2) refPackage).refViewContext()
                 : null;
             Object values = viewContext == null 
-                ? this.getValue(this.getFeature(featureName), null) 
+            ? this.getValue(this.getFeature(featureName), null) 
                 : null;
 
             // set indexed element in case of Colletion values. For convencience
@@ -1443,10 +1419,8 @@ public abstract class RefObject_1
                         new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             StackedException.NOT_SUPPORTED,
-                            new BasicException.Parameter[] {
-                                new BasicException.Parameter("values", values)
-                            },
-                            "operation only supported for features instanceof [List|SparseArray]"
+                            "operation only supported for features instanceof [List|SparseArray]",
+                            new BasicException.Parameter("values", values)
                         ),
                         this
                     );
@@ -1465,10 +1439,8 @@ public abstract class RefObject_1
                     new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         StackedException.NOT_SUPPORTED,
-                        new BasicException.Parameter[] {
-                            new BasicException.Parameter("values", values)
-                        },
-                        "index must be 0 for non-collection values"
+                        "index must be 0 for non-collection values",
+                        new BasicException.Parameter("values", values)
                     ), 
                     this
                 );
@@ -1522,10 +1494,8 @@ public abstract class RefObject_1
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     StackedException.NOT_SUPPORTED,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("values", values)
-                    },
-                    "operation only supported for features instanceof [List]"                   
+                    "operation only supported for features instanceof [List]",
+                    new BasicException.Parameter("values", values)
                 ),
                 this
             );
@@ -1564,11 +1534,9 @@ public abstract class RefObject_1
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     StackedException.NOT_SUPPORTED,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("value class", values.getClass().getName()),
-                        new BasicException.Parameter("values", values)
-                    },
-                    "operation only supported for features instanceof [Set|List|SparseArray|Container]"
+                    "operation only supported for features instanceof [Set|List|SparseArray|Container]",
+                    new BasicException.Parameter("value class", values.getClass().getName()),
+                    new BasicException.Parameter("values", values)
                 ),
                 this
             );
@@ -1601,10 +1569,8 @@ public abstract class RefObject_1
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     StackedException.NOT_SUPPORTED,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("values", values)
-                    },
-                    "operation only supported for features instanceof [List|SparseArray]"
+                    "operation only supported for features instanceof [List|SparseArray]",
+                    new BasicException.Parameter("values", values)
                 ),
                 this
             );
@@ -1624,9 +1590,9 @@ public abstract class RefObject_1
             throw new JmiServiceException(e, this);
         }
         if (
-            values instanceof List || 
-            values instanceof Set || 
-            values instanceof org.openmdx.compatibility.base.collection.Container
+                values instanceof List || 
+                values instanceof Set || 
+                values instanceof org.openmdx.compatibility.base.collection.Container
         ) {
             try {
                 ((Collection<?>) values).clear();
@@ -1648,10 +1614,8 @@ public abstract class RefObject_1
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     StackedException.NOT_SUPPORTED,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("values", values)
-                    },
-                    "operation only supported for features instanceof [Set|List|SparseArray|Container]"
+                    "operation only supported for features instanceof [Set|List|SparseArray|Container]",
+                    new BasicException.Parameter("values", values)
                 ),
                 this
             );
@@ -1672,10 +1636,8 @@ public abstract class RefObject_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("objType", objType),
-                    },
-                    "objType must be a class type"
+                    "objType must be a class type",
+                    new BasicException.Parameter("objType", objType)
                 ); 
             }
             return this.getModel().isInstanceof(this.object, objType);
@@ -1831,7 +1793,7 @@ public abstract class RefObject_1
                 packageName = packageName.substring(
                     0,
                     packageName.lastIndexOf(':')).replace(':', '.'
-                );
+                    );
                 String typeName = exceptionType.substring(exceptionType.lastIndexOf(":") + 1);
                 try {
                     Class exceptionClass = Classes.getApplicationClass(
@@ -1844,9 +1806,9 @@ public abstract class RefObject_1
                             ServiceException.class
                         }
                     );
-                    throw (RefException) constructor.newInstance(new Object[] {
+                    throw (RefException) constructor.newInstance(
                         e
-                    });
+                    );
                 } 
                 catch (InstantiationException dummy) {
                     throw new RefException_1(e);
@@ -1895,7 +1857,7 @@ public abstract class RefObject_1
     final public RefPackage refImmediatePackage(
     ) {
         return "org:openmdx:base:Authority".equals(this.refClass().refMofId())
-            ? this.refOutermostPackage().refPackage(this.refGetPath().get(0))
+        ? this.refOutermostPackage().refPackage(this.refGetPath().get(0))
             : this.refClass().refImmediatePackage();
     }
 
@@ -1916,9 +1878,9 @@ public abstract class RefObject_1
             } 
             else {
                 if (
-                    !refIsDeleted() &&
-                    this.getModel().isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") && 
-                    this.object.objDefaultFetchGroup().contains(SystemAttributes.OBJECT_IDENTITY)
+                        !refIsDeleted() &&
+                        this.getModel().isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") && 
+                        this.object.objDefaultFetchGroup().contains(SystemAttributes.OBJECT_IDENTITY)
                 ) {
                     this.refMofId = (String) this.object.objGetValue(
                         SystemAttributes.OBJECT_IDENTITY
@@ -1961,8 +1923,8 @@ public abstract class RefObject_1
                         thisElement != null && 
                         thisElement.equals(getElementInError(serviceException));
                     violationTarget[i] = thisElementInError 
-                        ? new JmiServiceException(serviceException, this)
-                        : new JmiServiceException(serviceException);
+                    ? new JmiServiceException(serviceException, this)
+                    : new JmiServiceException(serviceException);
                 }
                 return Arrays.asList(violationTarget);
             }
@@ -1988,8 +1950,8 @@ public abstract class RefObject_1
         ServiceException serviceException
     ) {
         return serviceException
-            .getCause(BasicException.Code.DEFAULT_DOMAIN)
-            .getParameter("elementInError");
+        .getCause(BasicException.Code.DEFAULT_DOMAIN)
+        .getParameter("elementInError");
     }
 
     // -------------------------------------------------------------------------
@@ -2013,7 +1975,6 @@ public abstract class RefObject_1
             new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 StackedException.NOT_SUPPORTED,
-                null,
                 "Write protection no longer supported"
             ), 
             this
@@ -2160,13 +2121,13 @@ public abstract class RefObject_1
         ModelElement_1_0 featureDef
     ) {
         if(
-            (refDelegate() instanceof ViewObject_1_0) &&
-            refIsPersistent() 
+                (refDelegate() instanceof ViewObject_1_0) &&
+                refIsPersistent() 
         ) {
             String feature = (String) featureDef.values("name").get(0);
             return 
-                State_1_Attributes.STATE_VALID_FROM.equals(feature) ||
-                State_1_Attributes.STATE_VALID_TO.equals(feature);
+            State_1_Attributes.STATE_VALID_FROM.equals(feature) ||
+            State_1_Attributes.STATE_VALID_TO.equals(feature);
         } 
         else {
             return false;
@@ -2182,14 +2143,14 @@ public abstract class RefObject_1
         try {
             ModelElement_1_0 elementDef = ((RefMetaObject_1)this.refMetaObject()).getElementDef();
             for (
-                Iterator<ModelElement_1_0> i = ((Map) elementDef.values("allFeature").get(0)).values().iterator(); 
-                i.hasNext();
+                    Iterator<ModelElement_1_0> i = ((Map) elementDef.values("allFeature").get(0)).values().iterator(); 
+                    i.hasNext();
             ) {
                 ModelElement_1_0 featureDef = i.next();
                 if (
-                    this.isAttributeOrReferenceStoredAsAttribute(featureDef) && 
-                    ((Boolean) featureDef.values("isChangeable").get(0)).booleanValue() && 
-                    !isUnmodifiable(featureDef)
+                        this.isAttributeOrReferenceStoredAsAttribute(featureDef) && 
+                        ((Boolean) featureDef.values("isChangeable").get(0)).booleanValue() && 
+                        !isUnmodifiable(featureDef)
                 ) {
                     String multiplicity = (String) featureDef.values("multiplicity").get(0);
                     ModelElement_1_0 type = this.getModel().getDereferencedType(featureDef.values("type").get(0));
@@ -2199,12 +2160,12 @@ public abstract class RefObject_1
                         }
                     } 
                     else if (
-                        Multiplicities.SET.equals(multiplicity) || 
-                        Multiplicities.LIST.equals(multiplicity) || 
-                        Multiplicities.MULTI_VALUE.equals(multiplicity) || 
-                        Multiplicities.SPARSEARRAY.equals(multiplicity)
+                            Multiplicities.SET.equals(multiplicity) || 
+                            Multiplicities.LIST.equals(multiplicity) || 
+                            Multiplicities.MULTI_VALUE.equals(multiplicity) || 
+                            Multiplicities.SPARSEARRAY.equals(multiplicity)
                     ) {
-                        this.setValue(featureDef, new Object[] {});
+                        this.setValue(featureDef, EMPTY_OBJECT_ARRAY);
                     } 
                     else if (Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
                         if (setRequiredToNull) {
@@ -2222,7 +2183,7 @@ public abstract class RefObject_1
                                 this.setValue(
                                     featureDef, 
                                     DateTimeMarshaller.getInstance(true).marshal
-                                        (org.openmdx.base.text.format.DateFormat.getInstance().format(new Date())
+                                    (org.openmdx.base.text.format.DateFormat.getInstance().format(new Date())
                                     )
                                 );
                             } 
@@ -2230,6 +2191,12 @@ public abstract class RefObject_1
                                 this.setValue(
                                     featureDef, 
                                     DateMarshaller.getInstance(true).marshal("20000101")
+                                );
+                            } 
+                            else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                                this.setValue(
+                                    featureDef, 
+                                    URIMarshaller.getInstance(true).marshal("20000101")
                                 );
                             } 
                             else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
@@ -2259,8 +2226,8 @@ public abstract class RefObject_1
                                 );
                             } 
                             else if (
-                                this.getModel().isClassType(type) || 
-                                PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                                    this.getModel().isClassType(type) || 
+                                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
                             ) {
                                 SysLog.warning("initializing of object references not supported", featureDef);
                             } 
@@ -2286,14 +2253,14 @@ public abstract class RefObject_1
         try {
             ModelElement_1_0 elementDef = ((RefMetaObject_1) this.refMetaObject()).getElementDef();
             for (
-                Iterator<ModelElement_1_0> i = ((Map) elementDef.values("allFeature").get(0)).values().iterator(); 
-                i.hasNext();
+                    Iterator<ModelElement_1_0> i = ((Map) elementDef.values("allFeature").get(0)).values().iterator(); 
+                    i.hasNext();
             ) {
                 ModelElement_1_0 featureDef = i.next();
                 if (
-                    this.isAttributeOrReferenceStoredAsAttribute(featureDef) && 
-                    Boolean.TRUE.equals(featureDef.values("isChangeable").get(0)) &&
-                    !isUnmodifiable(featureDef)
+                        this.isAttributeOrReferenceStoredAsAttribute(featureDef) && 
+                        Boolean.TRUE.equals(featureDef.values("isChangeable").get(0)) &&
+                        !isUnmodifiable(featureDef)
                 ) {
                     this.setValue(featureDef, ((RefObject_1_2) source).getValue(
                         featureDef,
@@ -2323,8 +2290,8 @@ public abstract class RefObject_1
                     null
                 );
                 if (
-                    (container instanceof List) && 
-                    (qualifier instanceof Number)
+                        (container instanceof List) && 
+                        (qualifier instanceof Number)
                 ) {
                     ((List<Object>) container).add(
                         ((Number) qualifier).intValue(),
@@ -2332,8 +2299,8 @@ public abstract class RefObject_1
                     );
                 } 
                 else if (
-                    (container instanceof RefContainer_1) && 
-                    (value instanceof RefObject_1_0)
+                        (container instanceof RefContainer_1) && 
+                        (value instanceof RefObject_1_0)
                 ) {
                     RefContainer_1 refContainer = (RefContainer_1) container;
                     (((RefObject_1_0) value).refDelegate()).objMove(
@@ -2351,12 +2318,10 @@ public abstract class RefObject_1
                         new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             StackedException.NOT_SUPPORTED,
-                            new BasicException.Parameter[] {
-                                new BasicException.Parameter(
-                                    "values", container == null ? null : container.getClass().getName()
-                                )
-                            },
-                            "a) feature type = Reference and qualifier is RefObject_1_0; b) feature type = collection type attribute and qualifier is Number"
+                            "a) feature type = Reference and qualifier is RefObject_1_0; b) feature type = collection type attribute and qualifier is Number",
+                            new BasicException.Parameter(
+                                "values", container == null ? null : container.getClass().getName()
+                            )
                         ),
                         this
                     );
@@ -2381,8 +2346,8 @@ public abstract class RefObject_1
             ModelElement_1_0 feature = this.getFeature(featureName);
             // optimized remove. do not marshal Object_1_0 to RefObject
             if (
-                this.getModel().isReferenceType(feature) &&
-                !this.getModel().referenceIsStoredAsAttribute(feature)
+                    this.getModel().isReferenceType(feature) &&
+                    !this.getModel().referenceIsStoredAsAttribute(feature)
             ) {
                 String base = qualifier.toString();
                 String reference = (String) feature.values("name").get(0);
@@ -2391,20 +2356,18 @@ public abstract class RefObject_1
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_FOUND,
-                            new BasicException.Parameter[] {
-                                new BasicException.Parameter("feature", featureName),
-                                new BasicException.Parameter("qualifier", base)
-                            },
-                            "Attempt to remove an object with a given qualifier while no object is bound to this qualifier"
+                            "Attempt to remove an object with a given qualifier while no object is bound to this qualifier",
+                            new BasicException.Parameter("feature", featureName),
+                            new BasicException.Parameter("qualifier", base)
                         ); 
                     }
                 } 
                 else {
                     RefRootPackage_1 rootPkg = (RefRootPackage_1) this.refClass.refOutermostPackage();
                     rootPkg.refObjectFactory().getObject(
-                        this.refGetPath().getDescendant(new String[] {
+                        this.refGetPath().getDescendant(
                             reference, base
-                        })).objRemove();
+                        )).objRemove();
                 }
             }
             // non-optimized remove
@@ -2420,8 +2383,8 @@ public abstract class RefObject_1
             // object removal handle above
         } 
         else if (
-            (values instanceof List) && 
-            (qualifier instanceof Number)
+                (values instanceof List) && 
+                (qualifier instanceof Number)
         ) {
             ((List<?>) values).remove(((Number) qualifier).intValue());
         } 
@@ -2440,10 +2403,8 @@ public abstract class RefObject_1
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     StackedException.NOT_SUPPORTED,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("values", values)
-                    },
-                    "operation only supported for features instanceof [List|SparseArray|FilterableMap]"
+                    "operation only supported for features instanceof [List|SparseArray|FilterableMap]",
+                    new BasicException.Parameter("values", values)
                 ),
                 this
             );
@@ -2505,10 +2466,8 @@ public abstract class RefObject_1
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     StackedException.NOT_SUPPORTED,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("values", values)
-                    },
-                    "operation only supported for features instanceof [Set|List|SparseArray|Container]"
+                    "operation only supported for features instanceof [Set|List|SparseArray|Container]",
+                    new BasicException.Parameter("values", values)
                 ),
                 this
             );
@@ -2534,7 +2493,7 @@ public abstract class RefObject_1
         String feature, 
         EventListener listener
     )
-        throws ServiceException {
+    throws ServiceException {
         this.object.objAddEventListener(feature, listener); // TODO marshalling
     }
 
@@ -2624,16 +2583,16 @@ public abstract class RefObject_1
     ) {
         return getClass().getName() + " delegating to " + this.object;
     }
-    
+
     // -------------------------------------------------------------------------
     public boolean equals(
         Object that
     ) {
         return 
-            that instanceof RefObject_1_0 && 
-            this.object.equals(((RefObject_1_0) that).refDelegate());
+        that instanceof RefObject_1_0 && 
+        this.object.equals(((RefObject_1_0) that).refDelegate());
     }
-    
+
     // -------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
@@ -2643,7 +2602,7 @@ public abstract class RefObject_1
         return this.object.hashCode();
     }
 
-    
+
     // -------------------------------------------------------------------------
     // Implements PersistenceCapable
     // -------------------------------------------------------------------------
@@ -2730,7 +2689,7 @@ public abstract class RefObject_1
     ) {
         RefPackage outermostPackage = refOutermostPackage();
         return outermostPackage instanceof RefPackage_1_1 
-            ? ((RefPackage_1_1) outermostPackage).refPersistenceManager()
+        ? ((RefPackage_1_1) outermostPackage).refPersistenceManager()
             : null;
     }
 
@@ -2753,8 +2712,7 @@ public abstract class RefObject_1
      */
     public Object jdoGetVersion(
     ) {
-        // TODO Auto-generated method stub
-        return null;
+        return null; // TODO return the object's digest
     }
 
     // -------------------------------------------------------------------------
@@ -2983,6 +2941,7 @@ public abstract class RefObject_1
     // -------------------------------------------------------------------------
     // Instance members
     // -------------------------------------------------------------------------
+    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[] {};
     private static final String OPENMDX_1_JDO = 
         "This JDO operation is not supported in openMDX 1 compatibility mode";
     private static Model_1_2 model = null;
@@ -2990,7 +2949,7 @@ public abstract class RefObject_1
     private String refMofId = null;
     private transient RefObject metaObject = null;
     private transient ModelElement_1_0 refClassDef = null;
-    
+
     /**
      * @serial
      */
@@ -3000,5 +2959,5 @@ public abstract class RefObject_1
      * @serial
      */
     private RefClass_1_0 refClass;
- 
+
 }

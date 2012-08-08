@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OptimisticLocking_1.java,v 1.11 2008/03/21 18:46:21 hburger Exp $
+ * Name:        $Id: OptimisticLocking_1.java,v 1.12 2008/09/10 08:55:21 hburger Exp $
  * Description: OptimisticLocking_1 plugin
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:46:21 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,14 +72,14 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 public class OptimisticLocking_1
-    extends SystemAttributes_1 
+extends SystemAttributes_1 
 {
 
     /**
      * 
      */
     private boolean optimisticLocking = false;
-    
+
     /**
      * Calculates and sets an object's digest
      * @throws ServiceException 
@@ -91,8 +91,8 @@ public class OptimisticLocking_1
         DataproviderObject_1_0 object
     ) throws ServiceException{
         if(
-          object.getDigest() != null || // Do not override digest
-          !isInstanceOfBasicObject(object) // relies on BasicObject's modifiedAt feature
+                object.getDigest() != null || // Do not override digest
+                !isInstanceOfBasicObject(object) // relies on BasicObject's modifiedAt feature
         ) return;
         SparseList modifiedAt = object.getValues(SystemAttributes.MODIFIED_AT);
         if(modifiedAt == null) return;
@@ -124,29 +124,27 @@ public class OptimisticLocking_1
             DataproviderObject_1_0 beforeImage = getBeforeImage(header, request);
             propagateDigest(beforeImage);
             if (
-                !Arrays.equals(beforeImage.getDigest(),afterImage.getDigest())
+                    !Arrays.equals(beforeImage.getDigest(),afterImage.getDigest())
             ) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "path",
-                        request.path()
-                    ),
-                    new BasicException.Parameter(
-                        "beforeImageDigest",
-                        beforeImage.getDigest()
-                    ),
-                    new BasicException.Parameter(
-                        "afterImageDigest",
-                        afterImage.getDigest()
-                    )
-                },
-                "Digest mismatch"
+                "Digest mismatch",
+                new BasicException.Parameter(
+                    "path",
+                    request.path()
+                ),
+                new BasicException.Parameter(
+                    "beforeImageDigest",
+                    beforeImage.getDigest()
+                ),
+                new BasicException.Parameter(
+                    "afterImageDigest",
+                    afterImage.getDigest()
+                )
             );
         }
     }
-    
+
 
     //------------------------------------------------------------------------
     // Implements Layer_1_0
@@ -219,15 +217,15 @@ public class OptimisticLocking_1
     ) throws ServiceException {
         super.epilog(header, requests, replies);
         if (this.optimisticLocking) for(
-            int i = 0; 
-            i < replies.length;
-            i++
+                int i = 0; 
+                i < replies.length;
+                i++
         ){
             DataproviderObject[] objects =  replies[i].getObjects(); 
             for (
-                int j = 0;
-                j < objects.length;
-                j++
+                    int j = 0;
+                    j < objects.length;
+                    j++
             ) this.propagateDigest(objects[j]);
         }
     }

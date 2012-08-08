@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: URLConfiguration.java,v 1.3 2008/04/04 17:55:34 hburger Exp $
+ * Name:        $Id: URLConfiguration.java,v 1.4 2008/09/11 10:47:30 hburger Exp $
  * Description: URL Configuration
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:55:34 $
+ * Date:        $Date: 2008/09/11 10:47:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,8 +70,8 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 
 import org.openmdx.base.exception.ExtendedIOException;
+import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.DelegatingMappedRecord;
-import org.openmdx.base.resource.spi.OrderedRecordFactory;
 import org.openmdx.base.text.conversion.URLReader;
 import org.openmdx.kernel.environment.SystemProperties;
 import org.openmdx.kernel.exception.BasicException;
@@ -237,11 +237,9 @@ public class URLConfiguration extends Configuration {
 			    new BasicException(
 				    BasicException.Code.DEFAULT_DOMAIN,
 				    BasicException.Code.INVALID_CONFIGURATION,
-				    new BasicException.Parameter[]{
+				    "Can not specify multiple entries for application name",
 						new BasicException.Parameter("url", this.url),
 						new BasicException.Parameter("applicationName", applicationName)
-				    },
-				    "Can not specify multiple entries for application name"
 				)
 			);
 			configuration.put(applicationName, configEntries);
@@ -273,12 +271,10 @@ public class URLConfiguration extends Configuration {
 		    new BasicException(
 			    BasicException.Code.DEFAULT_DOMAIN,
 			    BasicException.Code.INVALID_CONFIGURATION,
-			    new BasicException.Parameter[]{
+			    "Invalid Control Flag",
 					new BasicException.Parameter("url", this.url),
 					new BasicException.Parameter("line", this.currentLine),
 					new BasicException.Parameter("controlFlag", value)
-			    },
-			    "Invalid Control Flag"
 			)
 		);
 	}
@@ -340,11 +336,9 @@ public class URLConfiguration extends Configuration {
 				    new BasicException(
 					    BasicException.Code.DEFAULT_DOMAIN,
 					    BasicException.Code.INVALID_CONFIGURATION,
-					    new BasicException.Parameter[]{
+					    "Unexpected end of file",
 							new BasicException.Parameter("url", this.url),
 							new BasicException.Parameter("expected", expected)
-					    },
-					    "Unexpected end of file"
 					)
 				);				
 			case '{':
@@ -358,7 +352,7 @@ public class URLConfiguration extends Configuration {
 					    new BasicException(
 						    BasicException.Code.DEFAULT_DOMAIN,
 						    BasicException.Code.INVALID_CONFIGURATION,
-						    new BasicException.Parameter[]{
+						    "Unexpected value",
 								new BasicException.Parameter(
 									"url", 
 									this.url
@@ -375,8 +369,6 @@ public class URLConfiguration extends Configuration {
 									"found", 
 									this.tokenizer.sval
 								)
-						    },
-						    "Unexpected value"
 						)
 					);
 				}
@@ -387,7 +379,7 @@ public class URLConfiguration extends Configuration {
 				    new BasicException(
 					    BasicException.Code.DEFAULT_DOMAIN,
 					    BasicException.Code.INVALID_CONFIGURATION,
-					    new BasicException.Parameter[]{
+					    "Unexpected value",
 							new BasicException.Parameter(
 								"url", 
 								this.url
@@ -404,8 +396,6 @@ public class URLConfiguration extends Configuration {
 								"found", 
 								this.tokenizer.sval
 							)
-					    },
-					    "Unexpected value"
 					)
 				);
 		}
@@ -429,11 +419,9 @@ public class URLConfiguration extends Configuration {
 				    new BasicException(
 					    BasicException.Code.DEFAULT_DOMAIN,
 					    BasicException.Code.INVALID_CONFIGURATION,
-					    new BasicException.Parameter[]{
+					    "Unexpected end of file",
 							new BasicException.Parameter("url", this.url),								
 							new BasicException.Parameter("expected", expected)
-					    },
-					    "Unexpected end of file"
 					)
 				);				
 			case '"':
@@ -446,7 +434,7 @@ public class URLConfiguration extends Configuration {
 				    new BasicException(
 					    BasicException.Code.DEFAULT_DOMAIN,
 					    BasicException.Code.INVALID_CONFIGURATION,
-					    new BasicException.Parameter[]{
+					    "Unexpected value",
 							new BasicException.Parameter(
 								"url", 
 								this.url
@@ -463,8 +451,6 @@ public class URLConfiguration extends Configuration {
 								"found", 
 								this.tokenizer.sval
 							)
-					    },
-					    "Unexpected value"
 					)
 				);
 		}
@@ -492,7 +478,7 @@ public class URLConfiguration extends Configuration {
 	 */
 	public String toString() {
 		try {
-			MappedRecord reply = OrderedRecordFactory.getInstance().createMappedRecord(
+			MappedRecord reply = Records.getRecordFactory().createMappedRecord(
 				getClass().getName(),
 				"URL: " + this.url
 			);

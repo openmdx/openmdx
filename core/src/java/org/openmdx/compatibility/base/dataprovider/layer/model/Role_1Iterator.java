@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Role_1Iterator.java,v 1.9 2008/03/21 18:46:23 hburger Exp $
+ * Name:        $Id: Role_1Iterator.java,v 1.10 2008/09/10 08:55:22 hburger Exp $
  * Description: JDBC Iterator for find requests
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:46:23 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,102 +74,101 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 class Role_1Iterator
-  implements Serializable {
+implements Serializable {
 
-  /**
+    /**
      * 
      */
     private static final long serialVersionUID = 3977575913783310390L;
-//---------------------------------------------------------------------------
-  static byte[] serialize(
-    Serializable object
-  ) throws ServiceException {
-    try {
-      final CRC32 crc = new CRC32();
-      final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-      final CheckedOutputStream checkStream = new CheckedOutputStream(
-        byteStream, 
-        crc
-      );
-      final ObjectOutputStream objectStream = new ObjectOutputStream(
-        checkStream
-      );
-      // write the objects
-      objectStream.writeObject(object);
-      // write the checksum
-      objectStream.writeLong(crc.getValue());
-      // release ressources
-      objectStream.close();
-      // save the extende session key
-      return byteStream.toByteArray();
-    } catch (Exception exception) {
-      throw new ServiceException(exception);
+//  ---------------------------------------------------------------------------
+    static byte[] serialize(
+        Serializable object
+    ) throws ServiceException {
+        try {
+            final CRC32 crc = new CRC32();
+            final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            final CheckedOutputStream checkStream = new CheckedOutputStream(
+                byteStream, 
+                crc
+            );
+            final ObjectOutputStream objectStream = new ObjectOutputStream(
+                checkStream
+            );
+            // write the objects
+            objectStream.writeObject(object);
+            // write the checksum
+            objectStream.writeLong(crc.getValue());
+            // release ressources
+            objectStream.close();
+            // save the extende session key
+            return byteStream.toByteArray();
+        } catch (Exception exception) {
+            throw new ServiceException(exception);
+        }
     }
-  }
 
-  //---------------------------------------------------------------------------
-  static Serializable deserialize(
-    byte[] object
-  ) throws ServiceException {
-    if(object.length == 0) return new HashMap();
-    final CRC32  crc = new CRC32();
-    try {
-      final ByteArrayInputStream byteStream = new ByteArrayInputStream(
-        object
-      );
-      final CheckedInputStream checkStream = new CheckedInputStream(
-        byteStream,
-        crc
-      );
-      final ObjectInputStream objectStream = new ObjectInputStream(
-        checkStream
-      );
-      // read the objects
-      final Object target = objectStream.readObject();
-      // remember the checksum
-      final long readChecksum = crc.getValue();
-      final long writeChecksum = objectStream.readLong();
-      // release ressources
-      objectStream.close();
-      // compare the two checksums
-      if(readChecksum != writeChecksum) {
-        throw new ServiceException( 
-          BasicException.Code.DEFAULT_DOMAIN, 
-          BasicException.Code.TRANSFORMATION_FAILURE,
-          null,
-          "Checksum test failed"
-        );
-      }    
-      // return the extracted value
-      return (Serializable)target;
-    } catch (Exception exception) {
-      throw new ServiceException(exception);
+    //---------------------------------------------------------------------------
+    static Serializable deserialize(
+        byte[] object
+    ) throws ServiceException {
+        if(object.length == 0) return new HashMap();
+        final CRC32  crc = new CRC32();
+        try {
+            final ByteArrayInputStream byteStream = new ByteArrayInputStream(
+                object
+            );
+            final CheckedInputStream checkStream = new CheckedInputStream(
+                byteStream,
+                crc
+            );
+            final ObjectInputStream objectStream = new ObjectInputStream(
+                checkStream
+            );
+            // read the objects
+            final Object target = objectStream.readObject();
+            // remember the checksum
+            final long readChecksum = crc.getValue();
+            final long writeChecksum = objectStream.readLong();
+            // release ressources
+            objectStream.close();
+            // compare the two checksums
+            if(readChecksum != writeChecksum) {
+                throw new ServiceException( 
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.TRANSFORMATION_FAILURE,
+                    "Checksum test failed"
+                );
+            }    
+            // return the extracted value
+            return (Serializable)target;
+        } catch (Exception exception) {
+            throw new ServiceException(exception);
+        }
     }
-  }
 
-  //---------------------------------------------------------------------------
-  public Role_1Iterator(
-    String role,
-    byte[] iterator
-  ) { 
-    this.iterator = iterator;
-    this.role = role;
-  }
- 
-  //---------------------------------------------------------------------------
-  public byte[] getIterator() {
-    return this.iterator;
-  }
+    //---------------------------------------------------------------------------
+    public Role_1Iterator(
+        String role,
+        byte[] iterator
+    ) { 
+        this.iterator = iterator;
+        this.role = role;
+    }
 
-  //---------------------------------------------------------------------------
-  public String getRole() {
-    return this.role;
-  }
+    //---------------------------------------------------------------------------
+    public byte[] getIterator() {
+        return this.iterator;
+    }
 
-  //---------------------------------------------------------------------------
-  
-  private byte[] iterator = null;
-  private String role = null;
+    //---------------------------------------------------------------------------
+    public String getRole() {
+        return this.role;
+    }
+
+    //---------------------------------------------------------------------------
+
+    private byte[] iterator = null;
+    private String role = null;
 
 }
 

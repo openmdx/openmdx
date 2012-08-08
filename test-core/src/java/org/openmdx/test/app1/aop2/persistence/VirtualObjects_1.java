@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VirtualObjects_1.java,v 1.1 2008/04/25 12:11:22 hburger Exp $
+ * Name:        $Id: VirtualObjects_1.java,v 1.2 2008/09/10 18:10:56 hburger Exp $
  * Description: Hard-Wired Objects Layer
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 12:11:22 $
+ * Date:        $Date: 2008/09/10 18:10:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -74,7 +74,7 @@ import org.slf4j.LoggerFactory;
  * persistence plug-in in future.
  */
 public class VirtualObjects_1
-    extends HardWiredObjects_1 
+extends HardWiredObjects_1 
 {
 
     /**
@@ -96,7 +96,7 @@ public class VirtualObjects_1
             ":*"
         }
     );
-    
+
     /**
      * 
      */
@@ -126,12 +126,12 @@ public class VirtualObjects_1
      * 
      */
     private final Logger logger = LoggerFactory.getLogger(VirtualObjects_1.class);
-    
-    
+
+
     //------------------------------------------------------------------------
     // Extends Layer_1
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
      */
@@ -224,8 +224,8 @@ public class VirtualObjects_1
         Path objectId = request.path();
         this.logger.trace("Create request for {}", objectId);
         if(
-            objectId.isLike(PRODUCT_GROUP_PATTERN) ||
-            objectId.isLike(PRODUCT_PATTERN)
+                objectId.isLike(PRODUCT_GROUP_PATTERN) ||
+                objectId.isLike(PRODUCT_PATTERN)
         ) {
             //
             // virtual Product|ProductGroup
@@ -233,10 +233,8 @@ public class VirtualObjects_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("objectId", objectId.toXri())
-                },
-                "Virtual objects can't be created"
+                "Virtual objects can't be created",
+                new BasicException.Parameter("objectId", objectId.toXri())
             );
         } else {
             //
@@ -245,7 +243,7 @@ public class VirtualObjects_1
             return super.create(header, request);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#remove(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
      */
@@ -257,8 +255,8 @@ public class VirtualObjects_1
         Path objectId = request.path();
         this.logger.trace("Remove request for {}", objectId);
         if(
-            objectId.isLike(PRODUCT_GROUP_PATTERN) ||
-            objectId.isLike(PRODUCT_PATTERN)
+                objectId.isLike(PRODUCT_GROUP_PATTERN) ||
+                objectId.isLike(PRODUCT_PATTERN)
         ) {
             //
             // virtual Product|ProductGroup
@@ -266,10 +264,10 @@ public class VirtualObjects_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
+                "Virtual objects can't be removed",
                 new BasicException.Parameter[]{
                     new BasicException.Parameter("objectId", objectId.toXri())
-                },
-                "Virtual objects can't be removed"
+                }
             );
         } else {
             //
@@ -278,7 +276,7 @@ public class VirtualObjects_1
             return super.remove(header, request);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#replace(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
      */
@@ -290,8 +288,8 @@ public class VirtualObjects_1
         Path objectId = request.path();
         this.logger.trace("Replace request for {}", objectId);
         if(
-            objectId.isLike(PRODUCT_GROUP_PATTERN) ||
-            objectId.isLike(PRODUCT_PATTERN)
+                objectId.isLike(PRODUCT_GROUP_PATTERN) ||
+                objectId.isLike(PRODUCT_PATTERN)
         ) {
             //
             // virtual Product|ProductGroup
@@ -299,10 +297,8 @@ public class VirtualObjects_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("objectId", objectId.toXri())
-                },
-                "Virtual objects can't be replaced"
+                "Virtual objects can't be replaced",
+                new BasicException.Parameter("objectId", objectId.toXri())
             );
         } else {
             //
@@ -311,7 +307,7 @@ public class VirtualObjects_1
             return super.replace(header, request);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#find(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
      */
@@ -323,8 +319,8 @@ public class VirtualObjects_1
         Path objectId = request.path();
         this.logger.trace("Find request for {}", objectId);
         if(
-            objectId.isLike(PRODUCT_GROUP_PATTERN) ||
-            objectId.isLike(PRODUCT_PATTERN)
+                objectId.isLike(PRODUCT_GROUP_PATTERN) ||
+                objectId.isLike(PRODUCT_PATTERN)
         ) {
             //
             // virtual Product|ProductGroup

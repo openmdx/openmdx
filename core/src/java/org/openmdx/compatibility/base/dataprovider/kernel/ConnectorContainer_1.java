@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ConnectorContainer_1.java,v 1.19 2008/03/25 23:20:22 hburger Exp $
+ * Name:        $Id: ConnectorContainer_1.java,v 1.21 2008/09/10 08:55:24 hburger Exp $
  * Description: ConnectorContainer_1 class
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/25 23:20:22 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -85,307 +85,287 @@ import org.openmdx.kernel.log.SysLog;
 @SuppressWarnings("unchecked")
 public class ConnectorContainer_1 {
 
-  //-------------------------------------------------------------------------
-  public static void undeploy(
-    Path[] deploymentUnits
-  ) throws ServiceException {
-    for (int i = 0; i < deploymentUnits.length; i++) {
-      SysLog.trace("Undeploying deployment unit", deploymentUnits[i]);
-      DataproviderObject_1_0[] resourceAdapters =
-          DeploymentConfiguration_1.getInstance().getResourceAdapters(deploymentUnits[i]);
-      for (int j = 0; j < resourceAdapters.length; j++) {
-        DataproviderObject_1_0 resourceAdapter = resourceAdapters[j];
-        String registrationId =
-          (String)resourceAdapter.getValues("registrationId").get(0);
-        SysLog.trace("Undeploying resource adapter", resourceAdapter);
-        org.openmdx.compatibility.base.application.container.SimpleServiceLocator.getInstance(
-        ).unbind(
-          registrationId
-		);
-      }
-    }
-  }
-
-  //-------------------------------------------------------------------------
-  public static void deploy(
-    Path[] deploymentUnits
-  ) throws ServiceException {
-      org.openmdx.compatibility.base.application.cci.ServiceLocator_1_0 serviceLocator = 
-      org.openmdx.compatibility.base.application.container.SimpleServiceLocator.getInstance();
-    DeploymentConfiguration_1_0 configuration = DeploymentConfiguration_1.getInstance();
-    for(
-      int i = 0; 
-      i < deploymentUnits.length; 
-      i++
-    ) {
-      try {
-        SysLog.trace("Deploying deployment unit", deploymentUnits[i]);
-        DataproviderObject_1_0[] resourceAdapters =
-          configuration.getResourceAdapters(deploymentUnits[i]);
-        for (int j = 0; j < resourceAdapters.length; j++) {
-          DataproviderObject_1_0 resourceAdapter = resourceAdapters[j];
-          String objectClass = (String)resourceAdapter.getValues(SystemAttributes.OBJECT_CLASS).get(0);
-          String registrationId = (String)resourceAdapter.getValues("registrationId").get(0);
-          SysLog.trace("Deploying resource adapter", resourceAdapter);
-
-          // DatabaseConnector
-          if (DATABASE_CONNECTOR_TYPES.contains(objectClass)) {
-            String connectionFactoryImpl = resourceAdapter.values("connectionFactoryImplementation").isEmpty()
-              ? null
-              : (String)resourceAdapter.values("connectionFactoryImplementation").get(0);
-            DbConnectionManager_1_0 connectionFactory = null;
-            if(THE_DATABASE_CONNECTION_FACTORY.equals(connectionFactoryImpl)) {
-
-              // userId
-              String userId = (String)configuration.get(
-                resourceAdapter.path().getDescendant(USER_ID_V1) == null
-                  ? resourceAdapter.path().getDescendant(USER_ID_V2)
-                  : resourceAdapter.path().getDescendant(USER_ID_V1)
-              ).values("value").get(0);
-
-              // password
-              String password = (String)configuration.get(
-                resourceAdapter.path().getDescendant(PASSWORD_V1) == null
-                  ? resourceAdapter.path().getDescendant(PASSWORD_V2)
-                  : resourceAdapter.path().getDescendant(PASSWORD_V1)
-              ).values("value").get(0);
-
-              connectionFactory = new DbConnectionManagerSimple_1(
-                (String)resourceAdapter.values("driver").get(0),
-                (String)resourceAdapter.values("uri").get(0),
-                userId,
-                password,
-                BasicException.Code.DEFAULT_DOMAIN
-              );
-            }
-            else {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter("registrationId", registrationId),
-                  new BasicException.Parameter("connectionFactoryImplementation", connectionFactoryImpl),
-                },
-                "No other database connection factory class than "
-                + THE_DATABASE_CONNECTION_FACTORY
-                + "is supported by this resource container"
-              );
-            }
-            serviceLocator.bind(
-              registrationId, 
-              connectionFactory
-            );
-            SysLog.info(DATAPROVIDER_CONNECTOR_TYPES + " deployed", registrationId);
-          }
-          
-          // HttpUrlConnector
-          else if (HTTP_URL_CONNECTOR_TYPES.contains(objectClass)) {
-            String connectionFactoryImpl = resourceAdapter.values("connectionFactoryImplementation").isEmpty()
-              ? null
-              : (String)resourceAdapter.values("connectionFactoryImplementation").get(0);
-            Dataprovider_1ConnectionFactory connectionFactory = null;
-
-            if(THE_WEBSERVICE_CONNECTION_FACTORY.equals(connectionFactoryImpl)) {
-
-              // userId
-              String userId = (String)configuration.get(
-                resourceAdapter.path().getDescendant(USER_ID_V1) == null
-                  ? resourceAdapter.path().getDescendant(USER_ID_V2)
-                  : resourceAdapter.path().getDescendant(USER_ID_V1)
-              ).values("value").get(0);
-
-              // password
-              String password = (String)configuration.get(
-                resourceAdapter.path().getDescendant(PASSWORD_V1) == null
-                  ? resourceAdapter.path().getDescendant(PASSWORD_V2)
-                  : resourceAdapter.path().getDescendant(PASSWORD_V1)
-              ).values("value").get(0);
-              
-              // connectorFactory
-              connectionFactory = new WebService_1ConnectionFactoryImpl(
-                (String)resourceAdapter.values("uri").get(0),
-                userId,
-                password
-              );
-            }
-            else {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter("registrationId", registrationId),
-                  new BasicException.Parameter("connectionFactoryImplementation", connectionFactoryImpl),
-                },
-                "No other database connection factory class than "
-                + THE_DATABASE_CONNECTION_FACTORY
-                + "is supported by this resource container"
-              );
-            }
-            serviceLocator.bind(
-              registrationId, 
-              connectionFactory
-            );
-            SysLog.info(DATAPROVIDER_CONNECTOR_TYPES + " deployed", registrationId);
-          }
-          
-          // DataproviderConnector
-          else if(DATAPROVIDER_CONNECTOR_TYPES.contains(objectClass)) {
-            String connectionFactoryImpl = resourceAdapter.values("connectionFactoryImplementation").isEmpty()
-              ? null
-              : (String)resourceAdapter.values("connectionFactoryImplementation").get(0);
-            Dataprovider_1ConnectionFactory connectionFactory = null;
-            if(THE_DATAPROVIDER_CONNECTION_FACTORY.equals(connectionFactoryImpl)) {
-              String uri = (String)resourceAdapter.values("uri").get(0);
-              int separator = uri.indexOf('/', uri.indexOf("//") + 2);
-              String providerUrl = uri.substring(0, separator);
-              String jndiName = uri.substring(separator + 1);
-              String securityPrincipal = (String)configuration.get(
-                resourceAdapter.path().getDescendant(USER_ID_V1) == null
-                  ? resourceAdapter.path().getDescendant(USER_ID_V2)
-                  : resourceAdapter.path().getDescendant(USER_ID_V1)
-              ).values("value").get(0);
-              String password = (String)configuration.get(
-                resourceAdapter.path().getDescendant(PASSWORD_V1) == null
-                  ? resourceAdapter.path().getDescendant(PASSWORD_V2)
-                  : resourceAdapter.path().getDescendant(PASSWORD_V1)
-              ).values("value").get(0);
-              String initialContextFactory = (String)configuration.get(
-                resourceAdapter.path().getDescendant(
-                  INITIAL_CONTEXT_FACTORY_V1) == null
-                  ? resourceAdapter.path().getDescendant(
-                    INITIAL_CONTEXT_FACTORY_V2)
-                  : resourceAdapter.path().getDescendant(
-                    INITIAL_CONTEXT_FACTORY_V1)
-              ).values("value").get(0);
-              Hashtable environment = new Hashtable();
-              environment.put(Context.PROVIDER_URL, providerUrl);
-              environment.put(Context.SECURITY_PRINCIPAL, securityPrincipal);
-              environment.put(Context.SECURITY_CREDENTIALS, password);
-              environment.put(
-                Context.INITIAL_CONTEXT_FACTORY,
-                initialContextFactory);
-              try {
-                Context context = new InitialContext(environment);
-                try {
-                    connectionFactory = new Dataprovider_1RemoteConnectionFactory(
-                      (Dataprovider_1Home)PortableRemoteObject.narrow(
-                        context.lookup(jndiName),
-                        Dataprovider_1Home.class
-                      )
-                    );
-                } finally {
-                    context.close();
-                }
-              }
-              catch (Exception exception) {
-                throw new ServiceException(
-                  exception,
-                  BasicException.Code.DEFAULT_DOMAIN,
-                  BasicException.Code.ACTIVATION_FAILURE,
-                  new BasicException.Parameter[] {
-                    new BasicException.Parameter("uri", uri),
-                    new BasicException.Parameter(Context.PROVIDER_URL, providerUrl),
-                    new BasicException.Parameter(
-                      Context.SECURITY_PRINCIPAL,
-                      securityPrincipal)
-                  },
-                  "Could not set up dataprovider connection factory"
+    //-------------------------------------------------------------------------
+    public static void undeploy(
+        Path[] deploymentUnits
+    ) throws ServiceException {
+        for (int i = 0; i < deploymentUnits.length; i++) {
+            SysLog.trace("Undeploying deployment unit", deploymentUnits[i]);
+            DataproviderObject_1_0[] resourceAdapters =
+                DeploymentConfiguration_1.getInstance().getResourceAdapters(deploymentUnits[i]);
+            for (int j = 0; j < resourceAdapters.length; j++) {
+                DataproviderObject_1_0 resourceAdapter = resourceAdapters[j];
+                String registrationId =
+                    (String)resourceAdapter.getValues("registrationId").get(0);
+                SysLog.trace("Undeploying resource adapter", resourceAdapter);
+                org.openmdx.compatibility.base.application.container.SimpleServiceLocator.getInstance(
+                ).unbind(
+                    registrationId
                 );
-              }
             }
-            else {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter("registrationId", registrationId),
-                  new BasicException.Parameter("connectionFactoryImplementation", connectionFactoryImpl),
-                },
-                "No other dataprovider connection factory class than "
-                + THE_DATAPROVIDER_CONNECTION_FACTORY
-                + "is supported by this resource container"
-              );
-            }
-            serviceLocator.bind(registrationId, connectionFactory);
-            SysLog.info(DATAPROVIDER_CONNECTOR_TYPES + " deployed", registrationId);
-          }
-          else if (DATAPROVIDER_RESOURCE_TYPES.contains(objectClass)) {
-            SysLog.trace("InboundCommunication ignored by ConnectorContainer_1", registrationId);
-          }
-          else {
-            throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.NOT_SUPPORTED,
-              new BasicException.Parameter[] {
-                new BasicException.Parameter("registrationId", registrationId),
-                new BasicException.Parameter("class", objectClass)
-              },
-              "No other resource adapters than "
-                + DATAPROVIDER_CONNECTOR_TYPES
-                + " and "
-                + DATABASE_CONNECTOR_TYPES
-                + " are supported by this resource container"
-            );
-          }
         }
-      }
-      catch (RuntimeException exception) {
-        throw new ServiceException(
-          exception,
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.ACTIVATION_FAILURE,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter("deploymentUnit", deploymentUnits[i])
-          },
-          "Deployment failed"
-        );
-      }
     }
-  }
 
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  final private static String[] INITIAL_CONTEXT_FACTORY_V1 = new String[]{"property", "JNDI:InitialContextFactory"};
-  final private static String[] INITIAL_CONTEXT_FACTORY_V2 = new String[]{"propertySet", "JNDI", "property", "InitialContextFactory"};
-  final private static String[] USER_ID_V1 = new String[]{"property", "BasicPassword:UserName"};
-  final private static String[] USER_ID_V2 = new String[]{"propertySet", "BasicPassword", "property", "UserName"};
-  final private static String[] PASSWORD_V1 = new String[]{"property", "BasicPassword:Password"};
-  final private static String[] PASSWORD_V2 = new String[]{"propertySet", "BasicPassword", "property", "Password"};
+    //-------------------------------------------------------------------------
+    public static void deploy(
+        Path[] deploymentUnits
+    ) throws ServiceException {
+        org.openmdx.compatibility.base.application.cci.ServiceLocator_1_0 serviceLocator = 
+            org.openmdx.compatibility.base.application.container.SimpleServiceLocator.getInstance();
+        DeploymentConfiguration_1_0 configuration = DeploymentConfiguration_1.getInstance();
+        for(
+                int i = 0; 
+                i < deploymentUnits.length; 
+                i++
+        ) {
+            try {
+                SysLog.trace("Deploying deployment unit", deploymentUnits[i]);
+                DataproviderObject_1_0[] resourceAdapters =
+                    configuration.getResourceAdapters(deploymentUnits[i]);
+                for (int j = 0; j < resourceAdapters.length; j++) {
+                    DataproviderObject_1_0 resourceAdapter = resourceAdapters[j];
+                    String objectClass = (String)resourceAdapter.getValues(SystemAttributes.OBJECT_CLASS).get(0);
+                    String registrationId = (String)resourceAdapter.getValues("registrationId").get(0);
+                    SysLog.trace("Deploying resource adapter", resourceAdapter);
 
-  final static private List DATABASE_CONNECTOR_TYPES = Arrays.asList(
-    new String[]{ 
-      "org:openmdx:deployment1:DatabaseConnector"
+                    // DatabaseConnector
+                    if (DATABASE_CONNECTOR_TYPES.contains(objectClass)) {
+                        String connectionFactoryImpl = resourceAdapter.values("connectionFactoryImplementation").isEmpty()
+                        ? null
+                            : (String)resourceAdapter.values("connectionFactoryImplementation").get(0);
+                        DbConnectionManager_1_0 connectionFactory = null;
+                        if(THE_DATABASE_CONNECTION_FACTORY.equals(connectionFactoryImpl)) {
+
+                            // userId
+                            String userId = (String)configuration.get(
+                                resourceAdapter.path().getDescendant(USER_ID_V1) == null
+                                ? resourceAdapter.path().getDescendant(USER_ID_V2)
+                                    : resourceAdapter.path().getDescendant(USER_ID_V1)
+                            ).values("value").get(0);
+
+                            // password
+                            String password = (String)configuration.get(
+                                resourceAdapter.path().getDescendant(PASSWORD_V1) == null
+                                ? resourceAdapter.path().getDescendant(PASSWORD_V2)
+                                    : resourceAdapter.path().getDescendant(PASSWORD_V1)
+                            ).values("value").get(0);
+
+                            connectionFactory = new DbConnectionManagerSimple_1(
+                                (String)resourceAdapter.values("driver").get(0),
+                                (String)resourceAdapter.values("uri").get(0),
+                                userId,
+                                password,
+                                BasicException.Code.DEFAULT_DOMAIN
+                            );
+                        }
+                        else {
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.NOT_SUPPORTED,
+                                "No other database connection factory class than "
+                                + THE_DATABASE_CONNECTION_FACTORY
+                                + "is supported by this resource container",
+                                new BasicException.Parameter("registrationId", registrationId),
+                                new BasicException.Parameter("connectionFactoryImplementation", connectionFactoryImpl)
+                            );
+                        }
+                        serviceLocator.bind(
+                            registrationId, 
+                            connectionFactory
+                        );
+                        SysLog.info(DATAPROVIDER_CONNECTOR_TYPES + " deployed", registrationId);
+                    }
+
+                    // HttpUrlConnector
+                    else if (HTTP_URL_CONNECTOR_TYPES.contains(objectClass)) {
+                        String connectionFactoryImpl = resourceAdapter.values("connectionFactoryImplementation").isEmpty()
+                        ? null
+                            : (String)resourceAdapter.values("connectionFactoryImplementation").get(0);
+                        Dataprovider_1ConnectionFactory connectionFactory = null;
+
+                        if(THE_WEBSERVICE_CONNECTION_FACTORY.equals(connectionFactoryImpl)) {
+
+                            // userId
+                            String userId = (String)configuration.get(
+                                resourceAdapter.path().getDescendant(USER_ID_V1) == null
+                                ? resourceAdapter.path().getDescendant(USER_ID_V2)
+                                    : resourceAdapter.path().getDescendant(USER_ID_V1)
+                            ).values("value").get(0);
+
+                            // password
+                            String password = (String)configuration.get(
+                                resourceAdapter.path().getDescendant(PASSWORD_V1) == null
+                                ? resourceAdapter.path().getDescendant(PASSWORD_V2)
+                                    : resourceAdapter.path().getDescendant(PASSWORD_V1)
+                            ).values("value").get(0);
+
+                            // connectorFactory
+                            connectionFactory = new WebService_1ConnectionFactoryImpl(
+                                (String)resourceAdapter.values("uri").get(0),
+                                userId,
+                                password
+                            );
+                        }
+                        else {
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.NOT_SUPPORTED,
+                                "No other database connection factory class than "
+                                + THE_DATABASE_CONNECTION_FACTORY
+                                + "is supported by this resource container",
+                                new BasicException.Parameter("registrationId", registrationId),
+                                new BasicException.Parameter("connectionFactoryImplementation", connectionFactoryImpl)
+                            );
+                        }
+                        serviceLocator.bind(
+                            registrationId, 
+                            connectionFactory
+                        );
+                        SysLog.info(DATAPROVIDER_CONNECTOR_TYPES + " deployed", registrationId);
+                    }
+
+                    // DataproviderConnector
+                    else if(DATAPROVIDER_CONNECTOR_TYPES.contains(objectClass)) {
+                        String connectionFactoryImpl = resourceAdapter.values("connectionFactoryImplementation").isEmpty()
+                        ? null
+                            : (String)resourceAdapter.values("connectionFactoryImplementation").get(0);
+                        Dataprovider_1ConnectionFactory connectionFactory = null;
+                        if(THE_DATAPROVIDER_CONNECTION_FACTORY.equals(connectionFactoryImpl)) {
+                            String uri = (String)resourceAdapter.values("uri").get(0);
+                            int separator = uri.indexOf('/', uri.indexOf("//") + 2);
+                            String providerUrl = uri.substring(0, separator);
+                            String jndiName = uri.substring(separator + 1);
+                            String securityPrincipal = (String)configuration.get(
+                                resourceAdapter.path().getDescendant(USER_ID_V1) == null
+                                ? resourceAdapter.path().getDescendant(USER_ID_V2)
+                                    : resourceAdapter.path().getDescendant(USER_ID_V1)
+                            ).values("value").get(0);
+                            String password = (String)configuration.get(
+                                resourceAdapter.path().getDescendant(PASSWORD_V1) == null
+                                ? resourceAdapter.path().getDescendant(PASSWORD_V2)
+                                    : resourceAdapter.path().getDescendant(PASSWORD_V1)
+                            ).values("value").get(0);
+                            String initialContextFactory = (String)configuration.get(
+                                resourceAdapter.path().getDescendant(
+                                    INITIAL_CONTEXT_FACTORY_V1) == null
+                                    ? resourceAdapter.path().getDescendant(
+                                        INITIAL_CONTEXT_FACTORY_V2)
+                                        : resourceAdapter.path().getDescendant(
+                                            INITIAL_CONTEXT_FACTORY_V1)
+                            ).values("value").get(0);
+                            Hashtable environment = new Hashtable();
+                            environment.put(Context.PROVIDER_URL, providerUrl);
+                            environment.put(Context.SECURITY_PRINCIPAL, securityPrincipal);
+                            environment.put(Context.SECURITY_CREDENTIALS, password);
+                            environment.put(
+                                Context.INITIAL_CONTEXT_FACTORY,
+                                initialContextFactory);
+                            try {
+                                Context context = new InitialContext(environment);
+                                try {
+                                    connectionFactory = new Dataprovider_1RemoteConnectionFactory(
+                                        (Dataprovider_1Home)PortableRemoteObject.narrow(
+                                            context.lookup(jndiName),
+                                            Dataprovider_1Home.class
+                                        )
+                                    );
+                                } finally {
+                                    context.close();
+                                }
+                            }
+                            catch (Exception exception) {
+                                throw new ServiceException(
+                                    exception,
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.ACTIVATION_FAILURE,
+                                    "Could not set up dataprovider connection factory",
+                                    new BasicException.Parameter("uri", uri),
+                                    new BasicException.Parameter(Context.PROVIDER_URL, providerUrl),
+                                    new BasicException.Parameter(
+                                        Context.SECURITY_PRINCIPAL,
+                                        securityPrincipal)
+                                );
+                            }
+                        }
+                        else {
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.NOT_SUPPORTED,
+                                "No other dataprovider connection factory class than "
+                                + THE_DATAPROVIDER_CONNECTION_FACTORY
+                                + "is supported by this resource container",
+                                new BasicException.Parameter("registrationId", registrationId),
+                                new BasicException.Parameter("connectionFactoryImplementation", connectionFactoryImpl)
+                            );
+                        }
+                        serviceLocator.bind(registrationId, connectionFactory);
+                        SysLog.info(DATAPROVIDER_CONNECTOR_TYPES + " deployed", registrationId);
+                    }
+                    else if (DATAPROVIDER_RESOURCE_TYPES.contains(objectClass)) {
+                        SysLog.trace("InboundCommunication ignored by ConnectorContainer_1", registrationId);
+                    }
+                    else {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            "No other resource adapters than "
+                            + DATAPROVIDER_CONNECTOR_TYPES
+                            + " and "
+                            + DATABASE_CONNECTOR_TYPES
+                            + " are supported by this resource container",
+                            new BasicException.Parameter("registrationId", registrationId),
+                            new BasicException.Parameter("class", objectClass)
+                        );
+                    }
+                }
+            }
+            catch (RuntimeException exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ACTIVATION_FAILURE,
+                    "Deployment failed",
+                    new BasicException.Parameter("deploymentUnit", deploymentUnits[i])
+                );
+            }
+        }
     }
-  );
 
-  final static private List HTTP_URL_CONNECTOR_TYPES = Arrays.asList(
-    new String[]{ 
-      "org:openmdx:deployment1:HttpUrlConnector"
-    }
-  );
-        
-  final static private List DATAPROVIDER_CONNECTOR_TYPES = Arrays.asList(
-    new String[]{ 
-      "org:openmdx:deployment1:DataproviderConnector"
-    }
-  );
-        
-  final static private List DATAPROVIDER_RESOURCE_TYPES = Arrays.asList(
-    new String[]{ 
-      "org:openmdx:deployment1:DataproviderResource"
-    }
-  );  
+    //-------------------------------------------------------------------------
+    // Variables
+    //-------------------------------------------------------------------------
+    final private static String[] INITIAL_CONTEXT_FACTORY_V1 = {"property", "JNDI:InitialContextFactory"};
+    final private static String[] INITIAL_CONTEXT_FACTORY_V2 = {"propertySet", "JNDI", "property", "InitialContextFactory"};
+    final private static String[] USER_ID_V1 = {"property", "BasicPassword:UserName"};
+    final private static String[] USER_ID_V2 = {"propertySet", "BasicPassword", "property", "UserName"};
+    final private static String[] PASSWORD_V1 = {"property", "BasicPassword:Password"};
+    final private static String[] PASSWORD_V2 = {"propertySet", "BasicPassword", "property", "Password"};
 
-  final private static String THE_DATABASE_CONNECTION_FACTORY = 
-    "org.openmdx.compatibility.kernel.application.spi.DbConnectionManagerSimple_1";
-        
-  final private static String THE_DATAPROVIDER_CONNECTION_FACTORY = 
-    "org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1RemoteConnectionFactory";
+    final static private List DATABASE_CONNECTOR_TYPES = Arrays.asList(
+        "org:openmdx:deployment1:DatabaseConnector"
+    );
 
-  final private static String THE_WEBSERVICE_CONNECTION_FACTORY = 
-    "org.openmdx.compatibility.base.dataprovider.transport.webservices.WebService_1ConnectionFactoryImpl";
-                
+    final static private List HTTP_URL_CONNECTOR_TYPES = Arrays.asList(
+        "org:openmdx:deployment1:HttpUrlConnector"
+    );
+
+    final static private List DATAPROVIDER_CONNECTOR_TYPES = Arrays.asList(
+        "org:openmdx:deployment1:DataproviderConnector"
+    );
+
+    final static private List DATAPROVIDER_RESOURCE_TYPES = Arrays.asList(
+        "org:openmdx:deployment1:DataproviderResource"
+    );  
+
+    final private static String THE_DATABASE_CONNECTION_FACTORY = 
+        "org.openmdx.compatibility.kernel.application.spi.DbConnectionManagerSimple_1";
+
+    final private static String THE_DATAPROVIDER_CONNECTION_FACTORY = 
+        "org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1RemoteConnectionFactory";
+
+    final private static String THE_WEBSERVICE_CONNECTION_FACTORY = 
+        "org.openmdx.compatibility.base.dataprovider.transport.webservices.WebService_1ConnectionFactoryImpl";
+
 }
 
 //--- End of File -----------------------------------------------------------

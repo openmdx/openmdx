@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateMarshaller.java,v 1.15 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: DateMarshaller.java,v 1.16 2008/09/10 08:55:22 hburger Exp $
  * Description: DateMarshaller class
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,134 +64,132 @@ import org.w3c.cci2.Datatypes;
  * Marshals Object -> XMLGregorianCalendar and XMLGregorianCalendar -> Object. 
  */
 public class DateMarshaller
-  extends Datatypes
-  implements Marshaller, ReluctantUnmarshalling 
+extends Datatypes
+implements Marshaller, ReluctantUnmarshalling 
 {
 
-  //-------------------------------------------------------------------------
-  private DateMarshaller(
-    boolean forward
-  ) {
-    this.forward = forward;
-  }
-
-  //-------------------------------------------------------------------------
-  public static DateMarshaller getInstance(
-    boolean forward
-  ) {
-    return forward
-      ? DateMarshaller.toMarshaller
-      : DateMarshaller.fromMarshaller;
-  }
-
-  //-------------------------------------------------------------------------
-  public Object marshalGeneric(
-    Object source,
-    boolean forward
-  ) throws ServiceException {
-    if(source == null) {
-      return null;
+    //-------------------------------------------------------------------------
+    private DateMarshaller(
+        boolean forward
+    ) {
+        this.forward = forward;
     }
-    if(forward) {
-      try {
-        String date = (String)source;
-        int limit = date.indexOf('T');
-        if(limit >= 0) date = date.substring(0, limit);
-        int length = date.length();
-        switch (length) {
-          case 0: return getFactory().newXMLGregorianCalendarDate(
-            DatatypeConstants.FIELD_UNDEFINED, // year
-            DatatypeConstants.FIELD_UNDEFINED, // month
-            DatatypeConstants.FIELD_UNDEFINED, // day 
-            DatatypeConstants.FIELD_UNDEFINED // timezone
-          );
-          case 1: case 2: return getFactory().newXMLGregorianCalendarDate(
-            DatatypeConstants.FIELD_UNDEFINED, // year
-            DatatypeConstants.FIELD_UNDEFINED, // month
-            Integer.parseInt(date), // day
-            DatatypeConstants.FIELD_UNDEFINED // timezone
-          );
-          case 3: case 4: return getFactory().newXMLGregorianCalendarDate(
-            DatatypeConstants.FIELD_UNDEFINED, // year
-            Integer.parseInt(date.substring(0, length - 2)), // month
-            Integer.parseInt(date.substring(length - 2)), // day
-            DatatypeConstants.FIELD_UNDEFINED // timezone
-          );
-          default: return getFactory().newXMLGregorianCalendarDate(
-            Integer.parseInt(date.substring(0, length - 4)), // year
-            Integer.parseInt(date.substring(length - 4, length - 2)), // month
-            Integer.parseInt(date.substring(length - 2)), // day
-            DatatypeConstants.FIELD_UNDEFINED // timezone
-          );
+
+    //-------------------------------------------------------------------------
+    public static DateMarshaller getInstance(
+        boolean forward
+    ) {
+        return forward
+        ? DateMarshaller.toMarshaller
+            : DateMarshaller.fromMarshaller;
+    }
+
+    //-------------------------------------------------------------------------
+    public Object marshalGeneric(
+        Object source,
+        boolean forward
+    ) throws ServiceException {
+        if(source == null) {
+            return null;
         }
-      }
-      catch(IllegalArgumentException e) {
-        throw new ServiceException(
-          e,
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.TRANSFORMATION_FAILURE,
-          new BasicException.Parameter [] {
-            new BasicException.Parameter("source", source),
-            new BasicException.Parameter("source class", source.getClass().getName()),
-          },
-          "exception parsing date"
-        );
-      }
+        if(forward) {
+            try {
+                String date = (String)source;
+                int limit = date.indexOf('T');
+                if(limit >= 0) date = date.substring(0, limit);
+                int length = date.length();
+                switch (length) {
+                    case 0: return getFactory().newXMLGregorianCalendarDate(
+                        DatatypeConstants.FIELD_UNDEFINED, // year
+                        DatatypeConstants.FIELD_UNDEFINED, // month
+                        DatatypeConstants.FIELD_UNDEFINED, // day 
+                        DatatypeConstants.FIELD_UNDEFINED // timezone
+                    );
+                    case 1: case 2: return getFactory().newXMLGregorianCalendarDate(
+                        DatatypeConstants.FIELD_UNDEFINED, // year
+                        DatatypeConstants.FIELD_UNDEFINED, // month
+                        Integer.parseInt(date), // day
+                        DatatypeConstants.FIELD_UNDEFINED // timezone
+                    );
+                    case 3: case 4: return getFactory().newXMLGregorianCalendarDate(
+                        DatatypeConstants.FIELD_UNDEFINED, // year
+                        Integer.parseInt(date.substring(0, length - 2)), // month
+                        Integer.parseInt(date.substring(length - 2)), // day
+                        DatatypeConstants.FIELD_UNDEFINED // timezone
+                    );
+                    default: return getFactory().newXMLGregorianCalendarDate(
+                        Integer.parseInt(date.substring(0, length - 4)), // year
+                        Integer.parseInt(date.substring(length - 4, length - 2)), // month
+                        Integer.parseInt(date.substring(length - 2)), // day
+                        DatatypeConstants.FIELD_UNDEFINED // timezone
+                    );
+                }
+            }
+            catch(IllegalArgumentException e) {
+                throw new ServiceException(
+                    e,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.TRANSFORMATION_FAILURE,
+                    "exception parsing date",
+                    new BasicException.Parameter [] {
+                        new BasicException.Parameter("source", source),
+                        new BasicException.Parameter("source class", source.getClass().getName()),
+                    }
+                );
+            }
+        }
+        else {
+            if(source instanceof XMLGregorianCalendar) {
+                XMLGregorianCalendar date = (XMLGregorianCalendar)source;
+                int year = date.getYear();
+                int month = date.getMonth();
+                int day = date.getDay();
+                return
+                (year < 10 ? "000" : year < 100 ? "00" : year < 1000 ? "0" : "") + year +
+                (month < 10 ? "0" : "") + month +
+                (day < 10 ? "0" : "") + day;
+            }
+            else {
+                throw new ServiceException (
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.TRANSFORMATION_FAILURE,
+                    "Can only unmarshal objects of type " + XMLGregorianCalendar.class.getName(),
+                    new BasicException.Parameter("source", source),
+                    new BasicException.Parameter("source class", source.getClass().getName())
+                );
+            }
+        }
     }
-    else {
-      if(source instanceof XMLGregorianCalendar) {
-        XMLGregorianCalendar date = (XMLGregorianCalendar)source;
-        int year = date.getYear();
-        int month = date.getMonth();
-        int day = date.getDay();
-        return
-          (year < 10 ? "000" : year < 100 ? "00" : year < 1000 ? "0" : "") + year +
-          (month < 10 ? "0" : "") + month +
-          (day < 10 ? "0" : "") + day;
-      }
-      else {
-        throw new ServiceException (
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.TRANSFORMATION_FAILURE,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Can only unmarshal objects of type " + XMLGregorianCalendar.class.getName()
+
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    public Object marshal(
+        Object source
+    ) throws ServiceException {
+        return marshalGeneric(
+            source,
+            this.forward
         );
-      }
     }
-  }
 
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object marshal(
-    Object source
-  ) throws ServiceException {
-    return marshalGeneric(
-      source,
-      this.forward
-    );
-  }
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    public Object unmarshal (
+        Object source
+    ) throws ServiceException {
+        return marshalGeneric(
+            source,
+            !this.forward
+        );
+    }
 
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object unmarshal (
-    Object source
-  ) throws ServiceException {
-    return marshalGeneric(
-      source,
-      !this.forward
-    );
-  }
+    //-------------------------------------------------------------------------
+    // Variables
+    //-------------------------------------------------------------------------
+    private final boolean forward;
 
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private final boolean forward;
-
-  static private final DateMarshaller toMarshaller = new DateMarshaller(true);
-  static private final DateMarshaller fromMarshaller = new DateMarshaller(false);
+    static private final DateMarshaller toMarshaller = new DateMarshaller(true);
+    static private final DateMarshaller fromMarshaller = new DateMarshaller(false);
 
 }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Object_1.java,v 1.51 2008/06/28 00:21:46 hburger Exp $
+ * Name:        $Id: Object_1.java,v 1.71 2008/09/18 12:13:37 hburger Exp $
  * Description: Object_1 class
- * Revision:    $Revision: 1.51 $
+ * Revision:    $Revision: 1.71 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:46 $
+ * Date:        $Date: 2008/09/18 12:13:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,8 +52,6 @@ package org.openmdx.compatibility.base.dataprovider.transport.delegation;
 
 import java.beans.PropertyChangeListener;
 import java.beans.VetoableChangeListener;
-import java.io.ByteArrayInputStream;
-import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,7 +62,6 @@ import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.AbstractSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EventListener;
@@ -74,6 +71,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -93,6 +91,7 @@ import org.openmdx.base.accessor.generic.spi.AbstractObject_1;
 import org.openmdx.base.accessor.generic.spi.MarshallingStructure_1;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.collection.MarshallingSequentialList;
+import org.openmdx.base.exception.ExtendedIOException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.Records;
@@ -115,7 +114,6 @@ import org.openmdx.compatibility.base.naming.PathComponent;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
-import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 
 /**
@@ -123,130 +121,6 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  */
 @SuppressWarnings({"unchecked", "deprecation"})
 public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable {
-
-    /**
-     *
-     */
-    private static final long serialVersionUID = 3978993154257203764L;
-
-    /**
-     * Constructor
-     *
-     * @param identity
-     * @param that
-     * @param completelyDirty
-     * @throws ServiceException
-     */
-    protected Object_1(
-        Path identity,
-        Object_1 that,
-        boolean completelyDirty
-    )throws ServiceException{
-        if(
-            that.transactionalValuesRecordName == null &&
-            that.persistentValues == null
-        ) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.ILLEGAL_STATE,
-               null,
-               "The object is hollow"
-           );
-      }
-        this.provider = that.provider;
-        this.manager = that.manager;
-        this.transactionalValues = new HashMap();
-        propagate(that, completelyDirty);
-        if(identity != null) {
-            int p = identity.size() - 2;
-            Object_1_0 parent = this.manager.getObject(identity.getPrefix(p));
-            FilterableMap there = parent.objGetContainer(identity.get(p));
-            objMove(
-                there,
-                identity.get(p + 1)
-            );
-        }
-    }
-
-
-    void propagate(
-        Object_1 that,
-        boolean completelyDirty
-    ) throws ServiceException{
-        this.transactionalValuesRecordName = that.transactionalValuesRecordName != null ?
-            that.transactionalValuesRecordName :
-            that.persistentValues.getRecordName();
-        if(this.persistentValues == null) {
-            this.persistentValues = Object_1.createMappedRecord(this.transactionalValuesRecordName);
-        }
-        this.deleted = that.deleted;
-        this.digest = that.digest;
-
-        if(that.persistentValues != null) {
-            for(
-                Iterator i = that.persistentValues.entrySet().iterator();
-                i.hasNext();
-            ){
-                Map.Entry e = (Entry) i.next();
-                Object feature = e.getKey();
-                Object candidate = e.getValue();
-                if(
-                    candidate instanceof Container ||
-                    candidate instanceof FilterableMap
-                ) {
-                    // ignore containments
-                } else {
-                    this.persistentValues.put(feature, candidate);
-                }
-            }
-         }
-
-        if(that.transactionalValues != null) {
-            for(
-                Iterator i = that.transactionalValues.entrySet().iterator();
-                i.hasNext();
-            ){
-                Map.Entry e = (Entry) i.next();
-                String feature = (String) e.getKey();
-                Object candidate = e.getValue();
-                if(
-                    candidate instanceof Container ||
-                    candidate instanceof FilterableMap
-                ) {
-                    // ignore containments
-                } else if (candidate instanceof ManagedSet) {
-                    if(completelyDirty || that.dirty.contains(feature)) {
-                        Set target = this.objGetSet(feature);
-                        target.clear();
-                        target.addAll((Set)candidate);
-                    }
-                } else if (candidate instanceof ManagedList) {
-                    if(completelyDirty || that.dirty.contains(feature)) {
-                        List target = this.objGetList(feature);
-                        target.clear();
-                        target.addAll((List)candidate);
-                    }
-                } else if (candidate instanceof ManagedSparseArray) {
-                    if(completelyDirty || that.dirty.contains(feature)) {
-                        SortedMap target = this.objGetSparseArray(feature);
-                        target.clear();
-                        target.putAll((SortedMap)candidate);
-                    }
-                } else {
-                    this.transactionalValues.put(feature, candidate);
-                }
-            }
-         }
-
-        if(completelyDirty) {
-            this.dirty.addAll(this.transactionalValues.keySet());
-            if(that.persistentValues != null) {
-                this.dirty.addAll(that.persistentValues.keySet());
-            }
-        } else {
-            this.dirty.addAll(that.dirty);
-        }
-    }
 
     /**
      * Constructor for transient objects
@@ -264,79 +138,15 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         this.manager = manager;
         this.provider = null;
         this.deleted = false;
-        this.transactionalValues = new HashMap();
         this.transactionalValuesRecordName = objectClass;
         if(objectClass == null) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.BAD_PARAMETER,
-               null,
-               "Argument objectClass is null"
-           );
-//      SysLog.trace("Object created", this);
-      }
-    }
-
-    /**
-     * Create a transient object with initial values
-     */
-    public Object_1(
-        String objectClass,
-        Object_1 initialValues
-    ) throws ServiceException {
-        this.identity = null;
-        this.manager = initialValues.manager;
-        this.provider = this.manager.getSynchronization() instanceof Provider_1_0 ?
-            (Provider_1_0 )this.manager.getSynchronization() : null;
-        this.deleted = false;
-        this.transactionalValues = new HashMap();
-        this.transactionalValuesRecordName = objectClass;
-        if(objectClass == null) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.BAD_PARAMETER,
-               null,
-               "Argument objectClass is null"
-           );
-      }
-        this.persistentValues=Object_1.createMappedRecord(objectClass);
-        if(initialValues.persistentValues != null) {
-            this.persistentValues.putAll(
-                initialValues.persistentValues
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                null,
+                "Argument objectClass is null"
             );
         }
-        if(initialValues.transactionalValues != null) {
-            for(
-                Iterator i = initialValues.transactionalValues.entrySet().iterator();
-                i.hasNext();
-            ){
-                Map.Entry e = (Entry) i.next();
-                String feature = (String) e.getKey();
-                Object candidate = e.getValue();
-                if (candidate instanceof ManagedSet) {
-                    if(initialValues.dirty.contains(feature)) {
-                        Set target = this.objGetSet(feature);
-                        target.clear();
-                        target.addAll((Set)candidate);
-                    }
-                } if (candidate instanceof ManagedList) {
-                    if(initialValues.dirty.contains(feature)) {
-                        List target = this.objGetList(feature);
-                        target.clear();
-                        target.addAll((List)candidate);
-                    }
-                } if (candidate instanceof ManagedSparseArray) {
-                    if(initialValues.dirty.contains(feature)) {
-                        SortedMap target = this.objGetSparseArray(feature);
-                        target.clear();
-                        target.putAll((SortedMap)candidate);
-                    }
-                } else {
-                    this.transactionalValues.put(feature, candidate);
-                }
-            }
-         }
-//      SysLog.trace("Object cloned", this);
     }
 
     /**
@@ -351,29 +161,142 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         this.provider = provider;
         this.manager = manager;
         this.deleted = false;
-        this.transactionalValues = new HashMap();
         this.transactionalValuesRecordName = null;
         if(
-            identity == null || manager == null || provider == null
+                identity == null || manager == null || provider == null
         ) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.BAD_PARAMETER,
-               new BasicException.Parameter[] {
-                   new BasicException.Parameter("accessPath",identity == null ? "null" : ""),
-                   new BasicException.Parameter("manager",identity == null ? "null" : ""),
-                   new BasicException.Parameter("provider",identity == null ? "null" : "")
-               },
-               "Invalid null argument"
-           );
-//      SysLog.trace("Object retrieved", this);
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "Invalid null argument",
+                new BasicException.Parameter("accessPath",identity == null ? "null" : ""),
+                new BasicException.Parameter("manager",identity == null ? "null" : ""),
+                new BasicException.Parameter("provider",identity == null ? "null" : "")
+            );
+        }
     }
 
+    /**
+     * Constructor
+     *
+     * @param identity
+     * @param that
+     * @param completelyDirty
+     * @throws ServiceException
+     */
+    protected Object_1(
+        Path identity,
+        Object_1 that,
+        boolean completelyDirty
+    )throws ServiceException{
+        if(
+                that.transactionalValuesRecordName == null &&
+                that.objIsHollow()
+        ) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                null,
+                "The object is hollow"
+            );
+        }
+        this.provider = that.provider;
+        this.manager = that.manager;
+        propagate(that, completelyDirty);
+        if(identity != null) {
+            int p = identity.size() - 2;
+            Object_1_0 parent = this.manager.getObject(identity.getPrefix(p));
+            FilterableMap there = parent.objGetContainer(identity.get(p));
+            objMove(
+                there,
+                identity.get(p + 1)
+            );
+        }
+    }
 
-    //------------------------------------------------------------------------
-    // Implements Object_1_0
-    //------------------------------------------------------------------------
+    static final String[] GET_STREAM_ARGUMENTS = {
+        SystemOperations.GET_STREAM_FEATURE,
+        SystemOperations.GET_STREAM_POSITION,
+        SystemOperations.GET_STREAM_VALUE
+    };
+
+    private final TransactionalState_1 getState(
+        boolean optional
+    ) throws ServiceException{
+        return 
+        optional && (this.manager == null || this.manager.isClosed()) ? null :
+            ((UnitOfWork_1)this.manager.getUnitOfWork()).getState(this,optional);        
+    }
+
+    void propagate(
+        Object_1 that,
+        boolean completelyDirty
+    ) throws ServiceException{
+        this.transactionalValuesRecordName = that.transactionalValuesRecordName != null ?
+            that.transactionalValuesRecordName :
+                that.persistentValues.getRecordName();
+        if(objIsHollow()) {
+            this.persistentValues = Object_1.createMappedRecord(this.transactionalValuesRecordName);
+        }
+        this.deleted = that.deleted;
+        this.digest = that.digest;
+
+        if(that.persistentValues != null) {
+            for(Map.Entry e : (Set<Map.Entry>)that.persistentValues.entrySet()) {
+                Object feature = e.getKey();
+                Object candidate = e.getValue();
+                if(
+                        candidate instanceof Container ||
+                        candidate instanceof FilterableMap
+                ) {
+                    // ignore containments
+                } else {
+                    this.persistentValues.put(feature, candidate);
+                }
+            }
+        }
+        TransactionalState_1 thisState = this.getState(false);
+        TransactionalState_1 thatState = that.getState(false);
+        for(Map.Entry<String,Object> e : thatState.values(false).entrySet()){
+            String feature = e.getKey();
+            Object candidate = e.getValue();
+            if(
+                    candidate instanceof Container ||
+                    candidate instanceof FilterableMap
+            ) {
+                // ignore containments
+            } else if (candidate instanceof ManagedSet) {
+                if(completelyDirty || thatState.dirtyFeatures(true).contains(feature)) {
+                    Set target = this.objGetSet(feature);
+                    target.clear();
+                    target.addAll((Set)candidate);
+                }
+            } else if (candidate instanceof ManagedList) {
+                if(completelyDirty || thatState.dirtyFeatures(true).contains(feature)) {
+                    List target = this.objGetList(feature);
+                    target.clear();
+                    target.addAll((List)candidate);
+                }
+            } else if (candidate instanceof ManagedSparseArray) {
+                if(completelyDirty || thatState.dirtyFeatures(true).contains(feature)) {
+                    SortedMap target = this.objGetSparseArray(feature);
+                    target.clear();
+                    target.putAll((SortedMap)candidate);
+                }
+            } else {
+                thisState.values(false).put(feature, candidate);
+            }
+        }
+
+        if(completelyDirty) {
+            thisState.dirtyFeatures(false).addAll(thisState.values(false).keySet());
+            if(that.persistentValues != null) {
+                thisState.dirtyFeatures(false).addAll(that.persistentValues.keySet());
+            }
+        } else {
+            thisState.dirtyFeatures(false).addAll(thatState.dirtyFeatures(true));
+        }
+    }
 
     /**
      * Returns the object's model class.
@@ -386,19 +309,19 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public String objGetClass(
     ) throws ServiceException {
         if(this.transactionalValuesRecordName == null) {
-         try {
-               assertObjectIsAccessible();
-               this.transactionalValuesRecordName = this.persistentValues.getRecordName();
-           } catch (NullPointerException exception){
-               throw new ServiceException(
-                   exception,
-                   BasicException.Code.DEFAULT_DOMAIN,
-                   BasicException.Code.NOT_AVAILABLE,
-                   null,
-                   "Object class can't be determined"
-               );
-           }
-      }
+            try {
+                assertObjectIsAccessible();
+                this.transactionalValuesRecordName = this.persistentValues.getRecordName();
+            } catch (NullPointerException exception){
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_AVAILABLE,
+                    null,
+                    "Object class can't be determined"
+                );
+            }
+        }
         return this.transactionalValuesRecordName;
     }
 
@@ -432,13 +355,18 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
      * free to modify it before passing it on.
      *
      * @return  the names of the features in the default fetch group
+     * @throws ServiceException 
      */
     public Set objDefaultFetchGroup(
-    ){
-        Set result = new HashSet(transactionalValues.keySet());
-        if(persistentValues != null) {
-         result.addAll(persistentValues.keySet());
-      }
+    ) throws ServiceException{
+        Set result = new HashSet();
+        TransactionalState_1 state = getState(true);
+        if(state != null) {
+            result.addAll(state.values(true).keySet());
+        }
+        if(!objIsHollow()) {
+            result.addAll(this.persistentValues.keySet());
+        }            
         return result;
     }
 
@@ -465,32 +393,32 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         String reference
     ) throws ServiceException{
         if(objIsNew()) {
-         return AbstractContainer.SEQUENCE_MIN_VALUE;
-      }
+            return AbstractContainer.SEQUENCE_MIN_VALUE;
+        }
         assertObjectIsAccessible();
         SparseList supported = (SparseList)this.persistentValues.get(
             SystemAttributes.SEQUENCE_PREFIX + SystemAttributes.SEQUENCE_SUPPORTED
         );
         if(supported != null && ((Boolean)supported.get(0)).booleanValue()) {
-                SparseList names = (SparseList)this.persistentValues.get(
-                    SystemAttributes.SEQUENCE_PREFIX + SystemAttributes.SEQUENCE_NAME
-                );
-                int index = names.indexOf(reference);
-                if(index < 0) {
-                  return AbstractContainer.SEQUENCE_MIN_VALUE;
-               }
-                Long value = (Long) (
+            SparseList names = (SparseList)this.persistentValues.get(
+                SystemAttributes.SEQUENCE_PREFIX + SystemAttributes.SEQUENCE_NAME
+            );
+            int index = names.indexOf(reference);
+            if(index < 0) {
+                return AbstractContainer.SEQUENCE_MIN_VALUE;
+            }
+            Long value = (Long) (
                     (SparseList)this.persistentValues.get(
                         SystemAttributes.SEQUENCE_PREFIX + SystemAttributes.SEQUENCE_NEXT_VALUE
                     )
-                ).get(index);
-                return value == null ?
-                    AbstractContainer.SEQUENCE_MIN_VALUE :
+            ).get(index);
+            return value == null ?
+                AbstractContainer.SEQUENCE_MIN_VALUE :
                     value.longValue();
         } else {
             return AbstractContainer.SEQUENCE_NOT_SUPPORTED;
         }
-   }
+    }
 
     /**
      * Set the default fetch group
@@ -504,10 +432,9 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         MappedRecord defaultFetchGroup
     ) throws ServiceException {
         this.persistentValues = defaultFetchGroup;
-        SysLog.trace(logMessage, defaultFetchGroup);
         if(this.digest == null) {
-         this.digest = getDigest(defaultFetchGroup);
-      }
+            this.digest = getDigest(defaultFetchGroup);
+        }
         fireInstanceCallback(InstanceCallbackEvent.POST_LOAD);
     }
 
@@ -530,14 +457,13 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         target.putAll(secondary);
         target.putAll(primary);
         this.persistentValues = target;
-        SysLog.trace(logMessage, target);
         byte[] digest = getDigest(primary);
         if(digest != null) {
-         this.digest = digest;
-      }
+            this.digest = digest;
+        }
         if(notify) {
-         fireInstanceCallback(InstanceCallbackEvent.POST_RELOAD);
-      }
+            fireInstanceCallback(InstanceCallbackEvent.POST_RELOAD);
+        }
     }
 
     /**
@@ -548,7 +474,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         MappedRecord fetchGroup
     ){
         try {
-            if(this.persistentValues == null){
+            if(objIsHollow()){
                 set(
                     "pre-loaded",
                     fetchGroup
@@ -574,18 +500,26 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         MappedRecord pushGroup
     ){
         if(this.refreshAsynchronously) {
-         try {
-               if(pushGroup == null) {
-                   evict();
-               } else if(this.persistentValues == null){
-                   set("updated",pushGroup);
-               } else {
-                   merge("updated",pushGroup,this.persistentValues,true);
-               }
-           } catch (Exception exception) {
-               new RuntimeServiceException(exception).log();
-           }
-      }
+            try {
+                if(pushGroup == null) {
+                    evict();
+                } else if(objIsHollow()){
+                    set(
+                        "updated",
+                        pushGroup
+                    );
+                } else {
+                    merge(
+                        "updated",
+                        pushGroup,
+                        this.persistentValues,
+                        true // notify
+                    );
+                }
+            } catch (Exception exception) {
+                new RuntimeServiceException(exception).log();
+            }
+        }
     }
 
     /**
@@ -609,35 +543,28 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
 
     /**
      * Ask the persistence framework for the object's content
-     *
-     * @param condition under which load should be executed
      */
     private void load(
-        boolean condition
     ) throws ServiceException {
-        if(condition) {
-         try {
-               set(
-                   "loaded",
-                   this.provider.getDefaultFetchGroup(
-                       this.identity,
-                       null,
-                       this.manager
-                   )
-               );
-               this.inaccessabilityReason = null;
-           } catch (ServiceException exception){
-               this.inaccessabilityReason = exception;
-               if(this.manager != null){
-                   this.manager.invalidate(this.identity, true);
-               } else {
-                   this.invalidate(true);
-               }
-           }
-      }
-        if (objIsInaccessable()) {
-         throw this.inaccessabilityReason;
-      }
+        try {
+            set(
+                "loaded",
+                this.provider.getDefaultFetchGroup(
+                    this.identity,
+                    null,
+                    this.manager
+                )
+            );
+            this.inaccessabilityReason = null;
+        } catch (ServiceException exception){
+            this.inaccessabilityReason = exception;
+            if(this.manager != null){
+                this.manager.invalidate(this.identity, true);
+            } else {
+                this.invalidate(true);
+            }
+            throw exception;
+        }
     }
 
     /**
@@ -649,13 +576,12 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public void objRefresh(
     ) throws ServiceException {
         if(objIsPersistent() && !objIsNew()) {
-         try {
-               load(true);
-           } finally {
-               objMakeClean();
-           }
-//      SysLog.trace("Object refreshed", this);
-      }
+            try {
+                load();
+            } finally {
+                objMakeClean();
+            }
+        }
     }
 
     /* (non-Javadoc)
@@ -663,10 +589,11 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
      */
     public void objMakeClean(
     ) throws ServiceException {
-        this.transactionalValues.clear();
-        this.dirty.clear();
+        TransactionalState_1 state = getState(true);
+        if(state != null) {
+            state.clear();
+        }
         objRemoveFromUnitOfWork();
-//      SysLog.trace("Object cleaned", this);
     }
 
     /**
@@ -699,15 +626,14 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public void objAddToUnitOfWork(
     ) throws ServiceException {
         if(!objIsPersistent()) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.NOT_SUPPORTED,
-               null,
-               "TRANSIENT_CLEAN and TRANSIENT_DIRTY not supported"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                null,
+                "TRANSIENT_CLEAN and TRANSIENT_DIRTY not supported"
+            );
+        }
         ((UnitOfWork_1)this.manager.getUnitOfWork()).add(this);
-//      SysLog.trace("Object added to unit of work", this);
     }
 
     /**
@@ -724,15 +650,14 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public void objRemoveFromUnitOfWork(
     ) throws ServiceException {
         if(objIsDirty()) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.ILLEGAL_STATE,
-               null,
-               "A dirty object can't be removed from the unit of work"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                null,
+                "A dirty object can't be removed from the unit of work"
+            );
+        }
         ((UnitOfWork_1)this.manager.getUnitOfWork()).remove(this);
-//      SysLog.trace("Object removed from unit of work", this);
     }
 
 
@@ -791,55 +716,52 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
      *            if the move operation fails.
      */
     public void objMove(
-      FilterableMap there,
-      String criteria
+        FilterableMap there,
+        String criteria
     ) throws ServiceException{
         if(objIsPersistent() && !objIsNew()) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.ILLEGAL_STATE,
-               new BasicException.Parameter[]{
-                   new BasicException.Parameter(SystemAttributes.OBJECT_IDENTITY,objGetPath().toUri())
-               },
-               "Attempt to move a persistent object"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "Attempt to move a persistent object",
+                new BasicException.Parameter(SystemAttributes.OBJECT_IDENTITY,objGetPath().toUri())
+            );
+        }
         if(there != null && !(there instanceof DelegatingContainer)) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.BAD_PARAMETER,
-               new BasicException.Parameter[]{
-                   new BasicException.Parameter("there",there == null ? null : there.getClass().getName()),
-                   new BasicException.Parameter("criteria",criteria)
-               },
-               "There is not an instance of DelegatingContainer"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "There is not an instance of DelegatingContainer",
+                new BasicException.Parameter("there",there == null ? null : there.getClass().getName()),
+                new BasicException.Parameter("criteria",criteria)
+            );
+        }
         Container container = there == null ? null : ((DelegatingContainer)there).container;
         if(
-            this.transientContainer != null
+                this.transientContainer != null
         ){
             this.transientContainer.remove(this);
             this.transientContainer = null;
         }
         if(container instanceof PersistentContainer_1){
-            this.lifeCycleEventPending = true;
+            TransactionalState_1 state = getState(false);
+            state.setLifeCycleEventPending(true);
             this.persistentContainer=(PersistentContainer_1)container;
             Path containerPath = persistentContainer.getReferenceFilter();
             PathComponent qualifier = criteria == null ? null : new PathComponent(criteria);
             if(this.manager.getUnitOfWork().isOptimistic()) {
                 if(qualifier == null) {
-                  qualifier = PathComponent.createPlaceHolder();
-               }
+                    qualifier = PathComponent.createPlaceHolder();
+                }
             } else {
                 if(qualifier == null || qualifier.isPlaceHolder()) {
-                  qualifier = new PathComponent(
-                       createDefaultQualifier(
-                           (AbstractContainer)container,
-                           this.manager.getDefaultQualifierType()
-                       )
-                   );
-               }
+                    qualifier = new PathComponent(
+                        createDefaultQualifier(
+                            (AbstractContainer)container,
+                            this.manager.getDefaultQualifierType()
+                        )
+                    );
+                }
             }
             this.identity = containerPath.getChild(qualifier);
             if(this.manager.containsKey(this.identity)){
@@ -850,16 +772,14 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                 }
                 if(this.manager.containsKey(this.identity)){
                     this.identity = null;
-                    this.lifeCycleEventPending = false;
+                    state.setLifeCycleEventPending(false);
                     this.persistentContainer = null;
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.DUPLICATE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("container",containerPath),
-                            new BasicException.Parameter("qualifier", qualifier)
-                        },
-                        "There is already an object with the same qualifier in the container"
+                        "There is already an object with the same qualifier in the container",
+                        new BasicException.Parameter("container",containerPath),
+                        new BasicException.Parameter("qualifier", qualifier)
                     );
                 }
             }
@@ -867,32 +787,20 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             this.manager.cache(this.identity,this);
             this.fireInstanceCallback(InstanceCallbackEvent.POST_CREATE);
             objAddToUnitOfWork();
-            for(
-                Iterator i=this.transactionalValues.entrySet().iterator();
-                i.hasNext();
-            ){
-                Map.Entry e=(Map.Entry)i.next();
+            for(Map.Entry e : state.values(false).entrySet()){
                 if(e.getValue() instanceof DelegatingContainer){
                     DelegatingContainer dc = (DelegatingContainer)e.getValue();
                     TransientContainer_1 source = (TransientContainer_1)dc.container;
-                    Container target = new PersistentContainer_1(
+                    dc.container = new PersistentContainer_1(
                         identity.getChild((String)e.getKey()),
                         this.persistentContainer.getManager(),
                         this.persistentContainer.getProvider(),
                         new EvictablePersistentObjects((String)e.getKey()),
                         this
                     );
-                    dc.container = target;
-                    Set children=new HashSet(source.getEntrySet());
-                    for(
-                        Iterator j=children.iterator();
-                        j.hasNext();
-                    ){
-                        Map.Entry f=(Map.Entry)j.next();
-                        ((Object_1_0)f.getValue()).objMove(
-                            dc,
-                            (String)f.getKey()
-                        );
+                    Set<Map.Entry<String,Object_1_0>> children=new HashSet<Map.Entry<String,Object_1_0>>(source.getEntrySet());
+                    for(Map.Entry<String,Object_1_0> f : children) {
+                        f.getValue().objMove(dc,f.getKey());
                     }
                 }
             }
@@ -900,7 +808,6 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             this.transientContainer = (TransientContainer_1)container;
             this.transientContainer.add(criteria,this);
         }
-//      SysLog.trace("Object moved", this);
     }
 
     /**
@@ -920,12 +827,12 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         if("SEQUENCE".equals(defaultQualifierType)) {
             String qualifier = container.nextQualifier();
             if(qualifier != null) {
-               return qualifier;
+                return qualifier;
             }
         }
         if(this.uuidGenerator == null) {
-         this.uuidGenerator = UUIDs.getGenerator();
-      }
+            this.uuidGenerator = UUIDs.getGenerator();
+        }
         UUID uuid = this.uuidGenerator.next();
         if("UUID".equals(defaultQualifierType)){
             return uuid.toString();
@@ -937,15 +844,13 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         ) {
             return '(' + UUIDConversion.toURN(uuid) + ')';
         } else {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.INVALID_CONFIGURATION,
-               new BasicException.Parameter[]{
-                   new BasicException.Parameter("defaultQualifierType",defaultQualifierType)
-               },
-               "The following default qualifier types are supported: [UUID, UID, URN, SEQUENCE]"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "The following default qualifier types are supported: [UUID, UID, URN, SEQUENCE]",
+                new BasicException.Parameter("defaultQualifierType",defaultQualifierType)
+            );
+        }
     }
 
     /**
@@ -964,21 +869,20 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public void objRemove(
     ) throws ServiceException {
         if(!objIsPersistent()) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.ILLEGAL_STATE,
-               null,
-               "Attempt to remove a transient object"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                null,
+                "Attempt to remove a transient object"
+            );
+        }
         objAddToUnitOfWork();
         this.manager.getObject(
             this.identity.getPrefix(this.identity.size()-2)
         ).objAddToUnitOfWork();
         fireInstanceCallback(InstanceCallbackEvent.PRE_DELETE);
         this.deleted = true;
-        this.lifeCycleEventPending = true;
-//      SysLog.trace("Object removed", this);
+        getState(false).setLifeCycleEventPending(true);
     }
 
     /**
@@ -990,16 +894,13 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         Collection source
     ) throws ServiceException{
         if(source instanceof Container) {
-         return false;
-      }
-        for(
-            Iterator i = source.iterator();
-            i.hasNext();
-        ) {
-         if(unflushable(i.next())) {
-            return true;
-         }
-      }
+            return false;
+        }
+        for(Object o : source) {
+            if(unflushable(o)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -1012,14 +913,14 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         Path source
     ) throws ServiceException{
         for(
-            int i = 0;
-            i < source.size();
-            i++
+                int i = 0;
+                i < source.size();
+                i++
         ) {
-         if(source.getComponent(i).isPlaceHolder()) {
-            return true;
-         }
-      }
+            if(source.getComponent(i).isPlaceHolder()) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -1041,8 +942,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         Object source
     ) throws ServiceException{
         return
-            (source instanceof Object_1_0 && unflushable((Object_1_0)source)) ||
-            (source instanceof Collection && unflushable((Collection)source));
+        (source instanceof Object_1_0 && unflushable((Object_1_0)source)) ||
+        (source instanceof Collection && unflushable((Collection)source));
     }
 
     /**
@@ -1061,42 +962,42 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public boolean objFlush(
     ) throws ServiceException {
         if(this.manager.getUnitOfWork().isOptimistic()) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.NOT_SUPPORTED,
-               null,
-               "Optimistc units of work can't flush"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                null,
+                "Optimistc units of work can't flush"
+            );
+        }
         if(!objIsPersistent()) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.ILLEGAL_STATE,
-               null,
-               "Transient objects can't be flushed"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                null,
+                "Transient objects can't be flushed"
+            );
+        }
         Path current = objGetPath();
         if(current.size() == 1) {
-         return true; // No need to flush the authority
-      }
+            return true; // No need to flush the authority
+        }
         Path parent = current.getPrefix(current.size() - 2);
+        TransactionalState_1 parentState = ((Object_1)this.manager.getObject(parent)).getState(true);
         if(
-            ((Object_1)this.manager.getObject(parent)).lifeCycleEventPending
+                parentState != null &&
+                parentState.isLifeCycleEventPending()
         ) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.ILLEGAL_STATE,
-               new BasicException.Parameter[]{
-                   new BasicException.Parameter("current", current),
-                   new BasicException.Parameter("parent", current)
-               },
-               "Life cycle event pending for parent object"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "Life cycle event pending for parent object",
+                new BasicException.Parameter("current", current),
+                new BasicException.Parameter("parent", current)
+            );
+        }
         prepare();
         flush(true);
-        return this.dirty.isEmpty();
+        return !objIsDirty();
     }
 
     void prepare(
@@ -1106,7 +1007,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                 InstanceCallbackEvent.PRE_STORE
             );
         }
-        this.prepared = true;
+        getState(false).setPrepared(true);
     }
 
     /**
@@ -1118,31 +1019,22 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     void flush(
         boolean excludePlaceholders
     ) throws ServiceException {
-//      SysLog.trace(
-//          this.lifeCycleEventPending ?
-//              "life cycle event pending" :
-//              "no life cycle event pending",
-//          this
-//      );
         Set retained = new HashSet();
+        TransactionalState_1 state = getState(false);
         if(objIsDeleted()){
-            if(this.lifeCycleEventPending){
+            if(state.isLifeCycleEventPending()){
                 if(!objIsNew()) {
-                  this.provider.removeObject(objGetPath(),this.manager);
-               }
-                this.lifeCycleEventPending = false;
+                    this.provider.removeObject(objGetPath(),this.manager);
+                }
+                state.setLifeCycleEventPending(false);
             }
-        } else if(objIsNew() && this.lifeCycleEventPending){
+        } else if(objIsNew() && state.isLifeCycleEventPending()){
             this.manager = this.persistentContainer.getManager();
             this.provider = this.persistentContainer.getProvider();
             this.persistentValues=Object_1.createMappedRecord(
                 objGetClass()
             );
-            for(
-                Iterator i=this.transactionalValues.entrySet().iterator();
-                i.hasNext();
-            ){
-                Map.Entry e = (Map.Entry)i.next();
+            for(Map.Entry e : state.values(false).entrySet()) {
                 Object feature = e.getKey();
                 Object source = e.getValue();
                 if(excludePlaceholders && unflushable(source)){
@@ -1157,42 +1049,30 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                     if(source instanceof ManagedList){
                         ManagedList collection = (ManagedList)source;
                         List target = new ArrayList();
-                        for(
-                            ListIterator j=collection.listIterator();
-                            j.hasNext();
-                        ) {
-                           target.add(this.manager.unmarshal(j.next()));
+                        for(Object o : collection) {
+                            target.add(this.manager.unmarshal(o));
                         }
                         this.persistentValues.put(feature, target);
                     }else if(source instanceof ManagedSet){
                         ManagedSet collection = (ManagedSet)source;
                         Set target = new HashSet();
-                        for(
-                            Iterator j=collection.iterator();
-                            j.hasNext();
-                        ) {
-                           target.add(this.manager.unmarshal(j.next()));
+                        for(Object o : collection) {
+                            target.add(this.manager.unmarshal(o));
                         }
                         this.persistentValues.put(feature, target);
                     } else {
-                     throw new ServiceException(
-                           BasicException.Code.DEFAULT_DOMAIN,
-                           BasicException.Code.ASSERTION_FAILURE,
-                           new BasicException.Parameter[]{
-                               new BasicException.Parameter("class",source.getClass().getName())
-                           },
-                           "Unsupported Collection class"
-                       );
-                  }
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "Unsupported Collection class",
+                            new BasicException.Parameter("class",source.getClass().getName())
+                        );
+                    }
                 }else if(source instanceof Map){
                     if(source instanceof SortedMap){
-                        SortedMap collection = (SortedMap)source;
+                        SortedMap<?,?> collection = (SortedMap<?,?>)source;
                         SortedMap target = new TreeMap();
-                        for(
-                            Iterator j = collection.entrySet().iterator();
-                            j.hasNext();
-                        ){
-                            Map.Entry k = (Entry)j.next();
+                        for(Map.Entry<?,?> k : collection.entrySet()) {
                             target.put(
                                 k.getKey(),
                                 this.manager.unmarshal(k.getValue())
@@ -1202,15 +1082,13 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                     } else if (source instanceof FilterableMap) {
                         // handled below
                     } else {
-                     throw new ServiceException(
-                           BasicException.Code.DEFAULT_DOMAIN,
-                           BasicException.Code.ASSERTION_FAILURE,
-                           new BasicException.Parameter[]{
-                               new BasicException.Parameter("class",source.getClass().getName())
-                           },
-                           "Unsupported Map class"
-                       );
-                  }
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "Unsupported Map class",
+                            new BasicException.Parameter("class",source.getClass().getName())
+                        );
+                    }
                 }else{
                     this.persistentValues.put(
                         feature,
@@ -1224,13 +1102,13 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                 this.manager
             );
             this.persistentContainer = null;
-            this.lifeCycleEventPending = false;
+            state.setLifeCycleEventPending(false);
             this.transientOnRollback = this.provider instanceof Provider_1_1 ?
                 ((Provider_1_1)this.provider).doPeristentNewObjectsBecomeTransientUponRollback() :
-                this.manager.getUnitOfWork().isTransactional();
+                    this.manager.getUnitOfWork().isTransactional();
         } else if(
-            objIsDirty() || objIsPersistent() && this.digest != null &&
-            objGetPath().size() > 4 // exclude Authorities and Providers
+                objIsDirty() || objIsPersistent() && this.digest != null &&
+                objGetPath().size() > 4 // exclude Authorities and Providers
         ){
             MappedRecord arguments = null;
             arguments = Object_1.createMappedRecord(objGetClass());
@@ -1242,13 +1120,9 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                 SystemAttributes.OBJECT_LOCK_PREFIX + SystemAttributes.OBJECT_DIGEST,
                 digest
             );
-            for(
-              Iterator i=this.dirty.iterator();
-              i.hasNext();
-            ){
-                Object feature = i.next();
-                if(transactionalValues.containsKey(feature)) {
-                    Object source = this.transactionalValues.get(feature);
+            for(String feature : state.dirtyFeatures(true)){
+                if(state.values(false).containsKey(feature)) {
+                    Object source = state.values(false).get(feature);
                     if(excludePlaceholders && unflushable(source)){
                         retained.add(feature);
                     } else if(source instanceof ManagedLargeObject){
@@ -1261,34 +1135,24 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                         if(source instanceof ManagedList){
                             ManagedList collection = (ManagedList)source;
                             List target = new ArrayList();
-                            for(
-                                ListIterator j=collection.listIterator();
-                                j.hasNext();
-                            ) {
-                              target.add(this.manager.unmarshal(j.next()));
-                           }
+                            for(Object o : collection) {
+                                target.add(this.manager.unmarshal(o));
+                            }
                             arguments.put(feature, target);
                         }else if(source instanceof ManagedSet){
                             ManagedSet collection = (ManagedSet)source;
                             Set target = new HashSet();
-                            for(
-                              Iterator j=collection.iterator();
-                              j.hasNext();
-                            ) {
-                              target.add(this.manager.unmarshal(j.next()));
-                           }
+                            for(Object o : collection) {
+                                target.add(this.manager.unmarshal(o));
+                            }
                             arguments.put(feature, target);
                         }else{
                             //Container not handled here
                         }
                     }else if(source instanceof ManagedSparseArray){
-                        SortedMap collection = (SortedMap)source;
+                        SortedMap<?,?> collection = (SortedMap)source;
                         SortedMap target = new TreeMap();
-                        for(
-                            Iterator j=collection.entrySet().iterator();
-                            j.hasNext();
-                        ){
-                            Map.Entry k = (Entry)j.next();
+                        for(Map.Entry<?,?> k : collection.entrySet()){
                             target.put(
                                 k.getKey(),
                                 this.manager.unmarshal(k.getValue())
@@ -1309,29 +1173,33 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                 }
             }
             this.provider.editObject(
-                this.identity,arguments,
+                this.identity,
+                arguments,
                 this.manager
             );
         }
+        Queue<Operation> operations = state.operations(true);
         for(
-            Iterator i=this.operationQueue.iterator();
-            i.hasNext();
+                Operation operation = operations.poll();
+                operation != null;
+                operation = operations.poll()
         ){
-            ((Operation)i.next()).invoke();
-            i.remove();
+            operation.invoke();
         }
-        this.dirty = retained;
+        Set<String> dirty = state.dirtyFeatures(false);
+        dirty.clear();
+        dirty.addAll(retained);
     }
 
     void afterCompletion(boolean committed) throws ServiceException {
         if (committed) {
             if(objIsDeleted()){
-                 this.manager.invalidate(this.identity, true);
+                this.manager.invalidate(this.identity, true);
             } else {
                 evict(); //... depending on configuration
             }
         } else {
-            this.lifeCycleEventPending = false;
+            getState(false).setLifeCycleEventPending(false);
             if(objIsDeleted()){
                 this.deleted = false;
             } else {
@@ -1339,7 +1207,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             }
             if(isTransientOnRollback()){
                 if(this.manager != null) {
-                   this.manager.evict(this);
+                    this.manager.evict(this);
                 }
                 this.persistentContainer = null;
                 this.identity = null;
@@ -1356,7 +1224,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     ){
         InstanceCallbackEvent event = new InstanceCallbackEvent(
             InstanceCallbackEvent.PRE_CLEAR,
-            this, null
+            this, 
+            null
         );
         InstanceCallbackListener[] listeners;
         try {
@@ -1365,53 +1234,60 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                 InstanceCallbackListener.class
             );
             for(
-                int i = 0;
-                i < listeners.length;
-                i++
+                    int i = 0;
+                    i < listeners.length;
+                    i++
             ) {
-               try {
-                   listeners[i].preClear(event);
-               } catch (ServiceException preclearException) {
-                   preclearException.log();
-               }
+                try {
+                    listeners[i].preClear(event);
+                } catch (ServiceException preclearException) {
+                    preclearException.log();
+                }
             }
         } catch (ServiceException listenerException) {
             listenerException.log();
         }
-        for(
-            Iterator i = this.transactionalValues.entrySet().iterator();
-            i.hasNext();
-        ){
-            Map.Entry j = (Entry)i.next();
-            Object value = j.getValue();
-            if(value instanceof Evictable && value instanceof Collection){
-                ((Evictable)value).evict();
-            } else if (
-                value instanceof DelegatingContainer &&
-                ((DelegatingContainer)value).container instanceof PersistentContainer_1
-            ){
-                if(this.identity == null){ // Maybe there was a BasicException.Code.DUPLICATE...
-                    ((DelegatingContainer)value).container = new TransientContainer_1();
-                    //... forget about potential children
-                } else {
-                    String feature = (String)j.getKey();
-                    PersistentContainer_1 container = (PersistentContainer_1)((DelegatingContainer)value).container;
-                    Path expectedIdentity = this.identity.getChild(feature);
-                    if(expectedIdentity.equals(container.getReferenceFilter())){
-                        container.evict();
+        try {
+            TransactionalState_1 state = getState(true);
+            if(state != null){ 
+                for(
+                        Iterator i = state.values(false).entrySet().iterator();
+                        i.hasNext();
+                ){
+                    Map.Entry j = (Entry)i.next();
+                    Object value = j.getValue();
+                    if(value instanceof Evictable && value instanceof Collection){
+                        ((Evictable)value).evict();
+                    } else if (
+                            value instanceof DelegatingContainer &&
+                            ((DelegatingContainer)value).container instanceof PersistentContainer_1
+                    ){
+                        if(this.identity == null){ // Maybe there was a BasicException.Code.DUPLICATE...
+                            ((DelegatingContainer)value).container = new TransientContainer_1();
+                            //... forget about potential children
+                        } else {
+                            String feature = (String)j.getKey();
+                            PersistentContainer_1 container = (PersistentContainer_1)((DelegatingContainer)value).container;
+                            Path expectedIdentity = this.identity.getChild(feature);
+                            if(expectedIdentity.equals(container.getReferenceFilter())){
+                                container.evict();
+                            } else {
+                                ((DelegatingContainer)value).container = new PersistentContainer_1(
+                                    this.identity.getChild(feature),
+                                    this.manager,
+                                    this.provider,
+                                    new EvictablePersistentObjects(feature),
+                                    this
+                                );
+                            }
+                        }
                     } else {
-                        ((DelegatingContainer)value).container = new PersistentContainer_1(
-                            this.identity.getChild(feature),
-                            this.manager,
-                            this.provider,
-                            new EvictablePersistentObjects(feature),
-                            this
-                        );
+                        i.remove();
                     }
                 }
-            } else {
-               i.remove();
             }
+        } catch (ServiceException ignore) {
+            // Eviction should nevertheless be successful
         }
         this.digest = null;
         this.persistentValues = null;
@@ -1437,57 +1313,51 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         Class listenerType
     ) throws ServiceException {
         if(listenerType == null) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.BAD_PARAMETER,
-               null,
-               "The listener argument must not be null"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                null,
+                "The listener argument must not be null"
+            );
+        }
         if(InstanceCallbackListener.class.isAssignableFrom(listenerType)){
             if(feature != null) {
-               throw new ServiceException(
-                   BasicException.Code.DEFAULT_DOMAIN,
-                   BasicException.Code.BAD_PARAMETER,
-                   new BasicException.Parameter[]{
-                       new BasicException.Parameter(
-                           "feature",
-                           feature
-                       ),
-                       new BasicException.Parameter(
-                           "listenerType",
-                           listenerType.getName()
-                       )
-                   },
-                   "Instance level events must not be associated with a feature"
-               );
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_PARAMETER,
+                    "Instance level events must not be associated with a feature",
+                    new BasicException.Parameter(
+                        "feature",
+                        feature
+                    ),
+                    new BasicException.Parameter(
+                        "listenerType",
+                        listenerType.getName()
+                    )
+                );
             }
         } else if (
-            PropertyChangeListener.class.isAssignableFrom(listenerType) ||
-            VetoableChangeListener.class.isAssignableFrom(listenerType)
+                PropertyChangeListener.class.isAssignableFrom(listenerType) ||
+                VetoableChangeListener.class.isAssignableFrom(listenerType)
         ){
             // Feature scope o.k.
         } else {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.NOT_SUPPORTED,
-               new BasicException.Parameter[]{
-                   new BasicException.Parameter(
-                       "listenerType",
-                       listenerType.getName()
-                   ),
-                   new BasicException.Parameter(
-                       "supported",
-                       new String[]{
-                           InstanceCallbackListener.class.getName(),
-                           PropertyChangeListener.class.getName(),
-                           VetoableChangeListener.class.getName()
-                       }
-                   ),
-               },
-               "Unsupported listener class"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "Unsupported listener class",
+                new BasicException.Parameter(
+                    "listenerType",
+                    listenerType.getName()
+                ),
+                new BasicException.Parameter(
+                    "supported",
+                    InstanceCallbackListener.class.getName(),
+                    PropertyChangeListener.class.getName(),
+                    VetoableChangeListener.class.getName()
+                )
+            );
+        }
     }
 
     /**
@@ -1524,8 +1394,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             Set features = (Set)this.listeners.get(listener);
             if(features == null){
                 if (this.listeners.containsKey(listener)) {
-                  return;
-               }
+                    return;
+                }
                 this.listeners.put(
                     listener,
                     features = new HashSet()
@@ -1565,7 +1435,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         } else {
             Set features = (Set)this.listeners.get(listener);
             if(features != null) {
-               features.remove(feature);
+                features.remove(feature);
             }
         }
     }
@@ -1603,18 +1473,18 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         verifyListenerArguments(feature,listenerType);
         List matchingListeners = new ArrayList();
         for(
-            Iterator i = this.listeners.entrySet().iterator();
-            i.hasNext();
+                Iterator i = this.listeners.entrySet().iterator();
+                i.hasNext();
         ){
             Map.Entry e = (Map.Entry) i.next();
             EventListener l = (EventListener) e.getKey();
             Set f = (Set) e.getValue();
             if(
-                listenerType.isInstance(l) && (
-                    f == null || f.contains(feature)
-                )
+                    listenerType.isInstance(l) && (
+                            f == null || f.contains(feature)
+                    )
             ) {
-               matchingListeners.add(l);
+                matchingListeners.add(l);
             }
         }
         return (EventListener[]) matchingListeners.toArray(
@@ -1667,11 +1537,6 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         }
     }
 
-    boolean isPrepared(
-    ){
-        return this.prepared;
-    }
-
     /**
      * Tests whether this object is dirty. Instances that have been modified,
      * deleted, or newly made persistent in the current unit of work return
@@ -1681,11 +1546,19 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
      *
      * @return true if this instance has been modified in the current unit
      *         of work.
+     * @throws ServiceException 
      */
     public boolean objIsDirty(
-    ){
-        return objIsPersistent() && !this.dirty.isEmpty();
-        //... transient-dirty and persistent-non-transactional not yet supported
+    ) throws ServiceException{
+        if(objIsPersistent()) {
+            TransactionalState_1 state = getState(true);
+            return state != null && !state.dirtyFeatures(true).isEmpty();
+        } else {
+            //
+            // transient-dirty and persistent-non-transactional not yet supported
+            //
+            return false;
+        }
     }
 
     /**
@@ -1711,6 +1584,15 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public boolean objIsNew(
     ){
         return this.persistentContainer != null;
+    }
+
+    /**
+     * Tests whether this object is hollow
+     * 
+     * @return <code>true</code> if the object is hollow
+     */
+    private boolean objIsHollow(){
+        return this.persistentValues == null;
     }
 
     /**
@@ -1773,14 +1655,15 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
      *                  if the object is write protected
      */
     protected void objMakeDirty(
-      String feature
+        String feature
     ) throws ServiceException {
-        this.prepared = false;
-        this.dirty.add(feature);
+        TransactionalState_1 state = getState(false);
+        state.setPrepared(false);
+        state.dirtyFeatures(false).add(feature);
         assertObjectIsAccessible();
         if(objIsPersistent()) {
-         objAddToUnitOfWork();
-      }
+            objAddToUnitOfWork();
+        }
     }
 
     /**
@@ -1793,7 +1676,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
      *              if the object is write-protected
      */
     protected void makeCollectionDirty(
-      String feature
+        String feature
     ){
         try{
             objMakeDirty(feature);
@@ -1812,19 +1695,22 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     protected void assertObjectIsAccessible(
     ) throws ServiceException {
         if (objIsDeleted()) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.ILLEGAL_STATE,
-               new BasicException.Parameter[] {
-                   new BasicException.Parameter("identitity", this.identity)
-               },
-               "The object is deleted"
-           );
-      }
-        load(
-            objIsPersistent() && !objIsNew() && !objIsInaccessable() &&
-            this.persistentValues == null
-        );
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "The object is deleted",
+                new BasicException.Parameter("identitity", this.identity)
+            );
+        }
+        if(objIsInaccessable()){
+            throw getInaccessabilityReason();
+        } else if(
+                objIsPersistent() && 
+                !objIsNew() && 
+                objIsHollow()
+        ){
+            load();
+        }
     }
 
     /**
@@ -1843,21 +1729,23 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         boolean stream
     ) throws ServiceException {
         if(objIsPersistent() && !objIsNew()){
+            assertObjectIsAccessible();
             Object attribute = this.persistentValues.get(name);
             if(
-                attribute == null &&
-                !this.persistentValues.containsKey(name)
+                    attribute == null &&
+                    !this.persistentValues.containsKey(name)
             ) {
+                MappedRecord persistentValues = this.persistentValues=Object_1.createMappedRecord(
+                    this.persistentValues
+                );
                 this.provider.getAttribute(
                     this.identity,
                     name,
-                    this.persistentValues,
+                    persistentValues,
                     this.manager
                 );
-                Object result = this.persistentValues.get(name);
-                if(stream & result != null) {
-                  this.persistentValues.remove(name);
-               }
+                Object result = stream ? persistentValues.remove(name) : persistentValues.get(name);
+                this.persistentValues = persistentValues;
                 return result;
             } else {
                 return attribute;
@@ -1877,17 +1765,15 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
      *                  if the argument is multi-valued
      */
     protected void assertSingleValued(
-      Object argument
+        Object argument
     ) throws ServiceException {
         if(argument instanceof Collection) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.BAD_PARAMETER,
-               new BasicException.Parameter[]{
-                   new BasicException.Parameter("class", argument.getClass().getName())
-               },
-               "Single valued argument expected"
-           );
-      }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.BAD_PARAMETER,
+                "Single valued argument expected",
+                new BasicException.Parameter("class", argument.getClass().getName())
+            );
+        }
     }
 
 
@@ -1927,23 +1813,21 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             } else if(SystemAttributes.OBJECT_CLASS.equals(feature)) {
                 this.transactionalValuesRecordName = (String) to;
             } else if (
-                SystemAttributes.CREATED_AT.equals(feature) ||
-                State_1_Attributes.STATE_VALID_FROM.equals(feature) ||
-                State_1_Attributes.STATE_VALID_TO.equals(feature)
+                    SystemAttributes.CREATED_AT.equals(feature) ||
+                    State_1_Attributes.STATE_VALID_FROM.equals(feature) ||
+                    State_1_Attributes.STATE_VALID_TO.equals(feature)
             ) {
                 assertSingleValued(to);
-                this.transactionalValues.put(feature, to);
+                getState(false).values(false).put(feature, to);
             } else throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("feature", feature)
-                },
-                "The given feature has no private accessor starting with '$'"
+                "The given feature has no private accessor starting with '$'",
+                new BasicException.Parameter("feature", feature)
             );
         } else {
             objMakeDirty(_feature);
-            this.transactionalValues.put(_feature, to);
+            getState(false).values(false).put(_feature, to);
         }
     }
 
@@ -1974,35 +1858,33 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         } else if(('$' + SystemAttributes.OBJECT_CLASS).equals(feature)) {
             return this.transactionalValuesRecordName;
         } else {
-            assertObjectIsAccessible();
-            Object transactionalValue = this.transactionalValues.get(feature);
+            TransactionalState_1 state = getState(false);
+            Object transactionalValue = state.values(false).get(feature);
             if(
-                transactionalValue == null &&
-                ! transactionalValues.containsKey(feature)
+                    transactionalValue == null &&
+                    ! state.values(false).containsKey(feature)
             ){
                 Object persistentValue = this.getPersistentAttribute(feature, false);
                 if(persistentValue instanceof SparseList){
                     SparseList collection = (SparseList)persistentValue;
                     if(collection.size()>1) {
-                     throw new ServiceException(
-                           BasicException.Code.DEFAULT_DOMAIN,
-                           BasicException.Code.BAD_SEQUENCE_LENGTH,
-                           new BasicException.Parameter[]{
-                               new BasicException.Parameter("feature",feature),
-                               new BasicException.Parameter("size", collection.size())
-                           },
-                           "The size of a sparse list representing a single-valued" +
-                           " attribute must be less or equal 1"
-                       );
-                  }
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_SEQUENCE_LENGTH,
+                            "The size of a sparse list representing a single-valued" +
+                            " attribute must be less or equal 1",
+                            new BasicException.Parameter("feature",feature),
+                            new BasicException.Parameter("size", collection.size())
+                        );
+                    }
                     persistentValue = collection.get(0);
                 }
                 if(persistentValue!=null) {
-                  transactionalValue=this.manager.marshal(
-                       persistentValue
-                   );
-               }
-                this.transactionalValues.put(feature,transactionalValue);
+                    transactionalValue=this.manager.marshal(
+                        persistentValue
+                    );
+                }
+                state.values(false).put(feature,transactionalValue);
             } else {
                 assertSingleValued(transactionalValue);
             }
@@ -2030,11 +1912,15 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     Object getRawValue(
         String feature
     ) throws ServiceException {
-        assertObjectIsAccessible();
-        Object transactionalValue = this.transactionalValues.get(feature);
-        return transactionalValue == null && ! transactionalValues.containsKey(feature) ?
-            this.getPersistentAttribute(feature, false) :
-            this.manager.unmarshal(transactionalValue);
+        TransactionalState_1 state = getState(true);
+        if(state == null){
+            return this.getPersistentAttribute(feature, false);
+        } else {
+            Object transactionalValue = state.values(false).get(feature);
+            return transactionalValue == null && !state.values(false).containsKey(feature) ?
+                this.getPersistentAttribute(feature, false) :
+                    this.manager.unmarshal(transactionalValue);
+        }
     }
 
     /**
@@ -2052,7 +1938,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     private Object getCachedValue(
         String feature
     ){
-        return this.persistentValues == null ? null : this.persistentValues.get(feature);
+        return objIsHollow() ? null : this.persistentValues.get(feature);
     }
 
     /**
@@ -2076,17 +1962,16 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public List objGetList(
         String feature
     ) throws ServiceException {
-        assertObjectIsAccessible();
-        List values = (List)this.transactionalValues.get(feature);
+        List values = (List)getState(false).values(false).get(feature);
         if(values==null) {
-         this.transactionalValues.put(
-               feature,
-               values = new ManagedList(
-                   feature,
-                   (Collection)getPersistentAttribute(feature, false)
-               )
-           );
-      }
+            getState(false).values(false).put(
+                feature,
+                values = new ManagedList(
+                    feature,
+                    (Collection)getPersistentAttribute(feature, false)
+                )
+            );
+        }
         return values;
     }
 
@@ -2111,17 +1996,17 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public Set objGetSet(
         String feature
     ) throws ServiceException {
-        assertObjectIsAccessible();
-        Set values = (Set)this.transactionalValues.get(feature);
+        TransactionalState_1 state = getState(false);
+        Set values = (Set)state.values(false).get(feature);
         if(values==null) {
-         this.transactionalValues.put(
-               feature,
-               values = new ManagedSet(
-                   feature,
-                   (Collection)getPersistentAttribute(feature, false)
-               )
-           );
-      }
+            state.values(false).put(
+                feature,
+                values = new ManagedSet(
+                    feature,
+                    (Collection)getPersistentAttribute(feature, false)
+                )
+            );
+        }
         return values;
     }
 
@@ -2146,17 +2031,17 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public SortedMap objGetSparseArray(
         String feature
     ) throws ServiceException {
-        assertObjectIsAccessible();
-        SortedMap values=(SortedMap)this.transactionalValues.get(feature);
+        TransactionalState_1 state = getState(false);
+        SortedMap values=(SortedMap)state.values(false).get(feature);
         if(values==null) {
-         this.transactionalValues.put(
-               feature,
-               values = new ManagedSparseArray(
-                   feature,
-                   getPersistentAttribute(feature, false)
-               )
-           );
-      }
+            state.values(false).put(
+                feature,
+                values = new ManagedSparseArray(
+                    feature,
+                    getPersistentAttribute(feature, false)
+                )
+            );
+        }
         return values;
     }
 
@@ -2181,13 +2066,14 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         String feature
     ) throws ServiceException {
         assertObjectIsAccessible();
-        LargeObject_1_0 values=(LargeObject_1_0)this.transactionalValues.get(feature);
+        TransactionalState_1 state = getState(false);
+        LargeObject_1_0 values=(LargeObject_1_0)state.values(false).get(feature);
         if(values==null) {
-         this.transactionalValues.put(
-               feature,
-               values = new ManagedLargeObject(feature)
-           );
-      }
+            state.values(false).put(
+                feature,
+                values = new ManagedLargeObject(feature)
+            );
+        }
         return values;
     }
 
@@ -2212,29 +2098,30 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     public FilterableMap objGetContainer(
         String feature
     ) throws ServiceException{
-        FilterableMap values = (FilterableMap)this.transactionalValues.get(feature);
+        TransactionalState_1 state = getState(false);
+        FilterableMap values = (FilterableMap)state.values(false).get(feature);
         if(values==null) {
-         this.transactionalValues.put(
-               feature,
-               values = new DelegatingContainer(
-                   objIsPersistent() ? (Container)(
-                           objIsInaccessable() || objIsNew() ? new PersistentContainer_1(
-                           this.identity.getChild(feature),
-                           this.persistentContainer.getManager(),
-                           this.persistentContainer.getProvider(),
-                           new EvictablePersistentObjects(feature),
-                           this
-                       ) : new PersistentContainer_1(
-                           this.identity.getChild(feature),
-                           this.manager,
-                           this.provider,
-                           new EvictablePersistentObjects(feature),
-                           this
-                       )
-                   ) : (Container)new TransientContainer_1()
-               )
-           );
-      }
+            state.values(false).put(
+                feature,
+                values = new DelegatingContainer(
+                    objIsPersistent() ? (Container)(
+                            objIsInaccessable() || objIsNew() ? new PersistentContainer_1(
+                                this.identity.getChild(feature),
+                                this.persistentContainer.getManager(),
+                                this.persistentContainer.getProvider(),
+                                new EvictablePersistentObjects(feature),
+                                this
+                            ) : new PersistentContainer_1(
+                                this.identity.getChild(feature),
+                                this.manager,
+                                this.provider,
+                                new EvictablePersistentObjects(feature),
+                                this
+                            )
+                    ) : (Container)new TransientContainer_1()
+                )
+            );
+        }
         return values;
     }
 
@@ -2274,7 +2161,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             arguments
         );
         objAddToUnitOfWork();
-        operationQueue.add(entry);
+        getState(false).operations(false).offer(entry);
         return entry;
     }
 
@@ -2303,8 +2190,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
      *              the invocation fails for another reason.
      */
     public Structure_1_0 objInvokeOperation(
-      String operation,
-      Structure_1_0 arguments
+        String operation,
+        Structure_1_0 arguments
     ) throws ServiceException {
         Operation entry = new Operation(
             operation,
@@ -2327,98 +2214,39 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         try {
             Set state = new HashSet();
             if(objIsDeleted()) {
-               state.add("deleted");
+                state.add("deleted");
             }
             if(objIsDirty()) {
-               state.add("dirty");
+                state.add("dirty");
             }
             if(objIsInUnitOfWork()) {
-               state.add("inUnitOfWork");
+                state.add("inUnitOfWork");
             }
             if(objIsNew()) {
-               state.add("new");
+                state.add("new");
             }
             if(objIsPersistent()) {
-               state.add("persistent");
+                state.add("persistent");
             }
             return state.toString();
         } catch (Exception exception) {
-            return "n/a";
-        }
-    }
-
-    Map toStringContent(
-    ){
-        try {
-            Map target = new HashMap();
-            for(
-                Iterator i = this.transactionalValues.entrySet().iterator();
-                i.hasNext();
-            ){
-                Map.Entry e = (Entry)i.next();
-                Object v = e.getValue();
-                if(v instanceof Collection) {
-                    if (v instanceof List) {
-                        List t = new ArrayList();
-                        for(
-                            Iterator j = ((List)v).iterator();
-                            j.hasNext();
-                        ) {
-                           t.add(
-                               noContent(j.next())
-                           );
-                        }
-                    } else if (v instanceof Set) {
-                        Set t = new HashSet();
-                        for(
-                            Iterator j = ((Set)v).iterator();
-                            j.hasNext();
-                        ) {
-                           t.add(
-                               noContent(j.next())
-                           );
-                        }
-                    } // else ignore
-                } else if (v instanceof SortedMap) {
-                    SortedMap t = new TreeMap();
-                    for(
-                        Iterator j = ((SortedMap)v).entrySet().iterator();
-                        j.hasNext();
-                    ){
-                        Map.Entry k = (Map.Entry)j.next();
-                        t.put(
-                            k.getKey(),
-                            noContent(k.getValue())
-                        );
-                    }
-                } else {
-                    target.put(e.getKey(), noContent(v));
-                }
-            }
-            return target;
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            return Collections.EMPTY_MAP;
+            return "(" + exception.getMessage() + ")";
         }
     }
 
     Object noContent (
         Object source
     ){
-        return source instanceof Object_1 ?
-                AbstractObject_1.toString((Object_1)source, ((Object_1)source).transactionalValuesRecordName, null) :
-            source;
-    }
-
-    /**
-     *
-     */
-    String toString(
-        Map content
-    ){
-        return
-                        AbstractObject_1.toString(this, this.transactionalValuesRecordName, null) +
-                        ", attributes=" + IndentingFormatter.toString(content);
+        if(source instanceof Object_1){
+            Object_1 object = (Object_1) source;
+            return AbstractObject_1.toString(
+                object, 
+                object.transactionalValuesRecordName, 
+                null
+            );
+        } else {
+            return source;
+        }
     }
 
     /**
@@ -2426,7 +2254,69 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
      */
     public String toString(
     ){
-        return toString(toStringContent());
+        if(this.objIsInaccessable()) {
+            return AbstractObject_1.toString(this, null);
+        } else {
+            try {
+                Map content = new HashMap();
+                TransactionalState_1 state = getState(true);
+                if(state != null) {
+                    for(Map.Entry<String,Object> e : state.values(false).entrySet()) {
+                        Object v = e.getValue();
+                        if(v instanceof Collection) {
+                            if (v instanceof List) {
+                                List t = new ArrayList();
+                                for(
+                                        Iterator j = ((List)v).iterator();
+                                        j.hasNext();
+                                ) {
+                                    t.add(
+                                        noContent(j.next())
+                                    );
+                                }
+                            } else if (v instanceof Set) {
+                                Set t = new HashSet();
+                                for(
+                                        Iterator j = ((Set)v).iterator();
+                                        j.hasNext();
+                                ) {
+                                    t.add(
+                                        noContent(j.next())
+                                    );
+                                }
+                            } // else ignore
+                        } else if (v instanceof SortedMap) {
+                            SortedMap t = new TreeMap();
+                            for(
+                                    Iterator j = ((SortedMap)v).entrySet().iterator();
+                                    j.hasNext();
+                            ){
+                                Map.Entry k = (Map.Entry)j.next();
+                                t.put(
+                                    k.getKey(),
+                                    noContent(k.getValue())
+                                );
+                            }
+                        } else {
+                            content.put(e.getKey(), noContent(v));
+                        }
+                    }
+                }
+                return AbstractObject_1.toString(
+                    this, 
+                    this.transactionalValuesRecordName, 
+                    null
+                ) + ", attributes=" + IndentingFormatter.toString(
+                    content
+                );
+            } catch (Exception exception) {
+                return AbstractObject_1.toString(
+                    this, 
+                    this.transactionalValuesRecordName, 
+                    exception.getMessage()
+                );
+            }
+        }
     }
 
 
@@ -2435,7 +2325,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     //------------------------------------------------------------------------
 
     static MappedRecord createMappedRecord(
-      String name
+        String name
     )throws ServiceException{
         try{
             return Records.getRecordFactory().createMappedRecord(name);
@@ -2444,9 +2334,19 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         }
     }
 
-    //------------------------------------------------------------------------
-    // Instance Members
-    //------------------------------------------------------------------------
+    static MappedRecord createMappedRecord(
+        MappedRecord that
+    )throws ServiceException{
+        try{
+            return Records.getRecordFactory().createMappedRecord(
+                that.getRecordName(),
+                that.getRecordShortDescription(),
+                that
+            );
+        } catch(ResourceException exception){
+            throw new ServiceException(exception);
+        }
+    }
 
     private BasicException.Parameter[] getExceptionParameters(
     ){
@@ -2469,6 +2369,21 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         }
     }
 
+
+    //------------------------------------------------------------------------
+    // Class Members
+    //------------------------------------------------------------------------
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 6246865175754052117L;
+
+
+    //------------------------------------------------------------------------
+    // Instance Members
+    //------------------------------------------------------------------------
+
     /**
      * The object's identity
      *
@@ -2487,26 +2402,6 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     protected Connection_1_3 manager;
 
     /**
-     *
-     */
-    protected transient MappedRecord persistentValues = null;
-
-    /**
-     * @serial
-     */
-    protected byte[] digest = null;
-
-    /**
-     * @serial
-     */
-    protected Map sequences = new HashMap();
-
-    /**
-     *
-     */
-    private transient Map transactionalValues;
-
-    /**
      * @serial
      */
     private String transactionalValuesRecordName;
@@ -2514,7 +2409,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     /**
      * @serial
      */
-    TransientContainer_1 transientContainer = null;
+    private TransientContainer_1 transientContainer = null;
 
     /**
      * @serial
@@ -2529,17 +2424,17 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     /**
      * @serial
      */
-    protected transient Set dirty = new HashSet();
-
-    /**
-     * @serial
-     */
     private boolean deleted;
 
     /**
+     *
+     */
+    protected transient MappedRecord persistentValues = null;
+
+    /**
      * @serial
      */
-    private boolean lifeCycleEventPending = false;
+    protected byte[] digest = null;
 
     /**
      * @serial
@@ -2547,21 +2442,9 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     private boolean transientOnRollback = false;
 
     /**
-     * @serial
-     */
-    private boolean prepared = false;
-
-    /**
      * Such an object cant't leave its hollow state
      */
     private transient ServiceException inaccessabilityReason = null;
-
-    /**
-     * Operation Queue
-     *
-     * @serial
-     */
-    private List operationQueue = new ArrayList();
 
     /**
      *
@@ -2574,9 +2457,9 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     private transient UUIDGenerator uuidGenerator = null;
 
 
-    //--------------------------------------------------------------------------
+    //------------------------------------------------------------------------
     // Implements Serializable
-    //--------------------------------------------------------------------------
+    //------------------------------------------------------------------------
 
     /**
      * Save the data of the <tt>Object_1_0</tt> instance to a stream (that
@@ -2587,16 +2470,23 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     private synchronized void writeObject(
         java.io.ObjectOutputStream stream
     ) throws java.io.IOException {
-        Object[] dirty = this.dirty.toArray();
-        stream.writeObject(dirty);
-        for(
-            int i = 0;
-            i < dirty.length;
-            i++
-        ) {
-         stream.writeObject(this.transactionalValues.get(dirty[i]));
-      }
-        stream.defaultWriteObject();
+        try {
+            TransactionalState_1 state = getState(true);
+            stream.defaultWriteObject();
+            if(state == null) {
+                stream.writeInt(0);
+            } else {
+                Set<String> features = state.dirtyFeatures(true);
+                Map<String,Object> source = state.values(false);
+                stream.writeInt(features.size());
+                for(String feature : features) {
+                    stream.writeObject(feature);
+                    stream.writeObject(source.get(feature));
+                }
+            }
+        } catch (ServiceException exception) {
+            throw new ExtendedIOException(exception);
+        }
     }
 
     /**
@@ -2606,18 +2496,24 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     private synchronized void readObject(
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
-        listeners = new WeakHashMap();
-        Object[] dirty = (Object[])stream.readObject();
-        this.dirty = new HashSet(Arrays.asList(dirty));
-        this.transactionalValues = new HashMap();
-        for(
-            int i = 0;
-            i < dirty.length;
-            i++
-        ) {
-         this.transactionalValues.put(dirty[i], stream.readObject());
-      }
         stream.defaultReadObject();
+        this.listeners = new WeakHashMap();
+        int count = stream.readInt();
+        if(count > 0) {
+            TransactionalState_1 state;
+            try {
+                state = getState(false);
+            } catch (ServiceException exception) {
+                throw new ExtendedIOException(exception);
+            }
+            Set<String> features = state.dirtyFeatures(false);
+            Map<String,Object> target = state.values(false);
+            for(int i = 0; i < count; i++) {
+                String feature = (String) stream.readObject();
+                features.add(feature);
+                target.put(feature, stream.readObject());
+            }
+        }
         this.manager.cache(this.identity, this);
     }
 
@@ -2627,11 +2523,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     //------------------------------------------------------------------------
 
     /**
-     *
-     * @author hburger
-     *
-     * To change the template for this generated type comment go to
-     * Window>Preferences>Java>Code Generation>Code and Comments
+     * Evictable Persistent Objects
      */
     private class EvictablePersistentObjects
         extends MarshallingSequentialList
@@ -2644,8 +2536,9 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         private static final long serialVersionUID = 3257285812084159024L;
 
         /**
-         * @param marshaller
-         * @param list
+         * Constructor 
+         *
+         * @param feature
          */
         EvictablePersistentObjects(
             String feature
@@ -2658,25 +2551,25 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
          */
         protected List getDelegate() {
             if(super.list == null) {
-               try {
-                   if(objIsNew()){
-                       super.list = Collections.EMPTY_LIST;
-                   } else {
-                       if(persistentValues != null) {
-                        super.list = (List)persistentValues.get(feature);
-                     }
-                       if(super.list == null) {
-                        super.list = provider.find(
-                              identity.getChild(feature),
-                              null,
-                              null,
-                              manager
-                          );
-                     }
-                   }
-               } catch (ServiceException e){
-                   throw new RuntimeServiceException(e);
-               }
+                try {
+                    if(objIsNew()){
+                        super.list = Collections.EMPTY_LIST;
+                    } else {
+                        if(persistentValues != null) {
+                            super.list = (List)persistentValues.get(feature);
+                        }
+                        if(super.list == null) {
+                            super.list = provider.find(
+                                identity.getChild(feature),
+                                null,
+                                null,
+                                manager
+                            );
+                        }
+                    }
+                } catch (ServiceException e){
+                    throw new RuntimeServiceException(e);
+                }
             }
             return super.list;
         }
@@ -2783,23 +2676,23 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
          */
         public long length() throws ServiceException {
             if(this.persistentSource == null) {
-               getStream();
+                getStream();
             }
             if(this.persistentSource instanceof Source_1_0) {
-               try {
-                   this.persistentSource = new Long(
-                           ((Source_1_0)this.persistentSource).length()
-                       );
-               } catch (IOException exception) {
-                   throw new ServiceException(exception);
-               }
+                try {
+                    this.persistentSource = new Long(
+                        ((Source_1_0)this.persistentSource).length()
+                    );
+                } catch (IOException exception) {
+                    throw new ServiceException(exception);
+                }
             } else if (this.persistentSource instanceof List) {
                 List source = (List) this.persistentSource;
                 this.persistentSource = source.isEmpty() ? null : source.get(0);
             }
             return this.persistentSource instanceof Long ?
                 ((Long)this.persistentSource).longValue() :
-                UNKNOWN;
+                    UNKNOWN;
         }
 
         /**
@@ -2838,8 +2731,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         public InputStream getBinaryStream() throws ServiceException {
             Object stream = getStream();
             return stream instanceof BinaryHolder ? 
-                new ByteArrayInputStream(((BinaryHolder)stream).getBytes()) : 
-                (InputStream)stream;
+                ((BinaryHolder)stream).toStream() :
+                    (InputStream)stream;
         }
 
         /* (non-Javadoc)
@@ -2849,14 +2742,10 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                 SystemOperations.GET_BINARY_STREAM,
                 manager.createStructure(
                     SystemOperations.GET_BINARY_STREAM_ARGUMENTS,
-                    new String[]{
-                        SystemOperations.GET_STREAM_FEATURE,
-                        SystemOperations.GET_STREAM_POSITION,
-                        SystemOperations.GET_STREAM_VALUE
-                    },
+                    GET_STREAM_ARGUMENTS,
                     new Object[]{
                         this.feature,
-                        new Long(position),
+                        Long.valueOf(position),
                         stream
                     }
                 )
@@ -2888,8 +2777,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         public Reader getCharacterStream() throws ServiceException {
             Object stream = getStream();
             return stream instanceof CharacterHolder ? 
-                new CharArrayReader(((CharacterHolder)stream).getChars()) : 
-                (Reader)stream;
+                ((CharacterHolder)stream).toStream() : 
+                    (Reader)stream;
         }
 
         /* (non-Javadoc)
@@ -2899,11 +2788,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                 SystemOperations.GET_CHARACTER_STREAM,
                 manager.createStructure(
                     SystemOperations.GET_CHARACTER_STREAM_ARGUMENTS,
-                    new String[]{
-                        SystemOperations.GET_STREAM_FEATURE,
-                        SystemOperations.GET_STREAM_POSITION,
-                        SystemOperations.GET_STREAM_VALUE
-                    },
+                    GET_STREAM_ARGUMENTS,
                     new Object[]{
                         this.feature,
                         new Long(position),
@@ -3000,8 +2885,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     //--------------------------------------------------------------------------
 
     final class ManagedList
-        extends AbstractList
-        implements Evictable
+    extends AbstractList
+    implements Evictable
     {
 
         /**
@@ -3014,8 +2899,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
          *        or null for transient objects.
          */
         ManagedList(
-          String feature,
-          Collection source
+            String feature,
+            Collection source
         ) throws ServiceException{
             this.feature = feature;
             refresh(source);
@@ -3031,20 +2916,15 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
          * instances.
          */
         void refresh(
-          Collection source
+            Collection source
         ) throws ServiceException{
             this.collection = new ArrayList(source == null ? 0 : source.size());
-            if(
-                source != null
-            ) {
-               for(
-                   Iterator i = source.iterator();
-                   i.hasNext();
-               ) {
-                  this.collection.add(
-                      Object_1.this.manager.marshal(i.next())
-                  );
-               }
+            if(source != null) {
+                for(Object i : source) {
+                    this.collection.add(
+                        Object_1.this.manager.marshal(i)
+                    );
+                }
             }
         }
 
@@ -3062,28 +2942,27 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
 
         private void assertCollectionIsAccessible(
         ){
-          if(!this.fetched){
-            try {
-              assertObjectIsAccessible();
-              refresh((Collection)getPersistentAttribute(this.feature, false));
-            } catch (ServiceException exception) {
-              throw new RuntimeServiceException(exception);
+            if(!this.fetched){
+                try {
+                    refresh((Collection)getPersistentAttribute(this.feature, false));
+                } catch (ServiceException exception) {
+                    throw new RuntimeServiceException(exception);
+                }
+                this.fetched = true;
             }
-            this.fetched = true;
-          }
         }
 
         public Object get(
             int index
         ) {
-          assertCollectionIsAccessible();
+            assertCollectionIsAccessible();
             return this.collection.get(index);
         }
 
         public int size(
         ){
-          assertCollectionIsAccessible();
-        return this.collection.size();
+            assertCollectionIsAccessible();
+            return this.collection.size();
         }
 
         public Object set(
@@ -3095,8 +2974,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         }
 
         public void add(
-        int index,
-        Object element
+            int index,
+            Object element
         ){
             makeDirty();
             this.collection.add(index, element);
@@ -3124,8 +3003,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     //------------------------------------------------------------------------
 
     final class ManagedSet
-        extends AbstractSet
-        implements Evictable
+    extends AbstractSet
+    implements Evictable
     {
 
         /**
@@ -3138,8 +3017,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
          *        or null for transient objects.
          */
         ManagedSet(
-          String feature,
-          Collection source
+            String feature,
+            Collection source
         ) throws ServiceException{
             this.feature = feature;
             refresh(source);
@@ -3155,20 +3034,20 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
          * instances.
          */
         void refresh(
-          Collection source
+            Collection source
         ) throws ServiceException{
             this.collection = new HashSet(source == null ? 0 : source.size());
             if(source != null){
                 for(
-                    Iterator i = source instanceof SparseList ?
-                        ((SparseList)source).populationIterator() :
-                        source.iterator();
-                    i.hasNext();
+                        Iterator i = source instanceof SparseList ?
+                            ((SparseList)source).populationIterator() :
+                                source.iterator();
+                            i.hasNext();
                 ) {
-                  this.collection.add(
-                       Object_1.this.manager.marshal(i.next())
-                   );
-               }
+                    this.collection.add(
+                        Object_1.this.manager.marshal(i.next())
+                    );
+                }
             }
         }
 
@@ -3186,15 +3065,14 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
 
         private void assertCollectionIsAccessible(
         ){
-          if(!this.fetched){
-            try {
-              assertObjectIsAccessible();
-              refresh((Collection)getPersistentAttribute(this.feature, false));
-            } catch (ServiceException exception) {
-              throw new RuntimeServiceException(exception);
+            if(!this.fetched){
+                try {
+                    refresh((Collection)getPersistentAttribute(this.feature, false));
+                } catch (ServiceException exception) {
+                    throw new RuntimeServiceException(exception);
+                }
+                this.fetched = true;
             }
-            this.fetched = true;
-          }
         }
 
         public int size(
@@ -3242,7 +3120,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             }
 
             private final Iterator iterator =
-              ManagedSet.this.collection.iterator();
+                ManagedSet.this.collection.iterator();
 
         }
 
@@ -3254,8 +3132,8 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     //------------------------------------------------------------------------
 
     final class ManagedSparseArray
-      extends TreeMap
-      implements SortedMap, Evictable
+    extends TreeMap
+    implements SortedMap, Evictable
     {
 
         /**
@@ -3292,25 +3170,19 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             Object source
         ) throws ServiceException{
             super.clear();
-            if(
-                source != null
-            ){
+            if(source != null){
                 if(source instanceof SparseList){
                     for(
-                        ListIterator i = ((SparseList)source).populationIterator();
-                        i.hasNext();
+                            ListIterator i = ((SparseList)source).populationIterator();
+                            i.hasNext();
                     ) {
-                     super.put(
-                           new Integer(i.nextIndex()),
-                           Object_1.this.manager.marshal(i.next())
-                       );
-                  }
+                        super.put(
+                            new Integer(i.nextIndex()),
+                            Object_1.this.manager.marshal(i.next())
+                        );
+                    }
                 } else {
-                    for(
-                        java.util.Iterator i = ((SortedMap)source).entrySet().iterator();
-                        i.hasNext();
-                    ){
-                        Map.Entry j = (Map.Entry)i.next();
+                    for(Map.Entry<?,?> j : ((SortedMap<?,?>)source).entrySet()) {
                         super.put(
                             j.getKey(),
                             Object_1.this.manager.marshal(j.getValue())
@@ -3336,7 +3208,6 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         ){
             if(!this.fetched){
                 try {
-                    assertObjectIsAccessible();
                     refresh(getPersistentAttribute(this.feature, false));
                 } catch (ServiceException exception) {
                     throw new RuntimeServiceException(exception);
@@ -3386,7 +3257,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
     }
 
     //------------------------------------------------------------------------
-    // Class OperationResult
+    // Class Operation
     //------------------------------------------------------------------------
 
     final class Operation extends MarshallingStructure_1 {
@@ -3404,33 +3275,21 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             this.arguments=Object_1.createMappedRecord(
                 arguments.objGetType()
             );
-            for(
-                Iterator i=arguments.objFieldNames().iterator();
-                i.hasNext();
-            ){
-                String fieldName=(String)i.next();
+            for(String fieldName : arguments.objFieldNames()){
                 Object source = arguments.objGetValue(fieldName);
                 if(source instanceof Collection){
                     if(source instanceof List){
                         List collection = (List)source;
                         List target = new ArrayList();
-                        for(
-                            Iterator j=collection.iterator();
-                            j.hasNext();
-                        ) {
-                           target.add(
-                               super.marshaller.unmarshal(j.next())
-                           );
+                        for(Object j : collection){
+                            target.add(
+                                super.marshaller.unmarshal(j)
+                            );
                         }
                         this.arguments.put(fieldName, target);
                     }else if(source instanceof SortedMap){
-                        SortedMap collection = (SortedMap)source;
                         SortedMap target = new TreeMap();
-                        for(
-                            Iterator j = collection.entrySet().iterator();
-                            j.hasNext();
-                        ){
-                            Map.Entry k = (Entry)j.next();
+                        for(Map.Entry<?,?> k : ((SortedMap<?,?>)source).entrySet()) {
                             target.put(
                                 k.getKey(),
                                 super.marshaller.unmarshal(k.getValue())
@@ -3438,24 +3297,18 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
                         }
                         this.arguments.put(fieldName, target);
                     }else if(source instanceof Set){
-                        Set collection = (Set)source;
                         Set target = new HashSet();
-                        for(
-                            Iterator j=collection.iterator();
-                            j.hasNext();
-                        ) {
-                           target.add(
-                               super.marshaller.unmarshal(j.next())
-                           );
+                        for(Object j : (Set)source) {
+                            target.add(
+                                super.marshaller.unmarshal(j)
+                            );
                         }
                         this.arguments.put(fieldName, target);
                     }else{
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.ASSERTION_FAILURE,
-                            new BasicException.Parameter[]{
+                            "Structure_1_0 field has an invalid Collection class",
                             new BasicException.Parameter("class",source.getClass().getName())
-                            },
-                            "Structure_1_0 field has an invalid Collection class"
                         );
                     }
                 }else{
@@ -3469,7 +3322,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             try {
                 super.setDelegate(
                     new MapStructure_1(
-                            provider.invokeOperation(
+                        provider.invokeOperation(
                             identity,
                             this.operation,
                             this.arguments
@@ -3481,18 +3334,12 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             } catch (Exception exception) {
                 throw new ServiceException(
                     exception,
-                    exception instanceof BasicException.Wrapper ?
-                        ((BasicException.Wrapper)exception).getExceptionDomain() :
-                        BasicException.Code.DEFAULT_DOMAIN,
-                    exception instanceof BasicException.Wrapper ?
-                        ((BasicException.Wrapper)exception).getExceptionCode() :
-                        BasicException.Code.GENERIC,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("object", identity),
-                        new BasicException.Parameter("operation",this.operation),
-                        new BasicException.Parameter("arguments",this.arguments)
-                    },
-                    "Operation failed"
+                    exception instanceof BasicException.Wrapper ? ((BasicException.Wrapper)exception).getExceptionDomain() : BasicException.Code.DEFAULT_DOMAIN,
+                    exception instanceof BasicException.Wrapper ? ((BasicException.Wrapper)exception).getExceptionCode() : BasicException.Code.GENERIC,
+                    "Operation failed",
+                    new BasicException.Parameter("object", identity),
+                    new BasicException.Parameter("operation",this.operation),
+                    new BasicException.Parameter("arguments",this.arguments)
                 );
             }
         }

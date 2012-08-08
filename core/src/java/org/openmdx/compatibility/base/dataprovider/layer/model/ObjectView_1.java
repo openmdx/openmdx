@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ObjectView_1.java,v 1.6 2008/03/21 18:46:21 hburger Exp $
+ * Name:        $Id: ObjectView_1.java,v 1.7 2008/09/10 08:55:21 hburger Exp $
  * Description: ObjectView_1 class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:46:21 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,335 +80,329 @@ import org.openmdx.kernel.log.SysLog;
  */
 @SuppressWarnings("unchecked")
 public abstract class ObjectView_1
-  extends Standard_1 {
+extends Standard_1 {
 
-  //------------------------------------------------------------------------
-  @SuppressWarnings("deprecation")
-public void activate(
-    short id,
-    Configuration configuration,
-    Layer_1_0 delegation
-  ) throws Exception, ServiceException {
+    //------------------------------------------------------------------------
+    @SuppressWarnings("deprecation")
+    public void activate(
+        short id,
+        Configuration configuration,
+        Layer_1_0 delegation
+    ) throws Exception, ServiceException {
 
-    super.activate(
-      id, 
-      configuration, 
-      delegation
-    );
+        super.activate(
+            id, 
+            configuration, 
+            delegation
+        );
 
-    // Default  Qualifier Type
-    this.defaultQualifierType = configuration.isOn(
-        SharedConfigurationEntries.COMPRESS_UID
-    ) ? "UID" : "UUID";
+        // Default  Qualifier Type
+        this.defaultQualifierType = configuration.isOn(
+            SharedConfigurationEntries.COMPRESS_UID
+        ) ? "UID" : "UUID";
 
-    // Switch configuration
-    SparseList dataproviderSource = configuration.values(
-        SharedConfigurationEntries.DATAPROVIDER_CONNECTION
-    );
-    SparseList delegationPathSource = configuration.values(
-        SharedConfigurationEntries.DELEGATION_PATH
-    );
-    if(delegationPathSource.isEmpty()){
-        if(dataproviderSource.isEmpty()) {
-	        this.router = this.getDelegation();
+        // Switch configuration
+        SparseList dataproviderSource = configuration.values(
+            SharedConfigurationEntries.DATAPROVIDER_CONNECTION
+        );
+        SparseList delegationPathSource = configuration.values(
+            SharedConfigurationEntries.DELEGATION_PATH
+        );
+        if(delegationPathSource.isEmpty()){
+            if(dataproviderSource.isEmpty()) {
+                this.router = this.getDelegation();
+            } else {
+                SysLog.info(
+                    "The org:openmdx:compatibility:runtime1 model allowing to explore other dataproviders is deprecated",
+                    "Specifying some " + SharedConfigurationEntries.DATAPROVIDER_CONNECTION +
+                    " entries without their corresponding " + SharedConfigurationEntries.DELEGATION_PATH +
+                    " is deprecated"
+                );
+                List dataproviderTarget = dataproviderSource.population(); 
+                this.router = new Switch_1(
+                    (Dataprovider_1_0[]) dataproviderTarget.toArray(
+                        new Dataprovider_1_0[dataproviderTarget.size()]
+                    ),
+                    this.getDelegation()
+                );   
+            }
         } else {
-            SysLog.info(
-                "The org:openmdx:compatibility:runtime1 model allowing to explore other dataproviders is deprecated",
-                "Specifying some " + SharedConfigurationEntries.DATAPROVIDER_CONNECTION +
-                " entries without their corresponding " + SharedConfigurationEntries.DELEGATION_PATH +
-                " is deprecated"
-            );
-            List dataproviderTarget = dataproviderSource.population(); 
+            List dataproviderTarget = new ArrayList();
+            List delegationPathTarget = new ArrayList();
+            for(
+                    ListIterator dpi = delegationPathSource.populationIterator();
+                    dpi.hasNext();
+            ){
+                int i = dpi.nextIndex();
+                Object dp = dataproviderSource.get(i);
+                if(dp == null) throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "The delegation path at the given index has no corresponding dataprovider counterpart",
+                    new BasicException.Parameter(
+                        SharedConfigurationEntries.DELEGATION_PATH,
+                        delegationPathSource
+                    ),
+                    new BasicException.Parameter(
+                        "index",
+                        i
+                    ),
+                    new BasicException.Parameter(
+                        SharedConfigurationEntries.DATAPROVIDER_CONNECTION,
+                        dataproviderSource
+                    )
+                );
+                delegationPathTarget.add(dpi.next());
+                dataproviderTarget.add(dp);
+            }
             this.router = new Switch_1(
                 (Dataprovider_1_0[]) dataproviderTarget.toArray(
                     new Dataprovider_1_0[dataproviderTarget.size()]
                 ),
+                Path.toPathArray(delegationPathTarget),
                 this.getDelegation()
-			);   
-        }
-    } else {
-        List dataproviderTarget = new ArrayList();
-        List delegationPathTarget = new ArrayList();
-        for(
-            ListIterator dpi = delegationPathSource.populationIterator();
-            dpi.hasNext();
-        ){
-            int i = dpi.nextIndex();
-            Object dp = dataproviderSource.get(i);
-            if(dp == null) throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.INVALID_CONFIGURATION,
-			  new BasicException.Parameter[]{
-              	  new BasicException.Parameter(
-              	  	SharedConfigurationEntries.DELEGATION_PATH,
-					delegationPathSource
-              	  ),
-              	  new BasicException.Parameter(
-                	"index",
-  					i
-  			      ),
-              	  new BasicException.Parameter(
-              	  	SharedConfigurationEntries.DATAPROVIDER_CONNECTION,
-					dataproviderSource
-              	  )
-              },
-              "The delegation path at the given index has no corresponding dataprovider counterpart"
-	        );
-            delegationPathTarget.add(dpi.next());
-            dataproviderTarget.add(dp);
-        }
-        this.router = new Switch_1(
-            (Dataprovider_1_0[]) dataproviderTarget.toArray(
-                new Dataprovider_1_0[dataproviderTarget.size()]
-            ),
-            Path.toPathArray(delegationPathTarget),
-            this.getDelegation()
-		);
-    }      
-  }
-  
-  //------------------------------------------------------------------------
-  private void prepareObjectFactories(
-    ServiceHeader header, 
-    boolean reset
-  ) throws ServiceException {
-      //
-      // volatile object factory
-      //
-      if(reset || this.volatileObjectFactory == null) this.volatileObjectFactory = new Manager_1(
-	      new Connection_1(
-	          new Provider_1(
-	    	      new RequestCollection(
-	    	        header,
-	    	        this.getDelegation()
-	    	      ),
-	    	      false
-	    	    ),
-	        false,
-	        this.defaultQualifierType
-	      )
-	  );
-      //
-      // persistent object factory
-      // 
-      if(reset || this.persistentObjectFactory == null) this.persistentObjectFactory = new Manager_1(
-	      new Connection_1(
-	          new Provider_1(
-	    	      new RequestCollection(
-	    	        header,
-	    	        this.router
-	    	      ),
-	    	      false
-	    	    ),
-	        true,
-	        this.defaultQualifierType
-	      )
-	  );
-  }
-
-  //------------------------------------------------------------------------
-  // implements Layer_1_0
-  //------------------------------------------------------------------------
-
-  /**
-   * Set the unit of work id and test whether it has changed or is null.
-   * 
-   * @return true if the unit of work id has changed or is null.  
-   */
-  private boolean setUnitOfWorkId(
-      String unitOfWorkId
-  ){
-      boolean changed = unitOfWorkId == null || unitOfWorkId != this.currentUnitOfWorkId;
-      this.currentUnitOfWorkId = unitOfWorkId;
-      return changed;
-  }
-  
-  //------------------------------------------------------------------------
-  public void prolog(
-    ServiceHeader header, 
-    DataproviderRequest[] requests
-  ) throws ServiceException {
-//    super.prolog(header,requests);
-      prepareObjectFactories(
-          header,
-          setUnitOfWorkId(
-	          requests.length > 0 ? 
-	              (String) requests[0].context(DataproviderRequestContexts.UNIT_OF_WORK_ID).get(0) :
-	              null
-	      )
-	  );    
-  }
-
-  
-  //------------------------------------------------------------------------
-  public DataproviderReply get(
-    ServiceHeader header,
-    DataproviderRequest request
-  ) throws ServiceException {
-      this.prepareObjectFactories(header, false);
-	  this.volatileObjectFactory.getUnitOfWork().begin();
-	  this.prepareObject(
-	    request.path()
-	  );
-	  this.volatileObjectFactory.getUnitOfWork().commit();
-		return super.get(
-		  header,
-		  request
-		);
-  }
-
-  //------------------------------------------------------------------------
-  public DataproviderReply find(
-    ServiceHeader header,
-    DataproviderRequest request
-  ) throws ServiceException {
-      this.prepareObjectFactories(header, false);
-	  this.volatileObjectFactory.getUnitOfWork().begin();
-	  this.prepareContainer(
-	    request.path()
-	  );
-	  this.volatileObjectFactory.getUnitOfWork().commit();
-    return super.find(
-      header,
-      request
-    );
-  }
-
-  //------------------------------------------------------------------------
-  public DataproviderReply set(
-    ServiceHeader header,
-    DataproviderRequest request
-  ) throws ServiceException {
-    this.prepareObjectFactories(header, false);
-    try {
-      super.get(
-        header,
-        request
-      );
-    } catch(ServiceException e) {
-      throw new ServiceException(
-        BasicException.Code.DEFAULT_DOMAIN,
-        BasicException.Code.NOT_SUPPORTED,
-        new BasicException.Parameter[]{
-          new BasicException.Parameter("object", request.object())
-        },
-        "ObjectView does not support object creation"
-      );    
+            );
+        }      
     }
-    // object is already prepared and is replaced
-    return super.set(
-      header,
-      request
-    );
-  }
 
-  //------------------------------------------------------------------------
-  public DataproviderReply create(
-    ServiceHeader header,
-    DataproviderRequest request
-  ) throws ServiceException {
-    throw new ServiceException(
-      BasicException.Code.DEFAULT_DOMAIN,
-      BasicException.Code.NOT_SUPPORTED,
-      new BasicException.Parameter[]{
-        new BasicException.Parameter("object", request.object())
-      },
-      "ObjectView does not support object creation"
-    );    
-  }
+    //------------------------------------------------------------------------
+    private void prepareObjectFactories(
+        ServiceHeader header, 
+        boolean reset
+    ) throws ServiceException {
+        //
+        // volatile object factory
+        //
+        if(reset || this.volatileObjectFactory == null) this.volatileObjectFactory = new Manager_1(
+            new Connection_1(
+                new Provider_1(
+                    new RequestCollection(
+                        header,
+                        this.getDelegation()
+                    ),
+                    false
+                ),
+                false,
+                this.defaultQualifierType
+            )
+        );
+        //
+        // persistent object factory
+        // 
+        if(reset || this.persistentObjectFactory == null) this.persistentObjectFactory = new Manager_1(
+            new Connection_1(
+                new Provider_1(
+                    new RequestCollection(
+                        header,
+                        this.router
+                    ),
+                    false
+                ),
+                true,
+                this.defaultQualifierType
+            )
+        );
+    }
 
-  //------------------------------------------------------------------------
-  public DataproviderReply replace(
-    ServiceHeader header,
-    DataproviderRequest request
-  ) throws ServiceException {
-      this.prepareObjectFactories(header, false);
-	  super.get(
-	    header,
-	    request
-	  );
-	  return super.replace(
-	    header,
-	    request
-	  );
-  }
+    //------------------------------------------------------------------------
+    // implements Layer_1_0
+    //------------------------------------------------------------------------
 
-  //------------------------------------------------------------------------
-  public DataproviderReply modify(
-    ServiceHeader header,
-    DataproviderRequest request
-  ) throws ServiceException {
-      this.prepareObjectFactories(header, false);
-	  super.get(
-	    header,
-	    request
-	  );
-	  return super.modify(
-	    header,
-	    request
-	  );
-  }
+    /**
+     * Set the unit of work id and test whether it has changed or is null.
+     * 
+     * @return true if the unit of work id has changed or is null.  
+     */
+    private boolean setUnitOfWorkId(
+        String unitOfWorkId
+    ){
+        boolean changed = unitOfWorkId == null || unitOfWorkId != this.currentUnitOfWorkId;
+        this.currentUnitOfWorkId = unitOfWorkId;
+        return changed;
+    }
 
-  //------------------------------------------------------------------------
-  // ObjectView
-  //------------------------------------------------------------------------
+    //------------------------------------------------------------------------
+    public void prolog(
+        ServiceHeader header, 
+        DataproviderRequest[] requests
+    ) throws ServiceException {
+//      super.prolog(header,requests);
+        prepareObjectFactories(
+            header,
+            setUnitOfWorkId(
+                requests.length > 0 ? 
+                    (String) requests[0].context(DataproviderRequestContexts.UNIT_OF_WORK_ID).get(0) :
+                        null
+            )
+        );    
+    }
 
-  //------------------------------------------------------------------------
-  /**
-   * This method is no longer invoked.
-   * <p>
-   * The clearStorage() invocations have been replaced by object factory
-   * replacements.
-   * 
-   * @deprecated since openMDX 1.5.3
-   */
-  protected abstract void clearStorage(
-  ) throws ServiceException;
 
-  //------------------------------------------------------------------------
-  /**
-   * Prepare objects of the specified container. The objects must be prepared
-   * using the volatile factory. prepareContainer() is called within a
-   * unit of work.
-   */
-  protected abstract void prepareContainer(
-    Path identity
-  ) throws ServiceException;
+    //------------------------------------------------------------------------
+    public DataproviderReply get(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        this.prepareObjectFactories(header, false);
+        this.volatileObjectFactory.getUnitOfWork().begin();
+        this.prepareObject(
+            request.path()
+        );
+        this.volatileObjectFactory.getUnitOfWork().commit();
+        return super.get(
+            header,
+            request
+        );
+    }
 
-  //------------------------------------------------------------------------
-  /**
-   * Prepare specified object. The object must be prepared using the volatile 
-   * factory. prepareContainer() is called within a unit of work.
-   */
-  protected abstract void prepareObject(
-    Path identity
-  ) throws ServiceException;
+    //------------------------------------------------------------------------
+    public DataproviderReply find(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        this.prepareObjectFactories(header, false);
+        this.volatileObjectFactory.getUnitOfWork().begin();
+        this.prepareContainer(
+            request.path()
+        );
+        this.volatileObjectFactory.getUnitOfWork().commit();
+        return super.find(
+            header,
+            request
+        );
+    }
 
-  //------------------------------------------------------------------------
-  protected ObjectFactory_1_0 getVolatileObjectFactory(
-  ) throws ServiceException {
-    return this.volatileObjectFactory;
-  }
-  
-  //------------------------------------------------------------------------
-  /**
-   * Object factory used to retrieve objects from other (remote) providers.
-   * ObjectView does not perform any unit of work handling on this factory.
-   */
-  protected ObjectFactory_1_0 getPersistentObjectFactory(
-  ) throws ServiceException {
-    return this.persistentObjectFactory;
-  }
-  
-  //------------------------------------------------------------------------
-  // Variables
-  //------------------------------------------------------------------------
-  private String currentUnitOfWorkId = null;
-  private Dataprovider_1_0 router = null;
-  private ObjectFactory_1_0 volatileObjectFactory = null;
-  private ObjectFactory_1_0 persistentObjectFactory = null;
-  private String defaultQualifierType = null;
-  
+    //------------------------------------------------------------------------
+    public DataproviderReply set(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        this.prepareObjectFactories(header, false);
+        try {
+            super.get(
+                header,
+                request
+            );
+        } catch(ServiceException e) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "ObjectView does not support object creation",
+                new BasicException.Parameter("object", request.object())
+            );    
+        }
+        // object is already prepared and is replaced
+        return super.set(
+            header,
+            request
+        );
+    }
+
+    //------------------------------------------------------------------------
+    public DataproviderReply create(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            "ObjectView does not support object creation",
+            new BasicException.Parameter("object", request.object())
+        );    
+    }
+
+    //------------------------------------------------------------------------
+    public DataproviderReply replace(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        this.prepareObjectFactories(header, false);
+        super.get(
+            header,
+            request
+        );
+        return super.replace(
+            header,
+            request
+        );
+    }
+
+    //------------------------------------------------------------------------
+    public DataproviderReply modify(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        this.prepareObjectFactories(header, false);
+        super.get(
+            header,
+            request
+        );
+        return super.modify(
+            header,
+            request
+        );
+    }
+
+    //------------------------------------------------------------------------
+    // ObjectView
+    //------------------------------------------------------------------------
+
+    //------------------------------------------------------------------------
+    /**
+     * This method is no longer invoked.
+     * <p>
+     * The clearStorage() invocations have been replaced by object factory
+     * replacements.
+     * 
+     * @deprecated since openMDX 1.5.3
+     */
+    protected abstract void clearStorage(
+    ) throws ServiceException;
+
+    //------------------------------------------------------------------------
+    /**
+     * Prepare objects of the specified container. The objects must be prepared
+     * using the volatile factory. prepareContainer() is called within a
+     * unit of work.
+     */
+    protected abstract void prepareContainer(
+        Path identity
+    ) throws ServiceException;
+
+    //------------------------------------------------------------------------
+    /**
+     * Prepare specified object. The object must be prepared using the volatile 
+     * factory. prepareContainer() is called within a unit of work.
+     */
+    protected abstract void prepareObject(
+        Path identity
+    ) throws ServiceException;
+
+    //------------------------------------------------------------------------
+    protected ObjectFactory_1_0 getVolatileObjectFactory(
+    ) throws ServiceException {
+        return this.volatileObjectFactory;
+    }
+
+    //------------------------------------------------------------------------
+    /**
+     * Object factory used to retrieve objects from other (remote) providers.
+     * ObjectView does not perform any unit of work handling on this factory.
+     */
+    protected ObjectFactory_1_0 getPersistentObjectFactory(
+    ) throws ServiceException {
+        return this.persistentObjectFactory;
+    }
+
+    //------------------------------------------------------------------------
+    // Variables
+    //------------------------------------------------------------------------
+    private String currentUnitOfWorkId = null;
+    private Dataprovider_1_0 router = null;
+    private ObjectFactory_1_0 volatileObjectFactory = null;
+    private ObjectFactory_1_0 persistentObjectFactory = null;
+    private String defaultQualifierType = null;
+
 }
 
 //---End of File -----------------------------------------------------------

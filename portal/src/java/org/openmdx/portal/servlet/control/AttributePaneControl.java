@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributePaneControl.java,v 1.27 2008/05/28 12:02:09 wfro Exp $
+ * Name:        $Id: AttributePaneControl.java,v 1.30 2008/08/12 16:38:06 wfro Exp $
  * Description: TabControl
  * Revision:    $AttributePaneRenderer: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/28 12:02:09 $
+ * Date:        $Date: 2008/08/12 16:38:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -67,7 +64,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.HtmlPage;
-import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.ObjectView;
 
@@ -120,10 +116,8 @@ public class AttributePaneControl
         AppLog.detail("> paint");
         
         ApplicationContext app = p.getApplicationContext();
-        String guiMode = app.getCurrentGuiMode();
         HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
         ObjectView view = (ObjectView)p.getView();        
-        p.write("<div id=\"inspector\">");
         
         int nActiveTab = 0;
         for(int i = 0; i < this.attributeTabControl.length; i++) {
@@ -138,56 +132,41 @@ public class AttributePaneControl
         );
         
         // Select all tabs. Show only if tab size > 0
-        boolean useSimpleTabs = 
-            guiMode.equals(WebKeys.SETTING_GUI_MODE_BASIC) ||
-            guiMode.equals(WebKeys.SETTING_GUI_MODE_STANDARD) ||
-            view.getContainerElementId() != null;
         if(nActiveTab > 0) {       
+            p.write("<div id=\"inspector\">");
             // Generate divs for each tab in case of simple look. Tabs are generated
             // in PageEpilogControl in other looks
-            if(useSimpleTabs) {
-                p.write("  <div class=\"inspTabPanel\" style=\"z-index:201;\">");
-                for(int i = 0; i < this.attributeTabControl.length; i++) {
-                    AttributeTabControl tab = this.getAttributeTabControl()[i];                            
-                    String inspPanelId = view.getContainerElementId() == null
-                        ? Integer.toString(i)
-                        : view.getContainerElementId() + "-" + Integer.toString(i);                            
-                    p.write("    <a href=\"#\" class=\"", (i == 0 ? "selected" : "hidden"), "\" ", p.getOnClick("javascript:inspTabSelect(this, 'inspPanel", inspPanelId, "');return false;"), ">", htmlEncoder.encode(tab.getName(), false), "</a>");
-                }
-                p.write("    <a href=\"#\" onclick=\"javascript:inspTabSelect(this, '');return false;\">*</a>");
-                p.write("  </div>");
-                p.write("  <div id=\"inspContent\" class=\"inspContent\" style=\"z-index:200;\">");
+            p.write("  <div class=\"inspTabPanel\" style=\"z-index:201;\">");
+            for(int i = 0; i < this.attributeTabControl.length; i++) {
+                AttributeTabControl tab = this.getAttributeTabControl()[i];                            
+                String inspPanelId = view.getContainerElementId() == null
+                    ? Integer.toString(i)
+                    : view.getContainerElementId() + "-" + Integer.toString(i);                            
+                p.write("    <a href=\"#\" class=\"", (i == 0 ? "selected" : "hidden"), "\" ", p.getOnClick("javascript:inspTabSelect(this, 'inspPanel", inspPanelId, "');return false;"), ">", htmlEncoder.encode(tab.getName(), false), "</a>");
             }
+            p.write("    <a href=\"#\" onclick=\"javascript:inspTabSelect(this, '');return false;\">*</a>");
+            p.write("  </div>");
+            p.write("  <div id=\"inspContent\" class=\"inspContent\" style=\"z-index:200;\">");
             for(int i = 0; i < this.attributeTabControl.length; i++) {
                 AttributeTabControl tab = this.attributeTabControl[i];
                 String inspPanelId = view.getContainerElementId() == null
                     ? Integer.toString(i)
                     : view.getContainerElementId() + "-" + Integer.toString(i);                                            
-                if(useSimpleTabs) {
-                    p.write("    <div id=\"inspPanel", inspPanelId, "\" class=\"", (i == 0 ? "selected" : "hidden"), "\" style=\"padding-top:10px;\">");
-                }
-                else {
-                    p.write("    <div id=\"tab", Integer.toString(i), "\">");
-                }
+                p.write("    <div id=\"inspPanel", inspPanelId, "\" class=\"", (i == 0 ? "selected" : "hidden"), "\" style=\"padding-top:10px;\">");
                 tab.paint(
                     p,
                     frame,
                     forEditing
                 );
                 p.write("    </div>");    
-          }
-          if(useSimpleTabs) {
-              p.write("  </div>");
-          }
-        }
-        p.write("</div>");
-        if(useSimpleTabs) {
-            // Inheritance breaker for IE
+            }
+            p.write("  </div>");
+            p.write("</div>");
             p.write("<div style=\"padding:1px;\"></div>");
+            if(view.getContainerElementId() != null && !(view instanceof EditObjectView)) {
+                p.write("<div class=\"gridSpacerBottom\"></div>");                        
+            }                                                
         }
-        if(view.getContainerElementId() != null && !(view instanceof EditObjectView)) {
-            p.write("<div class=\"gridSpacerBottom\"></div>");                        
-        }                                                
         AppLog.detail("< paint");
     }
     

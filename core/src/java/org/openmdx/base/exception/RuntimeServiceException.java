@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RuntimeServiceException.java,v 1.10 2008/03/21 18:30:08 hburger Exp $
+ * Name:        $Id: RuntimeServiceException.java,v 1.11 2008/09/10 08:55:22 hburger Exp $
  * Description: Exception Framework 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:30:08 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,6 +55,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.BasicException.Parameter;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -64,10 +65,10 @@ import org.openmdx.kernel.log.SysLog;
  * @author   H. Burger
  */
 public final class RuntimeServiceException 
-    extends RuntimeException 
-    implements BasicException.Wrapper
+extends RuntimeException 
+implements BasicException.Wrapper
 { 
-    
+
     /**
      * 
      */
@@ -84,7 +85,7 @@ public final class RuntimeServiceException
     ){
         this.exceptionStack = exception == null ? 
             BasicException.toStackedException(this) : 
-            exception;
+                exception;
     }
 
     /**
@@ -140,6 +141,34 @@ public final class RuntimeServiceException
         BasicException.Parameter[] parameters,
         String description
     ){
+        this(cause, exceptionDomain, exceptionCode, description, parameters);
+    }
+
+    /**
+     * Creates a new <code>RuntimeServiceException</code>.
+     *
+     * @param   cause
+     *          The exception cause.
+     * @param   exceptionDomain
+     *          The exception domain or <code>null</code> for the
+     *          default exception domain containing negative exception codes
+     *          only.
+     * @param   exceptionCode
+     *          The exception code. Negative codes are shared by all exception
+     *          domains, while positive ones are (non-default) exception
+     *          domain specific.
+     * @param   description
+     *          A readable description usually not including the parameters.
+     * @param   parameters
+     *          The exception specific parameters.
+     */
+    public RuntimeServiceException(
+        Exception cause,
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        Parameter... parameters
+    ){
         this.exceptionStack = new BasicException(
             cause,
             exceptionDomain,
@@ -167,17 +196,42 @@ public final class RuntimeServiceException
      *          A readable description not including the parameters.
      */
     public RuntimeServiceException(
-          String exceptionDomain,
-          int exceptionCode,
-          BasicException.Parameter[] parameters,
-          String description
+        String exceptionDomain,
+        int exceptionCode,
+        BasicException.Parameter[] parameters,
+        String description
+    ) {
+        this(exceptionDomain, exceptionCode, description, parameters);
+    }
+
+    /**
+     * Creates a new <code>RuntimeServiceException</code>.
+     *
+     * @param   exceptionDomain
+     *          The exception domain or <code>null</code> for the
+     *          default exception domain containing negative exception codes
+     *          only.
+     * @param   exceptionCode
+     *          The exception code. Negative codes are shared by all exception
+     *          domains, while positive ones are (non-default) exception
+     *          domain specific.
+     * @param   parameters
+     *          The exception specific parameters.
+     * @param   message
+     *          A readable description not including the parameters.
+     */
+    public RuntimeServiceException(
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        Parameter... parameters
     ) {
         this(
             null, // none
             exceptionDomain,
             exceptionCode,
-            parameters,
-            description
+            description,
+            parameters
         );
     }
 
@@ -196,7 +250,7 @@ public final class RuntimeServiceException
         Throwable cause
     ){
         (
-            (BasicException)this.exceptionStack.getExceptionStack().get(0)
+                (BasicException)this.exceptionStack.getExceptionStack().get(0)
         ).initCause(cause);
         return this;
     }
@@ -235,7 +289,7 @@ public final class RuntimeServiceException
     {
         return this.exceptionStack == null ? 
             BasicException.Code.DEFAULT_DOMAIN : 
-            this.exceptionStack.getExceptionDomain();
+                this.exceptionStack.getExceptionDomain();
     }
 
     /**
@@ -247,33 +301,33 @@ public final class RuntimeServiceException
     {
         return this.exceptionStack == null ? 
             BasicException.Code.GENERIC : 
-            this.exceptionStack.getExceptionCode();
+                this.exceptionStack.getExceptionCode();
     }
 
-	/**
-	 * Returns the cause belonging to a specific exception domain.
-	 * 
-	 * @param 	exceptionDomain
-	 * 			the desired exception domain,
-	 *          or <code>null</code> to retrieve the initial cause.
-	 *
-	 * @return  Either the cause belonging to a specific exception domain
-	 *          or the initial cause if <code>exceptionDomain</code> is
-	 * 			<code>null</code>.  
-	 */
-	public BasicException getCause(
-	    String exceptionDomain
-	){
+    /**
+     * Returns the cause belonging to a specific exception domain.
+     * 
+     * @param 	exceptionDomain
+     * 			the desired exception domain,
+     *          or <code>null</code> to retrieve the initial cause.
+     *
+     * @return  Either the cause belonging to a specific exception domain
+     *          or the initial cause if <code>exceptionDomain</code> is
+     * 			<code>null</code>.  
+     */
+    public BasicException getCause(
+        String exceptionDomain
+    ){
         return this.exceptionStack == null ? 
             null : 
-            this.exceptionStack.getCause(exceptionDomain);
-	}
+                this.exceptionStack.getCause(exceptionDomain);
+    }
 
     /**
      * The exception stack
      */
     private BasicException exceptionStack;
-         
+
 
     //------------------------------------------------------------------------
     // Extends Throwable
@@ -286,10 +340,10 @@ public final class RuntimeServiceException
     ){
         return this.exceptionStack == null ?
             super.getMessage() : 
-            this.exceptionStack.getMessage() + ": " +
-            this.exceptionStack.getDescription();
+                this.exceptionStack.getMessage() + ": " +
+                this.exceptionStack.getDescription();
     }
-    
+
     /**
      * A String consisting of the class of this exception, the exception 
      * domain, the exception code, the exception description and the exception
@@ -299,9 +353,9 @@ public final class RuntimeServiceException
      */     
     public String toString(){
         return 
-            this.exceptionStack == null ?
+        this.exceptionStack == null ?
             super.toString() : 
-            super.toString() + '\n' + this.exceptionStack;
+                super.toString() + '\n' + this.exceptionStack;
     }
 
     /**

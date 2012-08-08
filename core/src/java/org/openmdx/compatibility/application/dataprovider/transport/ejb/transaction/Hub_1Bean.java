@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Hub_1Bean.java,v 1.15 2008/03/25 23:20:19 hburger Exp $
+ * Name:        $Id: Hub_1Bean.java,v 1.17 2008/09/10 08:55:26 hburger Exp $
  * Description: Hub_1Bean class
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/25 23:20:19 $
+ * Date:        $Date: 2008/09/10 08:55:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,9 +71,9 @@ import org.openmdx.kernel.exception.BasicException;
  * Hub_1Bean
  */
 public class Hub_1Bean 
-    extends UnitOfWork_1Bean 
+extends UnitOfWork_1Bean 
 {
-    
+
     /**
      * 
      */
@@ -84,6 +84,17 @@ public class Hub_1Bean
      */
     Dataprovider_1_1Connection nonTransactional;
 
+    private static final String[] NON_TRANSACTIONAL_ENTRIES = {
+        TransactionPolicies.NEVER,
+        "NoOrNewTransaction",
+        "noOrNew"
+    };
+
+    private static final String[] JOINING_TRANSACTION_ENTRIES = {
+        TransactionPolicies.MANDATORY,
+        "JoiningTransaction",
+        "joining"
+    };
 
     //------------------------------------------------------------------------
     // Implements Manageable_1_0
@@ -104,22 +115,10 @@ public class Hub_1Bean
     ) throws Exception {
 
         super.activate();
-        this.nonTransactional = findConnection(
-            new String[]{
-                TransactionPolicies.NEVER,
-                "NoOrNewTransaction",
-                "noOrNew"
-            }
-        );
-        super.joiningTransaction =  findConnection(
-            new String[]{
-                TransactionPolicies.MANDATORY,
-                "JoiningTransaction",
-                "joining"
-            }
-        );    
+        this.nonTransactional = findConnection(NON_TRANSACTIONAL_ENTRIES);
+        super.joiningTransaction =  findConnection(JOINING_TRANSACTION_ENTRIES);    
     }
-  
+
     /**
      * The deactivate() method is used to release a managed object's 
      * resources.
@@ -143,17 +142,17 @@ public class Hub_1Bean
     ){
         try {
             for(
-                Enumeration<NameClassPair> e = getConfigurationContext().list(DATAPROVIDER_NAME_CONTEXT);
-                e.hasMoreElements();
+                    Enumeration<NameClassPair> e = getConfigurationContext().list(DATAPROVIDER_NAME_CONTEXT);
+                    e.hasMoreElements();
             ){
                 NameClassPair ncp = e.nextElement();
                 String n = ncp.getName();
                 for(
-                    int i = 0;
-                    i < entries.length;
-                    i++
+                        int i = 0;
+                        i < entries.length;
+                        i++
                 ) if(
-                    entries[i].equals(n)
+                        entries[i].equals(n)
                 ) return new LateBindingConnection_1(
                     BEAN_ENVIRONMENT + 
                     '/' + DATAPROVIDER_NAME_CONTEXT +
@@ -196,10 +195,8 @@ public class Hub_1Bean
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("transactional",Boolean.TRUE),
-                    },
-                    "The current configuration does not support transactional units of work"
+                    "The current configuration does not support transactional units of work",
+                    new BasicException.Parameter("transactional",Boolean.TRUE)
                 )
             );
             try {
@@ -217,10 +214,8 @@ public class Hub_1Bean
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("transactional",Boolean.FALSE),
-                    },
-                    "The current configuration does not support non-transactional units of work"
+                    "The current configuration does not support non-transactional units of work",
+                    new BasicException.Parameter("transactional",Boolean.FALSE)
                 )
             );
             try {
@@ -235,7 +230,6 @@ public class Hub_1Bean
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ABORT,
-                        null,
                         "Non-transactional unit of work aborted with " +
                         "RuntimeException"
                     )

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractPlugin_1.java,v 1.9 2008/06/28 00:21:27 hburger Exp $
+ * Name:        $Id: AbstractPlugin_1.java,v 1.10 2008/09/10 08:55:21 hburger Exp $
  * Description: AbstractPlugin_1
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:27 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -98,9 +98,9 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_3;
  */
 @SuppressWarnings("unchecked")
 abstract public class AbstractPlugin_1
-  extends StreamOperationAwareLayer_1 
+extends StreamOperationAwareLayer_1 
 {
-  
+
     //---------------------------------------------------------------------------
     /**
      * Retrieve object with given id. The object is retrieved by navigating
@@ -129,7 +129,7 @@ abstract public class AbstractPlugin_1
         }
         return object.objGetContainer(featureName);
     }
-    
+
     //---------------------------------------------------------------------------
     /**
      * Retrieve object with given id. The object is retrieved by navigating
@@ -145,8 +145,8 @@ abstract public class AbstractPlugin_1
         // startFrom
         int startFrom = 0;
         for(
-            Iterator i = this.directAccessPaths.iterator();
-            i.hasNext();
+                Iterator i = this.directAccessPaths.iterator();
+                i.hasNext();
         ) {
             Path path = (Path)i.next();
             if(identity.size() >= path.size()) {
@@ -161,9 +161,9 @@ abstract public class AbstractPlugin_1
             mandatory
         );
         for(
-            int i = startFrom;
-            object != null && i < identity.size(); 
-            i+=2
+                int i = startFrom;
+                object != null && i < identity.size(); 
+                i+=2
         ) { 
             try {
                 object = (Object_1_0)this.getContainer(
@@ -173,7 +173,7 @@ abstract public class AbstractPlugin_1
             } 
             catch (ServiceException exception) {
                 if(
-                    exception.getExceptionCode() != BasicException.Code.NOT_FOUND
+                        exception.getExceptionCode() != BasicException.Code.NOT_FOUND
                 ) throw exception;
                 object = null;  
             }
@@ -184,10 +184,8 @@ abstract public class AbstractPlugin_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_FOUND,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("accessPath", identity)
-            },
-            "Object not found"
+            "Object not found",
+            new BasicException.Parameter("accessPath", identity)
         );
     }
 
@@ -212,10 +210,8 @@ abstract public class AbstractPlugin_1
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("accessPath", identity)
-                        },
-                        "Object not found"
+                        "Object not found",
+                        new BasicException.Parameter("accessPath", identity)
                     );
                 }
                 object = null;
@@ -234,7 +230,7 @@ abstract public class AbstractPlugin_1
     ) {
         Path path = request.path();    
         return path.size() % 2 == 0 
-            ? (String)path.get(path.size()-1) 
+        ? (String)path.get(path.size()-1) 
             : (String)path.get(path.size()-2);
     }
 
@@ -256,9 +252,9 @@ abstract public class AbstractPlugin_1
         // Default  Qualifier Type
         //
         this.defaultQualifierType = configuration.isOn(SharedConfigurationEntries.SEQUENCE_SUPPORTED) 
-            ? "SEQUENCE" 
+        ? "SEQUENCE" 
             : configuration.isOn(SharedConfigurationEntries.COMPRESS_UID) 
-                ? "UID" 
+            ? "UID" 
                 : "UUID";
         //
         // batchSize
@@ -282,8 +278,8 @@ abstract public class AbstractPlugin_1
         if(configuration.values(SharedConfigurationEntries.MODEL_PACKAGE).size() > 0) {
             this.packageImpls = new HashMap();
             for(
-                ListIterator i = configuration.values(SharedConfigurationEntries.MODEL_PACKAGE).listIterator();
-                i.hasNext();
+                    ListIterator i = configuration.values(SharedConfigurationEntries.MODEL_PACKAGE).listIterator();
+                    i.hasNext();
             ) {
                 String packageImpl = (String)configuration.values(SharedConfigurationEntries.PACKAGE_IMPL).get(
                     i.nextIndex()
@@ -327,8 +323,8 @@ abstract public class AbstractPlugin_1
             List dataproviderTarget = new ArrayList();
             List delegationPathTarget = new ArrayList();
             for(
-                ListIterator dpi = delegationPathSource.populationIterator();
-                dpi.hasNext();
+                    ListIterator dpi = delegationPathSource.populationIterator();
+                    dpi.hasNext();
             ){
                 int i = dpi.nextIndex();
                 Object dp = dataproviderSource.get(i);
@@ -336,28 +332,26 @@ abstract public class AbstractPlugin_1
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.INVALID_CONFIGURATION,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter(
-                                SharedConfigurationEntries.DELEGATION_PATH,
-                                delegationPathSource
-                            ),
-                            new BasicException.Parameter(
-                                "index",
-                                i
-                            ),
-                            new BasicException.Parameter(
-                                SharedConfigurationEntries.DATAPROVIDER_CONNECTION,
-                                dataproviderSource
-                            )
-                        },
-                        "The delegation path at the given index has no corresponding dataprovider counterpart"
+                        "The delegation path at the given index has no corresponding dataprovider counterpart",
+                        new BasicException.Parameter(
+                            SharedConfigurationEntries.DELEGATION_PATH,
+                            delegationPathSource
+                        ),
+                        new BasicException.Parameter(
+                            "index",
+                            i
+                        ),
+                        new BasicException.Parameter(
+                            SharedConfigurationEntries.DATAPROVIDER_CONNECTION,
+                            dataproviderSource
+                        )
                     );
                 }
                 Object delegationPath = dpi.next();
                 delegationPathTarget.add(
                     delegationPath instanceof String
-                        ? new Path((String)delegationPath)
-                        : delegationPath
+                    ? new Path((String)delegationPath)
+                    : delegationPath
                 );
                 dataproviderTarget.add(dp);
             }
@@ -377,7 +371,6 @@ abstract public class AbstractPlugin_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                null,
                 "A model must be configured with options 'modelPackage' and 'packageImpl'"
             );
         } 
@@ -418,31 +411,31 @@ abstract public class AbstractPlugin_1
         this.header = header;
         Dataprovider_1_0 delegation = this.router == null ? 
             this.getDelegation() : 
-            this.router;
-        if(delegation == null) {
-            this.delegation = null;
-            this.manager = null;
-        } else {
-            this.delegation = new RequestCollection(
-                header,
-                delegation
-            );
-            Provider_1_0 provider = new Provider_1(
-                this.delegation,
-                false // transactionPolicyIsNew
-            );
-            Connection_1_5 interaction = new Connection_1(
-                provider,
-                true, // containerManagedUnitOfWork
-                this.defaultQualifierType
-            ); 
-            interaction.setModel(this.model);
-            this.manager = new Manager_1(interaction);
-        }
-        this.objectFactory = this.getObjectFactory();
-        this.objectFactory.getUnitOfWork().afterBegin();
-        this.objectCache.clear();
-        this.objectIsNew.clear();
+                this.router;
+            if(delegation == null) {
+                this.delegation = null;
+                this.manager = null;
+            } else {
+                this.delegation = new RequestCollection(
+                    header,
+                    delegation
+                );
+                Provider_1_0 provider = new Provider_1(
+                    this.delegation,
+                    false // transactionPolicyIsNew
+                );
+                Connection_1_5 interaction = new Connection_1(
+                    provider,
+                    true, // containerManagedUnitOfWork
+                    this.defaultQualifierType
+                ); 
+                interaction.setModel(this.model);
+                this.manager = new Manager_1(interaction);
+            }
+            this.objectFactory = this.getObjectFactory();
+            this.objectFactory.getUnitOfWork().afterBegin();
+            this.objectCache.clear();
+            this.objectIsNew.clear();
     }
 
     //-------------------------------------------------------------------------
@@ -557,7 +550,7 @@ abstract public class AbstractPlugin_1
             false
         );
     }
-    
+
     //---------------------------------------------------------------------------
     public ServiceHeader getServiceHeader(
     ) {
@@ -589,10 +582,8 @@ abstract public class AbstractPlugin_1
                 cause,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_FOUND,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("path",id)
-                },
-                "Object not found"
+                "Object not found",
+                new BasicException.Parameter("path",id)
             );
         }
         return object;
@@ -614,7 +605,7 @@ abstract public class AbstractPlugin_1
     protected Map objectCache = null;
     protected Map objectIsNew = null;
     protected String defaultQualifierType = null;
-  
+
 }
 
 //--- End of File -----------------------------------------------------------

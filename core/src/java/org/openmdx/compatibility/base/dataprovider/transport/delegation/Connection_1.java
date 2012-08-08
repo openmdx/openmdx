@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection_1.java,v 1.27 2008/03/27 19:16:28 hburger Exp $
+ * Name:        $Id: Connection_1.java,v 1.42 2008/09/18 12:46:43 hburger Exp $
  * Description: SPICE Object Layer: Manager implementation
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/27 19:16:28 $
+ * Date:        $Date: 2008/09/18 12:46:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,6 +54,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.resource.cci.MappedRecord;
 import javax.transaction.UserTransaction;
@@ -62,7 +64,6 @@ import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.accessor.generic.cci.Structure_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.transaction.Synchronization_1_0;
-import org.openmdx.base.transaction.UnitOfWork_1_0;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Provider_1_0;
 import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1Factory;
 import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_5;
@@ -98,34 +99,62 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
  * is not itself transaction coordinator.
  */
 public class Connection_1
-    extends CachingMarshaller
-    implements Connection_1_5
+extends CachingMarshaller
+implements Connection_1_5
 {
 
     /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = 3977865059621680436L;
-
-    /**
      * Constructor 
-     *
+     * 
+     * @param provider 
+     * @param userTransaction 
+     * @param multithreaded 
      * @param defaultQualifierType UID, UUID, URN, SEQUENCE
-     * @param    containerManagedUnitOfWork
-     *               defines whether the unit of work is container managed
+     * @param containerManagedUnitOfWork
+     * @param transactional 
+     * @param optimistic 
      * 
      * @throws ServiceException
      */
     private Connection_1(
+        Provider_1_0 provider, 
+        UserTransaction userTransaction, 
+        boolean multithreaded, 
         String defaultQualifierType, 
-        boolean containerManagedUnitOfWork
+        boolean containerManagedUnitOfWork, 
+        boolean transactional, 
+        boolean optimistic
     ) throws ServiceException{
+        super(
+            multithreaded
+        );
+        this.provider = provider;
         this.defaultQualifierType = defaultQualifierType;
         this.containerManagedUnitOfWork = containerManagedUnitOfWork;
+        this.transactional = transactional;
+        this.optimistic = optimistic;
+        this.userTransaction = userTransaction;
+        if(!optimistic && transactional && userTransaction == null) throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.BAD_PARAMETER,
+            new BasicException.Parameter[]{
+                new BasicException.Parameter("transactional", transactional),
+                new BasicException.Parameter("containerManaged", containerManagedUnitOfWork),
+                new BasicException.Parameter("optimistic", optimistic)
+            },
+            "Transactional non-optimistic units of work require a user transaction"
+        );
+        if(multithreaded) {
+            this.unitOfWork = null;
+            this.unitsOfWork = new ConcurrentHashMap<Thread,UnitOfWork_1>();
+        } else {
+            this.unitOfWork = newUnitOfWork();
+            this.unitsOfWork = null;
+        }
     }
-    
+
     /**
-     * Constructs a Manager.
+     * Constructor
      *
      * @param   providers
      *           the provider connected to this router
@@ -145,19 +174,19 @@ public class Connection_1
         boolean optimisticUnitOfWork,
         UserTransaction userTransaction
     ) throws ServiceException{
-        this("UUID", containerManagedUnitOfWork);
-        this.provider = provider;
-        this.unitOfWork = new UnitOfWork_1(
-            provider,
-            transactionalUnitOfWork,
-            containerManagedUnitOfWork,
-            optimisticUnitOfWork,
-            userTransaction
+        this(
+            provider, 
+            null, // userTransaction
+            true, // multithreaded
+            "UUID", 
+            containerManagedUnitOfWork, 
+            transactionalUnitOfWork, 
+            optimisticUnitOfWork
         );
     }
 
     /**
-     * Constructs a Manager.
+     * Constructor
      *
      * @param   providers
      *           the provider connected to this router
@@ -172,35 +201,15 @@ public class Connection_1
         boolean containerManagedUnitOfWork,
         String defaultQualifierType
     ) throws ServiceException{
-        this(defaultQualifierType, containerManagedUnitOfWork);
-        this.provider = provider;
-        this.unitOfWork = new UnitOfWork_1(
-            provider,
-            provider.isTransactionPolicyIsNew(),
-            containerManagedUnitOfWork,
-            !containerManagedUnitOfWork,
-            null
+        this(
+            provider, 
+            null, // userTransaction
+            true, // multithreaded
+            defaultQualifierType, 
+            containerManagedUnitOfWork, 
+            provider.isTransactionPolicyIsNew(), // transactional
+            !containerManagedUnitOfWork // optimistic
         );
-    }
-    
-    /**
-     * Constructor 
-     *
-     * @param provider
-     * @param transaction
-     * @param optimistic
-     * @param defaultQualifierType UID, UUID, URN, SEQUENCE
-     * 
-     * @throws ServiceException
-     * @deprecated Use {@link #Connection_1(Provider_1_0,UserTransaction,boolean,boolean,String)} instead
-     */
-    public Connection_1(
-        Provider_1_0 provider,
-        UserTransaction transaction,
-        boolean optimistic, 
-        String defaultQualifierType
-    ) throws ServiceException{
-        this(provider, transaction, false, optimistic, defaultQualifierType);
     }
 
     /**
@@ -208,7 +217,7 @@ public class Connection_1
      *
      * @param provider
      * @param transaction
-     * @param containerManaged TODO
+     * @param containerManaged 
      * @param optimistic
      * @param defaultQualifierType UID, UUID, URN, SEQUENCE
      * @throws ServiceException
@@ -221,20 +230,17 @@ public class Connection_1
         String defaultQualifierType
     ) throws ServiceException{
         this(
+            provider, 
+            transaction, 
+            true, // multithreaded
             defaultQualifierType, 
-            containerManaged
-        );
-        this.provider = provider;
-        this.unitOfWork = new UnitOfWork_1(
-            provider,
-            provider.isTransactionPolicyIsNew(),
-            containerManaged,
-            optimistic,
-            transaction
+            containerManaged, 
+            provider.isTransactionPolicyIsNew(), // transactional
+            optimistic
         );
     }
 
-    
+
     /**
      * Constructs a Manager.
      *
@@ -249,7 +255,15 @@ public class Connection_1
         Provider_1_0 provider,
         boolean containerManagedUnitOfWork
     ) throws ServiceException{
-        this(provider, containerManagedUnitOfWork, "UUID");
+        this(
+            provider, 
+            null, // userTransaction
+            true, // multithreaded
+            "UUID", // defaultQualifierType
+            containerManagedUnitOfWork, 
+            provider.isTransactionPolicyIsNew(), // transactional
+            !containerManagedUnitOfWork // optimistic
+        );
     }
 
     /**
@@ -269,12 +283,21 @@ public class Connection_1
         this(
             provider, 
             transaction, 
-            false, // containerManaged
-            optimistic, 
-            "UUID" // defaultQualifierType
-       );
+            true, // multithreaded
+            "UUID", 
+            false, // containerManagedUnitOfWork
+            provider.isTransactionPolicyIsNew(), // transactional
+            optimistic
+        );
     }
-    
+
+    /**
+     * Aspects replace former view and role patterns
+     */
+    private static final String ASPECTS_ONLY = "Support for " +
+        "org::openmdx::compatibility::view1 and " +
+        "org::openmdx::compatibility::role1 has been removed"; 
+
     /**
      * Retrieves the defaultQualifierType.
      * 
@@ -284,10 +307,32 @@ public class Connection_1
         return this.defaultQualifierType;
     }
 
-    
+    /**
+     * Unit of work factory method
+     * 
+     * @return a new unit of work
+     */
+    protected UnitOfWork_1 newUnitOfWork(
+    ){
+        return new UnitOfWork_1(
+            this.provider, 
+            this.transactional, 
+            this.containerManagedUnitOfWork, 
+            this.optimistic, 
+            this.userTransaction
+        );
+    }
+
     //------------------------------------------------------------------------
     // Implements Connection_1_5
     //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_5#isMultithreaded()
+     */
+    public boolean isMultithreaded() {
+        return super.multithreaded;
+    }
 
     /**
      * Retrieve model.
@@ -306,8 +351,8 @@ public class Connection_1
     public final void setModel(Model_1_0 model) {
         this.model = model;
     }    
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Connection_1_2
     //------------------------------------------------------------------------
@@ -318,9 +363,9 @@ public class Connection_1
     public Connection_1Factory getConnectionFactory() {
         return this.provider instanceof Connection_1Factory ?
             (Connection_1Factory) this.provider : 
-            null;
+                null;
     }
-    
+
     /**
      * Container managed units of work are either non transactional or part of
      * a bigger unit of work.
@@ -331,7 +376,7 @@ public class Connection_1
     ){
         return this.containerManagedUnitOfWork;
     }
-    
+
     //------------------------------------------------------------------------
     // Implements Connection_1_0
     //------------------------------------------------------------------------
@@ -355,9 +400,9 @@ public class Connection_1
      * @throws ServiceException
      */
     public Object_1_0 cloneObject(
-      Path target, 
-      Object_1_0 original, 
-      boolean completelyDirty
+        Path target, 
+        Object_1_0 original, 
+        boolean completelyDirty
     ) throws ServiceException {
         validateState();
         if(original instanceof Object_1) {
@@ -374,14 +419,14 @@ public class Connection_1
                     target,
                     that,
                     completelyDirty
-                 );
+                );
             }
         } else {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED, 
+                BasicException.Code.NOT_SUPPORTED,
                 new BasicException.Parameter[]{
-                  new BasicException.Parameter("object class", original == null ? null : original.getClass().getName())
+                    new BasicException.Parameter("object class", original == null ? null : original.getClass().getName())
                 },
                 "object extension requires an object instanceof '" + Object_1.class.getName() + "'. " + 
                 "This problem is likely to occur in JMI plugins when using refCloneObject(refObject)"
@@ -392,8 +437,8 @@ public class Connection_1
     public void evict(
     ){
         for(
-             Iterator<?> i = this.mapping.values().iterator();
-             i.hasNext();
+                Iterator<?> i = this.mapping.values().iterator();
+                i.hasNext();
         ){
             Object o = i.next();
             if(o instanceof Evictable) {
@@ -401,16 +446,19 @@ public class Connection_1
             }
         }
     }
-    
+
     public void clear(
     ){
+        if(multithreaded) {
+            this.unitsOfWork.clear();
+        }
         super.clear();
     }
-    
+
     //------------------------------------------------------------------------
     // Implements ObjectFactory_1_0
     //------------------------------------------------------------------------
-    
+
     /**
      * Close the basic accessor.
      * <p>
@@ -419,21 +467,22 @@ public class Connection_1
      */
     public void close(
     ) throws ServiceException{
-        if(isClosed()) return;
-        this.provider.close();
-        this.provider = null;
-        super.clear();      
+        if(!isClosed()) {
+            this.provider.close();
+            this.provider = null;
+            clear();      
+        }
     }
 
     /**
      * 
      */
-    private boolean isClosed(
+    public boolean isClosed(
     ){  
-         return this.provider == null;
+        return this.provider == null;
     }
 
-    private void validateState(
+    private final void validateState(
     ) throws ServiceException{
         if(isClosed()) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
@@ -442,16 +491,29 @@ public class Connection_1
             "Connection is closed"
         );  
     }
-    
+
     /**
      * Return the unit of work associated with the current basic accessor.
      *
      * @return  the unit of work
+     * @throws ServiceException 
      */
-    public UnitOfWork_1_0 getUnitOfWork(
+    public UnitOfWork_1 getUnitOfWork(
     ) throws ServiceException{
         validateState();
-        return this.unitOfWork;
+        if(multithreaded) {
+            Thread thread = Thread.currentThread();
+            UnitOfWork_1 unitOfWork = this.unitsOfWork.get(thread);
+            if(unitOfWork == null) {
+                this.unitsOfWork.put(
+                    thread,
+                    unitOfWork = newUnitOfWork()
+                );
+            }
+            return unitOfWork;
+        } else {
+            return this.unitOfWork;
+        }
     }
 
     /* (non-Javadoc)
@@ -499,9 +561,9 @@ public class Connection_1
     ) throws ServiceException {
         return accessPath == null ?
             null :
-        accessPath instanceof Path ?
-            getObject((Path)accessPath) :
-            getObject(new Path(accessPath.toString()));
+                accessPath instanceof Path ?
+                    getObject((Path)accessPath) :
+                        getObject(new Path(accessPath.toString()));
     }
 
     /**
@@ -518,31 +580,6 @@ public class Connection_1
         validateState();
         return new Object_1(objectClass, this);
     }
-
-  public Object_1_0 createObject(
-    String objectClass,
-    Object_1_0 object
-  ) throws ServiceException {
-    validateState();
-    if(!(object instanceof Object_1)) {
-      throw new ServiceException(
-        BasicException.Code.DEFAULT_DOMAIN,
-        BasicException.Code.NOT_SUPPORTED, 
-        new BasicException.Parameter[]{
-          new BasicException.Parameter("object class", object == null ? null : object.getClass().getName())
-        },
-        "object extension requires an object instanceof '" + Object_1.class.getName() + "'. " + 
-        "This problem is likely to occur in JMI plugins when using extend<X>(refObject). " +
-        "This restriction will be fixed in a future version."
-      );      
-    }
-    else {
-      return new Object_1(
-        objectClass,
-        (Object_1)object
-      );
-    }
-  }
 
     /**
      * Create a structure
@@ -586,6 +623,54 @@ public class Connection_1
         return new ListStructure_1(type,fieldNames,fieldValues);
     }
 
+    
+    //------------------------------------------------------------------------
+    // Implements ObjectFactory_1_0
+    //------------------------------------------------------------------------
+
+    /**
+     * This method is deprecated and will throw a NOT_SUPPORTED exception
+     * 
+     * @deprecated
+     * 
+     * @exception   ServiceException    NOT_SUPPORTED
+     */
+    public Object_1_0 createObject(
+        String objectClass, 
+        Object_1_0 initialValues
+    ) throws ServiceException {
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            ASPECTS_ONLY
+        );
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Implements ObjectFactory_1_1
+    //------------------------------------------------------------------------
+
+    /**
+     * This method is deprecated and will throw a NOT_SUPPORTED exception
+     * 
+     * @deprecated
+     * 
+     * @exception   ServiceException    NOT_SUPPORTED
+     */
+    public Object_1_0 createObject(
+      String roleClass,
+      String roleId,
+      Object_1_0 roleCapable
+    ) throws ServiceException {
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            ASPECTS_ONLY
+        );
+    }
+
+    
     //------------------------------------------------------------------------
     // Implements Manager_1_0
     //------------------------------------------------------------------------
@@ -621,8 +706,8 @@ public class Connection_1
     ) throws ServiceException {
         if(isClosed()) return;
         for (
-            Iterator<Entry<Object, Object>> i = super.mapping.entrySet().iterator();
-            i.hasNext();
+                Iterator<Entry<Object, Object>> i = super.mapping.entrySet().iterator();
+                i.hasNext();
         ){
             Map.Entry<?,?> e = i.next();
             if (((Path)e.getKey()).startsWith(accessPath)){
@@ -645,30 +730,6 @@ public class Connection_1
             Object object = super.mapping.remove(path);
             path.setTo(newValue);
             if(object != null) cache(path, object);
-//          Map toBeMoved = new HashMap();
-//          for (
-//              Iterator i = super.mapping.entrySet().iterator();
-//              i.hasNext();
-//          ){
-//              Map.Entry e = (Entry)i.next();
-//              Path p = (Path)e.getKey();
-//              if (p.startsWith(path)){
-//                  toBeMoved.put(p, e.getValue());
-//                  i.remove();
-//              }
-//          }
-//          for (
-//              Iterator i = toBeMoved.entrySet().iterator();
-//              i.hasNext();
-//          ){
-//              Map.Entry e = (Entry)i.next();
-//              Path p = (Path)e.getKey();
-//              Object o = e.getValue();
-//              i.remove();
-//              String[] suffix = p.getSuffix(path.size());
-//              p.setTo(newValue.getDescendant(suffix));
-//              cache(p,o);
-//          }
         }
     }
 
@@ -677,11 +738,11 @@ public class Connection_1
     ){
         return mapping.containsKey(path);
     }
-    
+
     //------------------------------------------------------------------------
     // Extends CachingMarshaller
     //------------------------------------------------------------------------
-    
+
     /**
      * Marshals path objects to Object_1_0 objects.
      *
@@ -730,13 +791,23 @@ public class Connection_1
      *                  Object can't be unmarshalled
      */
     public Object unmarshal (
-            Object source
+        Object source
     ) throws ServiceException{
         validateState();
         return source instanceof Object_1_0 ? 
             ((Object_1_0)source).objGetPath() : 
-            source;
+                source;
     }
+
+
+    //------------------------------------------------------------------------
+    // Class members
+    //------------------------------------------------------------------------
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3977865059621680436L;
 
 
     //------------------------------------------------------------------------
@@ -747,16 +818,36 @@ public class Connection_1
      *  
      */
     private Model_1_0 model = null;
-    
+
     /**
      *
      */ 
-    private UnitOfWork_1_0 unitOfWork;
-    
+    private UnitOfWork_1 unitOfWork;
+
+    /**
+     *
+     */ 
+    private ConcurrentMap<Thread,UnitOfWork_1> unitsOfWork; 
+
     /**
      *
      */
     private Provider_1_0 provider;
+
+    /**
+     * 
+     */
+    private final boolean transactional;
+
+    /**
+     * 
+     */
+    private final boolean optimistic;
+
+    /**
+     * 
+     */
+    private final UserTransaction userTransaction;
 
     /**
      * UID, UUID, URN, SEQUENCE

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiLoader.java,v 1.19 2008/04/18 11:10:39 wfro Exp $
+ * Name:        $Id: UiLoader.java,v 1.20 2008/08/12 16:38:07 wfro Exp $
  * Description: UiLoader
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/18 11:10:39 $
+ * Date:        $Date: 2008/08/12 16:38:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.loader;
 

@@ -1,6 +1,6 @@
-﻿/*
+/*
  * WYMeditor : what you see is What You Mean web-based editor
- * Copyright (C) 2007 H.O.net - http://www.honet.be/
+ * Copyright (c) 2008 Jean-Francois Hovinne, http://www.wymeditor.org/
  * Dual licensed under the MIT (MIT-license.txt)
  * and GPL (GPL-license.txt) licenses.
  *
@@ -12,18 +12,18 @@
  *        hovertools plugin for WYMeditor
  *
  * File Authors:
- *        Jean-Francois Hovinne (jf.hovinne@wymeditor.org)
+ *        Jean-Francois Hovinne (jf.hovinne a-t wymeditor dotorg)
  */
 
 //Extend WYMeditor
-Wymeditor.prototype.hovertools = function() {
+WYMeditor.editor.prototype.hovertools = function() {
   
   var wym = this;
   
   //bind events on buttons
-  $j(this._box).find(this._options.toolSelector).hover(
+  jQuery(this._box).find(this._options.toolSelector).hover(
     function() {
-      wym.status($j(this).html());
+      wym.status(jQuery(this).html());
     },
     function() {
       wym.status('&nbsp;');
@@ -32,25 +32,25 @@ Wymeditor.prototype.hovertools = function() {
 
   //classes: add/remove a style attr to matching elems
   //while mouseover/mouseout
-  $j(this._box).find(this._options.classSelector).hover(
+  jQuery(this._box).find(this._options.classSelector).hover(
     function() {
       var aClasses = eval(wym._options.classesItems);
-      var sName = $j(this).attr(WYM_NAME);
+      var sName = jQuery(this).attr(WYMeditor.NAME);
       var oClass = aClasses.findByName(sName);
 
       if(oClass){
         jqexpr = oClass.expr;
         //don't use jQuery.find() on the iframe body
         //because of MSIE + jQuery + expando issue (#JQ1143)
-        if(!$j.browser.msie)
-          $j(wym._doc).find(jqexpr).css('background-color','#cfc');
+        if(!jQuery.browser.msie)
+          jQuery(wym._doc).find(jqexpr).css('background-color','#cfc');
       }
     },
     function() {
       //don't use jQuery.find() on the iframe body
       //because of MSIE + jQuery + expando issue (#JQ1143)
-      if(!$j.browser.msie)
-        $j(wym._doc).find('*').removeAttr('style');
+      if(!jQuery.browser.msie)
+        jQuery(wym._doc).find('*').removeAttr('style');
     }
   );
 

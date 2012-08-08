@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefContainer_1.java,v 1.14 2008/04/21 17:06:27 hburger Exp $
+ * Name:        $Id: RefContainer_1.java,v 1.16 2008/09/12 17:32:03 hburger Exp $
  * Description: RefContainer_1 class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/21 17:06:27 $
+ * Date:        $Date: 2008/09/12 17:32:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -85,7 +85,7 @@ import org.openmdx.compatibility.base.query.FilterProperty;
 @SuppressWarnings("deprecation")
 public class RefContainer_1
   extends AbstractCollection<RefObject_1_0>
-  implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.RefContainer_1_0, RefContainer
+  implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.LegacyContainer, RefContainer
 {
 
   /**
@@ -259,7 +259,8 @@ public class RefContainer_1
   public RefObject_1_0 get(Object filter) {
    if(filter instanceof String) {
      try {
-        return (RefObject_1_0) this.marshaller.marshal(this.container.get(filter));
+         Object_1_0 object = this.container.get(filter);
+        return (RefObject_1_0) this.marshaller.marshal(object);
      } catch (ServiceException exception){
         if(exception.getExceptionCode() == StackedException.NOT_FOUND) return null;
         throw new MarshalException(exception);
@@ -318,7 +319,10 @@ public class RefContainer_1
      * @see org.oasisopen.jmi1.RefContainer#refRemove(java.lang.Object[])
      */
     public void refRemove(Object... arguments) {
-        get(RefContainer_1.toQualifier(arguments.length, arguments)).refDelete();
+        RefObject_1_0 object = get(RefContainer_1.toQualifier(arguments.length, arguments));
+        if(object != null) {
+            object.refDelete();
+        }
     }
 
     /* (non-Javadoc)

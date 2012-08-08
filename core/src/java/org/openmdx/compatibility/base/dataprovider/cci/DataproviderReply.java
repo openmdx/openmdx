@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderReply.java,v 1.7 2008/03/21 18:45:24 hburger Exp $
+ * Name:        $Id: DataproviderReply.java,v 1.8 2008/09/09 14:20:01 hburger Exp $
  * Description: DataproviderReply class
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:45:24 $
+ * Date:        $Date: 2008/09/09 14:20:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,6 +53,7 @@ package org.openmdx.compatibility.base.dataprovider.cci;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.resource.ResourceException;
@@ -158,7 +159,7 @@ public class DataproviderReply
      * @see org.openmdx.compatibility.base.dataprovider.cci.DataproviderContext#keys()
      */
     protected Collection keys() {
-        return Arrays.asList(new String[]{"objects","contexts"});
+        return KEYS;
     }
 
 
@@ -180,5 +181,12 @@ public class DataproviderReply
     //------------------------------------------------------------------------
     private DataproviderObject[] objects;
 
+    private static final List<String> KEYS = Collections.unmodifiableList(
+        Arrays.asList(
+            "objects",
+            "contexts"
+        )
+    );
+    
 }
 

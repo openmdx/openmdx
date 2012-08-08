@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultRoleMapper.java,v 1.15 2008/07/04 13:26:06 wfro Exp $
+ * Name:        $Id: DefaultRoleMapper.java,v 1.17 2008/08/12 16:38:05 wfro Exp $
  * Description: DefaultRoleMapper 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/04 13:26:06 $
+ * Date:        $Date: 2008/08/12 16:38:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -174,7 +171,10 @@ public class DefaultRoleMapper
                                 if(groups != null) {
                                     long lastLoginAt = 0L;
                                     try {
-                                        lastLoginAt = ((Date)principal.refGetValue("lastLoginAt")).getTime();
+                                        Date at = (Date)principal.refGetValue("lastLoginAt");
+                                        if(at != null) {
+                                            lastLoginAt = at.getTime();
+                                        }
                                     } catch(Exception e) {}
                                     String roleId = principalId + "@" + realmName;
                                     AppLog.detail("Checking role", roleId);

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingContainer.java,v 1.16 2008/04/21 16:53:28 hburger Exp $
+ * Name:        $Id: DelegatingContainer.java,v 1.17 2008/09/04 06:49:13 hburger Exp $
  * Description: Delegating Container
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/21 16:53:28 $
+ * Date:        $Date: 2008/09/04 06:49:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,7 +63,6 @@ import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.Container;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.compatibility.base.naming.Path;
 
@@ -81,15 +80,18 @@ public class DelegatingContainer
      * 
      */
     private static final long serialVersionUID = 3907208269167474229L;
+    
     /**
      * @serial
      */
-    Container container;
+    @SuppressWarnings("deprecation")
+    org.openmdx.compatibility.base.collection.Container container;
 
     /* (non-Javadoc)
      */
+    @SuppressWarnings("deprecation")
     public DelegatingContainer(
-        Container container
+        org.openmdx.compatibility.base.collection.Container container
     ) {
         this.container = container;
     }
@@ -102,6 +104,7 @@ public class DelegatingContainer
 
     /* (non-Javadoc)
      */
+    @SuppressWarnings("deprecation")
     public boolean containsKey(Object key) {
         return container.get(key) != null;
     }
@@ -123,6 +126,7 @@ public class DelegatingContainer
 
     /* (non-Javadoc)
      */
+    @SuppressWarnings("deprecation")
     public Object get(Object key) {
         return container.get(key);
     }
@@ -146,6 +150,7 @@ public class DelegatingContainer
 
     /* (non-Javadoc)
      */
+    @SuppressWarnings("deprecation")
     public Object remove(Object key) {
         Object_1_0 object = (Object_1_0)this.container.get(key);
         if(object != null) try {
@@ -169,6 +174,7 @@ public class DelegatingContainer
 
     /* (non-Javadoc)
      */
+    @SuppressWarnings("deprecation")
     public FilterableMap subMap(Object filter) {
         return new DelegatingContainer(this.container.subSet(filter));
     }
@@ -187,6 +193,7 @@ public class DelegatingContainer
 
     /* (non-Javadoc)
      */
+    @SuppressWarnings("deprecation")
     public List values(Object criteria) {
         return this.container.toList(criteria);
     }

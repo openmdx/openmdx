@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Grid.java,v 1.48 2008/04/04 11:55:30 hburger Exp $
+ * Name:        $Id: Grid.java,v 1.51 2008/09/18 09:28:16 wfro Exp $
  * Description: GridControl
- * Revision:    $Revision: 1.48 $
+ * Revision:    $Revision: 1.51 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:55:30 $
+ * Date:        $Date: 2008/09/18 09:28:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 
@@ -713,7 +710,13 @@ public abstract class Grid
           this.currentRow = firstRow;          
           this.currentPageSize = newPageSize;
     
-          int nCols = gridControl.getColumnFilterSetActions().length;    
+          int nCols = Math.min(
+              gridControl.getShowMaxMember(),
+              Math.min(
+                  gridControl.getObjectContainer().getMember().size(),
+                  Grid.MAX_COLUMNS
+              )
+          ) + 1;
           while(i.hasNext()) {
               RefObject_1_0 rowObject = (RefObject_1_0)i.next();
               Object[] row = new Object[nCols];      
@@ -906,7 +909,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             true,
-            null
+            (Object[])null
           );
         offset = 2;                      
       }
@@ -916,7 +919,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             false,
-            null
+            (Object[])null
           );
         offset = 2;
       }
@@ -926,7 +929,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             false,
-            null
+            (Object[])null
           );
         offset = 2;
       }
@@ -936,7 +939,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             false,
-            null
+            (Object[])null
           );
         offset = 1;
       }
@@ -946,7 +949,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             true,
-            null
+            (Object[])null
           );
         offset = 1;
       }
@@ -956,7 +959,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             true,
-            null
+            (Object[])null
           );
         offset = 1;
       }
@@ -966,7 +969,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             true,
-            null
+            (Object[])null
           );
         offset = 1;
       }
@@ -976,7 +979,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             true,
-            null
+            (Object[])null
           );
         offset = 1;
       }
@@ -986,7 +989,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             false,
-            null
+            (Object[])null
           );
         offset = 2;
       }
@@ -1096,7 +1099,7 @@ public abstract class Grid
                     Quantors.THERE_EXISTS,
                     column.getFeatureName(),
                     true,
-                    null
+                    (Object[])null
                   );
                 List values = new ArrayList();
                 StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
@@ -1149,7 +1152,7 @@ public abstract class Grid
                     Quantors.THERE_EXISTS,
                     column.getFeatureName(),
                     true,
-                    null
+                    (Object[])null
                   );
                 List values = new ArrayList();
                 StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
@@ -1297,22 +1300,20 @@ public abstract class Grid
                               conditions.add(
                                   new PiggyBackCondition(
                                       SystemAttributes.CONTEXT_PREFIX + queryFilterContext + SystemAttributes.OBJECT_CLASS, 
-                                      new String[]{Database_1_Attributes.QUERY_FILTER_CLASS}
+                                      Database_1_Attributes.QUERY_FILTER_CLASS
                                   )                          
                               );
                               conditions.add(
                                   new PiggyBackCondition(
                                       SystemAttributes.CONTEXT_PREFIX + queryFilterContext + Database_1_Attributes.QUERY_FILTER_CLAUSE, 
-                                      new String[]{clause}
+                                      clause
                                   )                          
                               );
                               String stringParam = this.getWildcardFilterValue(andExpr.trim(), application);                      
                               conditions.add(
                                   new PiggyBackCondition(
                                       SystemAttributes.CONTEXT_PREFIX + queryFilterContext + Database_1_Attributes.QUERY_FILTER_STRING_PARAM, 
-                                      new String[]{
-                                          (stringParam.startsWith("(?i)") ? stringParam.substring(4) : stringParam).toUpperCase()
-                                      }
+                                      (stringParam.startsWith("(?i)") ? stringParam.substring(4) : stringParam).toUpperCase()
                                   )                          
                               );
                           }
@@ -1322,7 +1323,7 @@ public abstract class Grid
                                       Quantors.THERE_EXISTS,
                                       column.getFeatureName(),
                                       true,
-                                      null
+                                      (Object[])null
                                   );
                               List values = new ArrayList();
                               StringTokenizer orExpr = new StringTokenizer(andExpr.trim(), ";");

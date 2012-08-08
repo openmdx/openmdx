@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="**/CVS/**" kind="src" path="src/java"/>
-	<classpathentry kind="src" path="/openMDX Thirdparty ~ Apache Ant (jre-1.2)"/>
 	<classpathentry kind="lib" path="src/resource"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 1.3"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Java2 Extension (jre-1.3)"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Apache Ant (jre-1.5)"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="build/jre-1.2/eclipse"/>
 </classpath>

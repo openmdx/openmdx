@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestDateFormat.java,v 1.5 2006/11/22 12:12:17 hburger Exp $
+ * Name:        $Id: TestDateFormat.java,v 1.6 2008/09/10 18:10:56 hburger Exp $
  * Description: TestDateFormat 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/11/22 12:12:17 $
+ * Date:        $Date: 2008/09/10 18:10:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,7 +69,7 @@ import org.openmdx.kernel.exception.BasicException;
  *
  */
 public class TestDateFormat
-    extends TestCase
+extends TestCase
 {
 
     /**
@@ -116,11 +116,11 @@ public class TestDateFormat
             calendar.get(Calendar.DAY_OF_MONTH),
             calendar.get(Calendar.DAY_OF_WEEK),
             calendar.get(Calendar.MILLISECOND) + 1000 * (
-                calendar.get(Calendar.SECOND) + 60 * (
-                    calendar.get(Calendar.MINUTE) + 60 * (
-                        calendar.get(Calendar.HOUR)
+                    calendar.get(Calendar.SECOND) + 60 * (
+                            calendar.get(Calendar.MINUTE) + 60 * (
+                                    calendar.get(Calendar.HOUR)
+                            )
                     )
-                )
             )                
         );
 //      assertEquals("offest", TimeZone.getDefault().getOffset(date20.getTime()), offset);
@@ -130,7 +130,7 @@ public class TestDateFormat
         assertEquals("20-12-2005 00:00:00", date, date19);
         assertEquals("20.12.2005", date, date10);
     }
-    
+
     public void testTimeZone() throws ServiceException, ParseException{
         assertEquals("Z (UTC)", "20010929T154521.798Z", getDateFromString("2001-09-29T15:45:21.798Z"));
         assertEquals("GMT+01:00 (UTC-1h)", "20010929T144521.798Z", getDateFromString("2001-09-29T15:45:21.798GMT+01:00"));
@@ -150,12 +150,12 @@ public class TestDateFormat
                 "Local winter date (UTC-1h)", 
                 "20010129T144521.798Z", 
                 getDateFromString("2001-01-29T15:45:21.798")
-             );
+            );
         } else {
             System.out.println("Skipping Europe/Berlin test");
         }
     }
-    
+
     /**
      * Code extracted from XMLImporter
      * 
@@ -169,13 +169,13 @@ public class TestDateFormat
         // Convert time zone from ISO 8601 to SimpleDateFormat 
         int timePosition = dateTime.indexOf('T');
         if(dateTime.endsWith("Z")){ // SimpleDateFormat can't handle 'Z' time zone designator
-          dateTime=dateTime.substring(0,dateTime.length()-1)+"GMT+00:00";
+            dateTime=dateTime.substring(0,dateTime.length()-1)+"GMT+00:00";
         } else {
             int timeZonePosition = dateTime.lastIndexOf('-');
             if(timeZonePosition < timePosition) timeZonePosition = dateTime.lastIndexOf('+');
             if(
-                timeZonePosition > timePosition &&
-                ! dateTime.regionMatches(true, timeZonePosition-3, "GMT", 0, 3)
+                    timeZonePosition > timePosition &&
+                    ! dateTime.regionMatches(true, timeZonePosition-3, "GMT", 0, 3)
             ) dateTime=dateTime.substring(
                 0, 
                 timeZonePosition
@@ -187,18 +187,16 @@ public class TestDateFormat
         try {
             return DateFormat.getInstance().format(
                 dateTime.indexOf('.', timePosition) == -1 ? 
-                (timeLength == 8 ? localSecondFormat.parse(dateTime) : secondFormat.parse(dateTime)) : 
-                (timeLength == 12 ? localMillisecondFormat.parse(dateTime) : millisecondFormat.parse(dateTime))
+                    (timeLength == 8 ? localSecondFormat.parse(dateTime) : secondFormat.parse(dateTime)) : 
+                        (timeLength == 12 ? localMillisecondFormat.parse(dateTime) : millisecondFormat.parse(dateTime))
             );
         } catch (ParseException e) {
             throw new ServiceException(
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("value", dateTime)
-                },
-                "DateTime conversion failed"
+                "DateTime conversion failed",
+                new BasicException.Parameter("value", dateTime)
             );
         }
     }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HomeHandler.java,v 1.4 2008/07/04 17:57:11 wfro Exp $
+ * Name:        $Id: HomeHandler.java,v 1.5 2008/09/10 08:55:20 hburger Exp $
  * Description: Home Handler
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/04 17:57:11 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,8 +67,8 @@ import org.openmdx.kernel.exception.BasicException;
  * This method handles stateless session beans only at the moment.
  */
 public class HomeHandler
-    extends AbstractHomeHandler
-    implements HomeHandle
+extends AbstractHomeHandler
+implements HomeHandle
 {
 
     /**
@@ -100,12 +100,12 @@ public class HomeHandler
      * 
      */
     private final InvocationHandler objectHandler;
-    
-    
+
+
     //------------------------------------------------------------------------
     // Extends AbstractInvocationHandler
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
@@ -117,8 +117,8 @@ public class HomeHandler
         if (GET_HOME_HANDLE.equals(method)) {
             return this.getHomeHandle();
         } else if (
-            "create".equals(method.getName()) &&
-            method.getParameterTypes().length == 0
+                "create".equals(method.getName()) &&
+                method.getParameterTypes().length == 0
         ) {
             //
             // EJBLocalHome.create()
@@ -158,12 +158,10 @@ public class HomeHandler
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.SYSTEM_EXCEPTION,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("ejbHome", ejbHomeClass),
-                        new BasicException.Parameter("ejbObject", ejbObjectClass),
-                        new BasicException.Parameter("homeHandler", this)
-                    },
-                    "Could bot create proxy delegating to the home handler"
+                    "Could bot create proxy delegating to the home handler",
+                    new BasicException.Parameter("ejbHome", ejbHomeClass),
+                    new BasicException.Parameter("ejbObject", ejbObjectClass),
+                    new BasicException.Parameter("homeHandler", this)
                 )
             );
         } 
@@ -180,12 +178,12 @@ public class HomeHandler
     ) throws RemoteException {
         return this;
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements HomeHandle
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see javax.ejb.HomeHandle#getEJBHome()
      */
@@ -193,5 +191,5 @@ public class HomeHandler
     ) throws RemoteException {
         return getHome();
     }
-    
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SQLExpression.java,v 1.12 2008/03/21 18:32:18 hburger Exp $
+ * Name:        $Id: SQLExpression.java,v 1.13 2008/09/10 08:55:29 hburger Exp $
  * Description: openMDX SQL LIKE Pattern implementation
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:32:18 $
+ * Date:        $Date: 2008/09/10 08:55:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ public class SQLExpression {
      * 
      */
     public static final char ESCAPE = '\\';
-    
+
     /**
      * 
      */
@@ -100,8 +100,8 @@ public class SQLExpression {
         try {
             StringBuilder regexpPattern = new StringBuilder();
             if(
-                SQLExpression.ACCEPT_GLOBAL_REGULAR_EXPRESSION_FLAGS &&
-                sqlPattern.startsWith("(?")
+                    SQLExpression.ACCEPT_GLOBAL_REGULAR_EXPRESSION_FLAGS &&
+                    sqlPattern.startsWith("(?")
             ){
                 int i = sqlPattern.indexOf(')') + 1;
                 if(i > 0) {
@@ -113,15 +113,15 @@ public class SQLExpression {
             }
             String terminator = "$";
             for(
-                int i = 0;
-                i < sqlPattern.length();
-                i++
+                    int i = 0;
+                    i < sqlPattern.length();
+                    i++
             ){
                 char candidate = sqlPattern.charAt(i);
                 if(i == 0){
                     if(
-                    	MISSING_DELIMITER_ALLOWS_ANY_MATCH && 
-                    	candidate == STRING_PLACEHOLDER
+                            MISSING_DELIMITER_ALLOWS_ANY_MATCH && 
+                            candidate == STRING_PLACEHOLDER
                     ) continue;
                     regexpPattern.append(
                         '^'
@@ -130,8 +130,8 @@ public class SQLExpression {
                 if(candidate == ESCAPE){
                     char escaped = sqlPattern.charAt(++i);
                     if(
-                        escaped != STRING_PLACEHOLDER && 
-                        escaped != CHARACTER_PLACEHOLDER
+                            escaped != STRING_PLACEHOLDER && 
+                            escaped != CHARACTER_PLACEHOLDER
                     ) regexpPattern.append(
                         candidate
                     );
@@ -140,8 +140,8 @@ public class SQLExpression {
                     );
                 } else if (candidate == STRING_PLACEHOLDER) {
                     if(
-                    	MISSING_DELIMITER_ALLOWS_ANY_MATCH && 
-                    	i + 1 == sqlPattern.length()
+                            MISSING_DELIMITER_ALLOWS_ANY_MATCH && 
+                            i + 1 == sqlPattern.length()
                     ){
                         terminator = "";
                     } else {
@@ -154,10 +154,10 @@ public class SQLExpression {
                         '.'
                     );
                 } else if (
-                    (candidate >= '/' && candidate <= '>') ||
-                    (candidate >= '@' && candidate <= 'Z') ||
-                    (candidate >= '`' && candidate <= 'z') ||
-                    candidate > '~'    
+                        (candidate >= '/' && candidate <= '>') ||
+                        (candidate >= '@' && candidate <= 'Z') ||
+                        (candidate >= '`' && candidate <= 'z') ||
+                        candidate > '~'    
                 ) {
                     regexpPattern.append(
                         candidate
@@ -183,18 +183,14 @@ public class SQLExpression {
         } catch (BadParameterException exception) {
             throw new BadParameterException(
                 exception,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("sqlPattern", sqlPattern)
-                },
-                "Could not parse the SQL pattern"
+                "Could not parse the SQL pattern",
+                new BasicException.Parameter("sqlPattern", sqlPattern)
             );
         } catch (NullPointerException exception) {
             throw new BadParameterException(
                 exception,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("sqlPattern", sqlPattern)
-                },
-                "SQL pattern must not be null"
+                "SQL pattern must not be null",
+                new BasicException.Parameter("sqlPattern", sqlPattern)
             );
         }
     }
@@ -208,12 +204,12 @@ public class SQLExpression {
      * May be set to true if global regular expression flags are accepted.
      */
     final static private boolean ACCEPT_GLOBAL_REGULAR_EXPRESSION_FLAGS = true;
-    
+
     /**
      * SQL Pattern_1
      */
     static class Pattern_1 implements Pattern_1_0 {
-        
+
         /**
          * 
          */
@@ -223,7 +219,7 @@ public class SQLExpression {
          * 
          */
         private final Pattern_1_0 pattern;
-        
+
         /**
          * 
          */
@@ -247,17 +243,17 @@ public class SQLExpression {
          */
         public boolean equals(Object that) {
             return 
-                this == that || 
-                that instanceof Pattern_1 && this.pattern().equals(((Pattern_1)that).pattern());
+            this == that || 
+            that instanceof Pattern_1 && this.pattern().equals(((Pattern_1)that).pattern());
         }
-        
+
         /* (non-Javadoc)
          * @see java.lang.Object#hashCode()
          */
         public int hashCode() {
             return pattern.hashCode();
         }
-        
+
         /**
          * @param input
          * @return
@@ -265,7 +261,7 @@ public class SQLExpression {
         public Matcher_1_0 matcher(String input) {
             return pattern.matcher(input);
         }
-        
+
         /**
          * @param input
          * @return
@@ -273,14 +269,14 @@ public class SQLExpression {
         public boolean matches(String input) {
             return pattern.matches(input);
         }
-        
+
         /**
          * @return
          */
         public String pattern() {
             return this.expression;
         }
-        
+
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */

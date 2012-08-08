@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DateState_1.java,v 1.6 2008/03/21 18:46:21 hburger Exp $
+ * Name:        $Id: DateState_1.java,v 1.7 2008/09/10 08:55:21 hburger Exp $
  * Description: DateStateExcludingEnd_1 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:46:21 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,7 +69,7 @@ import org.openmdx.kernel.exception.BasicException;
  * DateStateExcludingEnd_1
  */
 public class DateState_1
-    extends AbstractState_1
+extends AbstractState_1
 {
 
     /**
@@ -79,7 +79,7 @@ public class DateState_1
         super();
     }
 
-    
+
     //------------------------------------------------------------------------
     // Extends Layer_1
     //------------------------------------------------------------------------
@@ -106,8 +106,8 @@ public class DateState_1
         this.now = null;
         super.epilog(header, requests, replies);
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Extends AbstractState_1
     //------------------------------------------------------------------------
@@ -128,16 +128,14 @@ public class DateState_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("date", date),
-                    new BasicException.Parameter("days", days)
-                },
-                "Conversion between inclusive abd exclusive end dates failed"
+                "Conversion between inclusive abd exclusive end dates failed",
+                new BasicException.Parameter("date", date),
+                new BasicException.Parameter("days", days)
             );
         }
     }
-    
-    
+
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.layer.model.AbstractState_1#excludingEnd()
      */
@@ -167,7 +165,7 @@ public class DateState_1
     protected String validFromAttribute() {
         return State_1_Attributes.STATE_VALID_FROM;
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.layer.model.AbstractState_1#validToAttribute()
      */
@@ -179,7 +177,7 @@ public class DateState_1
     protected Pattern validForPattern(){
         return DATE_PATTERN;
     }
-    
+
     protected String stateTypeName(){
         return "org:openmdx:compatibility:state1:DateState";
     }
@@ -212,16 +210,16 @@ public class DateState_1
         return requestedAt == null ? getRequestedAt(header) : requestedAt;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Class Members
     //------------------------------------------------------------------------
 
     protected static final DateFormat DATE_FORMAT = DateFormat.getInstance("yyyyMMdd");
-    
+
     protected static final Pattern DATE_PATTERN = Pattern.compile("^[0-9]{8}$");
 
-    
+
     //------------------------------------------------------------------------
     // Instance Members
     //------------------------------------------------------------------------
@@ -229,5 +227,5 @@ public class DateState_1
     private Date now;
 
     private static final DateFormat DATE_FORMATTER = DateFormat.getInstance("yyyyMMdd");
-    
+
 }

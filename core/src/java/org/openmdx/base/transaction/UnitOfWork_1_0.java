@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1_0.java,v 1.3 2004/04/02 16:59:01 wfro Exp $
+ * Name:        $Id: UnitOfWork_1_0.java,v 1.4 2008/09/10 08:55:31 hburger Exp $
  * Description: SPICE UnitOfWork_1_0 interface
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:01 $
+ * Date:        $Date: 2008/09/10 08:55:31 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,59 +68,59 @@ import org.openmdx.base.exception.ServiceException;
  */
 public interface UnitOfWork_1_0 extends Synchronization_1_0 {
 
-	//------------------------------------------------------------------------
-	// Control
-	//------------------------------------------------------------------------
+    //------------------------------------------------------------------------
+    // Control
+    //------------------------------------------------------------------------
 
-	/** 
-	 * Begin a unit of work.  The type of unit of work is determined by the
-	 * setting of the Optimistic flag.
-	 * @throws ServiceException if transactions are managed by a container
-	 * in the managed environment, or if the unit of work is already active.
-	 */
-	void begin(
-	) throws ServiceException;
-    
-	/** 
-	 * Commit the current unit of work.
-	 * @throws ServiceException if transactions are managed by a container
-	 * in the managed environment, or if the unit of work is already active.
-	 */
-	void commit(
-	) throws ServiceException;
-    
-	/**
-	 * Roll back the current unit of work.
-	 * @throws ServiceException if transactions are managed by a container
-	 * in the managed environment, or if the unit of work is not active.
-	 */
-	void rollback(
-	) throws ServiceException;
+    /** 
+     * Begin a unit of work.  The type of unit of work is determined by the
+     * setting of the Optimistic flag.
+     * @throws ServiceException if transactions are managed by a container
+     * in the managed environment, or if the unit of work is already active.
+     */
+    void begin(
+    ) throws ServiceException;
 
-	/**
-	 * Verify the content of the current unit of work.
-	 * <p>
-	 * The state of the objects remains unchanged.
-	 *
-	 * @exception   ServiceException ILLEGAL_STATE
-	 *              if no unit of work is in progress
-	 * @exception   ServiceException 
-	 *              if verification fails
-	 */    
-	void verify(
-	) throws ServiceException;
+    /** 
+     * Commit the current unit of work.
+     * @throws ServiceException if transactions are managed by a container
+     * in the managed environment, or if the unit of work is already active.
+     */
+    void commit(
+    ) throws ServiceException;
+
+    /**
+     * Roll back the current unit of work.
+     * @throws ServiceException if transactions are managed by a container
+     * in the managed environment, or if the unit of work is not active.
+     */
+    void rollback(
+    ) throws ServiceException;
+
+    /**
+     * Verify the content of the current unit of work.
+     * <p>
+     * The state of the objects remains unchanged.
+     *
+     * @exception   ServiceException ILLEGAL_STATE
+     *              if no unit of work is in progress
+     * @exception   ServiceException 
+     *              if verification fails
+     */    
+    void verify(
+    ) throws ServiceException;
 
 
-	//------------------------------------------------------------------------
-	// State
-	//------------------------------------------------------------------------
-	
+    //------------------------------------------------------------------------
+    // State
+    //------------------------------------------------------------------------
+
     /** 
      * Tells whether there is a unit of work currently active.
      * @return <code>true</code> if the unit of work is active.
      */
     boolean isActive();
-    
+
     /**
      * Transactional units of work are executed atomically, i.e. they are 
      * either committed or rolled back while the execution of non-transactional
@@ -130,7 +130,7 @@ public interface UnitOfWork_1_0 extends Synchronization_1_0 {
      */
     boolean isTransactional(
     );
-    
+
     /**
      * Optimistic units of work do not hold data store locks until commit time.
      *

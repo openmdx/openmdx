@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: show-Default.jsp,v 1.44 2008/06/01 16:40:52 wfro Exp $
+ * Name:        $Id: show-Default.jsp,v 1.73 2008/08/27 13:21:18 wfro Exp $
  * Description: Default.jsp
- * Revision:    $Revision: 1.44 $
+ * Revision:    $Revision: 1.73 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/01 16:40:52 $
+ * Date:        $Date: 2008/08/27 13:21:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,7 +68,6 @@ org.openmdx.portal.servlet.texts.*
 	PaintScope paintScope = PaintScope.valueOf(request.getParameter(Action.PARAMETER_SCOPE));
 	Texts_1_0 texts = app.getTexts();
 	ShowInspectorControl inspectorControl = view.getShowInspectorControl();
-	String guiMode = app.getCurrentGuiMode();
 	HtmlPage p = HtmlPageFactory.openPage(
 		view,
 		request,
@@ -86,19 +85,19 @@ org.openmdx.portal.servlet.texts.*
 			"Pragma",
 			""
 		);
-	
+
 		// Prolog
 		Control prolog = view.createControl(
 			"PROLOG",
 			PagePrologControl.class
 		);
-	
+
 		// Epilog
 		Control epilog = view.createControl(
 			"EPILOG",
 			PageEpilogControl.class
 		);
-	
+
 		// Operation parameters
 		PanelControl operationParams = (PanelControl)view.createControl(
 			"PARAMS",
@@ -107,62 +106,56 @@ org.openmdx.portal.servlet.texts.*
 		operationParams.setLayout(PanelControl.LAYOUT_NONE);
 		operationParams.addControl(inspectorControl.getOperationPaneControl(), OperationPaneControl.FRAME_PARAMETERS);
 		operationParams.addControl(inspectorControl.getReportControl(), OperationPaneControl.FRAME_PARAMETERS);
-	
-		// Dialogs
-		PanelControl dialogs = (PanelControl)view.createControl(
-			"dialogs",
-			PanelControl.class
-		);
-		dialogs.addControl(operationParams);
-	
+
 		// North
 		Control north = view.createControl(
-			"north", 
+			"north",
 			SessionInfoControl.class
 		);
-	
-		// West
-		MenuControl menuRoot = (MenuControl)view.createControl(
-			"menuRoot",
+
+		// Root menu
+		MenuControl rootPanel = (MenuControl)view.createControl(
+			"rootPanel",
 			MenuControl.class
 		);
-		menuRoot.addControl(
+		rootPanel.addControl(
 			view.createControl("rootmenu", RootMenuControl.class)
 		);
-		menuRoot.setMenuClass("navv");
-		menuRoot.setLayout(MenuControl.LAYOUT_VERTICAL);
+		rootPanel.setMenuClass("navv");
+		rootPanel.setLayout(MenuControl.LAYOUT_VERTICAL);
+
+		// West
 		PanelControl west = (PanelControl)view.createControl(
 			"layoutWest",
 			PanelControl.class
 		);
 		west.setLayout(PanelControl.LAYOUT_VERTICAL);
 		west.setTableStyle("cellspacing=\"0\" cellpadding=\"0\"");
-		west.addControl(
-			new Control[]{
-				view.createControl("userwest", ScriptControl.class),
-				menuRoot,
-				view.createControl("nav-calendar", CalendarControl.class)
-			}
+
+		// Navigation
+		Control navigation = view.createControl(
+			"navigation",
+			NavigationControl.class
 		);
-	
-		// Title
-		ObjectTitleControl title = (ObjectTitleControl)view.createControl(
-			"TITLE",
-			ObjectTitleControl.class
-		);
-		title.setShowPerformance(false);
-		// Menu
-		MenuControl menu = (MenuControl)view.createControl(
-			"opMenu",
+
+		// Operations Menu
+		MenuControl menuOps = (MenuControl)view.createControl(
+			"menuOps",
 			MenuControl.class
 		);
-		menu.setLayout(MenuControl.LAYOUT_HORIZONTAL);
-		menu.setMenuClass("nav");
-		menu.setHasPrintOption(true);
-		menu.addControl(inspectorControl.getOperationPaneControl());
-		menu.addControl(inspectorControl.getWizardControl());
-		menu.addControl(inspectorControl.getReportControl());
-	
+		menuOps.setLayout(MenuControl.LAYOUT_HORIZONTAL);
+		menuOps.setMenuClass("nav");
+		menuOps.setHasPrintOption(true);
+		menuOps.addControl(inspectorControl.getOperationPaneControl());
+		menuOps.addControl(inspectorControl.getWizardControl());
+		menuOps.addControl(inspectorControl.getReportControl());
+
+		// Search
+		Control search = view.createControl(
+			"search",
+			ScriptControl.class
+		);
+
 		// Operation results
 		PanelControl operationResults = (PanelControl)view.createControl(
 			"PARAMS",
@@ -170,13 +163,13 @@ org.openmdx.portal.servlet.texts.*
 		);
 		operationResults.setLayout(PanelControl.LAYOUT_NONE);
 		operationResults.addControl(inspectorControl.getOperationPaneControl(), OperationPaneControl.FRAME_RESULTS);
-	
+
 		// Errors
 		Control errors =	view.createControl(null, ShowErrorsControl.class);
-	
+
 		// Attributes
 		Control attributes = inspectorControl.getAttributePaneControl();
-	
+
 		// References
 		PanelControl references = (PanelControl)view.createControl(
 			"REFERENCES",
@@ -185,41 +178,16 @@ org.openmdx.portal.servlet.texts.*
 		references.setLayout(PanelControl.LAYOUT_NONE);
 		ReferencePaneControl[] referencePaneControls = inspectorControl.getReferencePaneControl();
 		for(int i = 0; i < referencePaneControls.length; i++) {
-			referencePaneControls[i].setIsMultiDeleteEnabled(true);
+      %><%@ include file="../Set-MultiDelete-include.jsp" %><%
 		}
 		references.addControl(
 			referencePaneControls,
 			ReferencePaneControl.FRAME_VIEW
 		);
-	
-		// Center
-		PanelControl center = (PanelControl)view.createControl(
-			"CENTER",
-			PanelControl.class
-		);
-		center.setLayout(PanelControl.LAYOUT_VERTICAL);
-		center.setTableStyle("class=\"wide\"");
-		center.addControl(title);
-		center.addControl(menu);
-	
-		boolean noLayoutManager =
-		guiMode.equals(WebKeys.SETTING_GUI_MODE_BASIC);
 
 %>
-<!--[if IE]><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><![endif]-->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<%
-	if(noLayoutManager) {
-%>
-		<html dir="<%= texts.getDir() %>">
-<%
-	}
-	else {
-%>
-		<html dir="<%= texts.getDir() %>" style="overflow:hidden;">
-<%
-	}
-%>
+<html dir="<%= texts.getDir() %>">
 <head>
   <title><%= app.getApplicationName() + " - " + view.getObjectReference().getTitle() + (view.getObjectReference().getTitle().length() == 0 ? "" : " - ") + view.getObjectReference().getLabel() %></title>
 <%
@@ -229,8 +197,8 @@ org.openmdx.portal.servlet.texts.*
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<link href="_style/colors.css" rel="stylesheet" type="text/css">
 	<link href="_style/calendar-small.css" rel="stylesheet" type="text/css">
-	<!--[if lt IE 7]><script type="text/javascript" src="javascript/iehover-fix.js"></script><![endif]-->
 	<script type="text/javascript" src="javascript/portal-all.js"></script>
+	<!--[if lt IE 7]><script type="text/javascript" src="javascript/iehover-fix.js"></script><![endif]-->
 	<script type="text/javascript" src="javascript/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
 	<script language="javascript" type="text/javascript">
 	  var OF = null;
@@ -245,122 +213,109 @@ org.openmdx.portal.servlet.texts.*
 	  }
 	</script>
 	<link rel="stylesheet" type="text/css" href="_style/ssf.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/yui-ext/resources/css/yui-ext.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/yui-ext/resources/css/ytheme-gray.css" >
 	<link rel="stylesheet" type="text/css" href="_style/n2default.css" >
+	<link rel="stylesheet" type="text/css" href="javascript/yui/build/assets/skins/sam/container.css" >
 	<link rel='shortcut icon' href='images/favicon.ico' />
 <%
 	prolog.paint(p, PagePrologControl.FRAME_POST_PROLOG, false);
 	p.flush();
 %>
+<script language="javascript" type="text/javascript">
+		var rootMenu = null;
+
+		function toggleRootMenu(e){
+			try{if(e.ctrlKey && e.altKey){rootMenu.moveTo(e.clientX+1, e.clientY);if(rootMenu.cfg.config.visible.value){rootMenu.hide();}else{rootMenu.show();}YAHOO.util.Event.preventDefault(e);}}catch(e){}
+		};
+
+		YAHOO.util.Event.onDOMReady(function(){
+			rootMenu = new YAHOO.widget.Panel("rootPanel",{context:['rootMenuAnchor','tl','tr'], close:true, visible:false,constraintoviewport:true});
+			rootMenu.cfg.queueProperty(
+				"keylisteners",
+				new YAHOO.util.KeyListener(document, { keys:27 }, {fn:rootMenu.hide, scope:rootMenu, correctScope:true })
+			);
+			rootMenu.cfg.queueProperty(
+				"keylisteners",
+				new YAHOO.util.KeyListener(document, { alt:true, keys:88 }, {fn:rootMenu.hide, scope:rootMenu, correctScope:true })
+			);
+			kl = new YAHOO.util.KeyListener(document, { alt:true, keys:88 }, {fn:rootMenu.show, scope:rootMenu, correctScope:true });
+			kl.enable();
+			YAHOO.util.Event.addListener(document, "click", toggleRootMenu);
+			rootMenu.render();
+		});
+</script>
 </head>
-<%
-	if(noLayoutManager) {
-%>
-		<body class="ytheme-gray" onload="initPage();">
-<%
-	}
-	else {
-%>
-		<body class="ytheme-gray" onload="initPage();" style="overflow:hidden;">
-<%
-	}
-%>
+<body class="yui-skin-sam" onload="initPage();">
 <iframe class="popUpFrame" id="DivShim" src="blank.html" scrolling="no" frameborder="0" style="position:absolute; top:0px; left:0px; display:none;"></iframe>
 <%
-	dialogs.paint(p, false);
-	p.flush();
+		EditObjectControl.paintEditPopups(p);
+		operationParams.paint(p, false);
+		p.flush();
 %>
+<div id="container">
+	<div id="wrap">
+		<div id="header">
+			<div id="hider">
 <%
-	if(noLayoutManager) {
+				rootPanel.paint(p, false);
+				p.flush();
 %>
-<div id ="container">
-<table id="simpleLayout">
-<tr id="slHeaderRow">
-<td id="slHeader" colspan="2">
-	<div id="header">
+			</div> <!-- hider -->
 <%
-	}
-	else {
+			north.paint(p, false);
+			p.flush();
 %>
-<div id ="container">
-  <div id="header" class="ylayout-inactive-content">
+			<div id="topnavi">
 <%
-	}
-	north.paint(p, false);
-	p.flush();
-	if(noLayoutManager) {
+				search.paint(p, false);
+				p.flush();
 %>
-	</div>
-</td>
-</tr>
-<tr id="slContentRow">
-<td id="slNavigation">
-	<div id="navigation" >
+				<ul id="nav" class="nav" onmouseover="sfinit(this);" >
+					<li><a href="#" onclick="javascript:return false;"><img id="rootMenuAnchor" src="./images/mlogo.png" border="0"/></a>
+						<ul onclick="this.style.left='-999em';" onmouseout="this.style.left='';">
 <%
-	}
-	else {
+							RootMenuControl.paintQuickAccessors(p);
+							p.flush();
 %>
-  </div>
-	<div id="navigation" class="ylayout-inactive-content">
+						</ul>
+					</li>
+				</ul>
+				<ul id="navigation" class="navigation" onmouseover="sfinit(this);">
 <%
-	}
-    west.paint(p, false);
-    p.flush();
+					RootMenuControl.paintTopNavigation(p);
+					p.flush();
 %>
-       <%@ include file="../../../../show-note.html" %>
+				</ul>
+			</div> <!-- topnavi -->
 <%
-	if(noLayoutManager) {
+			navigation.paint(p, false);
+			menuOps.paint(p, false);
+			p.flush();
 %>
-	</div>
-</td>
-<td id="slContent">
-	<div id="content">
-<%
-	}
-	else {
-%>
-	</div>
-  <div id="content" class="ylayout-inactive-content">
-<%
-	}
-%>
-		<div id="ie7bugfix" style="position:relative;top:0;left:0;height:auto;">
+		</div> <!-- header -->
+		<div id="content-wrap">
+			<div id="<%= app.getPanelState("Header") == 0 ? "content" : "contentNH" %>">
 <%@ include file="../../../../show-header.html" %>
 <%
-			errors.paint(p, false);
-			center.paint(p, false);
-			operationResults.paint(p, false);
-			p.flush();
+				errors.paint(p, false);
+				operationResults.paint(p, false);
+				p.flush();
 %>
-			<div id="aPanel">
+				<div id="aPanel">
 <%
-			attributes.paint(p, false);
-			p.flush();
+					attributes.paint(p, false);
+					p.flush();
 %>
-			</div>
+				</div>
 <%
-			references.paint(p, false);
-			p.flush();
+				references.paint(p, false);
+				p.flush();
 %>
 <%@ include file="../../../../show-footer.html" %>
-		</div>
-<%
-	if(noLayoutManager) {
-%>
-	</div>
-</td>
-</tr>
-</table
-<%
-	}
-	else {
-%>
-	</div>
-<%
-	}
-%>
-</div>
+			</div> <!-- content -->
+		</div> <!-- content-wrap -->
+<%@ include file="../../../../show-footer-noscroll.html" %>
+	<div> <!-- wrap -->
+</div> <!-- container -->
 
 <%
 	epilog.paint(p, false);
@@ -373,7 +328,7 @@ org.openmdx.portal.servlet.texts.*
 	// PaintScope.ATTRIBUTE_PANE
 	else if(paintScope == PaintScope.ATTRIBUTE_PANE) {
 		view.getAttributePane().getAttributePaneControl().paint(
-			p, 
+			p,
 			false
 		);
 		p.flush();

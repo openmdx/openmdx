@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectFactory_1_0.java,v 1.8 2008/04/10 18:13:53 hburger Exp $
+ * Name:        $Id: ObjectFactory_1_0.java,v 1.12 2008/09/11 10:42:06 hburger Exp $
  * Description: openMDX Object Layer: Object Factory Interface
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/10 18:13:53 $
+ * Date:        $Date: 2008/09/11 10:42:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,13 +61,13 @@ import org.openmdx.compatibility.base.marshalling.Marshaller;
  * as it is not garbage collected.
  */
 public interface ObjectFactory_1_0 
-    extends StructureFactory_1_0, Marshaller
+extends StructureFactory_1_0, Marshaller
 {
 
     //------------------------------------------------------------------------
     // Life cycle management
     //------------------------------------------------------------------------
-    
+
     /**
      * Close the object factory.
      * <p>
@@ -78,6 +78,13 @@ public interface ObjectFactory_1_0
     void close(
     ) throws ServiceException;
 
+    /**
+     * Tells whether the object factory has been closed.
+     * 
+     * @return <code>true</code> if the object factory has been closed
+     */
+    boolean isClosed();
+
 
     //------------------------------------------------------------------------
     // Unit Of Work management
@@ -87,14 +94,14 @@ public interface ObjectFactory_1_0
      * Return the unit of work associated with the current object factory.
      *
      * @return  the unit of work
-     *
-     * @exception   ServiceException    ILLEGAL_STATE
-     *              if the object factory is closed
+     * 
+     * @exception ServiceException ILLEGAL_STATE if the object factory is 
+     * closed
      */
     UnitOfWork_1_0 getUnitOfWork(
     ) throws ServiceException;
 
-     
+
     //------------------------------------------------------------------------
     // Object management
     //------------------------------------------------------------------------
@@ -123,17 +130,23 @@ public interface ObjectFactory_1_0
      * @param       objectClass
      *              The model class of the object to be created
      *
-     * @return      an object
+     * @return      a new object instance
      *
      * @exception   ServiceException    ILLEGAL_STATE
      *              if the object factory is closed
+     * @exception   ServiceException    BAD_PARAMETER
+     *              if the objectClass is an Aspect sub-class             
      */
     Object_1_0 createObject(
         String objectClass
     ) throws ServiceException;
 
     /**
-     * Creates a new object with the initial values.
+     * This method is deprecated and will throw a NOT_SUPPORTED exception
+     * 
+     * @deprecated
+     * 
+     * @exception   ServiceException    NOT_SUPPORTED
      */
     Object_1_0 createObject(
       String objectClass,

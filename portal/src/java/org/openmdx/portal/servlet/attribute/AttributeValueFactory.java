@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValueFactory.java,v 1.21 2008/04/04 17:01:10 hburger Exp $
+ * Name:        $Id: AttributeValueFactory.java,v 1.22 2008/08/12 16:38:05 wfro Exp $
  * Description: AttributeMapper
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:10 $
+ * Date:        $Date: 2008/08/12 16:38:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 

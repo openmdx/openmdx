@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filters.java,v 1.10 2008/04/04 11:56:08 hburger Exp $
+ * Name:        $Id: Filters.java,v 1.12 2008/09/11 10:50:16 hburger Exp $
  * Description: Filters
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:56:08 $
+ * Date:        $Date: 2008/09/11 10:50:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -291,25 +288,22 @@ public class Filters
       return Records.getRecordFactory().asMappedRecord(
         getClass().getName(), 
         null,
-        new String[]{
-          "forReference",
-          "filters"
-        }, 
+        TO_STRING_FIELDS,
         new Object[]{
           Records.getRecordFactory().asIndexedRecord(
             String.class.getName(),
-            "",
+            null,
             this.forReference
           ),
           Records.getRecordFactory().asIndexedRecord(
             Filter.class.getName(),
-            "",
+            null,
             this.filter
           )
         }
       ).toString();
     } catch (ResourceException exception) {
-      throw new RuntimeServiceException(exception);
+        return super.toString();
     }    
   }
   
@@ -322,6 +316,11 @@ public class Filters
 
   private Filter[] filter = null;
   private String[] forReference = null;
+  
+  private static final String[] TO_STRING_FIELDS = {
+      "forReference",
+      "filters"
+  };
   
 }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX http://www.openmdx.org/
- * Name:        $Id: RequestedList.java,v 1.14 2008/03/07 03:25:10 hburger Exp $
+ * Name:        $Id: RequestedList.java,v 1.15 2008/09/10 08:55:22 hburger Exp $
  * Description: RequestedList class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/07 03:25:10 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -72,8 +72,8 @@ import org.openmdx.kernel.log.SysLog;
  */
 @SuppressWarnings("unchecked")
 public class RequestedList 
-  extends AbstractSequentialList
-  implements Serializable, DataproviderReplyListener, Reconstructable
+extends AbstractSequentialList
+implements Serializable, DataproviderReplyListener, Reconstructable
 {
 
     /**
@@ -131,9 +131,9 @@ public class RequestedList
             if(buffer.readBoolean()){ // hasAttributeSpecifiers
                 this.attributeSpecifiers = new AttributeSpecifier[buffer.readInt()];
                 for(
-                    int i = 0;
-                    i < this.attributeSpecifiers.length;
-                    i++
+                        int i = 0;
+                        i < this.attributeSpecifiers.length;
+                        i++
                 ){
                     this.attributeSpecifiers[i] = new AttributeSpecifier(
                         buffer.readUTF(), // name
@@ -183,9 +183,9 @@ public class RequestedList
             if(hasAttributeSpecifiers) {
                 buffer.writeInt(this.attributeSpecifiers.length);
                 for(
-                    int i = 0;
-                    i < this.attributeSpecifiers.length;
-                    i++
+                        int i = 0;
+                        i < this.attributeSpecifiers.length;
+                        i++
                 ){
                     buffer.writeUTF(this.attributeSpecifiers[i].name());
                     buffer.writeInt(this.attributeSpecifiers[i].position());
@@ -222,11 +222,11 @@ public class RequestedList
         this.attributeSelector = reply.contexts().containsKey(
             DataproviderReplyContexts.ATTRIBUTE_SELECTOR
         ) ? ((Number)
-            reply.context(
-                DataproviderReplyContexts.ATTRIBUTE_SELECTOR
-            ).get(0) 
+                reply.context(
+                    DataproviderReplyContexts.ATTRIBUTE_SELECTOR
+                ).get(0) 
         ).shortValue() : 
-        AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES;
+            AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES;
         // Extract size from reply
         this.size = reply.contexts().containsKey(
             DataproviderReplyContexts.TOTAL
@@ -235,7 +235,7 @@ public class RequestedList
         this.initialReply = reply;
     }
 
-            
+
     /**
      * Called if the work unit processing failed
      */
@@ -250,7 +250,7 @@ public class RequestedList
     //------------------------------------------------------------------------
     // Class Methods
     //------------------------------------------------------------------------
-    
+
     /**
      *
      */
@@ -288,7 +288,7 @@ public class RequestedList
      *
      */
     protected IterationProcessor iterationProcessor;
-    
+
     /**
      * The initial reply if the request succeeds; null otherwise.
      */
@@ -298,7 +298,7 @@ public class RequestedList
      * The capacity to be used.
      */ 
     protected int capacity; 
-    
+
     /**
      * The list's size
      */
@@ -308,7 +308,7 @@ public class RequestedList
      * The iteration context
      */
     protected byte[] iterator;
-        
+
     /**
      *
      */
@@ -318,12 +318,12 @@ public class RequestedList
      * 
      */
     protected AttributeSpecifier[] attributeSpecifiers;
-    
+
     /**
      *
      */
     protected final Path referenceFilter;
-    
+
 
     //------------------------------------------------------------------------
     // Extends AbstractSequentialList
@@ -375,11 +375,11 @@ public class RequestedList
         );
     }
 
-  //------------------------------------------------------------------------
-  // BufferingIterator
-  //------------------------------------------------------------------------
+    //------------------------------------------------------------------------
+    // BufferingIterator
+    //------------------------------------------------------------------------
     protected class BufferingIterator 
-        implements Serializable, ListIterator, DataproviderReplyListener
+    implements Serializable, ListIterator, DataproviderReplyListener
     {
 
         /**
@@ -395,11 +395,11 @@ public class RequestedList
             this.nextIndex = index;
             this.iterator = // throw IndexOutOfBoundsException if necessary
                 this.reply == null || (
-                    index >= this.reply.getObjects().length && 
-                    hasMore(this.reply)
+                        index >= this.reply.getObjects().length && 
+                        hasMore(this.reply)
                 ) ? 
-                cache(this.nextIndex, Directions.ASCENDING) :
-                Arrays.asList(this.reply.getObjects()).listIterator(index);
+                    cache(this.nextIndex, Directions.ASCENDING) :
+                        Arrays.asList(this.reply.getObjects()).listIterator(index);
         }
 
         /**
@@ -419,11 +419,9 @@ public class RequestedList
                         ServiceException exception = new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.ASSERTION_FAILURE,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("oldSize", oldValue),
-                                new BasicException.Parameter("newSize", size)
-                            },
-                            "Dataprovider changed the list's size"
+                            "Dataprovider changed the list's size",
+                            new BasicException.Parameter("oldSize", oldValue),
+                            new BasicException.Parameter("newSize", size)
                         );
                         SysLog.error(
                             exception.getMessage(),
@@ -434,7 +432,7 @@ public class RequestedList
                 }
             }
         }
-                
+
         /**
          * Called if the work unit processing failed
          */
@@ -463,13 +461,13 @@ public class RequestedList
                 return Arrays.asList(reply.getObjects()).listIterator(
                     direction == Directions.ASCENDING ? 
                         0 : 
-                        reply.getObjects().length
+                            reply.getObjects().length
                 );
             } catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
             }
         }
-                        
+
         /**
          * Returns true if this list iterator has more elements when
          * traversing the list in the forward direction. (In other words,
@@ -483,7 +481,7 @@ public class RequestedList
         ){
             return this.iterator.hasNext() || hasMore(this.reply);
         }
-        
+
         /**
          * Returns the next element in the list. This method may be called
          * repeatedly to iterate through the list, or intermixed with calls to
@@ -505,7 +503,7 @@ public class RequestedList
             this.nextIndex++; 
             return this.iterator.next();
         }
-        
+
         /**
          * Returns true if this list iterator has more elements when
          * traversing the list in the reverse direction. (In other words,
@@ -556,7 +554,7 @@ public class RequestedList
         ){
             return this.nextIndex;
         }
-        
+
         /**
          * Returns the index of the element that would be returned by a
          * subsequent call to previous. (Returns -1 if the list iterator is at
@@ -589,7 +587,7 @@ public class RequestedList
         ){
             throw new UnsupportedOperationException(UNMODIFIABLE);
         }
-        
+
         /**
          * Replaces the last element returned by next or previous with the
          * specified element (optional operation). This call can be made only
@@ -619,7 +617,7 @@ public class RequestedList
         ){
             throw new UnsupportedOperationException(UNMODIFIABLE);
         }
-        
+
         /**
          * Inserts the specified element into the list (optional operation).
          * The element is inserted immediately before the next element that
@@ -650,87 +648,87 @@ public class RequestedList
         ){
             throw new UnsupportedOperationException(UNMODIFIABLE);
         }
-        
+
         final static String UNMODIFIABLE = "This list is unmodifiable";
-    
+
         DataproviderReply reply;  
         ListIterator iterator;
         int previousIndex;
         int currentIndex;
         int nextIndex;
-        
+
     }
-        
-  //------------------------------------------------------------------------
-  // MarshallingIterator
-  //------------------------------------------------------------------------
-  protected class MarshallingIterator 
+
+    //------------------------------------------------------------------------
+    // MarshallingIterator
+    //------------------------------------------------------------------------
+    protected class MarshallingIterator 
     extends BufferingIterator
-  {
+    {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3257288045601632562L;
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 3257288045601632562L;
 
-    MarshallingIterator(
-      int index,
-      DataproviderObjectMarshaller_1_0 marshaller
-    ){
-      super(index);
-      this.marshaller = marshaller;
-    }
+        MarshallingIterator(
+            int index,
+            DataproviderObjectMarshaller_1_0 marshaller
+        ){
+            super(index);
+            this.marshaller = marshaller;
+        }
 
-    /**
-     * Returns the next element in the list. This method may be called
-     * repeatedly to iterate through the list, or intermixed with calls to
-     * previous to go back and forth. (Note that alternating calls to next
-     * and previous will return the same element repeatedly.)
-     *
-     * @return    the next element in the list.
-     *
-     * @exception NoSuchElementException
-     *        if the iteration has no next element.
-     */
-    public Object next(
-    ){
-      try {
-        return marshaller.fromDataproviderObject(
-          (DataproviderObject_1_0)super.next()
-        );
-      } catch (ServiceException exception) {
-        throw new RuntimeServiceException(exception);
-      }
+        /**
+         * Returns the next element in the list. This method may be called
+         * repeatedly to iterate through the list, or intermixed with calls to
+         * previous to go back and forth. (Note that alternating calls to next
+         * and previous will return the same element repeatedly.)
+         *
+         * @return    the next element in the list.
+         *
+         * @exception NoSuchElementException
+         *        if the iteration has no next element.
+         */
+        public Object next(
+        ){
+            try {
+                return marshaller.fromDataproviderObject(
+                    (DataproviderObject_1_0)super.next()
+                );
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(exception);
+            }
+        }
+
+        /**
+         * Returns the previous element in the list. This method may be called
+         * repeatedly to iterate through the list backwards, or intermixed
+         * with calls to next to go back and forth. (Note that alternating
+         * calls to next and previous will return the same element
+         * repeatedly.)
+         *
+         * @return    the previous element in the list.
+         *
+         * @exception NoSuchElementException
+         *        if the iteration has no previous element.
+         */
+        public Object previous(
+        ){
+            try {
+                return marshaller.fromDataproviderObject(
+                    (DataproviderObject_1_0)super.previous()
+                );
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(exception);
+            }
+        }
+
+        //------------------------------------------------------------------------
+        // Variables
+        //------------------------------------------------------------------------
+        protected transient DataproviderObjectMarshaller_1_0 marshaller;
+
     }
-    
-    /**
-     * Returns the previous element in the list. This method may be called
-     * repeatedly to iterate through the list backwards, or intermixed
-     * with calls to next to go back and forth. (Note that alternating
-     * calls to next and previous will return the same element
-     * repeatedly.)
-     *
-     * @return    the previous element in the list.
-     *
-     * @exception NoSuchElementException
-     *        if the iteration has no previous element.
-     */
-    public Object previous(
-    ){
-      try {
-        return marshaller.fromDataproviderObject(
-          (DataproviderObject_1_0)super.previous()
-        );
-      } catch (ServiceException exception) {
-        throw new RuntimeServiceException(exception);
-      }
-    }
-        
-    //------------------------------------------------------------------------
-    // Variables
-    //------------------------------------------------------------------------
-    protected transient DataproviderObjectMarshaller_1_0 marshaller;
-    
-  }
 
 }

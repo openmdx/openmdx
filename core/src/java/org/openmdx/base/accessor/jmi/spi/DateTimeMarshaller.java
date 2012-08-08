@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateTimeMarshaller.java,v 1.4 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: DateTimeMarshaller.java,v 1.5 2008/09/10 08:55:22 hburger Exp $
  * Description: Date-Time Marshaller class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,97 +65,95 @@ import org.openmdx.kernel.exception.BasicException;
  * Marshals Object -> Date and Date -> Object. Object must be instanceof String.
  */
 public class DateTimeMarshaller
-  implements Marshaller, ReluctantUnmarshalling 
+implements Marshaller, ReluctantUnmarshalling 
 {
 
-  //-------------------------------------------------------------------------
-  private DateTimeMarshaller(
-    boolean forward
-  ) {
-    this.forward = forward;
-  }
-  
-  //-------------------------------------------------------------------------
-  public static DateTimeMarshaller getInstance(
-    boolean forward
-  ) {
-    return forward
-      ? DateTimeMarshaller.toMarshaller
-      : DateTimeMarshaller.fromMarshaller;
-  }
+    //-------------------------------------------------------------------------
+    private DateTimeMarshaller(
+        boolean forward
+    ) {
+        this.forward = forward;
+    }
 
-  //-------------------------------------------------------------------------
-  public Object marshalGeneric(
-    Object source,
-    boolean forward
-  ) throws ServiceException {
-    if(source == null) {
-      return null;
+    //-------------------------------------------------------------------------
+    public static DateTimeMarshaller getInstance(
+        boolean forward
+    ) {
+        return forward
+        ? DateTimeMarshaller.toMarshaller
+            : DateTimeMarshaller.fromMarshaller;
     }
-    if(forward) {
-      try {
-        return DateFormat.getInstance().parse((String)source);
-      }
-      catch(ParseException e) {
-        throw new ServiceException(
-            e,
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "exception parsing date"
-        );  
-      }
-    }
-    else {
-      if(source instanceof Date) {
-        return DateFormat.getInstance().format((Date)source);
-      }
-      else {
-        throw new ServiceException (
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Can only unmarshal objects of type " + Date.class.getName()
-        );  
-      }
-    }
-  }
-  
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object marshal(
-    Object source
-  ) throws ServiceException {
-    return marshalGeneric(
-      source, 
-      this.forward
-    );
-  }
-  
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object unmarshal (
-    Object source
-  ) throws ServiceException {
-    return marshalGeneric(
-      source, 
-      !this.forward
-    );
-  }
 
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private final boolean forward;
-  
-  static private final DateTimeMarshaller toMarshaller = new DateTimeMarshaller(true);
-  static private final DateTimeMarshaller fromMarshaller = new DateTimeMarshaller(false);
+    //-------------------------------------------------------------------------
+    public Object marshalGeneric(
+        Object source,
+        boolean forward
+    ) throws ServiceException {
+        if(source == null) {
+            return null;
+        }
+        if(forward) {
+            try {
+                return DateFormat.getInstance().parse((String)source);
+            }
+            catch(ParseException e) {
+                throw new ServiceException(
+                    e,
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.TRANSFORMATION_FAILURE, 
+                    "exception parsing date",
+                    new BasicException.Parameter [] {
+                        new BasicException.Parameter("source", source),
+                        new BasicException.Parameter("source class", source.getClass().getName()),
+                    }
+                );  
+            }
+        }
+        else {
+            if(source instanceof Date) {
+                return DateFormat.getInstance().format((Date)source);
+            }
+            else {
+                throw new ServiceException (
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.TRANSFORMATION_FAILURE, 
+                    "Can only unmarshal objects of type " + Date.class.getName(),
+                    new BasicException.Parameter("source", source),
+                    new BasicException.Parameter("source class", source.getClass().getName())
+                );  
+            }
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    public Object marshal(
+        Object source
+    ) throws ServiceException {
+        return marshalGeneric(
+            source, 
+            this.forward
+        );
+    }
+
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    public Object unmarshal (
+        Object source
+    ) throws ServiceException {
+        return marshalGeneric(
+            source, 
+            !this.forward
+        );
+    }
+
+    //-------------------------------------------------------------------------
+    // Variables
+    //-------------------------------------------------------------------------
+    private final boolean forward;
+
+    static private final DateTimeMarshaller toMarshaller = new DateTimeMarshaller(true);
+    static private final DateTimeMarshaller fromMarshaller = new DateTimeMarshaller(false);
 
 }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReplyParser.java,v 1.12 2008/03/19 17:10:05 hburger Exp $
+ * Name:        $Id: ReplyParser.java,v 1.14 2008/09/10 08:55:21 hburger Exp $
  * Description: ClientParser class
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:10:05 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -240,7 +240,7 @@ public class ReplyParser
           propertyValueArray[i] = (String)stringValues.get(i);
         }
         properties.add(
-          new BasicException.Parameter(name, propertyValueArray)
+          new BasicException.Parameter(name, (Object[])propertyValueArray)
         );
         name = null;
         stringValues.clear();
@@ -260,10 +260,10 @@ public class ReplyParser
           new BasicException(
             domain,
             errorCode,
+            description,
             (BasicException.Parameter[])properties.toArray(
               new BasicException.Parameter[properties.size()]
-            ),
-            description
+            )
           )
         );
         domain = null;

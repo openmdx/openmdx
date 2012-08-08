@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RemoteExceptions.java,v 1.5 2008/03/21 18:30:07 hburger Exp $
+ * Name:        $Id: RemoteExceptions.java,v 1.6 2008/09/09 12:06:39 hburger Exp $
  * Description: Remote Exception Categorization
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:30:07 $
+ * Date:        $Date: 2008/09/09 12:06:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,7 @@ import java.util.Properties;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.base.resource.spi.OrderedRecordFactory;
+import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -203,7 +203,7 @@ public class RemoteExceptions {
         try {
             SysLog.info(
                 PROPERTIES,
-                OrderedRecordFactory.getInstance().asMappedRecord(
+                Records.getRecordFactory().asMappedRecord(
                     "retriableRemoteExceptions",
                     "remotExceptionClass" + DELIMITER + "detailClass",
                     retriableRemoteExceptions,

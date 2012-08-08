@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ServiceException.java,v 1.11 2008/03/21 18:30:08 hburger Exp $
+ * Name:        $Id: ServiceException.java,v 1.12 2008/09/10 08:55:22 hburger Exp $
  * Description: ServiceException class
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:30:08 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,11 +56,12 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.BasicException.Parameter;
 import org.openmdx.kernel.log.SysLog;
 
 public final class ServiceException
-  extends Exception
-  implements BasicException.Wrapper
+extends Exception
+implements BasicException.Wrapper
 {
 
     /**
@@ -79,7 +80,7 @@ public final class ServiceException
     ){
         this.exceptionStack = exception == null ? 
             BasicException.toStackedException(this) : 
-            exception;
+                exception;
     }
 
     /**
@@ -121,6 +122,34 @@ public final class ServiceException
         BasicException.Parameter[] parameters,
         String description
     ){
+        this(cause, exceptionDomain, exceptionCode, description, parameters);
+    }
+
+    /**
+     * Creates a new <code>ServiceException</code>.
+     *
+     * @param   cause
+     *          The exception cause.
+     * @param   exceptionDomain
+     *          The exception domain or <code>null</code> for the
+     *          default exception domain containing negative exception codes
+     *          only.
+     * @param   exceptionCode
+     *          The exception code. Negative codes are shared by all exception
+     *          domains, while positive ones are (non-default) exception
+     *          domain specific.
+     * @param   description
+     *          A readable description usually not including the parameters.
+     * @param   parameters
+     *          The exception specific parameters.
+     */
+    public ServiceException(
+        Exception cause,
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        Parameter... parameters
+    ){
         this.exceptionStack = new BasicException(
             cause,
             exceptionDomain,
@@ -148,17 +177,42 @@ public final class ServiceException
      *          A readable description not including the parameters.
      */
     public ServiceException(
-          String exceptionDomain,
-          int exceptionCode,
-          BasicException.Parameter[] parameters,
-          String description
+        String exceptionDomain,
+        int exceptionCode,
+        BasicException.Parameter[] parameters,
+        String description
+    ) {
+        this(exceptionDomain, exceptionCode, description, parameters);
+    }
+
+    /**
+     * Creates a new <code>ServiceException</code>.
+     *
+     * @param   exceptionDomain
+     *          The exception domain or <code>null</code> for the
+     *          default exception domain containing negative exception codes
+     *          only.
+     * @param   exceptionCode
+     *          The exception code. Negative codes are shared by all exception
+     *          domains, while positive ones are (non-default) exception
+     *          domain specific.
+     * @param   parameters
+     *          The exception specific parameters.
+     * @param   message
+     *          A readable description not including the parameters.
+     */
+    public ServiceException(
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        Parameter... parameters
     ) {
         this(
             null, // none
             exceptionDomain,
             exceptionCode,
-            parameters,
-            description
+            description,
+            parameters
         );
     }
 
@@ -171,7 +225,7 @@ public final class ServiceException
     ) {
         SysLog.warning(this);
         return this;
-      }
+    }
 
 
     /**
@@ -181,12 +235,12 @@ public final class ServiceException
         Throwable cause
     ){
         (
-            (BasicException)this.exceptionStack.getExceptionStack().get(0)
+                (BasicException)this.exceptionStack.getExceptionStack().get(0)
         ).initCause(cause);
         return this;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements StackedException.Wrapper
     //------------------------------------------------------------------------
@@ -220,7 +274,7 @@ public final class ServiceException
     {
         return this.exceptionStack == null ? 
             BasicException.Code.DEFAULT_DOMAIN : 
-            this.exceptionStack.getExceptionDomain();
+                this.exceptionStack.getExceptionDomain();
     }
 
     /**
@@ -232,33 +286,33 @@ public final class ServiceException
     {
         return this.exceptionStack == null ? 
             BasicException.Code.GENERIC : 
-            this.exceptionStack.getExceptionCode();
+                this.exceptionStack.getExceptionCode();
     }
 
-	/**
-	 * Returns the cause belonging to a specific exception domain.
-	 * 
-	 * @param 	exceptionDomain
-	 * 			the desired exception domain,
-	 *          or <code>null</code> to retrieve the initial cause.
-	 *
-	 * @return  Either the cause belonging to a specific exception domain
-	 *          or the initial cause if <code>exceptionDomain</code> is
-	 * 			<code>null</code>.  
-	 */
-	public BasicException getCause(
-	    String exceptionDomain
-	){
+    /**
+     * Returns the cause belonging to a specific exception domain.
+     * 
+     * @param 	exceptionDomain
+     * 			the desired exception domain,
+     *          or <code>null</code> to retrieve the initial cause.
+     *
+     * @return  Either the cause belonging to a specific exception domain
+     *          or the initial cause if <code>exceptionDomain</code> is
+     * 			<code>null</code>.  
+     */
+    public BasicException getCause(
+        String exceptionDomain
+    ){
         return this.exceptionStack == null ? 
             null : 
-            this.exceptionStack.getCause(exceptionDomain);
-	}
+                this.exceptionStack.getCause(exceptionDomain);
+    }
 
     /**
      * The exception stack
      */
     private BasicException exceptionStack;
-         
+
 
     //------------------------------------------------------------------------
     // Extends Throwable
@@ -271,10 +325,10 @@ public final class ServiceException
     ){
         return this.exceptionStack == null ?
             super.getMessage() : 
-            this.exceptionStack.getMessage() + ": " +
-            this.exceptionStack.getDescription();
+                this.exceptionStack.getMessage() + ": " +
+                this.exceptionStack.getDescription();
     }
-    
+
     /**
      * A String consisting of the class of this exception, the exception 
      * domain, the exception code, the exception description and the exception
@@ -284,9 +338,9 @@ public final class ServiceException
      */     
     public String toString(){
         return 
-            this.exceptionStack == null ?
+        this.exceptionStack == null ?
             super.toString() : 
-            super.toString() + '\n' + this.exceptionStack;
+                super.toString() + '\n' + this.exceptionStack;
     }
 
     /**
@@ -324,26 +378,26 @@ public final class ServiceException
     ){
         return this.exceptionStack;
     }
-    
+
 
     //----------------------------------------------------------------------------
     // Deprecated
     //----------------------------------------------------------------------------
 
-     /**
-      * Returns a formatted multiline String representation for the exception
-      * including all stacked exceptions. Includes all available exception
-      * information as timestamp, class, method, line, number, domain, error code,
-      * description, parameters and the stack trace for each exception.
-      *
-      * @return  a String representation
-      * *
-      * @deprecated use @{link ServiceException#toString()}.
-      */
-     public String stackToString()
-     {
+    /**
+     * Returns a formatted multiline String representation for the exception
+     * including all stacked exceptions. Includes all available exception
+     * information as timestamp, class, method, line, number, domain, error code,
+     * description, parameters and the stack trace for each exception.
+     *
+     * @return  a String representation
+     * *
+     * @deprecated use @{link ServiceException#toString()}.
+     */
+    public String stackToString()
+    {
         return toString();
-     }
+    }
 
     /**
      * @deprecated use @{link ServiceException#getStackedException()} followed by
@@ -368,7 +422,7 @@ public final class ServiceException
     {
         return this.exceptionStack == null ? 
             null : 
-            this.exceptionStack.getClassName();
+                this.exceptionStack.getClassName();
     }
 
     /**
@@ -383,7 +437,7 @@ public final class ServiceException
     {
         return this.exceptionStack == null ? 
             null : 
-            this.exceptionStack.getMethodName();
+                this.exceptionStack.getMethodName();
     }
 
     /**
@@ -398,7 +452,7 @@ public final class ServiceException
     {
         return this.exceptionStack == null ? 
             0 : 
-            this.exceptionStack.getLineNr();
+                this.exceptionStack.getLineNr();
     }
 
     /**
@@ -412,7 +466,7 @@ public final class ServiceException
     {
         return this.exceptionStack == null ? 
             null : 
-            this.exceptionStack.getExceptionDomain();
+                this.exceptionStack.getExceptionDomain();
     }
 
     /**
@@ -440,7 +494,7 @@ public final class ServiceException
     {
         return this.exceptionStack == null ? 
             null : 
-            this.exceptionStack.getTimestamp();
+                this.exceptionStack.getTimestamp();
     }
 
 
@@ -457,7 +511,7 @@ public final class ServiceException
     {
         return this.exceptionStack == null ? 
             null : 
-            this.exceptionStack.getParameters();
+                this.exceptionStack.getParameters();
     }
 
     /**
@@ -472,7 +526,7 @@ public final class ServiceException
     {
         return this.exceptionStack == null ? 
             null : 
-            this.exceptionStack.getDescription();
+                this.exceptionStack.getDescription();
     }
 
 
@@ -631,7 +685,7 @@ public final class ServiceException
         }
     }
 
-    
+
     //----------------------------------------------------------------------------
     // Class Features
     //----------------------------------------------------------------------------
@@ -652,7 +706,7 @@ public final class ServiceException
     ){
         return exception instanceof ServiceException ?
             (ServiceException)exception :
-            new ServiceException(exception);
+                new ServiceException(exception);
     }
 
 }

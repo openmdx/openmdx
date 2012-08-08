@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1ConnectionFactoryImpl.java,v 1.13 2008/07/01 20:47:17 hburger Exp $
+ * Name:        $Id: Dataprovider_1ConnectionFactoryImpl.java,v 1.16 2008/09/10 08:55:24 hburger Exp $
  * Description: sDataprovider_1ConnectionFactoryImpl class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/01 20:47:17 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,7 +68,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
 public class Dataprovider_1ConnectionFactoryImpl
-    implements Dataprovider_1ConnectionFactory
+implements Dataprovider_1ConnectionFactory
 {
 
     /**
@@ -89,7 +89,7 @@ public class Dataprovider_1ConnectionFactoryImpl
             DEFAULT_REGISTRY_NAMES
         );
     }   
-            
+
     /**
      * Constructor
      *
@@ -111,7 +111,7 @@ public class Dataprovider_1ConnectionFactoryImpl
             DEFAULT_REGISTRY_NAMES
         );
     }   
-            
+
 
     /**
      * Constructor
@@ -133,11 +133,11 @@ public class Dataprovider_1ConnectionFactoryImpl
     ) throws ServiceException {
         this.defaultRegistrationId = defaultRegistrationId;
         List<Context> registries = new ArrayList<Context>();
-        
+
         for(
-            int index = 0;
-            index < registryNames.length;
-            index++
+                int index = 0;
+                index < registryNames.length;
+                index++
         ) try {
             registries.add(
                 (Context)registryContext.lookup(
@@ -153,9 +153,9 @@ public class Dataprovider_1ConnectionFactoryImpl
         this.registryNames = new String[this.registries.length];
 
         for(
-            int index = 0;
-            index < this.registryNames.length;
-            index++
+                int index = 0;
+                index < this.registryNames.length;
+                index++
         ) try {
             this.registryNames[index] = 
                 this.registries[index].getNameInNamespace();
@@ -180,7 +180,7 @@ public class Dataprovider_1ConnectionFactoryImpl
         Object connectionFactory
     ) throws Exception {
         return ((Dataprovider_1ConnectionFactory)
-            connectionFactory
+                connectionFactory
         ).createConnection();
     }
 
@@ -196,9 +196,9 @@ public class Dataprovider_1ConnectionFactoryImpl
         Object ejbHome
     ) throws Exception {
         return new Dataprovider_1RemoteConnection<Dataprovider_1_0Remote>(
-            ((Dataprovider_1Home)
-                PortableRemoteObject.narrow(ejbHome, Dataprovider_1Home.class)
-            ).create()
+                ((Dataprovider_1Home)
+                        PortableRemoteObject.narrow(ejbHome, Dataprovider_1Home.class)
+                ).create()
         );
     }
 
@@ -218,8 +218,8 @@ public class Dataprovider_1ConnectionFactoryImpl
     ) throws ServiceException, CreateException {
         Dataprovider_1_0Local dataprovider = home instanceof EntityManagerFactory_2LocalHome ?
             ((EntityManagerFactory_2LocalHome)home).create() :
-            ((Dataprovider_1LocalHome)home).create();
-        return new Dataprovider_1LocalConnection(dataprovider);
+                ((Dataprovider_1LocalHome)home).create();
+            return new Dataprovider_1LocalConnection(dataprovider);
     }
 
     /**
@@ -235,17 +235,17 @@ public class Dataprovider_1ConnectionFactoryImpl
     ) throws Exception {
         return home instanceof Dataprovider_1ConnectionFactory ?
             createStandardConnection(home) :
-        home instanceof Dataprovider_1LocalHome || 
-        home instanceof  EntityManagerFactory_2LocalHome?
-            createLocalConnection(home) :
-            createRemoteConnection(home);
+                home instanceof Dataprovider_1LocalHome || 
+                home instanceof  EntityManagerFactory_2LocalHome?
+                    createLocalConnection(home) :
+                        createRemoteConnection(home);
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Dataprovider_1ConnectionFactory
     //------------------------------------------------------------------------
-        
+
     /**
      * Creates a dataprovider connection with the default registration id and
      * transaction policy. 
@@ -259,7 +259,7 @@ public class Dataprovider_1ConnectionFactoryImpl
     ) throws ServiceException {
         return createConnection(defaultRegistrationId);
     }
-    
+
 
     /**
      * Creates a dataprovider connection with the specified registration id
@@ -277,9 +277,9 @@ public class Dataprovider_1ConnectionFactoryImpl
         String registrationId
     ) throws ServiceException {
         for (
-            int index = 0;
-            index < this.registries.length;
-            index++
+                int index = 0;
+                index < this.registries.length;
+                index++
         ) try {
             return createGenericConnection(
                 this.registries[index].lookup(registrationId)
@@ -291,39 +291,35 @@ public class Dataprovider_1ConnectionFactoryImpl
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("registrationId", registrationId),
-                    new BasicException.Parameter("registryName", this.registryNames[index])
-                },
                 "Dataprovider connection \"" + registrationId + 
-                    "\" could not be created"
+                "\" could not be created",
+                new BasicException.Parameter("registrationId", registrationId),
+                new BasicException.Parameter("registryName", this.registryNames[index])
             );
         }
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_FOUND,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("registrationId", registrationId),
-                new BasicException.Parameter("registryNames", this.registryNames)
-            },
             "Dataprovider connection \"" + registrationId + 
-                "\" could not be created"
+            "\" could not be created",
+            new BasicException.Parameter("registrationId", registrationId),
+            new BasicException.Parameter("registryNames", (Object[])this.registryNames)
         );
     }
-    
-            
+
+
     //------------------------------------------------------------------------
     // Variables
     //------------------------------------------------------------------------
 
-    protected static final String[] DEFAULT_REGISTRY_NAMES = new String[]{
+    protected static final String[] DEFAULT_REGISTRY_NAMES = {
         "java:comp/env",
         "ch/omex/dataprovider-1/NoOrNewTransaction"
     };
 
     protected static final String DEFAULT_REGISTRATION_ID = "access";
 
-    
+
     //------------------------------------------------------------------------
     // Variables
     //------------------------------------------------------------------------

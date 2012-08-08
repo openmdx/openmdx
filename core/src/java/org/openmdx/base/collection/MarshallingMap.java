@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingMap.java,v 1.17 2008/04/09 12:33:43 hburger Exp $
+ * Name:        $Id: MarshallingMap.java,v 1.18 2008/09/12 17:34:19 hburger Exp $
  * Description: Marshalling Map
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:33:43 $
+ * Date:        $Date: 2008/09/12 17:34:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,9 +56,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * A Marshalling Map
@@ -196,9 +198,17 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
      */
     @SuppressWarnings("unchecked")
     public V get(Object key) {
-        return (V) this.marshaller.marshal(
-            this.map.get(key)
-        );
+        Object value = this.map.get(key); 
+        if(this.marshaller instanceof CollectionMarshallerAdapter) {
+            try {
+                return (V) ((CollectionMarshallerAdapter)this.marshaller).getDelegate().marshal(value);
+            } catch (ServiceException exception) {
+                if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
+                    return null;
+                }
+            }
+        }
+        return (V) this.marshaller.marshal(value);
     }
 
     /* (non-Javadoc)

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: IsInCondition.java,v 1.5 2005/04/06 15:28:18 wfro Exp $
+ * Name:        $Id: IsInCondition.java,v 1.6 2008/09/09 01:05:33 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/06 15:28:18 $
+ * Date:        $Date: 2008/09/09 01:05:33 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ public class IsInCondition
 public IsInCondition(
   ) {
     super(
-        new Object[]{}
+        EMPTY_OBJECT_ARRAY
     );
   }
   
@@ -73,7 +73,7 @@ public IsInCondition(
       short quantor,
       String feature,
       boolean fulfil,
-      Object[] values
+      Object... values
   ) {
     super(
         quantor,

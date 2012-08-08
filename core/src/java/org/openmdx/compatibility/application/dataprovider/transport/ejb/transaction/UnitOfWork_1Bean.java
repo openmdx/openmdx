@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1Bean.java,v 1.39 2008/06/11 17:08:33 hburger Exp $
+ * Name:        $Id: UnitOfWork_1Bean.java,v 1.42 2008/09/10 08:55:26 hburger Exp $
  * Description: Unit Of Work Bean
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/11 17:08:33 $
+ * Date:        $Date: 2008/09/10 08:55:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,7 @@ import javax.transaction.UserTransaction;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.base.transaction.Synchronization_1_0;
-import org.openmdx.compatibility.base.application.j2ee.AbstractDataprovider_1Bean;
+import org.openmdx.compatibility.application.dataprovider.transport.ejb.spi.AbstractDataprovider_1Bean;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequestContexts;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
@@ -70,15 +70,13 @@ import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.Comm
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.compatibility.base.dataprovider.transport.rmi.RMIMapper;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
-
 
 /**
  * Unit Of Work Bean
  */
 public abstract class UnitOfWork_1Bean 
-    extends AbstractDataprovider_1Bean 
-    implements Dataprovider_1_0, Synchronization_1_0
+extends AbstractDataprovider_1Bean 
+implements Dataprovider_1_0, Synchronization_1_0
 {
 
     /**
@@ -115,7 +113,7 @@ public abstract class UnitOfWork_1Bean
      * 
      */   
     private boolean trustPeer;
-    
+
     /**
      * 
      */   
@@ -146,12 +144,12 @@ public abstract class UnitOfWork_1Bean
      * boundaries.
      */
     private File streamBufferDirectory;
-    
+
     /**
      * Defines the chunk size used to buffer and flush streams.
      */
     private int streamChunkSize;
-    
+
     /**
      * 
      */
@@ -161,8 +159,8 @@ public abstract class UnitOfWork_1Bean
      * 
      */
     protected static final int DEFAULT_STREAM_CHUNK_SIZE = 10000;
-        
-    
+
+
     //------------------------------------------------------------------------
     // Extends SessionBean_1
     //------------------------------------------------------------------------
@@ -174,8 +172,8 @@ public abstract class UnitOfWork_1Bean
     ) {
         return BasicException.Code.DEFAULT_DOMAIN;
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Manageable_1_0
     //------------------------------------------------------------------------
@@ -200,15 +198,13 @@ public abstract class UnitOfWork_1Bean
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.INVALID_CONFIGURATION,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("timeout", timeout)
-                    },
-                    "Transaction timeout must be specified in milliseconds"             
+                    "Transaction timeout must be specified in milliseconds",
+                    new BasicException.Parameter("timeout", timeout)
                 );
             }
             this.timeoutInSeconds = timeoutInMillisecods.longValue() < 0L ? -1 :
                 timeoutInMillisecods.longValue() < 1000L ? 1 :
-                (int) (timeoutInMillisecods.longValue() / 1000L);
+                    (int) (timeoutInMillisecods.longValue() / 1000L);
         } catch(NameNotFoundException e) {
             this.timeoutInSeconds = -1;
         }
@@ -222,7 +218,7 @@ public abstract class UnitOfWork_1Bean
             String pathname = value == null ? null : value.toString().trim();
             this.streamBufferDirectory = pathname == null || pathname.length() == 0 ? 
                 null :
-                new File(pathname);
+                    new File(pathname);
         } catch(NameNotFoundException e) {
             this.streamBufferDirectory = null;
         }
@@ -240,19 +236,15 @@ public abstract class UnitOfWork_1Bean
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.INVALID_CONFIGURATION,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("streamChunkSize", streamChunkSize)
-                    },
-                    "The stream chunk sizes is an integer defining how many bytes or characters are transferred at once"             
+                    "The stream chunk sizes is an integer defining how many bytes or characters are transferred at once",
+                    new BasicException.Parameter("streamChunkSize", streamChunkSize)
                 );
             }
             if(this.streamChunkSize <= 0) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("streamChunkSize", streamChunkSize)
-                },
-                "The stream chunk size defining how many bytes or characters are transferred at once must be positive"             
+                "The stream chunk size defining how many bytes or characters are transferred at once must be positive",
+                new BasicException.Parameter("streamChunkSize", streamChunkSize)
             );
         } catch(NameNotFoundException e) {
             this.streamChunkSize = DEFAULT_STREAM_CHUNK_SIZE;
@@ -262,7 +254,7 @@ public abstract class UnitOfWork_1Bean
         //
         try {
             this.trustPeer = (
-                (Boolean)getConfigurationContext().lookup("SECURITY/trustPeer")
+                    (Boolean)getConfigurationContext().lookup("SECURITY/trustPeer")
             ).booleanValue();
         } catch(NameNotFoundException e) {
             this.trustPeer = true;
@@ -271,8 +263,7 @@ public abstract class UnitOfWork_1Bean
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                null,
-                "The trustPeer flag must be specified as Boolean"             
+                "The trustPeer flag must be specified as Boolean"
             );
         }
         //
@@ -280,7 +271,7 @@ public abstract class UnitOfWork_1Bean
         // 
         try {
             this.trustTransactionTime = (
-                (Boolean)getConfigurationContext().lookup("SECURITY/trustTransactionTime")
+                    (Boolean)getConfigurationContext().lookup("SECURITY/trustTransactionTime")
             ).booleanValue();
         } catch(NameNotFoundException e) {
             this.trustTransactionTime = false;
@@ -289,8 +280,7 @@ public abstract class UnitOfWork_1Bean
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                null,
-                "The trustTransactionTime flag must be specified as Boolean"             
+                "The trustTransactionTime flag must be specified as Boolean"
             );
         }
         //
@@ -302,23 +292,21 @@ public abstract class UnitOfWork_1Bean
             this.appendPrincipalString = "String".equals(appendPrincipal);
             this.ignorePrincipal = "false".equals(appendPrincipal); 
             if(
-                !this.appendPrincipalName & 
-                !this.appendPrincipalString &
-                !this.ignorePrincipal
+                    !this.appendPrincipalName & 
+                    !this.appendPrincipalString &
+                    !this.ignorePrincipal
             ) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("appendPrincipal", appendPrincipal)
-                },
-                "The appendPrincipal value must be one of [\"false\", \"Name\", \"String\"]"             
+                "The appendPrincipal value must be one of [\"false\", \"Name\", \"String\"]",
+                new BasicException.Parameter("appendPrincipal", appendPrincipal)
             );
         } catch(NameNotFoundException e) {
             this.ignorePrincipal = true;
             this.appendPrincipalName = false; 
             this.appendPrincipalString = false;
         }
-        
+
     }
 
     /**
@@ -360,13 +348,13 @@ public abstract class UnitOfWork_1Bean
         UnitOfWorkRequest[] requests = RMIMapper.unmarshal(unitsOfWork);
         UnitOfWorkReply[] replies = new UnitOfWorkReply[unitsOfWork.length];
         for (
-            int index = 0;
-            index < unitsOfWork.length;
-            index++
+                int index = 0;
+                index < unitsOfWork.length;
+                index++
         ) replies[index] = process(header,transaction,requests[index]);
         return RMIMapper.marshal(replies);
     }
-            
+
     /**
      * Adjust the Service Header
      * 
@@ -381,40 +369,40 @@ public abstract class UnitOfWork_1Bean
         //
         String requestedAt = this.keepDate ?
             source.getRequestedAt() :
-            DateFormat.getInstance().format(new Date());
-        //
-        // Adjust Principal Chain 
-        //
-        String[] principalChain = new String[
-          (this.trustPeer ? source.getPrincipalChain().size() : 0) +
-          (this.ignorePrincipal ? 0 : 1)
-        ];
-        if(this.trustPeer) source.getPrincipalChain().toArray(principalChain);
-        if(this.appendPrincipalName) {
-          String principal = this.getSessionContext().getCallerPrincipal().getName();
-          SysLog.detail("appending principal.getName()", principal);
-          principalChain[principalChain.length - 1] = principal;
-        }
-        if(this.appendPrincipalString) {
-          String principal = this.getSessionContext().getCallerPrincipal().toString();
-          SysLog.detail("appending principal.toString()", principal);
-          principalChain[principalChain.length - 1] = principal;
-        }
-        if(this.ignorePrincipal) {
-          SysLog.detail("not appending any principal");
-        }
-        ServiceHeader header = new ServiceHeader(
-            principalChain,
-            source.getCorrelationId(),
-            source.traceRequest(),
-            source.getQualityOfService(),
-            requestedAt,
-            source.getRequestedFor()
-        );
-        SysLog.detail("adjusted ServiceHeader", header);
-        return header;
+                DateFormat.getInstance().format(new Date());
+            //
+            // Adjust Principal Chain 
+            //
+            String[] principalChain = new String[
+                                                 (this.trustPeer ? source.getPrincipalChain().size() : 0) +
+                                                 (this.ignorePrincipal ? 0 : 1)
+                                                 ];
+            if(this.trustPeer) source.getPrincipalChain().toArray(principalChain);
+            if(this.appendPrincipalName) {
+                String principal = this.getSessionContext().getCallerPrincipal().getName();
+                logger.debug("appending principal.getName()|{}", principal);
+                principalChain[principalChain.length - 1] = principal;
+            }
+            if(this.appendPrincipalString) {
+                String principal = this.getSessionContext().getCallerPrincipal().toString();
+                logger.debug("appending principal.toString()|{}", principal);
+                principalChain[principalChain.length - 1] = principal;
+            }
+            if(this.ignorePrincipal) {
+                logger.debug("not appending any principal");
+            }
+            ServiceHeader header = new ServiceHeader(
+                principalChain,
+                source.getCorrelationId(),
+                source.traceRequest(),
+                source.getQualityOfService(),
+                requestedAt,
+                source.getRequestedFor()
+            );
+            logger.debug("adjusted ServiceHeader|{}", header);
+            return header;
     }
-    
+
     /**
      * Pre-process a single of unit of work
      *
@@ -438,14 +426,14 @@ public abstract class UnitOfWork_1Bean
         // Determine timestamp policy
         //
         this.keepDate = (
-            this.trustTransactionTime || !transactionBoundary
+                this.trustTransactionTime || !transactionBoundary
         ) && header.getRequestedAt() != null;
         //
         // Adjust the header if necessary
         //        
         this.header = this.keepDate && this.trustPeer && this.ignorePrincipal ?
             header :
-            adjustHeader(header);
+                adjustHeader(header);
         //
         // Create Unit Of Work Id
         //
@@ -466,9 +454,9 @@ public abstract class UnitOfWork_1Bean
         //
         DataproviderRequest[] requests = unitOfWork.getRequests();
         for(
-            int i=0;
-            i<requests.length;
-            i++
+                int i=0;
+                i<requests.length;
+                i++
         ){
             DataproviderRequest request = requests[i];
             request.context(DataproviderRequestContexts.UNIT_OF_WORK_ID).set(0,unitOfWorkId);
@@ -490,7 +478,7 @@ public abstract class UnitOfWork_1Bean
         }
         return RMIMapper.intercept(this.reply)[0];
     }
-    
+
     /**
      * Process a single of unit of work
      *
@@ -510,7 +498,7 @@ public abstract class UnitOfWork_1Bean
     ){
         return this.timeoutInSeconds;
     }
-    
+
     //------------------------------------------------------------------------
     // Implements Synchronization_1_0
     //------------------------------------------------------------------------

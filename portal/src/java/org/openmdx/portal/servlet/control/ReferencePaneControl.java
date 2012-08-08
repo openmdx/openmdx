@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePaneControl.java,v 1.139 2008/06/01 11:26:18 wfro Exp $
+ * Name:        $Id: ReferencePaneControl.java,v 1.145 2008/08/15 12:14:12 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.139 $
+ * Revision:    $Revision: 1.145 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/01 11:26:18 $
+ * Date:        $Date: 2008/08/15 12:14:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -702,14 +699,7 @@ public class ReferencePaneControl
                         : "style=\"" + styleModifier + "\"";
                     
                     ObjectReference objRow = (ObjectReference)((AttributeValue)row[0]).getValue(true);
-                    String rowLevelId = objRow.getGridRowLevelId();
-                    rowLevelId = rowLevelId == null
-                        ? null
-                        : "gridTable" + tabId + "-" + rowLevelId;
-                    String rowIdModifier = rowLevelId == null
-                        ? ""
-                        : "id=\"" + rowLevelId + "\"";
-                    p.write("<tr class=\"gridTableRow", gridClassNameSuffix, (j % 2 == 0 ? "" : " odd"),  "\" ", styleModifier, " ", rowIdModifier, " >");
+                    p.write("<tr class=\"gridTableRow", gridClassNameSuffix, (j % 2 == 0 ? "" : " odd"),  "\" ", styleModifier, " >");
                     if((objRow != null) && grid.showRowSelectors()) {
                         if((view.getLookupType() != null) && objRow.isInstanceof(view.getLookupType())) {
                           p.write("<td class=\"gridColTypeCheck\"><input type=\"checkbox\" name=\"objselect\" value=\"\"", p.getOnClick("OF.selectAndClose('", htmlEncoder.encode(objRow.refMofId(), false), "', '", htmlEncoder.encode(objRow.getTitleEscapeQuote(), false), "', '", view.getId(), "', window);"), " /></td>");
@@ -728,21 +718,29 @@ public class ReferencePaneControl
                             true
                         );
                         stringifiedValue = valueHolder instanceof TextValue
-                          ? ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue
-                          : stringifiedValue;
-                        // null or empty collection
+                            ? ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue
+                            : stringifiedValue;
+                        // iconTag                        
+                        CharSequence iconTag = "";
+                        CharSequence iconSpacer = "";
+                        CharSequence divBegin = "";
+                        CharSequence divEnd = "";
+                        if(valueHolder.getIconKey() != null) {
+                            iconTag = p.getImg("src=\"", p.getResourcePath("images/"), valueHolder.getIconKey(), "\" align=\"absbottom\" border=\"0\" alt=\"\"");
+                            // Spacer only if icon and text
+                            if(stringifiedValue.length() > 0) {
+                                divBegin = "<div>";
+                                divEnd = "</div>";
+                                iconSpacer = p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");
+                            }
+                        }                        
+                        // Null or empty collection
                         if(stringifiedValue.length() == 0) {
-                          stringifiedValue = "&nbsp;";
-                        }
-                        
-                        // iconTag
-                        CharSequence iconTag = valueHolder.getIconKey() == null
-                            ? ""
-                            : "" + p.getImg("src=\"", p.getResourcePath("images/"), valueHolder.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");
-    
+                            stringifiedValue = "&nbsp;";
+                        }                        
                         if(value == null) {
-                          p.debug("<!-- null -->");
-                          p.write("<td>",  iconTag, "",  stringifiedValue, "</td>");
+                            p.debug("<!-- null -->");
+                            p.write("<td>", divBegin, iconTag, iconSpacer, stringifiedValue, divEnd, "</td>");
                         }
                         else if(valueHolder instanceof BooleanValue) {
                             String images = "";
@@ -765,7 +763,7 @@ public class ReferencePaneControl
                               }
                             }
                             p.debug("<!-- BooleanValue -->");
-                            p.write("<td>",  iconTag, "",  images, "</td>");
+                            p.write("<td>", images, "</td>");
                         }
                         else if(valueHolder instanceof ObjectReferenceValue) {
                             // Multi-valued
@@ -805,11 +803,8 @@ public class ReferencePaneControl
                                     ObjectReference nextObjRef = nextRow == null
                                        ? null
                                        : (ObjectReference)((AttributeValue)nextRow[0]).getValue(true);
-                                    CharSequence expandRowsModifier = (rowLevelId != null) && (nextRow != null) && (nextObjRef.getGridRowNestingLevel() > objRef.getGridRowNestingLevel())
-                                        ? "" + p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_COLLAPSE, "\" border=\"0\" align=\"bottom\" alt=\"*\" title=\"\"", p.getOnClick("javascript:updateCollapsableRows('gridTable", tabId, "', 1, '", rowLevelId, "', ", Integer.toString(objRef.getGridRowNestingLevel()), ", (this.src.indexOf('collapse')>0)); if(this.src.indexOf('collapse')>0) {this.src='", p.getResourcePath("images/"), WebKeys.ICON_EXPAND, "';} else {this.src='", p.getResourcePath("images/"), WebKeys.ICON_COLLAPSE, "';};")) + p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_EXPAND, "\" style=\"display:none;\" border=\"0\" align=\"bottom\" alt=\"*\" title=\"\"")
-                                        : "";            
                                     p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
-                                    p.write("<td class=\"gridColTypeIcon-3\"><div style=\"float:left;\">", p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" alt=\"\" width=\"", Integer.toString(16*objRef.getGridRowNestingLevel()), "\" height=\"0\""), "<a href=\"#\"", p.getOnMouseOver("javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};"), ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" style=\"cursor:pointer;\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "</a></div><span id=\"", "gridRow", Long.toString(rowId), "-menu\" class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\"><a href=\"#\" class=\"gridMenuIndicator\" ", p.getOnClick("javascript:new Ajax.Updater('gridRow", Long.toString(rowId), "-menu', ", p.getEvalHRef(this.getRowMenuAction(objRef.refMofId(), rowId)), ", {asynchronous:true, evalScripts: true, onComplete: function(){}});return false;"), ">", p.getImg("border=\"0\" height=\"16\" width=\"15\" alt=\"\" src=\"", p.getResourcePath("images/"), "spacer.gif\""), "</a>", p.getImg("border=\"0\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" style=\"display:none;\""), "</span>", expandRowsModifier, "</td>");
+                                    p.write("<td class=\"gridColTypeIcon-3\"><table id=\"gm\"<tr><td><a href=\"#\" ", p.getOnClick("javascript:this.href=", p.getEvalHRef(action), ";"), ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "</a></td><td><div id=\"", "gridRow", Long.toString(rowId), "-menu\" class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\"><div class=\"gridMenuIndicator\" ", p.getOnClick("javascript:new Ajax.Updater('gridRow", Long.toString(rowId), "-menu', ", p.getEvalHRef(this.getRowMenuAction(objRef.refMofId(), rowId)), ", {asynchronous:true, evalScripts: true, onComplete: function(){}});"), ">", p.getImg("border=\"0\" height=\"16\" width=\"16\" alt=\"\" src=\"", p.getResourcePath("images/"), "spacer.gif\""), "</div>", p.getImg("border=\"0\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" style=\"display:none;\""), "</div></td></tr></table></td>");
                                 }
                                 // only text in columns > 0
                                 else {
@@ -832,7 +827,7 @@ public class ReferencePaneControl
                         }
                         else {
                           p.debug("<!-- AttributeValue -->");
-                          p.write("<td>",  iconTag, "",  stringifiedValue, "</td>");
+                          p.write("<td>", divBegin, iconTag, iconSpacer, stringifiedValue, divEnd, "</td>");
                         }
                     }
                     if((objRow != null) && grid.showRowSelectors()) {
@@ -858,26 +853,28 @@ public class ReferencePaneControl
                     // Only show pagers if there are more than 10 rows 
                     if(rows.length > 10) {                    
                         if(grid.getAddObjectAction() == null) { 
+                            p.write("        <div id=\"gridPagerBottom\">");
                             // Page 0
-                            p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(firstPageAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), firstPageAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
+                            p.write("          <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(firstPageAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), firstPageAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
                             // Page previous
                             if(pagePreviousIsEnabled) {
-                                p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
-                                p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
+                                p.write("          <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
+                                p.write("          <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
                             }
                             else {
-                                p.write("        ", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
-                                p.write("        ", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
+                                p.write("          ", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
+                                p.write("          ", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
                             }
                             // Page next
                             if(pageNextIsEnabled) {
-                                p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextAction), " + '&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");
-                                p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
+                                p.write("          <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextAction), " + '&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");
+                                p.write("          <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
                             }
                             else {
-                                p.write("        ", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
-                                p.write("        ", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
+                                p.write("          ", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
+                                p.write("          ", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
                             }
+                            p.write("        </div>");
                         }
                     }
                 }
@@ -1265,8 +1262,8 @@ public class ReferencePaneControl
                               p.write("</td>");
                             }
                             else {
-                              p.debug("<!-- DateValue -->");
-                              p.write("<td class=\"locked\">",  iconTag, "",  stringifiedValueShow, "</td>");
+                                p.debug("<!-- DateValue -->");
+                                p.write("<td class=\"locked\">",  iconTag, "",  stringifiedValueShow, "</td>");
                             }
                         }
                         // CodeValue
@@ -1336,7 +1333,7 @@ public class ReferencePaneControl
                                   : ((ObjectReference)value).getInspector().isChangeable(); 
                               p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
                               p.write("<td class=\"gridColTypeIconEdit-3\">");
-                              p.write(p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" alt=\"\" width=\"", Integer.toString(16*objRow.getGridRowNestingLevel()), "\" height=\"0\""), p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""));
+                              p.write(p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" alt=\"\" height=\"0\""), p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""));
                               if(rowIsChangeable) {
                                   if (showCloneOp) {
                                     p.write(p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_CLONE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", texts.getCloneTitle(), "\"", p.getOnClick("javascript:rowIndex", tabId, "++;cloneGridRow('editGridTable", tabId, "',this, ", Integer.toString(paneIndex), "*10000, rowIndex", tabId, "*100, 100);"), p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';")));
@@ -1442,8 +1439,7 @@ public class ReferencePaneControl
                   p.write("</div>");
                 }                
             }
-        }
-        
+        }        
         AppLog.detail("< paint");
     }
     

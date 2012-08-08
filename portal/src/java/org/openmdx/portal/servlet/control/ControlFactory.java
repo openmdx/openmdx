@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: ControlFactory.java,v 1.26 2008/04/04 17:01:06 hburger Exp $
+ * Name:        $Id: ControlFactory.java,v 1.27 2008/08/12 16:38:06 wfro Exp $
  * Description: ControlFactory
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:06 $
+ * Date:        $Date: 2008/08/12 16:38:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Connection_1_2.java,v 1.2 2006/05/12 20:08:53 hburger Exp $
+ * Name:        $Id: Connection_1_2.java,v 1.4 2008/09/11 18:01:06 hburger Exp $
  * Description: Connection 1.2 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/05/12 20:08:53 $
+ * Date:        $Date: 2008/09/11 18:01:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ public interface Connection_1_2
      * @return the corresponding connection factory
      */
     Connection_1Factory getConnectionFactory();
-    
+
     /**
      * Container managed units of work are either non transactional or part of
      * a bigger unit of work.

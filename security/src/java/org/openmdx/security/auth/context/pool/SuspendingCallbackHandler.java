@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: SuspendingCallbackHandler.java,v 1.11 2008/03/17 16:29:18 hburger Exp $
+ * Name:        $Id: SuspendingCallbackHandler.java,v 1.12 2008/09/11 10:47:30 hburger Exp $
  * Description: Suspending Callback Handler
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/17 16:29:18 $
+ * Date:        $Date: 2008/09/11 10:47:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,10 +81,10 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 	 * @param debug 
 	 */
 	SuspendingCallbackHandler(
-		long callbackTimeout,
-		long maximumWait,
-		String owner,
-		boolean debug
+			long callbackTimeout,
+			long maximumWait,
+			String owner,
+			boolean debug
 	){
 		this.callbackTimeout = callbackTimeout;
 		this.maximumWait = maximumWait;
@@ -139,7 +139,7 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 	 * 
 	 */
 	private static final EnumSet<Status> PASSIVE = EnumSet.of(Status.PASSIVE);
-	
+
 	/**
 	 * 
 	 */
@@ -317,10 +317,8 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 					stateException,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.ILLEGAL_STATE,
-					new BasicException.Parameter[]{
-							new BasicException.Parameter("status", this.status),
-					},
-					"Unexpected state during completion, force to COMPLETED"
+					"Unexpected state during completion, force to COMPLETED",
+					new BasicException.Parameter("status", this.status)
 			);
 			(
 					loginException == null ? exception : exception.appendCause(loginException)

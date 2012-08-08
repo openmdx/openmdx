@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ExecutionContextModifier_1.java,v 1.8 2006/02/19 22:36:14 wfro Exp $
+ * Name:        $Id: ExecutionContextModifier_1.java,v 1.9 2008/09/10 08:55:25 hburger Exp $
  * Description: ExecutionContextModifier_1
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/02/19 22:36:14 $
+ * Date:        $Date: 2008/09/10 08:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,7 +67,7 @@ import org.openmdx.kernel.exception.BasicException;
  * ExecutionContextModifier_1
  */
 public class ExecutionContextModifier_1
-    implements ExecutionContextModifier_1_0 
+implements ExecutionContextModifier_1_0 
 {
 
     /**
@@ -86,17 +86,17 @@ public class ExecutionContextModifier_1
         this.trustPeer = trustPeer;
         this.useName = useName;
     }
-       
+
     /**
      * Defines whether the principal chain should be cleared or not.
      */
     private final boolean trustPeer;
-    
+
     /**
      * Defines whether the principals name or string representation should be used.
      */
     private final boolean useName;
-    
+
     /**
      * Context based modifier
      * 
@@ -151,11 +151,11 @@ public class ExecutionContextModifier_1
     ){
         return source == null ? 
             null :
-          this.useName ? 
-            source.getName() : 
-            source.toString();
+                this.useName ? 
+                    source.getName() : 
+                        source.toString();
     }
-    
+
     /**
      * Create an ExecutionContextModifier_1_0 instance
      * <p>
@@ -187,30 +187,28 @@ public class ExecutionContextModifier_1
         try {
             return null == kind || "null".equals(kind) ? 
                 null :
-            "setPrincipalName".equals(kind) ? new ExecutionContextModifier_1(
-                false, // trustPeer 
-                true // useName
-            ) : "setPrincipalString".equals(kind) ? new ExecutionContextModifier_1(
-                false, // trustPeer
-                false // useName
-            ) : "addPrincipalName".equals(kind) ? new ExecutionContextModifier_1(
-                true, // trustPeer
-                true // useName
-            ) : "addPrincipalString".equals(kind) ? new ExecutionContextModifier_1(
-                true, // trustPeer
-                false // useName
-            ) : (ExecutionContextModifier_1_0) Classes.getApplicationClass(
-                kind // execution context modifier class name
-            ).newInstance();
+                    "setPrincipalName".equals(kind) ? new ExecutionContextModifier_1(
+                        false, // trustPeer 
+                        true // useName
+                    ) : "setPrincipalString".equals(kind) ? new ExecutionContextModifier_1(
+                        false, // trustPeer
+                        false // useName
+                    ) : "addPrincipalName".equals(kind) ? new ExecutionContextModifier_1(
+                        true, // trustPeer
+                        true // useName
+                    ) : "addPrincipalString".equals(kind) ? new ExecutionContextModifier_1(
+                        true, // trustPeer
+                        false // useName
+                    ) : (ExecutionContextModifier_1_0) Classes.getApplicationClass(
+                        kind // execution context modifier class name
+                    ).newInstance();
         } catch (Exception exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("kind", kind)
-                },
-                "Execution context modifier could not be created"
+                "Execution context modifier could not be created",
+                new BasicException.Parameter("kind", kind)
             );
         }
     }

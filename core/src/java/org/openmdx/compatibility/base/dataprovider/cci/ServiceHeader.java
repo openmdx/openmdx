@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ServiceHeader.java,v 1.8 2008/02/19 13:55:49 hburger Exp $
+ * Name:        $Id: ServiceHeader.java,v 1.11 2008/09/09 12:06:39 hburger Exp $
  * Description: Service Header
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/19 13:55:49 $
+ * Date:        $Date: 2008/09/09 12:06:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,11 +56,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.resource.ResourceException;
+
+import org.openmdx.base.resource.Records;
+import org.openmdx.kernel.text.MultiLineStringRepresentation;
+
 /**
  * This class represents a service header
  */
 public final class ServiceHeader
-    implements Serializable, Cloneable
+    implements MultiLineStringRepresentation, Serializable, Cloneable
 {
 
     /**
@@ -241,8 +246,21 @@ public final class ServiceHeader
      */
     private final List<String> principalChain;
 
+    /**
+     * 
+     */
     private final static List<String> NO_PRINCIPALS = Collections.emptyList();
     
+    /**
+     * For toString
+     */
+    private final static String[] TO_STRING_CONTENT = {
+        "principalChain",
+        "correlationId",
+        "requestedAt",
+        "requestedFor"
+    };
+
     /**
      *
      */
@@ -339,5 +357,32 @@ public final class ServiceHeader
         );
     }
 
-    
+
+    //------------------------------------------------------------------------
+    // Extends Object
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString(
+    ){
+        try {
+            return Records.getRecordFactory().asMappedRecord(
+                ServiceHeader.class.getName(),
+                null, // short description
+                TO_STRING_CONTENT,
+                new Object[]{
+                    this.principalChain,
+                    this.correlationId,
+                    this.requestedAt,
+                    this.requestedFor
+                }
+            ).toString();
+        } catch (ResourceException exception) {
+            return super.toString();
+        }
+    }
+
 }

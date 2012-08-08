@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceManager_1.java,v 1.24 2008/07/01 08:29:44 hburger Exp $
+ * Name:        $Id: PersistenceManager_1.java,v 1.30 2008/09/10 08:55:23 hburger Exp $
  * Description: PersistenceManager_1 
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/01 08:29:44 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -95,8 +95,8 @@ import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
  * PersistenceManager_1
  */
 class PersistenceManager_1
-    extends AbstractPersistenceManager
-    implements StructureFactory_1_0
+extends AbstractPersistenceManager
+implements StructureFactory_1_0
 {
 
     /**
@@ -117,19 +117,19 @@ class PersistenceManager_1
             notifier
         );
         this.delegate = delegate;
-        this.transaction = new Transaction_1((UnitOfWork_1_2)delegate.refUnitOfWork());
+        this.transaction = new Transaction_1();
     }
 
     /**
      * 
      */
     private Transaction transaction;
-    
+
     /**
      * 
      */
-    private RefPackage_1_0 delegate;
-    
+    RefPackage_1_0 delegate;
+
     /**
      * Only a subset of the JDO methods are implemented in openMDX 1
      */
@@ -148,6 +148,9 @@ class PersistenceManager_1
      * @see javax.jdo.PersistenceManager#close()
      */
     public void close() {
+        if(this.delegate instanceof RefPackage_1_3) {
+            ((RefPackage_1_3)this.delegate).close();
+        }
         this.delegate = null;
         this.transaction = null;
     }
@@ -322,7 +325,7 @@ class PersistenceManager_1
     public Object getObjectId(Object pc) {
         return pc instanceof PersistenceCapable ?
             ((PersistenceCapable)pc).jdoGetObjectId() :
-            null;
+                null;
     }
 
     /* (non-Javadoc)
@@ -331,7 +334,7 @@ class PersistenceManager_1
     public Object getTransactionalObjectId(Object pc) {
         return pc instanceof PersistenceCapable ?
             ((PersistenceCapable)pc).jdoGetTransactionalObjectId() :
-            null;
+                null;
     }
 
     /* (non-Javadoc)
@@ -451,7 +454,7 @@ class PersistenceManager_1
     protected Object detachCopyRaw(Object pc) {
         throw new UnsupportedOperationException(OPENMDX_1_JDO);
     }
-        
+
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#attachCopy(java.lang.Object, boolean)
      */
@@ -541,7 +544,7 @@ class PersistenceManager_1
         // ignored by OPENMDX_1_JDO
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements StructureFactory_1_0
     //------------------------------------------------------------------------
@@ -554,7 +557,7 @@ class PersistenceManager_1
     protected boolean hasLegacyDelegate(){
         return !(this.delegate instanceof RefPackage_1_4) || ((RefPackage_1_4)this.delegate).hasLegacyDelegate();
     }
-        
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.StructureFactory_1_0#createStructure(java.lang.String, java.util.List, java.util.List)
      */
@@ -565,15 +568,15 @@ class PersistenceManager_1
     ) throws ServiceException {
         StructureFactory_1_0 delegate = this.hasLegacyDelegate() ? 
             this.delegate.refObjectFactory() :
-            (StructureFactory_1_0)((RefPackage_1_4)this.delegate).getDelegate();
-        return delegate.createStructure(
-            type,
-            fieldNames,
-            fieldValues
-        );
+                (StructureFactory_1_0)((RefPackage_1_4)this.delegate).getDelegate();
+            return delegate.createStructure(
+                type,
+                fieldNames,
+                fieldValues
+            );
     }
 
-    
+
     //------------------------------------------------------------------------
     // Class Transaction_1
     //------------------------------------------------------------------------
@@ -582,22 +585,15 @@ class PersistenceManager_1
      * Transaction_1
      */
     class Transaction_1
-        implements Transaction, Synchronization, Synchronization_1_0
+    implements Transaction, Synchronization, Synchronization_1_0
     {
-
-        /**
-         * Constructor 
-         */
-        public Transaction_1(
-            UnitOfWork_1_2 delegate
-        ) {
-            this.delegate = delegate;
-        }
 
         /**
          * 
          */
-        private final UnitOfWork_1_2 delegate;
+        private final UnitOfWork_1_2 getDelegate(){
+            return (UnitOfWork_1_2) delegate.refUnitOfWork();
+        }
 
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#begin()
@@ -605,7 +601,7 @@ class PersistenceManager_1
         public void begin(
         ) {
             try {
-                this.delegate.begin();
+                getDelegate().begin();
             } catch (ServiceException exception) {
                 throw new JDOUserException(
                     "Transaction begin failed",
@@ -619,7 +615,7 @@ class PersistenceManager_1
          */
         public void commit() {
             try {
-                this.delegate.commit();
+                getDelegate().commit();
             } catch (ServiceException exception) {                
                 BasicException initialCause = exception.getCause(null);   
                 throw initialCause.getExceptionCode() == BasicException.Code.CONCURRENT_ACCESS_FAILURE ?
@@ -634,7 +630,7 @@ class PersistenceManager_1
                     ) : new JDOFatalDataStoreException(
                         "Transaction commit failed",
                         exception
-                );
+                    );
             }
         }
 
@@ -643,7 +639,7 @@ class PersistenceManager_1
          */
         public void rollback() {
             try {
-                this.delegate.rollback();
+                getDelegate().rollback();
             } catch (ServiceException exception) {
                 throw new JDOFatalDataStoreException(
                     "Transaction rollback failed",
@@ -656,21 +652,28 @@ class PersistenceManager_1
          * @see javax.jdo.Transaction#isActive()
          */
         public boolean isActive() {
-           return this.delegate.isActive();
+            return getDelegate().isActive();
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#getRollbackOnly()
          */
         public boolean getRollbackOnly() {
-            return this.delegate.getRollbackOnly();
+            return getDelegate().getRollbackOnly();
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#setRollbackOnly()
          */
         public void setRollbackOnly() {
-            this.delegate.setRollbackOnly();
+            try {
+                getDelegate().setRollbackOnly();
+            } catch (ServiceException exception) {
+                throw new JDOUserException(
+                    exception.getMessage(),
+                    exception
+                );
+            }
         }
 
         /* (non-Javadoc)
@@ -686,7 +689,8 @@ class PersistenceManager_1
          * @see javax.jdo.Transaction#getNontransactionalRead()
          */
         public boolean getNontransactionalRead() {
-            return this.delegate.isOptimistic() || !this.delegate.isTransactional();
+            UnitOfWork_1_2 delegate = getDelegate();
+            return delegate.isOptimistic() || !delegate.isTransactional();
         }
 
         /* (non-Javadoc)
@@ -702,7 +706,7 @@ class PersistenceManager_1
          * @see javax.jdo.Transaction#getNontransactionalWrite()
          */
         public boolean getNontransactionalWrite() {
-            return !this.delegate.isTransactional();
+            return !getDelegate().isTransactional();
         }
 
         /* (non-Javadoc)
@@ -750,7 +754,7 @@ class PersistenceManager_1
          * @see javax.jdo.Transaction#getOptimistic()
          */
         public boolean getOptimistic() {
-            return this.delegate.isOptimistic();
+            return getDelegate().isOptimistic();
         }
 
         /* (non-Javadoc)
@@ -779,8 +783,8 @@ class PersistenceManager_1
          * @see org.openmdx.base.transaction.Synchronization_1_0#afterBegin()
          */
         public void afterBegin()
-            throws ServiceException {
-            this.delegate.afterBegin();
+        throws ServiceException {
+            getDelegate().afterBegin();
         }
 
         /**
@@ -791,15 +795,15 @@ class PersistenceManager_1
         public void afterCompletion(
             boolean committed
         ) throws ServiceException {
-            this.delegate.afterCompletion(committed);
+            getDelegate().afterCompletion(committed);
         }
-        
+
         /* (non-Javadoc)
          * @see javax.transaction.Synchronization#afterCompletion(int)
          */
         public void afterCompletion(int status) {
             try {
-                this.delegate.afterCompletion(status == Status.STATUS_COMMITTED);
+                getDelegate().afterCompletion(status == Status.STATUS_COMMITTED);
             } catch (ServiceException exception) {
                 throw new JDOFatalInternalException(
                     "After completion failure",
@@ -814,7 +818,7 @@ class PersistenceManager_1
          */
         public void beforeCompletion(){
             try {
-                this.delegate.beforeCompletion();
+                getDelegate().beforeCompletion();
             } catch (ServiceException exception) {
                 this.setRollbackOnly();
                 throw new JDODataStoreException(
@@ -825,5 +829,5 @@ class PersistenceManager_1
         }
 
     }
-        
+
 }

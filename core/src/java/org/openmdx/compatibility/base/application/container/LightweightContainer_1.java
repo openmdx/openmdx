@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightContainer_1.java,v 1.21 2008/03/26 19:29:57 hburger Exp $
+ * Name:        $Id: LightweightContainer_1.java,v 1.23 2008/09/10 08:55:27 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/26 19:29:57 $
+ * Date:        $Date: 2008/09/10 08:55:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,258 +75,254 @@ import org.openmdx.kernel.log.SysLog;
  */
 @SuppressWarnings("unchecked")
 public class LightweightContainer_1
-	implements Manageable_1_0
+implements Manageable_1_0
 { 
 
-	/**
-	 * Pass parameter as arguments.
-	 * <p>
-	 * This mthod allows the lightweight container's replacement during
-	 * unit tests.
+    /**
+     * Pass parameter as arguments.
+     * <p>
+     * This mthod allows the lightweight container's replacement during
+     * unit tests.
      * @deprecated
-	 */
-	public LightweightContainer_1(
-		String id,
-		Path[] connectorDeploymentUnits,
-		Path[] providerDeploymentUnits
-	) throws ServiceException {
-		
-	    LightweightContainer.getInstance(Mode.ENTERPRISE_APPLICATION_CONTAINER);
-		this.connectorDeploymentUnits = connectorDeploymentUnits;
-		this.providerDeploymentUnits = providerDeploymentUnits;
+     */
+    public LightweightContainer_1(
+        String id,
+        Path[] connectorDeploymentUnits,
+        Path[] providerDeploymentUnits
+    ) throws ServiceException {
 
-		new ApplicationContext_1(
-			connectorDeploymentUnits.length > 0 ?
-				connectorDeploymentUnits[0].get(8) :
-			providerDeploymentUnits.length > 0 ?
-				providerDeploymentUnits[0].get(8) :
-				NOT_AVAILABLE,
-			id
-		);
+        LightweightContainer.getInstance(Mode.ENTERPRISE_APPLICATION_CONTAINER);
+        this.connectorDeploymentUnits = connectorDeploymentUnits;
+        this.providerDeploymentUnits = providerDeploymentUnits;
 
-		try {
-			SysLog.info(
-				CONNECTOR_DEPLOYMENT_UNITS, 
-				Arrays.asList(this.connectorDeploymentUnits)
-			);
-			org.openmdx.compatibility.base.dataprovider.kernel.ConnectorContainer_1.deploy(
-				this.connectorDeploymentUnits
-			);
-		} catch (Exception exception) {
-			throw new ServiceException(
-				exception,
-			BasicException.Code.DEFAULT_DOMAIN,
-			BasicException.Code.ACTIVATION_FAILURE,
-				new BasicException.Parameter[]{
-					new BasicException.Parameter(
-						CONNECTOR_DEPLOYMENT_UNITS, 
-						this.connectorDeploymentUnits
-					)
-				},
-				"Establishment of connections failed"
-			).log(); 
-		}
-		
-		try {
-			SysLog.info(
-				PROVIDER_DEPLOYMENT_UNITS, 
-				Arrays.asList(this.providerDeploymentUnits)
-			);
-			this.providerContainer = 
-				new org.openmdx.compatibility.base.dataprovider.transport.none.DataproviderContainer_1();
-			this.providerContainer.deploy(this.providerDeploymentUnits);
-		} catch (RuntimeException exception) {
-			throw new ServiceException(
-				exception,
-			BasicException.Code.DEFAULT_DOMAIN,
-			BasicException.Code.ACTIVATION_FAILURE,
-				new BasicException.Parameter[]{
-					new BasicException.Parameter(
-						CONNECTOR_DEPLOYMENT_UNITS, 
-						this.providerDeploymentUnits
-					)
-				},
-				"Establishment of providers failed"
-			).log(); 
-		}
-	}		
+        new ApplicationContext_1(
+            connectorDeploymentUnits.length > 0 ?
+                connectorDeploymentUnits[0].get(8) :
+                    providerDeploymentUnits.length > 0 ?
+                        providerDeploymentUnits[0].get(8) :
+                            NOT_AVAILABLE,
+                            id
+        );
 
-	/**
-	 * Allow dynamic class loading by passing the parameters as system
-	 * property.
-	 * @deprecated
-	 */
-	public LightweightContainer_1(
-	) throws ServiceException {
-		this(	
-			createContainerId(),
-			getDeploymentUnits(CONNECTOR_DEPLOYMENT_UNITS),
-			getDeploymentUnits(PROVIDER_DEPLOYMENT_UNITS)
-		);
-	}
+        try {
+            SysLog.info(
+                CONNECTOR_DEPLOYMENT_UNITS, 
+                Arrays.asList(this.connectorDeploymentUnits)
+            );
+            org.openmdx.compatibility.base.dataprovider.kernel.ConnectorContainer_1.deploy(
+                this.connectorDeploymentUnits
+            );
+        } catch (Exception exception) {
+            throw new ServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ACTIVATION_FAILURE,
+                "Establishment of connections failed",
+                new BasicException.Parameter(
+                    CONNECTOR_DEPLOYMENT_UNITS, 
+                    (Object[])this.connectorDeploymentUnits
+                )
+            ).log(); 
+        }
 
-	 
-	//------------------------------------------------------------------------
-	// Implements Manageable_1_0
-	//------------------------------------------------------------------------
+        try {
+            SysLog.info(
+                PROVIDER_DEPLOYMENT_UNITS, 
+                Arrays.asList(this.providerDeploymentUnits)
+            );
+            this.providerContainer = 
+                new org.openmdx.compatibility.base.dataprovider.transport.none.DataproviderContainer_1();
+            this.providerContainer.deploy(this.providerDeploymentUnits);
+        } catch (RuntimeException exception) {
+            throw new ServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ACTIVATION_FAILURE,
+                "Establishment of providers failed",
+                new BasicException.Parameter(
+                    CONNECTOR_DEPLOYMENT_UNITS, 
+                    (Object[])this.providerDeploymentUnits
+                )
+            ).log(); 
+        }
+    }		
 
-	/**
+    /**
+     * Allow dynamic class loading by passing the parameters as system
+     * property.
+     * @deprecated
+     */
+    public LightweightContainer_1(
+    ) throws ServiceException {
+        this(	
+            createContainerId(),
+            getDeploymentUnits(CONNECTOR_DEPLOYMENT_UNITS),
+            getDeploymentUnits(PROVIDER_DEPLOYMENT_UNITS)
+        );
+    }
+
+
+    //------------------------------------------------------------------------
+    // Implements Manageable_1_0
+    //------------------------------------------------------------------------
+
+    /**
      * The activate method initializes a layer or component.
-	 * <p>
+     * <p>
      * An activate() implementation of a subclass should be of the form:
      * <pre>
      *   {
-	 *     super.activate();
-	 *     local activation code...
+     *     super.activate();
+     *     local activation code...
      *   }
      * </pre>
      */
-	public void activate (
-	) throws Exception {
-	    //
-	}
+    public void activate (
+    ) throws Exception {
+        //
+    }
 
-	/**
+    /**
      * The deactivate method releases a layer or component.
-	 * <p>
+     * <p>
      * A deactivate() implementation of a subclass should be of the form:
      * of the form:
      * <pre>
      *   {
-	 *     local deactivation code...
-	 *     super.deactivate();
+     *     local deactivation code...
+     *     super.deactivate();
      *   }
      * </pre>
      */
-	public void deactivate (
-	) throws Exception, ServiceException {
-		this.providerContainer.undeploy(this.providerDeploymentUnits);
-		org.openmdx.compatibility.base.dataprovider.kernel.ConnectorContainer_1.undeploy(
-			this.connectorDeploymentUnits
-		);
-		this.providerContainer = null;
-	}
+    public void deactivate (
+    ) throws Exception, ServiceException {
+        this.providerContainer.undeploy(this.providerDeploymentUnits);
+        org.openmdx.compatibility.base.dataprovider.kernel.ConnectorContainer_1.undeploy(
+            this.connectorDeploymentUnits
+        );
+        this.providerContainer = null;
+    }
 
 
-	//------------------------------------------------------------------------
-	// Instance members
-	//------------------------------------------------------------------------
-	
-	/**
-	 * The connector deployment units to be processed
-	 */
-	protected final Path[] connectorDeploymentUnits;
-	 
-	/**
-	 * The provider deployment units to be processed
-	 */
-	protected final Path[] providerDeploymentUnits;
-	 
-	/**
-	 * The provider container
-	 */
-	protected org.openmdx.compatibility.base.dataprovider.transport.none.DataproviderContainer_1 providerContainer;
-		
+    //------------------------------------------------------------------------
+    // Instance members
+    //------------------------------------------------------------------------
 
-	//------------------------------------------------------------------------
-	// Class members
-	//------------------------------------------------------------------------
-	
-	/**
-	 * Allow the spcification of a comma separated list of deployment units
-	 */
-	private static Path[] getDeploymentUnits(
-		String name
-	){
-		String deploymentUnits = System.getProperty(name);
-		List result = new ArrayList();
-		if (deploymentUnits != null) for (
-			StringTokenizer tokenizer = new StringTokenizer(
-				deploymentUnits,
-				SEPARATOR
-			);
-			tokenizer.hasMoreTokens();
-		) result.add(new Path(tokenizer.nextToken()));
-		return Path.toPathArray(result);
-	}
-	 		
-	/**
-	 * Use the host name as container id
-	 */
-	private static String createContainerId(
-	){
-		try {
-			return InetAddress.getLocalHost().getHostName();
-		} catch (Exception exception) {
-			return "localhost";
-		}
-	}
+    /**
+     * The connector deployment units to be processed
+     */
+    protected final Path[] connectorDeploymentUnits;
 
-	/**
-	 * Use this system property to define the connector deployment units to be
-	 * deployed
-	 */
-	public final static String CONNECTOR_DEPLOYMENT_UNITS =
-		"org.openmdx.compatibility.base.application.container.ConnectorDeploymentUnits";
+    /**
+     * The provider deployment units to be processed
+     */
+    protected final Path[] providerDeploymentUnits;
 
-	/**
-	 * Use this system property to define the provider deployment units to be
-	 * deployed
-	 */
-	public final static String PROVIDER_DEPLOYMENT_UNITS =
-		"org.openmdx.compatibility.base.application.container.ProviderDeploymentUnits";
+    /**
+     * The provider container
+     */
+    protected org.openmdx.compatibility.base.dataprovider.transport.none.DataproviderContainer_1 providerContainer;
 
-	/**
-	 * The deployment unit paths are separated by commas.
-	 */	
-	public final static String SEPARATOR = ",";
 
-	/**
-	 * Indicator that some information is not available
-	 */	
-	public final static String NOT_AVAILABLE = "n/a";
-	
+    //------------------------------------------------------------------------
+    // Class members
+    //------------------------------------------------------------------------
 
-        //------------------------------------------------------------------------
-	// Classes
-	//------------------------------------------------------------------------
-	
-	private static final class ApplicationContext_1 
-	    extends AbstractApplicationContext_1
-	    implements Manageable_1_0 
-        {
+    /**
+     * Allow the spcification of a comma separated list of deployment units
+     */
+    private static Path[] getDeploymentUnits(
+        String name
+    ){
+        String deploymentUnits = System.getProperty(name);
+        List result = new ArrayList();
+        if (deploymentUnits != null) for (
+                StringTokenizer tokenizer = new StringTokenizer(
+                    deploymentUnits,
+                    SEPARATOR
+                );
+                tokenizer.hasMoreTokens();
+        ) result.add(new Path(tokenizer.nextToken()));
+        return Path.toPathArray(result);
+    }
 
-		ApplicationContext_1(
-			String domainName,
-			String containerId
-		){
-			this.domainName = domainName;
-			this.containerId = containerId;
-		}
-		
-		public void activate(
-		) throws java.lang.Exception {
-		    //
-		}
+    /**
+     * Use the host name as container id
+     */
+    private static String createContainerId(
+    ){
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (Exception exception) {
+            return "localhost";
+        }
+    }
 
-		public void deactivate(
-		) throws java.lang.Exception {
-		    //
-		}
+    /**
+     * Use this system property to define the connector deployment units to be
+     * deployed
+     */
+    public final static String CONNECTOR_DEPLOYMENT_UNITS =
+        "org.openmdx.compatibility.base.application.container.ConnectorDeploymentUnits";
 
-		public java.lang.String getDomainName(){
-			return this.domainName;
-		}
+    /**
+     * Use this system property to define the provider deployment units to be
+     * deployed
+     */
+    public final static String PROVIDER_DEPLOYMENT_UNITS =
+        "org.openmdx.compatibility.base.application.container.ProviderDeploymentUnits";
 
-		public java.lang.String getContainerId(){
-			return this.containerId;
-		}
+    /**
+     * The deployment unit paths are separated by commas.
+     */	
+    public final static String SEPARATOR = ",";
 
-		private final String domainName;
-		private final String containerId;
-		
-	}  	
-        
-        
+    /**
+     * Indicator that some information is not available
+     */	
+    public final static String NOT_AVAILABLE = "n/a";
+
+
+    //------------------------------------------------------------------------
+    // Classes
+    //------------------------------------------------------------------------
+
+    private static final class ApplicationContext_1 
+    extends AbstractApplicationContext_1
+    implements Manageable_1_0 
+    {
+
+        ApplicationContext_1(
+            String domainName,
+            String containerId
+        ){
+            this.domainName = domainName;
+            this.containerId = containerId;
+        }
+
+        public void activate(
+        ) throws java.lang.Exception {
+            //
+        }
+
+        public void deactivate(
+        ) throws java.lang.Exception {
+            //
+        }
+
+        public java.lang.String getDomainName(){
+            return this.domainName;
+        }
+
+        public java.lang.String getContainerId(){
+            return this.containerId;
+        }
+
+        private final String domainName;
+        private final String containerId;
+
+    }  	
+
+
 
 }

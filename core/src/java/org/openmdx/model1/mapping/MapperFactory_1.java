@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapperFactory_1.java,v 1.18 2008/03/21 18:40:16 hburger Exp $
+ * Name:        $Id: MapperFactory_1.java,v 1.19 2008/09/09 14:55:26 hburger Exp $
  * Description: PackageExternalizerFactory_1
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:40:16 $
+ * Date:        $Date: 2008/09/09 14:55:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -89,11 +89,9 @@ public class MapperFactory_1 {
                 ).getConstructor(
                     MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION
                 ).newInstance(
-                    new Object[]{
-                        MappingTypes.JMI_OPENMDX_1,
-                        "cci",
-                        "java"            
-                    }
+                    MappingTypes.JMI_OPENMDX_1,
+                    "cci",
+                    "java"            
                 );
             } else if(
                 MappingTypes.CCI2.equals(format) ||
@@ -105,11 +103,9 @@ public class MapperFactory_1 {
                 ).getConstructor(
                     MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION
                 ).newInstance(
-                    new Object[]{
-                        format,
-                        format,
-                        "java"            
-                    }
+                    format,
+                    format,
+                    "java"            
                 );
             } else if(
                 format.startsWith(MappingTypes.JDO2 + ':')
@@ -119,11 +115,9 @@ public class MapperFactory_1 {
                 ).getConstructor(
                     MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION
                 ).newInstance(
-                    new Object[]{
-                        format,
-                        MappingTypes.JDO2,
-                        "java"            
-                    }
+                    format,
+                    MappingTypes.JDO2,
+                    "java"            
                 );
             } else {
                 return (Mapper_1_0) Classes.getApplicationClass(

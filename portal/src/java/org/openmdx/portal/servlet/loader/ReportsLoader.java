@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportsLoader.java,v 1.12 2008/04/04 17:01:12 hburger Exp $
+ * Name:        $Id: ReportsLoader.java,v 1.13 2008/08/12 16:38:07 wfro Exp $
  * Description: ReportsLoader
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:12 $
+ * Date:        $Date: 2008/08/12 16:38:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.loader;
 

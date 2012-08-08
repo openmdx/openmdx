@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Configuration.java,v 1.9 2008/02/08 16:52:21 hburger Exp $
+ * Name:        $Id: Configuration.java,v 1.11 2008/09/10 08:55:23 hburger Exp $
  * Description: Configuration
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:52:21 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -75,7 +75,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  * itself. 
  */
 public class Configuration
-    implements Cloneable, MultiLineStringRepresentation
+implements Cloneable, MultiLineStringRepresentation
 {
 
     /**
@@ -106,11 +106,11 @@ public class Configuration
             SparseList<Object> values;
             if (entry.getValue() instanceof Collection) {
                 values = new OffsetArrayList<Object>(
-                    (Collection<?>)entry.getValue()
+                        (Collection<?>)entry.getValue()
                 );
             } else if (entry.getValue() instanceof Object[]) {
                 values = new OffsetArrayList<Object>(
-                    Arrays.asList((Object[])entry.getValue())
+                        Arrays.asList((Object[])entry.getValue())
                 );
             } else {
                 values = new OffsetArrayList<Object>();
@@ -119,8 +119,8 @@ public class Configuration
             this.entries.put(name,values);
         }
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Value list interface
     //------------------------------------------------------------------------
@@ -137,7 +137,7 @@ public class Configuration
     ){
         return this.entries.containsKey(entryName);
     } 
-           
+
     /**
      * Returns true if the named flag is set.
      *
@@ -150,10 +150,10 @@ public class Configuration
         if (! containsEntry(entryName)) return false;
         final Object value = values(entryName).get(0);
         return 
-          value instanceof Boolean && ((Boolean)value).booleanValue() ||
-          "true".equalsIgnoreCase(value.toString());
+        value instanceof Boolean && ((Boolean)value).booleanValue() ||
+        "true".equalsIgnoreCase(value.toString());
     } 
-           
+
     /**
      * Returns the modifiable attribute value list.
      * This method never returns null.
@@ -200,39 +200,33 @@ public class Configuration
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("key",key),
-                    new BasicException.Parameter("value",value)
-                },
-                "Could not evaluate the key's index"
+                "Could not evaluate the key's index",
+                new BasicException.Parameter("key",key),
+                new BasicException.Parameter("value",value)
             ); 
         }
-        
+
         // Set the value at its correct position. 
         // Do not allow overwriting 
         final SparseList<?> list = values(name);
         if (list.get(index) != null) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.DUPLICATE,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("name",name),
-                new BasicException.Parameter("index",index),
-                new BasicException.Parameter(
-                    "values",
-                    new Object[]{
-                        list.get(index),
-                        value
-                    }
-                )
-            },
-            "Attempt to overwrite " + key
+            "Attempt to overwrite " + key,
+            new BasicException.Parameter("name",name),
+            new BasicException.Parameter("index",index),
+            new BasicException.Parameter(
+                "values",
+                list.get(index),
+                value
+            )
         );
         values(name).set(
             index,
             value
         );
     }
-    
+
 
     //------------------------------------------------------------------------
     // Entry collection interface
@@ -242,17 +236,17 @@ public class Configuration
     ){
         return this.entries;
     }
-    
+
 
     //------------------------------------------------------------------------
     // String interface
     //------------------------------------------------------------------------
-            
+
     /**
      *
      */
     final private static String[] NO_VALUES = {};
-    
+
     /**
      * Returns the property values. 
      * This method never returns null.
@@ -270,9 +264,9 @@ public class Configuration
         final String[] target = new String[values.size()];  
         final Iterator<?> iterator = values.iterator();
         for(
-            int index = 0;
-            index < target.length;
-            index++
+                int index = 0;
+                index < target.length;
+                index++
         ) target[index] = String.valueOf(iterator.next());
         return target;  
     }           
@@ -291,9 +285,9 @@ public class Configuration
         final SparseList<?> values = this.entries.get(name);
         return values == null || values.isEmpty() ? 
             null : 
-            values.get(values.firstIndex()).toString();
+                values.get(values.firstIndex()).toString();
     }
-           
+
     /**
      * Returns an array containing all of the elements in this collection. 
      * The returned array will be "safe" in that no references to it are
@@ -310,18 +304,18 @@ public class Configuration
     public BasicException.Parameter[] toExceptionParameters (
     ){
         final BasicException.Parameter[] target = new BasicException.Parameter[
-            this.entries.size()
-        ];
+                                                                               this.entries.size()
+                                                                               ];
         final Iterator<String> iterator = this.entries.keySet().iterator();
         for(
-            int index = 0;
-            index < target.length;
-            index++
+                int index = 0;
+                index < target.length;
+                index++
         ){
             final String name = iterator.next();
             target[index] = new BasicException.Parameter(
                 name,
-                getValues(name)
+                (Object[])getValues(name)
             );
         }
         return target;
@@ -372,5 +366,5 @@ public class Configuration
      *
      */
     private Map<String, SparseList<?>> entries = new HashMap<String, SparseList<?>>();
-    
+
 }

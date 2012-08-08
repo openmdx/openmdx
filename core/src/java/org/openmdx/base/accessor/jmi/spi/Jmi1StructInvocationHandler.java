@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.21 2008/06/28 00:21:32 hburger Exp $
+ * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.22 2008/09/10 08:55:23 hburger Exp $
  * Description: Jmi1StructInvocationHandler 
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:32 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -161,11 +161,11 @@ public class Jmi1StructInvocationHandler implements InvocationHandler {
                 throw new ServiceException (
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.NOT_FOUND, 
+                    "field not found for struct",
                     new BasicException.Parameter [] {
                       new BasicException.Parameter("field.name", methodName),
                       new BasicException.Parameter("struct.name", structName)
-                    },
-                    "field not found for struct"
+                    }
                 );                
             }
         }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BinaryValue.java,v 1.29 2008/06/18 22:42:30 wfro Exp $
+ * Name:        $Id: BinaryValue.java,v 1.30 2008/08/12 16:38:05 wfro Exp $
  * Description: BinaryValue
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/18 22:42:30 $
+ * Date:        $Date: 2008/08/12 16:38:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 

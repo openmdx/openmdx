@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ZipURLConnection.java,v 1.6 2008/06/28 00:21:33 hburger Exp $
+ * Name:        $Id: ZipURLConnection.java,v 1.7 2008/08/20 23:38:35 hburger Exp $
  * Description: Resource URL Connection
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:33 $
+ * Date:        $Date: 2008/08/20 23:38:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,8 +67,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.url.protocol.XriAuthorities;
-import org.openmdx.kernel.url.protocol.XriProtocols;
 
 /**
  * An delegating URLConnection support class.
@@ -118,13 +118,13 @@ public class ZipURLConnection extends JarURLConnection {
 	    final URL xri
 	) throws MalformedURLException, IOException {
         String url = xri.toExternalForm();
-        int i = url.lastIndexOf(XriProtocols.ZIP_SEPARATOR);
+        int i = url.lastIndexOf(XRI_2Protocols.ZIP_SEPARATOR);
         if(i < 0) throw new MalformedURLException(
-            "No separator ('" + XriProtocols.ZIP_SEPARATOR + "' found in URL " + url
+            "No separator ('" + XRI_2Protocols.ZIP_SEPARATOR + "' found in URL " + url
         );
         return new URL(
             JAR_PREFIX + url.substring(XriAuthorities.ZIP_AUTHORITY.length() + 8, i) + 
-			JAR_SEPARATOR + url.substring(i + XriProtocols.ZIP_SEPARATOR.length())
+			JAR_SEPARATOR + url.substring(i + XRI_2Protocols.ZIP_SEPARATOR.length())
         );
 	}
 

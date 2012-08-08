@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewConnection_1.java,v 1.16 2008/03/19 17:13:11 hburger Exp $
+ * Name:        $Id: ViewConnection_1.java,v 1.22 2008/09/18 12:46:43 hburger Exp $
  * Description: StateConnection_1 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:13:11 $
+ * Date:        $Date: 2008/09/18 12:46:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -79,8 +79,8 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
  */
 @SuppressWarnings("unchecked")
 public class ViewConnection_1
-    extends CachingMarshaller
-    implements ObjectFactory_1_3
+extends CachingMarshaller
+implements ObjectFactory_1_3
 {
 
     /**
@@ -111,11 +111,18 @@ public class ViewConnection_1
      * 
      */
     private final DateStateContext context;
-    
+
     /**
      * 
      */
     private ObjectFactory_1_0 source;
+
+    /**
+     * Aspects replace former view and role patterns
+     */
+    private static final String ASPECTS_ONLY = "Support for " +
+        "org::openmdx::compatibility::view1 and " +
+        "org::openmdx::compatibility::role1 has been removed"; 
 
     /**
      * 
@@ -126,7 +133,7 @@ public class ViewConnection_1
     ){
         return this.sink.getModel();
     }
-    
+
     /**
      * Retrieve the view connection's context
      * 
@@ -146,18 +153,18 @@ public class ViewConnection_1
     ){
         return this.sink;
     }
-    
+
     ObjectFactory_1_0 getSource(
     ) throws ServiceException{
         return this.source;
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0#close()
      */
     public void close(
     ) throws ServiceException {
-        if(isOpen()) {
+        if(!isClosed()) {
             this.source.close();
             this.source = null;
             this.sink = null;
@@ -174,22 +181,6 @@ public class ViewConnection_1
         return (Object_1_0) marshal(
             this.sink.getDelegate().createObject(
                 objectClass
-            )
-        );
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0#createObject(java.lang.String, org.openmdx.base.accessor.generic.cci.Object_1_0)
-     */
-    public Object_1_0 createObject(
-        String objectClass, 
-        Object_1_0 initialValues
-    ) throws ServiceException {
-        assertOpen();
-        return (Object_1_0) marshal(
-            this.sink.getDelegate().createObject(
-                objectClass, 
-                (Object_1_0) unmarshal(initialValues)
             )
         );
     }
@@ -225,7 +216,7 @@ public class ViewConnection_1
             false // initializeCacheWithDelegate
         );
     }
-    
+
     public Object_1_0 getObject(
         Object accessPath,
         Boolean dateStateInstance, 
@@ -237,20 +228,20 @@ public class ViewConnection_1
             assertOpen();
             Path path = accessPath instanceof Path ?
                 (Path)accessPath :
-                new Path(accessPath.toString());
-            SinkObject_1 sinkObject = dateStateInstance == null ? this.sink.getObject(
-                path
-            ) : this.sink.getObject(
-                path, 
-                dateStateInstance.booleanValue(), 
-                initializeCacheWithDelegate
-            );    
-            return sinkObject == null || !sinkObject.isDirty() ? (Object_1_0) marshal(
-                this.source.getObject(path)
-            ) : new ViewObject_1(
-                this, 
-                sinkObject
-            );
+                    new Path(accessPath.toString());
+                SinkObject_1 sinkObject = dateStateInstance == null ? this.sink.getObject(
+                    path
+                ) : this.sink.getObject(
+                    path, 
+                    dateStateInstance.booleanValue(), 
+                    initializeCacheWithDelegate
+                );    
+                    return sinkObject == null || !sinkObject.isDirty() ? (Object_1_0) marshal(
+                        this.source.getObject(path)
+                    ) : new ViewObject_1(
+                        this, 
+                        sinkObject
+                    );
         }
     }
 
@@ -258,20 +249,20 @@ public class ViewConnection_1
         SparseList paths
     ) throws ServiceException {
         for(
-            Iterator i = paths.populationIterator();
-            i.hasNext();
+                Iterator i = paths.populationIterator();
+                i.hasNext();
         ){
             marshal(
                 this.source.getObject(i.next())
             );
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0#getUnitOfWork()
      */
     public UnitOfWork_1_0 getUnitOfWork(
-    ) throws ServiceException {
+    ) throws ServiceException{
         assertOpen();
         return this.sink.getUnitOfWork();
     }
@@ -293,10 +284,10 @@ public class ViewConnection_1
      * 
      * @return <code>true</code> if the connection is open.
      */
-    protected final boolean isOpen(){
-        return this.source != null;
+    public final boolean isClosed(){
+        return this.source == null;
     }
-    
+
     /**
      * Asserts that the connection is open
      * 
@@ -304,15 +295,14 @@ public class ViewConnection_1
      */
     protected void assertOpen(
     ) throws ServiceException{
-        if(!isOpen()) throw new ServiceException(
+        if(isClosed()) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "The connection is already closed"
         );
     }
-    
-    
+
+
 
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.marshalling.CachingMarshaller#unmarshal(java.lang.Object)
@@ -321,7 +311,7 @@ public class ViewConnection_1
         Object source
     ) throws ServiceException {
         return 
-            source instanceof Delegating_1_0 ? ((Delegating_1_0)source).objGetDelegate() :
+        source instanceof Delegating_1_0 ? ((Delegating_1_0)source).objGetDelegate() :
             source;
     }
 
@@ -335,12 +325,12 @@ public class ViewConnection_1
      * @throws ServiceException
      */
     private Object unmarshalStructureValues(
-       Object source
+        Object source
     ) throws ServiceException {
         return 
-            source instanceof List ? unmarshalStructureValues((List)source) :
+        source instanceof List ? unmarshalStructureValues((List)source) :
             source instanceof Set ? unmarshalStructureValues((Set)source) :
-            unmarshal(source);
+                unmarshal(source);
     }
 
     /**
@@ -353,12 +343,12 @@ public class ViewConnection_1
      * @throws ServiceException
      */
     private List unmarshalStructureValues(
-       List source
+        List source
     ) throws ServiceException {
         List target = new ArrayList(source.size());
         for(
-            Iterator i = source.iterator();
-            i.hasNext();
+                Iterator i = source.iterator();
+                i.hasNext();
         ){
             target.add(unmarshalStructureValues(i.next()));
         }
@@ -375,12 +365,12 @@ public class ViewConnection_1
      * @throws ServiceException
      */
     private Set unmarshalStructureValues(
-       Set source
+        Set source
     ) throws ServiceException {
         Set target = new HashSet(source.size());
         for(
-            Iterator i = source.iterator();
-            i.hasNext();
+                Iterator i = source.iterator();
+                i.hasNext();
         ){
             target.add(unmarshalStructureValues(i.next()));
         }
@@ -393,23 +383,50 @@ public class ViewConnection_1
         this.mapping.remove(object.objGetDelegate());
     }
 
+
+    //------------------------------------------------------------------------
+    // Implements ObjectFactory_1_0
+    //------------------------------------------------------------------------
+
+    /**
+     * This method is deprecated and will throw a NOT_SUPPORTED exception
+     * 
+     * @deprecated
+     * 
+     * @exception   ServiceException    NOT_SUPPORTED
+     */
+    public Object_1_0 createObject(
+        String objectClass, 
+        Object_1_0 initialValues
+    ) throws ServiceException {
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            ASPECTS_ONLY
+        );
+    }
+
     
     //------------------------------------------------------------------------
     // Implements ObjectFactory_1_1
     //------------------------------------------------------------------------
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.ObjectFactory_1_1#createObject(java.lang.String, java.lang.String, org.openmdx.base.accessor.generic.cci.Object_1_0)
+
+    /**
+     * This method is deprecated and will throw a NOT_SUPPORTED exception
+     * 
+     * @deprecated
+     * 
+     * @exception   ServiceException    NOT_SUPPORTED
      */
     public Object_1_0 createObject(
-        String roleClass,
-        String roleId,
-        Object_1_0 roleCapable
+      String roleClass,
+      String roleId,
+      Object_1_0 roleCapable
     ) throws ServiceException {
-        return getSink().getDelegate().createObject(
-            roleClass,
-            roleId,
-            roleCapable
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            ASPECTS_ONLY
         );
     }
 
@@ -432,11 +449,11 @@ public class ViewConnection_1
         return getSink().getDelegate().hasContainerManagedUnitOfWork();
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements ObjectFactory_1_3
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.ObjectFactory_1_3#cloneObject(org.openmdx.compatibility.base.naming.Path, org.openmdx.base.accessor.generic.cci.Object_1_0, boolean)
      */
@@ -471,5 +488,5 @@ public class ViewConnection_1
             ((ObjectFactory_1_3)this.source).evict();
         }
     }
-    
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SimpleSubjectHandler.java,v 1.9 2006/01/12 00:07:02 hburger Exp $
+ * Name:        $Id: SimpleSubjectHandler.java,v 1.10 2008/09/11 10:47:30 hburger Exp $
  * Description: SimpleSubjectHandler
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/01/12 00:07:02 $
+ * Date:        $Date: 2008/09/11 10:47:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -73,86 +73,85 @@ import org.openmdx.security.auth.servlet.spi.AbstractSubjectHandler;
  */
 public class SimpleSubjectHandler extends AbstractSubjectHandler {
 
-    /**
-     * Constructor
-     */
-    public SimpleSubjectHandler() {
-        super();
-    }
-    
-    //------------------------------------------------------------------------
-    // Extends AbstractHandler
-    //------------------------------------------------------------------------
+	/**
+	 * Constructor
+	 */
+	public SimpleSubjectHandler() {
+		super();
+	}
 
-    /* (non-Javadoc)
-     * @see org.openmdx.application.security.auth.servlet.spi.AbstractHandler#init()
-     */
-    protected void init(
-    ) throws ServletException {
-        String privateKeyProvider = getInitParameter(
-            "private-key-provider",
-            SimplePrivateKeyProvider.class.getName()
-        );
-        try {
-            this.privateKeyProvider = (KeyProvider) Classes.getApplicationClass(privateKeyProvider).newInstance();
-            if(isDebug()) {
-                log("$Id: SimpleSubjectHandler.java,v 1.9 2006/01/12 00:07:02 hburger Exp $");
-                log("private-key-provider: " + privateKeyProvider);
-            }
-        } catch (Exception exception) {
-            throw (UnavailableException) Throwables.initCause(
-                new UnavailableException(
-                    "Private key provider acquisition failed"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ACTIVATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("info", "$Id: SimpleSubjectHandler.java,v 1.9 2006/01/12 00:07:02 hburger Exp $"),
-                    new BasicException.Parameter("name", getServletName()),
-                    new BasicException.Parameter("private-key-provider", privateKeyProvider),
-                }, null
-            );
-        }
-        if(this.privateKeyProvider instanceof HttpHandler) ((HttpHandler)this.privateKeyProvider).init(this);
-    }
+	//------------------------------------------------------------------------
+	// Extends AbstractHandler
+	//------------------------------------------------------------------------
 
-    
-    //------------------------------------------------------------------------
-    // Extends AbstractSubjectHandler
-    //------------------------------------------------------------------------
-    
-    /**
-     * The <code>SimpleSubjectHandler</code>'s private key provider
-     */
-    private KeyProvider privateKeyProvider;
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.security.auth.servlet.spi.AbstractSubjectHandler#getKeyProvider()
-     */
-    protected KeyProvider getKeyProvider() {
-        return this.privateKeyProvider;
-    }
+	/* (non-Javadoc)
+	 * @see org.openmdx.application.security.auth.servlet.spi.AbstractHandler#init()
+	 */
+	protected void init(
+	) throws ServletException {
+		String privateKeyProvider = getInitParameter(
+				"private-key-provider",
+				SimplePrivateKeyProvider.class.getName()
+		);
+		try {
+			this.privateKeyProvider = (KeyProvider) Classes.getApplicationClass(privateKeyProvider).newInstance();
+			if(isDebug()) {
+				log("$Id: SimpleSubjectHandler.java,v 1.10 2008/09/11 10:47:30 hburger Exp $");
+				log("private-key-provider: " + privateKeyProvider);
+			}
+		} catch (Exception exception) {
+			throw (UnavailableException) Throwables.initCause(
+					new UnavailableException(
+							"Private key provider acquisition failed"
+					),
+					exception,
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.ACTIVATION_FAILURE,
+					null,
+					new BasicException.Parameter("info", "$Id: SimpleSubjectHandler.java,v 1.10 2008/09/11 10:47:30 hburger Exp $"),
+					new BasicException.Parameter("name", getServletName()),
+					new BasicException.Parameter("private-key-provider", privateKeyProvider)
+			);
+		}
+		if(this.privateKeyProvider instanceof HttpHandler) ((HttpHandler)this.privateKeyProvider).init(this);
+	}
 
-    
-    //------------------------------------------------------------------------
-    // Implements HttpSubjectHandler
-    //------------------------------------------------------------------------    
 
-    /* (non-Javadoc)
-     * @see org.openmdx.application.security.auth.servlet.cci.HttpSubjectHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, javax.security.auth.Subject)
-     */
-    public void handle(
-        HttpServletRequest request,
-        HttpServletResponse response, 
-        Subject subject
-    ) throws IOException {
-        try {
-            response.addCookie(getCookie(subject));
-        } catch (LoginException exception) {
-            throw new ExtendedIOException(exception);
-        }
-    }
+	//------------------------------------------------------------------------
+	// Extends AbstractSubjectHandler
+	//------------------------------------------------------------------------
+
+	/**
+	 * The <code>SimpleSubjectHandler</code>'s private key provider
+	 */
+	private KeyProvider privateKeyProvider;
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.security.auth.servlet.spi.AbstractSubjectHandler#getKeyProvider()
+	 */
+	protected KeyProvider getKeyProvider() {
+		return this.privateKeyProvider;
+	}
+
+
+	//------------------------------------------------------------------------
+	// Implements HttpSubjectHandler
+	//------------------------------------------------------------------------    
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.application.security.auth.servlet.cci.HttpSubjectHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, javax.security.auth.Subject)
+	 */
+	public void handle(
+			HttpServletRequest request,
+			HttpServletResponse response, 
+			Subject subject
+	) throws IOException {
+		try {
+			response.addCookie(getCookie(subject));
+		} catch (LoginException exception) {
+			throw new ExtendedIOException(exception);
+		}
+	}
 
 
 }

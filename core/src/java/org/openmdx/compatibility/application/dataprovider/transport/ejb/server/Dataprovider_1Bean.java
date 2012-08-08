@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Bean.java,v 1.33 2008/06/27 13:56:09 hburger Exp $
+ * Name:        $Id: Dataprovider_1Bean.java,v 1.34 2008/09/09 10:05:04 hburger Exp $
  * Description: A Dataprovider Service
- * Revision:    $Revision: 1.33 $
+ * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 13:56:09 $
+ * Date:        $Date: 2008/09/09 10:05:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,6 @@
  */
 package org.openmdx.compatibility.application.dataprovider.transport.ejb.server;
 
-import java.util.Arrays;
-
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.application.dataprovider.transport.ejb.spi.AbstractDataprovider_1Bean;
 import org.openmdx.compatibility.base.application.configuration.Configuration;
@@ -62,7 +60,6 @@ import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.compatibility.base.dataprovider.kernel.Dataprovider_1;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.compatibility.base.dataprovider.transport.rmi.RMIMapper;
-import org.openmdx.kernel.log.SysLog;
 
 /**
  * The dataprovider server
@@ -141,15 +138,14 @@ public class Dataprovider_1Bean
         UnitOfWorkRequest[] workingUnits
     ) {      
         try {
-            SysLog.detail(this.serverId + ": header", header);
-            SysLog.detail(this.serverId + ": requests", Arrays.asList(workingUnits));
+            logger.debug("Requests: server={}, header={}, {}", this.serverId, header, workingUnits);
             UnitOfWorkReply[] replies = RMIMapper.marshal(
                 this.kernel.process(
                     header,
                     RMIMapper.unmarshal(workingUnits)
                 )
             );
-            SysLog.detail(this.serverId + ": replies", Arrays.asList(replies));
+            logger.debug("Replies: serverId={}, header={}, {}", this.serverId, header, replies);
             return replies;
        } catch (RuntimeException exception) {
             new ServiceException(exception).log();

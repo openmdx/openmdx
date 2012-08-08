@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LateBindingConnection_1.java,v 1.20 2008/07/01 21:54:55 hburger Exp $
+ * Name:        $Id: LateBindingConnection_1.java,v 1.21 2008/09/10 08:55:24 hburger Exp $
  * Description: Late Binding Connection
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/01 21:54:55 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -76,7 +76,7 @@ import org.openmdx.kernel.exception.BasicException;
  * Late Binding Connection
  */
 public class LateBindingConnection_1 
-    implements Dataprovider_1_1Connection, ManagerFactory_2_0, Serializable 
+implements Dataprovider_1_1Connection, ManagerFactory_2_0, Serializable 
 {
 
     /**
@@ -118,7 +118,7 @@ public class LateBindingConnection_1
      * @serial The dataprovider connection factory's JNDI name
      */
     protected final String dataproviderName;
-        
+
     /**
      * @serial The initial context's environment
      */
@@ -141,11 +141,9 @@ public class LateBindingConnection_1
                 exception,
                 StackedException.DEFAULT_DOMAIN,
                 StackedException.COMMUNICATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("name",this.dataproviderName),
-                    new BasicException.Parameter("environment", this.environment)
-                },
-                "Could not establish connection to dataprovider"
+                "Could not establish connection to dataprovider",
+                new BasicException.Parameter("name",this.dataproviderName),
+                new BasicException.Parameter("environment", this.environment)
             );
         }
         return this.dataprovider;
@@ -160,7 +158,7 @@ public class LateBindingConnection_1
     ) throws NamingException{
         return new InitialContext(this.environment);
     }
-    
+
     /**
      * This method may be overridden by a subclass
      * 
@@ -178,7 +176,7 @@ public class LateBindingConnection_1
             initialContext.close();
         }
     }
-    
+
 
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0Connection
@@ -193,7 +191,7 @@ public class LateBindingConnection_1
         Object delegate = getDelegate();
         return delegate instanceof ManagerFactory_2_0 ?
             ((ManagerFactory_2_0)delegate).createManager(subject) :
-            null;
+                null;
     }
 
     /* (non-Javadoc)
@@ -204,9 +202,9 @@ public class LateBindingConnection_1
         Object delegate = getDelegate();
         return delegate instanceof ManagerFactory_2_0 ?
             ((ManagerFactory_2_0)delegate).createManager() :
-            null;
+                null;
     }
-    
+
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_1Connection
     //------------------------------------------------------------------------
@@ -221,7 +219,7 @@ public class LateBindingConnection_1
         this.dataprovider = null;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0Connection
     //------------------------------------------------------------------------

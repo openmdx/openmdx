@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Servlet.java,v 1.32 2008/03/19 17:10:05 hburger Exp $
+ * Name:        $Id: Dataprovider_1Servlet.java,v 1.33 2008/09/10 08:55:24 hburger Exp $
  * Description: Dataprovider_1Servlet
- * Revision:    $Revision: 1.32 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:10:05 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -127,111 +127,109 @@ import org.openmdx.kernel.log.SysLog;
  * @author wfro
  */
 public class Dataprovider_1Servlet
-  extends HttpServlet {
+extends HttpServlet {
 
-  /**
+    /**
      * 
      */
     private static final long serialVersionUID = 3256446889107994931L;
-//-------------------------------------------------------------------------
-  public void init(
-  ) throws ServletException {
-    super.init();
-    registrationId = getInitParameter("registrationId");
-    if(registrationId == null) {
-      ServiceException se = new ServiceException(
-        BasicException.Code.DEFAULT_DOMAIN,
-        BasicException.Code.INVALID_CONFIGURATION,
-        new BasicException.Parameter[]{
-          new StackedException.Parameter("registrationId", "null")
-        },
-        "Servlet-InitParameter registrationId not set"
-      );
-      SysLog.error(
-        se.getMessage(),
-        se.getExceptionStack()
-      );
-      throw new ServletException(se);
+//  -------------------------------------------------------------------------
+    public void init(
+    ) throws ServletException {
+        super.init();
+        registrationId = getInitParameter("registrationId");
+        if(registrationId == null) {
+            ServiceException se = new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "Servlet-InitParameter registrationId not set",
+                new StackedException.Parameter("registrationId", "null")
+            );
+            SysLog.error(
+                se.getMessage(),
+                se.getExceptionStack()
+            );
+            throw new ServletException(se);
+        }
+
+        // get connection
+        try {
+            this.delegation = Dataprovider_1ConnectionFactoryImpl.createGenericConnection(
+                new InitialContext().lookup(registrationId)
+            );
+        }
+        catch(ServiceException e) {
+            e.log();
+        }
+        catch(Exception e) {
+            new ServiceException(e).log();
+        }
     }
 
-    // get connection
-    try {
-      this.delegation = Dataprovider_1ConnectionFactoryImpl.createGenericConnection(
-        new InitialContext().lookup(registrationId)
-      );
-    }
-    catch(ServiceException e) {
-      e.log();
-    }
-    catch(Exception e) {
-      new ServiceException(e).log();
-    }
-  }
-
-  //-----------------------------------------------------------------------
-  public void doPost(
-    HttpServletRequest req,
-    HttpServletResponse res
-  ) throws IOException {
-    SysLog.detail("Request size", "" + req.getContentLength());
-    StringBuilder result = new StringBuilder(
-        2048
-    ).append(
-        "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
-    ).append(
-        "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" "
-    ).append(
-        "xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\" "
-    ).append(
-        "xmlns:xsd=\"http://www.w3.org/1999/XMLSchema\">"
-    ).append(
-        "<SOAP-ENV:Body>"
-    );
-
-    try {
-      RequestParser parser = new RequestParser(
-        new InputStreamReader(req.getInputStream(), "ISO-8859-1")
-      );
-      if(delegation != null) {
-        UnitOfWorkReply[] replies = delegation.process(
-          parser.getHeader(),
-          parser.getUnitOfWorkRequests()
+    //-----------------------------------------------------------------------
+    public void doPost(
+        HttpServletRequest req,
+        HttpServletResponse res
+    ) throws IOException {
+        SysLog.detail("Request size", "" + req.getContentLength());
+        StringBuilder result = new StringBuilder(
+            2048
+        ).append(
+            "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
+        ).append(
+            "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" "
+        ).append(
+            "xmlns:xsi=\"http://www.w3.org/1999/XMLSchema-instance\" "
+        ).append(
+            "xmlns:xsd=\"http://www.w3.org/1999/XMLSchema\">"
+        ).append(
+            "<SOAP-ENV:Body>"
         );
-        res.setContentType("text/xml; charset=ISO-8859-1");
-        Writer response = null;
-        ServletOutputStream out = res.getOutputStream();
-        String accEncHeadField = req.getHeader("Accept-Encoding");
-        // check whether the client does accept gzipped reply encoding
-        if ((accEncHeadField != null) && (accEncHeadField.indexOf("gzip") != -1)) {
-          res.setHeader("Content-Encoding", "gzip");
-          GZIPOutputStream gzipOut = new GZIPOutputStream(out);
-          response = new OutputStreamWriter(gzipOut,"ISO-8859-1");
-        }
-        else {
-          response = new BufferedWriter(new OutputStreamWriter(out,"ISO-8859-1"));
-        }
-        ReplyMapper mapper = new ReplyMapper(response);
-        mapper.mapProlog(result.toString());
-        mapper.mapUnitOfWorkReplies(replies);
-        mapper.mapEpilog("</SOAP-ENV:Body></SOAP-ENV:Envelope>");
-        response.flush();
-        response.close();
-        res.setContentType("text/xml; charset=ISO-8859-1");
-      }
-    }
-    catch(ServiceException e) {
-      e.log();
-    }
-    if (SysLog.isTraceOn()) {
-      SysLog.trace("Response", result.toString());
-    }
-  }
 
-  //-----------------------------------------------------------------------
-  // Variables
-  //-----------------------------------------------------------------------
-  private String registrationId = null;
-  private Dataprovider_1_1Connection delegation = null;
+        try {
+            RequestParser parser = new RequestParser(
+                new InputStreamReader(req.getInputStream(), "ISO-8859-1")
+            );
+            if(delegation != null) {
+                UnitOfWorkReply[] replies = delegation.process(
+                    parser.getHeader(),
+                    parser.getUnitOfWorkRequests()
+                );
+                res.setContentType("text/xml; charset=ISO-8859-1");
+                Writer response = null;
+                ServletOutputStream out = res.getOutputStream();
+                String accEncHeadField = req.getHeader("Accept-Encoding");
+                // check whether the client does accept gzipped reply encoding
+                if ((accEncHeadField != null) && (accEncHeadField.indexOf("gzip") != -1)) {
+                    res.setHeader("Content-Encoding", "gzip");
+                    GZIPOutputStream gzipOut = new GZIPOutputStream(out);
+                    response = new OutputStreamWriter(gzipOut,"ISO-8859-1");
+                }
+                else {
+                    response = new BufferedWriter(new OutputStreamWriter(out,"ISO-8859-1"));
+                }
+                ReplyMapper mapper = new ReplyMapper(response);
+                mapper.mapProlog(result.toString());
+                mapper.mapUnitOfWorkReplies(replies);
+                mapper.mapEpilog("</SOAP-ENV:Body></SOAP-ENV:Envelope>");
+                response.flush();
+                response.close();
+                res.setContentType("text/xml; charset=ISO-8859-1");
+            }
+        }
+        catch(ServiceException e) {
+            e.log();
+        }
+        if (SysLog.isTraceOn()) {
+            SysLog.trace("Response", result.toString());
+        }
+    }
+
+    //-----------------------------------------------------------------------
+    // Variables
+    //-----------------------------------------------------------------------
+    private String registrationId = null;
+    private Dataprovider_1_1Connection delegation = null;
 }
 
 //--- End of File -----------------------------------------------------------

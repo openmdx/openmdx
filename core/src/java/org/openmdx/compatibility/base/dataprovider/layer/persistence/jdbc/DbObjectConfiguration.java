@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObjectConfiguration.java,v 1.12 2008/03/21 18:47:36 hburger Exp $
+ * Name:        $Id: DbObjectConfiguration.java,v 1.13 2008/09/09 14:49:28 hburger Exp $
  * Description: TypeConfigurationEntry class
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:47:36 $
+ * Date:        $Date: 2008/09/09 14:49:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,12 +54,13 @@ package org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc;
 
 import java.util.List;
 
+import javax.resource.ResourceException;
+
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.resource.Records;
 import org.openmdx.base.text.pattern.RegularExpression;
 import org.openmdx.base.text.pattern.cci.Pattern_1_0;
 import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.kernel.collection.ArraysExtension;
-import org.openmdx.kernel.text.format.IndentingFormatter;
 
 //---------------------------------------------------------------------------
 /**
@@ -139,14 +140,19 @@ public class DbObjectConfiguration {
     //---------------------------------------------------------------------------
     public String toString(
     ) {
-        return this.type.toString() + ':' + IndentingFormatter.toString(
-            ArraysExtension.asMap(
-                new String[]{"typeName","dbObject","dbObject2","dbObjectFormat","dbObjectForQuery","dbObjectForQuery2","pathNormalizeLevel","dbObjectHint","objectIdPattern","autonumColumns"},    
+        try {
+            return Records.getRecordFactory().asMappedRecord(
+                this.type.toString(), // recordName, 
+                null, // recordShortDescription
+                TO_STRING_FIELDS,
                 new Object[]{this.typeName,this.dbObject1,this.dbObject2,this.dbObjectFormat,this.dbObjectForQuery1,this.dbObjectForQuery2,new Integer(this.pathNormalizeLevel),this.dbObjectHint,this.objectIdPattern,this.autonumColumns}
-            )
-        );
+            ).toString();
+        } catch (ResourceException exception) {
+            return super.toString();
+        }
     }
 
+    
   //---------------------------------------------------------------------------
   public Path getType(
   ) {
@@ -262,6 +268,10 @@ public class DbObjectConfiguration {
   private int objectIdComponents;
   private final List autonumColumns;
   private final String[] joinCriteria;
+
+  private static final String[] TO_STRING_FIELDS = {
+      "typeName","dbObject","dbObject2","dbObjectFormat","dbObjectForQuery","dbObjectForQuery2","pathNormalizeLevel","dbObjectHint","objectIdPattern","autonumColumns"
+  };
 }
 
 //--- End of File -----------------------------------------------------------

@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: XMLGregorianCalendarMarshaller.java,v 1.18 2008/03/21 18:47:38 hburger Exp $
+ * Name:        $Id: XMLGregorianCalendarMarshaller.java,v 1.21 2008/09/10 08:55:20 hburger Exp $
  * Description: XMLGregorianCalendarMarshaller 
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:47:38 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -97,29 +97,28 @@ public class XMLGregorianCalendarMarshaller {
             DatatypeFormat.newInstance(false), // EXTENDED
             DatatypeFormat.newInstance(true) // BASIC
         } : null;
-        try {
-            this.datatypeFactory = xmlDatatypes ? DatatypeFactory.newInstance() : null;
-        } catch (DatatypeConfigurationException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                null,
-                "DatatypeFactory acquisition failed"
+            try {
+                this.datatypeFactory = xmlDatatypes ? DatatypeFactory.newInstance() : null;
+            } catch (DatatypeConfigurationException exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "DatatypeFactory acquisition failed"
+                );
+            }
+            this.dateTimeFormatBefore1970 = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss.SSS"
             );
-        }
-        this.dateTimeFormatBefore1970 = new SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss.SSS"
-        );
-        this.dateTimeFormatBefore1970.setTimeZone(
-            XMLGregorianCalendarMarshaller.UTC
-        );
-        this.dateTimeFormatSince1970 = new SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss.SSS"
-        );
-        this.dateTimeFormatSince1970.setTimeZone(
-            TimeZone.getTimeZone(dateTimeZone)
-        );
+            this.dateTimeFormatBefore1970.setTimeZone(
+                XMLGregorianCalendarMarshaller.UTC
+            );
+            this.dateTimeFormatSince1970 = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss.SSS"
+            );
+            this.dateTimeFormatSince1970.setTimeZone(
+                TimeZone.getTimeZone(dateTimeZone)
+            );
     }
 
     /**
@@ -145,29 +144,23 @@ public class XMLGregorianCalendarMarshaller {
         if(!TIME_TYPES.contains(timeType)) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.INVALID_CONFIGURATION,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("supported", TIME_TYPES),
-                new BasicException.Parameter("requested", timeType)
-            },
-            "Unsupported time type"
+            "Unsupported time type",
+            new BasicException.Parameter("supported", TIME_TYPES),
+            new BasicException.Parameter("requested", timeType)
         );
         if(!DATE_TYPES.contains(dateType)) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.INVALID_CONFIGURATION,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("supported", DATE_TYPES),
-                new BasicException.Parameter("requested", dateType)
-            },
-            "Unsupported date type"
+            "Unsupported date type",
+            new BasicException.Parameter("supported", DATE_TYPES),
+            new BasicException.Parameter("requested", dateType)
         );
         if(!DATETIME_TYPES.contains(dateTimeType)) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.INVALID_CONFIGURATION,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("supported", DATETIME_TYPES),
-                new BasicException.Parameter("requested", dateTimeType)
-            },
-            "Unsupported dateTime type"
+            "Unsupported dateTime type",
+            new BasicException.Parameter("supported", DATETIME_TYPES),
+            new BasicException.Parameter("requested", dateTimeType)
         );
         return new XMLGregorianCalendarMarshaller(
             dateTimeZone,
@@ -190,7 +183,7 @@ public class XMLGregorianCalendarMarshaller {
      * 
      */
     private DataTypes sqlDataTypes;
-    
+
     /**
      * The type used to store <code>org::w3c::time</code> values, i.e. one of<ul>
      * <li><code>STANDARD</code>
@@ -205,14 +198,12 @@ public class XMLGregorianCalendarMarshaller {
      * @see LayerConfigurationEntries#TIME_TYPE_NUMERIC
      */
     private static final List TIME_TYPES = Arrays.asList(
-        new String[]{
-            LayerConfigurationEntries.TIME_TYPE_STANDARD,
-            LayerConfigurationEntries.TIME_TYPE_TIME,
-            LayerConfigurationEntries.TIME_TYPE_CHARACTER,
-            LayerConfigurationEntries.TIME_TYPE_NUMERIC
-        }
+        LayerConfigurationEntries.TIME_TYPE_STANDARD,
+        LayerConfigurationEntries.TIME_TYPE_TIME,
+        LayerConfigurationEntries.TIME_TYPE_CHARACTER,
+        LayerConfigurationEntries.TIME_TYPE_NUMERIC
     );
-    
+
     /**
      * The type used to store <code>org::w3c::date</code> values, i.e. one of<ul>
      * <li><code>STANDARD</code>
@@ -225,13 +216,11 @@ public class XMLGregorianCalendarMarshaller {
      * @see LayerConfigurationEntries#DATE_TYPE_CHARACTER
      */
     private static final List DATE_TYPES = Arrays.asList(
-        new String[]{
-            LayerConfigurationEntries.DATE_TYPE_STANDARD,
-            LayerConfigurationEntries.DATE_TYPE_DATE,
-            LayerConfigurationEntries.DATE_TYPE_CHARACTER
-        }
+        LayerConfigurationEntries.DATE_TYPE_STANDARD,
+        LayerConfigurationEntries.DATE_TYPE_DATE,
+        LayerConfigurationEntries.DATE_TYPE_CHARACTER
     );
-    
+
     /**
      * The type used to store <code>org::w3c::dateTime</code> values, i.e. one of<ul>
      * <li><code>STANDARD</code>
@@ -247,13 +236,11 @@ public class XMLGregorianCalendarMarshaller {
      * @see LayerConfigurationEntries#DATETIME_TYPE_NUMERIC
      */
     private static final List DATETIME_TYPES = Arrays.asList(
-        new String[]{
-            LayerConfigurationEntries.DATETIME_TYPE_STANDARD,
-            LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP,
-            LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE,
-            LayerConfigurationEntries.DATETIME_TYPE_CHARACTER,
-            LayerConfigurationEntries.DATETIME_TYPE_NUMERIC            
-        }
+        LayerConfigurationEntries.DATETIME_TYPE_STANDARD,
+        LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP,
+        LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE,
+        LayerConfigurationEntries.DATETIME_TYPE_CHARACTER,
+        LayerConfigurationEntries.DATETIME_TYPE_NUMERIC            
     );
 
     /**
@@ -265,7 +252,7 @@ public class XMLGregorianCalendarMarshaller {
      * Non-<code>null</code> if <code>xmlDatatypes</code> is <code>true</code>.
      */
     private final DatatypeFactory datatypeFactory;
-    
+
     /**
      * 
      */
@@ -275,12 +262,12 @@ public class XMLGregorianCalendarMarshaller {
      * For values >= 1979-01-01T00:00:00.000Z
      */
     private final SimpleDateFormat dateTimeFormatSince1970;
-    
+
     /**
      * For values < 1979-01-01T00:00:00.000Z
      */
     private final SimpleDateFormat dateTimeFormatBefore1970;
-    
+
     /**
      * 
      * 
@@ -303,11 +290,11 @@ public class XMLGregorianCalendarMarshaller {
                 String timeType = sqlDataTypes.getTimeType(connection).intern();
                 if(timeType == LayerConfigurationEntries.TIME_TYPE_NUMERIC) {
                     long milliseconds = value.getMillisecond() + 1000L * (
-                        value.getSecond() + 60L * (
-                            value.getMinute() + 60L * (
-                                value.getHour()
+                            value.getSecond() + 60L * (
+                                    value.getMinute() + 60L * (
+                                            value.getHour()
+                                    )
                             )
-                        )
                     );
                     return BigDecimal.valueOf(milliseconds, 3);
                 } else {
@@ -343,15 +330,13 @@ public class XMLGregorianCalendarMarshaller {
                 String date = value.toString();
                 return dateType == LayerConfigurationEntries.DATE_TYPE_CHARACTER ?
                     date.replaceAll("-", "") :
-                    (Object) Date.valueOf(date);    
+                        (Object) Date.valueOf(date);    
             } else throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("value", value)
-                },
                 getClass().getName() +
-                    " supports only the XML datatypes [time, datetime, date]"
+                " supports only the XML datatypes [time, datetime, date]",
+                new BasicException.Parameter("value", value)
             );
         } else {
             return source;
@@ -375,10 +360,10 @@ public class XMLGregorianCalendarMarshaller {
         String sqlDateTime = format.format(new Date(millisecondsSince1970));
         return withTimeZone ? 
             sqlDateTime + ' ' + format.getTimeZone().getID() :
-            sqlDateTime;
-        
+                sqlDateTime;
+
     }
-     
+
     /**
      * 
      * @param source
@@ -393,12 +378,12 @@ public class XMLGregorianCalendarMarshaller {
             boolean extended = value.indexOf('-') >= 0 || value.indexOf(':') >= 0;
             return this.datatypeFormat == null ?
                 (extended ? value.replaceAll("[:\\-]", "") : value ) :
-                (this.datatypeFormat[extended ? EXTENDED : BASIC].marshal(value));
+                    (this.datatypeFormat[extended ? EXTENDED : BASIC].marshal(value));
         } else if(source instanceof Time) {
             String value = "T" + source;
             return this.datatypeFormat == null ?
                 value.replaceAll(":", "") :
-                this.datatypeFormat[EXTENDED].marshal(value);
+                    this.datatypeFormat[EXTENDED].marshal(value);
         } else if (source instanceof Timestamp) {
             Timestamp value = (Timestamp) source;
             long milliseconds = value.getTime();
@@ -422,7 +407,7 @@ public class XMLGregorianCalendarMarshaller {
             String value = source.toString();
             return this.datatypeFormat == null ?
                 value.replaceAll("-", "") :
-                this.datatypeFormat[EXTENDED].marshal(value);
+                    this.datatypeFormat[EXTENDED].marshal(value);
         } else if (source instanceof BigDecimal) {
             BigDecimal value = (BigDecimal)source;
             long milliseconds = value.movePointRight(3).longValue();
@@ -443,5 +428,5 @@ public class XMLGregorianCalendarMarshaller {
             return source;
         }
     }
-        
+
 }

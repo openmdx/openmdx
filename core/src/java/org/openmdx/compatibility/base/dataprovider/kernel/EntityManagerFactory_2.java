@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EntityManagerFactory_2.java,v 1.6 2008/07/01 00:26:18 hburger Exp $
+ * Name:        $Id: EntityManagerFactory_2.java,v 1.10 2008/09/10 08:55:24 hburger Exp $
  * Description: Entity Manager Factory
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/01 00:26:18 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,6 @@
  */
 package org.openmdx.compatibility.base.dataprovider.kernel;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,9 +57,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
 
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.application.cci.ConfigurationProvider_1_0;
 import org.openmdx.compatibility.base.application.cci.ConfigurationSpecifier;
@@ -93,15 +89,14 @@ class EntityManagerFactory_2
         //
         // Section
         // 
-        String[] section = new String[]{ManagerFactoryConfigurationEntries.ENTITY_MANAGER}; 
-        String[] subSection = new String[section.length + 1];
-        System.arraycopy(section, 0, subSection, 0, section.length);
+        String[] subSection = new String[SECTION.length + 1];
+        System.arraycopy(SECTION, 0, subSection, 0, SECTION.length);
         //
         // Shared User Objects
         // 
         Map<String,Object> userObjects = new HashMap<String,Object>();
         Configuration configuration = configurationProvider.getConfiguration(
-            section,
+            SECTION,
             managerConfigurationSpecification // specification
         );
         for(
@@ -110,7 +105,7 @@ class EntityManagerFactory_2
             ).populationIterator();
             i.hasNext();
         ){
-            subSection[section.length] = (String) i.next();
+            subSection[SECTION.length] = (String) i.next();
             getUserObject(
                 configurationProvider,
                 subSection,
@@ -126,7 +121,7 @@ class EntityManagerFactory_2
             ).populationIterator();
             i.hasNext();
         ){
-            subSection[section.length] = (String) i.next();
+            subSection[SECTION.length] = (String) i.next();
             this.plugInConfigurations.add(
                 getPlugInConfiguration(
                     configurationProvider,
@@ -136,6 +131,10 @@ class EntityManagerFactory_2
             );
         }
     }
+    
+    private static final String[] SECTION = {
+        ManagerFactoryConfigurationEntries.ENTITY_MANAGER
+    };
     
    /**
     * 
@@ -153,16 +152,6 @@ class EntityManagerFactory_2
     */
    protected final static  Map<String,ConfigurationSpecifier> managerConfigurationSpecification = 
        new HashMap<String,ConfigurationSpecifier>();
-
-   /**
-    * User-object map.
-    */
-   protected final static String USER_OBJECT_MAP = "userObjects";
-      
-   /**
-    * Package  implementation map
-    */
-   protected final static String IMPLEMENTATION_MAP = "implementationMap";
 
    static {
        //
@@ -239,7 +228,7 @@ class EntityManagerFactory_2
            plugInConfigurationSpecification
        );
        plugInConfiguration.values(
-           USER_OBJECT_MAP
+           PlugInManagerFactory_2.USER_OBJECT_MAP
        ).set(
            0,
            userObjects
@@ -262,7 +251,7 @@ class EntityManagerFactory_2
        // 
        Map<String,String> implementationMap = new HashMap<String,String>();
        plugInConfiguration.values(
-           IMPLEMENTATION_MAP
+           PlugInManagerFactory_2.IMPLEMENTATION_MAP
        ).set(
            0,
            implementationMap
@@ -341,10 +330,10 @@ class EntityManagerFactory_2
                exception,
                BasicException.Code.DEFAULT_DOMAIN,
                BasicException.Code.ACTIVATION_FAILURE,
+               "User object initialization failure",
                new Parameter[]{
-                   new Parameter("section",section)
-               },
-               "User object initialization failure"
+                   new Parameter("section",(Object[])section)
+               }
            );
        } 
     }
@@ -370,90 +359,25 @@ class EntityManagerFactory_2
             return Boolean.FALSE;
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     protected PersistenceManager newEntityManager(
         PersistenceManager persistenceManager
     ) throws ServiceException {
-        if(this.plugInConfigurations.isEmpty()) {
-            return persistenceManager;
-        } else {
-            // 
-            // Not static reference to RefRootPackage_1 because of compilation dependencies!
-            //
-            Constructor<RefPackage_1_1> rootPkgCons;
-            try {
-                Class<RefPackage_1_1> rootPkgClass = Classes.getApplicationClass(
-                    "org.openmdx.base.accessor.jmi.spi.RefRootPackage_1"
-                );
-                rootPkgCons = rootPkgClass.getConstructor(
-                    PersistenceManagerFactory.class,
-                    PersistenceManager.class,
-                    Map.class
-                );
-            } catch (Exception exception) {
-                throw new ServiceException(exception);
-            }
-            //
-            // Create layers
-            //
-            PersistenceManager plugInManager = persistenceManager;
-            for(
-                int i = this.plugInConfigurations.size() - 1;
-                i >= 0;
-                i--
-            ){
-                Configuration plugInConfiguration = this.plugInConfigurations.get(i);
-                Map<String,String> implementationMap = (Map<String,String>)plugInConfiguration.values(
-                    IMPLEMENTATION_MAP
-                ).get(
-                    0
-                ); 
-                try {
-                    plugInManager = rootPkgCons.newInstance(
-                        null, // persistenceManagerFactory
-                        plugInManager,
-                        implementationMap
-                    ).refPersistenceManager();
-                } catch(InvocationTargetException e) {
-                    throw new ServiceException(
-                        BasicException.toStackedException(e.getTargetException())
-                    );
-                } catch(Exception e) {
-                    throw new ServiceException(e);
-                }
-                propagateUserObjects(
-                    plugInConfiguration,
-                    plugInManager
-                );
-            }
-            return plugInManager;
-        }
-    }
-
-    /**
-     * Propagate the user objects from the plug-in configuration to
-     * the persistence manager
-     * 
-     * @param plugInConfiguration
-     * @param plugInManager
-     */
-    @SuppressWarnings("unchecked")
-    protected static void propagateUserObjects(
-        Configuration plugInConfiguration,
-        PersistenceManager plugInManager
-    ){
-        Map<String,Object> userObjects = (Map<String,Object>) plugInConfiguration.values(
-            USER_OBJECT_MAP
-        ).get(
-            0
-        );
-        for(Map.Entry<String,Object> userObject : userObjects.entrySet()) {
-            plugInManager.putUserObject(
-                userObject.getKey(),
-                userObject.getValue()
+        PersistenceManager layerManager = persistenceManager;
+        for(
+            int i = this.plugInConfigurations.size() - 1;
+            i >= 0;
+            i--
+        ){
+            layerManager =  new PlugInManagerFactory_2(
+                layerManager,
+                this.plugInConfigurations.get(i)
+            ).newPersistenceManager(
+                layerManager
             );
         }
+        return layerManager;
     }
 
 }

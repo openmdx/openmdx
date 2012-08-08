@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TransactionManager_1.java,v 1.11 2008/06/28 00:21:53 hburger Exp $
+ * Name:        $Id: TransactionManager_1.java,v 1.12 2008/09/10 08:55:30 hburger Exp $
  * Description: Transaction Manager
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:53 $
+ * Date:        $Date: 2008/09/10 08:55:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -117,19 +117,19 @@ public class TransactionManager_1 {
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.ROLLBACK,
-					phase.getPhase(),
 					"The thread is already associated with a transaction " +
 					"and the Transaction Manager implementation does not " +
-					"support nested transactions."
+					"support nested transactions.",
+					phase.getPhase()
 				);
 			} catch (SystemException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.ROLLBACK,
-					phase.getPhase(),
 					"The transaction manager encountered an " +
-					"unexpected error condition"
+					"unexpected error condition",
+					phase.getPhase()
 				);
 			}
 			
@@ -155,54 +155,54 @@ public class TransactionManager_1 {
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.ROLLBACK,
-					phase.getPhase(),
-					"Transaction rolled back"
+					"Transaction rolled back",
+					phase.getPhase()
 				);
 			} catch (HeuristicMixedException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.HEURISTIC,
-					phase.getPhase(),
 					"A heuristic decision was made and some " +
 					"relevant updates have been committed " +
-					"while others have been rolled back"
+					"while others have been rolled back",
+					phase.getPhase()
 				).log();
 			} catch (HeuristicRollbackException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.HEURISTIC,
-					phase.getPhase(),
 					"A heuristic decision was made and all " +
-					"relevant updates have been rolled back"
+					"relevant updates have been rolled back",
+					phase.getPhase()
 				).log();
 			} catch (SecurityException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.HEURISTIC,
-					phase.getPhase(),
 					"The current thread is not allowed to commit " +
-					"the transaction"
+					"the transaction",
+					phase.getPhase()
 				).log();
 			} catch (IllegalStateException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.HEURISTIC,
-					phase.getPhase(),
 					"The current thread is not associated with a " +
-					"transaction"
+					"transaction",
+					phase.getPhase()
 				).log();
 			} catch (SystemException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.HEURISTIC,
-					phase.getPhase(),
 					"The transaction manager encountered an " +
-					"unexpected error condition"
+					"unexpected error condition",
+					phase.getPhase()
 				).log();
 			}
 
@@ -216,9 +216,9 @@ public class TransactionManager_1 {
 						exception,
 						BasicException.Code.DEFAULT_DOMAIN,
 						BasicException.Code.GENERIC,
-						phase.getPhase(),
 						"Transaction processing aborted with " +
-						"runtime exception"
+						"runtime exception",
+						phase.getPhase()
 					)
 				)
 			).log();
@@ -232,16 +232,16 @@ public class TransactionManager_1 {
 				exception,
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.NONE,
-				phase.getPhase(),
-				"The afterCompletion code failed"
+				"The afterCompletion code failed",
+				phase.getPhase()
 			).log();
 		} catch (RuntimeException exception) {
 			throw new RuntimeServiceException(
 				exception,
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.NONE,
-				phase.getPhase(),
-				"The afterCompletion code failed"
+				"The afterCompletion code failed",
+				phase.getPhase()
 			).log();
 		}
 
@@ -277,10 +277,10 @@ public class TransactionManager_1 {
                             cause,
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.HEURISTIC,
-                            phase.getPhase(),
                             "Rollback not invoked explicitely as the transaction " +
                             "is already rolling back, i.e. there is " +
-                            "no synchronization for rollback outcome"
+                            "no synchronization for rollback outcome",
+                            phase.getPhase()
                         )
                     );
                 }
@@ -292,9 +292,9 @@ public class TransactionManager_1 {
     					exception,
     					BasicException.Code.DEFAULT_DOMAIN,
     					BasicException.Code.HEURISTIC,
-    					phase.getPhase(),
     					"The current thread is not allowed to roll " +
-    					"back the transaction"
+    					"back the transaction",
+    					phase.getPhase()
     				).appendCause(cause)
     			).log();
     		} catch (IllegalStateException exception) {
@@ -305,9 +305,9 @@ public class TransactionManager_1 {
     					exception,
     					BasicException.Code.DEFAULT_DOMAIN,
     					BasicException.Code.HEURISTIC,
-    					phase.getPhase(),
     					"The current thread is not associated with a " +
-    					"transaction"
+    					"transaction",
+    					phase.getPhase()
     				).appendCause(cause)
     			).log();
             }
@@ -322,8 +322,8 @@ public class TransactionManager_1 {
     				cause,
     				BasicException.Code.DEFAULT_DOMAIN,
     				BasicException.Code.ROLLBACK,
-    				phase.getPhase(),
-    				"Transaction rolled back"
+    				"Transaction rolled back",
+    				phase.getPhase()
     			)
     		);
         } catch (SystemException exception) {
@@ -334,9 +334,9 @@ public class TransactionManager_1 {
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.HEURISTIC,
-                    phase.getPhase(),
                     "The transaction manager encountered an " +
-                    "unexpected error condition"
+                    "unexpected error condition",
+                    phase.getPhase()
                 ).appendCause(cause)
             ).log();
         }
@@ -361,8 +361,8 @@ public class TransactionManager_1 {
 				exception,
 				exception.getExceptionDomain(),
 				exception.getExceptionCode(),
-				phase.getPhase(),
-				"After completion code failed"
+				"After completion code failed",
+				phase.getPhase()
 			).appendCause(cause);
 		}
 	}

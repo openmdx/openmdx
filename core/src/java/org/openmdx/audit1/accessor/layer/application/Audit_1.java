@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Audit_1.java,v 1.29 2008/06/28 00:21:28 hburger Exp $
+ * Name:        $Id: Audit_1.java,v 1.32 2008/09/10 08:55:22 hburger Exp $
  * Description: accessor.Audit_1 plugin
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:28 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -111,7 +111,7 @@ import org.openmdx.kernel.log.SysLog;
  */
 @SuppressWarnings("unchecked")
 public class Audit_1
-	extends Database_1Jdbc2 {
+extends Database_1Jdbc2 {
 
     //------------------------------------------------------------------------
     public void activate(
@@ -134,8 +134,7 @@ public class Audit_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                null,
-                "two audit providers must be configured: dataprovider:0 audit objects; dataprovider:1 units of work. They must be configured with configuration option  'dataprovider'" 
+                "two audit providers must be configured: dataprovider:0 audit objects; dataprovider:1 units of work. They must be configured with configuration option  'dataprovider'"
             );
         }
         this.auditProviderBeforeImage = (Dataprovider_1_0)dataproviders.get(0);
@@ -153,16 +152,14 @@ public class Audit_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("exposed paths", exposedPaths),
-                    new BasicException.Parameter("audit paths", auditPaths)
-                },
-                "for each exposed path a corresponding audit path must be configured using the option 'auditMapping'" 
+                "for each exposed path a corresponding audit path must be configured using the option 'auditMapping'",
+                new BasicException.Parameter("exposed paths", exposedPaths),
+                new BasicException.Parameter("audit paths", auditPaths)
             );
         }
         for(
-            ListIterator i = exposedPaths.listIterator();
-            i.hasNext();
+                ListIterator i = exposedPaths.listIterator();
+                i.hasNext();
         ) {
             int index = i.nextIndex();
             this.auditMapping.put(
@@ -181,20 +178,20 @@ public class Audit_1
 
     }
 
-	//------------------------------------------------------------------------
-	// Audit_1
-	//------------------------------------------------------------------------
-  
+    //------------------------------------------------------------------------
+    // Audit_1
+    //------------------------------------------------------------------------
+
     //------------------------------------------------------------------------
     private boolean areEqual(
         Object e1,
         Object e2
     ) {
         return
-            (((e1 == null) || (e2 == null)) && (e1 == e2)) ||
-            e1.equals(e2);        
+        (((e1 == null) || (e2 == null)) && (e1 == e2)) ||
+        e1.equals(e2);        
     }
-    
+
     //------------------------------------------------------------------------
     /**
      * Return the set of attributes which's values changed in o2 relative to o1.
@@ -208,16 +205,16 @@ public class Audit_1
         }        
         // Touch all o1 attributes in o2
         for(
-            Iterator i = o1.attributeNames().iterator();
-            i.hasNext();
+                Iterator i = o1.attributeNames().iterator();
+                i.hasNext();
         ) {
             o2.values((String)i.next());
         }        
         // Diff
         Set changedAttributes = new HashSet();
         for(
-            Iterator i = o2.attributeNames().iterator();
-            i.hasNext();
+                Iterator i = o2.attributeNames().iterator();
+                i.hasNext();
         ) {
             String attributeName = (String)i.next();
             SparseList v1 = o1.values(attributeName);
@@ -267,8 +264,8 @@ public class Audit_1
         boolean auditAuthority
     ) throws ServiceException {
         for(
-            Iterator i = this.auditMapping.entrySet().iterator();
-            i.hasNext();
+                Iterator i = this.auditMapping.entrySet().iterator();
+                i.hasNext();
         ) {
             Entry entry = (Entry)i.next();
             if(objectPath.startsWith((Path)entry.getKey())) {
@@ -295,13 +292,11 @@ public class Audit_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ASSERTION_FAILURE,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path", objectPath)
-            },
-            "no audit provider found for path"
+            "no audit provider found for path",
+            new BasicException.Parameter("path", objectPath)
         );
     }
-  
+
     //------------------------------------------------------------------------
     /**
      * convert object to audit object (rewrite path according to mapping)
@@ -330,8 +325,8 @@ public class Audit_1
     ) {
         if(source != null) {
             for(
-                Iterator j = source.attributeNames().iterator();
-                j.hasNext();
+                    Iterator j = source.attributeNames().iterator();
+                    j.hasNext();
             ) {
                 String attributeName = (String)j.next();
                 target.values(namespaceId + ":" + attributeName).addAll(
@@ -380,9 +375,9 @@ public class Audit_1
         // TOTAL is unknown
         int ii = 0;
         for(
-            Iterator i = beforeImages.iterator(); 
-            i.hasNext(); 
-            ii++
+                Iterator i = beforeImages.iterator(); 
+                i.hasNext(); 
+                ii++
         ) {
             i.next();
         }
@@ -392,9 +387,9 @@ public class Audit_1
         List objects = new ArrayList(beforeImages);
         objects.add(current);
         for(
-            int i = 1; 
-            i < objects.size(); 
-            i++
+                int i = 1; 
+                i < objects.size(); 
+                i++
         ) {
             DataproviderObject beforeImage = (DataproviderObject)objects.get(i-1);
             beforeImage.clearValues(SystemAttributes.OBJECT_IDENTITY).add(auditablePath.toUri());
@@ -408,7 +403,7 @@ public class Audit_1
             String unitOfWorkId = base.getLastField();
             DataproviderObject involved = new DataproviderObject(
                 auditablePath.getDescendant(
-                    new String[]{"view:Audit:involved", unitOfWorkId}
+                    "view:Audit:involved", unitOfWorkId
                 )
             );
             involved.values(SystemAttributes.OBJECT_CLASS).add(
@@ -468,7 +463,7 @@ public class Audit_1
                     Quantors.THERE_EXISTS,
                     SystemAttributes.OBJECT_IDENTITY, 
                     FilterOperators.IS_LIKE,
-                    new String[]{beforeImageCorePath.toUri() + ":uow:%"}
+                    beforeImageCorePath.toUri() + ":uow:%"
                 )
             },
             AttributeSelectors.ALL_ATTRIBUTES,
@@ -525,7 +520,7 @@ public class Audit_1
         Path path
     ) {
         String referenceName = path.size() % 2 == 0
-            ? path.get(path.size()-1)
+        ? path.get(path.size()-1)
             : path.get(path.size()-2);
         return "view:Audit:involved".equals(referenceName);
     }
@@ -547,71 +542,71 @@ public class Audit_1
                     request.attributeSpecifier()
                 )
             ).getObject() : 
-            _beforeImageAsObject;
+                _beforeImageAsObject;
 
-        DataproviderObject beforeImage = this.objectToBeforeImage(
-            beforeImageAsObject,
-            this.unitOfWorkId
-        );
-
-        // lazy-init beforeImageChannel and unitsOfWork
-        if(this.beforeImageChannel == null) {
-            SysLog.trace("starting new batch");
-            // create channel on-demand (will be reset in epilog.
-            // Channel is used to store before images. A batching 
-            // channel minimizes th roundtrips to the audit provider. 
-            this.beforeImageChannel = new RequestCollection(
-                header,
-                this.auditProviderBeforeImage
+            DataproviderObject beforeImage = this.objectToBeforeImage(
+                beforeImageAsObject,
+                this.unitOfWorkId
             );
-            this.beforeImageChannel.beginBatch();
 
-            // pre-allocate units of work objects. They are modified during
-            // create, modify, remove, replace and set operations and stored
-            // stored in epilog(). This minimizes replace requests units of
-            // work objects.
-            this.unitsOfWork = new HashMap();
-        }
+            // lazy-init beforeImageChannel and unitsOfWork
+            if(this.beforeImageChannel == null) {
+                SysLog.trace("starting new batch");
+                // create channel on-demand (will be reset in epilog.
+                // Channel is used to store before images. A batching 
+                // channel minimizes th roundtrips to the audit provider. 
+                this.beforeImageChannel = new RequestCollection(
+                    header,
+                    this.auditProviderBeforeImage
+                );
+                this.beforeImageChannel.beginBatch();
 
-        // lazy-creation of unit of work object
-        Path mappedPath = this.mapAuditPath(
-            request.path(),
-            true
-        );    
-        Path unitOfWorkPath = mappedPath.getPrefix(5).getDescendant(
-            new String[]{"unitOfWork", this.unitOfWorkId}
-        );
-        if(this.unitsOfWork.get(unitOfWorkPath) == null) {
-            this.unitsOfWork.put(
-                unitOfWorkPath,
-                new DataproviderObject(
-                    unitOfWorkPath
+                // pre-allocate units of work objects. They are modified during
+                // create, modify, remove, replace and set operations and stored
+                // stored in epilog(). This minimizes replace requests units of
+                // work objects.
+                this.unitsOfWork = new HashMap();
+            }
+
+            // lazy-creation of unit of work object
+            Path mappedPath = this.mapAuditPath(
+                request.path(),
+                true
+            );    
+            Path unitOfWorkPath = mappedPath.getPrefix(5).getDescendant(
+                "unitOfWork", this.unitOfWorkId
+            );
+            if(this.unitsOfWork.get(unitOfWorkPath) == null) {
+                this.unitsOfWork.put(
+                    unitOfWorkPath,
+                    new DataproviderObject(
+                        unitOfWorkPath
+                    )
+                );
+                SysLog.trace("unit of work added", unitOfWorkPath);
+            }
+
+            // create before image
+            this.beforeImageChannel.addCreateRequest(
+                beforeImage
+            );
+
+            // update unit of work (will be stored in epilog)    
+            DataproviderObject unitOfWork = (DataproviderObject)this.unitsOfWork.get(
+                unitOfWorkPath
+            );
+            if(unitOfWork == null) {
+                SysLog.trace("unitOfWork is null for path", unitOfWorkPath);
+            }
+            Set involvedObjects = new HashSet(unitOfWork.values("involved"));
+            involvedObjects.add(
+                request.path().getDescendant(
+                    "view:Audit:involved", this.unitOfWorkId
                 )
             );
-            SysLog.trace("unit of work added", unitOfWorkPath);
-        }
-
-        // create before image
-        this.beforeImageChannel.addCreateRequest(
-            beforeImage
-        );
-
-        // update unit of work (will be stored in epilog)    
-        DataproviderObject unitOfWork = (DataproviderObject)this.unitsOfWork.get(
-            unitOfWorkPath
-        );
-        if(unitOfWork == null) {
-            SysLog.trace("unitOfWork is null for path", unitOfWorkPath);
-        }
-        Set involvedObjects = new HashSet(unitOfWork.values("involved"));
-        involvedObjects.add(
-            request.path().getDescendant(
-                new String[]{"view:Audit:involved", this.unitOfWorkId}
-            )
-        );
-        unitOfWork.clearValues("involved").addAll(
-            involvedObjects
-        );
+            unitOfWork.clearValues("involved").addAll(
+                involvedObjects
+            );
     }
 
     //------------------------------------------------------------------------
@@ -651,7 +646,7 @@ public class Audit_1
             requests
         );
         String unitOfWorkId = requests.length == 0 
-            ? null 
+        ? null 
             : (String)requests[0].context(DataproviderRequestContexts.UNIT_OF_WORK_ID).get(0);
 
         SysLog.trace("unit of work (request)", unitOfWorkId);
@@ -678,22 +673,22 @@ public class Audit_1
         );
         // update units of work and replace
         if(
-            (this.unitsOfWork != null) &&
-            (this.beforeImageChannel != null)
+                (this.unitsOfWork != null) &&
+                (this.beforeImageChannel != null)
         ) {
             RequestCollection unitOfWorkChannel = new RequestCollection(
                 header,
                 this.auditProviderUnitOfWork
             );
             for(
-                Iterator i = this.unitsOfWork.keySet().iterator();
-                i.hasNext();
+                    Iterator i = this.unitsOfWork.keySet().iterator();
+                    i.hasNext();
             ) {
                 Path unitOfWorkPath = (Path)i.next();
                 DataproviderObject sourceUnitOfWork = (DataproviderObject)this.unitsOfWork.get(unitOfWorkPath);
                 if(
-                    (sourceUnitOfWork.getValues("involved") != null) && 
-                    (sourceUnitOfWork.values("involved").size() > 0)
+                        (sourceUnitOfWork.getValues("involved") != null) && 
+                        (sourceUnitOfWork.values("involved").size() > 0)
                 ) {
                     DataproviderObject unitOfWorkToBeReplaced = this.getUnitOfWork(
                         unitOfWorkChannel,
@@ -744,9 +739,9 @@ public class Audit_1
             DataproviderObject involved = null;
             int ii = 0;
             for(                
-                Iterator i = involvedObjects.iterator();
-                i.hasNext();
-                ii++
+                    Iterator i = involvedObjects.iterator();
+                    i.hasNext();
+                    ii++
             ) {
                 involved = (DataproviderObject)i.next();
                 if(involved.path().equals(request.path())) {
@@ -779,10 +774,8 @@ public class Audit_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_FOUND,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("path", request.path())
-                    },
-                    "requested Involved not found" 
+                    "requested Involved not found",
+                    new BasicException.Parameter("path", request.path())
                 );
             }
         }
@@ -840,8 +833,8 @@ public class Audit_1
             object.path()
         );
         for(
-            Iterator i = object.attributeNames().iterator();
-            i.hasNext();
+                Iterator i = object.attributeNames().iterator();
+                i.hasNext();
         ) {
             String attributeName = (String)i.next();
             if(attributeName.startsWith("view:BeforeImage:")) {
@@ -947,17 +940,17 @@ public class Audit_1
         DataproviderObject_1_0 object
     ) throws ServiceException{
         for(
-            Iterator i = object.attributeNames().iterator();
-            i.hasNext();
+                Iterator i = object.attributeNames().iterator();
+                i.hasNext();
         ) {
             for (
-                ListIterator j = object.values((String) i.next()).populationIterator();
-                j.hasNext();
+                    ListIterator j = object.values((String) i.next()).populationIterator();
+                    j.hasNext();
             ) {
                 Object value = j.next();
                 if(
-                    value instanceof Duration || 
-                    value instanceof XMLGregorianCalendar
+                        value instanceof Duration || 
+                        value instanceof XMLGregorianCalendar
                 ) {
                     j.set(this.datatypeFormat.unmarshal(value));
                 } else {
@@ -977,7 +970,7 @@ public class Audit_1
     private Dataprovider_1_0 auditProviderUnitOfWork = null;
     private String unitOfWorkId = null; // initialized by prolog
     private boolean returnAllInvolved = false;
-    
+
     // for each request.path() the corresponding unit of work object
     // from audit provider. The units of work are retrieved/created
     // in prolog(), then modified in replace, create, modify requests

@@ -1,0 +1,3 @@
+<%
+  referencePaneControls[i].setIsMultiDeleteEnabled(true);
+%>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ViewObject_1.java,v 1.44 2008/06/24 16:17:21 hburger Exp $
+ * Name:        $Id: ViewObject_1.java,v 1.46 2008/09/10 08:55:21 hburger Exp $
  * Description: View Object
- * Revision:    $Revision: 1.44 $
+ * Revision:    $Revision: 1.46 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/24 16:17:21 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -90,7 +90,7 @@ import org.openmdx.model1.code.AggregationKind;
  */
 @SuppressWarnings("unchecked")
 public class ViewObject_1
-    implements Object_1_0, Delegating_1_0, ViewObject_1_0
+implements Object_1_0, Delegating_1_0, ViewObject_1_0
 {
 
     protected ViewObject_1(
@@ -110,7 +110,7 @@ public class ViewObject_1
         this.sourceObject = null;
         this.sinkObject = sinkObject;
     }
-    
+
     /**
      * Retrieve the object's delegate
      * 
@@ -123,7 +123,7 @@ public class ViewObject_1
         return getSourceDelegate(
             true, // assertSingleton
             false // forStateQuery
-         );
+        );
     }
 
     /**
@@ -139,9 +139,9 @@ public class ViewObject_1
             false, // forStateQuery
             false, // forRemoval
             false // asSource
-         );
+        );
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.ViewObject_1_0#getViewContext()
      */
@@ -184,11 +184,9 @@ public class ViewObject_1
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.ILLEGAL_STATE,
-                                new BasicException.Parameter[]{
-                                    new BasicException.Parameter("context", this.factory.getContext()),
-                                    new BasicException.Parameter("deleted", Boolean.TRUE)
-                                },
-                                "Can't access the features of a deleted state"
+                                "Can't access the features of a deleted state",
+                                new BasicException.Parameter("context", this.factory.getContext()),
+                                new BasicException.Parameter("deleted", Boolean.TRUE)
                             );
                         }
                         return delegate;
@@ -196,11 +194,9 @@ public class ViewObject_1
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.INVALID_CARDINALITY,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("context", this.factory.getContext()),
-                                new BasicException.Parameter("states", delegates.size())
-                            },
-                            "The object is accessed through a write-only view not referring to exactly one state"
+                            "The object is accessed through a write-only view not referring to exactly one state",
+                            new BasicException.Parameter("context", this.factory.getContext()),
+                            new BasicException.Parameter("states", delegates.size())
                         );
                     } else {
                         return null;
@@ -217,11 +213,9 @@ public class ViewObject_1
                                 throw new ServiceException(
                                     BasicException.Code.DEFAULT_DOMAIN,
                                     BasicException.Code.NOT_FOUND,
-                                    new BasicException.Parameter[]{
-                                        new BasicException.Parameter("context", this.factory.getContext()),
-                                        new BasicException.Parameter("states", 0)
-                                    },
-                                    "The object is accessed through a read-only view not referring a valid state"
+                                    "The object is accessed through a read-only view not referring a valid state",
+                                    new BasicException.Parameter("context", this.factory.getContext()),
+                                    new BasicException.Parameter("states", 0)
                                 );
                             } else {
                                 return null;
@@ -235,7 +229,7 @@ public class ViewObject_1
             } else {
                 return this.sinkObject.isDirty() || objIsHollow() ?
                     this.sinkObject.getDelegate() :
-                    getSourceObject();
+                        getSourceObject();
             }
         } else {
             return getSourceObject();
@@ -256,7 +250,7 @@ public class ViewObject_1
         }
         return this.sourceObject;
     }
-    
+
     /**
      * Retrieve the object's delegates
      * 
@@ -293,7 +287,7 @@ public class ViewObject_1
                             );
                             return delegate == null ?
                                 Collections.EMPTY_LIST :
-                                Collections.singletonList(delegate);
+                                    Collections.singletonList(delegate);
                         }
                     } else {
                         return Collections.EMPTY_LIST;
@@ -311,7 +305,6 @@ public class ViewObject_1
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.ASSERTION_FAILURE,
-                            null,
                             "getSinkelegates and getSourceDelegate call each other"
                         );
                     }
@@ -328,10 +321,8 @@ public class ViewObject_1
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_SUPPORTED,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("context", this.factory.getContext())
-                            },
-                            "The object is accessed through a read-only view"
+                            "The object is accessed through a read-only view",
+                            new BasicException.Parameter("context", this.factory.getContext())
                         );
                     }
                 }
@@ -342,8 +333,8 @@ public class ViewObject_1
             return Collections.singletonList(getSourceObject());
         }
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Extends Object
     //------------------------------------------------------------------------
@@ -363,10 +354,10 @@ public class ViewObject_1
         try {
             objectClass = this.sinkObject == null ? 
                 SinkObject_1.lenientGetObjectClass(this.sourceObject) : 
-                this.sinkObject.getObjectClass(); 
-            if(objectClass == null) {
-                objectClass = "n/a";
-            }
+                    this.sinkObject.getObjectClass(); 
+                if(objectClass == null) {
+                    objectClass = "n/a";
+                }
         } catch (Exception exception) {
             objectClass = "// " + exception;
         }
@@ -392,7 +383,7 @@ public class ViewObject_1
             ViewObject_1 that = (ViewObject_1) obj;
             return this.sinkObject == null ?
                 this == that :
-                this.sinkObject == that.sinkObject;
+                    this.sinkObject == that.sinkObject;
         } else {
             return false;
         }
@@ -404,10 +395,10 @@ public class ViewObject_1
     public int hashCode() {
         return this.sinkObject == null ?
             super.hashCode() :
-            this.sinkObject.hashCode();
+                this.sinkObject.hashCode();
     }
 
-    
+
     //--------------------------------------------------------------------------
     // Implements Object_1_0
     //--------------------------------------------------------------------------
@@ -433,7 +424,7 @@ public class ViewObject_1
             );
         }
     }
-    
+
     /**
      * Returns the object's model class.
      *
@@ -458,12 +449,12 @@ public class ViewObject_1
         }
         return objectClass;
     }
-    
+
     protected boolean isInstanceOfDateState(
     ) throws ServiceException{
         return this.factory.getSink().isInstanceOfDateState(this);
     }
-    
+
     /**
      * Returns the object's identity.
      *
@@ -475,7 +466,7 @@ public class ViewObject_1
     ) throws ServiceException{
         return this.sinkObject == null ? 
             null : 
-            this.sinkObject.objGetPath();
+                this.sinkObject.objGetPath();
     }
 
     /* (non-Javadoc)
@@ -506,7 +497,7 @@ public class ViewObject_1
     ) throws ServiceException {
         return objIsDeleted() ? Collections.EMPTY_SET : getSourceDelegate().objDefaultFetchGroup();
     }
-    
+
     /**
      * Refresh the state of the instance from its provider.
      *
@@ -518,7 +509,6 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "Refresh is not supported for views"
         );
     }
@@ -535,7 +525,6 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "Make volatile is not supported for views"
         );
     }
@@ -558,11 +547,10 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "Flush is not supported for views"
         );
     }
-    
+
 
     //--------------------------------------------------------------------------
     // Unit of work boundaries
@@ -584,11 +572,10 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_IMPLEMENTED,
-            null,
             "Add to unit of work is not yet implemented for views"
         );
     }
-     
+
     /**
      * After this call the object ignores unit of work boundaries.
      * <p>
@@ -605,7 +592,6 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "Remove from unit of work is not supported for views"
         );
     }
@@ -640,7 +626,6 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "Copy is not supported for views"
         );
     } 
@@ -649,7 +634,7 @@ public class ViewObject_1
     ){
         return this.sinkObject.getConnection();
     }
-    
+
     boolean containsInstancesOfDateState(
         String feature
     ) throws ServiceException {
@@ -658,13 +643,13 @@ public class ViewObject_1
             feature
         );
     }
-    
+
     FilterableMap getSinkContainer(
         String feature
     ) throws ServiceException{
         return this.sinkObject.objGetContainer(feature);
     }
-    
+
     /**
      * The move operation moves the object to the scope of the container passed
      * as the first parameter. The object remains valid after move has
@@ -691,10 +676,8 @@ public class ViewObject_1
         if(objIsPersistent()) throw new ServiceException (
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path", objGetPath())
-            },
-            "Object is already persistent"
+            "Object is already persistent",
+            new BasicException.Parameter("path", objGetPath())
         );
         ViewContainer_1 target = (ViewContainer_1) there;
         if(target.isPersistent()) {
@@ -703,7 +686,6 @@ public class ViewObject_1
                 if(criteria == null) throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
-                    null,
                     "Adding date state views with null qualifiers is not supported"
                 );
                 this.sinkObject = this.factory.getSink().getObject(
@@ -721,14 +703,14 @@ public class ViewObject_1
                 );
                 this.sinkObject.addState(this.sourceObject);
             } else {
-               this.sourceObject.objMove(
-                   target.getSinkContainer(), 
-                   criteria
-               );
-               this.sinkObject = this.factory.getSink().getObject(
-                   this.sourceObject
-               );
-               this.sinkObject.validateDelegate();
+                this.sourceObject.objMove(
+                    target.getSinkContainer(), 
+                    criteria
+                );
+                this.sinkObject = this.factory.getSink().getObject(
+                    this.sourceObject
+                );
+                this.sinkObject.validateDelegate();
             }
             moveChildren(identity);
         } else {
@@ -740,20 +722,20 @@ public class ViewObject_1
             this.factory.cache(this.sourceObject, this);
         }
     } 
-    
+
     private void moveChildren(
         Path path
     ) throws ServiceException {
         if(this.containers != null) {
             for(
-                Iterator i = this.containers.entrySet().iterator();
-                i.hasNext();
+                    Iterator i = this.containers.entrySet().iterator();
+                    i.hasNext();
             ){
                 Map.Entry containerEntry = (Map.Entry) i.next();
                 ViewContainer_1 container = (ViewContainer_1)containerEntry.getValue(); 
                 for(
-                    Iterator j = container.fetchTransientObjects().entrySet().iterator();
-                    j.hasNext();
+                        Iterator j = container.fetchTransientObjects().entrySet().iterator();
+                        j.hasNext();
                 ){
                     Map.Entry objectEntry = (Map.Entry) j.next();
                     ViewObject_1 object = (ViewObject_1)objectEntry.getValue(); 
@@ -761,18 +743,16 @@ public class ViewObject_1
                     if(qualifier == null) throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("qualifier", qualifier),
-                            new BasicException.Parameter("path", path)
-                        },
-                        "Missing qualifier"
+                        "Missing qualifier",
+                        new BasicException.Parameter("qualifier", qualifier),
+                        new BasicException.Parameter("path", path)
                     );
                     object.objMove(container, qualifier);
                 }
             }
         }
     }
-     
+
     /**
      * Removes an object. 
      * <p>
@@ -792,11 +772,9 @@ public class ViewObject_1
             if(!this.factory.getContext().isWritable()) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("context", this.factory.getContext()),
-                    new BasicException.Parameter("writable", false)
-                },
-                "A time range view is required to remove states of a DateState instance"
+                "A time range view is required to remove states of a DateState instance",
+                new BasicException.Parameter("context", this.factory.getContext()),
+                new BasicException.Parameter("writable", false)
             );
             List delegates = getSinkDelegates(
                 false, // forStateQuery
@@ -820,14 +798,14 @@ public class ViewObject_1
                     false // attributesOnly
                 );
                 for(
-                    Iterator i = features.entrySet().iterator();
-                    i.hasNext();
+                        Iterator i = features.entrySet().iterator();
+                        i.hasNext();
                 ){
                     Map.Entry e = (Map.Entry) i.next();
                     ModelElement_1_0 feature = (ModelElement_1_0) e.getValue();
                     if(
-                        model.isReferenceType(feature) &&
-                        Boolean.TRUE.equals(feature.getValues("isChangeable").get(0))
+                            model.isReferenceType(feature) &&
+                            Boolean.TRUE.equals(feature.getValues("isChangeable").get(0))
                     ) {
                         ModelElement_1_0 associationEnd = model.getElement(
                             feature.getValues("referencedEnd").get(0)
@@ -849,8 +827,8 @@ public class ViewObject_1
                         Object_1_0 first = (Object_1_0) delegates.remove(0);
                         Object_1_0 last = first;
                         while(
-                            !delegates.isEmpty() &&
-                            adjacent(last, (Object_1_0) delegates.get(0))
+                                !delegates.isEmpty() &&
+                                adjacent(last, (Object_1_0) delegates.get(0))
                         ) {
                             this.sinkObject.invalidateState(last);
                             last = (Object_1_0) delegates.remove(0); 
@@ -890,7 +868,7 @@ public class ViewObject_1
             (String)state2.objGetValue(State_1_Attributes.STATE_VALID_FROM)
         );
     }
-    
+
     //--------------------------------------------------------------------------
     // State Queries    
     //--------------------------------------------------------------------------
@@ -909,12 +887,12 @@ public class ViewObject_1
     ) throws ServiceException {
         if(objIsPersistent()) {
             for(
-                Iterator i = getSinkDelegates(
-                    true, // forStateQuery 
-                    false, // forRemoval
-                    false // asSource
-                ).iterator();
-                i.hasNext();
+                    Iterator i = getSinkDelegates(
+                        true, // forStateQuery 
+                        false, // forRemoval
+                        false // asSource
+                    ).iterator();
+                    i.hasNext();
             ){
                 Object_1_0 delegate = (Object_1_0) i.next();
                 if(delegate.objIsDirty()) {
@@ -949,7 +927,7 @@ public class ViewObject_1
     public boolean objIsNew(
     ) throws ServiceException{
         return this.objIsPersistent() && (
-            this.sourceObject == null ? this.sinkObject.objIsNew() : this.sourceObject.objIsNew()
+                this.sourceObject == null ? this.sinkObject.objIsNew() : this.sourceObject.objIsNew()
         );
     }
 
@@ -969,8 +947,8 @@ public class ViewObject_1
         );
         boolean deleted = false;
         for(
-            Iterator i = delegates.iterator();
-            i.hasNext();
+                Iterator i = delegates.iterator();
+                i.hasNext();
         ){
             Object_1_0 object = (Object_1_0) i.next();
             if(object.objIsDeleted()) {
@@ -990,12 +968,12 @@ public class ViewObject_1
     public boolean objIsInUnitOfWork(
     ) throws ServiceException {
         for(
-            Iterator i = getSinkDelegates(
-                true, // forStateQuery
-                false, // forRemoval
-                false // asSource
-            ).iterator();
-            i.hasNext();
+                Iterator i = getSinkDelegates(
+                    true, // forStateQuery
+                    false, // forRemoval
+                    false // asSource
+                ).iterator();
+                i.hasNext();
         ){
             Object_1_0 delegate = (Object_1_0) i.next();
             if(delegate.objIsInUnitOfWork()) {
@@ -1009,7 +987,7 @@ public class ViewObject_1
     ) throws ServiceException {
         return SinkObject_1.lenientGetObjectClass(this.sourceObject) == null;
     }
-    
+
     //--------------------------------------------------------------------------
     // Values
     //--------------------------------------------------------------------------
@@ -1021,7 +999,7 @@ public class ViewObject_1
             ViewObject_1 object = (ViewObject_1) source;
             return object.objIsPersistent() ?
                 object.sinkObject.getDelegate() :
-                object.sourceObject;
+                    object.sourceObject;
         } else {
             return source;
         }
@@ -1032,14 +1010,14 @@ public class ViewObject_1
     ) throws ServiceException {
         Collection value = new ArrayList();
         for(
-            Iterator i = source.iterator();
-            i.hasNext();
+                Iterator i = source.iterator();
+                i.hasNext();
         ){
             value.add(toSinkValue(i.next()));
         }
         return value;
     }
-    
+
     Object toViewValue (
         Object source
     ) throws ServiceException {
@@ -1047,7 +1025,7 @@ public class ViewObject_1
             Object_1_0 object = (Object_1_0) source;
             return object.objIsPersistent() ?
                 this.factory.getObject(object.objGetPath()) :
-                object;
+                    object;
         } else {
             return source;
         }
@@ -1062,11 +1040,11 @@ public class ViewObject_1
             path,
             Boolean.valueOf(dateStateInstance), 
             initializeCacheWithDelegate || (
-                objIsNew() && path.startsWith(objGetPath())
+                    objIsNew() && path.startsWith(objGetPath())
             )
         );
     }
-    
+
     private boolean isStateIncapable(
     ) throws ServiceException {
         Object_1_0 context = this.sinkObject.getQualifiedDelegate(
@@ -1077,7 +1055,7 @@ public class ViewObject_1
         );
         return "org:openmdx:compatibility:state1:StateIncapable".equals(context.objGetClass());
     }
-    
+
     /**
      * Set an attribute's value.
      * <p>
@@ -1104,31 +1082,29 @@ public class ViewObject_1
         Object to
     ) throws ServiceException {
         if(
-            isInstanceOfDateState() &&
-            objIsPersistent() && (
-                 State_1_Attributes.STATE_VALID_FROM.equals(feature) ||
-                 State_1_Attributes.STATE_VALID_TO.equals(feature)
-            ) && (
-                 objIsNew() || 
-                 !isStateIncapable()
-            )
+                isInstanceOfDateState() &&
+                objIsPersistent() && (
+                        State_1_Attributes.STATE_VALID_FROM.equals(feature) ||
+                        State_1_Attributes.STATE_VALID_TO.equals(feature)
+                ) && (
+                        objIsNew() || 
+                        !isStateIncapable()
+                )
         ) {
-           throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.ILLEGAL_STATE,
-               new BasicException.Parameter[]{
-                   new BasicException.Parameter("identity", objGetResourceIdentifier()),
-                   new BasicException.Parameter("persistent", Boolean.TRUE),
-                   new BasicException.Parameter("feature", feature),
-                   new BasicException.Parameter("value", to)
-               },
-               "A persistent states validity is read-only"
-           );
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "A persistent states validity is read-only",
+                new BasicException.Parameter("identity", objGetResourceIdentifier()),
+                new BasicException.Parameter("persistent", Boolean.TRUE),
+                new BasicException.Parameter("feature", feature),
+                new BasicException.Parameter("value", to)
+            );
         } else {
             Object value = toSinkValue(to);
             for(
-                Iterator i = getSinkDelegates().iterator();
-                i.hasNext();
+                    Iterator i = getSinkDelegates().iterator();
+                    i.hasNext();
             ){
                 Object_1_0 delegate = (Object_1_0) i.next();
                 delegate.objSetValue(feature, value);
@@ -1165,7 +1141,7 @@ public class ViewObject_1
             getSourceDelegate().objGetValue(feature)
         );
     }
-    
+
     /**
      * Get a List attribute.
      * <p> 
@@ -1189,7 +1165,7 @@ public class ViewObject_1
     ) throws ServiceException {
         return new ListView(feature);
     }
-        
+
     /**
      * Get a Set attribute.
      * <p> 
@@ -1213,7 +1189,7 @@ public class ViewObject_1
     ) throws ServiceException {
         return new SetView(feature);
     }
-    
+
     /**
      * Get a SparseArray attribute.
      * <p> 
@@ -1238,11 +1214,10 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_IMPLEMENTED,
-            null,
             "Sparse array access is not yet implemented for views"
         );
     }
-        
+
     /**
      * Get a large object feature
      * <p> 
@@ -1266,7 +1241,6 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_IMPLEMENTED,
-            null,
             "Large object handling is not yet implemented for views"
         );
     }
@@ -1294,28 +1268,28 @@ public class ViewObject_1
     ) throws ServiceException {
         String referenceName = feature.endsWith(SystemAttributes.USE_OBJECT_IDENTITY_HINT) ?
             feature.substring(0, feature.length() - SystemAttributes.USE_OBJECT_IDENTITY_HINT.length()) :
-            feature;
-        FilterableMap container;    
-        if(this.containers == null) {
-            this.containers = new HashMap();
-            container = null;
-        } else {
-            container = (FilterableMap) this.containers.get(referenceName);
-        }
-        if(container == null) {
-            this.containers.put(
-                referenceName, 
-                container = new ViewContainer_1(
-                    this.factory, 
-                    this,
-                    referenceName
-                )
-            );
-        }
-        return container;
+                feature;
+            FilterableMap container;    
+            if(this.containers == null) {
+                this.containers = new HashMap();
+                container = null;
+            } else {
+                container = (FilterableMap) this.containers.get(referenceName);
+            }
+            if(container == null) {
+                this.containers.put(
+                    referenceName, 
+                    container = new ViewContainer_1(
+                        this.factory, 
+                        this,
+                        referenceName
+                    )
+                );
+            }
+            return container;
     }
 
-    
+
     //--------------------------------------------------------------------------
     // Operations
     //--------------------------------------------------------------------------
@@ -1344,7 +1318,7 @@ public class ViewObject_1
      */
     public Structure_1_0 objInvokeOperationInUnitOfWork(
         String operation,
-            Structure_1_0 arguments
+        Structure_1_0 arguments
     ) throws ServiceException {
         Collection delegates = getSinkDelegates();
         if(delegates.size() == 1) {
@@ -1357,10 +1331,8 @@ public class ViewObject_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CARDINALITY,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("involvedStates", delegates.size())
-                },
-                "Operations must be invoked on a single state"
+                "Operations must be invoked on a single state",
+                new BasicException.Parameter("involvedStates", delegates.size())
             );
         }
     }
@@ -1409,7 +1381,6 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "Event listeners are not supported for views"
         );
     }
@@ -1424,7 +1395,6 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "Event listeners are not supported for views"
         );
     }
@@ -1439,7 +1409,6 @@ public class ViewObject_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "Event listeners are not supported for views"
         );
     }
@@ -1456,12 +1425,12 @@ public class ViewObject_1
         return this.sourceObject;
     }
 
-    
+
     //--------------------------------------------------------------------------
     // Instance Members
     //--------------------------------------------------------------------------
 
-    private static final String[] TO_STRING_KEYES = new String[]{
+    private static final String[] TO_STRING_KEYES = {
         "resourceIdentifier",
         "class",
         "context"
@@ -1483,8 +1452,8 @@ public class ViewObject_1
     private ViewConnection_1 factory;
 
     private Map containers = null;
-    
-    
+
+
     //--------------------------------------------------------------------------
     // Collection Classes
     //--------------------------------------------------------------------------
@@ -1502,17 +1471,17 @@ public class ViewObject_1
         SetView(String feature) {
             this.feature = feature;
         }
-        
+
         private final String feature;
-        
+
         /* (non-Javadoc)
          * @see java.util.AbstractCollection#clear()
          */
         public void clear() {
             try {
                 for(
-                     Iterator i = getSinkDelegates().iterator();
-                     i.hasNext();
+                        Iterator i = getSinkDelegates().iterator();
+                        i.hasNext();
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     delegate.objGetSet(this.feature).clear();
@@ -1554,8 +1523,8 @@ public class ViewObject_1
                 boolean reply = false;
                 Object value = toSinkValue(o);
                 for(
-                     Iterator i = getSinkDelegates().iterator();
-                     i.hasNext();
+                        Iterator i = getSinkDelegates().iterator();
+                        i.hasNext();
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     reply |= delegate.objGetSet(this.feature).add(value);
@@ -1574,8 +1543,8 @@ public class ViewObject_1
                 boolean reply = false;
                 Object value = toSinkValue(o);
                 for(
-                     Iterator i = getSinkDelegates().iterator();
-                     i.hasNext();
+                        Iterator i = getSinkDelegates().iterator();
+                        i.hasNext();
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     reply |= delegate.objGetSet(this.feature).remove(value);
@@ -1594,8 +1563,8 @@ public class ViewObject_1
                 boolean reply = false;
                 Collection value = toSinkValue(c);
                 for(
-                     Iterator i = getSinkDelegates().iterator();
-                     i.hasNext();
+                        Iterator i = getSinkDelegates().iterator();
+                        i.hasNext();
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     reply |= delegate.objGetSet(this.feature).removeAll(value);
@@ -1616,11 +1585,11 @@ public class ViewObject_1
                 throw new RuntimeServiceException(exception);
             }
         }
-        
+
     }
 
     class MarshallingIterator implements Iterator {
-    
+
         /**
          * Constructor 
          *
@@ -1631,9 +1600,9 @@ public class ViewObject_1
         ) {
             this.delegate = delegate;
         }
-                        
+
         private final Iterator delegate;
-        
+
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
@@ -1662,12 +1631,12 @@ public class ViewObject_1
         }
 
     }
-    
+
     /**
      * ListView
      */
     class ListView extends AbstractList {
-                
+
         /**
          * Constructor 
          *
@@ -1676,17 +1645,17 @@ public class ViewObject_1
         ListView(String feature) {
             this.feature = feature;
         }
-        
+
         private final String feature;
-        
+
         /* (non-Javadoc)
          * @see java.util.AbstractList#clear()
          */
         public void clear() {
             try {
                 for(
-                     Iterator i = getSinkDelegates().iterator();
-                     i.hasNext();
+                        Iterator i = getSinkDelegates().iterator();
+                        i.hasNext();
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     delegate.objGetList(this.feature).clear();
@@ -1708,7 +1677,7 @@ public class ViewObject_1
                 throw new RuntimeServiceException(exception);
             }
         }
-        
+
         /* (non-Javadoc)
          * @see java.util.AbstractCollection#size()
          */
@@ -1728,8 +1697,8 @@ public class ViewObject_1
                 boolean reply = false;
                 Object value = toSinkValue(o);
                 for(
-                     Iterator i = getSinkDelegates().iterator();
-                     i.hasNext();
+                        Iterator i = getSinkDelegates().iterator();
+                        i.hasNext();
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     reply |= delegate.objGetList(this.feature).add(value);
@@ -1747,8 +1716,8 @@ public class ViewObject_1
             try {
                 Object value = toSinkValue(element);
                 for(
-                     Iterator i = getSinkDelegates().iterator();
-                     i.hasNext();
+                        Iterator i = getSinkDelegates().iterator();
+                        i.hasNext();
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     delegate.objGetList(this.feature).add(index,value);
@@ -1767,28 +1736,26 @@ public class ViewObject_1
                 Object reply = null;  
                 Collection delegates = getSinkDelegates();
                 for(
-                     Iterator i = delegates.iterator();
-                     i.hasNext();
-                     first = false
+                        Iterator i = delegates.iterator();
+                        i.hasNext();
+                        first = false
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     Object candidate = delegate.objGetList(this.feature).remove(index);
                     if(first) {
                         reply = candidate;
                     } else if (
-                        !(reply instanceof ServiceException) &&
-                        reply != candidate && (
-                            reply == null || 
-                            !reply.equals(candidate)
-                        )
+                            !(reply instanceof ServiceException) &&
+                            reply != candidate && (
+                                    reply == null || 
+                                    !reply.equals(candidate)
+                            )
                     ) {
                         reply = new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.INVALID_CARDINALITY,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("involvedStates", delegates.size())
-                            },
-                            "Removal returned different values for the different states"
+                            "Removal returned different values for the different states",
+                            new BasicException.Parameter("involvedStates", delegates.size())
                         );
                     }
                 }
@@ -1807,8 +1774,8 @@ public class ViewObject_1
                 Object value = toSinkValue(o);
                 Collection delegates = getSinkDelegates();
                 for(
-                     Iterator i = delegates.iterator();
-                     i.hasNext();
+                        Iterator i = delegates.iterator();
+                        i.hasNext();
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     reply |= delegate.objGetList(this.feature).remove(value);
@@ -1819,7 +1786,7 @@ public class ViewObject_1
             }
         }
 
-        
+
         /* (non-Javadoc)
          * @see java.util.AbstractList#set(int, java.lang.Object)
          */
@@ -1833,28 +1800,26 @@ public class ViewObject_1
                 Object reply = null;  
                 Collection delegates = getSinkDelegates();
                 for(
-                     Iterator i = delegates.iterator();
-                     i.hasNext();
-                     first = false
+                        Iterator i = delegates.iterator();
+                        i.hasNext();
+                        first = false
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     Object candidate = delegate.objGetList(this.feature).set(index, value);
                     if(first) {
                         reply = candidate;
                     } else if (
-                        !(reply instanceof ServiceException) &&
-                        reply != candidate && (
-                            reply == null || 
-                            !reply.equals(candidate)
-                        )
+                            !(reply instanceof ServiceException) &&
+                            reply != candidate && (
+                                    reply == null || 
+                                    !reply.equals(candidate)
+                            )
                     ) {
                         reply = new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.INVALID_CARDINALITY,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("involvedStates", delegates.size())
-                            },
-                            "Set returned different values for the different states"
+                            "Set returned different values for the different states",
+                            new BasicException.Parameter("involvedStates", delegates.size())
                         );
                     }
                 }
@@ -1903,8 +1868,8 @@ public class ViewObject_1
         protected void removeRange(int fromIndex, int toIndex) {
             try {
                 for(
-                     Iterator i = getSinkDelegates().iterator();
-                     i.hasNext();
+                        Iterator i = getSinkDelegates().iterator();
+                        i.hasNext();
                 ){
                     Object_1_0 delegate = (Object_1_0) i.next();
                     delegate.objGetList(this.feature).subList(fromIndex, toIndex).clear();
@@ -1913,9 +1878,9 @@ public class ViewObject_1
                 throw new RuntimeServiceException(exception);
             }
         }        
-        
+
     }
-    
+
     /**
      * Retrieve all states of an object
      * 
@@ -1932,8 +1897,8 @@ public class ViewObject_1
     ) throws ServiceException{
         return this.sinkObject.allStates(invalidated, deleted);
     }
-    
-    
+
+
     public boolean isReadable(
     ){
         try {
@@ -1947,10 +1912,8 @@ public class ViewObject_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("assertSingleton", false)
-                },
-                "This excpetion should not occur"
+                "This excpetion should not occur",
+                new BasicException.Parameter("assertSingleton", false)
             );
         }        
     }
@@ -1972,7 +1935,7 @@ public class ViewObject_1
     ) throws ServiceException{
         return this.sinkObject.getSinkObjects(feature, fetch);
     }
-    
+
     /**
      * Tells whether there exist underlying valid states
      * 
@@ -1982,18 +1945,18 @@ public class ViewObject_1
     ) throws ServiceException {
         DateStateContext context = this.factory.getContext();
         if(
-            this.sinkObject.hasStateCache() ||
-            context.isWritable()
+                this.sinkObject.hasStateCache() ||
+                context.isWritable()
         ) {
             //
             // Object might be dirty
             //
             return !this.sinkObject.getDelegates(
                 context.isWritable() ? context.getValidFrom() : context.getValidFor(), 
-                context.isWritable() ? context.getValidTo() : context.getValidFor(),
-                false, // forQuery
-                false, // forRemoval
-                true // forRetrieval
+                    context.isWritable() ? context.getValidTo() : context.getValidFor(),
+                        false, // forQuery
+                        false, // forRemoval
+                        true // forRetrieval
             ).isEmpty();
         } else {
             //

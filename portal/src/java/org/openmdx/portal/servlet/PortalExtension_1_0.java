@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalExtension_1_0.java,v 1.16 2008/03/18 19:07:57 wfro Exp $
+ * Name:        $Id: PortalExtension_1_0.java,v 1.19 2008/08/26 23:35:11 wfro Exp $
  * Description: Evaluator_1_0
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/18 19:07:57 $
+ * Date:        $Date: 2008/08/26 23:35:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -94,13 +91,13 @@ public interface PortalExtension_1_0 {
      * is typically used in the ui rendering process to determine whether an ui element should
      * be rendered as enabled or disabled.
      * 
-     * @param uiElementName qualified name of the ui element
+     * @param elementName name of element to be tested (normally qualified ui element name)
      * @param refObj evaluate in the context of the object
      * @param context evaluate in the application context
-     * @return true when the ui element is enabled
+     * @return true when the element is enabled
      */
     public boolean isEnabled(
-        String uiElementName,
+        String elementName,
         RefObject_1_0 refObj,
         ApplicationContext context
     );
@@ -116,32 +113,6 @@ public interface PortalExtension_1_0 {
     public String getIdentityQueryFilterClause(        
         String qualifiedReferenceName
     );
-    
-    /**
-     * Returns the nesting level for an object shown in a grid. Objects
-     * at root level have a nesting level of 0.
-     * 
-     * @param refObj object for which the nesting level is calculated.
-     * @return nesting level of given object.
-     */
-    public int getGridRowNestingLevel(
-        RefObject_1_0 refObj
-    );
-    
-    /**
-     * Returns the level id for an object shown in a grid. The row level
-     * allows to arrange grid rows in a tree-like structure. The row level
-     * has the format <id level 0>-<id level 1>-<id level 2>, etc. Ids at
-     * level 0 must be unique, ids at level 1 must be unique within level 0,
-     * ids at level 2 must be unique within level 1, etc.
-     * 
-     * @param refObj object for which the row level id is calculated.
-     * @return row level id. Null if no row level is defined for given object.
-     */
-    public String getGridRowLevelId(
-        RefObject_1_0 refObj
-    );
-    
     
     public int getGridPageSize(
         String referencedTypeName

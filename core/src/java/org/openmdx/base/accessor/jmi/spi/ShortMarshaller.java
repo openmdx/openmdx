@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ShortMarshaller.java,v 1.8 2008/04/09 12:34:10 hburger Exp $
+ * Name:        $Id: ShortMarshaller.java,v 1.9 2008/09/10 08:55:23 hburger Exp $
  * Description: ShortMarshaller class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:10 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,7 @@ import org.openmdx.kernel.exception.BasicException;
  * Number to the specific type Short (which is also a Number).
  */
 public class ShortMarshaller 
-    implements Marshaller, ReluctantUnmarshalling 
+implements Marshaller, ReluctantUnmarshalling 
 {
 
     //-------------------------------------------------------------------------
@@ -81,20 +81,18 @@ public class ShortMarshaller
     ) throws ServiceException {
         try {
             return source == null
-                ? null
+            ? null
                 : new Short(((Number) source).shortValue());
         } catch(RuntimeException e) {
             throw new ServiceException(
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("source", source),
-                    new BasicException.Parameter(
-                        "source class",
-                        source.getClass().getName()),
-                    },
-                "Could not marshal source to Short"
+                "Could not marshal source to Short",
+                new BasicException.Parameter("source", source),
+                new BasicException.Parameter(
+                    "source class",
+                    source.getClass().getName())
             );
         }
     }
@@ -105,20 +103,18 @@ public class ShortMarshaller
     ) throws ServiceException {
         try {
             return source == null
-                ? null
+            ? null
                 : new Short(((Number) source).shortValue());
         } catch (RuntimeException e) {
             throw new ServiceException(
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("source", source),
-                    new BasicException.Parameter(
-                        "source class",
-                        source.getClass().getName()),
-                    },
-                "Could not marshal source to Short"
+                "Could not marshal source to Short",
+                new BasicException.Parameter("source", source),
+                new BasicException.Parameter(
+                    "source class",
+                    source.getClass().getName())
             );
         }
     }

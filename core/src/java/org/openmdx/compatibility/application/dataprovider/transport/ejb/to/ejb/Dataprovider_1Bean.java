@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Bean.java,v 1.21 2008/06/11 17:15:05 hburger Exp $
+ * Name:        $Id: Dataprovider_1Bean.java,v 1.25 2008/09/10 08:55:24 hburger Exp $
  * Description: Dataprovider_1Bean class
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/11 17:15:05 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,14 +67,11 @@ import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.compatibility.base.dataprovider.transport.rmi.RMIMapper;
-import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.text.format.IndentingFormatter;
 
 public class Dataprovider_1Bean 
-    extends AbstractDataprovider_1Bean 
-    implements Dataprovider_1_0
+extends AbstractDataprovider_1Bean 
+implements Dataprovider_1_0
 {
     /**
      * 
@@ -95,14 +92,18 @@ public class Dataprovider_1Bean
      * Append the principal's id
      */
     private boolean appendPrincipal;
-    
+
     /**
      * Use the principal's name as opposed to the principal's String 
      * representation.
      */
     private boolean usePrincipalName;
 
-    
+    /**
+     * Empty principal chain
+     */
+    private static final String[] NO_PRINCIPALS = {};
+
     //------------------------------------------------------------------------
     // Implements Manageable_1_0
     //------------------------------------------------------------------------
@@ -121,7 +122,7 @@ public class Dataprovider_1Bean
     public void activate(
     ) throws Exception {
         super.activate();
-        
+
         String registrationId = getOptions().getFirstValue("registrationId");
 
         if (registrationId == null) {
@@ -143,11 +144,9 @@ public class Dataprovider_1Bean
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("option", "registrationId"),
-                    new BasicException.Parameter("class", "org.openmdx.compatibility.base.application.j2ee.StandardServiceLocator")
-                },
-                "The formerly deprecated StandardServiceLocator class has been removed"
+                "The formerly deprecated StandardServiceLocator class has been removed",
+                new BasicException.Parameter("option", "registrationId"),
+                new BasicException.Parameter("class", "org.openmdx.compatibility.base.application.j2ee.StandardServiceLocator")
             );
         }
 
@@ -165,7 +164,7 @@ public class Dataprovider_1Bean
         String value = getOptions().getFirstValue(source);
         if(value != null) properties.put(target, value);
     }
-    
+
     /**
      * Deactivates the dataprovider.
      */
@@ -196,76 +195,40 @@ public class Dataprovider_1Bean
             Principal principal = getSessionContext().getCallerPrincipal(); 
             String principalId = this.usePrincipalName ? principal.getName() : principal.toString();
             ServiceHeader serviceHeader = this.clearPrincipalChain ? (
-                this.appendPrincipal ? new ServiceHeader(
-                    principalId,
-                    header.getCorrelationId(),
-                    header.traceRequest(),
-                    header.getQualityOfService(),
-                    header.getRequestedAt(),
-                    header.getRequestedFor()
-                ) : new ServiceHeader(
-                    new String[]{},
-                    header.getCorrelationId(),
-                    header.traceRequest(),
-                    header.getQualityOfService(),
-                    header.getRequestedAt(),
-                    header.getRequestedFor()
-                )                    
-             ) : (
-                this.appendPrincipal ? new ServiceHeader(
-                    concatenate(header.getPrincipalChain(), principalId),
-                    header.getCorrelationId(),
-                    header.traceRequest(),
-                    header.getQualityOfService(),
-                    header.getRequestedAt(),
-                    header.getRequestedFor()
-                ) : header
-             );
-             SysLog.detail(
-                principalId, 
-            	new IndentingFormatter(
-            		ArraysExtension.asMap(
-            			new String[]{
-            			    "correlationId",
-            			    "principalChain",
-            			    "requestedAt",
-            			    "requestedFor",
-            			    "unitsOfWork"
-            			},
-            			new Object[]{
-            			    header.getCorrelationId(),
-            			    header.getPrincipalChain(),
-            			    header.getRequestedAt(),
-            			    header.getRequestedFor(),
-            			    workingUnits
-            			}
-            		)
-            	)
+                    this.appendPrincipal ? new ServiceHeader(
+                        principalId,
+                        header.getCorrelationId(),
+                        header.traceRequest(),
+                        header.getQualityOfService(),
+                        header.getRequestedAt(),
+                        header.getRequestedFor()
+                    ) : new ServiceHeader(
+                        NO_PRINCIPALS,
+                        header.getCorrelationId(),
+                        header.traceRequest(),
+                        header.getQualityOfService(),
+                        header.getRequestedAt(),
+                        header.getRequestedFor()
+                    )                    
+            ) : (
+                    this.appendPrincipal ? new ServiceHeader(
+                        concatenate(header.getPrincipalChain(), principalId),
+                        header.getCorrelationId(),
+                        header.traceRequest(),
+                        header.getQualityOfService(),
+                        header.getRequestedAt(),
+                        header.getRequestedFor()
+                    ) : header
             );
-            UnitOfWorkReply[] replies = RMIMapper.intercept(
-                this.connection.process(
-                    serviceHeader,
-                    RMIMapper.intercept(workingUnits)
-                )
-            );
-            SysLog.detail(
-                principalId, 
-            	new IndentingFormatter(
-            		ArraysExtension.asMap(
-            			new String[]{
-            			    "correlationId",
-            			    "principalChain",
-            			    "replies"
-            			},
-            			new Object[]{
-            			    serviceHeader.getCorrelationId(),
-            			    serviceHeader.getPrincipalChain(),
-            			    replies
-            			}
-            		)
-            	)
-            );
-            return replies;
+                        logger.debug("Requests: principal={}, header={}, {}", principalId, header, workingUnits);
+                        UnitOfWorkReply[] replies = RMIMapper.intercept(
+                            this.connection.process(
+                                serviceHeader,
+                                RMIMapper.intercept(workingUnits)
+                            )
+                        );
+                        logger.debug("Replies: principal={}, header={}, {}", principalId, header, replies);
+                        return replies;
         } catch (RuntimeException exception) {
             new ServiceException(exception).log();
             throw exception;    
@@ -290,9 +253,9 @@ public class Dataprovider_1Bean
         String[] result = new String[list.size() + 1];
         int i = 0;
         for(
-            int s=list.size(); 
-            i < s; 
-            i++
+                int s=list.size(); 
+                i < s; 
+                i++
         ){
             result[i] = list.get(i);
         }

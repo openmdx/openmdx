@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusException.java,v 1.5 2005/04/26 20:28:50 hburger Exp $
+ * Name:        $Id: RadiusException.java,v 1.6 2008/09/11 10:47:29 hburger Exp $
  * Description: Radius Exception 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/26 20:28:50 $
+ * Date:        $Date: 2008/09/11 10:47:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,6 +55,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.BasicException.Parameter;
 
 
 /**
@@ -71,7 +72,7 @@ public class RadiusException
      * @param message
      */
     public RadiusException(String message) {
-        this(null, null, message);
+        this(null, message, null);
     }
     
     /**
@@ -98,20 +99,36 @@ public class RadiusException
         Exception cause,
         String message
     ){
-        this(cause, null, message);
+        this(cause, message, null);
     }
 
     /**
+	 * Constructor
+	 * 
+	 * @param cause
+	 * @param parameters
+	 * @param description
+	 * @deprecated Use {@link #RadiusException(Exception,String,BasicException.Parameter[])} instead
+	 */
+	public RadiusException(
+	    Exception cause,
+	    BasicException.Parameter[] parameters,
+	    String description
+	){
+		this(cause, description, parameters);
+	}
+
+	/**
      * Constructor
      * 
      * @param cause
-     * @param parameters
      * @param description
+     * @param parameters
      */
     public RadiusException(
         Exception cause,
-        BasicException.Parameter[] parameters,
-        String description
+        String description,
+        Parameter... parameters
     ){
         this.exceptionStack = new BasicException(
             cause,

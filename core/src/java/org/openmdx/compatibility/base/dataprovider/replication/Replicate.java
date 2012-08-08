@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Replicate.java,v 1.17 2008/03/21 20:17:18 hburger Exp $
+ * Name:        $Id: Replicate.java,v 1.18 2008/09/09 14:32:16 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:17:18 $
+ * Date:        $Date: 2008/09/09 14:32:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -284,7 +284,7 @@ public class Replicate
         List list
     ){
         return list == null ?
-            new String[]{} :
+            EMPTY :
             (String[])list.toArray(new String[list.size()]);
     }
 
@@ -417,12 +417,13 @@ public class Replicate
         return new Model_1(modelPackageName);
     }
 
+    private static final String[] EMPTY = {};
 
     /** The End-Of-Line separator for the platform */
     private static final String EOL = System.getProperty("line.separator");
 
     /** The version gets set by CVS */
-    private static final String VERSION = "$Revision: 1.17 $";
+    private static final String VERSION = "$Revision: 1.18 $";
 
     /** The application name */
     private static final String APP_NAME = "Replicate";

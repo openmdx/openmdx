@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Role_1.java,v 1.18 2008/04/25 22:22:57 hburger Exp $
+ * Name:        $Id: Role_1.java,v 1.24 2008/09/10 08:55:21 hburger Exp $
  * Description: Role_1 plugin
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 22:22:57 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -104,7 +104,7 @@ import org.openmdx.kernel.log.SysLog;
  */
 @SuppressWarnings("unchecked")
 public class Role_1
-    extends Standard_1 {
+extends Standard_1 {
 
     //---------------------------------------------------------------------------
     // PathNObject
@@ -113,29 +113,29 @@ public class Role_1
     //---------------------------------------------------------------------------
     class PathNObject {
 
-      //---------------------------------------------------------------------------
-      public PathNObject(Path path, ModelElement_1_0 object) {
-          this.path = path;
-          this.object = object;
-      }
-      
-      //---------------------------------------------------------------------------
-      public ModelElement_1_0 object() {
-          return this.object;
-      }
-      
-      //---------------------------------------------------------------------------
-      public Path path() {
-          return this.path;
-      }
-      
-      //---------------------------------------------------------------------------
-      // Variables
-      //---------------------------------------------------------------------------
-      private ModelElement_1_0 object = null;
-      private Path path = null;
+        //---------------------------------------------------------------------------
+        public PathNObject(Path path, ModelElement_1_0 object) {
+            this.path = path;
+            this.object = object;
+        }
+
+        //---------------------------------------------------------------------------
+        public ModelElement_1_0 object() {
+            return this.object;
+        }
+
+        //---------------------------------------------------------------------------
+        public Path path() {
+            return this.path;
+        }
+
+        //---------------------------------------------------------------------------
+        // Variables
+        //---------------------------------------------------------------------------
+        private ModelElement_1_0 object = null;
+        private Path path = null;
     }
-        
+
     //---------------------------------------------------------------------------
     // QualifierAndRoleClass
     //---------------------------------------------------------------------------
@@ -143,63 +143,62 @@ public class Role_1
     // role instance class and the type of this class
     class QualifierAndRoleClass {
 
-      //---------------------------------------------------------------------------
-      public QualifierAndRoleClass(
-        String[] qualifiers,
-        String[] qualifiersReferenceEnds,
-        String roleClass,
-        String qualifierLeadingToRoleClass
-      ) throws ServiceException {
-        if (qualifiers.length != qualifiersReferenceEnds.length) {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("qualifiers", qualifiers),
-              new BasicException.Parameter(
-                "qualifiersReferenceEnds",
-                qualifiersReferenceEnds)},
-            "qualifiers and qualifiersReferenceEnds must have same length .");
+        //---------------------------------------------------------------------------
+        public QualifierAndRoleClass(
+            String[] qualifiers,
+            String[] qualifiersReferenceEnds,
+            String roleClass,
+            String qualifierLeadingToRoleClass
+        ) throws ServiceException {
+            if (qualifiers.length != qualifiersReferenceEnds.length) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "qualifiers and qualifiersReferenceEnds must have same length .",
+                    new BasicException.Parameter("qualifiers", (Object[])qualifiers),
+                    new BasicException.Parameter(
+                        "qualifiersReferenceEnds",
+                        (Object[])qualifiersReferenceEnds));
+            }
+            this.qualifiers = qualifiers;
+            this.qualifiersReferenceEnds = qualifiersReferenceEnds;
+            this.roleClass = roleClass;
+            this.qualifierLeadingToRoleClass = qualifierLeadingToRoleClass;
         }
-        this.qualifiers = qualifiers;
-        this.qualifiersReferenceEnds = qualifiersReferenceEnds;
-        this.roleClass = roleClass;
-        this.qualifierLeadingToRoleClass = qualifierLeadingToRoleClass;
-      }
-        
-      //---------------------------------------------------------------------------        
-      public String[] qualifiers() {
-        return this.qualifiers;
-      }
 
-      //---------------------------------------------------------------------------        
-      public String[] qualifiersReferenceEnds() {
-          return this.qualifiersReferenceEnds;
-      }
-      
-      //---------------------------------------------------------------------------        
-      public String roleClass() {
-          return this.roleClass;
-      }
+        //---------------------------------------------------------------------------        
+        public String[] qualifiers() {
+            return this.qualifiers;
+        }
 
-      //---------------------------------------------------------------------------        
-      /** 
-       * Get the qualifiers name which leads to the role class. This is 
-       * typically 'id' or 'name'.
-       * 
-       * @return String name of the qualifier
-       */
-      public String qualifierLeadingToRoleClass() {
-          return this.qualifierLeadingToRoleClass;
-      }
-      
-      //---------------------------------------------------------------------------
-      // Variables
-      //---------------------------------------------------------------------------        
-      private String[] qualifiersReferenceEnds = null;
-      private String[] qualifiers = null;
-      private String roleClass = null;
-      private String qualifierLeadingToRoleClass = null;
+        //---------------------------------------------------------------------------        
+        public String[] qualifiersReferenceEnds() {
+            return this.qualifiersReferenceEnds;
+        }
+
+        //---------------------------------------------------------------------------        
+        public String roleClass() {
+            return this.roleClass;
+        }
+
+        //---------------------------------------------------------------------------        
+        /** 
+         * Get the qualifiers name which leads to the role class. This is 
+         * typically 'id' or 'name'.
+         * 
+         * @return String name of the qualifier
+         */
+        public String qualifierLeadingToRoleClass() {
+            return this.qualifierLeadingToRoleClass;
+        }
+
+        //---------------------------------------------------------------------------
+        // Variables
+        //---------------------------------------------------------------------------        
+        private String[] qualifiersReferenceEnds = null;
+        private String[] qualifiers = null;
+        private String roleClass = null;
+        private String qualifierLeadingToRoleClass = null;
     }
 
     //---------------------------------------------------------------------------
@@ -207,173 +206,170 @@ public class Role_1
     //---------------------------------------------------------------------------
     // Mapping virtual role types to role types
     class RoleTypeVirtualMap {
-        
-      //---------------------------------------------------------------------------
-      public RoleTypeVirtualMap(
-        List virtualPaths,
-        List originalPaths,
-        List virtualClass,
-        List originalClass
-      ) throws ServiceException {
-        if (virtualPaths == null
-          || originalPaths == null
-          || virtualClass == null
-          || originalClass == null) {
-          if (virtualPaths != null
-            || originalPaths != null
-            || virtualClass != null
-            || originalClass != null) {
-            throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.INVALID_CONFIGURATION,
-              new BasicException.Parameter[] {
-                new BasicException.Parameter("virtualPaths", virtualPaths),
-                new BasicException.Parameter("originalPaths", originalPaths),
-                new BasicException.Parameter("virtualClasses", virtualClass),
-                new BasicException.Parameter(
-                  "originalClasses",
-                  originalClass)},
-              "Missing definitions for role type mapping.");
-          }
-        }
-        else if (
-          virtualPaths.size() != originalPaths.size()
-            || virtualClass.size() != originalClass.size()) {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.INVALID_CONFIGURATION,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("virtualPaths", virtualPaths),
-              new BasicException.Parameter("originalPaths", originalPaths),
-              new BasicException.Parameter("virtualClasses", virtualClass),
-              new BasicException.Parameter("originalClasses", originalClass)},
-            "Not the same count of original and virtual paths of virtual class and original class mappings.");
-        }
-        for (int i = 0; i < virtualPaths.size(); i++) {
-          // tbd verification of paths with model 
-          Path virtual = new Path((String)virtualPaths.get(i));
-          Path original = new Path((String)originalPaths.get(i));
-          roleTypeVirtualToOriginalMap.put(toReferencePath(virtual), original);
-          SysLog.trace(
-            "RoleType Mapping: virtual path: "
-              + virtual
-              + " to real path: "
-              + original);
+
+        //---------------------------------------------------------------------------
+        public RoleTypeVirtualMap(
+            List virtualPaths,
+            List originalPaths,
+            List virtualClass,
+            List originalClass
+        ) throws ServiceException {
+            if (virtualPaths == null
+                    || originalPaths == null
+                    || virtualClass == null
+                    || originalClass == null) {
+                if (virtualPaths != null
+                        || originalPaths != null
+                        || virtualClass != null
+                        || originalClass != null) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.INVALID_CONFIGURATION,
+                        "Missing definitions for role type mapping.",
+                        new BasicException.Parameter("virtualPaths", virtualPaths),
+                        new BasicException.Parameter("originalPaths", originalPaths),
+                        new BasicException.Parameter("virtualClasses", virtualClass),
+                        new BasicException.Parameter(
+                            "originalClasses",
+                            originalClass));
+                }
+            }
+            else if (
+                    virtualPaths.size() != originalPaths.size()
+                    || virtualClass.size() != originalClass.size()) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "Not the same count of original and virtual paths of virtual class and original class mappings.",
+                    new BasicException.Parameter("virtualPaths", virtualPaths),
+                    new BasicException.Parameter("originalPaths", originalPaths),
+                    new BasicException.Parameter("virtualClasses", virtualClass),
+                    new BasicException.Parameter("originalClasses", originalClass));
+            }
+            for (int i = 0; i < virtualPaths.size(); i++) {
+                // tbd verification of paths with model 
+                Path virtual = new Path((String)virtualPaths.get(i));
+                Path original = new Path((String)originalPaths.get(i));
+                roleTypeVirtualToOriginalMap.put(toReferencePath(virtual), original);
+                SysLog.trace(
+                    "RoleType Mapping: virtual path: "
+                    + virtual
+                    + " to real path: "
+                    + original);
+            }
+
+            for (int i = 0; i < originalClass.size(); i++) {
+                originalToVirtualClass.put(originalClass.get(i), virtualClass.get(i));
+                SysLog.trace(
+                    "RoleType Mapping: virtual class: "
+                    + virtualClass.get(i)
+                    + " to real class: "
+                    + originalClass.get(i));
+            }
         }
 
-        for (int i = 0; i < originalClass.size(); i++) {
-          originalToVirtualClass.put(originalClass.get(i), virtualClass.get(i));
-          SysLog.trace(
-            "RoleType Mapping: virtual class: "
-              + virtualClass.get(i)
-              + " to real class: "
-              + originalClass.get(i));
-        }
-      }
-        
-      /**
-       * Convert the path supplied to a reference path. Reference path
-       * is one containing wildcards for ids and it does not contain
-       * the last id entry, if there is one.
-       */ 
-      protected Path toReferencePath(
-        Path path
-      ) {
-        Path virtPath = null;
-        if (path != null && path.size() > 1) {
-          virtPath = path.getPrefix(2);
+        /**
+         * Convert the path supplied to a reference path. Reference path
+         * is one containing wildcards for ids and it does not contain
+         * the last id entry, if there is one.
+         */ 
+        protected Path toReferencePath(
+            Path path
+        ) {
+            Path virtPath = null;
+            if (path != null && path.size() > 1) {
+                virtPath = path.getPrefix(2);
 
-          int size = path.size();
-          for (int i = 2; i < size; i++) {
-            if (i % 2 == 0) {
-              virtPath.add(":*");
+                int size = path.size();
+                for (int i = 2; i < size; i++) {
+                    if (i % 2 == 0) {
+                        virtPath.add(":*");
+                    }
+                    else {
+                        virtPath.add(path.get(i));
+                    }
+                }
+                // cut final wildcard
+                if (virtPath.getBase().equals(":*")) {
+                    virtPath = virtPath.getParent();
+                }
+            }
+            return virtPath;
+        }
+
+        /**
+         * Return last component of path if it is an id.
+         */
+        protected String getBaseId(
+            Path path
+        ) {
+            if ((path.size() % 2) == 1) {
+                return path.getBase();
             }
             else {
-              virtPath.add(path.get(i));
+                return null;
             }
-          }
-          // cut final wildcard
-          if (virtPath.getBase().equals(":*")) {
-            virtPath = virtPath.getParent();
-          }
+        }        
+
+        /**
+         * Return true if the path is one of the configured paths leading to a
+         * virtual RoleType.
+         */
+        public boolean isVirtualPath(Path path) {
+            return roleTypeVirtualToOriginalMap.containsKey(toReferencePath(path));
         }
-        return virtPath;
-      }
-      
-      /**
-       * Return last component of path if it is an id.
-       */
-      protected String getBaseId(
-        Path path
-      ) {
-        if ((path.size() % 2) == 1) {
-          return path.getBase();
+
+        /**
+         * Assert that it is not a virtual path and throw exception if it is.
+         */
+        public void assertNoModificationByVirtualPath(
+            Path path
+        ) throws ServiceException {
+            if (isVirtualPath(path)) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    "Path is a virtual path to a role type. Modifications/creation is not allowed. Use original path instead.",
+                    new BasicException.Parameter("virtual path", path),
+                    new BasicException.Parameter(
+                        "original path",
+                        remapVirtualPath(path)));
+            }
         }
-        else {
-          return null;
+
+        /**
+         * Return the path to the original RoleType if the path supplied is a 
+         * virtual path. Else return null.
+         */
+        public Path remapVirtualPath(
+            Path path
+        ) {
+            String baseId = getBaseId(path);
+            Path originalPath =
+                (Path)roleTypeVirtualToOriginalMap.get(toReferencePath(path));
+            if (originalPath != null) {
+                originalPath = new Path(originalPath);
+                if (baseId != null) {
+                    originalPath.add(baseId);
+                }
+            }
+            SysLog.trace("remapping path to: " + originalPath);
+            return originalPath;
         }
-      }        
-      
-      /**
-       * Return true if the path is one of the configured paths leading to a
-       * virtual RoleType.
-       */
-      public boolean isVirtualPath(Path path) {
-          return roleTypeVirtualToOriginalMap.containsKey(toReferencePath(path));
-      }
-       
-      /**
-       * Assert that it is not a virtual path and throw exception if it is.
-       */
-      public void assertNoModificationByVirtualPath(
-        Path path
-      ) throws ServiceException {
-        if (isVirtualPath(path)) {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("virtual path", path),
-              new BasicException.Parameter(
-                "original path",
-                remapVirtualPath(path))},
-            "Path is a virtual path to a role type. Modifications/creation is not allowed. Use original path instead.");
+
+        /**
+         * Return the corresponding virtual class of the role type to the original 
+         * class of the role type specified.
+         */
+        public String getVirtualClassName(String originalClassName) {
+            return (String)originalToVirtualClass.get(originalClassName); 
         }
-      }
-      
-      /**
-       * Return the path to the original RoleType if the path supplied is a 
-       * virtual path. Else return null.
-       */
-      public Path remapVirtualPath(
-        Path path
-      ) {
-        String baseId = getBaseId(path);
-        Path originalPath =
-          (Path)roleTypeVirtualToOriginalMap.get(toReferencePath(path));
-        if (originalPath != null) {
-          originalPath = new Path(originalPath);
-          if (baseId != null) {
-            originalPath.add(baseId);
-          }
-        }
-        SysLog.trace("remapping path to: " + originalPath);
-        return originalPath;
-      }
-      
-      /**
-       * Return the corresponding virtual class of the role type to the original 
-       * class of the role type specified.
-       */
-      public String getVirtualClassName(String originalClassName) {
-          return (String)originalToVirtualClass.get(originalClassName); 
-      }
-      
-      //---------------------------------------------------------------------------
-      // Variables
-      //---------------------------------------------------------------------------
-      private final Map originalToVirtualClass = new HashMap();
-      private final Map roleTypeVirtualToOriginalMap = new HashMap();
+
+        //---------------------------------------------------------------------------
+        // Variables
+        //---------------------------------------------------------------------------
+        private final Map originalToVirtualClass = new HashMap();
+        private final Map roleTypeVirtualToOriginalMap = new HashMap();
     }
 
     //---------------------------------------------------------------------------
@@ -381,360 +377,348 @@ public class Role_1
     //---------------------------------------------------------------------------
     class RoleTypeReference {
 
-      //---------------------------------------------------------------------------
-      public RoleTypeReference(
-      ) {
-        roleTypeReferenceMap = new HashMap();
-      }
-
-      //---------------------------------------------------------------------------
-      /** 
-       * prepare roleTypeReferenceMap. 
-       * <p>
-       * roleTypeReferenceMap holds for each RoleType class the role instance 
-       * class it is referencing, all the references qualifiers and the 
-       * referenceEnd's name (which occurs in a path) 
-       */
-      public void init(
-        Map roleClassToRoleReferenceMap,
-        Model_1_0 model
-      ) throws ServiceException {
-        ModelElement_1_0 roleTypeBase = model.getDereferencedType("org:openmdx:compatibility:role1:RoleType");
-        for(
-          Iterator i = roleTypeBase.getValues("allSubtype").iterator();
-          i.hasNext();
+        //---------------------------------------------------------------------------
+        public RoleTypeReference(
         ) {
-          Path roleTypePath = (Path)i.next();
-          ModelElement_1_0 roleType = model.getDereferencedType(roleTypePath);
-          
-          // only role role types which are not direct subclasses of RoleType
-          if(
-            (roleType != roleTypeBase)  && 
-            !roleTypeBase.values("subtype").contains(roleTypePath)
-          ) {
-            Path referencedClassName = null;
-            List attributeNames = new ArrayList();
-            List referenceEnds = new ArrayList();
+            roleTypeReferenceMap = new HashMap();
+        }
 
-            // now get the references in the roleType
-            for (
-              Iterator refIter = roleType.values("content").iterator();
-              refIter.hasNext();
+        //---------------------------------------------------------------------------
+        /** 
+         * prepare roleTypeReferenceMap. 
+         * <p>
+         * roleTypeReferenceMap holds for each RoleType class the role instance 
+         * class it is referencing, all the references qualifiers and the 
+         * referenceEnd's name (which occurs in a path) 
+         */
+        public void init(
+            Map roleClassToRoleReferenceMap,
+            Model_1_0 model
+        ) throws ServiceException {
+            ModelElement_1_0 roleTypeBase = model.getDereferencedType("org:openmdx:compatibility:role1:RoleType");
+            for(
+                    Iterator i = roleTypeBase.getValues("allSubtype").iterator();
+                    i.hasNext();
             ) {
-              ModelElement_1_0 reference = model.getElement(refIter.next());
-              if(model.isReferenceType(reference)) {
-                Path referencedEndPath = (Path) reference.values("referencedEnd").get(0);
-                ModelElement_1_0 referencedEnd = model.getElement(referencedEndPath);
-                if (referencedClassName == null) {
-                  referencedClassName = (Path) referencedEnd.values("type").get(0);                        
-                  // must only be done once per RoleType classes which 
-                  // have the same path:
-                  Role_1.this.prepareReferencePaths(
-                    roleType,
-                    (Path)referencedEnd.values("type").get(0),
-                    roleClassToRoleReferenceMap
-                  );
+                Path roleTypePath = (Path)i.next();
+                ModelElement_1_0 roleType = model.getDereferencedType(roleTypePath);
+
+                // only role role types which are not direct subclasses of RoleType
+                if(
+                        (roleType != roleTypeBase)  && 
+                        !roleTypeBase.values("subtype").contains(roleTypePath)
+                ) {
+                    Path referencedClassName = null;
+                    List attributeNames = new ArrayList();
+                    List referenceEnds = new ArrayList();
+
+                    // now get the references in the roleType
+                    for (
+                            Iterator refIter = roleType.values("content").iterator();
+                            refIter.hasNext();
+                    ) {
+                        ModelElement_1_0 reference = model.getElement(refIter.next());
+                        if(model.isReferenceType(reference)) {
+                            Path referencedEndPath = (Path) reference.values("referencedEnd").get(0);
+                            ModelElement_1_0 referencedEnd = model.getElement(referencedEndPath);
+                            if (referencedClassName == null) {
+                                referencedClassName = (Path) referencedEnd.values("type").get(0);                        
+                                // must only be done once per RoleType classes which 
+                                // have the same path:
+                                Role_1.this.prepareReferencePaths(
+                                    roleType,
+                                    (Path)referencedEnd.values("type").get(0),
+                                    roleClassToRoleReferenceMap
+                                );
+                            }
+                            else if(!referencedClassName.equals(referencedEnd.values("type").get(0))) {
+                                throw new ServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.ASSERTION_FAILURE, 
+                                    "References from RoleType to Role instances must all lead to the same Role instance class.",
+                                    new BasicException.Parameter("RoleType", roleType.values("qualifiedName"))
+                                );
+                            }
+                            // else they are the same which is ok
+                            attributeNames.add(referencedEnd.values("qualifierName").get(0));
+                            referenceEnds.add(referencedEnd.values("name").get(0));
+                        }
+                    }
+
+                    // need to find qualifier name which leads to the class 
+                    // (the one of the reference from the container to the class)
+                    if (referencedClassName != null) {
+                        ModelElement_1_0 referencedClass = model.getElement(referencedClassName); 
+                        ModelElement_1_0 compositeReference = model.getElement(referencedClass.getValues("compositeReference").get(0));
+                        ModelElement_1_0 referencedEnd = model.getElement(compositeReference.getValues("referencedEnd").get(0));                                        
+                        String qualifier = (String)referencedEnd.getValues("qualifierName").get(0);
+                        this.setQualifiers(
+                            roleTypePath.getBase(),
+                            (String[]) attributeNames.toArray(new String[0]),
+                            (String[]) referenceEnds.toArray(new String[0]),
+                            referencedClassName.getBase(),
+                            qualifier
+                        );
+                    }
+                    else {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE, 
+                            "Missing reference to role instance in model for RoleType.",
+                            new BasicException.Parameter("RoleType", roleType.values("qualifiedName"))
+                        );
+                    }
                 }
-                else if(!referencedClassName.equals(referencedEnd.values("type").get(0))) {
-                  throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE, 
-                    new BasicException.Parameter[]{
-                      new BasicException.Parameter("RoleType", roleType.values("qualifiedName"))
-                    },
-                    "References from RoleType to Role instances must all lead to the same Role instance class."
-                  );
-                }
-                // else they are the same which is ok
-                attributeNames.add(referencedEnd.values("qualifierName").get(0));
-                referenceEnds.add(referencedEnd.values("name").get(0));
-              }
             }
-           
-            // need to find qualifier name which leads to the class 
-            // (the one of the reference from the container to the class)
-            if (referencedClassName != null) {
-              ModelElement_1_0 referencedClass = model.getElement(referencedClassName); 
-              ModelElement_1_0 compositeReference = model.getElement(referencedClass.getValues("compositeReference").get(0));
-              ModelElement_1_0 referencedEnd = model.getElement(compositeReference.getValues("referencedEnd").get(0));                                        
-              String qualifier = (String)referencedEnd.getValues("qualifierName").get(0);
-              this.setQualifiers(
-                roleTypePath.getBase(),
-                (String[]) attributeNames.toArray(new String[0]),
-                (String[]) referenceEnds.toArray(new String[0]),
-                referencedClassName.getBase(),
-                qualifier
-              );
+        } 
+
+        //---------------------------------------------------------------------------
+        /**
+         * set qualifiers and roleClass for role type. returns any existing old
+         * entry.
+         */ 
+        protected QualifierAndRoleClass setQualifiers(
+            String roleTypeClass,
+            String[] qualifiers,
+            String[] qualifiersReferenceEnds,
+            String roleClass,
+            String qualifierLeadingToRoleClass
+        ) throws ServiceException {
+            Object entry = roleTypeReferenceMap.get(roleTypeClass);
+            if (entry == null) {
+                roleTypeReferenceMap.put(
+                    roleTypeClass,
+                    new QualifierAndRoleClass(
+                        qualifiers,
+                        qualifiersReferenceEnds,
+                        roleClass,
+                        qualifierLeadingToRoleClass));
+            }
+            return entry == null ? null : (QualifierAndRoleClass)entry;
+        }
+
+        //---------------------------------------------------------------------------
+        /** 
+         * Get all the qualifiers for this roleTypeClass. 
+         * <p>
+         * throws exception if roleTypeClass is unknown.
+         */
+        public String[] getQualifiers(
+            String roleTypeClass
+        ) throws ServiceException {
+            String[] qualifiers = null;
+            Object obj = roleTypeReferenceMap.get(roleTypeClass);
+            if (obj != null) {
+                QualifierAndRoleClass entry = (QualifierAndRoleClass)obj;
+                qualifiers = entry.qualifiers();
             }
             else {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                  new BasicException.Parameter("RoleType", roleType.values("qualifiedName"))
-                },
-                "Missing reference to role instance in model for RoleType."
-              );
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "unknown class of RoleType. RoleType classes must be in model.",
+                    new BasicException.Parameter(
+                        "RoleTypeClass",
+                        roleTypeClass));
             }
-          }
+            return qualifiers;
         }
-      } 
-              
-      //---------------------------------------------------------------------------
-      /**
-       * set qualifiers and roleClass for role type. returns any existing old
-       * entry.
-       */ 
-      protected QualifierAndRoleClass setQualifiers(
-        String roleTypeClass,
-        String[] qualifiers,
-        String[] qualifiersReferenceEnds,
-        String roleClass,
-        String qualifierLeadingToRoleClass
-      ) throws ServiceException {
-        Object entry = roleTypeReferenceMap.get(roleTypeClass);
-        if (entry == null) {
-          roleTypeReferenceMap.put(
-            roleTypeClass,
-            new QualifierAndRoleClass(
-              qualifiers,
-              qualifiersReferenceEnds,
-              roleClass,
-              qualifierLeadingToRoleClass));
-        }
-        return entry == null ? null : (QualifierAndRoleClass)entry;
-      }
-      
-      //---------------------------------------------------------------------------
-      /** 
-       * Get all the qualifiers for this roleTypeClass. 
-       * <p>
-       * throws exception if roleTypeClass is unknown.
-       */
-      public String[] getQualifiers(
-        String roleTypeClass
-      ) throws ServiceException {
-        String[] qualifiers = null;
-        Object obj = roleTypeReferenceMap.get(roleTypeClass);
-        if (obj != null) {
-          QualifierAndRoleClass entry = (QualifierAndRoleClass)obj;
-          qualifiers = entry.qualifiers();
-        }
-        else {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            new BasicException.Parameter[] {
-               new BasicException.Parameter(
-                "RoleTypeClass",
-                roleTypeClass)},
-            "unknown class of RoleType. RoleType classes must be in model.");
-        }
-        return qualifiers;
-      }
-        
-      //---------------------------------------------------------------------------
-      /** 
-       * Get the qualifier of reference leading to the role instance class
-       * for this role type class. 
-       * <p>
-       * throws exception if roleTypeClass is unknown.
-       */
-      public String getQualifierLeadingToRoleClass(
-        String roleTypeClass
-      ) throws ServiceException {
-        String qualifier = null;
-        Object obj = roleTypeReferenceMap.get(roleTypeClass);
-        if (obj != null) {
-          QualifierAndRoleClass entry = (QualifierAndRoleClass)obj;
-          qualifier = entry.qualifierLeadingToRoleClass();
-        }
-        else {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            new BasicException.Parameter[] {
-               new BasicException.Parameter(
-                "RoleTypeClass",
-                roleTypeClass)},
-            "unknown class of RoleType. RoleType classes must be in model.");
-        }
-        return qualifier;
-      }
 
-      //---------------------------------------------------------------------------
-      public String getQualifierForReferenceEnd(
-        String roleTypeClass, 
-        String pathComponent
-      ) throws ServiceException {
-        String qualifier = null;
-        Object obj = roleTypeReferenceMap.get(roleTypeClass);
-        if (obj != null) {
-          QualifierAndRoleClass entry = (QualifierAndRoleClass)obj;
-          String[] referenceEnds = entry.qualifiersReferenceEnds();
-          String[] qualifiers = entry.qualifiers();
-          for (int i = 0;
-            i < referenceEnds.length && qualifier == null;
-            i++) {
-            if (referenceEnds[i].equals(pathComponent)) {
-              qualifier = qualifiers[i];
+        //---------------------------------------------------------------------------
+        /** 
+         * Get the qualifier of reference leading to the role instance class
+         * for this role type class. 
+         * <p>
+         * throws exception if roleTypeClass is unknown.
+         */
+        public String getQualifierLeadingToRoleClass(
+            String roleTypeClass
+        ) throws ServiceException {
+            String qualifier = null;
+            Object obj = roleTypeReferenceMap.get(roleTypeClass);
+            if (obj != null) {
+                QualifierAndRoleClass entry = (QualifierAndRoleClass)obj;
+                qualifier = entry.qualifierLeadingToRoleClass();
             }
-          }
-        }
-        if (qualifier == null) {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("RoleTypeClass", roleTypeClass),
-              new BasicException.Parameter(
-                "AssociationEnd",
-                pathComponent)},
-            "unknown class of RoleType or associationEnd therein.");
-        }
-        return qualifier;
-      }
-
-      //---------------------------------------------------------------------------
-      /**
-       * get the role class for the roleTypeClass for the qualifier.
-       * <p>
-       * throws exception if roleTypeClass is unknown
-       */
-      public String getRoleClass(
-        String roleTypeClass
-      ) throws ServiceException {
-        String roleClass = null;
-        Object obj = roleTypeReferenceMap.get(roleTypeClass);
-        if (obj != null) {
-          QualifierAndRoleClass entry = (QualifierAndRoleClass)obj;
-          roleClass = entry.roleClass();
+            else {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "unknown class of RoleType. RoleType classes must be in model.",
+                    new BasicException.Parameter(
+                        "RoleTypeClass",
+                        roleTypeClass));
+            }
+            return qualifier;
         }
 
-        if (roleClass == null) {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            new BasicException.Parameter[] {
-               new BasicException.Parameter(
-                "RoleTypeClass",
-                roleTypeClass)},
-            "unknown class of RoleType or qualifier therein.");
+        //---------------------------------------------------------------------------
+        public String getQualifierForReferenceEnd(
+            String roleTypeClass, 
+            String pathComponent
+        ) throws ServiceException {
+            String qualifier = null;
+            Object obj = roleTypeReferenceMap.get(roleTypeClass);
+            if (obj != null) {
+                QualifierAndRoleClass entry = (QualifierAndRoleClass)obj;
+                String[] referenceEnds = entry.qualifiersReferenceEnds();
+                String[] qualifiers = entry.qualifiers();
+                for (int i = 0;
+                i < referenceEnds.length && qualifier == null;
+                i++) {
+                    if (referenceEnds[i].equals(pathComponent)) {
+                        qualifier = qualifiers[i];
+                    }
+                }
+            }
+            if (qualifier == null) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "unknown class of RoleType or associationEnd therein.",
+                    new BasicException.Parameter("RoleTypeClass", roleTypeClass),
+                    new BasicException.Parameter(
+                        "AssociationEnd",
+                        pathComponent));
+            }
+            return qualifier;
         }
-        return roleClass;
-      }
 
-      //---------------------------------------------------------------------------
-      // Variables
-      //---------------------------------------------------------------------------
-      private final HashMap roleTypeReferenceMap;
+        //---------------------------------------------------------------------------
+        /**
+         * get the role class for the roleTypeClass for the qualifier.
+         * <p>
+         * throws exception if roleTypeClass is unknown
+         */
+        public String getRoleClass(
+            String roleTypeClass
+        ) throws ServiceException {
+            String roleClass = null;
+            Object obj = roleTypeReferenceMap.get(roleTypeClass);
+            if (obj != null) {
+                QualifierAndRoleClass entry = (QualifierAndRoleClass)obj;
+                roleClass = entry.roleClass();
+            }
+
+            if (roleClass == null) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "unknown class of RoleType or qualifier therein.",
+                    new BasicException.Parameter(
+                        "RoleTypeClass",
+                        roleTypeClass));
+            }
+            return roleClass;
+        }
+
+        //---------------------------------------------------------------------------
+        // Variables
+        //---------------------------------------------------------------------------
+        private final HashMap roleTypeReferenceMap;
     }
 
     //---------------------------------------------------------------------------
     public void activate(
-      short id,
-      Configuration configuration,
-      Layer_1_0 delegation
+        short id,
+        Configuration configuration,
+        Layer_1_0 delegation
     ) throws Exception, ServiceException {
-      
-      super.activate(id, configuration, delegation);
 
-      // check for old configuration entries
-      if (configuration.getValues("RoleReferencePaths").length != 0
-        || configuration.getValues("RoleTypeReferencePaths").length != 0) {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.INVALID_CONFIGURATION,
-          new BasicException.Parameter[] {
-             new BasicException.Parameter(
-              "option",
-              "[RoleReferencePaths, RoleTypeReferencePaths]")},
-          "These configuration options are no longer supported. The settings are read from the model directly.");
-      }
+        super.activate(id, configuration, delegation);
 
-      if (configuration
-        .getValues("RoleTypeRemappingVirtualReferencePath")
-        .length
-        != 0
-        || configuration.getValues("RoleTypeRemappingOriginalPath").length != 0
-        || configuration.getValues("RoleTypeRemappingVirtualClass").length != 0
-        || configuration.getValues("RoleTypeRemappingOriginalClass").length
-          != 0) {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.INVALID_CONFIGURATION,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter(
-              "old options",
-              "[RoleTypeRemappingVirtualReferencePath, RoleTypeRemappingOriginalPath, RoleTypeRemappingVirtualClass, RoleTypeRemappingOriginalClass]"),
-            new BasicException.Parameter(
-              "new options",
-              new String[] {
-                LayerConfigurationEntries
-                  .ROLE_TYPE_MAPPING_VIRTUAL_REFERENCE_PATH,
-                LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_PATH,
-                LayerConfigurationEntries.ROLE_TYPE_MAPPING_VIRTUAL_CLASS,
-                LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_CLASS })
-        },
-          "These configuration options are no longer supported, use the new ones instead.");
-      }
+        // check for old configuration entries
+        if (configuration.getValues("RoleReferencePaths").length != 0
+                || configuration.getValues("RoleTypeReferencePaths").length != 0) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "These configuration options are no longer supported. The settings are read from the model directly.",
+                new BasicException.Parameter(
+                    "option",
+                "[RoleReferencePaths, RoleTypeReferencePaths]"));
+        }
 
-      // prepare role type remapping map
-      try {
+        if (configuration
+                .getValues("RoleTypeRemappingVirtualReferencePath")
+                .length
+                != 0
+                || configuration.getValues("RoleTypeRemappingOriginalPath").length != 0
+                || configuration.getValues("RoleTypeRemappingVirtualClass").length != 0
+                || configuration.getValues("RoleTypeRemappingOriginalClass").length
+                != 0) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "These configuration options are no longer supported, use the new ones instead.",
+                new BasicException.Parameter(
+                    "old options",
+                "[RoleTypeRemappingVirtualReferencePath, RoleTypeRemappingOriginalPath, RoleTypeRemappingVirtualClass, RoleTypeRemappingOriginalClass]"),
+                new BasicException.Parameter(
+                    "new options",
+                    LayerConfigurationEntries
+                    .ROLE_TYPE_MAPPING_VIRTUAL_REFERENCE_PATH,
+                    LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_PATH,
+                    LayerConfigurationEntries.ROLE_TYPE_MAPPING_VIRTUAL_CLASS,
+                    LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_CLASS)
+            );
+        }
 
-        roleTypeVirtualMap =
-          new RoleTypeVirtualMap(
-            configuration.values(
-              LayerConfigurationEntries
-                .ROLE_TYPE_MAPPING_VIRTUAL_REFERENCE_PATH),
-            configuration.values(
-              LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_PATH),
-            configuration.values(
-              LayerConfigurationEntries.ROLE_TYPE_MAPPING_VIRTUAL_CLASS),
-            configuration.values(
-              LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_CLASS));
-      }
-      catch (ServiceException se) {
-        throw new ServiceException(
-          se,
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.INVALID_CONFIGURATION,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter(
-              "Option",
-              LayerConfigurationEntries
-                .ROLE_TYPE_MAPPING_VIRTUAL_REFERENCE_PATH),
-            new BasicException.Parameter(
-              "Option",
-              LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_PATH),
-            new BasicException.Parameter(
-              "Option",
-              LayerConfigurationEntries.ROLE_TYPE_MAPPING_VIRTUAL_CLASS),
-            new BasicException.Parameter(
-              "Option",
-              LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_CLASS)},
-          "Error in configuration of Options.");
-      }
-      List models = configuration.values(SharedConfigurationEntries.MODEL);
-      if (models.size() > 0) {
-        this.model = (Model_1_0)models.get(0);
-      }
-      else {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.INVALID_CONFIGURATION,
-          null,
-          "A model must be configured with options 'modelPackage' and 'packageImpl'");
-      }
-      this.referencePathClassMap = new HashMap();
-      Map roleClassToReferencePathMap = new HashMap();
-      this.inspectModelForReferencePaths(
-        null,
-        model.getElement(AUTHORITY_TYPE_NAME),
-        referencePathClassMap,
-        roleClassToReferencePathMap);
-      this.roleTypeReference = new RoleTypeReference();
-      roleTypeReference.init(roleClassToReferencePathMap, this.model);
+        // prepare role type remapping map
+        try {
+
+            roleTypeVirtualMap =
+                new RoleTypeVirtualMap(
+                    configuration.values(
+                        LayerConfigurationEntries
+                        .ROLE_TYPE_MAPPING_VIRTUAL_REFERENCE_PATH),
+                        configuration.values(
+                            LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_PATH),
+                            configuration.values(
+                                LayerConfigurationEntries.ROLE_TYPE_MAPPING_VIRTUAL_CLASS),
+                                configuration.values(
+                                    LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_CLASS));
+        }
+        catch (ServiceException se) {
+            throw new ServiceException(
+                se,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "Error in configuration of Options.",
+                new BasicException.Parameter(
+                    "Option",
+                    LayerConfigurationEntries
+                    .ROLE_TYPE_MAPPING_VIRTUAL_REFERENCE_PATH),
+                    new BasicException.Parameter(
+                        "Option",
+                        LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_PATH),
+                        new BasicException.Parameter(
+                            "Option",
+                            LayerConfigurationEntries.ROLE_TYPE_MAPPING_VIRTUAL_CLASS),
+                            new BasicException.Parameter(
+                                "Option",
+                                LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_CLASS));
+        }
+        List models = configuration.values(SharedConfigurationEntries.MODEL);
+        if (models.size() > 0) {
+            this.model = (Model_1_0)models.get(0);
+        }
+        else {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "A model must be configured with options 'modelPackage' and 'packageImpl'"
+            );
+        }
+        this.referencePathClassMap = new HashMap();
+        Map roleClassToReferencePathMap = new HashMap();
+        this.inspectModelForReferencePaths(
+            null,
+            model.getElement(AUTHORITY_TYPE_NAME),
+            referencePathClassMap,
+            roleClassToReferencePathMap);
+        this.roleTypeReference = new RoleTypeReference();
+        roleTypeReference.init(roleClassToReferencePathMap, this.model);
     }
 
     /**
@@ -756,79 +740,78 @@ public class Role_1
      * @param roleInstancePath  path to the corresponding role instance
      */
     void prepareReferencePaths(
-      ModelElement_1_0 roleTypeDef,
-      Path rolePath,
-      Map roleClassToRoleReferenceMap
+        ModelElement_1_0 roleTypeDef,
+        Path rolePath,
+        Map roleClassToRoleReferenceMap
     ) throws ServiceException {
-        
-      ModelElement_1_0 roleDef = this.model.getElement(rolePath.getBase());
 
-      // the map should contain the path to one of the supertypes of roleType:
-      // iterate in reverse, to get closer parents first
-      List roleReferences = new ArrayList();
-      for (Iterator i = roleDef.values("allSupertype").iterator();
+        ModelElement_1_0 roleDef = this.model.getElement(rolePath.getBase());
+
+        // the map should contain the path to one of the supertypes of roleType:
+        // iterate in reverse, to get closer parents first
+        List roleReferences = new ArrayList();
+        for (Iterator i = roleDef.values("allSupertype").iterator();
         i.hasNext();
         ) {
-        Path roleReference =
-          (Path)roleClassToRoleReferenceMap.get(((Path)i.next()).getBase());
-        if (roleReference != null) {
-          roleReferences.add(roleReference);
+            Path roleReference =
+                (Path)roleClassToRoleReferenceMap.get(((Path)i.next()).getBase());
+            if (roleReference != null) {
+                roleReferences.add(roleReference);
+            }
         }
-      }
 
-      // get path to roleType.
-      // The map contains the parent of roleType as entry 
-      Path roleTypeReferencePath = null;
-      for (Iterator iter = roleTypeDef.values("supertype").iterator();
+        // get path to roleType.
+        // The map contains the parent of roleType as entry 
+        Path roleTypeReferencePath = null;
+        for (Iterator iter = roleTypeDef.values("supertype").iterator();
         iter.hasNext() && roleTypeReferencePath == null;
         ) {
-        String supertype = ((Path)iter.next()).getBase();
-        if (!supertype.equals("org:openmdx:base:BasicObject")
-          && !supertype.equals("org:openmdx:compatibility:role1:RoleType")) {
-          // hope we have it now. How else could we find out?
-          roleTypeReferencePath =
-            (Path)roleClassToRoleReferenceMap.get(supertype);
+            String supertype = ((Path)iter.next()).getBase();
+            if (!supertype.equals("org:openmdx:base:BasicObject")
+                    && !supertype.equals("org:openmdx:compatibility:role1:RoleType")) {
+                // hope we have it now. How else could we find out?
+                roleTypeReferencePath =
+                    (Path)roleClassToRoleReferenceMap.get(supertype);
+            }
         }
-      }
 
-      if ((roleTypeReferencePath == null) || (roleReferences.size() == 0)) {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.INVALID_CONFIGURATION,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter(
-              "RoleType",
-              roleTypeDef.values("qualifiedName")),
-            new BasicException.Parameter(
-              "RoleType reference path",
-              roleTypeReferencePath),
-            new BasicException.Parameter(
-              "Role",
-              roleDef.values("qualifiedName")),
-            new BasicException.Parameter(
-              "Role instance reference path",
-              roleReferences)},
-          "no mapping between Role and RoleType.");
-      }
-      else {
-        Path roleReference = (Path)roleReferences.get(0);
-        if (!roleTypePathPatternMap.containsKey(roleReference)) {
-          this.roleTypePathPatternMap.put(
-            roleReference,
-            roleTypeReferencePath);
-          this.roleTypePathPatternMap.put(
-            roleTypeReferencePath,
-            roleReference);
-          this.allRoleTypeReferencePaths.add(roleTypeReferencePath);
-          SysLog.trace(
-            "roleType to role mapping: "
-              + roleReference
-              + " to "
-              + roleTypeReferencePath);
+        if ((roleTypeReferencePath == null) || (roleReferences.size() == 0)) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "no mapping between Role and RoleType.",
+                new BasicException.Parameter(
+                    "RoleType",
+                    roleTypeDef.values("qualifiedName")),
+                    new BasicException.Parameter(
+                        "RoleType reference path",
+                        roleTypeReferencePath),
+                        new BasicException.Parameter(
+                            "Role",
+                            roleDef.values("qualifiedName")),
+                            new BasicException.Parameter(
+                                "Role instance reference path",
+                                roleReferences));
         }
-      }
+        else {
+            Path roleReference = (Path)roleReferences.get(0);
+            if (!roleTypePathPatternMap.containsKey(roleReference)) {
+                this.roleTypePathPatternMap.put(
+                    roleReference,
+                    roleTypeReferencePath);
+                this.roleTypePathPatternMap.put(
+                    roleTypeReferencePath,
+                    roleReference);
+                this.allRoleTypeReferencePaths.add(roleTypeReferencePath);
+                SysLog.trace(
+                    "roleType to role mapping: "
+                    + roleReference
+                    + " to "
+                    + roleTypeReferencePath);
+            }
+        }
     }
-    
+
     // --------------------------------------------------------------------------
     /** 
      * Find all the classes which are reachable from the startPoint.path or 
@@ -841,91 +824,91 @@ public class Role_1
      *                           get added.
      */
     private void getTransitiveClosure(
-      PathNObject ofClass,
-      List closure
+        PathNObject ofClass,
+        List closure
     ) throws ServiceException {
 
-      ModelElement_1_0 type = ofClass.object();
-      Path path = ofClass.path();
+        ModelElement_1_0 type = ofClass.object();
+        Path path = ofClass.path();
 
-      // for each subtype of type (this contains also the type itself)
-      for (Iterator i = type.values("allSubtype").iterator(); i.hasNext();) {
-        Path instancePath = path == null ? null : new Path(path);
-        Path subTypeModelPath = (Path)i.next();
-        ModelElement_1_0 subTypeObj =
-          this.model.getDereferencedType(subTypeModelPath);
-        for (Iterator j = subTypeObj.values("content").iterator();
-          j.hasNext();
-          ) {
-          ModelElement_1_0 contentObj = this.model.getElement(j.next());
+        // for each subtype of type (this contains also the type itself)
+        for (Iterator i = type.values("allSubtype").iterator(); i.hasNext();) {
+            Path instancePath = path == null ? null : new Path(path);
+            Path subTypeModelPath = (Path)i.next();
+            ModelElement_1_0 subTypeObj =
+                this.model.getDereferencedType(subTypeModelPath);
+            for (Iterator j = subTypeObj.values("content").iterator();
+            j.hasNext();
+            ) {
+                ModelElement_1_0 contentObj = this.model.getElement(j.next());
 
-          // note: we really need a composite aggregation here. Introducing
-          // shared aggregation requires first defining the semantics of a 
-          // shared aggregation together with roles. 
+                // note: we really need a composite aggregation here. Introducing
+                // shared aggregation requires first defining the semantics of a 
+                // shared aggregation together with roles. 
 
-          // check if it is a reference
-          if (this.model.isReferenceType(contentObj)) {
-            //contentObj.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
-            Path refendPath = (Path)contentObj.values("referencedEnd").get(0);
-            ModelElement_1_0 refend = this.model.getElement(refendPath);
+                // check if it is a reference
+                if (this.model.isReferenceType(contentObj)) {
+                    //contentObj.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
+                    Path refendPath = (Path)contentObj.values("referencedEnd").get(0);
+                    ModelElement_1_0 refend = this.model.getElement(refendPath);
 
-            // only interested in aggregated objects
-            if (AggregationKind
-              .COMPOSITE
-              .equals(refend.values("aggregation").get(0))) {
-              // System.out.println(" old criteria  instancePath: " + instancePath + " contentObj: " + contentObj.getValues("qualifiedName"));
+                    // only interested in aggregated objects
+                    if (AggregationKind
+                            .COMPOSITE
+                            .equals(refend.values("aggregation").get(0))) {
+                        // System.out.println(" old criteria  instancePath: " + instancePath + " contentObj: " + contentObj.getValues("qualifiedName"));
 
-              Path nextClassTypePath = (Path)refend.values("type").get(0);
-              ModelElement_1_0 nextClassType =
-                this.model.getDereferencedType(nextClassTypePath);
-              String pathComponent = (String)refend.values("name").get(0);
-              if (path == null) {
-                nextClassTypePath = new Path(pathComponent);
-              }
-              else {
-                nextClassTypePath = new Path(instancePath);
-                nextClassTypePath.add(pathComponent);
-              }
-              closure.add(new PathNObject(nextClassTypePath, nextClassType));
+                        Path nextClassTypePath = (Path)refend.values("type").get(0);
+                        ModelElement_1_0 nextClassType =
+                            this.model.getDereferencedType(nextClassTypePath);
+                        String pathComponent = (String)refend.values("name").get(0);
+                        if (path == null) {
+                            nextClassTypePath = new Path(pathComponent);
+                        }
+                        else {
+                            nextClassTypePath = new Path(instancePath);
+                            nextClassTypePath.add(pathComponent);
+                        }
+                        closure.add(new PathNObject(nextClassTypePath, nextClassType));
+                    }
+                }
             }
-          }
         }
-      }
     }
-     
+
     // --------------------------------------------------------------------------
     /**
      * Prepare the referencePathClassMap iterative
      */
     private void inspectModelForReferencePaths(
-      Path path,
-      ModelElement_1_0 rootElement,
-      Map referencePathToObjectMap,
-      Map roleClassToRoleReferencePathMap
+        Path path,
+        ModelElement_1_0 rootElement,
+        Map referencePathToObjectMap,
+        Map roleClassToRoleReferencePathMap
     ) throws ServiceException {
-      List openClassesAndPaths = new ArrayList();
-      Set visitedClasses = new HashSet();
-      PathNObject startPoint = new PathNObject(path, rootElement);
-      openClassesAndPaths.add(startPoint);      
-      while (openClassesAndPaths.size() > 0) {
-        startPoint = (PathNObject) openClassesAndPaths.remove(0);        
-        if(visitedClasses.add(startPoint.object())) {
-          referencePathToObjectMap.put(
-            startPoint.path(), 
-            startPoint.object()
-          );
-          roleClassToRoleReferencePathMap.put(
-            startPoint.object().values("qualifiedName").get(0),
-            startPoint.path()
-          );
-          this.getTransitiveClosure(
-            startPoint, 
-            openClassesAndPaths
-          );
+        List openClassesAndPaths = new ArrayList();
+        Set visitedClasses = new HashSet();
+        PathNObject startPoint = new PathNObject(path, rootElement);
+        openClassesAndPaths.add(startPoint);      
+        while (openClassesAndPaths.size() > 0) {
+            startPoint = (PathNObject) openClassesAndPaths.remove(0);        
+            if(visitedClasses.add(startPoint.object())) {
+                referencePathToObjectMap.put(
+                    startPoint.path(), 
+                    startPoint.object()
+                );
+                roleClassToRoleReferencePathMap.put(
+                    startPoint.object().values("qualifiedName").get(0),
+                    startPoint.path()
+                );
+                this.getTransitiveClosure(
+                    startPoint, 
+                    openClassesAndPaths
+                );
+            }
         }
-      }
     }
-        
+
     //---------------------------------------------------------------------------
     /** 
      * Get the path consisting of the references in the path supplied. 
@@ -935,13 +918,13 @@ public class Role_1
      * @return new path
      */ 
     private Path getPathWithRemovedObjectIds(
-      Path path
+        Path path
     ) {
-      Path result = new Path(path);
-      for(int i = 0; i < result.size(); i++) {
-        result.remove(i);
-      }
-      return result;
+        Path result = new Path(path);
+        for(int i = 0; i < result.size(); i++) {
+            result.remove(i);
+        }
+        return result;
     }
 
     //---------------------------------------------------------------------------
@@ -960,45 +943,44 @@ public class Role_1
      * @throws ServiceException if objectPath does not match a configured RoleType to Role mapping.
      */ 
     private Path getRoleTypesPath(
-      Path objectPath
+        Path objectPath
     ) throws ServiceException {
-      Path normalizedObjectPath = new Path(objectPath);
-      this.toRolelessPath(normalizedObjectPath);
-      this.toStatelessPath(normalizedObjectPath);
-      Path roleTypePathPattern =
-        (Path)this.roleTypePathPatternMap.get(
-          this.getPathWithRemovedObjectIds(normalizedObjectPath));
+        Path normalizedObjectPath = new Path(objectPath);
+        this.toRolelessPath(normalizedObjectPath);
+        this.toStatelessPath(normalizedObjectPath);
+        Path roleTypePathPattern =
+            (Path)this.roleTypePathPatternMap.get(
+                this.getPathWithRemovedObjectIds(normalizedObjectPath));
 
-      // complete path pattern with ids of objectPath
-      if (roleTypePathPattern != null) {
-        Path roleTypesPath = null;
-        for (int i = 0; i < roleTypePathPattern.size(); i++) {
-          if (i == 0) {
-            roleTypesPath =
-              new Path(new String[] { normalizedObjectPath.get(0)});
-          }
-          else {
-            roleTypesPath.add(normalizedObjectPath.get(i * 2));
-          }
-          roleTypesPath.add(roleTypePathPattern.get(i));
-          if (!normalizedObjectPath
-            .get((i * 2) + 1)
-            .equals(roleTypePathPattern.get(i))) {
-            break;
-          }
+        // complete path pattern with ids of objectPath
+        if (roleTypePathPattern != null) {
+            Path roleTypesPath = null;
+            for (int i = 0; i < roleTypePathPattern.size(); i++) {
+                if (i == 0) {
+                    roleTypesPath =
+                        new Path(new String[] { normalizedObjectPath.get(0)});
+                }
+                else {
+                    roleTypesPath.add(normalizedObjectPath.get(i * 2));
+                }
+                roleTypesPath.add(roleTypePathPattern.get(i));
+                if (!normalizedObjectPath
+                        .get((i * 2) + 1)
+                        .equals(roleTypePathPattern.get(i))) {
+                    break;
+                }
+            }
+            return roleTypesPath;
         }
-        return roleTypesPath;
-      }
-      else {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.ASSERTION_FAILURE,
-          new BasicException.Parameter[] {
-             new BasicException.Parameter("path", objectPath)},
-          "Missing path pattern in RoleType to Role mapping.");
-      }
+        else {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "Missing path pattern in RoleType to Role mapping.",
+                new BasicException.Parameter("path", objectPath));
+        }
     }
-        
+
     //---------------------------------------------------------------------------
     /**
      * Helper method for reading RoleType's from DB
@@ -1015,74 +997,72 @@ public class Role_1
      * @param roleTypeBasePath  path at which roleTypes are.
      */
     private DataproviderObject getRoleType(
-      ServiceHeader header,
-      DataproviderRequest request,
-      String role,
-      Map roleTypeCache,
-      Path roleTypeBasePath
+        ServiceHeader header,
+        DataproviderRequest request,
+        String role,
+        Map roleTypeCache,
+        Path roleTypeBasePath
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("getRoleType");
-      if (roleTypeBasePath == null) {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.ASSERTION_FAILURE,
-          new BasicException.Parameter[] {
-             new BasicException.Parameter("role", role)},
-          "RoleObject_1.getRoleType(): empty roleTypeBasePath not allowed.");
-      }
-
-      DataproviderObject roleType = null;
-      ServiceException exception = null;
-
-      Path roleTypePath = new Path(roleTypeBasePath);
-      roleTypePath.add(role);
-
-      roleType = (DataproviderObject)roleTypeCache.get(roleTypePath);
-      if (roleType == null) { // not in cache, access from storage
-        DataproviderReply roleTypeReply = null;
-
-        DataproviderRequest roleRequest =
-          new DataproviderRequest(
-            new DataproviderObject(roleTypePath),
-            DataproviderOperations.OBJECT_RETRIEVAL,
-            AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
-            null);
-        roleRequest.contexts().putAll(request.contexts());
-
-        // TODO OBJECT_TYPE of the roleType must be set here
-        roleRequest.context(DataproviderRequestContexts.OBJECT_TYPE).set(0,"UNDEF");
-
-        try {
-          // get through this plugin to allow for virtual role types path mapping
-          StopWatch_1.instance().startTimer("getRoleType-DB");
-          roleTypeReply = get(header, roleRequest);
-          StopWatch_1.instance().stopTimer("getRoleType-DB");
-        }
-        catch (ServiceException e) {
-          exception = e;
+        StopWatch_1.instance().startTimer("getRoleType");
+        if (roleTypeBasePath == null) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "RoleObject_1.getRoleType(): empty roleTypeBasePath not allowed.",
+                new BasicException.Parameter("role", role));
         }
 
-        if (exception != null
-          || roleTypeReply == null
-          || (roleTypeReply != null
-            && roleTypeReply.getObjects().length == 0)) {
-          throw new ServiceException(
-            exception,
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_FOUND,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("path", roleTypeBasePath),
-              new BasicException.Parameter("role type", role)},
-            "role type not found at path.");
+        DataproviderObject roleType = null;
+        ServiceException exception = null;
+
+        Path roleTypePath = new Path(roleTypeBasePath);
+        roleTypePath.add(role);
+
+        roleType = (DataproviderObject)roleTypeCache.get(roleTypePath);
+        if (roleType == null) { // not in cache, access from storage
+            DataproviderReply roleTypeReply = null;
+
+            DataproviderRequest roleRequest =
+                new DataproviderRequest(
+                    new DataproviderObject(roleTypePath),
+                    DataproviderOperations.OBJECT_RETRIEVAL,
+                    AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
+                    null);
+            roleRequest.contexts().putAll(request.contexts());
+
+            // TODO OBJECT_TYPE of the roleType must be set here
+            roleRequest.context(DataproviderRequestContexts.OBJECT_TYPE).set(0,"UNDEF");
+
+            try {
+                // get through this plugin to allow for virtual role types path mapping
+                StopWatch_1.instance().startTimer("getRoleType-DB");
+                roleTypeReply = get(header, roleRequest);
+                StopWatch_1.instance().stopTimer("getRoleType-DB");
+            }
+            catch (ServiceException e) {
+                exception = e;
+            }
+
+            if (exception != null
+                    || roleTypeReply == null
+                    || (roleTypeReply != null
+                            && roleTypeReply.getObjects().length == 0)) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "role type not found at path.",
+                    new BasicException.Parameter("path", roleTypeBasePath),
+                    new BasicException.Parameter("role type", role));
+            }
+            else {
+                // valid reply, add to cache
+                roleType = roleTypeReply.getObject();
+                roleTypeCache.put(roleTypePath, roleType);
+            }
         }
-        else {
-          // valid reply, add to cache
-          roleType = roleTypeReply.getObject();
-          roleTypeCache.put(roleTypePath, roleType);
-        }
-      }
-      StopWatch_1.instance().stopTimer("getRoleType");
-      return roleType;
+        StopWatch_1.instance().stopTimer("getRoleType");
+        return roleType;
     }
 
     //---------------------------------------------------------------------------
@@ -1102,61 +1082,60 @@ public class Role_1
      * throws NOT_FOUND exception if the states can not be found. 
      */
     private DataproviderObject[] findCoreObjectStates(
-      ServiceHeader header,
-      DataproviderRequest request
+        ServiceHeader header,
+        DataproviderRequest request
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("findCoreObjectStates");
-      DataproviderObject[] results = null;
+        StopWatch_1.instance().startTimer("findCoreObjectStates");
+        DataproviderObject[] results = null;
 
-      // check if it was already retrieved
-      if (request.contexts().containsKey(ROLE_OBJECT_STATES)) {
-        results =
-          (DataproviderObject[])request.contexts().get(ROLE_OBJECT_STATES);
-      }
-      else { // must retrieve the states
-        Path noRolePath = toRolelessPath(new Path(request.path()));
-        DataproviderRequest findRequest = null;
-
-        // get the object from storage.
-        // (do not replace with a find() request, the core must be present
-        // in all the cases where findCoreObjectStates() gets called.)
-        findRequest =
-          new DataproviderRequest(
-            new DataproviderObject(noRolePath),
-            DataproviderOperations.ITERATION_START,
-            null,
-            0,
-            Integer.MAX_VALUE,
-            Directions.ASCENDING,
-            AttributeSelectors.ALL_ATTRIBUTES,
-            null);
-        findRequest.contexts().putAll(request.contexts());
-        results =
-          new DataproviderObject[] {
-             super.get(header, findRequest).getObject()};
-
-        // must throw exception if not found; get() for the non stated case
-        // throws exception anyway.
-        if (results.length == 0) {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_FOUND,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("path", request.path()),
-              new BasicException.Parameter(
-                "request.validFrom",
-                request.object().getValues(State_1_Attributes.VALID_FROM)),
-              new BasicException.Parameter(
-                "request.validTo",
-                request.object().getValues(State_1_Attributes.VALID_TO))},
-            "No valid object or object states found. Are there valid states to update?");
+        // check if it was already retrieved
+        if (request.contexts().containsKey(ROLE_OBJECT_STATES)) {
+            results =
+                (DataproviderObject[])request.contexts().get(ROLE_OBJECT_STATES);
         }
-        request.contexts().put(ROLE_OBJECT_STATES, results);
-      }
-      StopWatch_1.instance().stopTimer("findCoreObjectStates");
-      return results;
+        else { // must retrieve the states
+            Path noRolePath = toRolelessPath(new Path(request.path()));
+            DataproviderRequest findRequest = null;
+
+            // get the object from storage.
+            // (do not replace with a find() request, the core must be present
+            // in all the cases where findCoreObjectStates() gets called.)
+            findRequest =
+                new DataproviderRequest(
+                    new DataproviderObject(noRolePath),
+                    DataproviderOperations.ITERATION_START,
+                    null,
+                    0,
+                    Integer.MAX_VALUE,
+                    Directions.ASCENDING,
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    null);
+            findRequest.contexts().putAll(request.contexts());
+            results =
+                new DataproviderObject[] {
+                super.get(header, findRequest).getObject()};
+
+            // must throw exception if not found; get() for the non stated case
+            // throws exception anyway.
+            if (results.length == 0) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "No valid object or object states found. Are there valid states to update?",
+                    new BasicException.Parameter("path", request.path()),
+                    new BasicException.Parameter(
+                        "request.validFrom",
+                        request.object().getValues(State_1_Attributes.VALID_FROM)),
+                        new BasicException.Parameter(
+                            "request.validTo",
+                            request.object().getValues(State_1_Attributes.VALID_TO)));
+            }
+            request.contexts().put(ROLE_OBJECT_STATES, results);
+        }
+        StopWatch_1.instance().stopTimer("findCoreObjectStates");
+        return results;
     }
-        
+
     //---------------------------------------------------------------------------
     /**
      * assert multiplicity of attributes defined to have at least one value 
@@ -1167,66 +1146,65 @@ public class Role_1
      * to exist.
      */
     private void assertRoleAttributeMultiplicity(
-      DataproviderObject request,
-      DataproviderObject roleType
+        DataproviderObject request,
+        DataproviderObject roleType
     ) throws ServiceException {
-      ModelElement_1_0 roleInstanceClass =
-        this.model.getDereferencedType(
-          this.roleTypeReference.getRoleClass(
-            (String)roleType.getValues(SystemAttributes.OBJECT_CLASS).get(
-              0)));
+        ModelElement_1_0 roleInstanceClass =
+            this.model.getDereferencedType(
+                this.roleTypeReference.getRoleClass(
+                    (String)roleType.getValues(SystemAttributes.OBJECT_CLASS).get(
+                        0)));
 
-      ModelElement_1_0 requestClass =
-        this.model.getDereferencedType(
-          request.getValues(SystemAttributes.OBJECT_CLASS).get(0));
+        ModelElement_1_0 requestClass =
+            this.model.getDereferencedType(
+                request.getValues(SystemAttributes.OBJECT_CLASS).get(0));
 
-      for (Iterator si = requestClass.getValues("allSupertype").iterator();
+        for (Iterator si = requestClass.getValues("allSupertype").iterator();
         si.hasNext();
         ) {
-        String classNameToCheck = ((Path)si.next()).getBase();
+            String classNameToCheck = ((Path)si.next()).getBase();
 
-        // if the class is derived from roleInstanceClass it must be 
-        // checked if it has an attribute with required values.
-        ModelElement_1_0 supertype =
-          this.model.getDereferencedType(classNameToCheck);
+            // if the class is derived from roleInstanceClass it must be 
+            // checked if it has an attribute with required values.
+            ModelElement_1_0 supertype =
+                this.model.getDereferencedType(classNameToCheck);
 
-        if (supertype
-          .getValues("allSupertype")
-          .contains(roleInstanceClass.getValues("subtype").get(0))) {
-          // check for required attributes
-          for (Iterator content = supertype.getValues("content").iterator();
-            content.hasNext();
-            ) {
-            ModelElement_1_0 modelContent =
-              this.model.getElement(((Path)content.next()).getBase());
-            if ("org:omg:model1:Attribute"
-              .equals(
-                modelContent.getValues(SystemAttributes.OBJECT_CLASS).get(0))
-              && (
-                (String)modelContent.getValues("multiplicity").get(
-                  0)).startsWith(
-                "1..")
-              && (request
-                .getValues((String)modelContent.getValues("name").get(0))
-                == null
-                || request
-                  .getValues((String)modelContent.getValues("name").get(0))
-                  .isEmpty())) {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter("request", request),
-                  new BasicException.Parameter(
-                    "attribute",
-                    modelContent.getValues("name").get(0))},
-                "trying to extend valid period of state. Multiplicity of attribute violated");
+            if (supertype
+                    .getValues("allSupertype")
+                    .contains(roleInstanceClass.getValues("subtype").get(0))) {
+                // check for required attributes
+                for (Iterator content = supertype.getValues("content").iterator();
+                content.hasNext();
+                ) {
+                    ModelElement_1_0 modelContent =
+                        this.model.getElement(((Path)content.next()).getBase());
+                    if ("org:omg:model1:Attribute"
+                            .equals(
+                                modelContent.getValues(SystemAttributes.OBJECT_CLASS).get(0))
+                                && (
+                                        (String)modelContent.getValues("multiplicity").get(
+                                            0)).startsWith(
+                                            "1..")
+                                            && (request
+                                                    .getValues((String)modelContent.getValues("name").get(0))
+                                                    == null
+                                                    || request
+                                                    .getValues((String)modelContent.getValues("name").get(0))
+                                                    .isEmpty())) {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "trying to extend valid period of state. Multiplicity of attribute violated",
+                            new BasicException.Parameter("request", request),
+                            new BasicException.Parameter(
+                                "attribute",
+                                modelContent.getValues("name").get(0)));
+                    }
+                }
             }
-          }
         }
-      }
     }
-    
+
     //---------------------------------------------------------------------------
     /** 
      * check that the object has valid role information of the current role.
@@ -1244,60 +1222,59 @@ public class Role_1
      * @return roleType of the role specified
      */ 
     private DataproviderObject assertCompleteRoleType(
-      ServiceHeader header,
-      DataproviderRequest request,
-      String role, 
-      Map roleTypeCache,
-      DataproviderObject_1_0 requestObject
+        ServiceHeader header,
+        DataproviderRequest request,
+        String role, 
+        Map roleTypeCache,
+        DataproviderObject_1_0 requestObject
     ) throws ServiceException {
-      DataproviderObject roleType = null;
+        DataproviderObject roleType = null;
 
-      //
-      // check for existence of the RoleType
-      //
-      Path roleTypeBasePath = this.getRoleTypesPath(requestObject.path());
-      roleType =
-        getRoleType(header, request, role, roleTypeCache, roleTypeBasePath);
-
-      if (roleType != null) { // case not found and warn only it may be null
         //
-        // check for correct class
+        // check for existence of the RoleType
         //
-        SparseList objectClass =
-          roleType.getValues(SystemAttributes.OBJECT_CLASS);
+        Path roleTypeBasePath = this.getRoleTypesPath(requestObject.path());
+        roleType =
+            getRoleType(header, request, role, roleTypeCache, roleTypeBasePath);
 
-        // objectClass may be null if NO_ATTRIBUTES was selected. This is
-        // asserted in some other layer.
-        if (objectClass != null) {
-          ModelElement_1_0 requestClass =
-            this.model.getDereferencedType(
-              requestObject.values(SystemAttributes.OBJECT_CLASS).get(0));
+        if (roleType != null) { // case not found and warn only it may be null
+            //
+            // check for correct class
+            //
+            SparseList objectClass =
+                roleType.getValues(SystemAttributes.OBJECT_CLASS);
 
-          ModelElement_1_0 roleInstanceClass =
-            this.model.getDereferencedType(
-              this.roleTypeReference.getRoleClass(
-                (String)objectClass.get(0)));
+            // objectClass may be null if NO_ATTRIBUTES was selected. This is
+            // asserted in some other layer.
+            if (objectClass != null) {
+                ModelElement_1_0 requestClass =
+                    this.model.getDereferencedType(
+                        requestObject.values(SystemAttributes.OBJECT_CLASS).get(0));
 
-          if (!classBelongsToRole(requestClass, roleInstanceClass)) {
-            throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.ASSERTION_FAILURE,
-              new BasicException.Parameter[] {
-                new BasicException.Parameter(
-                  "object path",
-                  requestObject.path()),
-                new BasicException.Parameter("role", role),
-                new BasicException.Parameter(
-                  SystemAttributes.OBJECT_CLASS,
-                  requestObject.values(SystemAttributes.OBJECT_CLASS).get(0)),
-                new BasicException.Parameter(
-                  "required object_class",
-                  roleInstanceClass.getValues("qualifiedName"))},
-              "Object is not of correct class for role.");
-          }
+                ModelElement_1_0 roleInstanceClass =
+                    this.model.getDereferencedType(
+                        this.roleTypeReference.getRoleClass(
+                            (String)objectClass.get(0)));
+
+                if (!classBelongsToRole(requestClass, roleInstanceClass)) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "Object is not of correct class for role.",
+                        new BasicException.Parameter(
+                            "object path",
+                            requestObject.path()),
+                            new BasicException.Parameter("role", role),
+                            new BasicException.Parameter(
+                                SystemAttributes.OBJECT_CLASS,
+                                requestObject.values(SystemAttributes.OBJECT_CLASS).get(0)),
+                                new BasicException.Parameter(
+                                    "required object_class",
+                                    roleInstanceClass.getValues("qualifiedName")));
+                }
+            }
         }
-      }
-      return roleType;
+        return roleType;
     }
 
     // --------------------------------------------------------------------------
@@ -1310,101 +1287,100 @@ public class Role_1
      * loadedObjects is an array to contain different states of an object.
      */
     private void assertCoreRoleExtensionClass(
-      ServiceHeader header,
-      DataproviderRequest request,
-      String role,
-      Map roleTypeCache, 
-      List requiredRoles,
-      DataproviderObject[] loadedObjects,
-      DataproviderObject requested
+        ServiceHeader header,
+        DataproviderRequest request,
+        String role,
+        Map roleTypeCache, 
+        List requiredRoles,
+        DataproviderObject[] loadedObjects,
+        DataproviderObject requested
     ) throws ServiceException {
-      String loadedCoreClassName = null;
+        String loadedCoreClassName = null;
 
-      ModelElement_1_0 requestClass =
-        this.model.getDereferencedType(
-          requested.values(SystemAttributes.OBJECT_CLASS).get(0));
-
-      for (int l = 0; l < loadedObjects.length; l++) {
-        DataproviderObject loaded = loadedObjects[l];
-        String nextLoadedCoreClassName = null;
-
-        if (requiredRoles.size() > 1) {
-          String coreRole = (String)requiredRoles.get(1);
-          nextLoadedCoreClassName =
-            (String)loaded
-              .getValues(
-                coreRole
-                  + ROLE_ATTRIBUTE_SEPARATOR
-                  + SystemAttributes.OBJECT_CLASS)
-              .get(0);
-        }
-        else {
-          // no required roles: must be core itself
-          nextLoadedCoreClassName =
-            (String)loaded.getValues(SystemAttributes.OBJECT_CLASS).get(0);
-        }
-
-        // it is unnessecary to do the check for all loaded object states
-        // if they have the same core class.
-        if (!nextLoadedCoreClassName.equals(loadedCoreClassName)) {
-          loadedCoreClassName = nextLoadedCoreClassName;
-
-          ModelElement_1_0 coreClass =
-            this.model.getDereferencedType(loadedCoreClassName);
-
-          ArrayList diffList = new ArrayList();
-          Path superType = null;
-          for (Iterator si =
-            requestClass.getValues("allSupertype").iterator();
-            si.hasNext();
-            ) {
-            superType = (Path)si.next();
-            if (!coreClass.getValues("allSupertype").contains(superType)) {
-              diffList.add(superType.getBase());
-            }
-            // else just try next
-          }
-
-          // remaining classes must all be classes of the role (the class itself
-          // or an extension.)
-          Path roleTypeBasePath = this.getRoleTypesPath(requested.path());
-          DataproviderObject roleType =
-            this.getRoleType(
-              header,
-              request,
-              role,
-              roleTypeCache,
-              roleTypeBasePath);
-
-          ModelElement_1_0 roleInstanceClass =
+        ModelElement_1_0 requestClass =
             this.model.getDereferencedType(
-              roleTypeReference.getRoleClass(
-                (String)roleType.getValues(
-                  SystemAttributes.OBJECT_CLASS).get(
-                  0)));
+                requested.values(SystemAttributes.OBJECT_CLASS).get(0));
 
-          for (Iterator i = diffList.iterator(); i.hasNext();) {
-            String type = (String)i.next();
+        for (int l = 0; l < loadedObjects.length; l++) {
+            DataproviderObject loaded = loadedObjects[l];
+            String nextLoadedCoreClassName = null;
 
-            if (!classBelongsToRole(this.model.getDereferencedType(type),
-              roleInstanceClass)) {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter("new role", role),
-                  new BasicException.Parameter(
-                    "new requested class",
-                    requested.values(SystemAttributes.OBJECT_CLASS).get(0)),
-                  new BasicException.Parameter(
-                    "existing core class",
-                    coreClass),
-                  new BasicException.Parameter("missing class", type)},
-                "Existing core role class does not allow subclass for new role.");
+            if (requiredRoles.size() > 1) {
+                String coreRole = (String)requiredRoles.get(1);
+                nextLoadedCoreClassName =
+                    (String)loaded
+                    .getValues(
+                        coreRole
+                        + ROLE_ATTRIBUTE_SEPARATOR
+                        + SystemAttributes.OBJECT_CLASS)
+                        .get(0);
             }
-          }
+            else {
+                // no required roles: must be core itself
+                nextLoadedCoreClassName =
+                    (String)loaded.getValues(SystemAttributes.OBJECT_CLASS).get(0);
+            }
+
+            // it is unnessecary to do the check for all loaded object states
+            // if they have the same core class.
+            if (!nextLoadedCoreClassName.equals(loadedCoreClassName)) {
+                loadedCoreClassName = nextLoadedCoreClassName;
+
+                ModelElement_1_0 coreClass =
+                    this.model.getDereferencedType(loadedCoreClassName);
+
+                ArrayList diffList = new ArrayList();
+                Path superType = null;
+                for (Iterator si =
+                    requestClass.getValues("allSupertype").iterator();
+                si.hasNext();
+                ) {
+                    superType = (Path)si.next();
+                    if (!coreClass.getValues("allSupertype").contains(superType)) {
+                        diffList.add(superType.getBase());
+                    }
+                    // else just try next
+                }
+
+                // remaining classes must all be classes of the role (the class itself
+                // or an extension.)
+                Path roleTypeBasePath = this.getRoleTypesPath(requested.path());
+                DataproviderObject roleType =
+                    this.getRoleType(
+                        header,
+                        request,
+                        role,
+                        roleTypeCache,
+                        roleTypeBasePath);
+
+                ModelElement_1_0 roleInstanceClass =
+                    this.model.getDereferencedType(
+                        roleTypeReference.getRoleClass(
+                            (String)roleType.getValues(
+                                SystemAttributes.OBJECT_CLASS).get(
+                                    0)));
+
+                for (Iterator i = diffList.iterator(); i.hasNext();) {
+                    String type = (String)i.next();
+
+                    if (!classBelongsToRole(this.model.getDereferencedType(type),
+                        roleInstanceClass)) {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "Existing core role class does not allow subclass for new role.",
+                            new BasicException.Parameter("new role", role),
+                            new BasicException.Parameter(
+                                "new requested class",
+                                requested.values(SystemAttributes.OBJECT_CLASS).get(0)),
+                                new BasicException.Parameter(
+                                    "existing core class",
+                                    coreClass),
+                                    new BasicException.Parameter("missing class", type));
+                    }
+                }
+            }
         }
-      }
     }
 
     //---------------------------------------------------------------------------
@@ -1412,24 +1388,23 @@ public class Role_1
      * assert that role is not null.
      */
     private void assertRoleNotNull(
-      String role, 
-      DataproviderObject object
+        String role, 
+        DataproviderObject object
     ) throws ServiceException {
-      if (role == null || role.length() == 0) {
-        ServiceException error =
-          new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter(
-                SystemAttributes.OBJECT_CLASS,
-                object.values(SystemAttributes.OBJECT_CLASS).get(0)),
-              new BasicException.Parameter("object path", object.path())},
-            "Object is role but path does not specify a role.");
-        throw error;
-      }
+        if (role == null || role.length() == 0) {
+            ServiceException error =
+                new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "Object is role but path does not specify a role.",
+                    new BasicException.Parameter(
+                        SystemAttributes.OBJECT_CLASS,
+                        object.values(SystemAttributes.OBJECT_CLASS).get(0)),
+                        new BasicException.Parameter("object path", object.path()));
+            throw error;
+        }
     }
-    
+
     // --------------------------------------------------------------------------
     /** 
      * Ensure that the qualifying attributes for the role to update
@@ -1440,97 +1415,96 @@ public class Role_1
      * This includes a search on the db for each of the qualifying attributes. 
      */
     private void assertMaintainingUniqueRoleInstance(
-      ServiceHeader header, 
-      DataproviderRequest request,  
-      DataproviderObject roleType,
-      List requiredRoles,
-      DataproviderObject[] loadedStates,
-      boolean replaceOp
+        ServiceHeader header, 
+        DataproviderRequest request,  
+        DataproviderObject roleType,
+        List requiredRoles,
+        DataproviderObject[] loadedStates,
+        boolean replaceOp
     ) throws ServiceException {
-      String roleName = roleType.path().getBase();
-      DataproviderObject requested = request.object();
+        String roleName = roleType.path().getBase();
+        DataproviderObject requested = request.object();
 
-      String[] qualifiers =
-        roleTypeReference.getQualifiers(
-          (String)roleType.values(SystemAttributes.OBJECT_CLASS).get(0));
+        String[] qualifiers =
+            roleTypeReference.getQualifiers(
+                (String)roleType.values(SystemAttributes.OBJECT_CLASS).get(0));
 
-      for (int i = 0; i < qualifiers.length; i++) {
-        // first check if the attribute is part of the request object
-        if (request.object().attributeNames().contains(qualifiers[i])) {
-          // there is a qualifying attribute in the request,
-          // need to know to which role it belongs (Note: it must be 
-          // present in any non overhanging updates)
+        for (int i = 0; i < qualifiers.length; i++) {
+            // first check if the attribute is part of the request object
+            if (request.object().attributeNames().contains(qualifiers[i])) {
+                // there is a qualifying attribute in the request,
+                // need to know to which role it belongs (Note: it must be 
+                // present in any non overhanging updates)
 
-          Object qualifyingValue = null;
-          if (request.object().values(qualifiers[i]).size() > 0) {
-            qualifyingValue = request.object().values(qualifiers[i]).get(0);
-          }
+                Object qualifyingValue = null;
+                if (request.object().values(qualifiers[i]).size() > 0) {
+                    qualifyingValue = request.object().values(qualifiers[i]).get(0);
+                }
 
-          String qualiRole =
-            findRoleForAttribute(qualifiers[i], loadedStates, requiredRoles);
+                String qualiRole =
+                    findRoleForAttribute(qualifiers[i], loadedStates, requiredRoles);
 
-          // qualiRole == null -> it must be the qualifier, which is asserted
-          // to be unique elsewhere.
-          if (qualiRole != null) {
-            String roleCompleteQualifyingAttribute = null;
+                // qualiRole == null -> it must be the qualifier, which is asserted
+                // to be unique elsewhere.
+                if (qualiRole != null) {
+                    String roleCompleteQualifyingAttribute = null;
 
-            if (qualiRole.length() > 0) {
-              roleCompleteQualifyingAttribute =
-                qualiRole + ROLE_ATTRIBUTE_SEPARATOR + qualifiers[i];
+                    if (qualiRole.length() > 0) {
+                        roleCompleteQualifyingAttribute =
+                            qualiRole + ROLE_ATTRIBUTE_SEPARATOR + qualifiers[i];
+                    }
+                    else { // it's an attribute of the core
+                        roleCompleteQualifyingAttribute = qualifiers[i];
+                    }
+                    // qualifying attribute value is not allowed to become null
+                    if (qualifyingValue == null) {
+                        if (replaceOp) {
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ASSERTION_FAILURE,
+                                "no value for qualifying role type attribute.",
+                                new BasicException.Parameter(
+                                    "qualifying attribute",
+                                    qualifiers[i]),
+                                    new BasicException.Parameter("role", roleName),
+                                    new BasicException.Parameter(
+                                        "object.path",
+                                        requested.path()));
+                        }
+                        else {
+                            // in an modify Operation it does not matter if the 
+                            // attributes value is null or the attribute is not 
+                            // present at all
+                            request.object().attributeNames().remove(qualifiers[i]);
+                        }
+                    }
+                    else {
+                        // assert uniqueness for the whole periode of the update
+                        assertUniquenessOfQualifyingAttribute(
+                            header,
+                            request,
+                            requested,
+                            roleName,
+                            roleCompleteQualifyingAttribute,
+                            qualifyingValue,
+                            requested.getValues(State_1_Attributes.VALID_FROM) == null
+                            || requested
+                            .getValues(State_1_Attributes.VALID_FROM)
+                            .isEmpty()
+                            ? null
+                                : (String)requested.getValues(
+                                    State_1_Attributes.VALID_FROM).get(
+                                        0),
+                                        requested.getValues(State_1_Attributes.VALID_TO) == null
+                                        || requested.getValues(State_1_Attributes.VALID_TO).isEmpty()
+                                        ? null
+                                            : (String)requested.getValues(
+                                                State_1_Attributes.VALID_TO).get(
+                                                    0));
+                    }
+                }
             }
-            else { // it's an attribute of the core
-              roleCompleteQualifyingAttribute = qualifiers[i];
-            }
-            // qualifying attribute value is not allowed to become null
-            if (qualifyingValue == null) {
-              if (replaceOp) {
-                throw new ServiceException(
-                  BasicException.Code.DEFAULT_DOMAIN,
-                  BasicException.Code.ASSERTION_FAILURE,
-                  new BasicException.Parameter[] {
-                    new BasicException.Parameter(
-                      "qualifying attribute",
-                      qualifiers[i]),
-                    new BasicException.Parameter("role", roleName),
-                    new BasicException.Parameter(
-                      "object.path",
-                      requested.path())},
-                  "no value for qualifying role type attribute.");
-              }
-              else {
-                // in an modify Operation it does not matter if the 
-                // attributes value is null or the attribute is not 
-                // present at all
-                request.object().attributeNames().remove(qualifiers[i]);
-              }
-            }
-            else {
-              // assert uniqueness for the whole periode of the update
-              assertUniquenessOfQualifyingAttribute(
-                header,
-                request,
-                requested,
-                roleName,
-                roleCompleteQualifyingAttribute,
-                qualifyingValue,
-                requested.getValues(State_1_Attributes.VALID_FROM) == null
-                  || requested
-                    .getValues(State_1_Attributes.VALID_FROM)
-                    .isEmpty()
-                    ? null
-                    : (String)requested.getValues(
-                      State_1_Attributes.VALID_FROM).get(
-                      0),
-                requested.getValues(State_1_Attributes.VALID_TO) == null
-                  || requested.getValues(State_1_Attributes.VALID_TO).isEmpty()
-                    ? null
-                    : (String)requested.getValues(
-                      State_1_Attributes.VALID_TO).get(
-                      0));
-            }
-          }
         }
-      }
     }
 
     // --------------------------------------------------------------------------
@@ -1549,240 +1523,237 @@ public class Role_1
      * @param loadedStates states of the object in db (possibly just one) 
      */
     private void assertCreatingUniqueRoleInstance(
-      ServiceHeader header, 
-      DataproviderRequest request,  
-      DataproviderObject roleType,
-      List requiredRoles,
-      DataproviderObject[] loadedStates
+        ServiceHeader header, 
+        DataproviderRequest request,  
+        DataproviderObject roleType,
+        List requiredRoles,
+        DataproviderObject[] loadedStates
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("assertUniqueRoleInstance");
-      String roleName = roleType.path().getBase();
-      DataproviderObject requested = request.object();
-      String updateFrom = null;
-      String updateTo = null;
+        StopWatch_1.instance().startTimer("assertUniqueRoleInstance");
+        String roleName = roleType.path().getBase();
+        DataproviderObject requested = request.object();
+        String updateFrom = null;
+        String updateTo = null;
 
-      updateFrom =
-        request.object().getValues(State_1_Attributes.VALID_FROM) == null
-          ? null
-          : (String)request.object().getValues(
-            State_1_Attributes.VALID_FROM).get(
-            0);
-
-      updateTo =
-        request.object().getValues(State_1_Attributes.VALID_TO) == null
-          ? null
-          : (String)request.object().getValues(
-            State_1_Attributes.VALID_TO).get(
-            0);
-
-      String[] qualifiers =
-        this.roleTypeReference.getQualifiers(
-          (String)roleType.values(SystemAttributes.OBJECT_CLASS).get(0));
-
-      for (int i = 0; i < qualifiers.length; i++) {
-        String qualifyingAttribute = qualifiers[i];
-
-        // try finding the qualifying attribute in the qualifier of the role.
-        String qualifier =
-          this.roleTypeReference.getQualifierLeadingToRoleClass(
-            (String)roleType.values(SystemAttributes.OBJECT_CLASS).get(0));
-
-        if (!qualifier.equals(qualifyingAttribute)) {
-          // its not the qualifier, try with the attributes
-
-          String attrRole =
-            this.findRoleForAttribute(
-              qualifyingAttribute,
-              loadedStates,
-              requiredRoles);
-
-          if (attrRole == null) {
-            // it is the first state of this class with this role, in 
-            // this case findRoleForAttribute cant find the role.
-            // In that case we can be sure that it belongs to the 
-            // current role
-            if (this
-              .classHasAttribute(
-                request.object().getValues(SystemAttributes.OBJECT_CLASS),
-                qualifyingAttribute)) {
-
-              // get the qualifying value immediately
-              Object qualifyingValue =
-                request.object().values(qualifyingAttribute).get(0);
-              if (qualifyingValue == null) {
-                throw new ServiceException(
-                  BasicException.Code.DEFAULT_DOMAIN,
-                  BasicException.Code.ASSERTION_FAILURE,
-                  new BasicException.Parameter[] {
-                    new BasicException.Parameter(
-                      "qualifying attribute",
-                      qualifyingAttribute),
-                    new BasicException.Parameter("role", roleName),
-                    new BasicException.Parameter(
-                      "object",
-                      request.object())},
-                  "Qualifying attributes value may not be null.");
-              }
-              this.assertUniquenessOfQualifyingAttribute(
-                header,
-                request,
-                requested,
-                roleName,
-                roleName + ROLE_ATTRIBUTE_SEPARATOR + qualifyingAttribute,
-                qualifyingValue,
-                updateFrom,
-                updateTo);
-            }
-            else {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter(
-                    "qualifying attribute",
-                    qualifyingAttribute),
-                  new BasicException.Parameter("role", roleName),
-                  new BasicException.Parameter(
-                    "object.path",
-                    requested.path())},
-                "Qualifying role type attributes name does not match any attribute nor the role class qualifier name.");
-            }
-          }
-          else {
-            // the qualifying attribute already exists in the states.
-            // For each period of a certain value of the attribute, the 
-            // uniqueness of the value has to be checked.
-            Object lastQualifyingValue = null;
-            String lastValidFrom = null;
-            String lastValidTo = null;
-            String roleCompleteQualifyingAttribute = null;
-
-            roleCompleteQualifyingAttribute =
-              attrRole.length() == 0
-                ? qualifyingAttribute
-                : attrRole + ROLE_ATTRIBUTE_SEPARATOR + qualifyingAttribute;
-
-            for (int stateNum = 0;
-              stateNum < loadedStates.length;
-              stateNum++) {
-              DataproviderObject loaded = loadedStates[stateNum];
-              boolean continuingState = true;
-              Object qualifyingValue = null;
-
-              qualifyingValue =
-                loaded.values(roleCompleteQualifyingAttribute).get(0);
-
-              if (qualifyingValue == null) {
-                throw new ServiceException(
-                  BasicException.Code.DEFAULT_DOMAIN,
-                  BasicException.Code.ASSERTION_FAILURE,
-                  new BasicException.Parameter[] {
-                    new BasicException.Parameter(
-                      "qualifying attribute",
-                      qualifyingAttribute),
-                    new BasicException.Parameter("role", roleName),
-                    new BasicException.Parameter("state", loaded)},
-                  "Qualifying attributes value may not be null.");
-              }
-
-              // first value for this qualifying attribute 
-              if (lastQualifyingValue == null) {
-                lastQualifyingValue = qualifyingValue;
-                if (loaded.getValues(State_1_Attributes.VALID_FROM)
-                  != null) {
-                  lastValidFrom =
-                    (String)loaded.getValues(
-                      State_1_Attributes.VALID_FROM).get(
-                      0);
-                }
-                if (loaded.getValues(State_1_Attributes.VALID_TO) != null) {
-                  lastValidTo =
-                    (String)loaded.getValues(
-                      State_1_Attributes.VALID_TO).get(
-                      0);
-                }
-              }
-              else if (
-                lastQualifyingValue != null
-                  && lastQualifyingValue.equals(qualifyingValue)
-                  && (lastValidTo != null
-                    && loaded.getValues(State_1_Attributes.VALID_FROM) != null
-                    && lastValidTo.equals(
-                      loaded.getValues(State_1_Attributes.VALID_FROM).get(
-                        0)))) {
-                // they are consecutive and have the same value, bundle!
-                if (loaded.getValues(State_1_Attributes.VALID_TO) != null) {
-                  lastValidTo =
-                    (String)loaded.getValues(
-                      State_1_Attributes.VALID_TO).get(
-                      0);
-                }
-                continuingState = true;
-              }
-              else {
-                // different value or non consecutive states.
-                continuingState = false;
-              }
-
-              if (continuingState == false
-                || stateNum
-                  == loadedStates.length - 1 // last state has to be saved!
-              ) {
-                // must only check within update period.
-                if (updateFrom != null) {
-                  if (lastValidFrom == null) {
-                    lastValidFrom = updateFrom;
-                  }
-                  else if (lastValidFrom.compareTo(updateFrom) < 0) {
-                    lastValidFrom = updateFrom;
-                  }
-                  // else leave lastValidFrom
-                }
-                if (updateTo != null) {
-                  if (lastValidTo == null) {
-                    lastValidTo = updateTo;
-                  }
-                  else if (lastValidTo.compareTo(updateTo) > 0) {
-                    lastValidTo = updateTo;
-                  }
-                  // else leave lastValidTo
-                }
-
-                assertUniquenessOfQualifyingAttribute(
-                  header,
-                  request,
-                  requested,
-                  roleName,
-                  roleCompleteQualifyingAttribute,
-                  lastQualifyingValue,
-                  lastValidFrom,
-                  lastValidTo);
-                // else, id does not need to be checked
-
-                if (stateNum < loadedStates.length - 1) {
-                  // set lastXXX 
-                  lastQualifyingValue = null;
-                  lastValidFrom =
-                    loaded.getValues(State_1_Attributes.VALID_FROM) == null
-                      ? null
-                      : (String)loaded.getValues(
-                        State_1_Attributes.VALID_FROM).get(
+        updateFrom =
+            request.object().getValues(State_1_Attributes.VALID_FROM) == null
+            ? null
+                : (String)request.object().getValues(
+                    State_1_Attributes.VALID_FROM).get(
                         0);
-                  lastValidTo =
-                    loaded.getValues(State_1_Attributes.VALID_TO) == null
-                      ? null
-                      : (String)loaded.getValues(
-                        State_1_Attributes.VALID_TO).get(
+
+        updateTo =
+            request.object().getValues(State_1_Attributes.VALID_TO) == null
+            ? null
+                : (String)request.object().getValues(
+                    State_1_Attributes.VALID_TO).get(
                         0);
+
+        String[] qualifiers =
+            this.roleTypeReference.getQualifiers(
+                (String)roleType.values(SystemAttributes.OBJECT_CLASS).get(0));
+
+        for (int i = 0; i < qualifiers.length; i++) {
+            String qualifyingAttribute = qualifiers[i];
+
+            // try finding the qualifying attribute in the qualifier of the role.
+            String qualifier =
+                this.roleTypeReference.getQualifierLeadingToRoleClass(
+                    (String)roleType.values(SystemAttributes.OBJECT_CLASS).get(0));
+
+            if (!qualifier.equals(qualifyingAttribute)) {
+                // its not the qualifier, try with the attributes
+
+                String attrRole =
+                    this.findRoleForAttribute(
+                        qualifyingAttribute,
+                        loadedStates,
+                        requiredRoles);
+
+                if (attrRole == null) {
+                    // it is the first state of this class with this role, in 
+                    // this case findRoleForAttribute cant find the role.
+                    // In that case we can be sure that it belongs to the 
+                    // current role
+                    if (this
+                            .classHasAttribute(
+                                request.object().getValues(SystemAttributes.OBJECT_CLASS),
+                                qualifyingAttribute)) {
+
+                        // get the qualifying value immediately
+                        Object qualifyingValue =
+                            request.object().values(qualifyingAttribute).get(0);
+                        if (qualifyingValue == null) {
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ASSERTION_FAILURE,
+                                "Qualifying attributes value may not be null.",
+                                new BasicException.Parameter(
+                                    "qualifying attribute",
+                                    qualifyingAttribute),
+                                    new BasicException.Parameter("role", roleName),
+                                    new BasicException.Parameter(
+                                        "object",
+                                        request.object()));
+                        }
+                        this.assertUniquenessOfQualifyingAttribute(
+                            header,
+                            request,
+                            requested,
+                            roleName,
+                            roleName + ROLE_ATTRIBUTE_SEPARATOR + qualifyingAttribute,
+                            qualifyingValue,
+                            updateFrom,
+                            updateTo);
+                    }
+                    else {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "Qualifying role type attributes name does not match any attribute nor the role class qualifier name.",
+                            new BasicException.Parameter(
+                                "qualifying attribute",
+                                qualifyingAttribute),
+                                new BasicException.Parameter("role", roleName),
+                                new BasicException.Parameter(
+                                    "object.path",
+                                    requested.path()));
+                    }
                 }
-              }
+                else {
+                    // the qualifying attribute already exists in the states.
+                    // For each period of a certain value of the attribute, the 
+                    // uniqueness of the value has to be checked.
+                    Object lastQualifyingValue = null;
+                    String lastValidFrom = null;
+                    String lastValidTo = null;
+                    String roleCompleteQualifyingAttribute = null;
+
+                    roleCompleteQualifyingAttribute =
+                        attrRole.length() == 0
+                        ? qualifyingAttribute
+                            : attrRole + ROLE_ATTRIBUTE_SEPARATOR + qualifyingAttribute;
+
+                    for (int stateNum = 0;
+                    stateNum < loadedStates.length;
+                    stateNum++) {
+                        DataproviderObject loaded = loadedStates[stateNum];
+                        boolean continuingState = true;
+                        Object qualifyingValue = null;
+
+                        qualifyingValue =
+                            loaded.values(roleCompleteQualifyingAttribute).get(0);
+
+                        if (qualifyingValue == null) {
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ASSERTION_FAILURE,
+                                "Qualifying attributes value may not be null.",
+                                new BasicException.Parameter(
+                                    "qualifying attribute",
+                                    qualifyingAttribute),
+                                    new BasicException.Parameter("role", roleName),
+                                    new BasicException.Parameter("state", loaded));
+                        }
+
+                        // first value for this qualifying attribute 
+                        if (lastQualifyingValue == null) {
+                            lastQualifyingValue = qualifyingValue;
+                            if (loaded.getValues(State_1_Attributes.VALID_FROM)
+                                    != null) {
+                                lastValidFrom =
+                                    (String)loaded.getValues(
+                                        State_1_Attributes.VALID_FROM).get(
+                                            0);
+                            }
+                            if (loaded.getValues(State_1_Attributes.VALID_TO) != null) {
+                                lastValidTo =
+                                    (String)loaded.getValues(
+                                        State_1_Attributes.VALID_TO).get(
+                                            0);
+                            }
+                        }
+                        else if (
+                                lastQualifyingValue != null
+                                && lastQualifyingValue.equals(qualifyingValue)
+                                && (lastValidTo != null
+                                        && loaded.getValues(State_1_Attributes.VALID_FROM) != null
+                                        && lastValidTo.equals(
+                                            loaded.getValues(State_1_Attributes.VALID_FROM).get(
+                                                0)))) {
+                            // they are consecutive and have the same value, bundle!
+                            if (loaded.getValues(State_1_Attributes.VALID_TO) != null) {
+                                lastValidTo =
+                                    (String)loaded.getValues(
+                                        State_1_Attributes.VALID_TO).get(
+                                            0);
+                            }
+                            continuingState = true;
+                        }
+                        else {
+                            // different value or non consecutive states.
+                            continuingState = false;
+                        }
+
+                        if (continuingState == false
+                                || stateNum
+                                == loadedStates.length - 1 // last state has to be saved!
+                        ) {
+                            // must only check within update period.
+                            if (updateFrom != null) {
+                                if (lastValidFrom == null) {
+                                    lastValidFrom = updateFrom;
+                                }
+                                else if (lastValidFrom.compareTo(updateFrom) < 0) {
+                                    lastValidFrom = updateFrom;
+                                }
+                                // else leave lastValidFrom
+                            }
+                            if (updateTo != null) {
+                                if (lastValidTo == null) {
+                                    lastValidTo = updateTo;
+                                }
+                                else if (lastValidTo.compareTo(updateTo) > 0) {
+                                    lastValidTo = updateTo;
+                                }
+                                // else leave lastValidTo
+                            }
+
+                            assertUniquenessOfQualifyingAttribute(
+                                header,
+                                request,
+                                requested,
+                                roleName,
+                                roleCompleteQualifyingAttribute,
+                                lastQualifyingValue,
+                                lastValidFrom,
+                                lastValidTo);
+                            // else, id does not need to be checked
+
+                            if (stateNum < loadedStates.length - 1) {
+                                // set lastXXX 
+                                lastQualifyingValue = null;
+                                lastValidFrom =
+                                    loaded.getValues(State_1_Attributes.VALID_FROM) == null
+                                    ? null
+                                        : (String)loaded.getValues(
+                                            State_1_Attributes.VALID_FROM).get(
+                                                0);
+                                lastValidTo =
+                                    loaded.getValues(State_1_Attributes.VALID_TO) == null
+                                    ? null
+                                        : (String)loaded.getValues(
+                                            State_1_Attributes.VALID_TO).get(
+                                                0);
+                            }
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-      StopWatch_1.instance().stopTimer("assertUniqueRoleInstance");
+        StopWatch_1.instance().stopTimer("assertUniqueRoleInstance");
     }
-    
+
     // --------------------------------------------------------------------------
     /**
      * Assert the uniqueness of the specified attribute for objects which have
@@ -1794,105 +1765,105 @@ public class Role_1
      * 
      */
     private void assertUniquenessOfQualifyingAttribute(
-      ServiceHeader header,
-      DataproviderRequest request,
-      DataproviderObject requested,
-      String roleName,
-      String roleCompleteQualifyingAttribute,
-      Object qualifyingValue, 
-      String validFrom,
-      String validTo
+        ServiceHeader header,
+        DataproviderRequest request,
+        DataproviderObject requested,
+        String roleName,
+        String roleCompleteQualifyingAttribute,
+        Object qualifyingValue, 
+        String validFrom,
+        String validTo
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("assertUniqueQualifyingAttribute");
-      // first assert that the value is valid, it may not start or end with /
-      if (qualifyingValue instanceof String
-        && (((String)qualifyingValue).charAt(0) == '/'
-          || ((String)qualifyingValue).endsWith("/"))) {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.ASSERTION_FAILURE,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter(
-              "qualifying attribute",
-              roleCompleteQualifyingAttribute),
-            new BasicException.Parameter("value", qualifyingValue),
-            new BasicException.Parameter("object.path", requested.path())},
-          "value for qualifying role type attribute may not start or end with /.");
-      }
-
-      Path rolelessRequestPath = toRolelessPath(new Path(request.path()));
-      DataproviderRequest findRequest =
-        new DataproviderRequest(
-          new DataproviderObject(rolelessRequestPath.getParent()),
-          DataproviderOperations.ITERATION_START,
-          new FilterProperty[] {
-             new FilterProperty(
-              Quantors.THERE_EXISTS,
-              roleCompleteQualifyingAttribute,
-              FilterOperators.IS_IN,
-              new Object[] { qualifyingValue })
-      },
-          0,
-          10,
-          request.direction(),
-          AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES,
-          null);
-      addRoleFilter(findRequest, roleName, true);
-      findRequest.contexts().putAll(request.contexts());
-      DataproviderReply reply = null;
-      int replyCount = -1; // invalid setting as default
-      // some persistence layers throw exception, some return empty collection
-      try {
-        StopWatch_1.instance().startTimer("assertUniqueQualifyingAttribute-DB");
-        reply = super.find(header, findRequest);
-        if (reply.getObjects() != null) {
-          replyCount = reply.getObjects().length;
-        }
-        else {
-          replyCount = 0;
-        }
-        StopWatch_1.instance().stopTimer("assertUniqueQualifyingAttribute-DB");
-
-      }
-      catch (ServiceException se) {
-        if (se.getExceptionCode() == BasicException.Code.NOT_FOUND) {
-          replyCount = 0;
-        }
-        else {
-          replyCount = -1;
-          throw se;
-        }
-      }
-
-      // in case of updates, the object itself may already be present
-      // in case of states, there may exist several states of the same object
-      if (replyCount > 0) {
-        for (int i = 0; i < reply.getObjects().length; i++) {
-          if (!reply.getObjects()[i].path().startsWith(rolelessRequestPath)) {
+        StopWatch_1.instance().startTimer("assertUniqueQualifyingAttribute");
+        // first assert that the value is valid, it may not start or end with /
+        if (qualifyingValue instanceof String
+                && (((String)qualifyingValue).charAt(0) == '/'
+                    || ((String)qualifyingValue).endsWith("/"))) {
             throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.DUPLICATE,
-              new BasicException
-                .Parameter[] {
-                  new BasicException.Parameter(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "value for qualifying role type attribute may not start or end with /.",
+                new BasicException.Parameter(
                     "qualifying attribute",
                     roleCompleteQualifyingAttribute),
-                  new BasicException.Parameter("role", roleName),
-                  new BasicException.Parameter(
-                    "requested.path",
-                    requested.path()),
-                  new BasicException.Parameter(
-                    "existing.path",
-                    reply.getObjects()[i].path()),
-              // only system attributes! new BasicException.Parameter("existing.value", reply.getObject().getValues(roleCompleteQualifyingAttribute)),
-              new BasicException.Parameter("number of objects", replyCount)},
-                "value of qualifying role type attribute exists already.");
-          }
+                    new BasicException.Parameter("value", qualifyingValue),
+                    new BasicException.Parameter("object.path", requested.path()));
         }
-      }
-      StopWatch_1.instance().stopTimer("assertUniqueQualifyingAttribute");
+
+        Path rolelessRequestPath = toRolelessPath(new Path(request.path()));
+        DataproviderRequest findRequest =
+            new DataproviderRequest(
+                new DataproviderObject(rolelessRequestPath.getParent()),
+                DataproviderOperations.ITERATION_START,
+                new FilterProperty[] {
+                    new FilterProperty(
+                        Quantors.THERE_EXISTS,
+                        roleCompleteQualifyingAttribute,
+                        FilterOperators.IS_IN,
+                        qualifyingValue
+                    )
+                },
+                0,
+                10,
+                request.direction(),
+                AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES,
+                null);
+        addRoleFilter(findRequest, roleName, true);
+        findRequest.contexts().putAll(request.contexts());
+        DataproviderReply reply = null;
+        int replyCount = -1; // invalid setting as default
+        // some persistence layers throw exception, some return empty collection
+        try {
+            StopWatch_1.instance().startTimer("assertUniqueQualifyingAttribute-DB");
+            reply = super.find(header, findRequest);
+            if (reply.getObjects() != null) {
+                replyCount = reply.getObjects().length;
+            }
+            else {
+                replyCount = 0;
+            }
+            StopWatch_1.instance().stopTimer("assertUniqueQualifyingAttribute-DB");
+
+        }
+        catch (ServiceException se) {
+            if (se.getExceptionCode() == BasicException.Code.NOT_FOUND) {
+                replyCount = 0;
+            }
+            else {
+                replyCount = -1;
+                throw se;
+            }
+        }
+
+        // in case of updates, the object itself may already be present
+        // in case of states, there may exist several states of the same object
+        if (replyCount > 0) {
+            for (int i = 0; i < reply.getObjects().length; i++) {
+                if (!reply.getObjects()[i].path().startsWith(rolelessRequestPath)) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.DUPLICATE,
+                        "value of qualifying role type attribute exists already.",
+                        new BasicException
+                        .Parameter[] {
+                            new BasicException.Parameter(
+                                "qualifying attribute",
+                                roleCompleteQualifyingAttribute),
+                                new BasicException.Parameter("role", roleName),
+                                new BasicException.Parameter(
+                                    "requested.path",
+                                    requested.path()),
+                                    new BasicException.Parameter(
+                                        "existing.path",
+                                        reply.getObjects()[i].path()),
+                                        // only system attributes! new BasicException.Parameter("existing.value", reply.getObject().getValues(roleCompleteQualifyingAttribute)),
+                                        new BasicException.Parameter("number of objects", replyCount)});
+                }
+            }
+        }
+        StopWatch_1.instance().stopTimer("assertUniqueQualifyingAttribute");
     }
-    
+
     // --------------------------------------------------------------------------
     /** 
      * Find the role for a specifying Attribute. A specifying attribute is the
@@ -1914,121 +1885,119 @@ public class Role_1
      *          role - specifyingAttribute is part of that role
      */ 
     private String findRoleForSpecifyingAttribute(
-      ServiceHeader header,
-      DataproviderRequest request,
-      String specifyingAttribute,
-      DataproviderObject _roleType
+        ServiceHeader header,
+        DataproviderRequest request,
+        String specifyingAttribute,
+        DataproviderObject _roleType
     ) throws ServiceException {
         DataproviderObject roleType = _roleType;
-      String roleName = null;
-      boolean attributeIsContained = true;
-      boolean firstRun = true;
+        String roleName = null;
+        boolean attributeIsContained = true;
+        boolean firstRun = true;
 
-      while (roleType != null && roleName == null && attributeIsContained) {
-        // get role instance class
+        while (roleType != null && roleName == null && attributeIsContained) {
+            // get role instance class
 
-        ModelElement_1_0 roleClass =
-          this.model.getDereferencedType(
-            roleTypeReference.getRoleClass(
-              (String)roleType.values(SystemAttributes.OBJECT_CLASS).get(0)));
+            ModelElement_1_0 roleClass =
+                this.model.getDereferencedType(
+                    roleTypeReference.getRoleClass(
+                        (String)roleType.values(SystemAttributes.OBJECT_CLASS).get(0)));
 
-        // is it part of this class?
-        List content = roleClass.values("content");
-        for (int i = 0; i < content.size() && roleName == null; i++) {
-          if (specifyingAttribute
-            .equals(
-              ((Path)content.get(i)).getLastComponent().getLastField())) {
-            roleName = roleType.path().getBase();
-          }
+            // is it part of this class?
+            List content = roleClass.values("content");
+            for (int i = 0; i < content.size() && roleName == null; i++) {
+                if (specifyingAttribute
+                        .equals(
+                            ((Path)content.get(i)).getLastComponent().getLastField())) {
+                    roleName = roleType.path().getBase();
+                }
+            }
+            // check if it is contained at all (but only if not already found)
+            if (roleName == null) {
+                attributeIsContained =
+                    ((HashMap)roleClass.values("attribute").get(0)).containsKey(
+                        specifyingAttribute);
+                if (firstRun && attributeIsContained) {
+                    firstRun = false;
+                }
+                else if (!firstRun && !attributeIsContained) {
+                    // the attribute is not contained any more, but it was 
+                    // with the last role type. This is the case if the 
+                    // attribute is part of A derived class of the role
+                    // instance class, which belongs to the same role type. 
+                    roleName = roleType.path().getBase();
+                }
+            }
+
+            // get core role 
+            if (roleName == null && attributeIsContained) {
+                if (!roleType.values(ROLETYPE_CORE_ROLE_ATTRIBUTE).isEmpty()) {
+                    // perhaps its part of the core role
+                    String coreRole =
+                        (String)roleType.values(ROLETYPE_CORE_ROLE_ATTRIBUTE).get(0);
+                    roleType =
+                        getRoleType(
+                            header,
+                            request,
+                            coreRole,
+                            this.roleTypes,
+                            roleType.path().getParent());
+                }
+                else {
+                    roleType = null;
+                }
+            }
         }
-        // check if it is contained at all (but only if not already found)
-        if (roleName == null) {
-          attributeIsContained =
-            ((HashMap)roleClass.values("attribute").get(0)).containsKey(
-              specifyingAttribute);
-          if (firstRun && attributeIsContained) {
-            firstRun = false;
-          }
-          else if (!firstRun && !attributeIsContained) {
-            // the attribute is not contained any more, but it was 
-            // with the last role type. This is the case if the 
-            // attribute is part of A derived class of the role
-            // instance class, which belongs to the same role type. 
-            roleName = roleType.path().getBase();
-          }
-        }
 
-        // get core role 
-        if (roleName == null && attributeIsContained) {
-          if (!roleType.values(ROLETYPE_CORE_ROLE_ATTRIBUTE).isEmpty()) {
-            // perhaps its part of the core role
-            String coreRole =
-              (String)roleType.values(ROLETYPE_CORE_ROLE_ATTRIBUTE).get(0);
-            roleType =
-              getRoleType(
-                header,
-                request,
-                coreRole,
-                this.roleTypes,
-                roleType.path().getParent());
-          }
-          else {
-            roleType = null;
-          }
+        String result = null;
+        if (roleName != null) {
+            // roleName has been found 
+            result = roleName;
         }
-      }
-
-      String result = null;
-      if (roleName != null) {
-        // roleName has been found 
-        result = roleName;
-      }
-      else if (roleType == null) {
-        // its a core attribute, return empty string 
-        result = new String();
-      }
-      else if (!attributeIsContained && firstRun) {
-        // specifyingAttribute is not an attribute, probably its an id
-        if (roleType != null
-          && roleType.getValues(SystemAttributes.OBJECT_CLASS) != null) {
-          String qualifier =
-            roleTypeReference.getQualifierLeadingToRoleClass(
-              (String)roleType.getValues(SystemAttributes.OBJECT_CLASS).get(
-                0));
-          if (!specifyingAttribute.equals(qualifier)) {
+        else if (roleType == null) {
+            // its a core attribute, return empty string 
+            result = new String();
+        }
+        else if (!attributeIsContained && firstRun) {
+            // specifyingAttribute is not an attribute, probably its an id
+            if (roleType != null
+                    && roleType.getValues(SystemAttributes.OBJECT_CLASS) != null) {
+                String qualifier =
+                    roleTypeReference.getQualifierLeadingToRoleClass(
+                        (String)roleType.getValues(SystemAttributes.OBJECT_CLASS).get(
+                            0));
+                if (!specifyingAttribute.equals(qualifier)) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "RoleType reference qualifier matches neither any attributes nor the qualifier of the role instance class.",
+                        new BasicException.Parameter("roleName", roleName),
+                        new BasicException.Parameter(
+                            "RoleType path",
+                            roleType.path()),
+                            new BasicException.Parameter(
+                                "specifyingAttribute",
+                                specifyingAttribute),
+                                new BasicException.Parameter(
+                                    "qualifierToRoleClass",
+                                    qualifier));
+                }
+            }
+            result = null;
+        }
+        else {
             throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.ASSERTION_FAILURE,
-              new BasicException.Parameter[] {
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "unexpected state of program.",
                 new BasicException.Parameter("roleName", roleName),
+                new BasicException.Parameter("RoleType path", roleType.path()),
                 new BasicException.Parameter(
-                  "RoleType path",
-                  roleType.path()),
-                new BasicException.Parameter(
-                  "specifyingAttribute",
-                  specifyingAttribute),
-                new BasicException.Parameter(
-                  "qualifierToRoleClass",
-                  qualifier)},
-              "RoleType reference qualifier matches neither any attributes nor the qualifier of the role instance class.");
-          }
+                    "attributeIsContained",
+                    attributeIsContained),
+                    new BasicException.Parameter("firstRun", firstRun));
         }
-        result = null;
-      }
-      else {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.ILLEGAL_STATE,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter("roleName", roleName),
-            new BasicException.Parameter("RoleType path", roleType.path()),
-            new BasicException.Parameter(
-              "attributeIsContained",
-              attributeIsContained),
-            new BasicException.Parameter("firstRun", firstRun)},
-          "unexpected state of program.");
-      }
-      return result;
+        return result;
     }
 
 
@@ -2053,138 +2022,138 @@ public class Role_1
      * @return path to role instance object (not null!)
      */
     private  Path getRoleInstancePathThroughRoleType(
-      ServiceHeader header, 
-      DataproviderRequest request,
-      Path  pathToRoleInstance
+        ServiceHeader header, 
+        DataproviderRequest request,
+        Path  pathToRoleInstance
     ) throws ServiceException {
-      Path roleInstancePath = null;
+        Path roleInstancePath = null;
 
-      // the last element must be the identifying element for the role instance
-      String id =
-        pathToRoleInstance.remove(pathToRoleInstance.size() - 1);
+        // the last element must be the identifying element for the role instance
+        String id =
+            pathToRoleInstance.remove(pathToRoleInstance.size() - 1);
 
-      // the one before must be the association leading to the class
-      String assoc =
-        pathToRoleInstance.remove(pathToRoleInstance.size() - 1);
+        // the one before must be the association leading to the class
+        String assoc =
+            pathToRoleInstance.remove(pathToRoleInstance.size() - 1);
 
-      // the next part must be the role name 
-      String roleName =
-        pathToRoleInstance.remove(pathToRoleInstance.size() - 1);
+        // the next part must be the role name 
+        String roleName =
+            pathToRoleInstance.remove(pathToRoleInstance.size() - 1);
 
-      // need roleType class to get the identifying attribute
+        // need roleType class to get the identifying attribute
 
-      // exception is thrown if not found!
-      DataproviderObject roleType =
-        getRoleType(
-          header,
-          request,
-          roleName,
-          this.roleTypes,
-          pathToRoleInstance);
+        // exception is thrown if not found!
+        DataproviderObject roleType =
+            getRoleType(
+                header,
+                request,
+                roleName,
+                this.roleTypes,
+                pathToRoleInstance);
 
-      // if it's found the OBJECT_CLASS is set!
-      String roleTypeClass =
-        (String)roleType.values(SystemAttributes.OBJECT_CLASS).get(0);
+        // if it's found the OBJECT_CLASS is set!
+        String roleTypeClass =
+            (String)roleType.values(SystemAttributes.OBJECT_CLASS).get(0);
 
-      // now get the corresponding path
-      Path correspondingPath = this.getRoleTypesPath(pathToRoleInstance);
-      String roleAttribute =
-        roleTypeReference.getQualifierForReferenceEnd(roleTypeClass, assoc);
+        // now get the corresponding path
+        Path correspondingPath = this.getRoleTypesPath(pathToRoleInstance);
+        String roleAttribute =
+            roleTypeReference.getQualifierForReferenceEnd(roleTypeClass, assoc);
 
-      String rolePrefix =
-        findRoleForSpecifyingAttribute(
-          header,
-          request,
-          roleAttribute,
-          roleType);
+        String rolePrefix =
+            findRoleForSpecifyingAttribute(
+                header,
+                request,
+                roleAttribute,
+                roleType);
 
-      if (rolePrefix == null) {
-        // its most probably the object id itself
-        // just add id to path
-        roleInstancePath = correspondingPath.add(id);
-      }
-      else {
-        DataproviderReply reply = null;
-
-        DataproviderRequest newRequest =
-          new DataproviderRequest(
-            new DataproviderObject(correspondingPath),
-            DataproviderOperations.ITERATION_START,
-            request.attributeSelector(),
-            request.attributeSpecifier());
-        newRequest.contexts().putAll(request.contexts());
-
-        // add filter for role 
-        addRoleFilter(newRequest, roleName, true);
-
-        if (rolePrefix.length() > 0) {
-          roleAttribute =
-            rolePrefix + ROLE_ATTRIBUTE_SEPARATOR + roleAttribute;
+        if (rolePrefix == null) {
+            // its most probably the object id itself
+            // just add id to path
+            roleInstancePath = correspondingPath.add(id);
         }
-        // else its a core attribute
+        else {
+            DataproviderReply reply = null;
 
-        // add Filter for the specifying attribute
-        newRequest.addAttributeFilterProperty(
-          new FilterProperty(
-            Quantors.THERE_EXISTS,
-            roleAttribute,
-            FilterOperators.IS_IN,
-            new String[] { id }));
+            DataproviderRequest newRequest =
+                new DataproviderRequest(
+                    new DataproviderObject(correspondingPath),
+                    DataproviderOperations.ITERATION_START,
+                    request.attributeSelector(),
+                    request.attributeSpecifier());
+            newRequest.contexts().putAll(request.contexts());
 
-        // if a not found exception is thrown it's ok
-        reply = super.find(header, newRequest);
+            // add filter for role 
+            addRoleFilter(newRequest, roleName, true);
 
-        if (reply == null
-          || reply.getObjects() == null
-          || reply.getObjects().length == 0) {
-          // throw not found exception to get a unified behaviour
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_FOUND,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("role", roleName),
-              new BasicException.Parameter(
-                "RoleType path",
-                pathToRoleInstance),
-              new BasicException.Parameter(
-                "Role instance path",
-                correspondingPath),
-              new BasicException.Parameter(
-                "unique attribute",
-                roleTypeReference.getQualifierForReferenceEnd(
-                  roleTypeClass,
-                  assoc)),
-              new BasicException.Parameter("unique attributes value", id)},
-            "no role instance object found on accessing through RoleType.");
+            if (rolePrefix.length() > 0) {
+                roleAttribute =
+                    rolePrefix + ROLE_ATTRIBUTE_SEPARATOR + roleAttribute;
+            }
+            // else its a core attribute
+
+            // add Filter for the specifying attribute
+            newRequest.addAttributeFilterProperty(
+                new FilterProperty(
+                    Quantors.THERE_EXISTS,
+                    roleAttribute,
+                    FilterOperators.IS_IN,
+                    id 
+                )
+            );
+
+            // if a not found exception is thrown it's ok
+            reply = super.find(header, newRequest);
+
+            if (reply == null
+                    || reply.getObjects() == null
+                    || reply.getObjects().length == 0) {
+                // throw not found exception to get a unified behaviour
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "no role instance object found on accessing through RoleType.",
+                    new BasicException.Parameter("role", roleName),
+                    new BasicException.Parameter(
+                        "RoleType path",
+                        pathToRoleInstance),
+                        new BasicException.Parameter(
+                            "Role instance path",
+                            correspondingPath),
+                            new BasicException.Parameter(
+                                "unique attribute",
+                                roleTypeReference.getQualifierForReferenceEnd(
+                                    roleTypeClass,
+                                    assoc)),
+                                    new BasicException.Parameter("unique attributes value", id));
+            }
+
+            // assert that there is at most one object found
+            if (reply.getObjects().length > 1) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "Several objects with the same unique attribute found on accessing through RoleType.",
+                    new BasicException.Parameter("role", roleName),
+                    new BasicException.Parameter(
+                        "RoleType path",
+                        pathToRoleInstance),
+                        new BasicException.Parameter(
+                            "Role instance path",
+                            correspondingPath),
+                            new BasicException.Parameter(
+                                "unique attribute",
+                                roleTypeReference.getQualifierForReferenceEnd(
+                                    roleTypeClass,
+                                    assoc)),
+                                    new BasicException.Parameter("value searched", id));
+            }
+
+            roleInstancePath = reply.getObject().path();
         }
-
-        // assert that there is at most one object found
-        if (reply.getObjects().length > 1) {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("role", roleName),
-              new BasicException.Parameter(
-                "RoleType path",
-                pathToRoleInstance),
-              new BasicException.Parameter(
-                "Role instance path",
-                correspondingPath),
-              new BasicException.Parameter(
-                "unique attribute",
-                roleTypeReference.getQualifierForReferenceEnd(
-                  roleTypeClass,
-                  assoc)),
-              new BasicException.Parameter("value searched", id)},
-            "Several objects with the same unique attribute found on accessing through RoleType.");
-        }
-
-        roleInstancePath = reply.getObject().path();
-      }
-      return roleInstancePath;
+        return roleInstancePath;
     }
-        
+
 
     // --------------------------------------------------------------------------
     /**
@@ -2200,151 +2169,151 @@ public class Role_1
      * @param request original request which is used to propagate request.
      */
     private void convertRoleTypeToRoleInstanceSearch(
-      ServiceHeader header,
-      DataproviderRequest request
+        ServiceHeader header,
+        DataproviderRequest request
     ) throws ServiceException {
-      // path which goes beyond roleType: 
-      // ch::omex::testRole1/provider/Test/segment/Standard/abstractRootRoleType/idRTArara1/roleClassRoleARoleA/rcra object[0] role idRTAra1/roleClassFree
-      // referencePath: provider/segment/abstractRootRoleType/roleClassRoleARoleA/roleClassFree
-      Path referencePath = getPathWithRemovedObjectIds(request.path());
-      Path roleTypePath = null;
-      // System.out.println(" convertRoleTypeToRoleInstanceSearch: treating path: " + request.path());
-      // path which goes beyond roleType: 
-      // ch::omex::testRole1/provider/Test/segment/Standard/abstractRootRoleType/idRTArara1/roleClassRoleARoleA/rcra object[0] role idRTAra1/roleClassFree
-      for (int i = 0;
+        // path which goes beyond roleType: 
+        // ch::omex::testRole1/provider/Test/segment/Standard/abstractRootRoleType/idRTArara1/roleClassRoleARoleA/rcra object[0] role idRTAra1/roleClassFree
+        // referencePath: provider/segment/abstractRootRoleType/roleClassRoleARoleA/roleClassFree
+        Path referencePath = getPathWithRemovedObjectIds(request.path());
+        Path roleTypePath = null;
+        // System.out.println(" convertRoleTypeToRoleInstanceSearch: treating path: " + request.path());
+        // path which goes beyond roleType: 
+        // ch::omex::testRole1/provider/Test/segment/Standard/abstractRootRoleType/idRTArara1/roleClassRoleARoleA/rcra object[0] role idRTAra1/roleClassFree
+        for (int i = 0;
         i < this.allRoleTypeReferencePaths.size() && roleTypePath == null;
         i++) {
-        if (referencePath
-          .startsWith((Path)allRoleTypeReferencePaths.get(i))) {
-          roleTypePath = (Path)allRoleTypeReferencePaths.get(i);
-        }
-      }
-
-      if (roleTypePath != null
-        && request.path().size()
-          > roleTypePath.size() * 2
-            + 1 // else its a find path leading to roleType itself
-      ) {
-        ModelElement_1_0 roleTypeSuperClass =
-          (ModelElement_1_0)this.referencePathClassMap.get(roleTypePath);
-
-        String referenceName =
-          request.path().get(roleTypePath.size() * 2 + 1);
-        ModelElement_1_0 reference = null;
-
-        for (Iterator subIter =
-          roleTypeSuperClass.getValues("subtype").iterator();
-          subIter.hasNext() && reference == null;
-          ) {
-          ModelElement_1_0 roleTypeClass =
-            model.getDereferencedType(subIter.next());
-
-          // check for the reference in the roleTypeClass:
-          for (Iterator features =
-            roleTypeClass.getValues("feature").iterator();
-            features.hasNext() && reference == null;
-            ) {
-            String featureName = ((Path)features.next()).getBase();
-            if (featureName
-              .endsWith(PathComponent.FIELD_DELIMITER + referenceName)) {
-              reference = model.getDereferencedType(featureName);
+            if (referencePath
+                    .startsWith((Path)allRoleTypeReferencePaths.get(i))) {
+                roleTypePath = (Path)allRoleTypeReferencePaths.get(i);
             }
-          }
         }
-        // must find out if it is a reference leading to a Role instance.
-        if (reference != null) {
-          boolean isRole = false;
-          ModelElement_1_0 referencedType =
-            model.getDereferencedType(
-              ((Path)reference.getValues("type").get(0)).getBase());
-          for (Iterator s =
-            referencedType.getValues("allSupertype").iterator();
-            s.hasNext() && !isRole;
+
+        if (roleTypePath != null
+                && request.path().size()
+                > roleTypePath.size() * 2
+                + 1 // else its a find path leading to roleType itself
+        ) {
+            ModelElement_1_0 roleTypeSuperClass =
+                (ModelElement_1_0)this.referencePathClassMap.get(roleTypePath);
+
+            String referenceName =
+                request.path().get(roleTypePath.size() * 2 + 1);
+            ModelElement_1_0 reference = null;
+
+            for (Iterator subIter =
+                roleTypeSuperClass.getValues("subtype").iterator();
+            subIter.hasNext() && reference == null;
             ) {
-            isRole =
-              "org:openmdx:compatibility:role1:Role".equals(((Path)s.next()).getBase());
-          }
-          if (isRole) {
-            // note: we try to avoid the contained objects. Introducing
-            // shared aggregation requires first defining the semantics 
-            // of a shared aggregation together with roles.
+                ModelElement_1_0 roleTypeClass =
+                    model.getDereferencedType(subIter.next());
 
-            // and to be sure, it also should not be a containment.
-            ModelElement_1_0 referencedEnd =
-              model.getDereferencedType(
-                reference.getValues("referencedEnd").get(0));
-
-            if (AggregationKind
-              .SHARED
-              .equals(referencedEnd.getValues("aggregation").get(0))) {
-              // it's ok, replace the path
-              String roleName = request.path().get(roleTypePath.size() * 2);
-
-              if (request.path().size() == roleTypePath.size() * 2 + 2) {
-                // it is a search for a role instance object
-                Path correspondingPath =
-                  (Path)roleTypePathPatternMap.get(roleTypePath);
-                int pos = (correspondingPath.size() * 2) - 1;
-
-                request.path().remove(pos); // from common super to roletype
-                request.path().remove(pos); // RoleTypeId
-                request.path().remove(pos);
-                // from RoleType to Role instance class
-                request.path().add(pos, correspondingPath.getBase());
-
-                // its a search for the objects of this role,
-                // add the in_role filter to the request
-                request.addAttributeFilterProperty(
-                  new FilterProperty(
-                    Quantors.THERE_EXISTS,
-                    "object_inRole",
-                    FilterOperators.IS_IN,
-                    new Object[] { roleName }));
-              }
-              // it may be a search not for role instances but for objects which
-              // are associated to a role. 
-              // In this case the referencePath must lead beyond 
-              else {
-                int roleInstancePathEndPos = (roleTypePath.size() * 2) + 3;
-                // extract the path to the role instance
-                Path roleInstancePath =
-                  request.path().getPrefix(roleInstancePathEndPos);
-
-                Path instancePath =
-                  getRoleInstancePathThroughRoleType(
-                    header,
-                    request,
-                    roleInstancePath);
-                int pos = instancePath.size();
-
-                List roles =
-                  getRequiredRoles(
-                    header,
-                    request,
-                    roleName,
-                    this.roleTypes,
-                    instancePath,
-                    new HashMap());
-                // roles are sorted from outermost to innermost invert it
-                // by inserting all to the same position
-                for (Iterator i = roles.iterator(); i.hasNext();) {
-                  instancePath.add(pos, (String)i.next());
-                  instancePath.add(pos, ROLE_PATH_ENTRY);
+                // check for the reference in the roleTypeClass:
+                for (Iterator features =
+                    roleTypeClass.getValues("feature").iterator();
+                features.hasNext() && reference == null;
+                ) {
+                    String featureName = ((Path)features.next()).getBase();
+                    if (featureName
+                            .endsWith(PathComponent.FIELD_DELIMITER + referenceName)) {
+                        reference = model.getDereferencedType(featureName);
+                    }
                 }
-
-                // now add other parts from path                    
-                instancePath.addAll(
-                  request.path().getSuffix(roleInstancePathEndPos));
-                request.path().setTo(instancePath);
-              }
-
-              SysLog.trace(
-                " convertRoleTypeToRoleInstancePath: new path : "
-                  + request.path());
             }
-          }
+            // must find out if it is a reference leading to a Role instance.
+            if (reference != null) {
+                boolean isRole = false;
+                ModelElement_1_0 referencedType =
+                    model.getDereferencedType(
+                        ((Path)reference.getValues("type").get(0)).getBase());
+                for (Iterator s =
+                    referencedType.getValues("allSupertype").iterator();
+                s.hasNext() && !isRole;
+                ) {
+                    isRole =
+                        "org:openmdx:compatibility:role1:Role".equals(((Path)s.next()).getBase());
+                }
+                if (isRole) {
+                    // note: we try to avoid the contained objects. Introducing
+                    // shared aggregation requires first defining the semantics 
+                    // of a shared aggregation together with roles.
+
+                    // and to be sure, it also should not be a containment.
+                    ModelElement_1_0 referencedEnd =
+                        model.getDereferencedType(
+                            reference.getValues("referencedEnd").get(0));
+
+                    if (AggregationKind
+                            .SHARED
+                            .equals(referencedEnd.getValues("aggregation").get(0))) {
+                        // it's ok, replace the path
+                        String roleName = request.path().get(roleTypePath.size() * 2);
+
+                        if (request.path().size() == roleTypePath.size() * 2 + 2) {
+                            // it is a search for a role instance object
+                            Path correspondingPath =
+                                (Path)roleTypePathPatternMap.get(roleTypePath);
+                            int pos = (correspondingPath.size() * 2) - 1;
+
+                            request.path().remove(pos); // from common super to roletype
+                            request.path().remove(pos); // RoleTypeId
+                            request.path().remove(pos);
+                            // from RoleType to Role instance class
+                            request.path().add(pos, correspondingPath.getBase());
+
+                            // its a search for the objects of this role,
+                            // add the in_role filter to the request
+                            request.addAttributeFilterProperty(
+                                new FilterProperty(
+                                    Quantors.THERE_EXISTS,
+                                    "object_inRole",
+                                    FilterOperators.IS_IN,
+                                    roleName ));
+                        }
+                        // it may be a search not for role instances but for objects which
+                        // are associated to a role. 
+                        // In this case the referencePath must lead beyond 
+                        else {
+                            int roleInstancePathEndPos = (roleTypePath.size() * 2) + 3;
+                            // extract the path to the role instance
+                            Path roleInstancePath =
+                                request.path().getPrefix(roleInstancePathEndPos);
+
+                            Path instancePath =
+                                getRoleInstancePathThroughRoleType(
+                                    header,
+                                    request,
+                                    roleInstancePath);
+                            int pos = instancePath.size();
+
+                            List roles =
+                                getRequiredRoles(
+                                    header,
+                                    request,
+                                    roleName,
+                                    this.roleTypes,
+                                    instancePath,
+                                    new HashMap());
+                            // roles are sorted from outermost to innermost invert it
+                            // by inserting all to the same position
+                            for (Iterator i = roles.iterator(); i.hasNext();) {
+                                instancePath.add(pos, (String)i.next());
+                                instancePath.add(pos, ROLE_PATH_ENTRY);
+                            }
+
+                            // now add other parts from path                    
+                            instancePath.addAll(
+                                request.path().getSuffix(roleInstancePathEndPos));
+                            request.path().setTo(instancePath);
+                        }
+
+                        SysLog.trace(
+                            " convertRoleTypeToRoleInstancePath: new path : "
+                            + request.path());
+                    }
+                }
+            }
         }
-      }
     }
 
     //---------------------------------------------------------------------------
@@ -2361,24 +2330,23 @@ public class Role_1
      * @param  request  
      */ 
     private void assertRoleTypeRemove(
-      ServiceHeader header,
-      DataproviderRequest request
+        ServiceHeader header,
+        DataproviderRequest request
     ) throws ServiceException {
-      // is it a RoleType which is to be removed
-      if (!allRoleTypeReferencePaths
-        .contains(getPathWithRemovedObjectIds(request.path()))) {
-        return; // not a role type, just return
-      }
+        // is it a RoleType which is to be removed
+        if (!allRoleTypeReferencePaths
+                .contains(getPathWithRemovedObjectIds(request.path()))) {
+            return; // not a role type, just return
+        }
 
-      // avoid deletion of role types: 
-      throw new ServiceException(
-        BasicException.Code.DEFAULT_DOMAIN,
-        BasicException.Code.NOT_SUPPORTED,
-        new BasicException.Parameter[] {
-           new BasicException.Parameter("request.path", request.path())},
-        "Removal of RoleType is not supported. It may still be in use in role objects.");
+        // avoid deletion of role types: 
+        throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            "Removal of RoleType is not supported. It may still be in use in role objects.",
+            new BasicException.Parameter("request.path", request.path()));
     }
-    
+
     //---------------------------------------------------------------------------
     /** 
      * check that the required roles are present in the objects.
@@ -2391,58 +2359,56 @@ public class Role_1
      * @param objects       objects to check for role
      */
     private void assertRequiredRoles(
-      List requiredRoles,
-      String role,
-      DataproviderObject_1_0[] objects
+        List requiredRoles,
+        String role,
+        DataproviderObject_1_0[] objects
     ) throws ServiceException {
-      String roleToCheck = null;
-      String roleClass = null;
-      DataproviderObject_1_0 object = null;
+        String roleToCheck = null;
+        String roleClass = null;
+        DataproviderObject_1_0 object = null;
 
-      for (int i = 0; i < objects.length; i++) {
-        object = objects[i];
-        // check for required roles:
-        for (Iterator reqIter = requiredRoles.iterator();
-          reqIter.hasNext();
-          ) {
-          roleToCheck = (String)reqIter.next();
-          // use the one attribute which is present for all roles
-          roleClass =
-            roleToCheck
-              + ROLE_ATTRIBUTE_SEPARATOR
-              + SystemAttributes.OBJECT_CLASS;
+        for (int i = 0; i < objects.length; i++) {
+            object = objects[i];
+            // check for required roles:
+            for (Iterator reqIter = requiredRoles.iterator();
+            reqIter.hasNext();
+            ) {
+                roleToCheck = (String)reqIter.next();
+                // use the one attribute which is present for all roles
+                roleClass =
+                    roleToCheck
+                    + ROLE_ATTRIBUTE_SEPARATOR
+                    + SystemAttributes.OBJECT_CLASS;
 
-          if (roleToCheck.equals(role)) {
-            // make sure this role is not already present
-            if (object.getValues(roleClass) != null
-              && !object.getValues(roleClass).isEmpty()) {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter("role to create", role),
-                  new BasicException.Parameter("object", object)},
-                "Trying to create a role which is already present.");
+                if (roleToCheck.equals(role)) {
+                    // make sure this role is not already present
+                    if (object.getValues(roleClass) != null
+                            && !object.getValues(roleClass).isEmpty()) {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "Trying to create a role which is already present.",
+                            new BasicException.Parameter("role to create", role),
+                            new BasicException.Parameter("object", object));
+                    }
+                    // else ok, role is not present
+                }
+                else {
+                    // these roles must be present
+                    if (object.getValues(roleClass) == null
+                            || object.getValues(roleClass).isEmpty()) {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "Missing required role for role.",
+                            new BasicException.Parameter("role", role),
+                            new BasicException.Parameter("role missing", roleToCheck),
+                            new BasicException.Parameter("object", object));
+                    }
+                    // else ok, role is present
+                }
             }
-            // else ok, role is not present
-          }
-          else {
-            // these roles must be present
-            if (object.getValues(roleClass) == null
-              || object.getValues(roleClass).isEmpty()) {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter("role", role),
-                  new BasicException.Parameter("role missing", roleToCheck),
-                  new BasicException.Parameter("object", object)},
-                "Missing required role for role.");
-            }
-            // else ok, role is present
-          }
         }
-      }
     }
 
     //---------------------------------------------------------------------------
@@ -2460,36 +2426,36 @@ public class Role_1
      * @return roleId or null
      */ 
     private String getRoleFromPath(
-      Path path
+        Path path
     ) {
-      int pos = 0;
-      String roleId = null;
+        int pos = 0;
+        String roleId = null;
 
-      int size = path.size();
-      for (pos = size - 1;
+        int size = path.size();
+        for (pos = size - 1;
         !path.get(pos).equals(this.ROLE_PATH_ENTRY) && pos > 0;
         pos--) {
-          //
-      }
-
-      if (pos > 0
-        && // no role found
-      pos + 1
-          < size // "role" as last component, no roleId
-      ) {
-        // only if roleId is last entry or followed by validState or 
-        // historyState
-        if (pos + 2 == size
-          || (pos + 2 < size
-            && (path.get(pos + 2).equals(State_1_Attributes.REF_HISTORY)
-              || path.get(pos + 2).equals(State_1_Attributes.REF_VALID)
-              || path.get(pos + 2).equals(State_1_Attributes.REF_STATE)))) {
-          roleId = path.get(pos + 1);
+            //
         }
-      }
-      return roleId;
+
+        if (pos > 0
+                && // no role found
+                pos + 1
+                < size // "role" as last component, no roleId
+        ) {
+            // only if roleId is last entry or followed by validState or 
+            // historyState
+            if (pos + 2 == size
+                    || (pos + 2 < size
+                            && (path.get(pos + 2).equals(State_1_Attributes.REF_HISTORY)
+                                    || path.get(pos + 2).equals(State_1_Attributes.REF_VALID)
+                                    || path.get(pos + 2).equals(State_1_Attributes.REF_STATE)))) {
+                roleId = path.get(pos + 1);
+            }
+        }
+        return roleId;
     }    
-    
+
     // --------------------------------------------------------------------------
     /**
      * remove the role specifiers from the path supplied. The same path is also
@@ -2508,41 +2474,41 @@ public class Role_1
      * @return  the path supplied
      */
     private Path toRolelessPath(
-      Path path
+        Path path
     ) {
-      boolean goOn = false;
-      int pos = path.size();
+        boolean goOn = false;
+        int pos = path.size();
 
-      do {
-        if (path.get(pos - 2).equals(ROLE_PATH_ENTRY)) {
-          path.remove(pos - 1);
-          path.remove(pos - 2);
-          goOn = true;
-          pos = pos - 2;
+        do {
+            if (path.get(pos - 2).equals(ROLE_PATH_ENTRY)) {
+                path.remove(pos - 1);
+                path.remove(pos - 2);
+                goOn = true;
+                pos = pos - 2;
+            }
+            else if (
+                    path.get(pos - 2).equals(State_1_Attributes.REF_HISTORY)
+                    || path.get(pos - 2).equals(State_1_Attributes.REF_VALID)
+                    || path.get(pos - 2).equals(State_1_Attributes.REF_STATE)) {
+                goOn = true;
+                pos = pos - 2;
+            }
+            else if (
+                    path.get(pos - 1).equals(State_1_Attributes.REF_HISTORY)
+                    || path.get(pos - 1).equals(State_1_Attributes.REF_VALID)
+                    || path.get(pos - 1).equals(State_1_Attributes.REF_STATE)) {
+                goOn = true;
+                pos = pos - 1;
+            }
+            else {
+                goOn = false;
+            }
         }
-        else if (
-          path.get(pos - 2).equals(State_1_Attributes.REF_HISTORY)
-            || path.get(pos - 2).equals(State_1_Attributes.REF_VALID)
-            || path.get(pos - 2).equals(State_1_Attributes.REF_STATE)) {
-          goOn = true;
-          pos = pos - 2;
-        }
-        else if (
-          path.get(pos - 1).equals(State_1_Attributes.REF_HISTORY)
-            || path.get(pos - 1).equals(State_1_Attributes.REF_VALID)
-            || path.get(pos - 1).equals(State_1_Attributes.REF_STATE)) {
-          goOn = true;
-          pos = pos - 1;
-        }
-        else {
-          goOn = false;
-        }
-      }
-      while (goOn && pos > 0);
-      return path;
+        while (goOn && pos > 0);
+        return path;
     }        
-    
-    
+
+
     // --------------------------------------------------------------------------
     /**
      * convert the path and remove the state specifiers from it. State 
@@ -2553,25 +2519,25 @@ public class Role_1
      * @return  the path supplied
      */
     private Path toStatelessPath(
-      Path path
+        Path path
     ) {
-      int pos = path.size();
-      if (path.get(pos - 2).equals(State_1_Attributes.REF_HISTORY)
-        || path.get(pos - 2).equals(State_1_Attributes.REF_VALID)
-        || path.get(pos - 2).equals(State_1_Attributes.REF_STATE)) {
-        path.remove(pos - 1);
-        path.remove(pos - 2);
-      }
-      else if (
-        path.get(pos - 1).equals(State_1_Attributes.REF_HISTORY)
-          || path.get(pos - 1).equals(State_1_Attributes.REF_VALID)
-          || path.get(pos - 1).equals(State_1_Attributes.REF_STATE)) {
-        path.remove(pos - 1);
-      }
-      return path;
+        int pos = path.size();
+        if (path.get(pos - 2).equals(State_1_Attributes.REF_HISTORY)
+                || path.get(pos - 2).equals(State_1_Attributes.REF_VALID)
+                || path.get(pos - 2).equals(State_1_Attributes.REF_STATE)) {
+            path.remove(pos - 1);
+            path.remove(pos - 2);
+        }
+        else if (
+                path.get(pos - 1).equals(State_1_Attributes.REF_HISTORY)
+                || path.get(pos - 1).equals(State_1_Attributes.REF_VALID)
+                || path.get(pos - 1).equals(State_1_Attributes.REF_STATE)) {
+            path.remove(pos - 1);
+        }
+        return path;
     }        
-        
-        
+
+
     //---------------------------------------------------------------------------
     /**
      * Complete the path supplied with the roleComponentes. The roleComponents
@@ -2583,18 +2549,18 @@ public class Role_1
      * @param path      path to insert to
      */
     private void addRolePathToPath(
-      String[] roleComponents,
-      Path path
+        String[] roleComponents,
+        Path path
     ) {
-      int pos = path.size();
-      if (path.get(pos - 2).equals(State_1_Attributes.REF_HISTORY)
-        || path.get(pos - 2).equals(State_1_Attributes.REF_VALID)
-        || path.get(pos - 2).equals(State_1_Attributes.REF_STATE)) {
-        path.addAll(pos - 2, roleComponents);
-      }
-      else {
-        path.addAll(roleComponents);
-      }
+        int pos = path.size();
+        if (path.get(pos - 2).equals(State_1_Attributes.REF_HISTORY)
+                || path.get(pos - 2).equals(State_1_Attributes.REF_VALID)
+                || path.get(pos - 2).equals(State_1_Attributes.REF_STATE)) {
+            path.addAll(pos - 2, roleComponents);
+        }
+        else {
+            path.addAll(roleComponents);
+        }
     }
 
     //---------------------------------------------------------------------------
@@ -2608,23 +2574,23 @@ public class Role_1
      * @return true if the attribute is contained
      */
     private boolean classHasAttribute(
-      List classes, 
-      String attribute
+        List classes, 
+        String attribute
     ) throws ServiceException {
-      Iterator classIter = classes.iterator();
-      while (classIter.hasNext()) {
-        String className = (String)classIter.next();
-        ModelElement_1_0 roleClass = this.model.getDereferencedType(className);
-        if (roleClass != null) {
-          Map modelAttributes = (Map)roleClass.values("attribute").get(0);
-          if(modelAttributes.containsKey(attribute)){
-            return true;
-          }
+        Iterator classIter = classes.iterator();
+        while (classIter.hasNext()) {
+            String className = (String)classIter.next();
+            ModelElement_1_0 roleClass = this.model.getDereferencedType(className);
+            if (roleClass != null) {
+                Map modelAttributes = (Map)roleClass.values("attribute").get(0);
+                if(modelAttributes.containsKey(attribute)){
+                    return true;
+                }
+            }
         }
-      }
-      return false;               
+        return false;               
     }    
-    
+
     //---------------------------------------------------------------------------
     /**
      * Decide if this attribute is part of a role or of the core.
@@ -2634,62 +2600,61 @@ public class Role_1
      * @return true if it is part of a role
      */
     private boolean isRoleAttribute(
-      String attributeName,
-      Path   requestPath
+        String attributeName,
+        Path   requestPath
     ) throws ServiceException {
-      boolean isRoleAttribute = false;
-      String attributeNameWithSeparator = ":" + attributeName;
-      Path referencePath =
-        this.getPathWithRemovedObjectIds(
-          this.toStatelessPath(this.toRolelessPath(new Path(requestPath))));
-      SysLog.trace("request path", requestPath);
-      SysLog.trace("reference path", referencePath);
-      ModelElement_1_0 objClassAtPath =
-        (ModelElement_1_0)this.referencePathClassMap.get(referencePath);
-      SysLog.trace("referenced class", objClassAtPath);
-      if (objClassAtPath == null) {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.ASSERTION_FAILURE,
-          new BasicException.Parameter[] {
-             new BasicException.Parameter("reference", referencePath)},
-          "referenced class can not be determined");
-      }
+        boolean isRoleAttribute = false;
+        String attributeNameWithSeparator = ":" + attributeName;
+        Path referencePath =
+            this.getPathWithRemovedObjectIds(
+                this.toStatelessPath(this.toRolelessPath(new Path(requestPath))));
+        SysLog.trace("request path", requestPath);
+        SysLog.trace("reference path", referencePath);
+        ModelElement_1_0 objClassAtPath =
+            (ModelElement_1_0)this.referencePathClassMap.get(referencePath);
+        SysLog.trace("referenced class", objClassAtPath);
+        if (objClassAtPath == null) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "referenced class can not be determined",
+                new BasicException.Parameter("reference", referencePath));
+        }
 
-      // get the class at this path
-      Path subClassPath = null;
-      ModelElement_1_0 subClass = null;
-      boolean found = false;
+        // get the class at this path
+        Path subClassPath = null;
+        ModelElement_1_0 subClass = null;
+        boolean found = false;
 
-      // the attribute may be part of this class or of one of its derived
-      // classes 
-      for (Iterator i = objClassAtPath.values("allSubtype").iterator();
+        // the attribute may be part of this class or of one of its derived
+        // classes 
+        for (Iterator i = objClassAtPath.values("allSubtype").iterator();
         i.hasNext() && !found;
         ) {
-        subClassPath = (Path)i.next();
-        subClass = this.model.getDereferencedType(subClassPath);
-        for (Iterator contentIter = subClass.values("content").iterator();
-          contentIter.hasNext() && !found;
-          ) {
-          String qualifiedName = ((Path)contentIter.next()).getBase();
-          if (qualifiedName.endsWith(attributeNameWithSeparator)) {
-            found = true;
-          }
+            subClassPath = (Path)i.next();
+            subClass = this.model.getDereferencedType(subClassPath);
+            for (Iterator contentIter = subClass.values("content").iterator();
+            contentIter.hasNext() && !found;
+            ) {
+                String qualifiedName = ((Path)contentIter.next()).getBase();
+                if (qualifiedName.endsWith(attributeNameWithSeparator)) {
+                    found = true;
+                }
+            }
         }
-      }
 
-      if (!found) {
-        // it was not found in the class or its subclasses, most 
-        // probably its some kind of system attribute.
-        isRoleAttribute = false;
-      }
-      else if (classIsRole(subClass)) {
-        isRoleAttribute = true;
-      }
-      else {
-        isRoleAttribute = false;
-      }
-      return isRoleAttribute;
+        if (!found) {
+            // it was not found in the class or its subclasses, most 
+            // probably its some kind of system attribute.
+            isRoleAttribute = false;
+        }
+        else if (classIsRole(subClass)) {
+            isRoleAttribute = true;
+        }
+        else {
+            isRoleAttribute = false;
+        }
+        return isRoleAttribute;
     }
 
     //---------------------------------------------------------------------------
@@ -2701,26 +2666,26 @@ public class Role_1
      * @return true if it is a role false otherwise
      */
     private boolean classIsRole(
-      ModelElement_1_0 _roleClass
+        ModelElement_1_0 _roleClass
     ) throws ServiceException {
         ModelElement_1_0 roleClass = _roleClass;
-      boolean isRole;
-      Path path;
-      // is this class or one of the superclasses a role
-      isRole = roleClass.values("stereotype").contains(ROLE_STEREOTYPE);
-      for (Iterator superIter =
-        roleClass.values("allSupertype").populationIterator();
+        boolean isRole;
+        Path path;
+        // is this class or one of the superclasses a role
+        isRole = roleClass.values("stereotype").contains(ROLE_STEREOTYPE);
+        for (Iterator superIter =
+            roleClass.values("allSupertype").populationIterator();
         superIter.hasNext() && !isRole;
         ) {
-        path = (Path)superIter.next();
-        roleClass = this.model.getDereferencedType(path);
-        isRole =
-          roleClass.getValues("stereotype") != null
-            && roleClass.getValues("stereotype").contains(ROLE_STEREOTYPE);
-      }
-      return isRole;
+            path = (Path)superIter.next();
+            roleClass = this.model.getDereferencedType(path);
+            isRole =
+                roleClass.getValues("stereotype") != null
+                && roleClass.getValues("stereotype").contains(ROLE_STEREOTYPE);
+        }
+        return isRole;
     }
-    
+
     //---------------------------------------------------------------------------
     /** 
      * Determine if the class belongs to the same role as the specified
@@ -2732,46 +2697,46 @@ public class Role_1
      * @return true if it belongs to the same role false otherwise
      */
     private boolean classBelongsToRole( 
-      ModelElement_1_0 _roleClass,
-      ModelElement_1_0 superClass
+        ModelElement_1_0 _roleClass,
+        ModelElement_1_0 superClass
     ) throws ServiceException {
         ModelElement_1_0 roleClass = _roleClass;
-      Object superClassName = superClass.getValues("qualifiedName").get(0);
-      Path path = null;
+        Object superClassName = superClass.getValues("qualifiedName").get(0);
+        Path path = null;
 
-      // there may be multiple supertypes for a class, each must be checked.
-      ArrayList supers = new ArrayList();
+        // there may be multiple supertypes for a class, each must be checked.
+        ArrayList supers = new ArrayList();
 
-      // search from roleClass upwards until the superclass is met or 
-      // one of the class holds the stereotype role.
-      while (roleClass != null
-        && !roleClass.getValues("qualifiedName").get(0).equals(superClassName)
-        && !(roleClass.getValues("stereotype") != null
-          && roleClass.getValues("stereotype").contains(ROLE_STEREOTYPE))) {
-        if (roleClass.getValues("supertype") != null) {
-          for (Iterator i = roleClass.getValues("supertype").iterator();
-            i.hasNext();
-            ) {
-            path = (Path)i.next();
+        // search from roleClass upwards until the superclass is met or 
+        // one of the class holds the stereotype role.
+        while (roleClass != null
+                && !roleClass.getValues("qualifiedName").get(0).equals(superClassName)
+                && !(roleClass.getValues("stereotype") != null
+                        && roleClass.getValues("stereotype").contains(ROLE_STEREOTYPE))) {
+            if (roleClass.getValues("supertype") != null) {
+                for (Iterator i = roleClass.getValues("supertype").iterator();
+                i.hasNext();
+                ) {
+                    path = (Path)i.next();
 
-            supers.add(this.model.getDereferencedType(path));
-          }
+                    supers.add(this.model.getDereferencedType(path));
+                }
+            }
+
+            if (supers.size() > 0
+                    && !roleClass.getValues("qualifiedName").get(0).equals(
+                        superClassName)) {
+                roleClass = (ModelElement_1_0)supers.remove(0);
+            }
+            else {
+                roleClass = null;
+            }
         }
-
-        if (supers.size() > 0
-          && !roleClass.getValues("qualifiedName").get(0).equals(
-            superClassName)) {
-          roleClass = (ModelElement_1_0)supers.remove(0);
-        }
-        else {
-          roleClass = null;
-        }
-      }
-      return (
-        roleClass != null
-          && roleClass.getValues("qualifiedName").get(0).equals(superClassName));
+        return (
+                roleClass != null
+                && roleClass.getValues("qualifiedName").get(0).equals(superClassName));
     }
-    
+
     //---------------------------------------------------------------------------
     /** 
      * Find the role this attribute belongs to concerning that it must
@@ -2804,49 +2769,49 @@ public class Role_1
      * 
      */
     private String findRoleForAttribute(
-      String attr,
-      DataproviderObject[] loadedStates,  
-      List roles
+        String attr,
+        DataproviderObject[] loadedStates,  
+        List roles
     ) throws ServiceException {
-      String attrRole = null;
-      List classNames = null;
+        String attrRole = null;
+        List classNames = null;
 
-      for (int i = 0; i < loadedStates.length && attrRole == null; i++) {
-        //
-        // first check the classes without roles
-        // 
-        if (classHasAttribute(loadedStates[i]
-          .getValues(SystemAttributes.OBJECT_CLASS),
-          attr)) {
-          attrRole = "";
-        }
-        else {
-          //
-          // if not found the roles must be searched 
-          //
-          // rolesIter gets the outermost role first, iterate in reverse:
-          ListIterator rolesIter = roles.listIterator(roles.size());
-          String searchRole = null;
-          while (rolesIter.hasPrevious() && attrRole == null) {
-            searchRole = (String)rolesIter.previous();
-            classNames =
-              loadedStates[i].getValues(
-                searchRole
-                  + ROLE_ATTRIBUTE_SEPARATOR
-                  + SystemAttributes.OBJECT_CLASS);
-
-            if (classNames != null) {
-              // if new role is contained required roles
-              if (classHasAttribute(classNames, attr)) {
-                attrRole = searchRole;
-              }
+        for (int i = 0; i < loadedStates.length && attrRole == null; i++) {
+            //
+            // first check the classes without roles
+            // 
+            if (classHasAttribute(loadedStates[i]
+                                               .getValues(SystemAttributes.OBJECT_CLASS),
+                                               attr)) {
+                attrRole = "";
             }
-          }
+            else {
+                //
+                // if not found the roles must be searched 
+                //
+                // rolesIter gets the outermost role first, iterate in reverse:
+                ListIterator rolesIter = roles.listIterator(roles.size());
+                String searchRole = null;
+                while (rolesIter.hasPrevious() && attrRole == null) {
+                    searchRole = (String)rolesIter.previous();
+                    classNames =
+                        loadedStates[i].getValues(
+                            searchRole
+                            + ROLE_ATTRIBUTE_SEPARATOR
+                            + SystemAttributes.OBJECT_CLASS);
+
+                    if (classNames != null) {
+                        // if new role is contained required roles
+                        if (classHasAttribute(classNames, attr)) {
+                            attrRole = searchRole;
+                        }
+                    }
+                }
+            }
         }
-      }
-      return attrRole;
+        return attrRole;
     }
-            
+
     //---------------------------------------------------------------------------
     /**
      * Create an object containing the attributes supplied in request with the
@@ -2865,314 +2830,310 @@ public class Role_1
      * @param updateOp whether it is an update operation (true) or a modify (false)
      */
     private DataproviderObject createExpandedObject(
-      ServiceHeader header, 
-      DataproviderRequest request, 
-      String role,
-      Map roleTypeCache,
-      boolean updateOp
+        ServiceHeader header, 
+        DataproviderRequest request, 
+        String role,
+        Map roleTypeCache,
+        boolean updateOp
     ) throws ServiceException {                
-      DataproviderObject delta = null;
-      DataproviderObject existingRoleInstanceState = null;
-      Path noRolePath = toRolelessPath(new Path(request.path()));
-      String attributeName = null;
+        DataproviderObject delta = null;
+        DataproviderObject existingRoleInstanceState = null;
+        Path noRolePath = toRolelessPath(new Path(request.path()));
+        String attributeName = null;
 
-      delta = new DataproviderObject(noRolePath);
+        delta = new DataproviderObject(noRolePath);
 
-      DataproviderObject[] states = findCoreObjectStates(header, request);
+        DataproviderObject[] states = findCoreObjectStates(header, request);
 
-      String requestFrom =
-        request.object().getValues(State_1_Attributes.VALID_FROM) == null
-          ? null
-          : (String)request.object().getValues(
-            State_1_Attributes.VALID_FROM).get(
-            0);
+        String requestFrom =
+            request.object().getValues(State_1_Attributes.VALID_FROM) == null
+            ? null
+                : (String)request.object().getValues(
+                    State_1_Attributes.VALID_FROM).get(
+                        0);
 
-      String requestTo =
-        request.object().getValues(State_1_Attributes.VALID_TO) == null
-          ? null
-          : (String)request.object().getValues(
-            State_1_Attributes.VALID_TO).get(
-            0);
+        String requestTo =
+            request.object().getValues(State_1_Attributes.VALID_TO) == null
+            ? null
+                : (String)request.object().getValues(
+                    State_1_Attributes.VALID_TO).get(
+                        0);
 
-      // 
-      // check that [requestFrom, requestTo] is within the objects validity frame 
-      //
-      if ((requestFrom == null
-        && !states[0].values(State_1_Attributes.VALID_FROM).isEmpty())
-        || (!states[0].values(State_1_Attributes.VALID_FROM).isEmpty()
-          && requestFrom.compareTo(
-            (String) states[0].getValues(State_1_Attributes.VALID_FROM).get(0))
-            < 0)
-        || (requestTo == null
-          && !states[states.length
-            - 1].values(State_1_Attributes.VALID_TO).isEmpty())
-        || (!states[states.length
-          - 1].values(State_1_Attributes.VALID_TO).isEmpty()
-          && requestFrom.compareTo(
-            (String) states[states.length
-              - 1].getValues(State_1_Attributes.VALID_TO).get(0))
-            > 0)) {
+        // 
+        // check that [requestFrom, requestTo] is within the objects validity frame 
+        //
+        if ((requestFrom == null
+                && !states[0].values(State_1_Attributes.VALID_FROM).isEmpty())
+                || (!states[0].values(State_1_Attributes.VALID_FROM).isEmpty()
+                        && requestFrom.compareTo(
+                            (String) states[0].getValues(State_1_Attributes.VALID_FROM).get(0))
+                            < 0)
+                            || (requestTo == null
+                                    && !states[states.length
+                                               - 1].values(State_1_Attributes.VALID_TO).isEmpty())
+                                               || (!states[states.length
+                                                           - 1].values(State_1_Attributes.VALID_TO).isEmpty()
+                                                           && requestFrom.compareTo(
+                                                               (String) states[states.length
+                                                                               - 1].getValues(State_1_Attributes.VALID_TO).get(0))
+                                                                               > 0)) {
 
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.ASSERTION_FAILURE,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter("path", request.path()),
-            new BasicException.Parameter("role", role),
-            new BasicException.Parameter(
-              "object.validFrom",
-              states[0].values(State_1_Attributes.VALID_FROM)),
-            new BasicException.Parameter(
-              "object.validTo",
-              states[states.length - 1].values(State_1_Attributes.VALID_TO)),
-            new BasicException.Parameter("request.validFrom", requestFrom),
-            new BasicException.Parameter("request.validTo", requestTo)},
-          "Role update spreads beyond object validity.");
-
-      }
-
-      // 
-      // don't allow updates through several consecutive role states.
-      // (testing for existence of required attributes would become 
-      //  too complicated.)
-      // an overhang beyond the existing role is allowed
-      // 
-
-      int overhangingStatesAtStartIndex = -1;
-      // index up to which the states are overhanging
-      int overhangingStatesAtEndIndex = -1;
-      // index from which the states are overhanging
-
-      String roleIndicationAttr =
-        role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS;
-      for (int i = 0; i < states.length; i++) {
-
-        if (states[i].getValues(roleIndicationAttr) != null
-          && !states[i].getValues(roleIndicationAttr).isEmpty()) {
-          // any of the states containing the role already would do
-          existingRoleInstanceState = states[i];
-        }
-        else {
-          if (existingRoleInstanceState == null) {
-            // did not yet find a state supporting the role
-            overhangingStatesAtStartIndex = i;
-          }
-          else if (overhangingStatesAtEndIndex == -1) {
-            // set only on first occurence
-            // after finding a state supporting the role. There may not
-            // be any holes within the role "instance". So these two 
-            // indices are enough.
-            overhangingStatesAtEndIndex = i;
-          }
-          else {
-            // this is an error as the role ended and starts now new
             throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.ASSERTION_FAILURE,
-              new BasicException.Parameter[] {
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "Role update spreads beyond object validity.",
                 new BasicException.Parameter("path", request.path()),
                 new BasicException.Parameter("role", role),
                 new BasicException.Parameter(
-                  "request.validFrom",
-                  requestFrom),
-                new BasicException.Parameter("request.validTo", requestTo),
-                new BasicException.Parameter(
-                  "second role instance validFrom",
-                  states[i].values(State_1_Attributes.VALID_FROM).get(0))},
-              "Role update hits two existing role instances.");
-          }
+                    "object.validFrom",
+                    states[0].values(State_1_Attributes.VALID_FROM)),
+                    new BasicException.Parameter(
+                        "object.validTo",
+                        states[states.length - 1].values(State_1_Attributes.VALID_TO)),
+                        new BasicException.Parameter("request.validFrom", requestFrom),
+                        new BasicException.Parameter("request.validTo", requestTo));
+
         }
-      }
 
-      //  
-      // check that the role is present in one of the states at least
-      //
-      // if the creation time was not set, the role is empty
-      if (existingRoleInstanceState == null) {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.ASSERTION_FAILURE,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter("path", request.path()),
-            new BasicException.Parameter("role", role)},
-          "Object does not have role.");
-      }
+        // 
+        // don't allow updates through several consecutive role states.
+        // (testing for existence of required attributes would become 
+        //  too complicated.)
+        // an overhang beyond the existing role is allowed
+        // 
 
-      //
-      // if the update is overhanging, check that the extended part is valid 
-      //
-      DataproviderObject roleType =
-        assertCompleteRoleType(
-          header,
-          request,
-          role,
-          roleTypeCache,
-          request.object());
+        int overhangingStatesAtStartIndex = -1;
+        // index up to which the states are overhanging
+        int overhangingStatesAtEndIndex = -1;
+        // index from which the states are overhanging
 
-      if (overhangingStatesAtStartIndex > -1
-        || overhangingStatesAtEndIndex > -1) {
-        List requiredRoles =
-          getRequiredRoles(
-            header,
-            request,
-            role,
-            roleTypeCache,
-            request.path(),
-            new HashMap());
+        String roleIndicationAttr =
+            role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS;
+        for (int i = 0; i < states.length; i++) {
 
-        assertRoleAttributeMultiplicity(request.object(), roleType);
+            if (states[i].getValues(roleIndicationAttr) != null
+                    && !states[i].getValues(roleIndicationAttr).isEmpty()) {
+                // any of the states containing the role already would do
+                existingRoleInstanceState = states[i];
+            }
+            else {
+                if (existingRoleInstanceState == null) {
+                    // did not yet find a state supporting the role
+                    overhangingStatesAtStartIndex = i;
+                }
+                else if (overhangingStatesAtEndIndex == -1) {
+                    // set only on first occurence
+                    // after finding a state supporting the role. There may not
+                    // be any holes within the role "instance". So these two 
+                    // indices are enough.
+                    overhangingStatesAtEndIndex = i;
+                }
+                else {
+                    // this is an error as the role ended and starts now new
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "Role update hits two existing role instances.",
+                        new BasicException.Parameter("path", request.path()),
+                        new BasicException.Parameter("role", role),
+                        new BasicException.Parameter(
+                            "request.validFrom",
+                            requestFrom),
+                            new BasicException.Parameter("request.validTo", requestTo),
+                            new BasicException.Parameter(
+                                "second role instance validFrom",
+                                states[i].values(State_1_Attributes.VALID_FROM).get(0)));
+                }
+            }
+        }
 
-        // first at the beginning
-        if (overhangingStatesAtStartIndex > -1) {
-          DataproviderObject[] overhangingStates;
-          overhangingStates =
-            new DataproviderObject[overhangingStatesAtStartIndex + 1];
-          for (int i = 0; i < overhangingStatesAtStartIndex; i++) {
-            overhangingStates[i] = states[i];
-          }
+        //  
+        // check that the role is present in one of the states at least
+        //
+        // if the creation time was not set, the role is empty
+        if (existingRoleInstanceState == null) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "Object does not have role.",
+                new BasicException.Parameter("path", request.path()),
+                new BasicException.Parameter("role", role));
+        }
 
-          assertRequiredRoles(requiredRoles, role, overhangingStates);
+        //
+        // if the update is overhanging, check that the extended part is valid 
+        //
+        DataproviderObject roleType =
+            assertCompleteRoleType(
+                header,
+                request,
+                role,
+                roleTypeCache,
+                request.object());
 
-          assertCoreRoleExtensionClass(
-            header,
-            request,
-            role,
-            roleTypeCache,
-            requiredRoles,
-            overhangingStates,
-            request.object());
+        if (overhangingStatesAtStartIndex > -1
+                || overhangingStatesAtEndIndex > -1) {
+            List requiredRoles =
+                getRequiredRoles(
+                    header,
+                    request,
+                    role,
+                    roleTypeCache,
+                    request.path(),
+                    new HashMap());
 
-          assertCreatingUniqueRoleInstance(
+            assertRoleAttributeMultiplicity(request.object(), roleType);
+
+            // first at the beginning
+            if (overhangingStatesAtStartIndex > -1) {
+                DataproviderObject[] overhangingStates;
+                overhangingStates =
+                    new DataproviderObject[overhangingStatesAtStartIndex + 1];
+                for (int i = 0; i < overhangingStatesAtStartIndex; i++) {
+                    overhangingStates[i] = states[i];
+                }
+
+                assertRequiredRoles(requiredRoles, role, overhangingStates);
+
+                assertCoreRoleExtensionClass(
+                    header,
+                    request,
+                    role,
+                    roleTypeCache,
+                    requiredRoles,
+                    overhangingStates,
+                    request.object());
+
+                assertCreatingUniqueRoleInstance(
+                    header,
+                    request,
+                    roleType,
+                    requiredRoles,
+                    overhangingStates);
+            }
+
+            // then at the end
+            if (overhangingStatesAtEndIndex > -1) {
+                DataproviderObject[] overhangingStates;
+                overhangingStates =
+                    new DataproviderObject[states.length
+                                           - overhangingStatesAtEndIndex];
+                for (int i = 0; i < overhangingStates.length; i++) {
+                    overhangingStates[i] = states[i + overhangingStatesAtEndIndex];
+                }
+                assertRequiredRoles(requiredRoles, role, overhangingStates);
+
+                assertCoreRoleExtensionClass(
+                    header,
+                    request,
+                    role,
+                    roleTypeCache,
+                    requiredRoles,
+                    overhangingStates,
+                    request.object());
+
+                assertCreatingUniqueRoleInstance(
+                    header,
+                    request,
+                    roleType,
+                    requiredRoles,
+                    overhangingStates);
+            }
+        }
+
+        // 
+        // check that the qualifying attributes are unique.
+        //
+        List roles =
+            getRequiredRoles(
+                header,
+                request,
+                role,
+                roleTypeCache,
+                noRolePath,
+                new HashMap());
+        // must assert all qualifying attributes because of overhanging updates
+        assertMaintainingUniqueRoleInstance(
             header,
             request,
             roleType,
-            requiredRoles,
-            overhangingStates);
-        }
+            roles,
+            states,
+            updateOp);
 
-        // then at the end
-        if (overhangingStatesAtEndIndex > -1) {
-          DataproviderObject[] overhangingStates;
-          overhangingStates =
-            new DataproviderObject[states.length
-              - overhangingStatesAtEndIndex];
-          for (int i = 0; i < overhangingStates.length; i++) {
-            overhangingStates[i] = states[i + overhangingStatesAtEndIndex];
-          }
-          assertRequiredRoles(requiredRoles, role, overhangingStates);
-
-          assertCoreRoleExtensionClass(
-            header,
-            request,
-            role,
-            roleTypeCache,
-            requiredRoles,
-            overhangingStates,
-            request.object());
-
-          assertCreatingUniqueRoleInstance(
-            header,
-            request,
-            roleType,
-            requiredRoles,
-            overhangingStates);
-        }
-      }
-
-      // 
-      // check that the qualifying attributes are unique.
-      //
-      List roles =
-        getRequiredRoles(
-          header,
-          request,
-          role,
-          roleTypeCache,
-          noRolePath,
-          new HashMap());
-      // must assert all qualifying attributes because of overhanging updates
-      assertMaintainingUniqueRoleInstance(
-        header,
-        request,
-        roleType,
-        roles,
-        states,
-        updateOp);
-
-      // 
-      // create update request
-      //
-      for (Iterator i = request.object().attributeNames().iterator();
+        // 
+        // create update request
+        //
+        for (Iterator i = request.object().attributeNames().iterator();
         i.hasNext();
         ) {
-        attributeName = (String)i.next();
+            attributeName = (String)i.next();
 
-        // object_class and creation can not change!
-        if (!attributeName.equals(SystemAttributes.CREATED_AT)
-          && !attributeName.equals(SystemAttributes.CREATED_BY)
-          && !attributeName.equals(SystemAttributes.OBJECT_CLASS)
-          && attributeName.indexOf(':')<0
-        ){
-          String attrRole =
-            this.findRoleForAttribute(attributeName, states, roles);
-          if (attrRole == null) {
-            throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.ASSERTION_FAILURE,
-              new BasicException.Parameter[] {
-                new BasicException.Parameter("attribute", attributeName),
-                new BasicException.Parameter("role", roles)},
-              "attribute does not exist in role");
-          }
-          String attrWithRole = null;
-          if (attrRole.length() > 0) {
-            attrWithRole =
-              attrRole + ROLE_ATTRIBUTE_SEPARATOR + attributeName;
-          }
-          else {
-            attrWithRole = attributeName;
-          }
-          delta.values(attrWithRole).addAll(
-            request.object().getValues(attributeName));
+            // object_class and creation can not change!
+            if (!attributeName.equals(SystemAttributes.CREATED_AT)
+                    && !attributeName.equals(SystemAttributes.CREATED_BY)
+                    && !attributeName.equals(SystemAttributes.OBJECT_CLASS)
+                    && attributeName.indexOf(':')<0
+            ){
+                String attrRole =
+                    this.findRoleForAttribute(attributeName, states, roles);
+                if (attrRole == null) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "attribute does not exist in role",
+                        new BasicException.Parameter("attribute", attributeName),
+                        new BasicException.Parameter("role", roles));
+                }
+                String attrWithRole = null;
+                if (attrRole.length() > 0) {
+                    attrWithRole =
+                        attrRole + ROLE_ATTRIBUTE_SEPARATOR + attributeName;
+                }
+                else {
+                    attrWithRole = attributeName;
+                }
+                delta.values(attrWithRole).addAll(
+                    request.object().getValues(attributeName));
+            }
         }
-      }
 
-      // now add some required attributes
+        // now add some required attributes
 
-      // at least the core must be present for each state, otherwise there would 
-      // have been an exception.
-      delta.clearValues(SystemAttributes.OBJECT_CLASS).addAll(
-        states[0].getValues(SystemAttributes.OBJECT_CLASS));
+        // at least the core must be present for each state, otherwise there would 
+        // have been an exception.
+        delta.clearValues(SystemAttributes.OBJECT_CLASS).addAll(
+            states[0].getValues(SystemAttributes.OBJECT_CLASS));
 
-      for (Iterator roleIter = roles.iterator(); roleIter.hasNext();) {
-        String roleName = (String)roleIter.next();
-        delta
-          .clearValues(
-            roleName
-              + ROLE_ATTRIBUTE_SEPARATOR
-              + SystemAttributes.OBJECT_CLASS)
-          .addAll(
-            existingRoleInstanceState.getValues(
-              roleName
+        for (Iterator roleIter = roles.iterator(); roleIter.hasNext();) {
+            String roleName = (String)roleIter.next();
+            delta
+            .clearValues(
+                roleName
                 + ROLE_ATTRIBUTE_SEPARATOR
-                + SystemAttributes.OBJECT_CLASS));
-      }
+                + SystemAttributes.OBJECT_CLASS)
+                .addAll(
+                    existingRoleInstanceState.getValues(
+                        roleName
+                        + ROLE_ATTRIBUTE_SEPARATOR
+                        + SystemAttributes.OBJECT_CLASS));
+        }
 
-      delta.clearValues(SystemAttributes.MODIFIED_AT).add(
-        0,
-        timeNow());
+        delta.clearValues(SystemAttributes.MODIFIED_AT).add(
+            0,
+            timeNow());
 
-      /*CR0000381
+        /*CR0000381
       String now = timeNow();
       delta.clearValues(role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CREATED_AT).
           add(now);
       delta.clearValues(role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_MODIFIED_AT).
           add(now);
-      */
-      return delta;
+         */
+        return delta;
     }
-        
-    
+
+
     //---------------------------------------------------------------------------
     /**
      * Prepare a DataproviderObject for removing all the attributes related 
@@ -3184,48 +3145,48 @@ public class Role_1
      * @param roleTypeCache   cache of retrieved roleTypes
      */
     private DataproviderObject removeRoleDependentAttributes(
-      ServiceHeader header,
-      DataproviderRequest request,
-      DataproviderObject dpo,
-      String deletingRole,
-      Map roleTypeCache
+        ServiceHeader header,
+        DataproviderRequest request,
+        DataproviderObject dpo,
+        String deletingRole,
+        Map roleTypeCache
     ) throws ServiceException  {
-      DataproviderObject cutter = null;
-      List roles = null;
+        DataproviderObject cutter = null;
+        List roles = null;
 
-      cutter = new DataproviderObject(dpo.path());
+        cutter = new DataproviderObject(dpo.path());
 
-      for (Iterator iter = dpo.attributeNames().iterator();
+        for (Iterator iter = dpo.attributeNames().iterator();
         iter.hasNext();
         ) {
-        String attrWithRole = (String)iter.next();
-        String role = null;
-        int pos = attrWithRole.indexOf(ROLE_ATTRIBUTE_SEPARATOR);
-        if (pos > 0) {
-          role = attrWithRole.substring(0, pos);
-          roles =
-            this.getRequiredRoles(
-              header,
-              request,
-              role,
-              roleTypeCache,
-              dpo.path(),
-              new HashMap());
-          if (roles.contains(deletingRole)) {
-            cutter.values(attrWithRole).clear();
-          }
+            String attrWithRole = (String)iter.next();
+            String role = null;
+            int pos = attrWithRole.indexOf(ROLE_ATTRIBUTE_SEPARATOR);
+            if (pos > 0) {
+                role = attrWithRole.substring(0, pos);
+                roles =
+                    this.getRequiredRoles(
+                        header,
+                        request,
+                        role,
+                        roleTypeCache,
+                        dpo.path(),
+                        new HashMap());
+                if (roles.contains(deletingRole)) {
+                    cutter.values(attrWithRole).clear();
+                }
+            }
         }
-      }
-      if (cutter.getValues(SystemAttributes.OBJECT_CLASS) == null) {
-        // need to maintain the object class of the core, otherwise
-        // state can't judge if it is statefull
-        cutter.values(SystemAttributes.OBJECT_CLASS).addAll(
-          dpo.values(SystemAttributes.OBJECT_CLASS));
-      }
+        if (cutter.getValues(SystemAttributes.OBJECT_CLASS) == null) {
+            // need to maintain the object class of the core, otherwise
+            // state can't judge if it is statefull
+            cutter.values(SystemAttributes.OBJECT_CLASS).addAll(
+                dpo.values(SystemAttributes.OBJECT_CLASS));
+        }
 
-      return cutter;
+        return cutter;
     }
-    
+
     //---------------------------------------------------------------------------
     /** 
      * Create an update object containing just the attributes of the new role.
@@ -3253,144 +3214,143 @@ public class Role_1
      * 
      */
     private DataproviderObject createUpdateObject(
-      DataproviderObject[] loadedStates,
-      DataproviderObject reqObject,
-      String role,
-      List   requiredRoles
+        DataproviderObject[] loadedStates,
+        DataproviderObject reqObject,
+        String role,
+        List   requiredRoles
     ) throws ServiceException {
-      DataproviderObject result =
-        new DataproviderObject(
-          toStatelessPath(new Path(loadedStates[0].path())));
-      // this must be the class which belongs to the role!
-      // it can also be one of the extensions of the class for the role.
-      List reqMostSpecificClassName =
-        reqObject.getValues(SystemAttributes.OBJECT_CLASS);
+        DataproviderObject result =
+            new DataproviderObject(
+                toStatelessPath(new Path(loadedStates[0].path())));
+        // this must be the class which belongs to the role!
+        // it can also be one of the extensions of the class for the role.
+        List reqMostSpecificClassName =
+            reqObject.getValues(SystemAttributes.OBJECT_CLASS);
 
-      // this is the class of the required role already present in the 
-      // object
-      List loadedMostSpecificClassName = null;
-      // must get it from loadedStates, only there the information is present
+        // this is the class of the required role already present in the 
+        // object
+        List loadedMostSpecificClassName = null;
+        // must get it from loadedStates, only there the information is present
 
-      // it may be that there are expanded classes in roles. Must find 
-      // most expanded class of all the loaded ones. Otherwise attributes 
-      // of this class which are present in update request would be 
-      // implied to the role
+        // it may be that there are expanded classes in roles. Must find 
+        // most expanded class of all the loaded ones. Otherwise attributes 
+        // of this class which are present in update request would be 
+        // implied to the role
 
-      for (int i = 0; i < loadedStates.length; i++) {
-        List loadedClassName = null;
-        if (requiredRoles != null
-          && requiredRoles.size() > 1
-          && requiredRoles.get(1) != null) {
-          loadedClassName =
-            loadedStates[i].getValues(
-              requiredRoles.get(1)
-                + ROLE_ATTRIBUTE_SEPARATOR
-                + SystemAttributes.OBJECT_CLASS);
+        for (int i = 0; i < loadedStates.length; i++) {
+            List loadedClassName = null;
+            if (requiredRoles != null
+                    && requiredRoles.size() > 1
+                    && requiredRoles.get(1) != null) {
+                loadedClassName =
+                    loadedStates[i].getValues(
+                        requiredRoles.get(1)
+                        + ROLE_ATTRIBUTE_SEPARATOR
+                        + SystemAttributes.OBJECT_CLASS);
+            }
+            else {
+                loadedClassName =
+                    loadedStates[i].getValues(SystemAttributes.OBJECT_CLASS);
+            }
+
+            if (loadedMostSpecificClassName == null) {
+                loadedMostSpecificClassName = loadedClassName;
+            }
+            else if (
+                    !loadedClassName.get(0).equals(
+                        loadedMostSpecificClassName.get(0))) {
+                ModelElement_1_0 loadedClass =
+                    this.model.getDereferencedType(loadedClassName.get(0));
+                ModelElement_1_0 loadedMostSpecificClass =
+                    this.model.getDereferencedType(loadedClassName.get(0));
+
+                if (loadedClass.getValues("allSupertype").size()
+                        > loadedMostSpecificClass.getValues("allSupertype").size()) {
+                    // loadedMostSpecificClass should be a supertype of 
+                    // loadedClass as it has a shorter allSupertype list.
+
+                    ModelElement_1_0 tmp = loadedClass;
+                    loadedClass = loadedMostSpecificClass;
+                    loadedMostSpecificClass = tmp;
+
+                    loadedMostSpecificClassName = loadedClassName;
+                }
+
+                // assert that it is true
+                if (!loadedMostSpecificClass
+                        .getValues("allSupertype")
+                        .contains(loadedClass.getValues("subtype"))) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "role classes of states are not extensions from each other.",
+                        new BasicException.Parameter("role", role),
+                        new BasicException.Parameter(
+                            "role class of state1",
+                            loadedMostSpecificClass.getValues("qualifiedName")),
+                            new BasicException.Parameter(
+                                "role class of state2",
+                                loadedMostSpecificClass.getValues("qualifiedName")),
+                                new BasicException.Parameter(
+                                    "object path",
+                                    reqObject.path()));
+                }
+            }
         }
-        else {
-          loadedClassName =
-            loadedStates[i].getValues(SystemAttributes.OBJECT_CLASS);
-        }
 
-        if (loadedMostSpecificClassName == null) {
-          loadedMostSpecificClassName = loadedClassName;
-        }
-        else if (
-          !loadedClassName.get(0).equals(
-            loadedMostSpecificClassName.get(0))) {
-          ModelElement_1_0 loadedClass =
-            this.model.getDereferencedType(loadedClassName.get(0));
-          ModelElement_1_0 loadedMostSpecificClass =
-            this.model.getDereferencedType(loadedClassName.get(0));
+        // object_class is needed for saving. It is the same as in the loaded.
+        // It should be the same for all states.
+        result.values(SystemAttributes.OBJECT_CLASS).set(
+            0,
+            loadedStates[0].getValues(SystemAttributes.OBJECT_CLASS).get(0));
 
-          if (loadedClass.getValues("allSupertype").size()
-            > loadedMostSpecificClass.getValues("allSupertype").size()) {
-            // loadedMostSpecificClass should be a supertype of 
-            // loadedClass as it has a shorter allSupertype list.
-
-            ModelElement_1_0 tmp = loadedClass;
-            loadedClass = loadedMostSpecificClass;
-            loadedMostSpecificClass = tmp;
-
-            loadedMostSpecificClassName = loadedClassName;
-          }
-
-          // assert that it is true
-          if (!loadedMostSpecificClass
-            .getValues("allSupertype")
-            .contains(loadedClass.getValues("subtype"))) {
-            throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.ASSERTION_FAILURE,
-              new BasicException.Parameter[] {
-                new BasicException.Parameter("role", role),
-                new BasicException.Parameter(
-                  "role class of state1",
-                  loadedMostSpecificClass.getValues("qualifiedName")),
-                new BasicException.Parameter(
-                  "role class of state2",
-                  loadedMostSpecificClass.getValues("qualifiedName")),
-                new BasicException.Parameter(
-                  "object path",
-                  reqObject.path())},
-              "role classes of states are not extensions from each other.");
-          }
-        }
-      }
-
-      // object_class is needed for saving. It is the same as in the loaded.
-      // It should be the same for all states.
-      result.values(SystemAttributes.OBJECT_CLASS).set(
-        0,
-        loadedStates[0].getValues(SystemAttributes.OBJECT_CLASS).get(0));
-
-      // The attributes to add must be part of the reqMostSpecific class and
-      // may not be part of the loadedMostSpecificClass (Each class holds
-      // its attributes and all the derived ones.) In the request there
-      // may also be attributes which don't belong to either class. This is 
-      // ok as the create request for a certain role may be made within any
-      // other role.
-      String attributeName = null;
-      for (Iterator attIter = reqObject.attributeNames().iterator();
+        // The attributes to add must be part of the reqMostSpecific class and
+        // may not be part of the loadedMostSpecificClass (Each class holds
+        // its attributes and all the derived ones.) In the request there
+        // may also be attributes which don't belong to either class. This is 
+        // ok as the create request for a certain role may be made within any
+        // other role.
+        String attributeName = null;
+        for (Iterator attIter = reqObject.attributeNames().iterator();
         attIter.hasNext();
         ) {
-        attributeName = (String)attIter.next();
+            attributeName = (String)attIter.next();
 
-        if (attributeName.equals(State_1_Attributes.VALID_FROM)
-          || attributeName.equals(State_1_Attributes.VALID_TO)
-          || attributeName.equals(SystemAttributes.MODIFIED_AT)
-          || attributeName.equals(SystemAttributes.MODIFIED_BY)) {
-          if (reqObject.getValues(attributeName) != null
-            && !reqObject.getValues(attributeName).isEmpty()) {
-            result.values(attributeName).set(
-              0,
-              reqObject.getValues(attributeName).get(0));
-          }
+            if (attributeName.equals(State_1_Attributes.VALID_FROM)
+                    || attributeName.equals(State_1_Attributes.VALID_TO)
+                    || attributeName.equals(SystemAttributes.MODIFIED_AT)
+                    || attributeName.equals(SystemAttributes.MODIFIED_BY)) {
+                if (reqObject.getValues(attributeName) != null
+                        && !reqObject.getValues(attributeName).isEmpty()) {
+                    result.values(attributeName).set(
+                        0,
+                        reqObject.getValues(attributeName).get(0));
+                }
+            }
+            // don't modify those system attributes
+            else if (
+                    !attributeName.equals(SystemAttributes.CREATED_AT)
+                    && !attributeName.equals(SystemAttributes.CREATED_BY)
+                    && !attributeName.equals(SystemAttributes.OBJECT_CLASS)
+                    && !attributeName.equals(RoleAttributes.IN_ROLE)
+                    && !attributeName.equals(RoleAttributes.HAS_ROLE)
+                    && !attributeName.equals(RoleAttributes.ROLE_TYPE)) {
+                if (classHasAttribute(reqMostSpecificClassName, attributeName)
+                        && !classHasAttribute(loadedMostSpecificClassName, attributeName)) {
+                    // it's a new valid attribute, add it                       
+                    result.values(
+                        role + ROLE_ATTRIBUTE_SEPARATOR + attributeName).addAll(
+                            reqObject.getValues(attributeName));
+                }
+            }
         }
-        // don't modify those system attributes
-        else if (
-          !attributeName.equals(SystemAttributes.CREATED_AT)
-            && !attributeName.equals(SystemAttributes.CREATED_BY)
-            && !attributeName.equals(SystemAttributes.OBJECT_CLASS)
-            && !attributeName.equals(RoleAttributes.IN_ROLE)
-            && !attributeName.equals(RoleAttributes.HAS_ROLE)
-            && !attributeName.equals(RoleAttributes.ROLE_TYPE)) {
-          if (classHasAttribute(reqMostSpecificClassName, attributeName)
-            && !classHasAttribute(loadedMostSpecificClassName, attributeName)) {
-            // it's a new valid attribute, add it                       
-            result.values(
-              role + ROLE_ATTRIBUTE_SEPARATOR + attributeName).addAll(
-              reqObject.getValues(attributeName));
-          }
-        }
-      }
-      result
+        result
         .values(
-          role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS)
-        .add(reqMostSpecificClassName.get(0));
-      return result;
+            role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS)
+            .add(reqMostSpecificClassName.get(0));
+        return result;
     }
-    
+
     //---------------------------------------------------------------------------
     /** 
      * Remove attributes which don't fit to one of the roles specified and 
@@ -3407,85 +3367,85 @@ public class Role_1
      * @param    obj       object to treat
      */ 
     private void reduceToRolesAndSpecifiedAttributes(
-      List roles, 
-      DataproviderObject_1_0 obj,
-      DataproviderRequest request
+        List roles, 
+        DataproviderObject_1_0 obj,
+        DataproviderRequest request
     ) {
-      String attrWithRole = null;
-      String role = null;
-      String attr = null;
-      Set allRoles = new HashSet();
-      int separatorPos = 0;
-      Map renamedAttributes = new HashMap();
+        String attrWithRole = null;
+        String role = null;
+        String attr = null;
+        Set allRoles = new HashSet();
+        int separatorPos = 0;
+        Map renamedAttributes = new HashMap();
 
-      Iterator attrIter = obj.attributeNames().iterator();
-      while (attrIter.hasNext()) {
-        role = null;
-        attrWithRole = (String)attrIter.next();
-        separatorPos = attrWithRole.indexOf(ROLE_ATTRIBUTE_SEPARATOR);
-        if (separatorPos > 0) { // there is a role
-          role = attrWithRole.substring(0, separatorPos);
-          allRoles.add(role); // collect all roles of this object
-          attr = attrWithRole.substring(separatorPos + 1);
-        }
-        else {
-          attr = attrWithRole;
-        }
+        Iterator attrIter = obj.attributeNames().iterator();
+        while (attrIter.hasNext()) {
+            role = null;
+            attrWithRole = (String)attrIter.next();
+            separatorPos = attrWithRole.indexOf(ROLE_ATTRIBUTE_SEPARATOR);
+            if (separatorPos > 0) { // there is a role
+                role = attrWithRole.substring(0, separatorPos);
+                allRoles.add(role); // collect all roles of this object
+                attr = attrWithRole.substring(separatorPos + 1);
+            }
+            else {
+                attr = attrWithRole;
+            }
 
-        // is the attribute part of the result
-        if (request.attributeSelector() == AttributeSelectors.NO_ATTRIBUTES
-          || (request.attributeSelector() != AttributeSelectors.ALL_ATTRIBUTES
-          && // all attributes received from super are typical
-        request
-          .attributeSelector()
-            != AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES
-          && // the only remaining option:
-        request.attributeSelector()
-            == AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES
-            && !request.attributeSpecifierAsMap().containsKey(attr)
-            && !attr.equals(SystemAttributes.MODIFIED_AT)
-            && !attr.equals(SystemAttributes.MODIFIED_BY)
-            && !attr.equals(SystemAttributes.CREATED_AT)
-            && !attr.equals(SystemAttributes.CREATED_BY)
-            && !attr.equals(SystemAttributes.OBJECT_CLASS)
-            && !attr.equals(State_1_Attributes.VALID_FROM)
-            && !attr.equals(State_1_Attributes.VALID_TO))) {
-          attrIter.remove(); // the attribute is not part of the result
-        }
-        else if (role != null) { // is it part of the wanted roles
-          if (roles.contains(role)
-            && // if it is in the roles required
-          !attrWithRole.endsWith(
-              ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS)
-            /* CR0000381
+            // is the attribute part of the result
+            if (request.attributeSelector() == AttributeSelectors.NO_ATTRIBUTES
+                    || (request.attributeSelector() != AttributeSelectors.ALL_ATTRIBUTES
+                            && // all attributes received from super are typical
+                            request
+                            .attributeSelector()
+                            != AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES
+                            && // the only remaining option:
+                            request.attributeSelector()
+                            == AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES
+                            && !request.attributeSpecifierAsMap().containsKey(attr)
+                            && !attr.equals(SystemAttributes.MODIFIED_AT)
+                            && !attr.equals(SystemAttributes.MODIFIED_BY)
+                            && !attr.equals(SystemAttributes.CREATED_AT)
+                            && !attr.equals(SystemAttributes.CREATED_BY)
+                            && !attr.equals(SystemAttributes.OBJECT_CLASS)
+                            && !attr.equals(State_1_Attributes.VALID_FROM)
+                            && !attr.equals(State_1_Attributes.VALID_TO))) {
+                attrIter.remove(); // the attribute is not part of the result
+            }
+            else if (role != null) { // is it part of the wanted roles
+                if (roles.contains(role)
+                        && // if it is in the roles required
+                        !attrWithRole.endsWith(
+                            ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS)
+                            /* CR0000381
           &&
           !attrWithRole.endsWith(ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CREATED_AT) &&
           !attrWithRole.endsWith(ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_MODIFIED_AT) 
-          */
-            ) {
-            renamedAttributes.put(// cut off role specifier
-            attr, obj.values(attrWithRole));
-          }
-          attrIter.remove(); // remove all with role spec.
+                             */
+                ) {
+                    renamedAttributes.put(// cut off role specifier
+                        attr, obj.values(attrWithRole));
+                }
+                attrIter.remove(); // remove all with role spec.
+            }
+            // else it is an attribute without role which stays 
         }
-        // else it is an attribute without role which stays 
-      }
 
-      // now add the renamed attributes again
-      Iterator entriesIter = renamedAttributes.entrySet().iterator();
-      Map.Entry entry = null;
-      while (entriesIter.hasNext()) {
-        entry = (Map.Entry)entriesIter.next();
-        obj.values((String)entry.getKey()).addAll(
-          (SparseList)entry.getValue());
-      }
+        // now add the renamed attributes again
+        Iterator entriesIter = renamedAttributes.entrySet().iterator();
+        Map.Entry entry = null;
+        while (entriesIter.hasNext()) {
+            entry = (Map.Entry)entriesIter.next();
+            obj.values((String)entry.getKey()).addAll(
+                (SparseList)entry.getValue());
+        }
 
-      // now add allRoles
-      if (allRoles.size() > 0) {
-        obj.clearValues(RoleAttributes.HAS_ROLE).addAll(allRoles);
-      }
+        // now add allRoles
+        if (allRoles.size() > 0) {
+            obj.clearValues(RoleAttributes.HAS_ROLE).addAll(allRoles);
+        }
     } 
-        
+
     //---------------------------------------------------------------------------
     /**
      * Get all the roles which are required for the basicRole specified.
@@ -3503,49 +3463,49 @@ public class Role_1
      * @return  ordered list of all roles starting with basicRole.
      */
     private List getRequiredRoles(
-      ServiceHeader header,
-      DataproviderRequest request,
-      String basicRole, 
-      Map roleTypeCache,
-      Path objPath,
-      Map requiredRoleTypeObjects
+        ServiceHeader header,
+        DataproviderRequest request,
+        String basicRole, 
+        Map roleTypeCache,
+        Path objPath,
+        Map requiredRoleTypeObjects
     ) throws ServiceException {        
-      DataproviderObject roleType = null;
-      List coreRoles = new ArrayList();
+        DataproviderObject roleType = null;
+        List coreRoles = new ArrayList();
 
-      if (basicRole != null) {
-        Path roleTypeBasePath = this.getRoleTypesPath(objPath);
-        roleType =
-          getRoleType(
-            header,
-            request,
-            basicRole,
-            roleTypeCache,
-            roleTypeBasePath);
+        if (basicRole != null) {
+            Path roleTypeBasePath = this.getRoleTypesPath(objPath);
+            roleType =
+                getRoleType(
+                    header,
+                    request,
+                    basicRole,
+                    roleTypeCache,
+                    roleTypeBasePath);
 
-        //
-        // now check for core roles        
-        //
-        coreRoles.add(basicRole);
-        requiredRoleTypeObjects.put(basicRole, roleType);
-        while (roleType != null
-          && !roleType.values(ROLETYPE_CORE_ROLE_ATTRIBUTE).isEmpty()) {
-          String coreRole =
-            (String)roleType.values(ROLETYPE_CORE_ROLE_ATTRIBUTE).get(0);
-          coreRoles.add(coreRole);
-          requiredRoleTypeObjects.put(coreRole, roleType);
-          roleType =
-            getRoleType(
-              header,
-              request,
-              coreRole,
-              roleTypeCache,
-              roleTypeBasePath);
+            //
+            // now check for core roles        
+            //
+            coreRoles.add(basicRole);
+            requiredRoleTypeObjects.put(basicRole, roleType);
+            while (roleType != null
+                    && !roleType.values(ROLETYPE_CORE_ROLE_ATTRIBUTE).isEmpty()) {
+                String coreRole =
+                    (String)roleType.values(ROLETYPE_CORE_ROLE_ATTRIBUTE).get(0);
+                coreRoles.add(coreRole);
+                requiredRoleTypeObjects.put(coreRole, roleType);
+                roleType =
+                    getRoleType(
+                        header,
+                        request,
+                        coreRole,
+                        roleTypeCache,
+                        roleTypeBasePath);
+            }
         }
-      }
-      return coreRoles;
+        return coreRoles;
     }
-           
+
     //---------------------------------------------------------------------------
     /**
      * Setup Reply according to the role demanded:
@@ -3568,158 +3528,157 @@ public class Role_1
      *              on failure
      */
     private DataproviderReply completeReply(
-      ServiceHeader header,
-      DataproviderRequest request,
-      DataproviderReply reply,
-      String requestedRole,
-      Path virtualRoleTypePath,        
-      Map roleTypeCache
+        ServiceHeader header,
+        DataproviderRequest request,
+        DataproviderReply reply,
+        String requestedRole,
+        Path virtualRoleTypePath,        
+        Map roleTypeCache
     ) throws ServiceException {
-        
-      if (virtualRoleTypePath != null) {
 
-        for (int i = 0; i < reply.getObjects().length; i++) {
-          // get or find on virtual role type path. The objects returned must contain 
-          // the virtual role type path as demanded in the query.
+        if (virtualRoleTypePath != null) {
 
-          // add id if needed
-          Path virtual = new Path(virtualRoleTypePath);
-          if (!virtual
-            .getBase()
-            .equals(reply.getObjects()[i].path().getBase())) {
-            virtual.add(reply.getObjects()[i].path().getBase());
-          }
-          reply.getObjects()[i].path().setTo(virtual);
+            for (int i = 0; i < reply.getObjects().length; i++) {
+                // get or find on virtual role type path. The objects returned must contain 
+                // the virtual role type path as demanded in the query.
 
-          String virtualClassName =
-            roleTypeVirtualMap.getVirtualClassName(
-              (String)reply.getObjects()[i].values(
-                SystemAttributes.OBJECT_CLASS).get(
-                0));
-          if (virtualClassName == null) {
-            throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.ASSERTION_FAILURE,
-              new BasicException.Parameter[] {
-                new BasicException.Parameter(
-                  "path",
-                  reply.getObjects()[i].path()),
-                new BasicException.Parameter(
-                  "role",
-                  reply.getObjects()[i].values(
-                    SystemAttributes.OBJECT_CLASS).get(
-                    0))},
-              "Missing virtual class for remapped role type. (Configuration entries "
-                + LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_CLASS
-                + " and "
-                + LayerConfigurationEntries.ROLE_TYPE_MAPPING_VIRTUAL_CLASS
-                + ")");
-          }
-          else {
-            reply.getObjects()[i].clearValues(
-              SystemAttributes.OBJECT_CLASS).add(
-              virtualClassName);
-          }
+                // add id if needed
+                Path virtual = new Path(virtualRoleTypePath);
+                if (!virtual
+                        .getBase()
+                        .equals(reply.getObjects()[i].path().getBase())) {
+                    virtual.add(reply.getObjects()[i].path().getBase());
+                }
+                reply.getObjects()[i].path().setTo(virtual);
+
+                String virtualClassName =
+                    roleTypeVirtualMap.getVirtualClassName(
+                        (String)reply.getObjects()[i].values(
+                            SystemAttributes.OBJECT_CLASS).get(
+                                0));
+                if (virtualClassName == null) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "Missing virtual class for remapped role type. (Configuration entries "
+                        + LayerConfigurationEntries.ROLE_TYPE_MAPPING_REAL_CLASS
+                        + " and "
+                        + LayerConfigurationEntries.ROLE_TYPE_MAPPING_VIRTUAL_CLASS
+                        + ")",
+                        new BasicException.Parameter(
+                            "path",
+                            reply.getObjects()[i].path()),
+                            new BasicException.Parameter(
+                                "role",
+                                reply.getObjects()[i].values(
+                                    SystemAttributes.OBJECT_CLASS).get(
+                                        0)));
+                }
+                else {
+                    reply.getObjects()[i].clearValues(
+                        SystemAttributes.OBJECT_CLASS).add(
+                            virtualClassName);
+                }
+            }
         }
-      }
 
-      List replyObjects = new ArrayList();
+        List replyObjects = new ArrayList();
 
-      Map requiredRoleObjects = new HashMap();
-      List requiredRoles = null;
-      requiredRoles =
-        getRequiredRoles(
-          header,
-          request,
-          requestedRole,
-          roleTypeCache,
-          toRolelessPath(new Path(request.path())),
-          requiredRoleObjects);
-
-      DataproviderObject original = null;
-      DataproviderObject prepared = null;
-      for (int i = 0; i < reply.getObjects().length; i++) {
-        if (i == 0) {
-          // get a copy for adding other roles.
-          original = new DataproviderObject(reply.getObjects()[i], true);
-        }
-        prepared = reply.getObjects()[i];
-        this.prepareReplyObject(
-          header,
-          request,
-          prepared,
-          requestedRole,
-          requiredRoles,
-          roleTypeCache);
-        replyObjects.add(prepared);
-      }
-
-      if (reply.getObjects().length == 1
-        && request.operation()
-          == DataproviderOperations
-            .OBJECT_RETRIEVAL //            && request.operation() != DataproviderOperations.ITERATION_CONTINUATION
-      //            && request.operation() != DataproviderOperations.ITERATION_START
-      //            && request.operation() != DataproviderOperations.OBJECT_MONITORING
-      //            && request.operation() != DataproviderOperations.OBJECT_OPERATION
-      //            && request.operation() != DataproviderOperations.OBJECT_REMOVAL
-        && prepared.getValues(RoleAttributes.HAS_ROLE) != null) {
-        // supply all roles at once; requested role must be first in reply,
-        // and was already added above.
-        List rolesAndBase =
-          new ArrayList(prepared.getValues(RoleAttributes.HAS_ROLE));
-        rolesAndBase.add(null); // add null for base
-        for (Iterator r = rolesAndBase.iterator(); r.hasNext();) {
-          String replyRole = (String)r.next();
-
-          // got requested already                
-          if (!(requestedRole == null && replyRole == null)
-            && !(replyRole != null && replyRole.equals(requestedRole))) {
-            DataproviderObject current =
-              new DataproviderObject(original, true);
-            try {
-              requiredRoles =
-                getRequiredRoles(
-                  header,
-                  request,
-                  replyRole,
-                  roleTypeCache,
-                  toRolelessPath(new Path(request.path())),
-                  requiredRoleObjects);
-
-              this.prepareReplyObject(
+        Map requiredRoleObjects = new HashMap();
+        List requiredRoles = null;
+        requiredRoles =
+            getRequiredRoles(
                 header,
                 request,
-                current,
-                replyRole,
+                requestedRole,
+                roleTypeCache,
+                toRolelessPath(new Path(request.path())),
+                requiredRoleObjects);
+
+        DataproviderObject original = null;
+        DataproviderObject prepared = null;
+        for (int i = 0; i < reply.getObjects().length; i++) {
+            if (i == 0) {
+                // get a copy for adding other roles.
+                original = new DataproviderObject(reply.getObjects()[i], true);
+            }
+            prepared = reply.getObjects()[i];
+            this.prepareReplyObject(
+                header,
+                request,
+                prepared,
+                requestedRole,
                 requiredRoles,
                 roleTypeCache);
-              replyObjects.add(current);
-            }
-            catch (ServiceException se) {
-              // just ignore. If anything goes wrong one of the 
-              // additional roles will be missing. As these are only 
-              // provided for performance reasons, the main result
-              // is still valid. If the erronous role is accessed 
-              // later on, the exception will reoccur.
-            }
-          }
-
-          // in any case add roletype, they have not already been added.
-          for (Iterator o = requiredRoleObjects.values().iterator();
-            o.hasNext();
-            ) {
-            DataproviderObject role =
-              new DataproviderObject((DataproviderObject)o.next());
-            replyObjects.add(role);
-          }
+            replyObjects.add(prepared);
         }
-      }
-      DataproviderReply newReply = super.completeReply(
-          request,
-          new DataproviderReply(replyObjects)
-      );
-      newReply.contexts().putAll(reply.contexts());
-      return newReply;
+
+        if (reply.getObjects().length == 1
+                && request.operation()
+                == DataproviderOperations
+                .OBJECT_RETRIEVAL //            && request.operation() != DataproviderOperations.ITERATION_CONTINUATION
+                //            && request.operation() != DataproviderOperations.ITERATION_START
+                //            && request.operation() != DataproviderOperations.OBJECT_MONITORING
+                //            && request.operation() != DataproviderOperations.OBJECT_OPERATION
+                //            && request.operation() != DataproviderOperations.OBJECT_REMOVAL
+                && prepared.getValues(RoleAttributes.HAS_ROLE) != null) {
+            // supply all roles at once; requested role must be first in reply,
+            // and was already added above.
+            List rolesAndBase =
+                new ArrayList(prepared.getValues(RoleAttributes.HAS_ROLE));
+            rolesAndBase.add(null); // add null for base
+            for (Iterator r = rolesAndBase.iterator(); r.hasNext();) {
+                String replyRole = (String)r.next();
+
+                // got requested already                
+                if (!(requestedRole == null && replyRole == null)
+                        && !(replyRole != null && replyRole.equals(requestedRole))) {
+                    DataproviderObject current =
+                        new DataproviderObject(original, true);
+                    try {
+                        requiredRoles =
+                            getRequiredRoles(
+                                header,
+                                request,
+                                replyRole,
+                                roleTypeCache,
+                                toRolelessPath(new Path(request.path())),
+                                requiredRoleObjects);
+
+                        this.prepareReplyObject(
+                            header,
+                            request,
+                            current,
+                            replyRole,
+                            requiredRoles,
+                            roleTypeCache);
+                        replyObjects.add(current);
+                    }
+                    catch (ServiceException se) {
+                        // just ignore. If anything goes wrong one of the 
+                        // additional roles will be missing. As these are only 
+                        // provided for performance reasons, the main result
+                        // is still valid. If the erronous role is accessed 
+                        // later on, the exception will reoccur.
+                    }
+                }
+
+                // in any case add roletype, they have not already been added.
+                for (Iterator o = requiredRoleObjects.values().iterator();
+                o.hasNext();
+                ) {
+                    DataproviderObject role =
+                        new DataproviderObject((DataproviderObject)o.next());
+                    replyObjects.add(role);
+                }
+            }
+        }
+        DataproviderReply newReply = super.completeReply(
+            request,
+            new DataproviderReply(replyObjects)
+        );
+        newReply.contexts().putAll(reply.contexts());
+        return newReply;
     }
 
     //---------------------------------------------------------------------------
@@ -3735,18 +3694,18 @@ public class Role_1
      * @return true if object has role or the role specified was null
      */
     private boolean objectHasRole(
-      DataproviderObject_1_0 obj, 
-      String role
+        DataproviderObject_1_0 obj, 
+        String role
     ) {
-      if(role != null) {
-          List indicator = obj.getValues(role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS);
-          return (indicator != null) && !indicator.isEmpty();
-      }
-      else {
-          return true;
-      }
+        if(role != null) {
+            List indicator = obj.getValues(role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS);
+            return (indicator != null) && !indicator.isEmpty();
+        }
+        else {
+            return true;
+        }
     }    
-    
+
     //---------------------------------------------------------------------------
     /**
      * Adds a filter for the specified role to a request
@@ -3759,35 +3718,31 @@ public class Role_1
      * @return   same request with added role
      */    
     private DataproviderRequest addRoleFilter(    
-      DataproviderRequest request,
-      String role,
-      boolean wantedRole
+        DataproviderRequest request,
+        String role,
+        boolean wantedRole
     ) {
-      if (wantedRole) {
-        request
-          .addAttributeFilterProperty(new FilterProperty(
-            Quantors.THERE_EXISTS,
-            role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS,
-        // existence of attribute means that role is supported
-        FilterOperators.IS_NOT_IN, // IS_LIKE, 
-        new Object[] {
-        } // new String[] {"%"}
-        ));
-      }
-      else {
-        request
-          .addAttributeFilterProperty(new FilterProperty(
-            Quantors.FOR_ALL,
-            role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS,
-        // existence of attribute means that role is supported
-        FilterOperators.IS_IN, //IS_NOT_IN,  // IS_LIKE, 
-        new Object[] {
-        } //new Object[] {}                        // new String[] {"%"}
-        ));
-      }
-      return request;
+        if (wantedRole) {
+            request
+            .addAttributeFilterProperty(new FilterProperty(
+                Quantors.THERE_EXISTS,
+                role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS,
+                // existence of attribute means that role is supported
+                FilterOperators.IS_NOT_IN
+            ));
+        }
+        else {
+            request
+            .addAttributeFilterProperty(new FilterProperty(
+                Quantors.FOR_ALL,
+                role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS,
+                // existence of attribute means that role is supported
+                FilterOperators.IS_IN
+            ));
+        }
+        return request;
     }        
-    
+
     /**
      * Detect if the iteration is over the roles of an object.
      * 
@@ -3827,140 +3782,138 @@ public class Role_1
      * @throws ServiceException
      */
     private DataproviderReply findRoleIteration(
-      ServiceHeader header,
-      DataproviderRequest request
+        ServiceHeader header,
+        DataproviderRequest request
     ) throws ServiceException {
-      List replyObjects = new ArrayList();
-      if (request.operation() == DataproviderOperations.ITERATION_START) {
+        List replyObjects = new ArrayList();
+        if (request.operation() == DataproviderOperations.ITERATION_START) {
 
-        //
-        //          Enable filtering:
-        //            
-        DataproviderObjectFilter filter;
-        try {
-          filter = new DataproviderObjectFilter(request.attributeFilter());
-        }
-        catch (RuntimeException exception) {
-          throw new ServiceException(
-            exception,
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.BAD_PARAMETER,
-            new BasicException.Parameter[] {
-               new BasicException.Parameter(
-                "attributeFilter",
-                request.attributeFilter())},
-            "Invalid attribute filter");
-        }
-
-        // 
-        //          if (request.attributeFilter().length > 0) throw new ServiceException(
-        //                StackedException.DEFAULT_DOMAIN,
-        //                StackedException.NOT_SUPPORTED,
-        //                new BasicException.Parameter[] { new BasicException.Parameter("filters", request.attributeFilter())},
-        //                "No filters allowed for iterating roles."
-        //          );
-
-        //            for (int i = 0; i < attrFilters.length; i++) {                 
-        //                if (attrFilters[i] != null && 
-        //                    attrFilters[i].name() != null
-        //                ) {
-        //                    if (attrFilters[i].name().equals(RoleAttributes.HAS_ROLE) 
-        //                        || attrFilters[i].name().equals(RoleAttributes.IN_ROLE)
-        //                        || attrFilters[i].name().equals(SystemAttributes.OBJECT_CLASS)
-        //                        || attrFilters[i].name().equals(SystemAttributes.OBJECT_INSTANCE_OF)
-        //                    ) {
-        //                        throw new ServiceException(
-        //                            StackedException.DEFAULT_DOMAIN,
-        //                            StackedException.NOT_SUPPORTED, 
-        //                            new BasicException.Parameter[]{
-        //                                new BasicException.Parameter(
-        //                                    "FilterProperty.name", 
-        //                                    attrFilters[i].name()
-        //                                )
-        //                            },
-        //                            "FilterProperty for attribute not supported when iterating over the roles of an object." 
-        //                        );
-        //                    }
-        //                }
-        //            }
-        // get object with all roles:
-        Path noRolePath = toRolelessPath(new Path(request.path()));
-        // must remove last role entry
-        if (noRolePath.getBase().equals(ROLE_PATH_ENTRY)) {
-          noRolePath.remove(noRolePath.size() - 1);
-        }
-
-        DataproviderRequest localRequest =
-          new DataproviderRequest(
-            new DataproviderObject(noRolePath),
-            DataproviderOperations.OBJECT_RETRIEVAL,
-            AttributeSelectors.ALL_ATTRIBUTES,
-            null);
-        localRequest.contexts().putAll(request.contexts());
-
-        DataproviderReply superReply = super.get(header, localRequest);
-
-        // now prepare a reply object for each of the roles the object has
-        for (Iterator a = superReply.getObject().attributeNames().iterator();
-          a.hasNext();
-          ) {
-          String attribute = (String)a.next();
-
-          if (attribute
-            .endsWith(
-              ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS)) {
-            int pos = attribute.indexOf(ROLE_ATTRIBUTE_SEPARATOR);
-            String role = attribute.substring(0, pos);
-
-            DataproviderObject object =
-              new DataproviderObject(superReply.getObject());
-
-            List requiredRoles =
-              getRequiredRoles(
-                header,
-                request,
-                role,
-                this.roleTypes,
-                noRolePath,
-                new HashMap());
-
-            prepareReplyObject(
-              header,
-              request,
-              object,
-              role,
-              requiredRoles,
-              this.roleTypes);
             //
-            //                  Enable filtering:
+            //          Enable filtering:
             //            
-            if (filter.accept(object))
-              replyObjects.add(object);
+            DataproviderObjectFilter filter;
+            try {
+                filter = new DataproviderObjectFilter(request.attributeFilter());
+            }
+            catch (RuntimeException exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_PARAMETER,
+                    "Invalid attribute filter",
+                    new BasicException.Parameter(
+                        "attributeFilter",
+                        (Object[])request.attributeFilter()));
+            }
 
-          }
+            // 
+            //          if (request.attributeFilter().length > 0) throw new ServiceException(
+            //                StackedException.DEFAULT_DOMAIN,
+            //                StackedException.NOT_SUPPORTED,
+            //                new BasicException.Parameter[] { new BasicException.Parameter("filters", request.attributeFilter())},
+            //                "No filters allowed for iterating roles."
+            //          );
+
+            //            for (int i = 0; i < attrFilters.length; i++) {                 
+            //                if (attrFilters[i] != null && 
+            //                    attrFilters[i].name() != null
+            //                ) {
+            //                    if (attrFilters[i].name().equals(RoleAttributes.HAS_ROLE) 
+            //                        || attrFilters[i].name().equals(RoleAttributes.IN_ROLE)
+            //                        || attrFilters[i].name().equals(SystemAttributes.OBJECT_CLASS)
+            //                        || attrFilters[i].name().equals(SystemAttributes.OBJECT_INSTANCE_OF)
+            //                    ) {
+            //                        throw new ServiceException(
+            //                            StackedException.DEFAULT_DOMAIN,
+            //                            StackedException.NOT_SUPPORTED, 
+            //                            new BasicException.Parameter[]{
+            //                                new BasicException.Parameter(
+            //                                    "FilterProperty.name", 
+            //                                    attrFilters[i].name()
+            //                                )
+            //                            },
+            //                            "FilterProperty for attribute not supported when iterating over the roles of an object." 
+            //                        );
+            //                    }
+            //                }
+            //            }
+            // get object with all roles:
+            Path noRolePath = toRolelessPath(new Path(request.path()));
+            // must remove last role entry
+            if (noRolePath.getBase().equals(ROLE_PATH_ENTRY)) {
+                noRolePath.remove(noRolePath.size() - 1);
+            }
+
+            DataproviderRequest localRequest =
+                new DataproviderRequest(
+                    new DataproviderObject(noRolePath),
+                    DataproviderOperations.OBJECT_RETRIEVAL,
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    null);
+            localRequest.contexts().putAll(request.contexts());
+
+            DataproviderReply superReply = super.get(header, localRequest);
+
+            // now prepare a reply object for each of the roles the object has
+            for (Iterator a = superReply.getObject().attributeNames().iterator();
+            a.hasNext();
+            ) {
+                String attribute = (String)a.next();
+
+                if (attribute
+                        .endsWith(
+                            ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS)) {
+                    int pos = attribute.indexOf(ROLE_ATTRIBUTE_SEPARATOR);
+                    String role = attribute.substring(0, pos);
+
+                    DataproviderObject object =
+                        new DataproviderObject(superReply.getObject());
+
+                    List requiredRoles =
+                        getRequiredRoles(
+                            header,
+                            request,
+                            role,
+                            this.roleTypes,
+                            noRolePath,
+                            new HashMap());
+
+                    prepareReplyObject(
+                        header,
+                        request,
+                        object,
+                        role,
+                        requiredRoles,
+                        this.roleTypes);
+                    //
+                    //                  Enable filtering:
+                    //            
+                    if (filter.accept(object))
+                        replyObjects.add(object);
+
+                }
+            }
         }
-      }
-      else if (
-        request.operation()
-          == DataproviderOperations.ITERATION_CONTINUATION) {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.NOT_SUPPORTED,
-          new BasicException.Parameter[] {
-             new BasicException.Parameter("request.path", request.path())},
-          "iteration continuation not supported for role iteration.");
-      }
+        else if (
+                request.operation()
+                == DataproviderOperations.ITERATION_CONTINUATION) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "iteration continuation not supported for role iteration.",
+                new BasicException.Parameter("request.path", request.path()));
+        }
 
-      DataproviderReply reply = new DataproviderReply(replyObjects);
+        DataproviderReply reply = new DataproviderReply(replyObjects);
 
-      reply.context(DataproviderReplyContexts.HAS_MORE).set(0, Boolean.FALSE);
-      reply.context(DataproviderReplyContexts.TOTAL).set(0, new Integer(replyObjects.size()));
-      reply.context(DataproviderReplyContexts.REFERENCE_FILTER).set(
-        0,
-        request.path().toString());
-      return reply;
+        reply.context(DataproviderReplyContexts.HAS_MORE).set(0, Boolean.FALSE);
+        reply.context(DataproviderReplyContexts.TOTAL).set(0, new Integer(replyObjects.size()));
+        reply.context(DataproviderReplyContexts.REFERENCE_FILTER).set(
+            0,
+            request.path().toString());
+        return reply;
     }
-    
+
     //-----------------------------------------------------------------------
     /** 
      * Prepare the object as a reply object for the role specified.
@@ -3974,217 +3927,216 @@ public class Role_1
      * @throws ServiceException
      */
     private void prepareReplyObject(
-      ServiceHeader header,
-      DataproviderRequest request, 
-      DataproviderObject_1_0 object,
-      String role, 
-      List requiredRoles,
-      Map roleTypeCache
+        ServiceHeader header,
+        DataproviderRequest request, 
+        DataproviderObject_1_0 object,
+        String role, 
+        List requiredRoles,
+        Map roleTypeCache
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("RoleObject_1.prepReply");
-      try {
-        String[] rolePathEnding = null;
+        StopWatch_1.instance().startTimer("RoleObject_1.prepReply");
+        try {
+            String[] rolePathEnding = null;
 
-        int rolesSize = requiredRoles.size();
-        rolePathEnding = new String[rolesSize * 2];
-        for (int r = 0; r < rolesSize; r++) {
-          rolePathEnding[2 * r] = this.ROLE_PATH_ENTRY;
-          rolePathEnding[2 * r + 1] =
-            (String)requiredRoles.get(rolesSize - 1 - r);
+            int rolesSize = requiredRoles.size();
+            rolePathEnding = new String[rolesSize * 2];
+            for (int r = 0; r < rolesSize; r++) {
+                rolePathEnding[2 * r] = this.ROLE_PATH_ENTRY;
+                rolePathEnding[2 * r + 1] =
+                    (String)requiredRoles.get(rolesSize - 1 - r);
+            }
+
+            // check that the object supports the role demanded
+            if (objectHasRole(object, role)) {
+                if (role != null) {
+                    object.clearValues(RoleAttributes.IN_ROLE).addAll(requiredRoles);
+                    this.addRolePathToPath(rolePathEnding, object.path());
+
+                    // get most specific object_class for the  hierarchy
+                    // most specific object class is the one of the outermost
+                    // role.                            
+                    object.clearValues(SystemAttributes.OBJECT_CLASS).addAll(
+                        object.values(
+                            role
+                            + ROLE_ATTRIBUTE_SEPARATOR
+                            + SystemAttributes.OBJECT_CLASS));
+
+                    // add derived attribute roleType (no checking done here,
+                    // just assume the roleType exists.) 
+                    Path roleTypePath =
+                        this.getRoleTypesPath(object.path()).add(
+                            object.path().getBase());
+                    object.clearValues(RoleAttributes.ROLE_TYPE).add(0, roleTypePath);
+                    this.assertCompleteRoleType(
+                        header,
+                        request,
+                        role,
+                        roleTypeCache,
+                        object);
+                    this.assertRequiredRoles(
+                        requiredRoles,
+                        null,
+                        new DataproviderObject_1_0[] { object });
+                }
+                this.reduceToRolesAndSpecifiedAttributes(
+                    requiredRoles,
+                    object,
+                    request);
+            }
+            else {
+                // can not remove single object from reply (no access)
+                // can not create new reply because context would be lost
+                // the only thing which remains:
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "reply object is not in expected role. can not complete reply.",
+                    new BasicException.Parameter("reply object", object),
+                    new BasicException.Parameter("role", role));
+            }
         }
-
-        // check that the object supports the role demanded
-        if (objectHasRole(object, role)) {
-          if (role != null) {
-            object.clearValues(RoleAttributes.IN_ROLE).addAll(requiredRoles);
-            this.addRolePathToPath(rolePathEnding, object.path());
-
-            // get most specific object_class for the  hierarchy
-            // most specific object class is the one of the outermost
-            // role.                            
-            object.clearValues(SystemAttributes.OBJECT_CLASS).addAll(
-              object.values(
-                role
-                  + ROLE_ATTRIBUTE_SEPARATOR
-                  + SystemAttributes.OBJECT_CLASS));
-
-            // add derived attribute roleType (no checking done here,
-            // just assume the roleType exists.) 
-            Path roleTypePath =
-              this.getRoleTypesPath(object.path()).add(
-                object.path().getBase());
-            object.clearValues(RoleAttributes.ROLE_TYPE).add(0, roleTypePath);
-            this.assertCompleteRoleType(
-              header,
-              request,
-              role,
-              roleTypeCache,
-              object);
-            this.assertRequiredRoles(
-              requiredRoles,
-              null,
-              new DataproviderObject_1_0[] { object });
-          }
-          this.reduceToRolesAndSpecifiedAttributes(
-            requiredRoles,
-            object,
-            request);
+        finally {
+            StopWatch_1.instance().stopTimer("RoleObject_1.prepReply");
         }
-        else {
-          // can not remove single object from reply (no access)
-          // can not create new reply because context would be lost
-          // the only thing which remains:
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_FOUND,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("reply object", object),
-              new BasicException.Parameter("role", role)},
-            "reply object is not in expected role. can not complete reply.");
-        }
-      }
-      finally {
-        StopWatch_1.instance().stopTimer("RoleObject_1.prepReply");
-      }
     }
-    
+
     //-----------------------------------------------------------------------
     private DataproviderRequest removeRoleAttributeSpecifier(
-      DataproviderRequest request
+        DataproviderRequest request
     ) throws ServiceException {
-      DataproviderRequest replyRequest = null;
-      final Set derivedRoleAttributes = new HashSet();
-      derivedRoleAttributes.add(RoleAttributes.HAS_ROLE);
-      derivedRoleAttributes.add(RoleAttributes.IN_ROLE);
-      derivedRoleAttributes.add(RoleAttributes.ROLE_TYPE);
+        DataproviderRequest replyRequest = null;
+        final Set derivedRoleAttributes = new HashSet();
+        derivedRoleAttributes.add(RoleAttributes.HAS_ROLE);
+        derivedRoleAttributes.add(RoleAttributes.IN_ROLE);
+        derivedRoleAttributes.add(RoleAttributes.ROLE_TYPE);
 
-      boolean hasDerived = false;
-      List newSpecifier = new ArrayList();
+        boolean hasDerived = false;
+        List newSpecifier = new ArrayList();
 
-      for (Iterator a = derivedRoleAttributes.iterator();
+        for (Iterator a = derivedRoleAttributes.iterator();
         a.hasNext() && !hasDerived;
         ) {
-        hasDerived = request.attributeSpecifierAsMap().containsKey(a.next());
-      }
-
-      if (hasDerived) {
-        for (int i = 0; i < request.attributeSpecifier().length; i++) {
-          if (!derivedRoleAttributes
-            .contains(request.attributeSpecifier()[i].name())) {
-            newSpecifier.add(request.attributeSpecifier()[i]);
-          }
+            hasDerived = request.attributeSpecifierAsMap().containsKey(a.next());
         }
-        replyRequest =
-          new DataproviderRequest(
-            request.object(),
-            request.operation(),
-            request.attributeFilter(),
-            request.position(),
-            request.size(),
-            request.direction(),
-            request.attributeSelector(),
-            (AttributeSpecifier[])newSpecifier.toArray(
-              new AttributeSpecifier[newSpecifier.size()]));
-        replyRequest.contexts().putAll(request.contexts());
-      }
-      else {
-        replyRequest = request;
-      }
-      return replyRequest;
+
+        if (hasDerived) {
+            for (int i = 0; i < request.attributeSpecifier().length; i++) {
+                if (!derivedRoleAttributes
+                        .contains(request.attributeSpecifier()[i].name())) {
+                    newSpecifier.add(request.attributeSpecifier()[i]);
+                }
+            }
+            replyRequest =
+                new DataproviderRequest(
+                    request.object(),
+                    request.operation(),
+                    request.attributeFilter(),
+                    request.position(),
+                    request.size(),
+                    request.direction(),
+                    request.attributeSelector(),
+                    (AttributeSpecifier[])newSpecifier.toArray(
+                        new AttributeSpecifier[newSpecifier.size()]));
+            replyRequest.contexts().putAll(request.contexts());
+        }
+        else {
+            replyRequest = request;
+        }
+        return replyRequest;
     }
-    
+
     //-----------------------------------------------------------------------
     public DataproviderReply set(
-      ServiceHeader header,
-      DataproviderRequest request
+        ServiceHeader header,
+        DataproviderRequest request
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("RoleObject_1.set");
-      String role = null;
-      DataproviderReply reply = null;                
-      role = this.getRoleFromPath(request.path());
-      if(role != null) {
-        SysLog.trace("role: ", role); 
-        DataproviderObject[] states = this.findCoreObjectStates(
-          header, 
-          request
+        StopWatch_1.instance().startTimer("RoleObject_1.set");
+        String role = null;
+        DataproviderReply reply = null;                
+        role = this.getRoleFromPath(request.path());
+        if(role != null) {
+            SysLog.trace("role: ", role); 
+            DataproviderObject[] states = this.findCoreObjectStates(
+                header, 
+                request
+            );
+            boolean hasRole = false;
+            for(
+                    int i = 0; 
+                    i < states.length && !hasRole; 
+                    i++
+            ) {
+                hasRole = states[i].containsAttributeName(role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS);
+            }            
+            if (hasRole) {
+                // this role already exists for this object:
+                if (request.object().attributeNames().size() > 3) {
+                    reply = this.replace(header, request);
+                }
+                else {
+                    // empty request, just return empty object
+                    reply = new DataproviderReply(request.object());
+                }
+            }
+            else {
+                // this role does not yet exist:
+                reply = this.create(header, request);
+            }
+        }
+        else {
+            boolean doCreate = false;
+            DataproviderRequest newRequest = 
+                new DataproviderRequest(
+                    new DataproviderObject(request.path().getParent()),
+                    DataproviderOperations.ITERATION_START, 
+                    AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES,
+                    null
+                );
+            newRequest.addAttributeFilterProperty(
+                new FilterProperty(
+                    Quantors.THERE_EXISTS,
+                    SystemAttributes.OBJECT_IDENTITY,
+                    FilterOperators.IS_IN,
+                    request.path().toUri()
+                )
+            );
+            newRequest.contexts().putAll(request.contexts());          
+            DataproviderObject[] existingObjs =
+                super.find(
+                    header,
+                    newRequest
+                ).getObjects();              
+            if(existingObjs.length == 0) {
+                doCreate = true;
+            }
+            else {
+                doCreate = false;
+                request.object().setDigest(existingObjs[0].getDigest());    
+            }
+            if(doCreate) {
+                request.object().clearValues(
+                    SystemAttributes.CREATED_BY
+                ).addAll(
+                    request.object().values(SystemAttributes.MODIFIED_BY)
+                );
+                request.object().clearValues(
+                    SystemAttributes.CREATED_AT
+                ).addAll(
+                    request.object().values(SystemAttributes.MODIFIED_AT)
+                );            
+                reply = this.create(header, request); 
+            }
+            else {
+                reply = this.replace(header, request);
+            }
+        }
+        StopWatch_1.instance().stopTimer("RoleObject_1.set");
+        return this.completeReply(
+            request,
+            reply
         );
-        boolean hasRole = false;
-        for(
-          int i = 0; 
-          i < states.length && !hasRole; 
-          i++
-        ) {
-          hasRole = states[i].containsAttributeName(role + ROLE_ATTRIBUTE_SEPARATOR + SystemAttributes.OBJECT_CLASS);
-        }            
-        if (hasRole) {
-          // this role already exists for this object:
-          if (request.object().attributeNames().size() > 3) {
-            reply = this.replace(header, request);
-          }
-          else {
-            // empty request, just return empty object
-            reply = new DataproviderReply(request.object());
-          }
-        }
-        else {
-          // this role does not yet exist:
-          reply = this.create(header, request);
-        }
-      }
-      else {
-        boolean doCreate = false;
-        DataproviderRequest newRequest = 
-          new DataproviderRequest(
-            new DataproviderObject(request.path().getParent()),
-            DataproviderOperations.ITERATION_START, 
-            AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES,
-            null
-          );
-        newRequest.addAttributeFilterProperty(
-          new FilterProperty(
-            Quantors.THERE_EXISTS,
-            SystemAttributes.OBJECT_IDENTITY,
-            FilterOperators.IS_IN,
-            new String[] { request.path().toUri()}
-          )
-        );
-        newRequest.contexts().putAll(request.contexts());          
-        DataproviderObject[] existingObjs =
-          super.find(
-            header,
-            newRequest
-          ).getObjects();              
-        if(existingObjs.length == 0) {
-          doCreate = true;
-        }
-        else {
-          doCreate = false;
-          request.object().setDigest(existingObjs[0].getDigest());    
-        }
-        if(doCreate) {
-          request.object().clearValues(
-            SystemAttributes.CREATED_BY
-          ).addAll(
-            request.object().values(SystemAttributes.MODIFIED_BY)
-          );
-          request.object().clearValues(
-            SystemAttributes.CREATED_AT
-          ).addAll(
-            request.object().values(SystemAttributes.MODIFIED_AT)
-          );            
-          reply = this.create(header, request); 
-        }
-        else {
-          reply = this.replace(header, request);
-        }
-      }
-      StopWatch_1.instance().stopTimer("RoleObject_1.set");
-      return this.completeReply(
-          request,
-          reply
-      );
     }
-        
+
     //---------------------------------------------------------------------------
     /**
      * Get the object specified by the requests's path.
@@ -4204,69 +4156,69 @@ public class Role_1
      *              on failure
      */
     public DataproviderReply get(
-      ServiceHeader header,
-      DataproviderRequest _request
+        ServiceHeader header,
+        DataproviderRequest _request
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("RoleObject_1.get");
-      String role = null;
-      Path virtualRoleTypePath = null;
-      DataproviderReply superReply = null;
+        StopWatch_1.instance().startTimer("RoleObject_1.get");
+        String role = null;
+        Path virtualRoleTypePath = null;
+        DataproviderReply superReply = null;
 
-      // remove attributeSpecifiers for derived attributes of role (they will 
-      // get added in completeReply.
+        // remove attributeSpecifiers for derived attributes of role (they will 
+        // get added in completeReply.
 
-      DataproviderRequest request = removeRoleAttributeSpecifier(_request);
+        DataproviderRequest request = removeRoleAttributeSpecifier(_request);
 
-      convertRoleTypeToRoleInstanceSearch(header, request);
+        convertRoleTypeToRoleInstanceSearch(header, request);
 
-      role = this.getRoleFromPath(request.path());
-      if (role != null) {
-        StopWatch_1.instance().startTimer("role1GetRole");
-        SysLog.trace("role: ", role);
-        Path noRolePath = toRolelessPath(new Path(request.path()));
+        role = this.getRoleFromPath(request.path());
+        if (role != null) {
+            StopWatch_1.instance().startTimer("role1GetRole");
+            SysLog.trace("role: ", role);
+            Path noRolePath = toRolelessPath(new Path(request.path()));
 
-        // no use to add attribute filter because the filters don't 
-        // get evaluated (at least by the in memory persistence.)
-        DataproviderRequest localRequest =
-          new DataproviderRequest(
-            new DataproviderObject(noRolePath),
-            DataproviderOperations.OBJECT_RETRIEVAL,
-            AttributeSelectors.ALL_ATTRIBUTES,
-            null);
-        localRequest.contexts().putAll(request.contexts());
+            // no use to add attribute filter because the filters don't 
+            // get evaluated (at least by the in memory persistence.)
+            DataproviderRequest localRequest =
+                new DataproviderRequest(
+                    new DataproviderObject(noRolePath),
+                    DataproviderOperations.OBJECT_RETRIEVAL,
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    null);
+            localRequest.contexts().putAll(request.contexts());
 
-        superReply = super.get(header, localRequest);
-        StopWatch_1.instance().stopTimer("role1GetRole");
-      }
-      else {
-        // an object without roles is searched
-        StopWatch_1.instance().startTimer("role1GetNoRole");
+            superReply = super.get(header, localRequest);
+            StopWatch_1.instance().stopTimer("role1GetRole");
+        }
+        else {
+            // an object without roles is searched
+            StopWatch_1.instance().startTimer("role1GetNoRole");
 
-        // check for RoleType remapping
-        Path originalRoleTypePath =
-          roleTypeVirtualMap.remapVirtualPath(request.path());
+            // check for RoleType remapping
+            Path originalRoleTypePath =
+                roleTypeVirtualMap.remapVirtualPath(request.path());
 
-        if (originalRoleTypePath != null) {
-          virtualRoleTypePath = request.path();
-          request.path().setTo(originalRoleTypePath);
+            if (originalRoleTypePath != null) {
+                virtualRoleTypePath = request.path();
+                request.path().setTo(originalRoleTypePath);
+            }
+
+            superReply = super.get(header, request);
+            StopWatch_1.instance().stopTimer("role1GetNoRole");
         }
 
-        superReply = super.get(header, request);
-        StopWatch_1.instance().stopTimer("role1GetNoRole");
-      }
-
-      DataproviderReply reply =
-        super.completeReply(
-          request,
-          this.completeReply(
-            header,
-            request,
-            superReply,
-            role,
-            virtualRoleTypePath,
-            this.roleTypes));
-      StopWatch_1.instance().stopTimer("RoleObject_1.get");
-      return reply;
+        DataproviderReply reply =
+            super.completeReply(
+                request,
+                this.completeReply(
+                    header,
+                    request,
+                    superReply,
+                    role,
+                    virtualRoleTypePath,
+                    this.roleTypes));
+        StopWatch_1.instance().stopTimer("RoleObject_1.get");
+        return reply;
     }
 
     //---------------------------------------------------------------------------
@@ -4301,358 +4253,354 @@ public class Role_1
      *              on failure
      */
     public DataproviderReply find(
-      ServiceHeader header,
-      DataproviderRequest request
+        ServiceHeader header,
+        DataproviderRequest request
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("RoleObject_1.find");
-      DataproviderReply superReply = null;
-      String replyRole = null; // role of the reply
-      DataproviderRequest findRequest = null;
-      Path virtualRoleTypePath = null;
+        StopWatch_1.instance().startTimer("RoleObject_1.find");
+        DataproviderReply superReply = null;
+        String replyRole = null; // role of the reply
+        DataproviderRequest findRequest = null;
+        Path virtualRoleTypePath = null;
 
-      if (isRoleIteration(request.path())) {
-        /** NOTE: direct return statement here */
-        DataproviderReply reply = findRoleIteration(header, request);
+        if (isRoleIteration(request.path())) {
+            /** NOTE: direct return statement here */
+            DataproviderReply reply = findRoleIteration(header, request);
+            StopWatch_1.instance().stopTimer("RoleObject_1.find");
+            return reply;
+        }
+
+        convertRoleTypeToRoleInstanceSearch(header, request);
+
+        replyRole = this.getRoleFromPath(request.path());
+
+        if (replyRole != null) {
+            // If the role is statefull, requests for different states of
+            // one role become possible. The path looks something like:
+            // objPath/objId/role/roleId/historyState   or
+            // objPath/objId/role/roleId/validState
+
+            toRolelessPath(request.path()); // change the path of request !!!
+
+            // only states with that role should be found, add the role as 
+            // an attribute filter 
+            addRoleFilter(request, replyRole, true);
+        }
+
+        // normaly the role is not contained in path. Rather a role must be
+        // specified with inRole. 
+        FilterProperty[] attrFilters = request.attributeFilter();
+        boolean hasRole = false;
+        String filterRole = null; // role contained in filter
+        ArrayList objectClassFilters = new ArrayList();
+
+        for (int i = 0; i < attrFilters.length && filterRole == null; i++) {
+            if (attrFilters[i] != null && attrFilters[i].name() != null) {
+                if (attrFilters[i].name().equals(RoleAttributes.HAS_ROLE)) {
+                    hasRole = true;
+                }
+                else if (attrFilters[i].name().equals(RoleAttributes.IN_ROLE)) {
+                    // get the role for all attributes
+                    filterRole = (String)attrFilters[i].getValue(0);
+                }
+                else if (
+                        attrFilters[i].name().equals(SystemAttributes.OBJECT_CLASS)
+                        && attrFilters[i].operator() == FilterOperators.IS_IN) {
+                    objectClassFilters.addAll(attrFilters[i].values());
+                }
+                else if (
+                        attrFilters[i].name().equals(SystemAttributes.OBJECT_INSTANCE_OF)
+                        && attrFilters[i].operator() == FilterOperators.IS_IN) {
+                    objectClassFilters.addAll(attrFilters[i].values());
+                }
+            }
+        }
+
+        if ((!hasRole && filterRole == null)
+                && request.operation() == DataproviderOperations.ITERATION_START
+                && objectClassFilters.size() > 0) {
+            // if no role is specified but a class is specified, the class is
+            // not allowed to be a roled class
+            for (Iterator c = objectClassFilters.iterator(); c.hasNext();) {
+                String objectClass = (String)c.next();
+                ModelElement_1_0 modelClass =
+                    this.model.getDereferencedType(objectClass);
+                if (modelClass != null && classIsRole(modelClass)) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_SUPPORTED,
+                        "For finding a role class through a filter, a role must be specified too.",
+                        new BasicException.Parameter(
+                            "filtered class",
+                            modelClass.getValues("qualifiedName").get(0)));
+                }
+            }
+        }
+
+        if ((hasRole || filterRole != null)
+                && request.operation() == DataproviderOperations.ITERATION_START) {
+            SysLog.trace(" filterRole: ", filterRole);
+
+            replyRole = filterRole;
+
+            AttributeSpecifier[] specifiers =
+                new AttributeSpecifier[request.attributeSpecifier().length];
+
+            // need to copy the attribute specifiers
+            for (int i = 0; i < specifiers.length; i++) {
+                String attrName = request.attributeSpecifier()[i].name();
+                if (isRoleAttribute(attrName, request.path())) {
+                    if (request.attributeSpecifier()[i].order() == Orders.ANY) {
+
+                        specifiers[i] =
+                            new AttributeSpecifier(
+                                filterRole + ROLE_ATTRIBUTE_SEPARATOR + attrName,
+                                request.attributeSpecifier()[i].position(),
+                                request.attributeSpecifier()[i].size(),
+                                request.attributeSpecifier()[i].direction());
+                    }
+                    else {
+                        specifiers[i] =
+                            new AttributeSpecifier(
+                                filterRole + ROLE_ATTRIBUTE_SEPARATOR + attrName,
+                                request.attributeSpecifier()[i].position(),
+                                request.attributeSpecifier()[i].order());
+                    }
+                }
+                else {
+                    specifiers[i] = request.attributeSpecifier()[i];
+                }
+            }
+
+            // prepare a new request out of the existing one,
+            // with changed attributeFilters:
+            findRequest =
+                new DataproviderRequest(
+                    new DataproviderObject(toRolelessPath(new Path(request.path()))),
+                    DataproviderOperations.ITERATION_START,
+                    null,
+                    request.position(),
+                    request.size(),
+                    request.direction(),
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    specifiers);
+            findRequest.contexts().putAll(request.contexts());
+
+            for (int i = 0; i < attrFilters.length; i++) {
+                // attrFilters[i].name() may not be null here because of roleSelect
+                if (attrFilters[i].name().equals(RoleAttributes.HAS_ROLE)) {
+                    if (attrFilters[i].operator() == FilterOperators.IS_NOT_IN
+                            && attrFilters[i].quantor() == Quantors.FOR_ALL) {
+                        for (int j = 0; j < attrFilters[i].getValues().length; j++) {
+                            addRoleFilter(
+                                findRequest,
+                                (String)attrFilters[i].getValue(j),
+                                false);
+                        }
+                    }
+                    else {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            "Only FOR_ALL ... IS_NOT_IN is supported for attribute.",
+                            new BasicException.Parameter(
+                                "attribute",
+                                RoleAttributes.HAS_ROLE),
+                                new BasicException.Parameter(
+                                    "filter.operator",
+                                    attrFilters[i].operator()),
+                                    new BasicException.Parameter(
+                                        "filter.quantor",
+                                        attrFilters[i].quantor()));
+                    }
+                }
+                else if (attrFilters[i].name().equals(RoleAttributes.IN_ROLE)) {
+                    if (attrFilters[i].operator() == FilterOperators.IS_IN
+                            && attrFilters[i].quantor() == Quantors.THERE_EXISTS
+                            && attrFilters[i].getValues().length == 1)
+                        // for now just one role is supported
+                    {
+                        addRoleFilter(findRequest, filterRole, true);
+                    }
+                    else {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            "Only THERE_EXISTS ... IS_IN with one value is supported for attribute.",
+                            new BasicException.Parameter(
+                                "attribute",
+                                RoleAttributes.IN_ROLE),
+                                new BasicException.Parameter(
+                                    "filter.values",
+                                    attrFilters[i].getValues()),
+                                    new BasicException.Parameter(
+                                        "filter.operator",
+                                        attrFilters[i].operator()),
+                                        new BasicException.Parameter(
+                                            "filter.quantor",
+                                            attrFilters[i].quantor()));
+                    }
+                }
+                else if (
+                        attrFilters[i].name().equals(SystemAttributes.OBJECT_CLASS)) {
+                    // if it is object_class of a role, it can only occur as 
+                    // object_class for that role and must be prefixed with role.
+                    ModelElement_1_0 modelClass =
+                        this.model.getDereferencedType(attrFilters[i].getValue(0));
+                    if (modelClass != null && classIsRole(modelClass)) {
+                        FilterProperty filter =
+                            new FilterProperty(
+                                attrFilters[i].quantor(),
+                                filterRole
+                                + ROLE_ATTRIBUTE_SEPARATOR
+                                + attrFilters[i].name(),
+                                attrFilters[i].operator(),
+                                attrFilters[i].getValues());
+                        findRequest.addAttributeFilterProperty(filter);
+                    }
+                    else {
+                        findRequest.addAttributeFilterProperty(attrFilters[i]);
+                    }
+                }
+                else if (
+                        attrFilters[i].name().equals(
+                            SystemAttributes.OBJECT_INSTANCE_OF)) {
+                    if (attrFilters[i].operator() == FilterOperators.IS_IN
+                            && attrFilters[i].quantor() == Quantors.THERE_EXISTS
+                            && attrFilters[i].getValues().length
+                            == 1 // for now just one instanceOf class is supported
+                    ) {
+                        // instance_of has to be translated if the class is a role class
+                        ModelElement_1_0 modelClass =
+                            this.model.getDereferencedType(attrFilters[i].getValue(0));
+                        ModelElement_1_0 subtype = null;
+                        Set subClasses = new HashSet();
+
+                        if (modelClass != null && classIsRole(modelClass)) {
+                            // add class and subtypes to object_class clause, but
+                            // only if subtypes are not roles themselfs
+                            for (Iterator subIter =
+                                modelClass.values("subtype").iterator();
+                            subIter.hasNext();
+                            ) {
+
+                                Path subPath = (Path)subIter.next();
+                                subtype = model.getDereferencedType(subPath);
+                                if (classBelongsToRole(subtype, modelClass)) {
+                                    subClasses.add(subPath.getBase());
+                                }
+                            }
+
+                            FilterProperty filter =
+                                new FilterProperty(
+                                    Quantors.THERE_EXISTS,
+                                    filterRole
+                                    + ROLE_ATTRIBUTE_SEPARATOR
+                                    + SystemAttributes.OBJECT_CLASS,
+                                    FilterOperators.IS_IN,
+                                    subClasses.toArray());
+                            findRequest.addAttributeFilterProperty(filter);
+
+                        }
+                        else {
+                            findRequest.addAttributeFilterProperty(attrFilters[i]);
+                        }
+                    }
+                    else {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            "Only THERE_EXISTS ... IS_IN with just one value is supported for attribute.",
+                            new BasicException.Parameter(
+                                "attribute",
+                                SystemAttributes.OBJECT_INSTANCE_OF),
+                                new BasicException.Parameter(
+                                    "filter.values",
+                                    attrFilters[i].getValues()),
+                                    new BasicException.Parameter(
+                                        "filter.operator",
+                                        attrFilters[i].operator()),
+                                        new BasicException.Parameter(
+                                            "filter.quantor",
+                                            attrFilters[i].quantor()));
+                    }
+                }
+                else {
+                    // attributes of the other filter conditions have to be checked
+                    // if they have to be prefixed with the role
+                    String attrName = attrFilters[i].name();
+                    if (isRoleAttribute(attrName, request.path())) {
+                        // if it is a role attribute it can only be of the specified role
+                        FilterProperty filter =
+                            new FilterProperty(
+                                attrFilters[i].quantor(),
+                                filterRole + ROLE_ATTRIBUTE_SEPARATOR + attrName,
+                                attrFilters[i].operator(),
+                                attrFilters[i].getValues());
+                        findRequest.addAttributeFilterProperty(filter);
+                    }
+                    else {
+                        findRequest.addAttributeFilterProperty(attrFilters[i]);
+                    }
+                }
+            }
+        }
+        else if (
+                request.operation()
+                == DataproviderOperations.ITERATION_CONTINUATION) {
+            // first get my iteration information
+            Role_1Iterator roleIterator =
+                (Role_1Iterator)Role_1Iterator.deserialize(
+                    (byte[])request.context(DataproviderReplyContexts.ITERATOR).get(
+                        0));
+
+            // now set the remaining iterator information for the following layers
+            request.context(DataproviderReplyContexts.ITERATOR).set(
+                0,
+                roleIterator.getIterator());
+
+            replyRole = roleIterator.getRole();
+
+            findRequest = request;
+        }
+        else { // some search which does not touch roles 
+
+            // check for RoleType remapping
+            Path originalRoleTypePath =
+                roleTypeVirtualMap.remapVirtualPath(request.path());
+
+            if (originalRoleTypePath != null) {
+                virtualRoleTypePath = request.path();
+                request.path().setTo(originalRoleTypePath);
+            }
+
+            findRequest = request;
+        }
+
+        // an object without roles is searched or an object with iteration_continuation
+        superReply = super.find(header, findRequest);
+        DataproviderReply reply =
+            completeReply(
+                header,
+                request,
+                superReply,
+                replyRole,
+                virtualRoleTypePath,
+                this.roleTypes);
+
+        // must do it even if replyRole is null because we cant find out
+        // if it was set.
+
+        reply.context(DataproviderReplyContexts.ITERATOR).set(
+            0,
+            Role_1Iterator.serialize(
+                new Role_1Iterator(
+                    replyRole,
+                    (byte[])reply.context(DataproviderReplyContexts.ITERATOR).get(
+                        0))));
         StopWatch_1.instance().stopTimer("RoleObject_1.find");
         return reply;
-      }
-
-      convertRoleTypeToRoleInstanceSearch(header, request);
-
-      replyRole = this.getRoleFromPath(request.path());
-
-      if (replyRole != null) {
-        // If the role is statefull, requests for different states of
-        // one role become possible. The path looks something like:
-        // objPath/objId/role/roleId/historyState   or
-        // objPath/objId/role/roleId/validState
-
-        toRolelessPath(request.path()); // change the path of request !!!
-
-        // only states with that role should be found, add the role as 
-        // an attribute filter 
-        addRoleFilter(request, replyRole, true);
-      }
-
-      // normaly the role is not contained in path. Rather a role must be
-      // specified with inRole. 
-      FilterProperty[] attrFilters = request.attributeFilter();
-      boolean hasRole = false;
-      String filterRole = null; // role contained in filter
-      ArrayList objectClassFilters = new ArrayList();
-
-      for (int i = 0; i < attrFilters.length && filterRole == null; i++) {
-        if (attrFilters[i] != null && attrFilters[i].name() != null) {
-          if (attrFilters[i].name().equals(RoleAttributes.HAS_ROLE)) {
-            hasRole = true;
-          }
-          else if (attrFilters[i].name().equals(RoleAttributes.IN_ROLE)) {
-            // get the role for all attributes
-            filterRole = (String)attrFilters[i].getValue(0);
-          }
-          else if (
-            attrFilters[i].name().equals(SystemAttributes.OBJECT_CLASS)
-              && attrFilters[i].operator() == FilterOperators.IS_IN) {
-            objectClassFilters.addAll(attrFilters[i].values());
-          }
-          else if (
-            attrFilters[i].name().equals(SystemAttributes.OBJECT_INSTANCE_OF)
-              && attrFilters[i].operator() == FilterOperators.IS_IN) {
-            objectClassFilters.addAll(attrFilters[i].values());
-          }
-        }
-      }
-
-      if ((!hasRole && filterRole == null)
-        && request.operation() == DataproviderOperations.ITERATION_START
-        && objectClassFilters.size() > 0) {
-        // if no role is specified but a class is specified, the class is
-        // not allowed to be a roled class
-        for (Iterator c = objectClassFilters.iterator(); c.hasNext();) {
-          String objectClass = (String)c.next();
-          ModelElement_1_0 modelClass =
-            this.model.getDereferencedType(objectClass);
-          if (modelClass != null && classIsRole(modelClass)) {
-            throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.NOT_SUPPORTED,
-              new BasicException.Parameter[] {
-                 new BasicException.Parameter(
-                  "filtered class",
-                  modelClass.getValues("qualifiedName").get(0))},
-              "For finding a role class through a filter, a role must be specified too.");
-          }
-        }
-      }
-
-      if ((hasRole || filterRole != null)
-        && request.operation() == DataproviderOperations.ITERATION_START) {
-        SysLog.trace(" filterRole: ", filterRole);
-
-        replyRole = filterRole;
-
-        AttributeSpecifier[] specifiers =
-          new AttributeSpecifier[request.attributeSpecifier().length];
-
-        // need to copy the attribute specifiers
-        for (int i = 0; i < specifiers.length; i++) {
-          String attrName = request.attributeSpecifier()[i].name();
-          if (isRoleAttribute(attrName, request.path())) {
-            if (request.attributeSpecifier()[i].order() == Orders.ANY) {
-
-              specifiers[i] =
-                new AttributeSpecifier(
-                  filterRole + ROLE_ATTRIBUTE_SEPARATOR + attrName,
-                  request.attributeSpecifier()[i].position(),
-                  request.attributeSpecifier()[i].size(),
-                  request.attributeSpecifier()[i].direction());
-            }
-            else {
-              specifiers[i] =
-                new AttributeSpecifier(
-                  filterRole + ROLE_ATTRIBUTE_SEPARATOR + attrName,
-                  request.attributeSpecifier()[i].position(),
-                  request.attributeSpecifier()[i].order());
-            }
-          }
-          else {
-            specifiers[i] = request.attributeSpecifier()[i];
-          }
-        }
-
-        // prepare a new request out of the existing one,
-        // with changed attributeFilters:
-        findRequest =
-          new DataproviderRequest(
-            new DataproviderObject(toRolelessPath(new Path(request.path()))),
-            DataproviderOperations.ITERATION_START,
-            null,
-            request.position(),
-            request.size(),
-            request.direction(),
-            AttributeSelectors.ALL_ATTRIBUTES,
-            specifiers);
-        findRequest.contexts().putAll(request.contexts());
-
-        for (int i = 0; i < attrFilters.length; i++) {
-          // attrFilters[i].name() may not be null here because of roleSelect
-          if (attrFilters[i].name().equals(RoleAttributes.HAS_ROLE)) {
-            if (attrFilters[i].operator() == FilterOperators.IS_NOT_IN
-              && attrFilters[i].quantor() == Quantors.FOR_ALL) {
-              for (int j = 0; j < attrFilters[i].getValues().length; j++) {
-                addRoleFilter(
-                  findRequest,
-                  (String)attrFilters[i].getValue(j),
-                  false);
-              }
-            }
-            else {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter(
-                    "attribute",
-                    RoleAttributes.HAS_ROLE),
-                  new BasicException.Parameter(
-                    "filter.operator",
-                    attrFilters[i].operator()),
-                  new BasicException.Parameter(
-                    "filter.quantor",
-                    attrFilters[i].quantor())},
-                "Only FOR_ALL ... IS_NOT_IN is supported for attribute.");
-            }
-          }
-          else if (attrFilters[i].name().equals(RoleAttributes.IN_ROLE)) {
-            if (attrFilters[i].operator() == FilterOperators.IS_IN
-              && attrFilters[i].quantor() == Quantors.THERE_EXISTS
-              && attrFilters[i].getValues().length == 1)
-              // for now just one role is supported
-              {
-              addRoleFilter(findRequest, filterRole, true);
-            }
-            else {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter(
-                    "attribute",
-                    RoleAttributes.IN_ROLE),
-                  new BasicException.Parameter(
-                    "filter.values",
-                    attrFilters[i].getValues()),
-                  new BasicException.Parameter(
-                    "filter.operator",
-                    attrFilters[i].operator()),
-                  new BasicException.Parameter(
-                    "filter.quantor",
-                    attrFilters[i].quantor())},
-                "Only THERE_EXISTS ... IS_IN with one value is supported for attribute.");
-            }
-          }
-          else if (
-            attrFilters[i].name().equals(SystemAttributes.OBJECT_CLASS)) {
-            // if it is object_class of a role, it can only occur as 
-            // object_class for that role and must be prefixed with role.
-            ModelElement_1_0 modelClass =
-              this.model.getDereferencedType(attrFilters[i].getValue(0));
-            if (modelClass != null && classIsRole(modelClass)) {
-              FilterProperty filter =
-                new FilterProperty(
-                  attrFilters[i].quantor(),
-                  filterRole
-                    + ROLE_ATTRIBUTE_SEPARATOR
-                    + attrFilters[i].name(),
-                  attrFilters[i].operator(),
-                  attrFilters[i].getValues());
-              findRequest.addAttributeFilterProperty(filter);
-            }
-            else {
-              findRequest.addAttributeFilterProperty(attrFilters[i]);
-            }
-          }
-          else if (
-            attrFilters[i].name().equals(
-              SystemAttributes.OBJECT_INSTANCE_OF)) {
-            if (attrFilters[i].operator() == FilterOperators.IS_IN
-              && attrFilters[i].quantor() == Quantors.THERE_EXISTS
-              && attrFilters[i].getValues().length
-                == 1 // for now just one instanceOf class is supported
-            ) {
-              // instance_of has to be translated if the class is a role class
-              ModelElement_1_0 modelClass =
-                this.model.getDereferencedType(attrFilters[i].getValue(0));
-              ModelElement_1_0 subtype = null;
-              Set subClasses = new HashSet();
-
-              if (modelClass != null && classIsRole(modelClass)) {
-                // add class and subtypes to object_class clause, but
-                // only if subtypes are not roles themselfs
-                for (Iterator subIter =
-                  modelClass.values("subtype").iterator();
-                  subIter.hasNext();
-                  ) {
-
-                  Path subPath = (Path)subIter.next();
-                  subtype = model.getDereferencedType(subPath);
-                  if (classBelongsToRole(subtype, modelClass)) {
-                    subClasses.add(subPath.getBase());
-                  }
-                }
-
-                FilterProperty filter =
-                  new FilterProperty(
-                    Quantors.THERE_EXISTS,
-                    filterRole
-                      + ROLE_ATTRIBUTE_SEPARATOR
-                      + SystemAttributes.OBJECT_CLASS,
-                    FilterOperators.IS_IN,
-                    subClasses.toArray());
-                findRequest.addAttributeFilterProperty(filter);
-
-              }
-              else {
-                findRequest.addAttributeFilterProperty(attrFilters[i]);
-              }
-            }
-            else {
-              throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[] {
-                  new BasicException.Parameter(
-                    "attribute",
-                    SystemAttributes.OBJECT_INSTANCE_OF),
-                  new BasicException.Parameter(
-                    "filter.values",
-                    attrFilters[i].getValues()),
-                  new BasicException.Parameter(
-                    "filter.operator",
-                    attrFilters[i].operator()),
-                  new BasicException.Parameter(
-                    "filter.quantor",
-                    attrFilters[i].quantor())},
-                "Only THERE_EXISTS ... IS_IN with just one value is supported for attribute.");
-            }
-          }
-          else {
-            // attributes of the other filter conditions have to be checked
-            // if they have to be prefixed with the role
-            String attrName = attrFilters[i].name();
-            if (isRoleAttribute(attrName, request.path())) {
-              // if it is a role attribute it can only be of the specified role
-              FilterProperty filter =
-                new FilterProperty(
-                  attrFilters[i].quantor(),
-                  filterRole + ROLE_ATTRIBUTE_SEPARATOR + attrName,
-                  attrFilters[i].operator(),
-                  attrFilters[i].getValues());
-              findRequest.addAttributeFilterProperty(filter);
-            }
-            else {
-              findRequest.addAttributeFilterProperty(attrFilters[i]);
-            }
-          }
-        }
-      }
-      else if (
-        request.operation()
-          == DataproviderOperations.ITERATION_CONTINUATION) {
-        // first get my iteration information
-        Role_1Iterator roleIterator =
-          (Role_1Iterator)Role_1Iterator.deserialize(
-            (byte[])request.context(DataproviderReplyContexts.ITERATOR).get(
-              0));
-
-        // now set the remaining iterator information for the following layers
-        request.context(DataproviderReplyContexts.ITERATOR).set(
-          0,
-          roleIterator.getIterator());
-
-        replyRole = roleIterator.getRole();
-
-        findRequest = request;
-      }
-      else { // some search which does not touch roles 
-
-        // check for RoleType remapping
-        Path originalRoleTypePath =
-          roleTypeVirtualMap.remapVirtualPath(request.path());
-
-        if (originalRoleTypePath != null) {
-          virtualRoleTypePath = request.path();
-          request.path().setTo(originalRoleTypePath);
-        }
-
-        findRequest = request;
-      }
-
-      // an object without roles is searched or an object with iteration_continuation
-      superReply = super.find(header, findRequest);
-      DataproviderReply reply =
-        completeReply(
-          header,
-          request,
-          superReply,
-          replyRole,
-          virtualRoleTypePath,
-          this.roleTypes);
-
-      // must do it even if replyRole is null because we cant find out
-      // if it was set.
-
-      reply.context(DataproviderReplyContexts.ITERATOR).set(
-        0,
-        Role_1Iterator.serialize(
-          new Role_1Iterator(
-            replyRole,
-            (byte[])reply.context(DataproviderReplyContexts.ITERATOR).get(
-              0))));
-      StopWatch_1.instance().stopTimer("RoleObject_1.find");
-      return reply;
     }
-  
+
     //---------------------------------------------------------------------------
     /**
      * Create a new object or a new role to an existing object.
@@ -4672,97 +4620,97 @@ public class Role_1
      * @exception ServiceException   on failure
      */
     public DataproviderReply create(
-      ServiceHeader header,
-      DataproviderRequest request
+        ServiceHeader header,
+        DataproviderRequest request
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("RoleObject_1.create");
-      DataproviderReply reply = null;
-      String newRole = null;
+        StopWatch_1.instance().startTimer("RoleObject_1.create");
+        DataproviderReply reply = null;
+        String newRole = null;
 
-      // the first processing class in model layer must remove derived attributes
-      removeNonPersistentAttributes(request.object());
+        // the first processing class in model layer must remove derived attributes
+        removeNonPersistentAttributes(request.object());
 
-      ModelElement_1_0 objClass =
-        this.model.getDereferencedType(
-          request.object().getValues(
-            SystemAttributes.OBJECT_CLASS).get(
-            0));
+        ModelElement_1_0 objClass =
+            this.model.getDereferencedType(
+                request.object().getValues(
+                    SystemAttributes.OBJECT_CLASS).get(
+                        0));
 
-      if (classIsRole(objClass)) {
-        newRole = getRoleFromPath(request.path());
-        SysLog.trace("create role:", newRole);
+        if (classIsRole(objClass)) {
+            newRole = getRoleFromPath(request.path());
+            SysLog.trace("create role:", newRole);
 
-        DataproviderObject roleType = null;
+            DataproviderObject roleType = null;
 
-        assertRoleNotNull(newRole, request.object());
+            assertRoleNotNull(newRole, request.object());
 
-        roleType =
-          assertCompleteRoleType(
-            header,
-            request,
-            newRole,
-            this.roleTypes,
-            request.object());
+            roleType =
+                assertCompleteRoleType(
+                    header,
+                    request,
+                    newRole,
+                    this.roleTypes,
+                    request.object());
 
-        List requiredRoles =
-          getRequiredRoles(
-            header,
-            request,
-            newRole,
-            this.roleTypes,
-            request.path(),
-            new HashMap());
+            List requiredRoles =
+                getRequiredRoles(
+                    header,
+                    request,
+                    newRole,
+                    this.roleTypes,
+                    request.path(),
+                    new HashMap());
 
-        // coreStates must be in ascendingOrder regarding their validFrom date
-        DataproviderObject[] coreStates =
-          findCoreObjectStates(header, request);
+            // coreStates must be in ascendingOrder regarding their validFrom date
+            DataproviderObject[] coreStates =
+                findCoreObjectStates(header, request);
 
-        assertRequiredRoles(requiredRoles, newRole, coreStates);
+            assertRequiredRoles(requiredRoles, newRole, coreStates);
 
-        assertCoreRoleExtensionClass(
-          header,
-          request,
-          newRole,
-          this.roleTypes,
-          requiredRoles,
-          coreStates,
-          request.object());
+            assertCoreRoleExtensionClass(
+                header,
+                request,
+                newRole,
+                this.roleTypes,
+                requiredRoles,
+                coreStates,
+                request.object());
 
-        assertCreatingUniqueRoleInstance(
-          header,
-          request,
-          roleType,
-          requiredRoles,
-          coreStates);
+            assertCreatingUniqueRoleInstance(
+                header,
+                request,
+                roleType,
+                requiredRoles,
+                coreStates);
 
-        DataproviderObject updateObject =
-          createUpdateObject(
-            coreStates,
-            request.object(),
-            newRole,
-            requiredRoles);
+            DataproviderObject updateObject =
+                createUpdateObject(
+                    coreStates,
+                    request.object(),
+                    newRole,
+                    requiredRoles);
 
-        StopWatch_1.instance().startTimer("create-DB");
-        DataproviderRequest modifyRequest =
-          new DataproviderRequest(
-            updateObject,
-            DataproviderOperations.OBJECT_MODIFICATION,
-            AttributeSelectors.ALL_ATTRIBUTES,
-            null);
-        modifyRequest.contexts().putAll(request.contexts());
-        reply = super.modify(header, modifyRequest);
-        StopWatch_1.instance().stopTimer("create-DB");
-      }
-      else {
-        // there is no role present, just save.
-        roleTypeVirtualMap.assertNoModificationByVirtualPath(request.path());
-        reply = super.create(header, request);
-      }
+            StopWatch_1.instance().startTimer("create-DB");
+            DataproviderRequest modifyRequest =
+                new DataproviderRequest(
+                    updateObject,
+                    DataproviderOperations.OBJECT_MODIFICATION,
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    null);
+            modifyRequest.contexts().putAll(request.contexts());
+            reply = super.modify(header, modifyRequest);
+            StopWatch_1.instance().stopTimer("create-DB");
+        }
+        else {
+            // there is no role present, just save.
+            roleTypeVirtualMap.assertNoModificationByVirtualPath(request.path());
+            reply = super.create(header, request);
+        }
 
-      completeReply(header, request, reply, newRole, null, this.roleTypes);
-      StopWatch_1.instance().stopTimer("RoleObject_1.create");
+        completeReply(header, request, reply, newRole, null, this.roleTypes);
+        StopWatch_1.instance().stopTimer("RoleObject_1.create");
 
-      return reply;
+        return reply;
     }
 
     //---------------------------------------------------------------------------
@@ -4789,64 +4737,64 @@ public class Role_1
      * @exception   ServiceException   on failure
      */
     public DataproviderReply modify(
-      ServiceHeader header,
-      DataproviderRequest request
+        ServiceHeader header,
+        DataproviderRequest request
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("RoleObject_1.modify");
-      String role = null;
-      DataproviderReply superReply = null;
+        StopWatch_1.instance().startTimer("RoleObject_1.modify");
+        String role = null;
+        DataproviderReply superReply = null;
 
-      // the first processing class in model layer must remove derived attributes
-      removeNonPersistentAttributes(request.object());
+        // the first processing class in model layer must remove derived attributes
+        removeNonPersistentAttributes(request.object());
 
-      String objClassName =
-        (String)request.object().getValues(
-          SystemAttributes.OBJECT_CLASS).get(
-          0);
+        String objClassName =
+            (String)request.object().getValues(
+                SystemAttributes.OBJECT_CLASS).get(
+                    0);
 
-      ModelElement_1_0 objClass =
-        this.model.getDereferencedType(objClassName);
+        ModelElement_1_0 objClass =
+            this.model.getDereferencedType(objClassName);
 
-      if (classIsRole(objClass)) {
-        role = getRoleFromPath(request.path());
-        SysLog.trace("modify in role: ", role);
+        if (classIsRole(objClass)) {
+            role = getRoleFromPath(request.path());
+            SysLog.trace("modify in role: ", role);
 
-        assertRoleNotNull(role, request.object());
+            assertRoleNotNull(role, request.object());
 
-        DataproviderObject expanded =
-          createExpandedObject(
-            header,
-            request,
-            role,
-            this.roleTypes,
-            MODIFICATION_OP);
+            DataproviderObject expanded =
+                createExpandedObject(
+                    header,
+                    request,
+                    role,
+                    this.roleTypes,
+                    MODIFICATION_OP);
 
-        DataproviderRequest modifyRequest =
-          new DataproviderRequest(
-            expanded,
-            DataproviderOperations.OBJECT_MODIFICATION,
-            AttributeSelectors.ALL_ATTRIBUTES,
-            null);
-        modifyRequest.contexts().putAll(request.contexts());
+            DataproviderRequest modifyRequest =
+                new DataproviderRequest(
+                    expanded,
+                    DataproviderOperations.OBJECT_MODIFICATION,
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    null);
+            modifyRequest.contexts().putAll(request.contexts());
 
-        superReply = super.modify(header, modifyRequest);
-      }
-      else {
-        // an object without roles is modified, use super implementation
-        roleTypeVirtualMap.assertNoModificationByVirtualPath(request.path());
-        superReply = super.modify(header, request);
-      }
+            superReply = super.modify(header, modifyRequest);
+        }
+        else {
+            // an object without roles is modified, use super implementation
+            roleTypeVirtualMap.assertNoModificationByVirtualPath(request.path());
+            superReply = super.modify(header, request);
+        }
 
-      DataproviderReply reply =
-        completeReply(
-          header,
-          request,
-          superReply,
-          role,
-          null,
-          this.roleTypes);
-      StopWatch_1.instance().stopTimer("RoleObject_1.modify");
-      return reply;
+        DataproviderReply reply =
+            completeReply(
+                header,
+                request,
+                superReply,
+                role,
+                null,
+                this.roleTypes);
+        StopWatch_1.instance().stopTimer("RoleObject_1.modify");
+        return reply;
     }
 
     //---------------------------------------------------------------------------
@@ -4873,67 +4821,67 @@ public class Role_1
      *                on failure
      */
     public DataproviderReply replace(
-      ServiceHeader header,
-      DataproviderRequest request
+        ServiceHeader header,
+        DataproviderRequest request
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("RoleObject_1.replace");
-      String role = null;
-      DataproviderReply superReply = null;
+        StopWatch_1.instance().startTimer("RoleObject_1.replace");
+        String role = null;
+        DataproviderReply superReply = null;
 
-      // the first processing class in model layer must remove derived attributes
-      removeNonPersistentAttributes(request.object());
+        // the first processing class in model layer must remove derived attributes
+        removeNonPersistentAttributes(request.object());
 
-      String objClassName =
-        (String)request.object().getValues(
-          SystemAttributes.OBJECT_CLASS).get(
-          0);
+        String objClassName =
+            (String)request.object().getValues(
+                SystemAttributes.OBJECT_CLASS).get(
+                    0);
 
-      ModelElement_1_0 objClass =
-        this.model.getDereferencedType(objClassName);
+        ModelElement_1_0 objClass =
+            this.model.getDereferencedType(objClassName);
 
-      if (classIsRole(objClass)) {
-        role = getRoleFromPath(request.path());
-        SysLog.trace("replace in role: ", role);
+        if (classIsRole(objClass)) {
+            role = getRoleFromPath(request.path());
+            SysLog.trace("replace in role: ", role);
 
-        assertRoleNotNull(role, request.object());
+            assertRoleNotNull(role, request.object());
 
-        DataproviderObject expanded =
-          createExpandedObject(
-            header,
-            request,
-            role,
-            this.roleTypes,
-            REPLACE_OP);
+            DataproviderObject expanded =
+                createExpandedObject(
+                    header,
+                    request,
+                    role,
+                    this.roleTypes,
+                    REPLACE_OP);
 
-        DataproviderRequest replaceRequest =
-          new DataproviderRequest(
-            expanded,
-            DataproviderOperations.OBJECT_REPLACEMENT,
-            AttributeSelectors.ALL_ATTRIBUTES,
-            null);
-        replaceRequest.contexts().putAll(request.contexts());
+            DataproviderRequest replaceRequest =
+                new DataproviderRequest(
+                    expanded,
+                    DataproviderOperations.OBJECT_REPLACEMENT,
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    null);
+            replaceRequest.contexts().putAll(request.contexts());
 
-        superReply = super.replace(header, replaceRequest);
-      }
-      else {
-        // an object without roles is modified, use super implementation
-        roleTypeVirtualMap.assertNoModificationByVirtualPath(request.path());
-        superReply = super.replace(header, request);
-      }
+            superReply = super.replace(header, replaceRequest);
+        }
+        else {
+            // an object without roles is modified, use super implementation
+            roleTypeVirtualMap.assertNoModificationByVirtualPath(request.path());
+            superReply = super.replace(header, request);
+        }
 
-      DataproviderReply reply =
-        completeReply(
-          header,
-          request,
-          superReply,
-          role,
-          null,
-          this.roleTypes);
-      StopWatch_1.instance().stopTimer("RoleObject_1.replace");
-      return reply;
+        DataproviderReply reply =
+            completeReply(
+                header,
+                request,
+                superReply,
+                role,
+                null,
+                this.roleTypes);
+        StopWatch_1.instance().stopTimer("RoleObject_1.replace");
+        return reply;
     }
-    
-  //---------------------------------------------------------------------------
+
+    //---------------------------------------------------------------------------
     /**
      * Removes an object's role and it's dependent roles. Removing without
      * a role specified in path removes the entire object and all its roles.
@@ -4947,75 +4895,75 @@ public class Role_1
      * @exception   ServiceException  on failure
      */
     public DataproviderReply remove(
-      ServiceHeader header,
-      DataproviderRequest request
+        ServiceHeader header,
+        DataproviderRequest request
     ) throws ServiceException {
-      StopWatch_1.instance().startTimer("RoleObject_1.remove");
-      try {
-        DataproviderReply superReply = null;
-        String role = getRoleFromPath(request.path());
-        if (role != null) {
-          SysLog.trace(" role: ", role);
-          Path noRolePath = toRolelessPath(new Path(request.path()));
+        StopWatch_1.instance().startTimer("RoleObject_1.remove");
+        try {
+            DataproviderReply superReply = null;
+            String role = getRoleFromPath(request.path());
+            if (role != null) {
+                SysLog.trace(" role: ", role);
+                Path noRolePath = toRolelessPath(new Path(request.path()));
 
-          // get the object from storage this will be used for reply 
-          // because the reply is based on the original object.
-          DataproviderRequest getRequest =
-            new DataproviderRequest(
-              new DataproviderObject(noRolePath),
-              DataproviderOperations.OBJECT_RETRIEVAL,
-              AttributeSelectors.ALL_ATTRIBUTES,
-              null);
-          getRequest.contexts().putAll(request.contexts());
-          superReply = super.get(header, getRequest);
-          DataproviderObject replaceObject =
-            this.removeRoleDependentAttributes(
-              header,
-              request,
-              (DataproviderObject)superReply.getObject().clone(),
-              role,
-              this.roleTypes);
-          DataproviderRequest replaceRequest =
-            new DataproviderRequest(
-              replaceObject,
-              DataproviderOperations.OBJECT_REPLACEMENT,
-              AttributeSelectors.ALL_ATTRIBUTES,
-              null);
-          replaceRequest.contexts().putAll(request.contexts());
-          super.replace(header, replaceRequest);
-        }
-        else {
-          this.assertRoleTypeRemove(header, request);
-          roleTypeVirtualMap.assertNoModificationByVirtualPath(request.path());
-          superReply = super.remove(header, request);
-        }
-        DataproviderReply reply =
-          completeReply(
-            header,
-            request,
-            superReply,
-            role,
-            null,
-            this.roleTypes);
+                // get the object from storage this will be used for reply 
+                // because the reply is based on the original object.
+                DataproviderRequest getRequest =
+                    new DataproviderRequest(
+                        new DataproviderObject(noRolePath),
+                        DataproviderOperations.OBJECT_RETRIEVAL,
+                        AttributeSelectors.ALL_ATTRIBUTES,
+                        null);
+                getRequest.contexts().putAll(request.contexts());
+                superReply = super.get(header, getRequest);
+                DataproviderObject replaceObject =
+                    this.removeRoleDependentAttributes(
+                        header,
+                        request,
+                        (DataproviderObject)superReply.getObject().clone(),
+                        role,
+                        this.roleTypes);
+                DataproviderRequest replaceRequest =
+                    new DataproviderRequest(
+                        replaceObject,
+                        DataproviderOperations.OBJECT_REPLACEMENT,
+                        AttributeSelectors.ALL_ATTRIBUTES,
+                        null);
+                replaceRequest.contexts().putAll(request.contexts());
+                super.replace(header, replaceRequest);
+            }
+            else {
+                this.assertRoleTypeRemove(header, request);
+                roleTypeVirtualMap.assertNoModificationByVirtualPath(request.path());
+                superReply = super.remove(header, request);
+            }
+            DataproviderReply reply =
+                completeReply(
+                    header,
+                    request,
+                    superReply,
+                    role,
+                    null,
+                    this.roleTypes);
 
-        return reply;
-      }
-      finally {
-        StopWatch_1.instance().stopTimer("RoleObject_1.remove");
-      }   
+            return reply;
+        }
+        finally {
+            StopWatch_1.instance().stopTimer("RoleObject_1.remove");
+        }   
     }
 
     //---------------------------------------------------------------------------
     // Variables
     //---------------------------------------------------------------------------
     private static final String ROLE_ATTRIBUTE_SEPARATOR = "$";
-    
+
     private final String ROLE_PATH_ENTRY = "role";
     private final String ROLE_STEREOTYPE = Stereotypes.ROLE;
-    
+
     private final boolean REPLACE_OP = true;
     private final boolean MODIFICATION_OP = false;  
-    
+
     private String AUTHORITY_TYPE_NAME = "org:openmdx:base:Authority";
 
     private final String ROLETYPE_CORE_ROLE_ATTRIBUTE = "coreRole";
@@ -5023,9 +4971,9 @@ public class Role_1
     // name of the entry which gets added to the request.context() in 
     // findCoreObjectStates()
     public final String ROLE_OBJECT_STATES = "RoleObjectStates";
-        
+
     private Model_1_0 model = null;
-    
+
     // mapping from RoleType to the corresponding role class. The elements
     // are of type QualifierAndRoleClass, they also contain the mapping 
     // attribute. 
@@ -5035,10 +4983,10 @@ public class Role_1
     // with removed object ids.
     private Map roleTypePathPatternMap = new HashMap(); 
     private List allRoleTypeReferencePaths = new ArrayList(); // only roletypes
-    
+
     // map virtual role type reference paths to the original objects
     private RoleTypeVirtualMap roleTypeVirtualMap = null;
-    
+
     // map containing all referencePath's in the model and the classes they 
     // lead to. This is not primarely for RoleType processing!
     private Map referencePathClassMap = null;           
@@ -5048,7 +4996,7 @@ public class Role_1
     // the cache. 
     // IMPORTANT: Removing roleTypes is not supported by this implementation.
     private Map roleTypes = new HashMap();
-        
+
 }
 
 //--- End of File -----------------------------------------------------------

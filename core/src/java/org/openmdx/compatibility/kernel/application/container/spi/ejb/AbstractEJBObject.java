@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractEJBObject.java,v 1.2 2008/03/27 19:16:29 hburger Exp $
+ * Name:        $Id: AbstractEJBObject.java,v 1.4 2008/09/09 10:05:04 hburger Exp $
  * Description: Abstract EJBObject implementation
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/27 19:16:29 $
+ * Date:        $Date: 2008/09/09 10:05:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -191,7 +191,7 @@ public abstract class AbstractEJBObject
          * @throws InvocationTargetException
          */
         Object invoke(
-            Object[] arguments
+            Object... arguments
         ) throws RemoteException, InvocationTargetException;
         
     }
@@ -241,7 +241,7 @@ public abstract class AbstractEJBObject
         private final TransactionAttribute transactionAttribute;
         
         public Object invoke(
-            Object[] arguments
+            Object... arguments
         ) throws RemoteException, InvocationTargetException {
             Object callerContext = this.home.setBeanContext();
             try {

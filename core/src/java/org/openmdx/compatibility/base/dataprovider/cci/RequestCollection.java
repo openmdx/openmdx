@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RequestCollection.java,v 1.25 2008/03/07 03:25:09 hburger Exp $
+ * Name:        $Id: RequestCollection.java,v 1.26 2008/09/10 08:55:22 hburger Exp $
  * Description: RequestCollection class
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/07 03:25:09 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,8 +70,8 @@ import org.openmdx.kernel.log.SysLog;
  * An object request
  */
 public final class RequestCollection
-    implements Serializable, Cloneable, 
-        IterationProcessor, DataproviderProcessor_1_0
+implements Serializable, Cloneable, 
+IterationProcessor, DataproviderProcessor_1_0
 {
 
     /**
@@ -88,7 +88,7 @@ public final class RequestCollection
     ){
         this(serviceHeader, dataprovider, false);
     }
-    
+
     /**
      * Constructor
      */
@@ -101,14 +101,12 @@ public final class RequestCollection
             if (serviceHeader == null) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                null,
                 "A RequestCollection's serviceHeader must not be null"
             );
             this.serviceHeader = serviceHeader;
             if (dataprovider == null) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                null,
                 "A RequestCollection's dataprovider must not be null"
             );
             this.dataprovider = dataprovider;
@@ -161,8 +159,8 @@ public final class RequestCollection
             this.lenient
         );
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements DataproviderProcessor_1_0
     //------------------------------------------------------------------------
@@ -182,7 +180,7 @@ public final class RequestCollection
         this.inUnitOfWork = false;
         this.transactionalUnit = false;
     }
-    
+
     /**
      * Calling beginBatch() postpones request processing until endBatch() is
      * called.
@@ -195,7 +193,6 @@ public final class RequestCollection
         if(this.inBatch) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "Request collection is already in batch mode"
         );
         this.inBatch = true;
@@ -217,7 +214,6 @@ public final class RequestCollection
         if(! this.inBatch) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "Request collection is not in batch mode"
         );
         UnitOfWorkRequest[] requests = batchRequests.toArray(
@@ -253,7 +249,6 @@ public final class RequestCollection
         if(this.inUnitOfWork) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "Request collection is already in working unit mode"
         );
         this.inUnitOfWork = true;
@@ -274,7 +269,6 @@ public final class RequestCollection
         if(! this.inUnitOfWork) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "Request collection is not in working unit mode"
         );
         DataproviderRequest[] requests = this.workingUnitRequests.toArray(
@@ -631,7 +625,7 @@ public final class RequestCollection
         );
         return target;
     }
-    
+
     /** 
      * Adds a replace request retrieving all attributes specified by either 
      * the <code>attributeSelector</code> or the
@@ -667,7 +661,7 @@ public final class RequestCollection
             listener
         );
     }
-    
+
 
     /**
      * Adds a set request retrieving the typical attributes.
@@ -689,7 +683,7 @@ public final class RequestCollection
             null
         );
     }
-    
+
     /** 
      * Adds a set request retrieveing all attributes specified by either 
      * the <code>attributeSelector</code> or the
@@ -938,7 +932,7 @@ public final class RequestCollection
             direction
         );
     }
-        
+
     /**
      * Adds a find request selecting all objects where the
      * <code>referenceFilter</code> as well as the
@@ -1042,14 +1036,14 @@ public final class RequestCollection
         DataproviderReplyListener listener
     ) throws ServiceException {
         addFindRequest(
-          referenceFilter,
-          attributeFilter,
-          attributeSelector,
-          null, // atributeSpecifier
-          position,
-          size,
-          direction,
-          listener
+            referenceFilter,
+            attributeFilter,
+            attributeSelector,
+            null, // atributeSpecifier
+            position,
+            size,
+            direction,
+            listener
         );
     }
 
@@ -1138,7 +1132,7 @@ public final class RequestCollection
         );
         return reply;
     }
-        
+
     /**
      * Add a publish request
      *
@@ -1191,19 +1185,17 @@ public final class RequestCollection
         DataproviderObject request
     ) throws ServiceException {
         if(
-            request.path().size() % 2 != 0
+                request.path().size() % 2 != 0
         ) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.BAD_PARAMETER,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path",request.path())
-            },
-            "The request's path must end in the requested operation's name"
+            "The request's path must end in the requested operation's name",
+            new BasicException.Parameter("path",request.path())
         );  
-        
+
         // Append request id
         request.path().add(uuidAsString());
-        
+
         final RequestedObject reply = new RequestedObject();
         dispatch(
             new DataproviderRequest(
@@ -1235,19 +1227,17 @@ public final class RequestCollection
         DataproviderReplyListener listener
     ) throws ServiceException {
         if(
-            request.path().size() % 2 != 0
+                request.path().size() % 2 != 0
         ) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.BAD_PARAMETER,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path",request.path())
-            },
-            "The request's path must end in the requested operation's name"
+            "The request's path must end in the requested operation's name",
+            new BasicException.Parameter("path",request.path())
         );  
-        
+
         // Append request id
         request.path().add(uuidAsString());
-        
+
         dispatch(
             new DataproviderRequest(
                 request,
@@ -1331,7 +1321,6 @@ public final class RequestCollection
         if(referenceFilter == null) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.BAD_PARAMETER,
-            null,
             "Reference filter must not be null"
         );
         DataproviderRequest request = new DataproviderRequest (
@@ -1350,7 +1339,7 @@ public final class RequestCollection
             listener
         );
     }
-    
+
 
     //------------------------------------------------------------------------
     // Dispatching
@@ -1389,10 +1378,9 @@ public final class RequestCollection
     ) throws ServiceException {
         if(request.getRequests().length != listeners.length) {
             RuntimeServiceException assertionFailure = new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.ASSERTION_FAILURE,
-                    null,
-                    "The number of requests and listeners does not match"
+                BasicException.Code.DEFAULT_DOMAIN, 
+                BasicException.Code.ASSERTION_FAILURE,
+                "The number of requests and listeners does not match"
             );
             SysLog.error(
                 assertionFailure.getMessage(), 
@@ -1418,10 +1406,9 @@ public final class RequestCollection
     ){
         if(requests.length != listeners.length) {
             RuntimeServiceException assertionFailure = new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.ASSERTION_FAILURE,
-                    null,
-                    "The number of working unit requests and listeners does not match"
+                BasicException.Code.DEFAULT_DOMAIN, 
+                BasicException.Code.ASSERTION_FAILURE,
+                "The number of working unit requests and listeners does not match"
             );
             SysLog.error(
                 assertionFailure.getMessage(), 
@@ -1435,10 +1422,9 @@ public final class RequestCollection
         );
         if(requests.length != listeners.length) {
             RuntimeServiceException assertionFailure = new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.ASSERTION_FAILURE,
-                    null,
-                    "The number of requests and replies does not match"
+                BasicException.Code.DEFAULT_DOMAIN, 
+                BasicException.Code.ASSERTION_FAILURE,
+                "The number of requests and replies does not match"
             );
             SysLog.error(
                 assertionFailure.getMessage(), 
@@ -1447,25 +1433,25 @@ public final class RequestCollection
             throw assertionFailure;
         }
         for (
-            int workingUnitIndex = 0;
-            workingUnitIndex < requests.length;
-            workingUnitIndex++
+                int workingUnitIndex = 0;
+                workingUnitIndex < requests.length;
+                workingUnitIndex++
         ) try {
             UnitOfWorkReply source = replies[workingUnitIndex];
             DataproviderReplyListener[] target = listeners[workingUnitIndex];
             if (source.failure()) {
                 for (
-                    int requestIndex = 0;
-                    requestIndex < target.length;
-                    requestIndex++
+                        int requestIndex = 0;
+                        requestIndex < target.length;
+                        requestIndex++
                 ) target[requestIndex].onException(
                     source.getStatus()
                 );
             } else {
                 for (
-                    int requestIndex = 0;
-                    requestIndex < target.length;
-                    requestIndex++
+                        int requestIndex = 0;
+                        requestIndex < target.length;
+                        requestIndex++
                 ) target[requestIndex].onReply(
                     source.getReplies()[requestIndex]
                 );
@@ -1475,18 +1461,16 @@ public final class RequestCollection
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "workingUnit", 
-                        workingUnitIndex
-                    )
-                },
-                "A DataproviderReplyListener raised an exception"
+                "A DataproviderReplyListener raised an exception",
+                new BasicException.Parameter(
+                    "workingUnit", 
+                    workingUnitIndex
+                )
             ).log();
         }
         return replies;     
     }
-    
+
 
     //------------------------------------------------------------------------
     // Implements Cloneable
@@ -1528,7 +1512,7 @@ public final class RequestCollection
      * should be set to <code>Boolean.TRUE</code>.
      */
     final protected boolean lenient;
-    
+
     /**
      *
      */
@@ -1538,7 +1522,7 @@ public final class RequestCollection
      *
      */
     protected boolean inBatch = false;
-    
+
     /**
      *
      */
@@ -1578,5 +1562,5 @@ public final class RequestCollection
      * 
      */
     private transient UUIDGenerator uuidGenerator = null;
-    
+
 }

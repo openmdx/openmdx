@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbConnectionManagerPool_1.java,v 1.5 2007/10/10 16:05:57 hburger Exp $
+ * Name:        $Id: DbConnectionManagerPool_1.java,v 1.6 2008/09/10 08:55:24 hburger Exp $
  * Description: Pooling DB connection manager
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:57 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -172,105 +172,100 @@ import org.openmdx.kernel.log.SysLog;
  * 
  */
 public class DbConnectionManagerPool_1 
-  implements DbConnectionManager_1_0 
+implements DbConnectionManager_1_0 
 {
 
-	/**
-	 * Creates a new connection manager. 
-	 * Using a pool of connections to the database.
-	 *
-	 * @param poolName JDBC Connection Pool name
-	 *
-	 * @param exDomain the exception domain name
-	 */
-	public DbConnectionManagerPool_1(
-	  String jndiName
-	) throws ServiceException {
-		this.pool = null; 
-		this.jndiName = jndiName;
-	}
-	
-	/**
-	 * Get a data source
-	 * 
-	 * @return the DataSource corresponding to the JNDI name
-	 * @throws ServiceException
-	 * 
-	 * @throws ServiceException
-	 */
-	protected DataSource getDataSource(
-	) throws ServiceException{
-	    try {
+    /**
+     * Creates a new connection manager. 
+     * Using a pool of connections to the database.
+     *
+     * @param poolName JDBC Connection Pool name
+     *
+     * @param exDomain the exception domain name
+     */
+    public DbConnectionManagerPool_1(
+        String jndiName
+    ) throws ServiceException {
+        this.pool = null; 
+        this.jndiName = jndiName;
+    }
+
+    /**
+     * Get a data source
+     * 
+     * @return the DataSource corresponding to the JNDI name
+     * @throws ServiceException
+     * 
+     * @throws ServiceException
+     */
+    protected DataSource getDataSource(
+    ) throws ServiceException{
+        try {
             return (DataSource)new InitialContext().lookup(this.jndiName);
         } catch (NamingException exception) {
-	        throw new ServiceException(
-	            exception, 
-	    		BasicException.Code.DEFAULT_DOMAIN,
-	    		BasicException.Code.MEDIA_ACCESS_FAILURE, 
-	            new BasicException.Parameter[]{
-	          	  new BasicException.Parameter("jndiName",this.jndiName)
-	            }, 
-	            "Could not lookup connection pool '" + this.jndiName + "'"
-	        ).log();
+            throw new ServiceException(
+                exception, 
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.MEDIA_ACCESS_FAILURE, 
+                "Could not lookup connection pool '" + this.jndiName + "'", 
+                new BasicException.Parameter("jndiName",this.jndiName)
+            ).log();
         }
-	}
-	
-	/**
-	 * Get a database connection pool
-	 * 
-	 * @return the DataSource corresponding to the JNDI name
-	 * 
-	 * @throws ServiceException
-	 */
-	private synchronized DataSource getPool(
-	) throws ServiceException{
-	    if (this.pool == null){
-	        SysLog.detail(
-	            "Acquire Connection Pool",
-	            this.jndiName
-	        );
-	        this.pool = getDataSource();
-	    }
-	    return this.pool;	    
-	}
-	
-	/**
-	 * Returns a connection. 
-	 * <p>
-	 * The connection must be closed when it is not needed any more, so it is 
-	 * available again. Otherwise the connection pool runs out of available 
-	 * connections!
-	 */
-	public java.sql.Connection getConnection(
-	) throws ServiceException {	
-	  try {
-	    Connection con = getPool().getConnection();    
-	    if(con == null) throw new ServiceException(
-		    BasicException.Code.DEFAULT_DOMAIN,
-			BasicException.Code.MEDIA_ACCESS_FAILURE, 
-	        new BasicException.Parameter[]{
-	      	  new BasicException.Parameter("jndiName",this.jndiName)
-	        }, "No connection available from '" + this.jndiName + "'"
-	    ).log();
-	    return con;
-	  } catch(SQLException ex) {
-	    throw new ServiceException(
-	      ex, 
-		  BasicException.Code.DEFAULT_DOMAIN,
-		  BasicException.Code.MEDIA_ACCESS_FAILURE, 
-	      new BasicException.Parameter[]{
-	      	new BasicException.Parameter("jndiName",this.jndiName)
-	      }, 
-	      "Failure when getting a connection from '" + this.jndiName + "'"
-	    ).log();
-	  }    
-	}
+    }
 
-	/**
-	 * The connection is returned to the free connection pool
-	 * 
-	 * @param the connection to be returned 
-	 */
+    /**
+     * Get a database connection pool
+     * 
+     * @return the DataSource corresponding to the JNDI name
+     * 
+     * @throws ServiceException
+     */
+    private synchronized DataSource getPool(
+    ) throws ServiceException{
+        if (this.pool == null){
+            SysLog.detail(
+                "Acquire Connection Pool",
+                this.jndiName
+            );
+            this.pool = getDataSource();
+        }
+        return this.pool;	    
+    }
+
+    /**
+     * Returns a connection. 
+     * <p>
+     * The connection must be closed when it is not needed any more, so it is 
+     * available again. Otherwise the connection pool runs out of available 
+     * connections!
+     */
+    public java.sql.Connection getConnection(
+    ) throws ServiceException {	
+        try {
+            Connection con = getPool().getConnection();    
+            if(con == null) throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.MEDIA_ACCESS_FAILURE, 
+                "No connection available from '" + this.jndiName + "'", 
+                new BasicException.Parameter("jndiName",this.jndiName)
+            ).log();
+            return con;
+        } catch(SQLException ex) {
+            throw new ServiceException(
+                ex, 
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.MEDIA_ACCESS_FAILURE, 
+                "Failure when getting a connection from '" + this.jndiName + "'", 
+                new BasicException.Parameter("jndiName",this.jndiName)
+            ).log();
+        }    
+    }
+
+    /**
+     * The connection is returned to the free connection pool
+     * 
+     * @param the connection to be returned 
+     */
     public void closeConnection(
         java.sql.Connection conn
     ) throws ServiceException {
@@ -284,43 +279,43 @@ public class DbConnectionManagerPool_1
     /**
      * 
      */
-	public void activate(
-	) throws java.lang.Exception {
-	    //
-	}
+    public void activate(
+    ) throws java.lang.Exception {
+        //
+    }
 
-	/**
-	 * Closes the connection manager. 
-	 *
-	 * Does not close any open connections that have been obtained from the manager.
-	 */
-	public void deactivate(
-	) throws java.lang.Exception {
-	  this.pool = null;
-	  SysLog.detail(
-	    "Connection pool discarded",
-	    this.jndiName
-	  );
-	}
+    /**
+     * Closes the connection manager. 
+     *
+     * Does not close any open connections that have been obtained from the manager.
+     */
+    public void deactivate(
+    ) throws java.lang.Exception {
+        this.pool = null;
+        SysLog.detail(
+            "Connection pool discarded",
+            this.jndiName
+        );
+    }
 
-	/**
-	 * Get the connection pool's JNDI name
-	 * 
-	 * @return the connection pool's JNDI name
-	 */
-	protected final String getName(){
-	    return this.jndiName;
-	}
-	
-	/**
-	 * 
-	 */
-	private DataSource pool;
+    /**
+     * Get the connection pool's JNDI name
+     * 
+     * @return the connection pool's JNDI name
+     */
+    protected final String getName(){
+        return this.jndiName;
+    }
 
-	/**
-	 * 
-	 */
-	private final String jndiName;
+    /**
+     * 
+     */
+    private DataSource pool;
+
+    /**
+     * 
+     */
+    private final String jndiName;
 
 }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ExceptionDef.java,v 1.7 2008/03/21 18:40:15 hburger Exp $
+ * Name:        $Id: ExceptionDef.java,v 1.8 2008/09/10 08:55:26 hburger Exp $
  * Description: VelocityExceptionDef class
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:40:15 $
+ * Date:        $Date: 2008/09/10 08:55:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,124 +66,122 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 
 @SuppressWarnings("unchecked")
 public class ExceptionDef 
-  extends FeatureDef {
+extends FeatureDef {
 
-  //-------------------------------------------------------------------------
-  public ExceptionDef(
-    ModelElement_1_0 exceptionDef,
-    Model_1_0 model, 
-    boolean openmdx1
-  ) throws ServiceException {
-    this(
-      mapName(openmdx1, (String)exceptionDef.values("name").get(0)),
-      (String)exceptionDef.values("qualifiedName").get(0),
-      (String)exceptionDef.values("annotation").get(0),
-      new HashSet(exceptionDef.values("stereotype")),
-      (String)exceptionDef.values("visibility").get(0),
-      getParameters(exceptionDef, (Model_1_3)model, openmdx1)
-    );
-  }
-
-  private static String mapName(
-      boolean openmdx1, String modelName
-  ){
-      if(openmdx1 || !STANDARD_COMPLIANT) {
-          return modelName;
-      } else {
-          return modelName.endsWith("Exception") ? modelName :  modelName + "Exception";  
-      }
-  }
-  
-  //-------------------------------------------------------------------------
-  private static List getParameters(
-    ModelElement_1_0 exceptionDef,
-    Model_1_3 model, 
-    boolean openmdx1
-  ) throws ServiceException {  
-
-    HashMap params = new HashMap();
-    for(
-      Iterator i = exceptionDef.values("content").iterator();
-      i.hasNext();
-    ) {
-      ModelElement_1_0 param = model.getElement(i.next());
-      params.put(
-        param.values("name").get(0),
-        param
-      );
-    }
- 
-    if(params.get("in") == null) {
-      throw new ServiceException(
-        BasicException.Code.DEFAULT_DOMAIN,
-        BasicException.Code.ASSERTION_FAILURE,
-        new BasicException.Parameter[]{
-          new BasicException.Parameter("exception", exceptionDef.path()),
-          new BasicException.Parameter("params", params)
-        },
-        "no parameter with name \"in\" defined for exception"
-      );
-    }
-
-    // set exeption parameters (as attributes)
-    ModelElement_1_0 inParamType = model.getDereferencedType(
-      ((ModelElement_1_0)params.get("in")).values("type").get(0),
-      openmdx1
-    );
-
-    List parameters = new ArrayList();
-    for(
-      Iterator i = inParamType.values("content").iterator();
-      i.hasNext();
-    ) {
-      ModelElement_1_0 field = model.getElement(i.next());
-      if(model.isStructureFieldType(field)) {
-        parameters.add(
-          new AttributeDef(
-            field,
-            model, 
-            openmdx1
-          )
-        );
-      }
-    }
-    return parameters;
-  }
-  
-  //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     public ExceptionDef(
-    String name,
-    String qualifiedName,
-    String annotation,
-    Set stereotype,
-    String visibility,
-    List parameters
-  ) {
-    super(
-      name, 
-      qualifiedName, 
-      annotation,
-      stereotype,
-      visibility
-    );
-    this.parameters = parameters;
+        ModelElement_1_0 exceptionDef,
+        Model_1_0 model, 
+        boolean openmdx1
+    ) throws ServiceException {
+        this(
+            mapName(openmdx1, (String)exceptionDef.values("name").get(0)),
+            (String)exceptionDef.values("qualifiedName").get(0),
+            (String)exceptionDef.values("annotation").get(0),
+            new HashSet(exceptionDef.values("stereotype")),
+            (String)exceptionDef.values("visibility").get(0),
+            getParameters(exceptionDef, (Model_1_3)model, openmdx1)
+        );
     }
-  
-  //-------------------------------------------------------------------------
-  public List getParameters(
-  ) {
-    return this.parameters;
-  }
 
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private final List parameters;
-  
-  /**
-   * Tells whether "Exception" is appended to the MOD name of required by
-   * the JMI 1 spec
-   */
-  public static final boolean STANDARD_COMPLIANT = false;
-  
+    private static String mapName(
+        boolean openmdx1, String modelName
+    ){
+        if(openmdx1 || !STANDARD_COMPLIANT) {
+            return modelName;
+        } else {
+            return modelName.endsWith("Exception") ? modelName :  modelName + "Exception";  
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    private static List getParameters(
+        ModelElement_1_0 exceptionDef,
+        Model_1_3 model, 
+        boolean openmdx1
+    ) throws ServiceException {  
+
+        HashMap params = new HashMap();
+        for(
+                Iterator i = exceptionDef.values("content").iterator();
+                i.hasNext();
+        ) {
+            ModelElement_1_0 param = model.getElement(i.next());
+            params.put(
+                param.values("name").get(0),
+                param
+            );
+        }
+
+        if(params.get("in") == null) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "no parameter with name \"in\" defined for exception",
+                new BasicException.Parameter("exception", exceptionDef.path()),
+                new BasicException.Parameter("params", params)
+            );
+        }
+
+        // set exeption parameters (as attributes)
+        ModelElement_1_0 inParamType = model.getDereferencedType(
+            ((ModelElement_1_0)params.get("in")).values("type").get(0),
+            openmdx1
+        );
+
+        List parameters = new ArrayList();
+        for(
+                Iterator i = inParamType.values("content").iterator();
+                i.hasNext();
+        ) {
+            ModelElement_1_0 field = model.getElement(i.next());
+            if(model.isStructureFieldType(field)) {
+                parameters.add(
+                    new AttributeDef(
+                        field,
+                        model, 
+                        openmdx1
+                    )
+                );
+            }
+        }
+        return parameters;
+    }
+
+    //-------------------------------------------------------------------------
+    public ExceptionDef(
+        String name,
+        String qualifiedName,
+        String annotation,
+        Set stereotype,
+        String visibility,
+        List parameters
+    ) {
+        super(
+            name, 
+            qualifiedName, 
+            annotation,
+            stereotype,
+            visibility
+        );
+        this.parameters = parameters;
+    }
+
+    //-------------------------------------------------------------------------
+    public List getParameters(
+    ) {
+        return this.parameters;
+    }
+
+    //-------------------------------------------------------------------------
+    // Variables
+    //-------------------------------------------------------------------------
+    private final List parameters;
+
+    /**
+     * Tells whether "Exception" is appended to the MOD name of required by
+     * the JMI 1 spec
+     */
+    public static final boolean STANDARD_COMPLIANT = false;
+
 }

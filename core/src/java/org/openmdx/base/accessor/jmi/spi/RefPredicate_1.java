@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPredicate_1.java,v 1.3 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: RefPredicate_1.java,v 1.6 2008/09/10 08:55:23 hburger Exp $
  * Description: RefFilter_1 based AnyTypePredicate implementation
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.compatibility.base.query.FilterOperators;
 import org.openmdx.compatibility.base.query.FilterProperty;
+import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.AnyTypePredicate;
 
@@ -68,8 +69,8 @@ import org.w3c.cci2.AnyTypePredicate;
  * RefFilter_1 based AnyTypePredicate implementation
  */
 public class RefPredicate_1
-    extends RefFilter_1
-    implements AnyTypePredicate
+extends RefFilter_1
+implements AnyTypePredicate
 {
 
     /**
@@ -112,7 +113,7 @@ public class RefPredicate_1
      * 
      */
     protected final RefFilter_1_0 filter;
-  
+
     /**
      * 
      */
@@ -143,15 +144,34 @@ public class RefPredicate_1
         } catch (NullPointerException exception) {
             throw new JmiServiceException(
                 new ServiceException(
+                    exception,
                     BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_IMPLEMENTED,
-                    null,
-                    "Candidate collection support not implemented for openMDX 1 compatibility mode"
+                    BasicException.Code.BAD_PARAMETER,
+                    "Either 'null operand' or 'candidate collection support not implemented for openMDX 1 compatibility mode'",
+                    new BasicException.Parameter(
+                        "quantor", 
+                        quantor == null ? "null" : Quantors.toString(this.quantor)
+                    ),
+                    new BasicException.Parameter(
+                        "name", 
+                        this.name
+                    ),
+                    new BasicException.Parameter(
+                        "operator",
+                        FilterOperators.toString(operator)
+                    ),
+                    operand == null ? new BasicException.Parameter(
+                        "operand", 
+                        "null"
+                    ) : new BasicException.Parameter(
+                        "operand.size()", 
+                        operand.size()
+                    )
                 )
             );
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.w3c.cci2.AnyTypePredicate#equalTo(V)
      */

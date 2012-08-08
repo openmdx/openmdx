@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExportXml.java,v 1.19 2008/03/21 20:17:17 hburger Exp $
+ * Name:        $Id: ExportXml.java,v 1.20 2008/09/09 14:32:16 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:17:17 $
+ * Date:        $Date: 2008/09/09 14:32:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -396,16 +396,17 @@ public class ExportXml
         List list
     ){
         return list == null ?
-            new String[]{} :
+            EMPTY :
             (String[])list.toArray(new String[list.size()]);
     }
     
-
+    private static final String[] EMPTY = {};
+    
     /** The End-Of-Line separator for the platform */
     private static final String EOL = System.getProperty("line.separator");
 
     /** The version gets set by CVS */
-    private static final String VERSION = "$Revision: 1.19 $";
+    private static final String VERSION = "$Revision: 1.20 $";
 
     /** The application name */
     private static final String APP_NAME = "ExportXml";

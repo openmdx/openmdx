@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestQueryFilter_1.java,v 1.2 2007/06/18 14:13:27 hburger Exp $
+ * Name:        $Id: TestQueryFilter_1.java,v 1.3 2008/09/09 14:20:58 hburger Exp $
  * Description: Context Query Test
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/06/18 14:13:27 $
+ * Date:        $Date: 2008/09/09 14:20:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -189,7 +189,7 @@ public class TestQueryFilter_1 extends TestCase {
                 Quantors.THERE_EXISTS,
                 SystemAttributes.OBJECT_INSTANCE_OF,
                 FilterOperators.IS_IN,
-                new Object[]{"org:openmdx:test:clock1:Segment"}
+                "org:openmdx:test:clock1:Segment"
             ),
             i.next()
         );
@@ -201,7 +201,7 @@ public class TestQueryFilter_1 extends TestCase {
                 Quantors.PIGGY_BACK,
                 namespace + SystemAttributes.OBJECT_CLASS,
                 FilterOperators.PIGGY_BACK,
-                new Object[]{"org:openmdx:compatibility:datastore1:QueryFilter"}
+                "org:openmdx:compatibility:datastore1:QueryFilter"
             ),
             p
         );

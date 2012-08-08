@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JndiServiceLocator_1.java,v 1.7 2008/03/21 18:45:21 hburger Exp $
+ * Name:        $Id: JndiServiceLocator_1.java,v 1.8 2008/09/10 08:55:24 hburger Exp $
  * Description: JndiServiceLocator_1 class 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:45:21 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,7 +74,7 @@ import org.openmdx.kernel.naming.Contexts;
  * Standard JNDI access} 
  */
 public class JndiServiceLocator_1
-    implements Manageable_1_0, org.openmdx.compatibility.base.application.cci.ServiceLocator_1_0
+implements Manageable_1_0, org.openmdx.compatibility.base.application.cci.ServiceLocator_1_0
 { 
 
     /**
@@ -121,7 +121,7 @@ public class JndiServiceLocator_1
     ) throws Exception {
         //
     }
-    
+
 
     //------------------------------------------------------------------------
     // Implements ServiceLocator_1_0
@@ -141,49 +141,45 @@ public class JndiServiceLocator_1
      * @see org.openmdx.compatibility.kernel.application.cci.ServiceLocator_1_0#lookup(java.lang.String)
      */
     public Object lookup(
-    	String registrationId
+        String registrationId
     ) throws ServiceException {
-    	try {
+        try {
             return initialContext().lookup(registrationId);
-	} catch (NamingException exception) {
+        } catch (NamingException exception) {
             throw new ServiceException(
-            	exception,
-            	BasicException.Code.DEFAULT_DOMAIN,
-            	BasicException.Code.NOT_FOUND,
-            	new BasicException.Parameter[]{
-                    new BasicException.Parameter("registrationId", registrationId)
-            },
-                "No object bound to the given registrationId"
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_FOUND,
+                "No object bound to the given registrationId",
+                new BasicException.Parameter("registrationId", registrationId)
             );
-	}
+        }
     }		
 
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.kernel.application.cci.ServiceLocator_1_0#bind(java.lang.String, java.lang.Object)
      */
     public void bind(
-    	String registrationId,
-    	Object object
+        String registrationId,
+        Object object
     ) throws ServiceException {
-	try {
-	    Contexts.bind(
+        try {
+            Contexts.bind(
                 initialContext(),
                 registrationId,
                 object
             );
-	} catch (NamingException exception) {
+        } catch (NamingException exception) {
             throw new ServiceException(
-            	exception,
-            	BasicException.Code.DEFAULT_DOMAIN,
-            	BasicException.Code.GENERIC,
-            	new BasicException.Parameter[]{
-                    new BasicException.Parameter("registrationId", registrationId)
-                },
-                "Could not bind object to the given registrationId"
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.GENERIC,
+                "Could not bind object to the given registrationId",
+                new BasicException.Parameter("registrationId", registrationId)
             );
-	}
+        }
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.kernel.application.cci.ServiceLocator_1_0#unbind(java.lang.String)
      */
@@ -197,10 +193,8 @@ public class JndiServiceLocator_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("registrationId", registrationId)
-                },
-                "Unbind failed"
+                "Unbind failed",
+                new BasicException.Parameter("registrationId", registrationId)
             );
         }
     }
@@ -219,10 +213,8 @@ public class JndiServiceLocator_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC,
-                new BasicException.Parameter[]{
-        		new BasicException.Parameter("registrationId", registrationId)
-                },
-                "Could not list bindings"
+                "Could not list bindings",
+                new BasicException.Parameter("registrationId", registrationId)
             );
         }
     }

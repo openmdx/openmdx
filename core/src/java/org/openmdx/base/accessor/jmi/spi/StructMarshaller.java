@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StructMarshaller.java,v 1.6 2004/07/11 19:15:30 hburger Exp $
+ * Name:        $Id: StructMarshaller.java,v 1.7 2008/09/10 08:55:23 hburger Exp $
  * Description: StructMarshaller class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/07/11 19:15:30 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -105,11 +105,11 @@ public class StructMarshaller
         throw new ServiceException (
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.TRANSFORMATION_FAILURE, 
+            "Can only unmarshal objects of type RefStruct_1_0",
             new BasicException.Parameter [] {
               new BasicException.Parameter("source", source),
               new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Can only unmarshal objects of type RefStruct_1_0"
+            }
         );  
       }
     }

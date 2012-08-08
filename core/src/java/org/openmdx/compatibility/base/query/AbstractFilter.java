@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractFilter.java,v 1.20 2008/03/21 20:14:50 hburger Exp $
+ * Name:        $Id: AbstractFilter.java,v 1.21 2008/09/10 08:55:20 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:14:50 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -74,7 +74,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
     ){
         // For Deserialization
     }
-    
+
     /**
      * Constructor
      * 
@@ -90,14 +90,14 @@ public abstract class AbstractFilter implements Selector, Serializable {
     ){
         this.filter = filter;
         for (
-          int i = 0;
-          i < this.filter.length;
-          i++
+                int i = 0;
+                i < this.filter.length;
+                i++
         ) try {
             short operator = filter[i].operator();
             if(
-                operator == FilterOperators.IS_LIKE ||
-                operator == FilterOperators.IS_UNLIKE
+                    operator == FilterOperators.IS_LIKE ||
+                    operator == FilterOperators.IS_UNLIKE
             ){
                 if(this.pattern == null) {
                     this.pattern = new Pattern_1_0[filter.length];
@@ -105,15 +105,13 @@ public abstract class AbstractFilter implements Selector, Serializable {
                 Object value = filter[i].getValue(0);
                 this.pattern[i] = value instanceof Path ?
                     new PathPattern((Path)value) :
-                    SQLExpression.compile((String)value);                
+                        SQLExpression.compile((String)value);                
             }
         } catch (BadParameterException exception) {
             throw new BadParameterException(
                 exception,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("filterProperty",filter[i])
-                },
-                "Invalid filter property"
+                "Invalid filter property",
+                new BasicException.Parameter("filterProperty",filter[i])
             );
         }
     }
@@ -132,7 +130,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
         Object candidate,
         String attribute
     );
-    
+
     /**
      * 
      */
@@ -155,8 +153,8 @@ public abstract class AbstractFilter implements Selector, Serializable {
     ){
         return this.filter;
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Selector 
     //------------------------------------------------------------------------
@@ -168,241 +166,237 @@ public abstract class AbstractFilter implements Selector, Serializable {
         Object candidate
     ){
         for (
-          int propertyIndex = 0;
-          propertyIndex < this.filter.length;
-          propertyIndex++
+                int propertyIndex = 0;
+                propertyIndex < this.filter.length;
+                propertyIndex++
         ){
-          boolean forAll = true;
-          boolean thereExists = false;
-          FilterProperty property = this.filter[propertyIndex];
-          
-          Iterator iterator = getValues(candidate, property.name());
-          if(iterator == null) {
-              return false;
-          }
-          while (iterator.hasNext()){
-              Object raw = iterator.next();
-              switch(property.operator()){
-              
-                case FilterOperators.IS_UNLIKE: {
-                  if (!matches(propertyIndex, raw)){
-                    thereExists = true;
-                  } else {
-                    forAll = false;
-                  }
-                  break;
-                }
-  
-                case FilterOperators.IS_LIKE: {
-                  if (matches(propertyIndex, raw)){
-                    thereExists = true;
-                  } else {
-                    forAll = false;
-                  }
-                  break;
-                }
-                
-                case FilterOperators.IS_OUTSIDE: {
-                    if(
-                      comparator.compare(raw,property.getValue(0)) < 0 ||
-                      comparator.compare(raw,property.getValue(1)) > 0
-                    ){
-                      thereExists = true;
-                    } else {
-                      forAll = false;
-                    }
-                    break;
-                }
-    
-                case FilterOperators.IS_BETWEEN: {
-                    if(
-                      comparator.compare(raw,property.getValue(0)) >= 0 &&
-                      comparator.compare(raw,property.getValue(1)) <= 0
-                    ){
-                      thereExists = true;
-                    } else {
-                      forAll = false;
-                    }
-                    break;
-                }
-    
-                case FilterOperators.IS_LESS_OR_EQUAL: {                
-                    if(
-                      comparator.compare(raw,property.getValue(0)) <= 0
-                    ){
-                      thereExists = true;
-                    } else {
-                      forAll = false;
-                    }
-                    break;
-                }
-    
-                case FilterOperators.IS_GREATER: {
-                    if(
-                      comparator.compare(raw,property.getValue(0)) > 0
-                    ){
-                      thereExists = true;
-                    } else {
-                      forAll = false;
-                    }
-                    break;
-                }
-                  
-                case FilterOperators.IS_LESS: {
-                    if(
-                      comparator.compare(raw,property.getValue(0)) < 0
-                    ){
-                      thereExists = true;
-                    } else {
-                      forAll = false;
-                    }
-                    break;
-                }
-                
-                case FilterOperators.IS_GREATER_OR_EQUAL: {
-                    if(
-                      comparator.compare(raw,property.getValue(0)) >= 0
-                    ){
-                      thereExists = true;
-                    } else {
-                      forAll = false;
-                    }
-                    break;
-                }
-    
-                case FilterOperators.IS_NOT_IN: {
-                    boolean test = true;
-                    IsNotIn: for(
-                        int setIndex = 0, setSize = property.getValues().length;
-                        setIndex < setSize;
-                        setIndex++
-                    ) {
-                        boolean equal =  raw instanceof Comparable || raw instanceof Number ? 
-                            comparator.compare(raw,property.getValue(setIndex)) == 0 :
-                            raw.equals(property.getValue(setIndex)); 
-                        if(equal) {
-                            test = false;
-                            break IsNotIn;
+            boolean forAll = true;
+            boolean thereExists = false;
+            FilterProperty property = this.filter[propertyIndex];
+
+            Iterator iterator = getValues(candidate, property.name());
+            if(iterator == null) {
+                return false;
+            }
+            while (iterator.hasNext()){
+                Object raw = iterator.next();
+                switch(property.operator()){
+
+                    case FilterOperators.IS_UNLIKE: {
+                        if (!matches(propertyIndex, raw)){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
                         }
+                        break;
                     }
-                    if(test){
-                        thereExists = true;
-                    } else {
-                        forAll = false;
-                    }
-                    break;
-                }
-                                  
-                case FilterOperators.IS_IN: {
-                    boolean test = false;
-                    IsIn: for(
-                        int setIndex = 0, setSize = property.getValues().length;
-                        setIndex < setSize;
-                        setIndex++
-                    ) {
-                        boolean equal = raw instanceof Comparable || raw instanceof Number ? 
-                          comparator.compare(raw,property.getValue(setIndex)) == 0 :
-                          raw.equals(property.getValue(setIndex));
-                        if(equal) {
-                            test = true;
-                            break IsIn;
+
+                    case FilterOperators.IS_LIKE: {
+                        if (matches(propertyIndex, raw)){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
                         }
-                  }
-                  if(test){
-                      thereExists = true;
-                  } else {
-                      forAll = false;
-                  }
-                  break;
-                }
-                
-                case FilterOperators.SOUNDS_LIKE: {
-                    boolean test = false;
-                    String encoded = Soundex.getInstance().encode((String)raw);
-                    for(
-                      int setIndex = 0, setSize = property.getValues().length;
-                      setIndex < setSize;
-                      setIndex++
-                    ){
-                        if(encoded.equals(Soundex.getInstance().encode((String)property.getValue(setIndex)))) {
-                            test = true;
+                        break;
+                    }
+
+                    case FilterOperators.IS_OUTSIDE: {
+                        if(
+                                comparator.compare(raw,property.getValue(0)) < 0 ||
+                                comparator.compare(raw,property.getValue(1)) > 0
+                        ){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
                         }
-                    } 
-                    if(test){
-                        thereExists = true;
-                    } else {
-                        forAll = false;
+                        break;
                     }
-                    break;
-                }
-  
-                case FilterOperators.SOUNDS_UNLIKE: {
-                    boolean test = true;
-                    String encoded = Soundex.getInstance().encode((String)raw);
-                    SoundsUnlike: for(
-                        int setIndex = 0, setSize = property.getValues().length;
-                        setIndex < setSize;
-                        setIndex++
-                    ) {
-                        if(encoded.equals(Soundex.getInstance().encode((String)property.getValue(setIndex)))) {
-                            test = false;
-                            break SoundsUnlike;
+
+                    case FilterOperators.IS_BETWEEN: {
+                        if(
+                                comparator.compare(raw,property.getValue(0)) >= 0 &&
+                                comparator.compare(raw,property.getValue(1)) <= 0
+                        ){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
                         }
+                        break;
                     }
-                    if(test){
-                        thereExists = true;
-                    } else {
-                        forAll = false;
+
+                    case FilterOperators.IS_LESS_OR_EQUAL: {                
+                        if(
+                                comparator.compare(raw,property.getValue(0)) <= 0
+                        ){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
+                        }
+                        break;
                     }
-                    break;
-                }
-                                  
-                default: throw new BadParameterException(
-                  new BasicException(
-                      BasicException.Code.DEFAULT_DOMAIN,
-                      BasicException.Code.BAD_PARAMETER,
-                      new BasicException.Parameter[]{
-                        new BasicException.Parameter(
-                          "operator",
-                          FilterOperators.toString(
-                            property.operator()
-                          )
+
+                    case FilterOperators.IS_GREATER: {
+                        if(
+                                comparator.compare(raw,property.getValue(0)) > 0
+                        ){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
+                        }
+                        break;
+                    }
+
+                    case FilterOperators.IS_LESS: {
+                        if(
+                                comparator.compare(raw,property.getValue(0)) < 0
+                        ){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
+                        }
+                        break;
+                    }
+
+                    case FilterOperators.IS_GREATER_OR_EQUAL: {
+                        if(
+                                comparator.compare(raw,property.getValue(0)) >= 0
+                        ){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
+                        }
+                        break;
+                    }
+
+                    case FilterOperators.IS_NOT_IN: {
+                        boolean test = true;
+                        IsNotIn: for(
+                                int setIndex = 0, setSize = property.getValues().length;
+                                setIndex < setSize;
+                                setIndex++
+                        ) {
+                            boolean equal =  raw instanceof Comparable || raw instanceof Number ? 
+                                comparator.compare(raw,property.getValue(setIndex)) == 0 :
+                                    raw.equals(property.getValue(setIndex)); 
+                            if(equal) {
+                                test = false;
+                                break IsNotIn;
+                            }
+                        }
+                        if(test){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
+                        }
+                        break;
+                    }
+
+                    case FilterOperators.IS_IN: {
+                        boolean test = false;
+                        IsIn: for(
+                                int setIndex = 0, setSize = property.getValues().length;
+                                setIndex < setSize;
+                                setIndex++
+                        ) {
+                            boolean equal = raw instanceof Comparable || raw instanceof Number ? 
+                                comparator.compare(raw,property.getValue(setIndex)) == 0 :
+                                    raw.equals(property.getValue(setIndex));
+                            if(equal) {
+                                test = true;
+                                break IsIn;
+                            }
+                        }
+                        if(test){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
+                        }
+                        break;
+                    }
+
+                    case FilterOperators.SOUNDS_LIKE: {
+                        boolean test = false;
+                        String encoded = Soundex.getInstance().encode((String)raw);
+                        for(
+                                int setIndex = 0, setSize = property.getValues().length;
+                                setIndex < setSize;
+                                setIndex++
+                        ){
+                            if(encoded.equals(Soundex.getInstance().encode((String)property.getValue(setIndex)))) {
+                                test = true;
+                            }
+                        } 
+                        if(test){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
+                        }
+                        break;
+                    }
+
+                    case FilterOperators.SOUNDS_UNLIKE: {
+                        boolean test = true;
+                        String encoded = Soundex.getInstance().encode((String)raw);
+                        SoundsUnlike: for(
+                                int setIndex = 0, setSize = property.getValues().length;
+                                setIndex < setSize;
+                                setIndex++
+                        ) {
+                            if(encoded.equals(Soundex.getInstance().encode((String)property.getValue(setIndex)))) {
+                                test = false;
+                                break SoundsUnlike;
+                            }
+                        }
+                        if(test){
+                            thereExists = true;
+                        } else {
+                            forAll = false;
+                        }
+                        break;
+                    }
+
+                    default: throw new BadParameterException(
+                        new BasicException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            "Unsupported operator", 
+                            new BasicException.Parameter(
+                                "operator",
+                                FilterOperators.toString(
+                                    property.operator()
+                                )
+                            )
                         )
-                      }, 
-                      "Unsupported operator"
-                    )
-                );                
-              }
+                    );                
+                }
             }
             switch (property.quantor()) {
-              case Quantors.FOR_ALL: 
-                  if(!forAll) {
-                      return false;
-                  }
-                  break;
-              case Quantors.THERE_EXISTS:
-                  if(!thereExists) {
-                    return false;
-                  }
-                  break;
-              default: 
-                  throw new BadParameterException(
-                      new BasicException(
-                          BasicException.Code.DEFAULT_DOMAIN,
-                          BasicException.Code.BAD_PARAMETER,
-                          new BasicException.Parameter[]{
-                              new BasicException.Parameter(
-                                  "quantor",
-                                  Quantors.toString(
-                                      property.quantor()
-                                  )
-                              )
-                          }, 
-                          "Unsupported quantor"
-                      )
-                  );
-          }
-          
+                case Quantors.FOR_ALL: 
+                    if(!forAll) {
+                        return false;
+                    }
+                    break;
+                case Quantors.THERE_EXISTS:
+                    if(!thereExists) {
+                        return false;
+                    }
+                    break;
+                default: 
+                    throw new BadParameterException(
+                        new BasicException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            "Unsupported quantor", 
+                            new BasicException.Parameter(
+                                "quantor",
+                                Quantors.toString(
+                                    property.quantor()
+                                )
+                            )
+                        )
+                    );
+            }
+
         }
         return true;
     }
@@ -421,7 +415,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
             return getClass().getName() + "//" + e.getMessage();
         }
     }
-    
+
     public int size(){
         return this.filter.length;
     }
@@ -434,8 +428,8 @@ public abstract class AbstractFilter implements Selector, Serializable {
      * @return
      */
     private boolean matches (
-         int index,
-         Object value
+        int index,
+        Object value
     ){        
         if(value instanceof Path){
             if(!(this.pattern[index] instanceof PathPattern)) try {
@@ -448,8 +442,8 @@ public abstract class AbstractFilter implements Selector, Serializable {
             return this.pattern[index].matches(value.toString());
         }
     }
-                
-    
+
+
     //------------------------------------------------------------------------
     // Class Soundex 
     //------------------------------------------------------------------------
@@ -462,240 +456,240 @@ public abstract class AbstractFilter implements Selector, Serializable {
      */
     final static class Soundex {
 
-      /**
-       * 
-       */
-      public static Soundex getInstance(
-      ) {
-        if(Soundex.instance == null) {
-          Soundex.instance = new Soundex();
+        /**
+         * 
+         */
+        public static Soundex getInstance(
+        ) {
+            if(Soundex.instance == null) {
+                Soundex.instance = new Soundex();
+            }
+            return instance;
         }
-        return instance;
-      }
 
-      /**
-       * @param _word
-       */    
-      public String encode(
-        String _word
-      ) {
-        String word = _word.trim();
-        if (DropFinalSBoolean) {
-          //we're not dropping double s as in guess
-          if ( (word.length() > 1) 
-            && (word.endsWith("S") || word.endsWith("s")))
-            word = word.substring(0, (word.length() - 1));
-          }
-        if(word.length() == 0) return "";
-        word = reduce(word);
-        int wordLength = word.length(); //original word size
-        int sofar = 0; //how many codes have been created
-        int max = LengthInt - 1; //max codes to create (less the first char)
-        if (LengthInt < 0) //if NO_MAX
-          max = wordLength; //wordLength was the max possible size.
-        int code = 0; 
-        StringBuilder buf = new StringBuilder(
-            max
-        ).append(
-            Character.toLowerCase(word.charAt(0))
-        );
-        for (int i = 1;(i < wordLength) && (sofar < max); i++) {
-          code = getCode(word.charAt(i));
-          if (code > 0) {
-            buf.append(code);
-            sofar++;
+        /**
+         * @param _word
+         */    
+        public String encode(
+            String _word
+        ) {
+            String word = _word.trim();
+            if (DropFinalSBoolean) {
+                //we're not dropping double s as in guess
+                if ( (word.length() > 1) 
+                        && (word.endsWith("S") || word.endsWith("s")))
+                    word = word.substring(0, (word.length() - 1));
             }
-          }
-        if (PadBoolean && (LengthInt > 0)) {
-          for (;sofar < max; sofar++)
-              buf.append('0');
-          }
-        return buf.toString();
-      }
-
-      /**
-       * Returns the Soundex code for the specified character.
-       * @param ch Should be between A-Z or a-z
-       * @return -1 if the character has no phonetic code.
-       */
-      public int getCode(
-        char ch
-      ) {
-        int arrayidx = -1;
-        if (('a' <= ch) && (ch <= 'z'))
-          arrayidx = ch - 'a';
-        else if (('A' <= ch) && (ch <= 'Z'))
-          arrayidx = ch - 'A';
-        if ((arrayidx >= 0) && (arrayidx < SoundexInts.length))
-          return SoundexInts[arrayidx];
-        else
-          return -1;
-      }
-
-      /**
-       * If true, a final char of 's' or 'S' of the word being encoded will be 
-       * dropped. By dropping the last s, lady and ladies for example,
-       * will encode the same. False by default.
-       */
-      public boolean getDropFinalS(
-      ) {
-        return DropFinalSBoolean;
-      }
-
-      /**
-       * The length of code strings to build, 4 by default.
-       * If negative, length is unlimited.
-       * @see #NO_MAX
-       */
-      public int getLength(
-      ) {
-        return LengthInt;
-      }
-
-      /**
-       * If true, appends zeros to a soundex code if the code is less than
-       * Soundex.getLength().  True by default.
-       */
-      public boolean getPad(
-      ) {
-        return PadBoolean;
-      }
-
-      /**
-       * Allows you to modify the default code table
-       * @param ch The character to specify the code for.
-       * @param code The code to represent ch with, must be -1, or 1 thru 9
-       */
-      public void setCode(
-        char ch, 
-        int code
-      ) {
-        int arrayidx = -1;
-        if (('a' <= ch) || (ch <= 'z'))
-          arrayidx = ch - 'a';
-        else if (('A' <= ch) || (ch <= 'Z'))
-          arrayidx = ch - 'A';
-        if ((0 <= arrayidx) && (arrayidx < SoundexInts.length))
-          SoundexInts[arrayidx] = code;
-      }
-
-      /**
-       * If true, a final char of 's' or 'S' of the word being encoded will be 
-       * dropped.
-       */
-      public void setDropFinalS(
-        boolean bool
-      ) {
-        DropFinalSBoolean = bool;
-      }
-
-      /**
-       * Sets the length of code strings to build. 4 by default.
-       * @param Length of code to produce, must be &gt;= 1
-       */
-      public void setLength(
-        int length
-      ) {
-        LengthInt = length;
-      }
-
-      /**
-       * If true, appends zeros to a soundex code if the code is less than
-       * Soundex.getLength().  True by default.
-       */
-      public void setPad(
-        boolean bool
-      ) {
-        PadBoolean = bool;
-      }
-
-      /**
-       * Creates the Soundex code table.
-       */
-      protected static int[] createArray(
-      ) {
-        return new int[] {
-          -1, //a 
-           1, //b
-           2, //c 
-           3, //d
-          -1, //e 
-           1, //f
-           2, //g 
-          -1, //h
-          -1, //i 
-           2, //j
-           2, //k
-           4, //l
-           5, //m
-           5, //n
-          -1, //o
-           1, //p
-           2, //q
-           6, //r
-           2, //s
-           3, //t
-          -1, //u
-           1, //v
-          -1, //w
-           2, //x
-          -1, //y
-           2  //z
-        };
-      }
-
-      /**
-       * Removes adjacent sounds.
-       */
-      protected String reduce(
-        String word
-      ) {
-        int len = word.length();
-        StringBuilder buf = new StringBuilder(len);
-        char ch = word.charAt(0);
-        int currentCode = getCode(ch);
-        buf.append(ch);
-        int lastCode = currentCode;
-        for (int i = 1; i < len; i++) {
-          ch = word.charAt(i);
-          currentCode = getCode(ch);
-          if ((currentCode != lastCode) && (currentCode >= 0)) {
-              buf.append(ch);
-            lastCode = currentCode;
+            if(word.length() == 0) return "";
+            word = reduce(word);
+            int wordLength = word.length(); //original word size
+            int sofar = 0; //how many codes have been created
+            int max = LengthInt - 1; //max codes to create (less the first char)
+            if (LengthInt < 0) //if NO_MAX
+                max = wordLength; //wordLength was the max possible size.
+            int code = 0; 
+            StringBuilder buf = new StringBuilder(
+                max
+            ).append(
+                Character.toLowerCase(word.charAt(0))
+            );
+            for (int i = 1;(i < wordLength) && (sofar < max); i++) {
+                code = getCode(word.charAt(i));
+                if (code > 0) {
+                    buf.append(code);
+                    sofar++;
+                }
             }
-          }
-        return buf.toString();
-      }
+            if (PadBoolean && (LengthInt > 0)) {
+                for (;sofar < max; sofar++)
+                    buf.append('0');
+            }
+            return buf.toString();
+        }
 
-      /**
-       * 
-       */
-      private static transient Soundex instance = null;
-    
-      /**
-       * 
-       */
-      public static final int NO_MAX = -1;
+        /**
+         * Returns the Soundex code for the specified character.
+         * @param ch Should be between A-Z or a-z
+         * @return -1 if the character has no phonetic code.
+         */
+        public int getCode(
+            char ch
+        ) {
+            int arrayidx = -1;
+            if (('a' <= ch) && (ch <= 'z'))
+                arrayidx = ch - 'a';
+            else if (('A' <= ch) && (ch <= 'Z'))
+                arrayidx = ch - 'A';
+            if ((arrayidx >= 0) && (arrayidx < SoundexInts.length))
+                return SoundexInts[arrayidx];
+            else
+                return -1;
+        }
 
-      /**
-       * If true, the final 's' of the word being encoded is dropped.
-       */
-      protected boolean DropFinalSBoolean = false;
+        /**
+         * If true, a final char of 's' or 'S' of the word being encoded will be 
+         * dropped. By dropping the last s, lady and ladies for example,
+         * will encode the same. False by default.
+         */
+        public boolean getDropFinalS(
+        ) {
+            return DropFinalSBoolean;
+        }
 
-      /**
-       * Length of code to build.
-       */
-      protected int LengthInt = 4;
+        /**
+         * The length of code strings to build, 4 by default.
+         * If negative, length is unlimited.
+         * @see #NO_MAX
+         */
+        public int getLength(
+        ) {
+            return LengthInt;
+        }
 
-      /**
-       * If true, codes are padded to the LengthInt with zeros.
-       */
-      protected boolean PadBoolean = true;
+        /**
+         * If true, appends zeros to a soundex code if the code is less than
+         * Soundex.getLength().  True by default.
+         */
+        public boolean getPad(
+        ) {
+            return PadBoolean;
+        }
 
-      /**
-       * Soundex code table.
-       */
-      protected int[] SoundexInts = createArray();
+        /**
+         * Allows you to modify the default code table
+         * @param ch The character to specify the code for.
+         * @param code The code to represent ch with, must be -1, or 1 thru 9
+         */
+        public void setCode(
+            char ch, 
+            int code
+        ) {
+            int arrayidx = -1;
+            if (('a' <= ch) || (ch <= 'z'))
+                arrayidx = ch - 'a';
+            else if (('A' <= ch) || (ch <= 'Z'))
+                arrayidx = ch - 'A';
+            if ((0 <= arrayidx) && (arrayidx < SoundexInts.length))
+                SoundexInts[arrayidx] = code;
+        }
+
+        /**
+         * If true, a final char of 's' or 'S' of the word being encoded will be 
+         * dropped.
+         */
+        public void setDropFinalS(
+            boolean bool
+        ) {
+            DropFinalSBoolean = bool;
+        }
+
+        /**
+         * Sets the length of code strings to build. 4 by default.
+         * @param Length of code to produce, must be &gt;= 1
+         */
+        public void setLength(
+            int length
+        ) {
+            LengthInt = length;
+        }
+
+        /**
+         * If true, appends zeros to a soundex code if the code is less than
+         * Soundex.getLength().  True by default.
+         */
+        public void setPad(
+            boolean bool
+        ) {
+            PadBoolean = bool;
+        }
+
+        /**
+         * Creates the Soundex code table.
+         */
+        protected static int[] createArray(
+        ) {
+            return new int[] {
+                -1, //a 
+                1, //b
+                2, //c 
+                3, //d
+                -1, //e 
+                1, //f
+                2, //g 
+                -1, //h
+                -1, //i 
+                2, //j
+                2, //k
+                4, //l
+                5, //m
+                5, //n
+                -1, //o
+                1, //p
+                2, //q
+                6, //r
+                2, //s
+                3, //t
+                -1, //u
+                1, //v
+                -1, //w
+                2, //x
+                -1, //y
+                2  //z
+            };
+        }
+
+        /**
+         * Removes adjacent sounds.
+         */
+        protected String reduce(
+            String word
+        ) {
+            int len = word.length();
+            StringBuilder buf = new StringBuilder(len);
+            char ch = word.charAt(0);
+            int currentCode = getCode(ch);
+            buf.append(ch);
+            int lastCode = currentCode;
+            for (int i = 1; i < len; i++) {
+                ch = word.charAt(i);
+                currentCode = getCode(ch);
+                if ((currentCode != lastCode) && (currentCode >= 0)) {
+                    buf.append(ch);
+                    lastCode = currentCode;
+                }
+            }
+            return buf.toString();
+        }
+
+        /**
+         * 
+         */
+        private static transient Soundex instance = null;
+
+        /**
+         * 
+         */
+        public static final int NO_MAX = -1;
+
+        /**
+         * If true, the final 's' of the word being encoded is dropped.
+         */
+        protected boolean DropFinalSBoolean = false;
+
+        /**
+         * Length of code to build.
+         */
+        protected int LengthInt = 4;
+
+        /**
+         * If true, codes are padded to the LengthInt with zeros.
+         */
+        protected boolean PadBoolean = true;
+
+        /**
+         * Soundex code table.
+         */
+        protected int[] SoundexInts = createArray();
 
     }
 

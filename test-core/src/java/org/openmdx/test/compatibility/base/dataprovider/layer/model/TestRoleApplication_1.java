@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestRoleApplication_1.java,v 1.7 2007/05/11 14:08:52 hburger Exp $
+ * Name:        $Id: TestRoleApplication_1.java,v 1.8 2008/09/10 18:10:56 hburger Exp $
  * Description: User Profile Service
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/05/11 14:08:52 $
+ * Date:        $Date: 2008/09/10 18:10:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,13 +71,13 @@ import org.openmdx.kernel.log.SysLog;
  * test application layer for roleObject
  */
 public class TestRoleApplication_1 extends Layer_1 {
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#get(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
      */
     public DataproviderReply get(
-      ServiceHeader header,
-      DataproviderRequest   request
+        ServiceHeader header,
+        DataproviderRequest   request
     ) throws ServiceException {
         Path path = request.path();
         return path.isLike(STATE_PATTERN_PATTERN) ? newReply(
@@ -92,7 +92,7 @@ public class TestRoleApplication_1 extends Layer_1 {
         );
     }
 
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#prolog(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest[])
      */
@@ -102,17 +102,15 @@ public class TestRoleApplication_1 extends Layer_1 {
     ) throws ServiceException {
         SysLog.detail("Entries into the CR20006725 segment should be rejected", Arrays.asList(requests));
         for(
-            int i = 0;
-            i < requests.length;
-            i++
+                int i = 0;
+                i < requests.length;
+                i++
         ) {
             if(requests[i].path().isLike(REJECTED_PATTERN)) throw new ServiceException(
                 "CR20006725",
                 1,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("path", requests[i].path())
-                },
-                "This layer may be bypassed by lenient requests"
+                "This layer may be bypassed by lenient requests",
+                new BasicException.Parameter("path", requests[i].path())
             );
         }
         SysLog.detail("None of the request is an entry of the CR20006725 segment", Arrays.asList(requests));
@@ -131,7 +129,7 @@ public class TestRoleApplication_1 extends Layer_1 {
         );
         return new DataproviderReply(object);
     }
-       
+
 
     /**
      * supply some derived Attributes for the classes knowing them.
@@ -144,10 +142,10 @@ public class TestRoleApplication_1 extends Layer_1 {
         SysLog.trace("in epilog");
         if(requests.length != replies.length) {
             RuntimeServiceException assertionFailure = new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.ASSERTION_FAILURE,
-                    null,
-                    "The numbers of requests and replies do not match"
+                BasicException.Code.DEFAULT_DOMAIN, 
+                BasicException.Code.ASSERTION_FAILURE,
+                "The numbers of requests and replies do not match",
+                null
             );
             SysLog.error(
                 assertionFailure.getMessage(), 
@@ -160,38 +158,38 @@ public class TestRoleApplication_1 extends Layer_1 {
             requests,
             replies
         );
-        
+
         for (
-            int i = 0;
-            i < replies.length;
-            i++
+                int i = 0;
+                i < replies.length;
+                i++
         ) {            
             DataproviderObject[] objects = replies[i].getObjects();
             DataproviderObject object = null;
-            
+
             for (
-                int j = 0;
-                j < objects.length;
-                j++
+                    int j = 0;
+                    j < objects.length;
+                    j++
             ) {            
                 object = objects[j];
-                
+
                 SysLog.trace("epilog: object.class", object.getValues(SystemAttributes.OBJECT_CLASS));
-                
+
                 // don't bother if object_class can not be detected
                 // the attribtue just stays empty.
                 if (object.getValues(SystemAttributes.OBJECT_CLASS) != null 
-                    && 
-                    !object.getValues(SystemAttributes.OBJECT_CLASS).isEmpty()
-                    && 
-                    (object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:role1:RoleNoRole")
-                     || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:role1:RoleClassRoleB")
-                     || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:role1:RoleClassD")
-                     || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:role1:RoleClassDRoleA")
-                     || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:state1:RoleClassRoleB")
-                     || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:state1:RoleClassD")
-                     || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:state1:RoleClassDRoleA")
-                   )
+                        && 
+                        !object.getValues(SystemAttributes.OBJECT_CLASS).isEmpty()
+                        && 
+                        (object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:role1:RoleNoRole")
+                                || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:role1:RoleClassRoleB")
+                                || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:role1:RoleClassD")
+                                || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:role1:RoleClassDRoleA")
+                                || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:state1:RoleClassRoleB")
+                                || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:state1:RoleClassD")
+                                || object.getValues(SystemAttributes.OBJECT_CLASS).get(0).equals("org:openmdx:test:compatibility:state1:RoleClassDRoleA")
+                        )
                 ) {
                     SysLog.trace("epilog: setting derived attribute \"application\"");
                     object.values("application").add("test");

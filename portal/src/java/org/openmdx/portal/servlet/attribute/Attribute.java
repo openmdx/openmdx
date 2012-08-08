@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Attribute.java,v 1.15 2007/12/13 18:58:09 wfro Exp $
+ * Name:        $Id: Attribute.java,v 1.16 2008/08/12 16:38:06 wfro Exp $
  * Description: Attribute 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:58:09 $
+ * Date:        $Date: 2008/08/12 16:38:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Preferences_1.java,v 1.1 2006/08/07 10:14:13 hburger Exp $
+ * Name:        $Id: Preferences_1.java,v 1.2 2008/09/10 18:10:56 hburger Exp $
  * Description: Preferences_1 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/07 10:14:13 $
+ * Date:        $Date: 2008/09/10 18:10:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -82,7 +82,7 @@ import org.openmdx.kernel.security.resource.ConnectionFactory;
  *
  */
 public class Preferences_1
-    extends Layer_1
+extends Layer_1
 {
 
     /**
@@ -93,7 +93,7 @@ public class Preferences_1
 
     private Context pkiContext;
     private Map pkiProviders;
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
      */
@@ -105,10 +105,10 @@ public class Preferences_1
         super.activate(id, configuration, delegation);
         this.pkiContext = (Context) new InitialContext().lookup("java:comp/env/pki");
         this.pkiProviders = new HashMap();
-//        System.err.println("Certificate: " + ((X509Certificate)certificateProvider.getCertificate()).getSubjectX500Principal());
-//        System.err.println("Key: " + ((RSAPrivateCrtKey)keyProvider.getKey()).getFormat());
+//      System.err.println("Certificate: " + ((X509Certificate)certificateProvider.getCertificate()).getSubjectX500Principal());
+//      System.err.println("Key: " + ((RSAPrivateCrtKey)keyProvider.getKey()).getFormat());
     }
-    
+
     private final ConnectionFactory getConnectionFactory(
         String segment
     ) throws ServiceException {
@@ -125,10 +125,8 @@ public class Preferences_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_FOUND,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("jndiName", "java:comp/env/pki/" + segment)                    
-                },
-                "Key store connection factory acquisition failed"
+                "Key store connection factory acquisition failed",
+                new BasicException.Parameter("jndiName", "java:comp/env/pki/" + segment)                    
             ).log();
         }
         return (ConnectionFactory) connectionFactory;
@@ -168,10 +166,8 @@ public class Preferences_1
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.MEDIA_ACCESS_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("jndiName", "java:comp/env/pki/" + request.path().getBase())                    
-                    },
-                    "Key store connection factory acquisition failed"
+                    "Key store connection factory acquisition failed",
+                    new BasicException.Parameter("jndiName", "java:comp/env/pki/" + request.path().getBase())                    
                 ).log();
             }
         } else if (request.path().isLike(PKI_PREFERENCES_PATTERN)) {
@@ -202,10 +198,8 @@ public class Preferences_1
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.MEDIA_ACCESS_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("jndiName", jndiName)                    
-                    },
-                    "Key store connection factory acquisition failed"
+                    "Key store connection factory acquisition failed",
+                    new BasicException.Parameter("jndiName", jndiName)                    
                 ).log();
             }
         } else {
@@ -216,12 +210,12 @@ public class Preferences_1
     private final Path PKI_SEGMENT_PATTERN = new Path(
         "xri:@openmdx*org:openmdx:preferences1/provider/JKS/segment/:*"
     );
-    
-    private final static String[] SEGMENT_INSTANCE_OF = new String[]{
+
+    private final static String[] SEGMENT_INSTANCE_OF = {
         "org:openmdx:preferences1:Segment",
         "org:openmdx:base:Segment",
-        "org:openmx:base:ContextCapable",
-        "org:openmdx:compatbility:view1:ViewCapable"
+        "org:openmx:base:ContextCapable"
+//     ,"org:openmdx:compatbility:view1:ViewCapable"
     };
 
     private final Path PKI_PREFERENCES_PATTERN = new Path(

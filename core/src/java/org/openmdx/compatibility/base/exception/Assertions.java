@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Assertions.java,v 1.7 2004/07/11 19:15:54 hburger Exp $
+ * Name:        $Id: Assertions.java,v 1.8 2008/09/10 08:55:22 hburger Exp $
  * Description: Exception Framework 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/07/11 19:15:54 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -94,7 +94,7 @@ public class Assertions
             description
         );
     }
-    
+
     /**
      * Throws an RuntimeServiceException if an assertion fails and logs the fact
      * at ERROR_LEVEL.
@@ -115,7 +115,6 @@ public class Assertions
         ServiceException exception = new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.ASSERTION_FAILURE,
-            null, 
             description
         );
         SysLog.error(
@@ -124,7 +123,7 @@ public class Assertions
         );
         throw new RuntimeServiceException(exception);
     }
-    
+
     /**
      * Maps a throwable to a ServiceError unless it is itself an instance of
      * Error. This method is used when the program expects never to have
@@ -182,7 +181,6 @@ public class Assertions
                     throwable,
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.ASSERTION_FAILURE,
-                    null,
                     description
                 )
             );
@@ -191,7 +189,7 @@ public class Assertions
         }
         return throwable instanceof Error ?
             (Error)throwable :
-            new Error(description);
+                new Error(description);
     }
 
 }

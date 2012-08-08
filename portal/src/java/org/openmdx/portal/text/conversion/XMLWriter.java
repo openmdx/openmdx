@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: XMLWriter.java,v 1.2 2007/01/21 20:47:27 wfro Exp $
+ * Name:        $Id: XMLWriter.java,v 1.3 2008/08/12 16:38:08 wfro Exp $
  * Description: XMLWriter
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:47:27 $
+ * Date:        $Date: 2008/08/12 16:38:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,9 +53,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.text.conversion;
 

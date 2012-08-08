@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceManagerFactory_2.java,v 1.7 2008/07/02 16:07:24 hburger Exp $
+ * Name:        $Id: PersistenceManagerFactory_2.java,v 1.15 2008/09/03 17:20:41 hburger Exp $
  * Description: Persistence Manager Factory
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/02 16:07:24 $
+ * Date:        $Date: 2008/09/03 17:20:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,7 +63,7 @@ import javax.security.auth.Subject;
 
 import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
 import org.openmdx.base.accessor.generic.view.Manager_1;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_4;
+import org.openmdx.base.accessor.jmi.cci.RefPackage_1_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.spi.AbstractManagerFactory;
 import org.openmdx.compatibility.base.application.cci.ConfigurationProvider_1_0;
@@ -104,17 +104,17 @@ public class PersistenceManagerFactory_2
     ) throws ServiceException {
         super(dataproviderConfiguration, configurationProvider, self);
         this.self = self;
-        String[] section = {
-            ManagerFactoryConfigurationEntries.PERSISTENCE_MANAGER, 
-            ManagerFactoryConfigurationEntries.LEGACY_PLUG_IN
-        };
         this.legacyPlugInConfiguration = getPlugInConfiguration(
             configurationProvider,
-            section,
+            LEGACY_PLUG_IN_CONFUGURATION_SECTION,
             Collections.EMPTY_MAP
         );        
     }
-    
+    private final static String[] LEGACY_PLUG_IN_CONFUGURATION_SECTION = {
+        ManagerFactoryConfigurationEntries.PERSISTENCE_MANAGER, 
+        ManagerFactoryConfigurationEntries.LEGACY_PLUG_IN
+    };
+
     /**
      * The legacy plug-in's configuration
      */
@@ -124,11 +124,19 @@ public class PersistenceManagerFactory_2
      * The EJB entry 
      */
     private final Dataprovider_1_0 self;
-    
+        
     
     //------------------------------------------------------------------------
     // Implements ManagerFactory_2_0
     //------------------------------------------------------------------------
+    
+    protected ObjectFactory_1_0 newObjectFactory(
+        Connection_1_5 interaction
+    ) throws ServiceException {
+        return new Manager_1(
+            interaction
+        );
+    }
     
     @SuppressWarnings("unchecked")
     protected PersistenceManager newPersistenceManager(
@@ -148,34 +156,34 @@ public class PersistenceManagerFactory_2
             "UUID" // defaultQualifierType
         ); 
         interaction.setModel(getModel());
-        ObjectFactory_1_0 manager = new Manager_1(interaction);
+        ObjectFactory_1_0 manager = newObjectFactory(interaction);
         try {
             // 
             // Not static reference to RefRootPackage_1 because of compilation dependencies!
             //
-            Class<RefPackage_1_4> rootPkgClass = Classes.getApplicationClass(
-                "org.openmdx.base.accessor.jmi.spi.RefRootPackage_1"
+            Class<RefPackage_1_1> rootPkgClass = Classes.getApplicationClass(
+                PlugInManagerFactory_2.OUTERMOST_PACKAGE_CLASS
             );
-            Constructor<RefPackage_1_4> rootPkgCons = rootPkgClass.getConstructor(
+            Constructor<RefPackage_1_1> rootPkgCons = rootPkgClass.getConstructor(
                 PersistenceManagerFactory.class,
                 ObjectFactory_1_0.class,
+                Map.class,
                 Map.class
             );
-            RefPackage_1_4 refPackage = rootPkgCons.newInstance(
+            return rootPkgCons.newInstance(
                 null, // persistenceManagerFactory
                 manager,
                 this.legacyPlugInConfiguration.values(
-                    IMPLEMENTATION_MAP
+                    PlugInManagerFactory_2.IMPLEMENTATION_MAP
+                ).get(
+                    0
+                ),
+                this.legacyPlugInConfiguration.values(
+                    PlugInManagerFactory_2.USER_OBJECT_MAP
                 ).get(
                     0
                 )
-            );
-            PersistenceManager persistenceManager = refPackage.refPersistenceManager();
-            EntityManagerFactory_2.propagateUserObjects(
-                this.legacyPlugInConfiguration, 
-                persistenceManager
-            );
-            return persistenceManager;
+            ).refPersistenceManager();
         } catch(InvocationTargetException e) {
             throw new ServiceException(
                 BasicException.toStackedException(e.getTargetException())
@@ -199,7 +207,7 @@ public class PersistenceManagerFactory_2
             );
         } catch (ServiceException exception) {
             throw new ResourceException(
-                "Persistence manager acquiwition failure",
+                "Persistence manager acquisition failure",
                 exception
             );
         }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: View.java,v 1.52 2008/06/26 00:39:15 wfro Exp $
+ * Name:        $Id: View.java,v 1.55 2008/08/20 11:42:07 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.52 $
+ * Revision:    $Revision: 1.55 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/26 00:39:15 $
+ * Date:        $Date: 2008/08/20 11:42:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 
@@ -76,7 +73,6 @@ import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.QuickAccessor;
-import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.ControlFactory;
 
@@ -111,24 +107,6 @@ public abstract class View
         // get the persistence manager from application.getPmData.
         this.pm = application.getPmData(); 
         this.controlFactory = controlFactory;
-        this.setGuiModeActions = new Action[]{
-            new Action(
-                Action.EVENT_SELECT_GUI_MODE, 
-                new Action.Parameter[]{ 
-                   new Action.Parameter(Action.PARAMETER_NAME, WebKeys.SETTING_GUI_MODE_BASIC) 
-                }, 
-                "0", 
-                true
-            ),                              
-            new Action(
-                Action.EVENT_SELECT_GUI_MODE, 
-                new Action.Parameter[]{ 
-                   new Action.Parameter(Action.PARAMETER_NAME, WebKeys.SETTING_GUI_MODE_STANDARD) 
-                }, 
-                "1", 
-                true
-            )      
-        };
     }
 
     //-------------------------------------------------------------------------
@@ -245,12 +223,6 @@ public abstract class View
     }
   
     //-------------------------------------------------------------------------  
-    public Action[] getSetGuiModeActions(
-    ) {
-        return this.setGuiModeActions;
-    }
-  
-    //-------------------------------------------------------------------------  
     public int getPanelState(
         String panelName
     ) {
@@ -312,8 +284,8 @@ public abstract class View
         BasicException e0 = e.getCause(this.application.getExceptionDomain());
         if(e0 == null) {
             this.application.addErrorMessage(
-              application.getTexts().getErrorTextCanNotCreateOrEditObject(),
-              new String[]{e.getMessage()}
+                this.application.getTexts().getErrorTextCanNotCreateOrEditObject(),
+                new String[]{e.getMessage()}
             );
         }
         else if(application.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
@@ -324,13 +296,13 @@ public abstract class View
                 i++;
             }
             this.application.addErrorMessage(
-                application.getTexts().getUserDefinedText(e0.getExceptionCode() + ""),
+                this.application.getTexts().getUserDefinedText(e0.getExceptionCode() + ""),
                 (String[])parameters.toArray(new String[parameters.size()])
 	        );             
         }
         else {
             this.application.addErrorMessage(
-                application.getTexts().getErrorTextCanNotCreateOrEditObject(),
+                this.application.getTexts().getErrorTextCanNotCreateOrEditObject(),
                 new String[]{e.getMessage()}
 	        );              
         }
@@ -510,7 +482,6 @@ public abstract class View
     protected PersistenceManager pm;
   
     protected String requestId = null;
-    protected Action[] setGuiModeActions = null;
     protected Object[] macro = null;
     
     private transient UUIDGenerator uuidGenerator = UUIDs.getGenerator();

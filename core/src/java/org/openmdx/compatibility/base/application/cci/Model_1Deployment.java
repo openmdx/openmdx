@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Model_1Deployment.java,v 1.3 2008/04/10 18:16:59 hburger Exp $
+ * Name:        $Id: Model_1Deployment.java,v 1.4 2008/09/16 16:19:29 hburger Exp $
  * Description: Model_1Deployment
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/10 18:16:59 $
+ * Date:        $Date: 2008/09/16 16:19:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,13 +51,12 @@
 package org.openmdx.compatibility.base.application.cci;
 
 import java.util.Arrays;
-
+import java.util.Collection;
 import javax.naming.Context;
 
 import org.openmdx.base.application.deploy.Deployment;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.model1.accessor.basic.spi.Model_1;
-
 
 /**
  * Model_1Deployment
@@ -69,15 +68,25 @@ public class Model_1Deployment implements Deployment {
      * 
      */
     public Model_1Deployment(
-        String... models
+        Collection<String> models
     ) {
         this.pending = models;
     }
 
     /**
+     * Constructor
+     * 
+     */
+    public Model_1Deployment(
+        String... models
+    ) {
+        this.pending = Arrays.asList(models);
+    }
+    
+    /**
      * Not yet deployed model elements
      */
-    private String[] pending;
+    private Collection<String> pending;
 
     /**
      * The exception in case of failure
@@ -101,8 +110,7 @@ public class Model_1Deployment implements Deployment {
      */
     public Context context() throws ServiceException {
         if(this.pending != null) try {
-            Model_1 model = new Model_1();
-            model.addModels(Arrays.asList(this.pending));
+            new Model_1().addModels(this.pending);
         } catch (ServiceException exception) {
             this.exception = exception;            
         } finally {

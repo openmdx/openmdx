@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Ui_1.java,v 1.27 2008/04/04 11:47:15 hburger Exp $
+ * Name:        $Id: Ui_1.java,v 1.30 2008/09/19 20:54:23 wfro Exp $
  * Description: Ui_1 plugin
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:47:15 $
+ * Date:        $Date: 2008/09/19 20:54:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.ui1.layer.application;
 
@@ -112,7 +109,7 @@ public class Ui_1
 extends Layer_1 {
 
     private abstract class FeatureDefinition {
-        
+
         public FeatureDefinition(
             String name,
             String qualifiedName,
@@ -123,7 +120,7 @@ extends Layer_1 {
             this.container = container;
             this.modelElement = null;
         }
-        
+
         public FeatureDefinition(
             ModelElement_1_0 element
         ) {
@@ -157,9 +154,9 @@ extends Layer_1 {
         protected final String qualifiedName;
         protected final Object container;
         protected final ModelElement_1_0 modelElement;
-        
+
     }
-    
+
     private class StructuralFeatureDefinition extends FeatureDefinition {
 
         public StructuralFeatureDefinition(
@@ -180,7 +177,7 @@ extends Layer_1 {
             this.multiplicity = multiplicity;
             this.isChangeable = isChangeable;
             this.isReference = isReference == null
-                ? false
+            ? false
                 : isReference.booleanValue();
             this.isReferenceStoredAsAttribute = false;
         }
@@ -192,8 +189,8 @@ extends Layer_1 {
             this.type = element.values("type").get(0);
             this.multiplicity = (String)element.values("multiplicity").get(0);
             this.isChangeable = (element.getValues("isChangeable") == null) || (element.values("isChangeable").isEmpty()) 
-                ? new Boolean(Ui_1.this.changableDefaultValue)
-                : (Boolean)element.values("isChangeable").get(0);
+            ? new Boolean(Ui_1.this.changableDefaultValue)
+            : (Boolean)element.values("isChangeable").get(0);
             if(Ui_1.this.model.isAttributeType(element) || Ui_1.this.model.isStructureFieldType(element)) {
                 this.isReference = false;
                 this.isReferenceStoredAsAttribute = false;
@@ -232,12 +229,12 @@ extends Layer_1 {
         ) {
             return this.isReference;
         }
-        
+
         public boolean isReferenceStoredAsAttribute(
         ) {
             return this.isReferenceStoredAsAttribute;
         }
-        
+
         private final Object type;
         private final String multiplicity;
         private final Boolean isChangeable;
@@ -261,16 +258,16 @@ extends Layer_1 {
             );
             this.isQuery = isQuery;
         }
-        
+
         public OperationDefinition(
             ModelElement_1_0 element
         ) {
             super(element);
             this.isQuery = element.values("isQuery").isEmpty()
-                ? true
+            ? true
                 : ((Boolean)element.values("isQuery").get(0)).booleanValue();
         }
-        
+
         public boolean isQuery(
         ) {
             return this.isQuery;
@@ -279,7 +276,7 @@ extends Layer_1 {
         private final boolean isQuery;
 
     }
-    
+
     //------------------------------------------------------------------------
     public void activate(
         short id,
@@ -722,9 +719,9 @@ extends Layer_1 {
         DataproviderObject elementDefinition = null;
         PathComponent components = new PathComponent(elementName);
         for(
-            int i = 0; 
-            i < components.size(); 
-            i++
+                int i = 0; 
+                i < components.size(); 
+                i++
         ) {
             elementDefinition = (DataproviderObject)this.existingElementDefinitions.get(
                 new PathComponent(components.getSuffix(i)).toString()
@@ -833,8 +830,8 @@ extends Layer_1 {
                     true
                 );
                 for(
-                    Iterator i = overloadDefinition.attributeNames().iterator();
-                    i.hasNext();
+                        Iterator i = overloadDefinition.attributeNames().iterator();
+                        i.hasNext();
                 ) {
                     String attributeName = (String)i.next();
                     if(!overloadDefinition.values(attributeName).isEmpty()) {
@@ -915,7 +912,7 @@ extends Layer_1 {
             );
             field.values("titleIndex").add(
                 !definition.values("titleIndex").isEmpty() 
-                    ? definition.values("titleIndex").get(0)
+                ? definition.values("titleIndex").get(0)
                     : new Integer(0)
             );
         }
@@ -927,19 +924,19 @@ extends Layer_1 {
         // inherit the type of the base definition.
         boolean mapToString = false;
         if(
-            PrimitiveTypes.STRING.equals(typeName) ||
-            PrimitiveTypes.ANYURI.equals(typeName) ||
-            isAdditionalElementDefinition
+                PrimitiveTypes.STRING.equals(typeName) ||
+                PrimitiveTypes.ANYURI.equals(typeName) ||
+                isAdditionalElementDefinition
         ) {
             mapToString = true;
         }
 
         // decimal
         else if(
-            PrimitiveTypes.DECIMAL.equals(typeName) ||
-            PrimitiveTypes.SHORT.equals(typeName) ||
-            PrimitiveTypes.LONG.equals(typeName) ||
-            PrimitiveTypes.INTEGER.equals(typeName)
+                PrimitiveTypes.DECIMAL.equals(typeName) ||
+                PrimitiveTypes.SHORT.equals(typeName) ||
+                PrimitiveTypes.LONG.equals(typeName) ||
+                PrimitiveTypes.INTEGER.equals(typeName)
         ) {
             field.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:NumberField");
             BigDecimal defaultMinValue = null;
@@ -964,27 +961,27 @@ extends Layer_1 {
             }
             field.values("minValue").add(
                 !definition.values("minValue").isEmpty()
-                    ? new BigDecimal((String)definition.values("minValue").get(0))
-                    : defaultMinValue
+                ? new BigDecimal((String)definition.values("minValue").get(0))
+                : defaultMinValue
             );
             field.values("maxValue").add(
                 !definition.values("maxValue").isEmpty()
-                    ? new BigDecimal((String)definition.values("maxValue").get(0))
-                    : defaultMaxValue
+                ? new BigDecimal((String)definition.values("maxValue").get(0))
+                : defaultMaxValue
             );
             field.values("decimalPlaces").add(
                 !definition.values("decimalPlaces").isEmpty()
-                    ? new Integer(((Number)definition.values("decimalPlaces").get(0)).intValue())
-                    : defaultDecimalPlaces        
+                ? new Integer(((Number)definition.values("decimalPlaces").get(0)).intValue())
+                : defaultDecimalPlaces        
             );
             field.values("increment").add(
                 !definition.values("increment").isEmpty()
-                    ? new BigDecimal((String)definition.values("increment").get(0))
-                    : new BigDecimal(1)
+                ? new BigDecimal((String)definition.values("increment").get(0))
+                : new BigDecimal(1)
             );
             field.values("hasThousandsSeparator").add(
                 !definition.values("hasThousandsSeparator").isEmpty()
-                    ? (Boolean)definition.values("hasThousandsSeparator").get(0)
+                ? (Boolean)definition.values("hasThousandsSeparator").get(0)
                     : Boolean.TRUE
             );
         }
@@ -1015,7 +1012,7 @@ extends Layer_1 {
             }
             field.values("inPlace").add(
                 !definition.values("inPlace").isEmpty()
-                    ? (Boolean)definition.values("inPlace").get(0)
+                ? (Boolean)definition.values("inPlace").get(0)
                     : Boolean.FALSE
             );
         }
@@ -1032,15 +1029,15 @@ extends Layer_1 {
             field.values("multiline").add(new Boolean(false));
             field.values("maxLength").add(
                 !definition.values("maxLength").isEmpty()
-                    ? (Integer)definition.values("maxLength").get(0)
+                ? (Integer)definition.values("maxLength").get(0)
                     : new Integer(Integer.MAX_VALUE)
             );
             field.values("autoSize").add(new Boolean(true));
             field.values("acceptsTab").add(new Boolean(false));
             field.values("isPassword").add(
                 definition.values("isPassword").isEmpty()
-                    ? new Boolean(false)
-                    : definition.values("isPassword").get(0)
+                ? new Boolean(false)
+                : definition.values("isPassword").get(0)
             );
             field.values("textAlign").add(new Short((short)0));
             if(defaultMimeType != null) {
@@ -1053,7 +1050,7 @@ extends Layer_1 {
             // as default take changeability from model. 
             Boolean isChangeable = feature.isChangeable();
             isChangeable = (definition.getValues("changeable") == null) || definition.values("changeable").isEmpty()
-                ? isChangeable
+            ? isChangeable
                 : (Boolean)definition.values("changeable").get(0); 
             boolean isSortable = 
                 !"org:openmdx:base:ExtentCapable:identity".equals(feature.getQualifiedName()) &&
@@ -1069,23 +1066,23 @@ extends Layer_1 {
                 (String)definition.values("color").get(0), 
                 (String)definition.values("backColor").get(0), 
                 definition.values("multiplicity").isEmpty() 
-                    ? feature.getMultiplicity() 
+                ? feature.getMultiplicity() 
                     : (String)definition.values("multiplicity").get(0),
-                !definition.values("spanRow").isEmpty() 
+                    !definition.values("spanRow").isEmpty() 
                     ? (Integer)definition.values("spanRow").get(0) 
-                    : new Integer(1), 
-                !definition.values("skipRow").isEmpty() 
-                    ? (Integer)definition.values("skipRow").get(0) 
-                    : new Integer(0), 
-                definition.values("filterable").isEmpty() 
-                    ? !isReferenceField 
-                    : ((Boolean)definition.values("filterable").get(0)).booleanValue(),
-                definition.values("sortable").isEmpty() 
-                    ? isSortable 
-                    : ((Boolean)definition.values("sortable").get(0)).booleanValue(),
-                feature.getName(),
-                feature.getQualifiedName(),
-                (String)definition.values("dataBindingName").get(0)
+                        : new Integer(1), 
+                        !definition.values("skipRow").isEmpty() 
+                        ? (Integer)definition.values("skipRow").get(0) 
+                            : new Integer(0), 
+                            definition.values("filterable").isEmpty() 
+                            ? !isReferenceField 
+                                : ((Boolean)definition.values("filterable").get(0)).booleanValue(),
+                                definition.values("sortable").isEmpty() 
+                                ? isSortable 
+                                    : ((Boolean)definition.values("sortable").get(0)).booleanValue(),
+                                    feature.getName(),
+                                    feature.getQualifiedName(),
+                                    (String)definition.values("dataBindingName").get(0)
             );
         }
     }
@@ -1103,8 +1100,8 @@ extends Layer_1 {
         // do not use addClones because attributes with no values must not
         // be replaced/cleared
         for(
-            Iterator i = overloadWith.attributeNames().iterator();
-            i.hasNext();
+                Iterator i = overloadWith.attributeNames().iterator();
+                i.hasNext();
         ) {
             String attributeName = (String)i.next();
             if(!overloadWith.values(attributeName).isEmpty()) {
@@ -1121,8 +1118,8 @@ extends Layer_1 {
         Map cachedDefinitions
     ) throws ServiceException {
         for(
-            Iterator i = modifiedGroups.iterator();
-            i.hasNext();
+                Iterator i = modifiedGroups.iterator();
+                i.hasNext();
         ) {
             DataproviderObject group = (DataproviderObject)this.existingElements.get(i.next());
             boolean customizedGroup = group.path().getBase().indexOf("Tab:100000") < 0;
@@ -1141,17 +1138,17 @@ extends Layer_1 {
                     7
                 );
             for(
-                Iterator j = group.values("member").iterator();
-                j.hasNext();
-                memberIndex++
+                    Iterator j = group.values("member").iterator();
+                    j.hasNext();
+                    memberIndex++
             ) {
                 Path e = (Path)j.next();
                 DataproviderObject_1_0 elementDefinition = (DataproviderObject_1_0)cachedDefinitions.get(e);
                 List columnBreak = elementDefinition.values("columnBreak");
                 if(
-                    (memberIndex > 0) &&
-                    ((!columnBreak.isEmpty() && ((Boolean)columnBreak.get(0)).booleanValue()) ||
-                    (!customizedGroup && (fieldIndex % defaultColumnHeight == 0)))
+                        (memberIndex > 0) &&
+                        ((!columnBreak.isEmpty() && ((Boolean)columnBreak.get(0)).booleanValue()) ||
+                                (!customizedGroup && (fieldIndex % defaultColumnHeight == 0)))
                 ) { 
                     group.values("columnSizeMin").add(new Integer(330));
                     group.values("columnSizeMax").add(new Integer(currentColumnSizeMax));
@@ -1194,8 +1191,8 @@ extends Layer_1 {
 
         // process all features
         for(
-            Iterator i = featureDefinitions.iterator();
-            i.hasNext();
+                Iterator i = featureDefinitions.iterator();
+                i.hasNext();
         ) {
             StructuralFeatureDefinition feature = (StructuralFeatureDefinition)i.next();
             if(!feature.isReference()) {
@@ -1224,8 +1221,8 @@ extends Layer_1 {
 
                     // map to tab/field group
                     for(
-                        Iterator j = definitions.iterator();
-                        j.hasNext();
+                            Iterator j = definitions.iterator();
+                            j.hasNext();
                     ) {
                         DataproviderObject definition = (DataproviderObject)j.next();
                         Boolean definitionIsActive = Boolean.TRUE;
@@ -1237,8 +1234,8 @@ extends Layer_1 {
                         }
                         // Only render if definition is active
                         if(
-                            (definitionIsActive == null) || // default is true
-                            definitionIsActive.booleanValue()
+                                (definitionIsActive == null) || // default is true
+                                definitionIsActive.booleanValue()
                         ) {
                             List order = this.getOrderFieldGroup(
                                 definition
@@ -1276,9 +1273,9 @@ extends Layer_1 {
                                     tab,
                                     tabElementDefinition.values("toolTip"),
                                     tabElementDefinition.values("changeable").isEmpty() 
-                                        ? this.changableDefaultValue 
+                                    ? this.changableDefaultValue 
                                         : ((Boolean)tabElementDefinition.values("changeable").get(0)).booleanValue(),
-                                    "N/A"
+                                        "N/A"
                                 );
                                 tab.values("title").addAll(
                                     tabElementDefinition.values("label")
@@ -1289,8 +1286,8 @@ extends Layer_1 {
                                 List members = pane.values("member");
                                 int k = 0;
                                 while(
-                                    (k < members.size()) &&
-                                    tab.path().getBase().compareTo(((Path)members.get(k)).getBase()) >= 0
+                                        (k < members.size()) &&
+                                        tab.path().getBase().compareTo(((Path)members.get(k)).getBase()) >= 0
                                 ) {
                                     k++;
                                 }
@@ -1327,11 +1324,11 @@ extends Layer_1 {
                                     groupElementDefinition.values("shortLabel"),
                                     groupElementDefinition.values("toolTip"),
                                     groupElementDefinition.values("changeable").isEmpty() 
-                                        ? this.changableDefaultValue 
+                                    ? this.changableDefaultValue 
                                         : ((Boolean)groupElementDefinition.values("changeable").get(0)).booleanValue(),
-                                    "N/A",
-                                    (String)groupElementDefinition.values("color").get(0),
-                                    (String)groupElementDefinition.values("backColor").get(0)
+                                        "N/A",
+                                        (String)groupElementDefinition.values("color").get(0),
+                                        (String)groupElementDefinition.values("backColor").get(0)
                                 );
                                 this.setElementDefinitionDefaultLayout(group);
                                 group.values("showMaxMember").addAll(
@@ -1345,8 +1342,8 @@ extends Layer_1 {
                                 List members = tab.values("member");
                                 int k = 0;
                                 while(
-                                    (k < members.size()) && 
-                                    group.path().getBase().compareTo(((Path)members.get(k)).getBase()) >= 0
+                                        (k < members.size()) && 
+                                        group.path().getBase().compareTo(((Path)members.get(k)).getBase()) >= 0
                                 ) {
                                     k++;
                                 }
@@ -1436,8 +1433,8 @@ extends Layer_1 {
 
         // store tabs
         for(
-            Iterator i = modifiedTabs.iterator();
-            i.hasNext();
+                Iterator i = modifiedTabs.iterator();
+                i.hasNext();
         ) {
             DataproviderObject tab = (DataproviderObject)this.existingElements.get(i.next());
             this.storeElement(
@@ -1471,14 +1468,14 @@ extends Layer_1 {
         StructuralFeatureDefinition featureD = null; // feature with name="description"
         StructuralFeatureDefinition featureT = null; // feature with name="title"
         for(
-            Iterator i = featureDefinitions.iterator();
-            i.hasNext();
+                Iterator i = featureDefinitions.iterator();
+                i.hasNext();
         ) {
             StructuralFeatureDefinition featureDefinition = (StructuralFeatureDefinition)i.next();        
             // feature is member of baseClass
             if(
-                (featureDefinition.getModelElement() != null) &&
-                baseClass.values("content").contains(featureDefinition.getModelElement().path())
+                    (featureDefinition.getModelElement() != null) &&
+                    baseClass.values("content").contains(featureDefinition.getModelElement().path())
             ) {            
                 String featureName = (String)featureDefinition.getName();
                 if("name".equals(featureName)) {
@@ -1510,8 +1507,8 @@ extends Layer_1 {
         // Process all features 
         Map elementDefinitions = new HashMap();
         for(
-            Iterator i = orderedFeatures.iterator();
-            i.hasNext();
+                Iterator i = orderedFeatures.iterator();
+                i.hasNext();
         ) {
             StructuralFeatureDefinition feature = (StructuralFeatureDefinition)i.next();
             if(this.isMemberOfObjectContainer(feature)) {
@@ -1600,8 +1597,8 @@ extends Layer_1 {
             Directions.ASCENDING
         );
         for(
-            Iterator j = additionalElementDefinitions.iterator();
-            j.hasNext();
+                Iterator j = additionalElementDefinitions.iterator();
+                j.hasNext();
         ) {
             DataproviderObject additionalDefinition = (DataproviderObject)j.next();
             DataproviderObject target = new DataproviderObject(
@@ -1640,8 +1637,8 @@ extends Layer_1 {
             Directions.ASCENDING
         );
         for(
-            Iterator j = alternateElementDefinitions.iterator();
-            j.hasNext();
+                Iterator j = alternateElementDefinitions.iterator();
+                j.hasNext();
         ) {
             DataproviderObject alternateDefinition = (DataproviderObject)j.next();
             DataproviderObject target = new DataproviderObject(
@@ -1667,9 +1664,9 @@ extends Layer_1 {
             for(int i = 0; i < containerDefinition.values("memberElementName").size(); i++) {
                 String name = (String)containerDefinition.values("memberElementName").get(i);
                 if(
-                    (containerDefinition.values("memberMimeType").size() > i) &&
-                    (containerDefinition.values("memberMimeType").get(i) != null) &&
-                    !"".equals(containerDefinition.values("memberMimeType").get(i))
+                        (containerDefinition.values("memberMimeType").size() > i) &&
+                        (containerDefinition.values("memberMimeType").get(i) != null) &&
+                        !"".equals(containerDefinition.values("memberMimeType").get(i))
                 ) {
                     memberMimeTypes.put(
                         name,
@@ -1690,9 +1687,9 @@ extends Layer_1 {
             for(int i = 0; i < containerDefinition.values("memberElementName").size(); i++) {
                 String name = (String)containerDefinition.values("memberElementName").get(i);
                 if(
-                    (containerDefinition.values("memberDefaultValue").size() > i) &&
-                    (containerDefinition.values("memberDefaultValue").get(i) != null) &&
-                    !"".equals(containerDefinition.values("memberDefaultValue").get(i))
+                        (containerDefinition.values("memberDefaultValue").size() > i) &&
+                        (containerDefinition.values("memberDefaultValue").get(i) != null) &&
+                        !"".equals(containerDefinition.values("memberDefaultValue").get(i))
                 ) {
                     memberDefaultValues.put(
                         name,
@@ -1711,8 +1708,8 @@ extends Layer_1 {
         Collection fieldDefs = ((Map)paramType.values("field").get(0)).values();
         List featureDefinitions = new ArrayList();
         for(
-            Iterator i = fieldDefs.iterator();
-            i.hasNext();
+                Iterator i = fieldDefs.iterator();
+                i.hasNext();
         ) {
             featureDefinitions.add(
                 new StructuralFeatureDefinition((ModelElement_1_0)i.next())
@@ -1738,8 +1735,8 @@ extends Layer_1 {
         List featureDefinitions = new ArrayList();
         // Add modeled structural features
         for(
-            Iterator i = featureDefs.iterator();
-            i.hasNext();
+                Iterator i = featureDefs.iterator();
+                i.hasNext();
         ) {
             ModelElement_1_0 featureDef = (ModelElement_1_0)i.next();
             StructuralFeatureDefinition feature = new StructuralFeatureDefinition(featureDef);            
@@ -1747,8 +1744,8 @@ extends Layer_1 {
                 // Only add reference features if not explicitly excluded and exposed end is not composite
                 ModelElement_1_0 exposedEnd = this.model.getElement(featureDef.values("exposedEnd").get(0));
                 if(
-                    !(REFERENCES_TO_EXCLUDE.contains(feature.getQualifiedName()) || REFERENCES_TO_EXCLUDE.contains(feature.getName())) &&
-                    !AggregationKind.COMPOSITE.equals(exposedEnd.values("aggregation").get(0))
+                        !(REFERENCES_TO_EXCLUDE.contains(feature.getQualifiedName()) || REFERENCES_TO_EXCLUDE.contains(feature.getName())) &&
+                        !AggregationKind.COMPOSITE.equals(exposedEnd.values("aggregation").get(0))
                 ) {
                     featureDefinitions.add(feature);
                 }
@@ -1759,13 +1756,13 @@ extends Layer_1 {
         }
         // Add customized structural features
         for(
-            Iterator i = this.structualFeatureDefinitions.iterator();
-            i.hasNext();
+                Iterator i = this.structualFeatureDefinitions.iterator();
+                i.hasNext();
         ) {
             StructuralFeatureDefinition featureDefinition = (StructuralFeatureDefinition)i.next();
             if(
-                (!featureDefinition.isReference() || !attributesOnly) &&
-                this.model.isSubtypeOf(classDef, featureDefinition.getContainer())
+                    (!featureDefinition.isReference() || !attributesOnly) &&
+                    this.model.isSubtypeOf(classDef, featureDefinition.getContainer())
             ) {
                 featureDefinitions.add(featureDefinition);
             }
@@ -1780,8 +1777,8 @@ extends Layer_1 {
         List featureDefinitions = new ArrayList();
         // Add modeled operations
         for(
-            Iterator i = ((Map)classDef.values("allFeature").get(0)).values().iterator();
-            i.hasNext();
+                Iterator i = ((Map)classDef.values("allFeature").get(0)).values().iterator();
+                i.hasNext();
         ) {
             ModelElement_1_0 feature = (ModelElement_1_0)i.next();
             if(this.model.isOperationType(feature)) {                    
@@ -1792,8 +1789,8 @@ extends Layer_1 {
         }
         // Add customized operations
         for(
-            Iterator i = this.operationDefinitions.iterator();
-            i.hasNext();
+                Iterator i = this.operationDefinitions.iterator();
+                i.hasNext();
         ) {
             OperationDefinition featureDefinition = (OperationDefinition)i.next();
             if(this.model.isSubtypeOf(classDef, featureDefinition.getContainer())) {
@@ -1821,8 +1818,8 @@ extends Layer_1 {
             false // no default iconKey for references
         );
         if(
-            baseDefinition.values("active").isEmpty() || // default to true if active is not set
-            ((Boolean)baseDefinition.values("active").get(0)).booleanValue()
+                baseDefinition.values("active").isEmpty() || // default to true if active is not set
+                ((Boolean)baseDefinition.values("active").get(0)).booleanValue()
         ) {
             // Get additional definitions
             List definitions = new ArrayList();
@@ -1842,13 +1839,13 @@ extends Layer_1 {
 
             // Create ui object containers for base and additional definitions
             for(
-                Iterator i = definitions.iterator(); 
-                i.hasNext(); 
+                    Iterator i = definitions.iterator(); 
+                    i.hasNext(); 
             ) {
                 DataproviderObject_1_0 definition = (DataproviderObject_1_0)i.next();
 
                 String alternateDefinitionNameSuffix = definition != baseDefinition
-                    ? ":" + definition.path().getBase()
+                ? ":" + definition.path().getBase()
                     : "";
 
                 // Create new ObjectContainer if it is a reference of classDef
@@ -1856,8 +1853,8 @@ extends Layer_1 {
                     this.model.getElement(feature.getContainer()).values("qualifiedName").get(0) + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix
                 );
                 if(
-                    (container == null) ||
-                    (feature.getQualifiedName()).startsWith(classDef.values("qualifiedName").get(0) + ":")
+                        (container == null) ||
+                        (feature.getQualifiedName()).startsWith(classDef.values("qualifiedName").get(0) + ":")
                 ) { 
                     String containerName = forClass + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix;
                     container = new DataproviderObject(
@@ -1866,7 +1863,7 @@ extends Layer_1 {
                     container.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:ObjectContainer");
                     Boolean isChangeable = feature.isChangeable();
                     isChangeable = definition.values("changeable").isEmpty()
-                        ? isChangeable
+                    ? isChangeable
                         : (Boolean)definition.values("changeable").get(0);
                     this.setLabelledFieldDefault(
                         container,
@@ -1911,7 +1908,7 @@ extends Layer_1 {
                     );
                     // limit number of members to maxMember (if defined)
                     int maxMember = !definition.values("maxMember").isEmpty()
-                        ? ((Number)definition.values("maxMember").get(0)).intValue()
+                    ? ((Number)definition.values("maxMember").get(0)).intValue()
                         : DEFAULT_MAX_MEMBER;
                     if(container.values("member").size() > maxMember) {
                         List limitedMembers = new ArrayList(
@@ -2014,9 +2011,9 @@ extends Layer_1 {
             tab,
             uiDef.values("toolTip"),
             uiDef.values("changeable").isEmpty() 
-                ? this.changableDefaultValue 
+            ? this.changableDefaultValue 
                 : ((Boolean)uiDef.values("changeable").get(0)).booleanValue(),
-            (String)uiDef.values("iconKey").get(0)
+                (String)uiDef.values("iconKey").get(0)
         );
         tab.values("title").addAll(
             uiDef.values("label")
@@ -2071,42 +2068,42 @@ extends Layer_1 {
             baseClass
         );
         Number paneOrder = uiDef == null
-            ? null
+        ? null
             : !uiDef.values("order").isEmpty() 
-                ? (Number)uiDef.values("order").get(0)
+            ? (Number)uiDef.values("order").get(0)
                 : new Integer(90000);                     
-        DecimalFormat orderFormatter= new DecimalFormat("###00"); 
-        Path paneIdentity = this.segmentIdentity.getDescendant(
-            new String[]{
-                "element",
-                paneOrder == null
+            DecimalFormat orderFormatter= new DecimalFormat("###00"); 
+            Path paneIdentity = this.segmentIdentity.getDescendant(
+                new String[]{
+                    "element",
+                    paneOrder == null
                     ? paneName
-                    : paneName + ":" + orderFormatter.format(paneOrder)
-            }
-        );
-        DataproviderObject_1_0 paneDef = this.getElementDefinition(
-            paneIdentity.getBase(),
-            null,
-            true
-        );
-        DataproviderObject pane = (DataproviderObject)panes.get(paneIdentity);
-        if(pane == null) {
-            pane = new DataproviderObject(paneIdentity);
-            pane.values(SystemAttributes.OBJECT_CLASS).add(paneType);
-            this.setElementDefault(
-                pane,
-                paneDef.values("toolTip"),
-                !paneDef.values("isChangeable").isEmpty() 
+                        : paneName + ":" + orderFormatter.format(paneOrder)
+                }
+            );
+            DataproviderObject_1_0 paneDef = this.getElementDefinition(
+                paneIdentity.getBase(),
+                null,
+                true
+            );
+            DataproviderObject pane = (DataproviderObject)panes.get(paneIdentity);
+            if(pane == null) {
+                pane = new DataproviderObject(paneIdentity);
+                pane.values(SystemAttributes.OBJECT_CLASS).add(paneType);
+                this.setElementDefault(
+                    pane,
+                    paneDef.values("toolTip"),
+                    !paneDef.values("isChangeable").isEmpty() 
                     ? ((Boolean)paneDef.values("isChangeable").get(0)).booleanValue() 
-                    : true, 
-                (String)paneDef.values("iconKey").get(0)
-            );
-            panes.put(
-                paneIdentity,
-                pane
-            );
-        }
-        return pane;  
+                        : true, 
+                        (String)paneDef.values("iconKey").get(0)
+                );
+                panes.put(
+                    paneIdentity,
+                    pane
+                );
+            }
+            return pane;  
     }
 
     //-------------------------------------------------------------------------
@@ -2133,8 +2130,8 @@ extends Layer_1 {
 
             // generate operation tabs for base definition and all alternate definitions
             for(
-                Iterator i = opDefs.iterator(); 
-                i.hasNext(); 
+                    Iterator i = opDefs.iterator(); 
+                    i.hasNext(); 
             ) {
                 DataproviderObject_1_0 opDef = (DataproviderObject_1_0)i.next();
                 // Pane
@@ -2159,7 +2156,7 @@ extends Layer_1 {
                 tab.values("operationName").add(
                     operationDef.getQualifiedName()
                 );
-                
+
                 if(tab.getValues("isQuery") != null) {
                     tab.values("isQuery").add(
                         Boolean.valueOf(operationDef.isQuery)
@@ -2169,8 +2166,8 @@ extends Layer_1 {
                 if(operationDef.getModelElement() != null) {
                     // Map parameter to FieldGroup
                     for(
-                        Iterator j = operationDef.getModelElement().values("content").iterator();
-                        j.hasNext();
+                            Iterator j = operationDef.getModelElement().values("content").iterator();
+                            j.hasNext();
                     ) {        
                         // create group and add to tab
                         ModelElement_1_0 paramDef = this.model.getElement(j.next());
@@ -2191,11 +2188,11 @@ extends Layer_1 {
                             groupElementDefinition.values("shortLabel"),
                             groupElementDefinition.values("toolTip"),
                             groupElementDefinition.values("changeable").isEmpty() 
-                                ? this.changableDefaultValue 
+                            ? this.changableDefaultValue 
                                 : ((Boolean)groupElementDefinition.values("changeable").get(0)).booleanValue(),
-                            "N/A",
-                            (String)groupElementDefinition.values("color").get(0),
-                            (String)groupElementDefinition.values("backColor").get(0)
+                                "N/A",
+                                (String)groupElementDefinition.values("color").get(0),
+                                (String)groupElementDefinition.values("backColor").get(0)
                         );
                         this.setElementDefinitionDefaultLayout(group);
                         tab.values("member").add(
@@ -2207,7 +2204,7 @@ extends Layer_1 {
                         group.values("inPlaceEditable").addAll(
                             groupElementDefinition.values("inPlace")
                         );
-    
+
                         // add fields of parameter to group
                         ModelElement_1_0 paramType = this.model.getDereferencedType(
                             paramDef.values("type").get(0)
@@ -2252,8 +2249,8 @@ extends Layer_1 {
             Directions.ASCENDING
         );
         for(
-            Iterator i = additionalInspectorDefinitions.iterator();
-            i.hasNext();
+                Iterator i = additionalInspectorDefinitions.iterator();
+                i.hasNext();
         ) {
             DataproviderObject additionalInspectorDefinition = (DataproviderObject)i.next();
             DataproviderObject target = new DataproviderObject(
@@ -2297,8 +2294,8 @@ extends Layer_1 {
 
         // create inspector for all supertypes
         for(
-            Iterator i = classDef.values("allSupertype").iterator();
-            i.hasNext(); 
+                Iterator i = classDef.values("allSupertype").iterator();
+                i.hasNext(); 
         ) {
             ModelElement_1_0 supertype = this.model.getElement(i.next());
             if(supertype != classDef) {
@@ -2319,8 +2316,8 @@ extends Layer_1 {
         inspector.values("toolTip").addAll(inspectorDefinition.values("toolTip"));
         inspector.values("changeable").add(
             inspectorDefinition.values("changeable").isEmpty()
-                ? new Boolean(this.changableDefaultValue)
-                : inspectorDefinition.values("changeable").get(0)
+            ? new Boolean(this.changableDefaultValue)
+            : inspectorDefinition.values("changeable").get(0)
         );
         inspector.values("forClass").add(forClass);
         inspector.values("scaleX").add(new Integer(1));
@@ -2338,9 +2335,9 @@ extends Layer_1 {
         // add inspector title for each inspector definition
         int ii = 0;
         for(
-            Iterator i = inspectorDefinitions.iterator();
-            i.hasNext();
-            ii++
+                Iterator i = inspectorDefinitions.iterator();
+                i.hasNext();
+                ii++
         ) {
             DataproviderObject definition = (DataproviderObject)i.next();
             DataproviderObject inspectorTitle = new DataproviderObject(
@@ -2384,8 +2381,8 @@ extends Layer_1 {
             classDef
         );
         for(
-            Iterator i = operationDefs.iterator(); 
-            i.hasNext(); 
+                Iterator i = operationDefs.iterator(); 
+                i.hasNext(); 
         ) {
             OperationDefinition operationDef = (OperationDefinition)i.next();
             this.addOperationPane(
@@ -2443,8 +2440,8 @@ extends Layer_1 {
          * Object container panes (reference panes)
          */    
         for(
-            Iterator i = this.getStructuralFeatureDefinitions(classDef, false, false).iterator();
-            i.hasNext();
+                Iterator i = this.getStructuralFeatureDefinitions(classDef, false, false).iterator();
+                i.hasNext();
         ) {
             StructuralFeatureDefinition feature = (StructuralFeatureDefinition)i.next();
             if(feature.isReference()) {
@@ -2472,8 +2469,8 @@ extends Layer_1 {
 
         // Store all panes and add to inspector
         for(
-            Iterator i = panes.values().iterator();
-            i.hasNext();
+                Iterator i = panes.values().iterator();
+                i.hasNext();
         ) {
             DataproviderObject pane = (DataproviderObject)i.next();
             inspector.values("member").add(
@@ -2505,8 +2502,8 @@ extends Layer_1 {
             );
             this.existingElements = new HashMap();
             for(
-                Iterator j = elements.iterator();
-                j.hasNext();
+                    Iterator j = elements.iterator();
+                    j.hasNext();
             ) {
                 DataproviderObject_1_0 element = (DataproviderObject_1_0)j.next();
                 this.existingElements.put(
@@ -2528,8 +2525,8 @@ extends Layer_1 {
             );
             this.existingElementDefinitions = new HashMap();
             for(
-                Iterator j = elementDefinitions.iterator();
-                j.hasNext();
+                    Iterator j = elementDefinitions.iterator();
+                    j.hasNext();
             ) {
                 DataproviderObject_1_0 elementDefinition = (DataproviderObject_1_0)j.next();
                 this.existingElementDefinitions.put(
@@ -2551,8 +2548,8 @@ extends Layer_1 {
             Directions.ASCENDING
         );
         for(
-            Iterator i = featureDefinitions.iterator();
-            i.hasNext();
+                Iterator i = featureDefinitions.iterator();
+                i.hasNext();
         ) {
             DataproviderObject_1_0 featureDefinition = (DataproviderObject_1_0)i.next();
             String qualifiedName = featureDefinition.path().getBase();
@@ -2586,7 +2583,7 @@ extends Layer_1 {
                             name,
                             qualifiedName,
                             isQuery == null ? true : isQuery.booleanValue(),
-                            this.model.getElement(className)
+                                this.model.getElement(className)
                         )
                     );
                 }
@@ -2654,8 +2651,8 @@ extends Layer_1 {
             List assertableInspectors = new ArrayList();  
             // return assertableInspector for all loaded classes
             for(
-                Iterator i = this.model.getContent().iterator(); 
-                i.hasNext();
+                    Iterator i = this.model.getContent().iterator(); 
+                    i.hasNext();
             ) {
                 ModelElement_1_0 elementDef = (ModelElement_1_0)i.next();
                 if(this.model.isClassType(elementDef)) {
@@ -2770,10 +2767,10 @@ extends Layer_1 {
                 throw new ServiceException(
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.CREATION_FAILURE, 
+                    BasicException.Code.CREATION_FAILURE,
                     new BasicException.Parameter[]{
                         new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
-                        new BasicException.Parameter("reason", e.getExceptionStack().toStringTopLevel(false))                
+                        new BasicException.Parameter("reason", e.getExceptionStack().toStringTopLevel(false))
                     },
                     "inspector for class " + arguments.values("forClass").get(0) + " can not be created"
                 );
@@ -2782,10 +2779,10 @@ extends Layer_1 {
                 throw new ServiceException(
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.CREATION_FAILURE, 
+                    BasicException.Code.CREATION_FAILURE,
                     new BasicException.Parameter[]{
                         new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
-                        new BasicException.Parameter("reason", e.getMessage())                
+                        new BasicException.Parameter("reason", e.getMessage())
                     },
                     "inspector for class " + arguments.values("forClass").get(0) + " can not be created"
                 );
@@ -2828,7 +2825,7 @@ extends Layer_1 {
         }
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED, 
+            BasicException.Code.NOT_SUPPORTED,
             new BasicException.Parameter[]{
                 new BasicException.Parameter("operation", operation)
             },
@@ -2851,7 +2848,6 @@ extends Layer_1 {
     private static final String PANE_TYPE_ATTRIBUTE = "org:openmdx:ui1:AttributePane";
     private static final String PANE_TYPE_REFERENCE = "org:openmdx:ui1:ReferencePane";
 
-//  private static final String TAB_TYPE_TAB = "org:openmdx:ui1:Tab";
     private static final String TAB_TYPE_OPERATION = "org:openmdx:ui1:OperationTab";
 
     private static final List REFERENCES_TO_EXCLUDE = Arrays.asList(

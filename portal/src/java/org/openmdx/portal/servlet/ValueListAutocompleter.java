@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ValueListAutocompleter.java,v 1.14 2007/11/23 00:21:03 wfro Exp $
+ * Name:        $Id: ValueListAutocompleter.java,v 1.15 2008/08/12 16:38:05 wfro Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/23 00:21:03 $
+ * Date:        $Date: 2008/08/12 16:38:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 

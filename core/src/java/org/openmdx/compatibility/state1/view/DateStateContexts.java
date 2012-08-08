@@ -1,9 +1,9 @@
 /*
  * ====================================================================
  * Description: Date State Contexts
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:30 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -104,7 +104,7 @@ public class DateStateContexts {
     ) throws ServiceException {
         return getStatedObject(object.objGetPath());
     }
-    
+
     protected static Path getStatedObject(
         Path state
     ){
@@ -130,7 +130,7 @@ public class DateStateContexts {
             }
         }
     }
-    
+
     protected static InteractionSpec newWritableDateStateContext(
         String validFrom,
         String validTo
@@ -157,14 +157,12 @@ public class DateStateContexts {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("invalidatedAt", invalidatedAt)
-                },
-                "Could not parse the given date-time value"
+                "Could not parse the given date-time value",
+                new BasicException.Parameter("invalidatedAt", invalidatedAt)
             );
         }
     }
-    
+
     public static InteractionSpec newDateStateContext(
         Object_1_0 prefetched
     ) throws ServiceException {
@@ -177,7 +175,7 @@ public class DateStateContexts {
             invalidatedAt
         );
     }
-    
+
     /**
      * Compare two XMLGregorianCalendar values where <code>null</code> is
      * considered to be smaller than every other value.
@@ -193,12 +191,12 @@ public class DateStateContexts {
         XMLGregorianCalendar d2
     ){
         return d1 == null ? (
-            d2 == null ? 0 : -1
+                d2 == null ? 0 : -1
         ) : (
-            d2 == null ? 1 : d1.compare(d2)
+                d2 == null ? 1 : d1.compare(d2)
         );
     }
-        
+
     /**
      * Compare two XMLGregorianCalendar values where <code>null</code> is
      * considered to be greater than every other value.
@@ -214,9 +212,9 @@ public class DateStateContexts {
         XMLGregorianCalendar d2
     ){
         return d1 == null ? (
-            d2 == null ? 0 : 1
+                d2 == null ? 0 : 1
         ) : (
-            d2 == null ? -1 : d1.compare(d2)
+                d2 == null ? -1 : d1.compare(d2)
         );
     }
 
@@ -234,10 +232,8 @@ public class DateStateContexts {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("date", date)
-                },
-                "Could not parse the given date value"
+                "Could not parse the given date value",
+                new BasicException.Parameter("date", date)
             );
         }
     }
@@ -250,12 +246,12 @@ public class DateStateContexts {
         } else {
             String standardFormat = date.toString();
             return 
-                standardFormat.substring(0, standardFormat.length() - 6) +
-                standardFormat.substring(standardFormat.length() - 5, standardFormat.length() - 3) +
-                standardFormat.substring(standardFormat.length() - 2);
+            standardFormat.substring(0, standardFormat.length() - 6) +
+            standardFormat.substring(standardFormat.length() - 5, standardFormat.length() - 3) +
+            standardFormat.substring(standardFormat.length() - 2);
         }
     }
-    
+
     /**
      * Retrieve the Datatype Factory
      * 
@@ -275,7 +271,7 @@ public class DateStateContexts {
             return null;
         }
     }
-    
+
     /**
      * Retrieve the current date
      * 
@@ -316,15 +312,15 @@ public class DateStateContexts {
     }
 
     /**
-      * The DatatypeFactory instance
-      */
-     static private final DatatypeFactory datatypeFactory = newDatatypeFactory();    
+     * The DatatypeFactory instance
+     */
+    static private final DatatypeFactory datatypeFactory = newDatatypeFactory();    
 
-     /**
-      * One day
-      */
-     static final Duration ONE_DAY = datatypeFactory == null ? 
-         null : 
-         datatypeFactory.newDurationDayTime(true, 1, 0, 0, 0);
+    /**
+     * One day
+     */
+    static final Duration ONE_DAY = datatypeFactory == null ? 
+        null : 
+            datatypeFactory.newDurationDayTime(true, 1, 0, 0, 0);
 
 }

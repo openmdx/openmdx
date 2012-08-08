@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapStructure_1.java,v 1.7 2008/03/21 18:44:51 hburger Exp $
+ * Name:        $Id: MapStructure_1.java,v 1.8 2008/09/10 08:55:27 hburger Exp $
  * Description: SPICE Structure_1_0 standard implementation
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:44:51 $
+ * Date:        $Date: 2008/09/10 08:55:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,7 +63,7 @@ import org.openmdx.kernel.exception.BasicException;
 
 @SuppressWarnings("unchecked")
 public class MapStructure_1
-    implements Structure_1_0 
+implements Structure_1_0 
 {
 
     /**
@@ -79,7 +79,7 @@ public class MapStructure_1
     ){
         this.record = record;
     }
-  
+
 
     //------------------------------------------------------------------------
     // Implements Structure_1_0
@@ -107,7 +107,7 @@ public class MapStructure_1
         );
         return this.fieldNames;
     }
-   
+
     /**
      * Get a field.
      *
@@ -124,14 +124,12 @@ public class MapStructure_1
     ) throws ServiceException {
         Object value = this.record.get(fieldName);
         if(
-            value == null &&
-            !this.record.containsKey(fieldName)
+                value == null &&
+                !this.record.containsKey(fieldName)
         ) throw new ServiceException(
-        BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.BAD_MEMBER_NAME,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("fieldName", fieldName)
-            },
-            "This structure has no such field"
+            BasicException.Code.DEFAULT_DOMAIN, BasicException.Code.BAD_MEMBER_NAME,
+            "This structure has no such field",
+            new BasicException.Parameter("fieldName", fieldName)
         );
         return value;
     }
@@ -145,8 +143,8 @@ public class MapStructure_1
     ){
         return this.record.toString();
     }
-  
-  
+
+
     //------------------------------------------------------------------------
     // Instance Members
     //------------------------------------------------------------------------
@@ -160,5 +158,5 @@ public class MapStructure_1
      * Field
      */  
     private transient List fieldNames = null;
-  
+
 }

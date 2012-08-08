@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1_2.java,v 1.7 2007/10/23 10:27:23 hburger Exp $
+ * Name:        $Id: RefPackage_1_2.java,v 1.8 2008/09/11 12:30:29 hburger Exp $
  * Description: RefPackage_1_2 interface
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/23 10:27:23 $
+ * Date:        $Date: 2008/09/11 12:30:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,6 @@
  */
 package org.openmdx.base.accessor.jmi.cci;
 
-import javax.jmi.reflect.RefObject;
-
 /**
  * View capable refPackage 
  */
@@ -64,20 +62,6 @@ public interface RefPackage_1_2 extends RefPackage_1_1 {
      * <code>null</code> otherwise
      */
     Object refViewContext(
-    );
-
-    /**
-     * Returns an new RefObject with initial values
-     * @param mofId 
-     * @param initialValues
-     * @param allValuesDirty whether all initial values attributes should be propagated as dirty
-     * 
-     * @return
-     */
-    RefObject refCloneObject (
-        String mofId,
-        RefObject initialValues, 
-        boolean allValuesDirty
     );
 
 }

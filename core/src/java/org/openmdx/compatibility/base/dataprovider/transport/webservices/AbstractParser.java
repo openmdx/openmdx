@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractParser.java,v 1.15 2008/03/19 17:09:57 hburger Exp $
+ * Name:        $Id: AbstractParser.java,v 1.16 2008/09/10 08:55:21 hburger Exp $
  * Description: AbstractParser.java
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:09:57 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,101 +68,100 @@ import org.openmdx.kernel.log.SysLog;
 @SuppressWarnings("unchecked")
 public abstract class AbstractParser {
 
-  /**
-   * @param reader    the Reader to be parsed as Object to be compatible
-   *                  with .NET implementation
-   * @throws ServiceException
-   */
-  void parse(
-    Object reader
-  ) throws ServiceException {
-    try {
-      if (! (reader instanceof Reader)) {
-        ServiceException se = new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.PARSE_FAILURE,
-          null,
-          "Could not read the Request"
-        );
-        SysLog.info("Error reading request. ", se);
-        SysLog.info("Continuing...");
-        throw se;
-      }
-      BufferedReader bufferedReader =
-        new BufferedReader((Reader)reader);
-      int c = bufferedReader.read();
-      StringBuilder chars = new StringBuilder(4096);
-      StringBuilder rawname = new StringBuilder(512);
-      while(c != -1) {
-        if(c == '<') {
-          c = bufferedReader.read();
-          // XML Header
-          if(c == '?') {
-            while((c != -1) && (c != '>')) {
-              c = bufferedReader.read();
+    /**
+     * @param reader    the Reader to be parsed as Object to be compatible
+     *                  with .NET implementation
+     * @throws ServiceException
+     */
+    void parse(
+        Object reader
+    ) throws ServiceException {
+        try {
+            if (! (reader instanceof Reader)) {
+                ServiceException se = new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.PARSE_FAILURE,
+                    "Could not read the Request"
+                );
+                SysLog.info("Error reading request. ", se);
+                SysLog.info("Continuing...");
+                throw se;
             }
-          }
-          // begin tag
-          else if(c != '/') {
-            rawname.setLength(0);
-            boolean append = true;
-            while((c != -1) && (c != '>')) {
-              append &= c != ' ';
-              if(append) {
-                  rawname.append((char)c);
-              }
-              c = bufferedReader.read();
+            BufferedReader bufferedReader =
+                new BufferedReader((Reader)reader);
+            int c = bufferedReader.read();
+            StringBuilder chars = new StringBuilder(4096);
+            StringBuilder rawname = new StringBuilder(512);
+            while(c != -1) {
+                if(c == '<') {
+                    c = bufferedReader.read();
+                    // XML Header
+                    if(c == '?') {
+                        while((c != -1) && (c != '>')) {
+                            c = bufferedReader.read();
+                        }
+                    }
+                    // begin tag
+                    else if(c != '/') {
+                        rawname.setLength(0);
+                        boolean append = true;
+                        while((c != -1) && (c != '>')) {
+                            append &= c != ' ';
+                            if(append) {
+                                rawname.append((char)c);
+                            }
+                            c = bufferedReader.read();
+                        }
+                        this.startElement(
+                            rawname.toString()
+                        );
+                    }
+                    // end tag
+                    else {
+                        this.characters(
+                            chars.toString().toCharArray(),
+                            0,
+                            chars.length()
+                        );
+                        chars.setLength(0);
+                        c = bufferedReader.read();
+                        rawname.setLength(0);
+                        while((c != -1) && (c != '>')) {
+                            rawname.append((char)c);
+                            c = bufferedReader.read();
+                        }
+                        this.endElement(
+                            rawname.toString()
+                        );
+                    }
+                }
+                else {
+                    chars.append((char)c);
+                }
+                c = bufferedReader.read();
             }
-            this.startElement(
-              rawname.toString()
-            );
-          }
-          // end tag
-          else {
-            this.characters(
-              chars.toString().toCharArray(),
-              0,
-              chars.length()
-            );
-            chars.setLength(0);
-            c = bufferedReader.read();
-            rawname.setLength(0);
-            while((c != -1) && (c != '>')) {
-                rawname.append((char)c);
-              c = bufferedReader.read();
-            }
-            this.endElement(
-              rawname.toString()
-            );
-          }
         }
-        else {
-            chars.append((char)c);
+        catch(IOException e) {
+            throw new ServiceException(e);
         }
-        c = bufferedReader.read();
-      }
     }
-    catch(IOException e) {
-      throw new ServiceException(e);
-    }
-  }
 
-  //-------------------------------------------------------------------------   
-  abstract void characters(
-    char[] ch,
-    int offset,
-    int length
-  ) throws ServiceException;
+    //-------------------------------------------------------------------------   
+    abstract void characters(
+        char[] ch,
+        int offset,
+        int length
+    ) throws ServiceException;
 
-  //-------------------------------------------------------------------------   
-  abstract void startElement(
-    String rawname
-  ) throws ServiceException;
+    //-------------------------------------------------------------------------   
+    abstract void startElement(
+        String rawname
+    ) throws ServiceException;
 
-  //-------------------------------------------------------------------------   
-  abstract void endElement(
-    String rawname
-  ) throws ServiceException;
+    //-------------------------------------------------------------------------   
+    abstract void endElement(
+        String rawname
+    ) throws ServiceException;
 
 }
 

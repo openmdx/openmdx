@@ -4,6 +4,31 @@
                     =====================================
 
 ==============================================================================
+Version 2.2.0                                                       2008-09-10
+==============================================================================
+
+1.    NEW FEATURES
+      none
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR10007941
+      GUI: horizontal root menu control. Replace vertical root menu by 
+      horizontal menu. At the same time remove yuiext layout manager. 
+      
+            
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
 Version 2.1.0                                                       2008-07-10
 ==============================================================================
 

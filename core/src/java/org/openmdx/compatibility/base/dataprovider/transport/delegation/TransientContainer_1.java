@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TransientContainer_1.java,v 1.10 2008/03/19 17:06:09 hburger Exp $
+ * Name:        $Id: TransientContainer_1.java,v 1.11 2008/09/04 06:49:13 hburger Exp $
  * Description: Transient Container
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:06:09 $
+ * Date:        $Date: 2008/09/04 06:49:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,7 +62,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.Container;
 import org.openmdx.compatibility.base.naming.PathComponent;
 import org.openmdx.compatibility.base.query.FilterProperty;
 
@@ -229,7 +228,8 @@ class TransientContainer_1
      *            if some aspect of this filter prevents it from being
      *            applied to this container. 
      */
-    public Container subSet(
+    @SuppressWarnings("deprecation")
+    public org.openmdx.compatibility.base.collection.Container subSet(
         Object filter
     ){
         if(filter == null) return this;

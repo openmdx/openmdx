@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectCreationResult.java,v 1.3 2007/01/21 20:47:09 wfro Exp $
+ * Name:        $Id: ObjectCreationResult.java,v 1.4 2008/08/12 16:38:07 wfro Exp $
  * Description: CreateOperationResult
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:47:09 $
+ * Date:        $Date: 2008/08/12 16:38:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 

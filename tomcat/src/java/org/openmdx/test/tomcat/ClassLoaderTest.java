@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ClassLoaderTest.java,v 1.5 2008/07/03 00:06:58 hburger Exp $
+ * Name:        $Id: ClassLoaderTest.java,v 1.6 2008/09/11 10:49:10 hburger Exp $
  * Description: Class Loader Test
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/03 00:06:58 $
+ * Date:        $Date: 2008/09/11 10:49:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -90,7 +90,7 @@ public class ClassLoaderTest implements Runnable {
 	
 	private static int CLASS_COUNT = 1000;
 	private static final int TEST_COUNT = 1000;
-	private static final boolean TOMCAT = true;
+	private static final boolean TOMCAT = false;
 	
 	private static final String[] openmdxClasses = {
 		"javax.jmi.corbaidltypes.CorbaIdlTypesPackage",
@@ -729,7 +729,6 @@ public class ClassLoaderTest implements Runnable {
 		"org.openmdx.base.accessor.jmi.spi.DateTimeMarshaller",
 		"org.openmdx.base.accessor.jmi.spi.DecimalMarshaller",
 		"org.openmdx.base.accessor.jmi.spi.DurationMarshaller",
-		"org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_2",
 		"org.openmdx.base.accessor.jmi.spi.FeatureMapper",
 		"org.openmdx.base.accessor.jmi.spi.InstanceCallbackAdapter_1",
 		"org.openmdx.base.accessor.jmi.spi.IntegerMarshaller",
@@ -3252,6 +3251,7 @@ public class ClassLoaderTest implements Runnable {
 			try {
 				this.classLoader.loadClass(this.classes[i]);
 			} catch (Throwable throwable) {
+				System.err.println("ClassLoader: " + this.classLoader.getClass().getName());
 				signalFailure(this.classes[i], throwable);
 			}
 		}
@@ -3267,7 +3267,10 @@ public class ClassLoaderTest implements Runnable {
 		String className,
 		Throwable throwable
 	){
-		failures.put(className, throwable.getClass().getSimpleName());
+		String throwableName = throwable.getClass().getSimpleName();
+		System.err.println(Thread.currentThread().getName() + '\t' + throwableName + '\t' + className);
+		throwable.printStackTrace();
+		failures.put(className, throwableName);
 	}
 
 	public static void printFailures () {
@@ -3365,8 +3368,8 @@ public class ClassLoaderTest implements Runnable {
 					e,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.ASSERTION_FAILURE,
-					null,
-					"Class Loader Test Failed"
+					"Class Loader Test Failed",
+					null
 				)
 			);
 		}

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractManagerFactory.java,v 1.1 2008/06/27 13:56:09 hburger Exp $
+ * Name:        $Id: AbstractManagerFactory.java,v 1.7 2008/09/18 15:29:17 hburger Exp $
  * Description: Abstract Manager Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 13:56:09 $
+ * Date:        $Date: 2008/09/18 15:29:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOUserException;
@@ -78,6 +79,7 @@ import org.openmdx.kernel.callback.CloseCallback;
 import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.openmdx.kernel.persistence.cci.NonConfigurableProperty;
 import org.openmdx.kernel.persistence.resource.Connection_2;
+import org.openmdx.uses.org.apache.commons.collections.set.MapBackedSet;
 
 /**
  * Abstract Manager Factory
@@ -139,7 +141,10 @@ public abstract class AbstractManagerFactory
     /**
      * <code>PersistentManager</code> book keeping.
      */
-    private Set<PersistenceManager> persistenceManagers = new HashSet<PersistenceManager>();
+    @SuppressWarnings("unchecked")
+    private Set<PersistenceManager> persistenceManagers = MapBackedSet.decorate( 
+        new WeakHashMap<PersistenceManager,Object>()
+    );
     
     /**
      * The <code>PersistenceManagerFactory</code>'s properties.
@@ -214,6 +219,11 @@ public abstract class AbstractManagerFactory
     private static final char[] NO_PASSWORD = new char[]{};
     
     /**
+     * 
+     */
+    private static final String[] NO_PRINCIPAL_CHAIN = {};
+    
+    /**
      * Return <code>true</code> if the property's value is
      * <code>"true"</code> ignoring case.
      * 
@@ -272,8 +282,10 @@ public abstract class AbstractManagerFactory
     /* (non-Javadoc)
      * @see org.openmdx.kernel.callback.CloseCallback#postClose(java.lang.Object)
      */
-    public void postClose(Object closed) {
-        this.persistenceManagers.remove(closed);
+    public synchronized void postClose(Object closed) {
+        if(!isClosed()) {
+            this.persistenceManagers.remove(closed);
+        }
     }
 
     
@@ -285,22 +297,25 @@ public abstract class AbstractManagerFactory
      * @see javax.jdo.PersistenceManagerFactory#close()
      */
     public synchronized void close() {
-        List<JDOUserException> exceptions = new ArrayList<JDOUserException>();
-        for(PersistenceManager p : this.persistenceManagers){
-            if(p.currentTransaction().isActive()) exceptions.add(
-                new JDOUserException("PersistenceManager has active transaction", p)
+        if(!isClosed()) {
+            List<JDOUserException> exceptions = new ArrayList<JDOUserException>();
+            for(PersistenceManager p : this.persistenceManagers){
+                if(p.currentTransaction().isActive()) exceptions.add(
+                    new JDOUserException("PersistenceManager has active transaction", p)
+                );
+            }
+            if(exceptions.isEmpty()) throw new JDOUserException(
+                "PersistenceManager with active transaction prevents close",
+                exceptions.toArray(
+                    new JDOUserException[exceptions.size()]
+                )
             );
+            Set<PersistenceManager> persistenceManagers = this.persistenceManagers;
+            this.persistenceManagers = null;
+            for(PersistenceManager p : persistenceManagers){
+                p.close();
+            }
         }
-        if(!exceptions.isEmpty()) throw new JDOUserException(
-            "PersistenceManager with active transaction prevents close",
-            exceptions.toArray(
-                new JDOUserException[exceptions.size()]
-            )
-        );
-        for(PersistenceManager p : this.persistenceManagers){
-            p.close();
-        }
-        this.persistenceManagers = null;
     }
 
     /* (non-Javadoc)
@@ -844,7 +859,7 @@ public abstract class AbstractManagerFactory
             connectionUsername == null || 
             "".equals(connectionUsername)
         ) {
-            return new String[]{};
+            return NO_PRINCIPAL_CHAIN;
         } else if (
             (connectionUsername.startsWith("[") && connectionUsername.endsWith("]")) ||
             (connectionUsername.startsWith("{") && connectionUsername.endsWith("}"))

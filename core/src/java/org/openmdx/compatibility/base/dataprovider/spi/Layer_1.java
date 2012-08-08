@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Layer_1.java,v 1.17 2008/06/24 16:17:21 hburger Exp $
+ * Name:        $Id: Layer_1.java,v 1.18 2008/09/10 08:55:25 hburger Exp $
  * Description: User Profile Service
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/24 16:17:21 $
+ * Date:        $Date: 2008/09/10 08:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -73,8 +73,8 @@ import org.openmdx.kernel.log.SysLog;
  * A transparent implementation of Layer_1_0, i.e. all calls are delegated.
  */
 public class Layer_1
-    extends AbstractLayer_1
-    implements Layer_1_2
+extends AbstractLayer_1
+implements Layer_1_2
 {
 
     /**
@@ -114,7 +114,7 @@ public class Layer_1
     ){
         return Boolean.TRUE.equals(request.context(DataproviderRequestContexts.LENIENT).get(0));
     }
-    
+
     /**
      * The layer this layer delegates to
      *
@@ -123,9 +123,9 @@ public class Layer_1
     protected final Layer_1_0 getDelegation(
         DataproviderRequest request
     ){
-         return isLenient(request) ? getLenientDelegation() : getDelegation();
+        return isLenient(request) ? getLenientDelegation() : getDelegation();
     }
-    
+
     /**
      * Says whether this layer is the terminal layer or not
      *
@@ -140,7 +140,7 @@ public class Layer_1
     //------------------------------------------------------------------------
     // Implements Layer_1_2
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1_2#epilog(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest, org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply)
      */
@@ -166,7 +166,7 @@ public class Layer_1
         }
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Layer_1_1
     //------------------------------------------------------------------------
@@ -186,10 +186,10 @@ public class Layer_1
     private Layer_1_0 getLenientDelegation() {
         return this.delegation instanceof Layer_1_1 ? 
             ((Layer_1_1)this.delegation).getLenientProcessor() :
-            this.delegation;
+                this.delegation;
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Layer_1_0
     //------------------------------------------------------------------------
@@ -254,7 +254,7 @@ public class Layer_1
         );
         SysLog.detail(
             "Activating " + DataproviderLayers.toString(id) + " layer " + getClass().getName(),
-             configuration
+            configuration
         );
     }
 
@@ -525,10 +525,9 @@ public class Layer_1
     ) throws ServiceException {
         if(requests.length != replies.length) {
             RuntimeServiceException assertionFailure = new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                    null,
-                    "The numbers of requests and replies do not match"
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "The numbers of requests and replies do not match"
             );
             SysLog.error(
                 assertionFailure.getMessage(),
@@ -560,12 +559,12 @@ public class Layer_1
         UnitOfWorkRequest[] workingUnits
     ){
         UnitOfWorkReply[] replies = new UnitOfWorkReply[
-            workingUnits.length
-        ];
+                                                        workingUnits.length
+                                                        ];
         for(
-            int index = 0;
-            index < workingUnits.length;
-            index++
+                int index = 0;
+                index < workingUnits.length;
+                index++
         ) {
             replies[index] = process(
                 header,
@@ -593,9 +592,9 @@ public class Layer_1
     ) throws ServiceException {
         prolog(header,requests);
         for (
-            int index = 0;
-            index < requests.length;
-            index++
+                int index = 0;
+                index < requests.length;
+                index++
         ) {
             DataproviderRequest request = requests[index];
             SysLog.trace(
@@ -605,38 +604,38 @@ public class Layer_1
             switch (request.operation()) {
                 case DataproviderOperations.OBJECT_OPERATION:
                     replies[index] = operation(header,request);
-                break;
+                    break;
                 case DataproviderOperations.OBJECT_CREATION:
                     replies[index] = create(header,request);
-                break;
+                    break;
                 case DataproviderOperations.OBJECT_MODIFICATION:
                     replies[index] = modify(header,request);
-                break;
+                    break;
                 case DataproviderOperations.OBJECT_REPLACEMENT:
                     replies[index] = replace(header,request);
-                break;
+                    break;
                 case DataproviderOperations.OBJECT_REMOVAL:
                     replies[index] = remove(header,request);
-                break;
+                    break;
                 case DataproviderOperations.OBJECT_SETTING:
                     replies[index] = set(header,request);
-                break;
+                    break;
                 case DataproviderOperations.ITERATION_START:
                 case DataproviderOperations.ITERATION_CONTINUATION:
                     replies[index] = find(header,request);
-                break;
+                    break;
                 case DataproviderOperations.OBJECT_MONITORING:
                     replies[index] = startPublishing(header,request);
-                break;
+                    break;
                 case DataproviderOperations.OBJECT_RETRIEVAL:
                     replies[index] = get(header,request);
-                break;
+                    break;
             }
         }
         epilog(
-          header,
-          requests,
-          replies
+            header,
+            requests,
+            replies
         );
     }
 
@@ -655,10 +654,9 @@ public class Layer_1
     ){
         if(unitOfWorkRequest.isTransactionalUnit()) {
             RuntimeServiceException assertionFailure = new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                    null,
-                    "A layer can't handle transactions"
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "A layer can't handle transactions"
             );
             SysLog.error(
                 assertionFailure.getMessage(),
@@ -672,9 +670,9 @@ public class Layer_1
             int lenient = 0;
             if(this.bypassedByLenientRequests) {
                 for(
-                    int i = 0;
-                    i < requests.length;
-                    i++
+                        int i = 0;
+                        i < requests.length;
+                        i++
                 ){
                     if(isLenient(requests[i])) {
                         lenient++;
@@ -690,8 +688,8 @@ public class Layer_1
                 }
                 process(header,requests,replies);
                 if (this.statistics != null) this.statistics.update(
-                  requests,
-                  replies
+                    requests,
+                    replies
                 );
                 UnitOfWorkReply unitOfWorkReply = new UnitOfWorkReply(replies); 
                 if(this.id == DataproviderLayers.INTERCEPTION) {
@@ -708,7 +706,6 @@ public class Layer_1
                     RuntimeServiceException configurationFailure = new RuntimeServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.INVALID_CONFIGURATION,
-                        null,
                         "No layer processes lenient requests"
                     );
                     SysLog.error(
@@ -717,8 +714,8 @@ public class Layer_1
                     );
                     throw configurationFailure;
                 } else if(
-                    this.id == DataproviderLayers.INTERCEPTION &&
-                    delegation instanceof Layer_1_2
+                        this.id == DataproviderLayers.INTERCEPTION &&
+                        delegation instanceof Layer_1_2
                 ){
                     ((Layer_1_2)delegation).prolog(
                         header,
@@ -743,16 +740,14 @@ public class Layer_1
             } else throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("requests", requests.length),
-                    new BasicException.Parameter("lenient requests", lenient)
-                },
-                "In a unit of work either all requests or none must be lenient"
+                "In a unit of work either all requests or none must be lenient",
+                new BasicException.Parameter("requests", requests.length),
+                new BasicException.Parameter("lenient requests", lenient)
             );
         } catch (ServiceException exception) {
             if (this.statistics != null) this.statistics.update(
-              requests,
-              replies
+                requests,
+                replies
             );
             return new UnitOfWorkReply(exception);
         }

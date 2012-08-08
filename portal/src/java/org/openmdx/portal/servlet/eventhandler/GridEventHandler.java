@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GridEventHandler.java,v 1.41 2008/05/31 23:40:08 wfro Exp $
+ * Name:        $Id: GridEventHandler.java,v 1.43 2008/08/12 16:38:08 wfro Exp $
  * Description: GridEventHandler 
- * Revision:    $Revision: 1.41 $
+ * Revision:    $Revision: 1.43 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/31 23:40:08 $
+ * Date:        $Date: 2008/08/12 16:38:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.eventhandler;
 
@@ -82,7 +79,6 @@ import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.HtmlPageFactory;
-import org.openmdx.portal.servlet.PaintScope;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
@@ -537,7 +533,7 @@ public class GridEventHandler {
                             HtmlEncoder_1_0 htmlEncoder = application.getHtmlEncoder();
                             p.write("<span class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\">");
                             p.write("  <ul id=\"nav\" class=\"nav\">");
-                            p.write("    <li><a href=\"#\"><img id=\"gridRow", rowId, "-details-opener\" border=\"0\" height=\"16\" width=\"15\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" /></a>");
+                            p.write("    <li><a href=\"#\" onclick=\"javascript:return false;\"><img id=\"gridRow", rowId, "-details-opener\" border=\"0\" height=\"16\" width=\"15\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" /></a>");
                             p.write("      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
                             // 000 - Show
                             Action getAttributesAction = selectedObjectView.getObjectReference().getObjectGetAttributesAction(); 

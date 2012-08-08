@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectControl.java,v 1.38 2008/06/01 16:52:33 wfro Exp $
+ * Name:        $Id: EditObjectControl.java,v 1.41 2008/08/27 13:45:16 wfro Exp $
  * Description: EditObjectControl
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/01 16:52:33 $
+ * Date:        $Date: 2008/08/27 13:45:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -100,6 +97,136 @@ public class EditObjectControl
     }
     
     //-------------------------------------------------------------------------
+    public static void paintEditPopups(
+        HtmlPage p        
+    ) throws ServiceException {
+        ApplicationContext application = p.getApplicationContext();
+        Texts_1_0 texts = application.getTexts();
+        
+        // Popup multi-valued strings
+        p.write("<div id=\"popup_", EDIT_STRINGS, "\" class=\"multiEditDialog\">");
+        p.write("<div class=\"bd\">");
+        p.write("  <form name=\"", EDIT_STRINGS, "\" method=\"post\" action=\"\">");
+        p.write("    <table class=\"popUpTable\">");
+        p.write("      <!-- template row -->");
+        p.write("      <tr id=\"editstringrow\" style=\"display:block;\">");
+        p.write("        <td class=\"fieldindex\" id=\"editstringIdx_\"></td>");
+        p.write("        <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editstringIsSelected_\" onmouseup=\"", EDIT_STRINGS, "_onchange_checkbox(this, $('editstringField_' + this.id.split('_')[1]));\" value=\"checkbox\"></td>");
+        p.write("        <td class=\"fieldvalue\"><input type=\"text\" class=\"valueL\" name=\"field\" id=\"editstringField_\" onkeyup=\"", EDIT_STRINGS, "_onchange_field($('editstringIsSelected_'+ this.id.split('_')[1]), this);\"></td>");
+        p.write("      </tr>");
+        p.write("    </table>");
+        p.write("    <div style=\"text-align:right;padding-top:8px;\">");
+        p.write("      <input type=\"button\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:", EDIT_STRINGS, "_click_OK();\" />");
+        p.write("      <input type=\"button\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:popup_", EDIT_STRINGS, ".hide();\" />");
+        p.write("    </div>");
+        p.write("  </form>");
+        p.write("</div>");
+        p.write("</div>");
+
+        // Popup multi-valued numbers
+        p.write("<div id=\"popup_", EDIT_NUMBERS, "\" class=\"multiEditDialog\">");
+        p.write("<div class=\"bd\">");
+        p.write("  <form name=\"", EDIT_NUMBERS, "\" method=\"post\" action=\"\">");
+        p.write("    <table class=\"popUpTable\">");
+        p.write("        <!-- template row -->");
+        p.write("        <tr id=\"editnumberrow\" style=\"display:block;\">");
+        p.write("          <td class=\"fieldindex\" id=\"editnumberIdx_\"></td>");
+        p.write("          <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editnumberIsSelected_\" onmouseup=\"", EDIT_NUMBERS, "_onchange_checkbox(this, $('editnumberField_' + this.id.split('_')[1]));\" value=\"checkbox\"></td>");
+        p.write("          <td class=\"fieldvalue\"><input type=\"text\" class=\"valueR\" name=\"field\" id=\"editnumberField_\" onkeyup=\"", EDIT_NUMBERS, "_onchange_field($('editnumberIsSelected_'+ this.id.split('_')[1]), this);\"></td>");
+        p.write("        </tr>");
+        p.write("    </table>");
+        p.write("    <div style=\"text-align:right;padding-top:8px;\">");
+        p.write("      <input type=\"button\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:", EDIT_NUMBERS, "_click_OK();\" />");
+        p.write("      <input type=\"button\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:popup_", EDIT_NUMBERS, ".hide();\" />");
+        p.write("    </div>");
+        p.write("  </form>");
+        p.write("</div>");
+        p.write("</div>");
+
+        // Popup multi-valued dates
+        p.write("<div id=\"popup_", EDIT_DATES, "\" class=\"multiEditDialog\">");
+        p.write("<div class=\"bd\">");
+        p.write("  <form name=\"", EDIT_DATES, "\" method=\"post\" action=\"\">");
+        p.write("    <table class=\"popUpTable\">");
+        p.write("        <!-- template row -->");
+        p.write("        <tr id=\"editdaterow\" style=\"display:block;\">");
+        p.write("          <td class=\"fieldindex\" id=\"editdateIdx_\"></td>");
+        p.write("          <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editdateIsSelected_\" onmouseup=\"", EDIT_DATES, "_onchange_checkbox(this, $('editdateField_' + this.id.split('_')[1]));\" value=\"checkbox\"></td>");
+        p.write("          <td class=\"fieldvalue\"><input type=\"text\" class=\"valueR\" name=\"field\" id=\"editdateField_\" title=\"wfro: locale dependent\" onkeyup=\"", EDIT_DATES, "_onchange_field($('editdateIsSelected_'+ this.id.split('_')[1]), this);\"></td>");
+        p.write("          <td class=\"addon\"><a><img class=\"popUpButton\" id=\"cal_date_trigger_\" border=\"0\" alt=\"\" src=\"", p.getResourcePath("images/"), "cal.gif\" /></a></td>");
+        p.write("        </tr>");
+        p.write("    </table>");
+        p.write("    <div style=\"text-align:right;padding-top:8px;\">");
+        p.write("      <input type=\"button\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:", EDIT_DATES, "_click_OK();\" />");
+        p.write("      <input type=\"button\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:popup_", EDIT_DATES, ".hide();\" />");
+        p.write("    </div>");
+        p.write("  </form>");
+        p.write("</div>");
+        p.write("</div>");
+                    
+        // Popup multi-valued datetime
+        p.write("<div id=\"popup_", EDIT_DATETIMES, "\" class=\"multiEditDialog\">");
+        p.write("<div class=\"bd\">");
+        p.write("  <form name=\"", EDIT_DATETIMES, "\" method=\"post\" action=\"\">");
+        p.write("    <table class=\"popUpTable\">");
+        p.write("        <!-- template row -->");
+        p.write("        <tr id=\"editdatetimerow\" style=\"display:block;\">");
+        p.write("          <td class=\"fieldindex\" id=\"editdatetimeIdx_\"></td>");
+        p.write("          <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editdatetimeIsSelected_\" onmouseup=\"", EDIT_DATETIMES, "_onchange_checkbox(this, $('editdatetimeField_' + this.id.split('_')[1]));\" value=\"checkbox\"></td>");
+        p.write("          <td class=\"fieldvalue\"><input type=\"text\" class=\"valueR\" name=\"field\" id=\"editdatetimeField_\" title=\"wfro: locale dependent\" onkeyup=\"", EDIT_DATETIMES, "_onchange_field($('editdatetimeIsSelected_'+ this.id.split('_')[1]), this);\"></td>");
+        p.write("          <td class=\"addon\"><a><img class=\"popUpButton\" id=\"cal_datetime_trigger_\" border=\"0\" alt=\"\" src=\"", p.getResourcePath("images/"), "cal.gif\" /></a></td>");
+        p.write("        </tr>");
+        p.write("    </table>");
+        p.write("    <div style=\"text-align:right;padding-top:8px;\">");
+        p.write("      <input type=\"button\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:", EDIT_DATETIMES, "_click_OK();\" />");
+        p.write("      <input type=\"button\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:popup_", EDIT_DATETIMES, ".hide();\" />");
+        p.write("    </div>");
+        p.write("  </form>");
+        p.write("</div>");
+        p.write("</div>");
+                    
+        // Poup multi-valued booleans
+        p.write("<div id=\"popup_", EDIT_BOOLEANS, "\" class=\"multiEditDialog\">");
+        p.write("<div class=\"bd\">");
+        p.write("  <form name=\"", EDIT_BOOLEANS, "\" method=\"post\" action=\"\">");
+        p.write("    <table class=\"popUpTable\">");
+        p.write("        <!-- template row -->");
+        p.write("        <tr id=\"editbooleanrow\" style=\"display:block;\">");
+        p.write("          <td class=\"fieldindex\" id=\"editbooleanIdx_\"></td>");
+        p.write("          <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editbooleanIsSelected_\" onmouseup=\"", EDIT_BOOLEANS, "_onchange_checkbox(this, $('editbooleanField_' + this.id.split('_')[1]));\"></td>");
+        p.write("          <td class=\"fieldvalue\"><input type=\"checkbox\" class=\"valueL\" name=\"field\" id=\"editbooleanField_\" onmouseup=\"", EDIT_BOOLEANS, "_onchange_field($('editbooleanIsSelected_'+ this.id.split('_')[1]), this);\"></td>");
+        p.write("        </tr>");
+        p.write("    </table>");
+        p.write("    <div style=\"text-align:right;padding-top:8px;\">");
+        p.write("      <input type=\"button\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:", EDIT_BOOLEANS, "_click_OK();\" />");
+        p.write("      <input type=\"button\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:popup_", EDIT_BOOLEANS, ".hide();\" />");
+        p.write("    </div>");
+        p.write("  </form>");
+        p.write("</div>");
+        p.write("</div>");
+        
+        // Popup multi-valued codes
+        p.write("<div id=\"popup_", EDIT_CODES, "\" class=\"multiEditDialog\">");
+        p.write("<div class=\"bd\">");
+        p.write("  <form name=\"", EDIT_CODES, "\" method=\"post\" action=\"\">");
+        p.write("    <table class=\"popUpTable\">");
+        p.write("        <!-- template row -->");
+        p.write("        <tr id=\"editcoderow\" style=\"display:none;\">");
+        p.write("          <td class=\"fieldindex\" id=\"editcodeIdx_\"></td>");
+        p.write("          <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editcodeIsSelected_\" onmouseup=\"", EDIT_CODES, "_onchange_checkbox(this, $('editcodeField_' + this.id.split('_')[1]));\" value=\"checkbox\"></td>");
+        p.write("          <td class=\"fieldvalue\"><select class=\"valueL\" name=\"field\" id=\"editcodeField_\" onchange=\"", EDIT_CODES, "_onchange_field($('editcodeIsSelected_'+ this.id.split('_')[1]), this);\"><option></option></select></td>");
+        p.write("        </tr>");
+        p.write("    </table>");
+        p.write("    <div style=\"text-align:right;padding-top:8px;\">");
+        p.write("      <input type=\"button\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:", EDIT_CODES, "_click_OK();\" />");
+        p.write("      <input type=\"button\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:popup_", EDIT_CODES, ".hide();\" />");
+        p.write("    </div>");
+        p.write("  </form>");
+        p.write("</div>");
+        p.write("</div>");        
+    }
+    
+    //-------------------------------------------------------------------------
     @Override
     public void paint(
         HtmlPage p, 
@@ -110,151 +237,6 @@ public class EditObjectControl
         Texts_1_0 texts = application.getTexts();
         if(forEditing) {
             EditObjectView editView =  (EditObjectView)p.getView();
-            // Popup multi-valued strings
-            p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_STRINGS, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <form name=\"editstrings\" method=\"post\" action=\"\">");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("      <!-- template row -->");
-            p.write("      <tr id=\"editstringrow\" style=\"display:block;\">");
-            p.write("        <td class=\"fieldindex\" id=\"editstringIdx_\"></td>");
-            p.write("        <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editstringIsSelected_\" onmouseup=\"editstrings_onchange_checkbox(this, $('editstringField_' + this.id.split('_')[1]));\" value=\"checkbox\"></td>");
-            p.write("        <td class=\"fieldvalue\"><input type=\"text\" class=\"valueL\" name=\"field\" id=\"editstringField_\" onkeyup=\"editstrings_onchange_field($('editstringIsSelected_'+ this.id.split('_')[1]), this);\"></td>");
-            p.write("      </tr>");
-            p.write("    </table>");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("      <tr>");
-            p.write("        <td></td>");
-            p.write("        <td></td>");
-            p.write("        <td align=\"right\">");
-            p.write("          <span class=\"noIcon\" onclick=\"editstrings_click_OK();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getOkTitle(), "</span>");
-            p.write("          <span class=\"noIcon\" onclick=\"editstrings_click_Cancel();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getCancelTitle(), "</span>");
-            p.write("        </td>");
-            p.write("      </tr>");
-            p.write("    </table>");
-            p.write("  </form>");
-            p.write("</div>");
-
-            // Popup multi-valued numbers
-            p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_NUMBERS, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <form name=\"editnumbers\" method=\"post\" action=\"\">");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("        <!-- template row -->");
-            p.write("        <tr id=\"editnumberrow\" style=\"display:block;\">");
-            p.write("          <td class=\"fieldindex\" id=\"editnumberIdx_\"></td>");
-            p.write("          <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editnumberIsSelected_\" onmouseup=\"editnumbers_onchange_checkbox(this, $('editnumberField_' + this.id.split('_')[1]));\" value=\"checkbox\"></td>");
-            p.write("          <td class=\"fieldvalue\"><input type=\"text\" class=\"valueR\" name=\"field\" id=\"editnumberField_\" onkeyup=\"editnumbers_onchange_field($('editnumberIsSelected_'+ this.id.split('_')[1]), this);\"></td>");
-            p.write("        </tr>");
-            p.write("    </table>");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("        <tr>");
-            p.write("          <td></td>");
-            p.write("          <td></td>");
-            p.write("          <td align=\"right\">");
-            p.write("             <span class=\"noIcon\" onclick=\"editnumbers_click_OK();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getOkTitle(), "</span>");
-            p.write("             <span class=\"noIcon\" onclick=\"editnumbers_click_Cancel();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getCancelTitle(), "</span>");
-            p.write("          </td>");
-            p.write("        </tr>");
-            p.write("    </table>");
-            p.write("  </form>");
-            p.write("</div>");
-
-            // Popup multi-valued dates
-            p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_DATES, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <form name=\"editdates\" method=\"post\" action=\"\">");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("        <!-- template row -->");
-            p.write("        <tr id=\"editdaterow\" style=\"display:block;\">");
-            p.write("          <td class=\"fieldindex\" id=\"editdateIdx_\"></td>");
-            p.write("          <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editdateIsSelected_\" onmouseup=\"editdates_onchange_checkbox(this, $('editdateField_' + this.id.split('_')[1]));\" value=\"checkbox\"></td>");
-            p.write("          <td class=\"fieldvalue\"><input type=\"text\" class=\"valueR\" name=\"field\" id=\"editdateField_\" title=\"wfro: locale dependent\" onkeyup=\"editdates_onchange_field($('editdateIsSelected_'+ this.id.split('_')[1]), this);\"></td>");
-            p.write("          <td class=\"addon\"><a><img class=\"popUpButton\" id=\"cal_date_trigger_\" border=\"0\" alt=\"\" src=\"", p.getResourcePath("images/"), "cal.gif\" /></a></td>");
-            p.write("        </tr>");
-            p.write("    </table>");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("      <tr>");
-            p.write("        <td></td>");
-            p.write("        <td></td>");
-            p.write("        <td align=\"right\">");
-            p.write("          <span class=\"noIcon\" onclick=\"editdates_click_OK();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getOkTitle(), "</span>");
-            p.write("          <span class=\"noIcon\" onclick=\"editdates_click_Cancel();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getCancelTitle(), "</span>");
-            p.write("        </td>");
-            p.write("      </tr>");
-            p.write("    </table>");
-            p.write("  </form>");
-            p.write("</div>");
-                        
-            // Popup multi-valued datetime
-            p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_DATETIMES, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <form name=\"editdatetimes\" method=\"post\" action=\"\">");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("        <!-- template row -->");
-            p.write("        <tr id=\"editdatetimerow\" style=\"display:block;\">");
-            p.write("          <td class=\"fieldindex\" id=\"editdatetimeIdx_\"></td>");
-            p.write("          <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editdatetimeIsSelected_\" onmouseup=\"editdatetimes_onchange_checkbox(this, $('editdatetimeField_' + this.id.split('_')[1]));\" value=\"checkbox\"></td>");
-            p.write("          <td class=\"fieldvalue\"><input type=\"text\" class=\"valueR\" name=\"field\" id=\"editdatetimeField_\" title=\"wfro: locale dependent\" onkeyup=\"editdatetimes_onchange_field($('editdatetimeIsSelected_'+ this.id.split('_')[1]), this);\"></td>");
-            p.write("          <td class=\"addon\"><a><img class=\"popUpButton\" id=\"cal_datetime_trigger_\" border=\"0\" alt=\"\" src=\"", p.getResourcePath("images/"), "cal.gif\" /></a></td>");
-            p.write("        </tr>");
-            p.write("    </table>");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("      <tr>");
-            p.write("        <td></td>");
-            p.write("        <td></td>");
-            p.write("        <td align=\"right\">");
-            p.write("          <span class=\"noIcon\" onclick=\"editdatetimes_click_OK();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getOkTitle(), "</span>");
-            p.write("          <span class=\"noIcon\" onclick=\"editdatetimes_click_Cancel();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getCancelTitle(), "</span>");
-            p.write("        </td>");
-            p.write("      </tr>");
-            p.write("    </table>");
-            p.write("  </form>");
-            p.write("</div>");
-                        
-            // Poup multi-valued booleans
-            p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_BOOLEANS, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <form name=\"editbooleans\" method=\"post\" action=\"\">");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("        <!-- template row -->");
-            p.write("        <tr id=\"editbooleanrow\" style=\"display:block;\">");
-            p.write("          <td class=\"fieldindex\" id=\"editbooleanIdx_\"></td>");
-            p.write("          <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editbooleanIsSelected_\" onmouseup=\"editbooleans_onchange_checkbox(this, $('editbooleanField_' + this.id.split('_')[1]));\"></td>");
-            p.write("          <td class=\"fieldvalue\"><input type=\"checkbox\" class=\"valueL\" name=\"field\" id=\"editbooleanField_\" onmouseup=\"editbooleans_onchange_field($('editbooleanIsSelected_'+ this.id.split('_')[1]), this);\"></td>");
-            p.write("        </tr>");
-            p.write("    </table>");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("        <tr>");
-            p.write("            <td></td>");
-            p.write("            <td></td>");
-            p.write("            <td align=\"right\">");
-            p.write("                <span class=\"noIcon\" onclick=\"editbooleans_click_OK();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getOkTitle(), "</span>");
-            p.write("                <span class=\"noIcon\" onclick=\"editbooleans_click_Cancel();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getCancelTitle(), "</span>");
-            p.write("            </td>");
-            p.write("        </tr>");
-            p.write("    </table>");
-            p.write("  </form>");
-            p.write("</div>");
-            
-            // Popup multi-valued codes
-            p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_CODES, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <form name=\"editcodes\" method=\"post\" action=\"\">");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("        <!-- template row -->");
-            p.write("        <tr id=\"editcoderow\" style=\"display:none;\">");
-            p.write("          <td class=\"fieldindex\" id=\"editcodeIdx_\"></td>");
-            p.write("          <td class=\"fieldselection\"><input type=\"checkbox\" name=\"isSelected\" id=\"editcodeIsSelected_\" onmouseup=\"editcodes_onchange_checkbox(this, $('editcodeField_' + this.id.split('_')[1]));\" value=\"checkbox\"></td>");
-            p.write("          <td class=\"fieldvalue\"><select class=\"valueL\" name=\"field\" id=\"editcodeField_\" onchange=\"editcodes_onchange_field($('editcodeIsSelected_'+ this.id.split('_')[1]), this);\"><option></option></select></td>");
-            p.write("        </tr>");
-            p.write("    </table>");
-            p.write("    <table class=\"popUpTable\">");
-            p.write("        <tr>");
-            p.write("            <td></td>");
-            p.write("            <td></td>");
-            p.write("            <td align=\"right\">");
-            p.write("                <span class=\"noIcon\" onclick=\"editcodes_click_OK();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getOkTitle(), "</span>");
-            p.write("                <span class=\"noIcon\" onclick=\"editcodes_click_Cancel();\" onmouseover=\"javascript:this.className='noIconhover';\" onmouseout=\"javascript:this.className='noIcon';\" >", texts.getCancelTitle(), "</span>");
-            p.write("            </td>");
-            p.write("        </tr>");
-            p.write("    </table>");
-            p.write("  </form>");
-            p.write("</div>");
             
             String formName = this.getFormName(editView);
             p.write("<form name=\"", formName, "\" id=\"", formName, "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" action=\"\">");
@@ -328,11 +310,11 @@ public class EditObjectControl
     public static final String LAYOUT_HORIZONTAL = "horizontal";
     public static final String LAYOUT_VERTICAL = "vertical";
 
-    public static final String POPUP_EDIT_STRINGS = "popup_editstrings";
-    public static final String POPUP_EDIT_CODES = "popup_editcodes";
-    public static final String POPUP_EDIT_NUMBERS = "popup_editnumbers";
-    public static final String POPUP_EDIT_BOOLEANS = "popup_editbooleans";
-    public static final String POPUP_EDIT_DATES = "popup_editdates";
-    public static final String POPUP_EDIT_DATETIMES = "popup_editdatetimes";
+    public static final String EDIT_STRINGS = "editstrings";
+    public static final String EDIT_CODES = "editcodes";
+    public static final String EDIT_NUMBERS = "editnumbers";
+    public static final String EDIT_BOOLEANS = "editbooleans";
+    public static final String EDIT_DATES = "editdates";
+    public static final String EDIT_DATETIMES = "editdatetimes";
     
 }

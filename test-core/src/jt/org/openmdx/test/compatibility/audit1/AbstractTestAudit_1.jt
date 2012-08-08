@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractTestAudit_1.jt,v 1.5 2007/12/17 18:33:35 hburger Exp $
+ * Name:        $Id: AbstractTestAudit_1.jt,v 1.6 2008/09/10 18:10:57 hburger Exp $
  * Description: Unit test for audit1
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/17 18:33:35 $
+ * Date:        $Date: 2008/09/10 18:10:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -399,7 +399,7 @@ abstract class AbstractTestAudit_1 extends TestCase {
         ) {
           person = segment.getPerson("000" + i);
           System.out.println("audit for person " + person.refMofId());
-          Auditable auditable = (Auditable)person.getView("Audit");
+          Auditable auditable = (Auditable)person.getContext("Audit");
           persistenceManager.refresh(auditable); // auditable.refRefresh();
           for(
             Iterator j = auditable.getInvolved().iterator();

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderConnection.java,v 1.4 2007/12/13 18:19:20 hburger Exp $
+ * Name:        $Id: DataproviderConnection.java,v 1.5 2008/09/10 08:55:24 hburger Exp $
  * Description: Dataprovider_1_0Connection Implementation class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:19:20 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,7 +69,7 @@ import org.openmdx.kernel.exception.BasicException;
  * LightweightContainer} and its implementation classes.
  */
 class DataproviderConnection
-    implements Dataprovider_1_1Connection, Serializable
+implements Dataprovider_1_1Connection, Serializable
 {
 
     /**
@@ -87,7 +87,7 @@ class DataproviderConnection
         this.registrationId = connectionFactory.getRegistrationId();
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0
     //------------------------------------------------------------------------
@@ -113,7 +113,6 @@ class DataproviderConnection
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ILLEGAL_STATE,
-                    null,
                     "Dataprovider connection has been removed"
                 );
             }
@@ -125,13 +124,12 @@ class DataproviderConnection
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.PROCESSING_FAILURE,
-                null,
                 "System exception, discarding Dataprovider instance"
             ).log();
         }
     }
 
-        
+
     //------------------------------------------------------------------------
     // Implements LifeCycleObject_1_0
     //------------------------------------------------------------------------
@@ -146,7 +144,7 @@ class DataproviderConnection
     ) throws ServiceException {
         close();
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_0Connection#close()
      */
@@ -162,31 +160,31 @@ class DataproviderConnection
     ) throws ServiceException {
         return this.connectionFactory != null ?
             this.connectionFactory :
-            (ManagedDataproviderConnectionFactory) 
-			org.openmdx.compatibility.base.application.container.SimpleServiceLocator.getInstance(
-            ).lookup(
-            CONTAINER_CONTEXT + ":" + new Path(new String[]{ this.registrationId })
-        );
+                (ManagedDataproviderConnectionFactory) 
+                org.openmdx.compatibility.base.application.container.SimpleServiceLocator.getInstance(
+                ).lookup(
+                    CONTAINER_CONTEXT + ":" + new Path(new String[]{ this.registrationId })
+                );
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Variables
     //------------------------------------------------------------------------
-    
+
     /**
      * The dataprovider managed connection factory.
      */
     private transient ManagedDataproviderConnectionFactory connectionFactory;
-    
+
     /**
      * Registration id at which the connection factory is located in service locator.
      */
     private final String registrationId;
-    
+
     /**
      * The base context for container.
      */
     final static String CONTAINER_CONTEXT = "org:openmdx:compatibility:dataprovider:container";
-    
+
 }

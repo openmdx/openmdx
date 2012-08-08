@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: NamingExceptions.java,v 1.2 2008/03/21 18:30:07 hburger Exp $
+ * Name:        $Id: NamingExceptions.java,v 1.3 2008/09/09 12:00:28 hburger Exp $
  * Description: Naming Exception Categorization
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:30:07 $
+ * Date:        $Date: 2008/09/09 12:00:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,7 @@ import java.util.Properties;
 import javax.naming.NamingException;
 import javax.resource.ResourceException;
 
-import org.openmdx.base.resource.spi.OrderedRecordFactory;
+import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -203,7 +203,7 @@ public class NamingExceptions {
         try {
             SysLog.info(
                 PROPERTIES,
-                OrderedRecordFactory.getInstance().asMappedRecord(
+                Records.getRecordFactory().asMappedRecord(
                     "RetriableNamingExceptions",
                     "namingExceptionClass" + DELIMITER + "rootCauseClass",
                     retriableNamingExceptions,

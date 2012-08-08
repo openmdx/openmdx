@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SinkObject_1.java,v 1.35 2008/06/28 00:21:44 hburger Exp $
+ * Name:        $Id: SinkObject_1.java,v 1.41 2008/09/10 08:55:21 hburger Exp $
  * Description: Date State View Object
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:44 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  *
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -73,7 +73,7 @@ import org.openmdx.base.accessor.generic.cci.Object_1_2;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.resource.spi.OrderedRecordFactory;
+import org.openmdx.base.resource.Records;
 import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes;
@@ -104,16 +104,16 @@ class SinkObject_1 {
         // Validate the path
         //
 //      for(
-//          int i = 0, iLimit = path.size();
-//          i < iLimit;
-//          i++
+//      int i = 0, iLimit = path.size();
+//      i < iLimit;
+//      i++
 //      ){
-//          if(path.get(i).indexOf(';') >= 0) {
-//              System.err.println("Invalid path for SinkObject_1: " + path);
-//          }
+//      if(path.get(i).indexOf(';') >= 0) {
+//      System.err.println("Invalid path for SinkObject_1: " + path);
+//      }
 //      }
     }
-    
+
     /**
      * Constructor
      *
@@ -174,7 +174,7 @@ class SinkObject_1 {
             }
         }
     }
-    
+
     /**
      * Constructor
      *
@@ -216,7 +216,7 @@ class SinkObject_1 {
     }
 
     private final int hashCode;
-    
+
     private Boolean instanceOfDateState;
 
     private final SinkConnection_1 connection;
@@ -259,13 +259,13 @@ class SinkObject_1 {
     ) throws ServiceException{
         if(Boolean.FALSE.equals(this.instanceOfDateState)) {
             return getDelegate().objIsDirty();
-       } else if(
-            Boolean.TRUE.equals(this.instanceOfDateState) &&
-            hasStateCache()
-       ){
+        } else if(
+                Boolean.TRUE.equals(this.instanceOfDateState) &&
+                hasStateCache()
+        ){
             for(
-                Iterator i = allStates(Boolean.FALSE, null).iterator();
-                i.hasNext();
+                    Iterator i = allStates(Boolean.FALSE, null).iterator();
+                    i.hasNext();
             ){
                 Object_1_0 state = (Object_1_0) i.next();
                 if(state.objIsDirty()) {
@@ -279,8 +279,8 @@ class SinkObject_1 {
     void validateDelegate(
     ) throws ServiceException{
         if(
-            this.path != null &&
-            isInaccessable(this.delegate)
+                this.path != null &&
+                isInaccessable(this.delegate)
         ) {
             this.delegate = null;
         }
@@ -305,24 +305,18 @@ class SinkObject_1 {
             ).append(
                 ": "
             ).append(
-                OrderedRecordFactory.getInstance().asMappedRecord(
+                Records.getRecordFactory().asMappedRecord(
                     getObjectClass(),
                     isHollow() ?
                         "hollow" :
-                        isInstanceOfDateState() ?
-                            (hasStateCache() ? Integer.toString(this.states.size()) : "no") + " states in cache" :
-                            "non-stated",
-                    new String[]{"refMofId"},
-                    new String[]{this.path == null ? "n/a" : this.path.toXri()}
+                            isInstanceOfDateState() ?
+                                (hasStateCache() ? Integer.toString(this.states.size()) : "no") + " states in cache" :
+                                    "non-stated",
+                                    new String[]{"refMofId"},
+                                    new String[]{this.path == null ? "n/a" : this.path.toXri()}
                 )
             ).toString();
         } catch (ResourceException exception) {
-            LoggerFactory.getLogger(
-                SinkObject_1.class
-            ).error(
-                "Farmatting failed",
-                exception
-            );
             return super.toString();
         }
     }
@@ -350,7 +344,7 @@ class SinkObject_1 {
         }
         return parent.objIsNew() ?
             null :
-            parent.getDelegate();
+                parent.getDelegate();
     }
 
     private List getStates(
@@ -359,10 +353,8 @@ class SinkObject_1 {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("class", this.objectClass)
-                },
-                "The class is not an instance of org::openmdx::compatibility::state1::DateState"
+                "The class is not an instance of org::openmdx::compatibility::state1::DateState",
+                new BasicException.Parameter("class", this.objectClass)
             );
         } else if(this.states == null) {
             List states = new ArrayList();
@@ -377,13 +369,13 @@ class SinkObject_1 {
                             Quantors.THERE_EXISTS,
                             State_1_Attributes.STATED_OBJECT,
                             FilterOperators.IS_IN,
-                            new Object[]{this.path}
+                            this.path
                         )
                     }
                 );
                 for(
-                    Iterator i = container.values().iterator();
-                    i.hasNext();
+                        Iterator i = container.values().iterator();
+                        i.hasNext();
                 ){
                     states.add(i.next());
                 }
@@ -402,18 +394,18 @@ class SinkObject_1 {
         List states = getStates();
         String viewValidAt = validAt == null ?
             null :
-            DateFormat.getInstance().format(validAt);
+                DateFormat.getInstance().format(validAt);
         for(
-            Iterator i = states.iterator();
-            i.hasNext();
+                Iterator i = states.iterator();
+                i.hasNext();
         ){
             Object_1_0 state = (Object_1_0) i.next();
             if(
-                (forStateQuery || !state.objIsDeleted()) &&
-                isValid(state, viewValidAt) &&
-                isInRange(state, viewValidFor)
+                    (forStateQuery || !state.objIsDeleted()) &&
+                    isValid(state, viewValidAt) &&
+                    isInRange(state, viewValidFor)
             ) {
-               return state;
+                return state;
             }
         }
         return null;
@@ -461,14 +453,14 @@ class SinkObject_1 {
         String viewValidFrom = toBasicFormat(validFrom);
         String viewValidTo = toBasicFormat(validTo);
         for(
-            int i = 0, iLimit = states.size();
-            i < iLimit;
-            i++
+                int i = 0, iLimit = states.size();
+                i < iLimit;
+                i++
         ){
             Object_1_0 state = (Object_1_0) states.get(i);
             if(
-                isValid(state, null) &&
-                isInvolved(state, viewValidFrom, viewValidTo)
+                    isValid(state, null) &&
+                    isInvolved(state, viewValidFrom, viewValidTo)
             ) {
                 splitState(state, validFrom, viewValidFrom, validTo, viewValidTo, null);
                 states.set(i, new InactiveObject_1(state, false));
@@ -497,15 +489,15 @@ class SinkObject_1 {
         // 'states' is modified, do not use an iterator!
         //
         for(
-            int i = 0, iLimit = states.size();
-            i < iLimit;
-            i++
+                int i = 0, iLimit = states.size();
+                i < iLimit;
+                i++
         ){
             Object_1_0 state = (Object_1_0) states.get(i);
             if(
-                (forQuery || !state.objIsDeleted()) &&
-                isValid(state, null) &&
-                isInvolved(state, viewValidFrom, viewValidTo)
+                    (forQuery || !state.objIsDeleted()) &&
+                    isValid(state, null) &&
+                    isInvolved(state, viewValidFrom, viewValidTo)
             ) {
                 if (forQuery || forRetrieval) {
                     delegates.add(state);
@@ -530,7 +522,7 @@ class SinkObject_1 {
         Collections.sort(delegates, VALID_FROM_COMPARATOR);
         return delegates;
     }
-    
+
     /**
      * Test whether an object is involved in a given context
      * 
@@ -551,14 +543,14 @@ class SinkObject_1 {
             String viewValidFrom = toBasicFormat(validFrom);
             String viewValidTo = toBasicFormat(validTo);
             for(
-                int i = 0, iLimit = this.states.size();
-                i < iLimit;
-                i++
+                    int i = 0, iLimit = this.states.size();
+                    i < iLimit;
+                    i++
             ){
                 Object_1_0 state = (Object_1_0) this.states.get(i);
                 if(
-                    isValid(state, null) &&
-                    isInvolved(state, viewValidFrom, viewValidTo)
+                        isValid(state, null) &&
+                        isInvolved(state, viewValidFrom, viewValidTo)
                 ) {
                     return true;
                 }
@@ -589,14 +581,14 @@ class SinkObject_1 {
             String viewValidFor = toBasicFormat(validFor);
             String viewValidAt = validAt == null ? null : DateFormat.getInstance().format(validAt);
             for(
-                int i = 0, iLimit = this.states.size();
-                i < iLimit;
-                i++
+                    int i = 0, iLimit = this.states.size();
+                    i < iLimit;
+                    i++
             ){
                 Object_1_0 state = (Object_1_0) this.states.get(i);
                 if(
-                    isValid(state, viewValidAt) &&
-                    isInvolved(state, viewValidFor, viewValidFor)
+                        isValid(state, viewValidAt) &&
+                        isInvolved(state, viewValidFor, viewValidFor)
                 ) {
                     return true;
                 }
@@ -606,7 +598,7 @@ class SinkObject_1 {
             return defaultValue;
         }
     }
-    
+
     Object_1_0 getDelegate() throws ServiceException{
         if(this.path != null && this.delegate == null) {
             this.delegate = connection.getDelegate().getObject(this.path);
@@ -629,14 +621,14 @@ class SinkObject_1 {
     ) throws ServiceException{
         Object_1_0 qualifiedDelegate = getQualifiedDelegate();
         return (
-             qualifiedDelegate.objIsNew() ? qualifiedDelegate : getDelegate()
+                qualifiedDelegate.objIsNew() ? qualifiedDelegate : getDelegate()
         ).objGetContainer(feature);
     }
 
     boolean objIsNew() throws ServiceException{
         return getQualifiedDelegate().objIsNew();
     }
-    
+
     void addState(
         Object_1_0 state
     ) throws ServiceException{
@@ -653,41 +645,35 @@ class SinkObject_1 {
             )
         );
         for(
-            Iterator i = allStates(Boolean.FALSE, Boolean.FALSE).iterator();
-            i.hasNext();
+                Iterator i = allStates(Boolean.FALSE, Boolean.FALSE).iterator();
+                i.hasNext();
         ){
             Object_1_0 candidate = (Object_1_0) i.next();
             if(
-               isInvolved(
-                   candidate,
-                   stateValidFrom,
-                   stateValidTo
-               )
+                    isInvolved(
+                        candidate,
+                        stateValidFrom,
+                        stateValidTo
+                    )
             ) {
-               throw new ServiceException(
-                   BasicException.Code.DEFAULT_DOMAIN,
-                   BasicException.Code.DUPLICATE,
-                   new BasicException.Parameter[]{
-                       new BasicException.Parameter(
-                           "path", this.objGetPath()
-                       ),
-                       new BasicException.Parameter(
-                           "new state's validity",
-                           new Object[]{
-                               stateValidFrom,
-                               stateValidTo
-                           }
-                       ),
-                       new BasicException.Parameter(
-                           "conflicting state's validity",
-                           new Object[]{
-                               candidate.objGetValue(State_1_Attributes.STATE_VALID_FROM),
-                               candidate.objGetValue(State_1_Attributes.STATE_VALID_TO)
-                           }
-                       )
-                   },
-                   "Overlapping validity"
-               );
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.DUPLICATE,
+                    "Overlapping validity",
+                    new BasicException.Parameter(
+                        "path", this.objGetPath()
+                    ),
+                    new BasicException.Parameter(
+                        "new state's validity",
+                        stateValidFrom,
+                        stateValidTo
+                    ),
+                    new BasicException.Parameter(
+                        "conflicting state's validity",
+                        candidate.objGetValue(State_1_Attributes.STATE_VALID_FROM),
+                        candidate.objGetValue(State_1_Attributes.STATE_VALID_TO)
+                    )
+                );
             }
         }
         if(this.states.isEmpty()) {
@@ -700,8 +686,8 @@ class SinkObject_1 {
         List states
     ) throws ServiceException {
         if(
-            !hasStateCache() &&
-            !states.isEmpty()
+                !hasStateCache() &&
+                !states.isEmpty()
         ){
             Object_1_0 object = (Object_1_0) states.get(0);
             if(isHollow()) {
@@ -717,8 +703,8 @@ class SinkObject_1 {
         Object_1_0 object
     ){
         return
-            object instanceof Object_1_2 &&
-            ((Object_1_2)object).objIsInaccessable();
+        object instanceof Object_1_2 &&
+        ((Object_1_2)object).objIsInaccessable();
     }
 
     void deleteState(
@@ -737,7 +723,7 @@ class SinkObject_1 {
             );
         }
     }
-    
+
     void deleteState(
         Object_1_0 state,
         String validFrom,
@@ -748,7 +734,7 @@ class SinkObject_1 {
         );
         invalidateState(state);
     }
-    
+
     void invalidateState(
         Object_1_0 state
     ) throws ServiceException{
@@ -765,7 +751,7 @@ class SinkObject_1 {
             );
         }
     }
-    
+
     private Object_1_0 clone(
         Object_1_0 source,
         String validFrom,
@@ -778,10 +764,10 @@ class SinkObject_1 {
                 objGetPath().getBase(),
                 validFrom,
                 validTo
-             )
+            )
         );
         boolean dirty = newObject || (
-            STATES_COMPLETED_BY_SERVICE ? source.objIsNew() : source.objIsDirty()           
+                STATES_COMPLETED_BY_SERVICE ? source.objIsNew() : source.objIsDirty()           
         );
         Object_1_0 object = this.connection.getDelegate().cloneObject(
             path,
@@ -790,15 +776,15 @@ class SinkObject_1 {
         );
         object.objSetValue(
             dirty ? SystemAttributes.CREATED_AT : '$' + SystemAttributes.CREATED_AT, 
-            DateFormat.getInstance().format(this.getConnection().getUnitOfWork().getDateTime())
+                DateFormat.getInstance().format(this.getConnection().getUnitOfWork().getDateTime())
         );
         object.objSetValue(
             dirty ? State_1_Attributes.STATE_VALID_FROM : '$' + State_1_Attributes.STATE_VALID_FROM, 
-            validFrom
+                validFrom
         );
         object.objSetValue(
             dirty ? State_1_Attributes.STATE_VALID_TO : '$' + State_1_Attributes.STATE_VALID_TO, 
-            validTo
+                validTo
         );
         if(object.objIsDirty()) {
             object.objAddToUnitOfWork();
@@ -825,14 +811,14 @@ class SinkObject_1 {
     ) throws ServiceException {
         Collection objects = this.containers == null ? 
             null : 
-            (Collection) this.containers.get(feature);
+                (Collection) this.containers.get(feature);
         if(objects == null) {
             Path referenceFilter = this.path.getChild(feature);
             if(fetch) {
                 if(objIsNew()) {
                     for(
-                        Iterator i = objGetContainer(feature).entrySet().iterator();
-                        i.hasNext();
+                            Iterator i = objGetContainer(feature).entrySet().iterator();
+                            i.hasNext();
                     ){
                         Map.Entry e = (Entry) i.next();
                         Path p = referenceFilter.getChild((String)e.getKey());
@@ -851,8 +837,8 @@ class SinkObject_1 {
                 } else {
                     Map stateDelegates = new HashMap();
                     for(
-                        Iterator i = objGetContainer(feature).subMap(DATE_STATE_FILTER).entrySet().iterator();
-                        i.hasNext();
+                            Iterator i = objGetContainer(feature).subMap(DATE_STATE_FILTER).entrySet().iterator();
+                            i.hasNext();
                     ){
                         Map.Entry e = (Entry) i.next();
                         String q = (String) e.getKey();
@@ -870,8 +856,8 @@ class SinkObject_1 {
                         target.add(e.getValue());
                     }
                     for(
-                        Iterator i = stateDelegates.entrySet().iterator();
-                        i.hasNext();
+                            Iterator i = stateDelegates.entrySet().iterator();
+                            i.hasNext();
                     ){
                         Map.Entry e = (Entry) i.next();
                         Path p = referenceFilter.getChild((String)e.getKey());
@@ -908,8 +894,8 @@ class SinkObject_1 {
         String stateValidFrom = (String) state.objGetValue(State_1_Attributes.STATE_VALID_FROM);
         String stateValidTo = (String) state.objGetValue(State_1_Attributes.STATE_VALID_TO);
         return
-            compareValidFrom(stateValidFrom, viewValidFor) <= 0 &&
-            compareValidTo(stateValidTo, viewValidFor) >= 0;
+        compareValidFrom(stateValidFrom, viewValidFor) <= 0 &&
+        compareValidTo(stateValidTo, viewValidFor) >= 0;
     }
 
     private static boolean isInvolved(
@@ -920,9 +906,9 @@ class SinkObject_1 {
         String stateValidFrom = (String) state.objGetValue(State_1_Attributes.STATE_VALID_FROM);
         String stateValidTo = (String) state.objGetValue(State_1_Attributes.STATE_VALID_TO);
         return (
-            stateValidTo == null || viewValidFrom == null || compareValidFrom(stateValidTo, viewValidFrom) >= 0
+                stateValidTo == null || viewValidFrom == null || compareValidFrom(stateValidTo, viewValidFrom) >= 0
         ) && (
-            stateValidFrom == null || viewValidTo == null || compareValidFrom(stateValidFrom, viewValidTo) <= 0
+                stateValidFrom == null || viewValidTo == null || compareValidFrom(stateValidFrom, viewValidTo) <= 0
         );
     }
 
@@ -1008,7 +994,7 @@ class SinkObject_1 {
         } else {
             String stateCreatedAt = (String) state.objGetValue(SystemAttributes.CREATED_AT);
             return stateCreatedAt.compareTo(viewValidAt) <= 0 && (
-                stateInvalidatedAt == null || stateInvalidatedAt.compareTo(viewValidAt) > 0
+                    stateInvalidatedAt == null || stateInvalidatedAt.compareTo(viewValidAt) > 0
             );
         }
     }
@@ -1032,18 +1018,18 @@ class SinkObject_1 {
         } else {
             Collection target = new ArrayList();
             for(
-                Iterator i = getStates().iterator();
-                i.hasNext();
+                    Iterator i = getStates().iterator();
+                    i.hasNext();
             ){
                 Object_1_0 state = (Object_1_0) i.next();
                 boolean invalidatedMatches = invalidated == null || (
-                    state.objGetValue(State_1_Attributes.INVALIDATED_AT) != null
+                        state.objGetValue(State_1_Attributes.INVALIDATED_AT) != null
                 ) == invalidated.booleanValue();
                 boolean deletedMatches = deleted == null || 
-                    deleted.booleanValue() == state.objIsDeleted();
+                deleted.booleanValue() == state.objIsDeleted();
                 if(invalidatedMatches & deletedMatches) {
-                  target.add(state);
-               }
+                    target.add(state);
+                }
             }
             return target;
         }
@@ -1081,9 +1067,9 @@ class SinkObject_1 {
         String d2
     ){
         return d1 == null ? (
-            d2 == null ? 0 : -1
+                d2 == null ? 0 : -1
         ) : (
-            d2 == null ? 1 : d1.compareTo(d2)
+                d2 == null ? 1 : d1.compareTo(d2)
         );
     }
 
@@ -1102,9 +1088,9 @@ class SinkObject_1 {
         String d2
     ){
         return d1 == null ? (
-            d2 == null ? 0 : 1
+                d2 == null ? 0 : 1
         ) : (
-            d2 == null ? -1 : d1.compareTo(d2)
+                d2 == null ? -1 : d1.compareTo(d2)
         );
     }
 
@@ -1113,7 +1099,7 @@ class SinkObject_1 {
     ) throws ServiceException{
         return object == null ? 
             null : 
-            (String) object.objGetValue('$' + SystemAttributes.OBJECT_CLASS);
+                (String) object.objGetValue('$' + SystemAttributes.OBJECT_CLASS);
     }
 
     void lenientSetObjectClass(
@@ -1215,8 +1201,7 @@ class SinkObject_1 {
         new FilterProperty(
             Quantors.THERE_EXISTS,
             State_1_Attributes.STATED_OBJECT,
-            FilterOperators.IS_NOT_IN,
-            new Object[]{}
+            FilterOperators.IS_NOT_IN
         )
     };
 
@@ -1225,23 +1210,23 @@ class SinkObject_1 {
      */
     private static final Comparator VALID_FROM_COMPARATOR = new ValidFromComparator();
 
-    
+
     //------------------------------------------------------------------------
     // Class ValidFromComparator
     //------------------------------------------------------------------------
-    
+
     /**
      * Date State Valid From Comparator 
      */
     final static class ValidFromComparator
-        implements Comparator, Serializable
+    implements Comparator, Serializable
     {
 
         /**
          * Implements <code>Serializable</code>
          */
         private static final long serialVersionUID = -6816519954526341332L;
-                 
+
         /**
          * Implements <code>Comparable</code>
          */
@@ -1255,7 +1240,7 @@ class SinkObject_1 {
                 throw new RuntimeServiceException(exception);
             }
         }
-        
+
         /* (non-Javadoc)
          * @see java.lang.Object#equals(java.lang.Object)
          */
@@ -1269,7 +1254,7 @@ class SinkObject_1 {
         public int hashCode() {
             return ValidFromComparator.class.hashCode();
         }
-        
+
     }
 
 }

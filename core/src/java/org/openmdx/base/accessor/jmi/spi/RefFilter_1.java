@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefFilter_1.java,v 1.23 2008/05/13 08:54:06 wfro Exp $
+ * Name:        $Id: RefFilter_1.java,v 1.26 2008/09/17 15:50:28 hburger Exp $
  * Description: RefFilter_1 class
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/13 08:54:06 $
+ * Date:        $Date: 2008/09/17 15:50:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -101,7 +101,7 @@ import org.openmdx.model1.mapping.java.Identifier;
  * RefFilter_1_0 implementation
  */
 public class RefFilter_1
-  implements RefFilter_1_1 {
+implements RefFilter_1_1 {
 
     //-------------------------------------------------------------------------
     public RefFilter_1(
@@ -111,10 +111,10 @@ public class RefFilter_1
         AttributeSpecifier[] attributeSpecifiers
     ) {
         this.filterProperties = filterProperties == null
-            ? new ArrayList<FilterProperty>()
+        ? new ArrayList<FilterProperty>()
             : new ArrayList<FilterProperty>(Arrays.asList(filterProperties));
         this.attributeSpecifiers = attributeSpecifiers == null
-            ? new ArrayList<AttributeSpecifier>()
+        ? new ArrayList<AttributeSpecifier>()
             : new ArrayList<AttributeSpecifier>(Arrays.asList(attributeSpecifiers));
         this.filterType = filterType;
         this.filterProperties.add(
@@ -122,7 +122,7 @@ public class RefFilter_1
                 Quantors.THERE_EXISTS,
                 SystemAttributes.OBJECT_INSTANCE_OF,
                 FilterOperators.IS_IN,
-                new String[]{filterType}
+                filterType
             )
         );
         this.refPackage = refPackage;
@@ -154,256 +154,267 @@ public class RefFilter_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     StackedException.NOT_FOUND,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("class name", this.filterType),
-                        new BasicException.Parameter("feature", featureName)
-                    },
-                    "feature not found"
+                    "feature not found",
+                    new BasicException.Parameter("class name", this.filterType),
+                    new BasicException.Parameter("feature", featureName)
                 ); 
             }
             return feature;
         }
     }
-  
-  //-------------------------------------------------------------------------
-  private void assertAttributeOrReferenceStoredAsAttribute(
-    ModelElement_1_0 elementDef
-  ) throws ServiceException {
 
-    if(
-      !elementDef.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE) &&
-      !this.getModel().referenceIsStoredAsAttribute(elementDef)
-    ) {
-      throw new ServiceException (
-        StackedException.DEFAULT_DOMAIN,
-        StackedException.ASSERTION_FAILURE,
-        new BasicException.Parameter [] {
-          new BasicException.Parameter("model element", elementDef)
-        },
-        "model element not of type " + ModelAttributes.ATTRIBUTE + " and not " + ModelAttributes.REFERENCE + " stored as attribute"
-      );
+    //-------------------------------------------------------------------------
+    private void assertAttributeOrReferenceStoredAsAttribute(
+        ModelElement_1_0 elementDef
+    ) throws ServiceException {
+
+        if(
+                !elementDef.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE) &&
+                !this.getModel().referenceIsStoredAsAttribute(elementDef)
+        ) {
+            throw new ServiceException (
+                StackedException.DEFAULT_DOMAIN,
+                StackedException.ASSERTION_FAILURE,
+                "model element not of type " + ModelAttributes.ATTRIBUTE + " and not " + ModelAttributes.REFERENCE + " stored as attribute",
+                new BasicException.Parameter [] {
+                    new BasicException.Parameter("model element", elementDef)
+                }
+            );
+        }
     }
-  }
 
-  //-------------------------------------------------------------------------
-  public void refAddValue(
-    ModelElement_1_0 featureDef,
-    short quantor,
-    short operator,
-    Collection<?> value
-  ) {
+    //-------------------------------------------------------------------------
+    public void refAddValue(
+        ModelElement_1_0 featureDef,
+        short quantor,
+        short operator,
+        Collection<?> value
+    ) {
 
-    try {
-      this.assertAttributeOrReferenceStoredAsAttribute(featureDef);
-      String featureName = (String)featureDef.values("name").get(0);
-      
-      SysLog.trace("feature", featureName);
-      SysLog.trace("quantor", Quantors.toString(quantor));
-      SysLog.trace("operator", FilterOperators.toString(operator));
-      SysLog.trace("value", value);
+        try {
+            this.assertAttributeOrReferenceStoredAsAttribute(featureDef);
+            String featureName = (String)featureDef.values("name").get(0);
 
-      if(this.getModel().isReferenceType(featureDef)) {
-        if("org:openmdx:base:ContextCapable:context".equals(featureDef.values("qualifiedName").get(0))) {
-            if(
-                quantor == Quantors.THERE_EXISTS &&
-                operator == FilterOperators.IS_IN 
-            ){
-                Model_1_0 m = getModel();
-                int ii = 0;
-                for(
-                  Iterator<?> i = value.iterator();
-                  i.hasNext();
-                  ii++
-                ) {
-                    Object c = i.next();
-                    if(c instanceof RefObject_1_0){
-                        RefObject_1_0 e = (RefObject_1_0) c;
-                        String objectClass = e.refClass().refMofId();
-                        String namespace = featureName + ':' + uuidGenerator().next() + ':';
-                        if(m.isSubtypeOf(objectClass, "org:openmdx:base:Context")) {
-                            filterProperties.add(
-                                new FilterProperty(
-                                    Quantors.PIGGY_BACK,
-                                    namespace + SystemAttributes.OBJECT_CLASS,
-                                    FilterOperators.PIGGY_BACK,
-                                    new String[]{objectClass}
-                                )
-                            );
-                            for(
-                                Iterator<String> j = e.refDefaultFetchGroup().iterator();
-                                j.hasNext();
-                            ){
-                                String attribute = j.next();
-                                Object v = e.refGetValue(attribute);
-                                filterProperties.add(
-                                    new FilterProperty(
-                                        Quantors.PIGGY_BACK,
-                                        namespace + attribute,
-                                        FilterOperators.PIGGY_BACK,
-                                        v instanceof Collection ?
-                                            ((Collection<?>)v).toArray() :
-                                            new Object[]{v}
-                                    )
+            SysLog.trace("feature", featureName);
+            SysLog.trace("quantor", Quantors.toString(quantor));
+            SysLog.trace("operator", FilterOperators.toString(operator));
+            SysLog.trace("value", value);
+
+            if(this.getModel().isReferenceType(featureDef)) {
+                if("org:openmdx:base:ContextCapable:context".equals(featureDef.values("qualifiedName").get(0))) {
+                    if(
+                            quantor == Quantors.THERE_EXISTS &&
+                            operator == FilterOperators.IS_IN 
+                    ){
+                        Model_1_0 m = getModel();
+                        int ii = 0;
+                        for(
+                                Iterator<?> i = value.iterator();
+                                i.hasNext();
+                                ii++
+                        ) {
+                            Object c = i.next();
+                            if(c instanceof RefObject_1_0){
+                                RefObject_1_0 e = (RefObject_1_0) c;
+                                String objectClass = e.refClass().refMofId();
+                                String namespace = featureName + ':' + uuidGenerator().next() + ':';
+                                if(m.isSubtypeOf(objectClass, "org:openmdx:base:Context")) {
+                                    filterProperties.add(
+                                        new FilterProperty(
+                                            Quantors.PIGGY_BACK,
+                                            namespace + SystemAttributes.OBJECT_CLASS,
+                                            FilterOperators.PIGGY_BACK,
+                                            objectClass
+                                        )
+                                    );
+                                    for(
+                                            Iterator<String> j = e.refDefaultFetchGroup().iterator();
+                                            j.hasNext();
+                                    ){
+                                        String attribute = j.next();
+                                        Object v = e.refGetValue(attribute);
+                                        filterProperties.add(
+                                            new FilterProperty(
+                                                Quantors.PIGGY_BACK,
+                                                namespace + attribute,
+                                                FilterOperators.PIGGY_BACK,
+                                                v instanceof Collection ?
+                                                    ((Collection<?>)v).toArray() :
+                                                        v
+                                            )
+                                        );
+                                    }
+                                } else throw new ServiceException (
+                                    StackedException.DEFAULT_DOMAIN,
+                                    StackedException.ASSERTION_FAILURE,
+                                    "Object can't be piggy backed as context unless it is an instance of org::openmdx::base::Context",
+                                    new BasicException.Parameter [] {
+                                        new BasicException.Parameter("quantor", Quantors.toString(quantor)),
+                                        new BasicException.Parameter("feature", featureName),
+                                        new BasicException.Parameter("operator", FilterOperators.toString(operator)),
+                                        new BasicException.Parameter("index", ii),
+                                        new BasicException.Parameter("class", objectClass)
+                                    }
                                 );
                             }
-                        } else throw new ServiceException (
-                            StackedException.DEFAULT_DOMAIN,
-                            StackedException.ASSERTION_FAILURE,
-                            new BasicException.Parameter [] {
-                              new BasicException.Parameter("quantor", Quantors.toString(quantor)),
-                              new BasicException.Parameter("feature", featureName),
-                              new BasicException.Parameter("operator", FilterOperators.toString(operator)),
-                              new BasicException.Parameter("index", ii),
-                              new BasicException.Parameter("class", objectClass)
-                            },
-                            "Object can't be piggy backed as context unless it is an instance of org::openmdx::base::Context"
-                        );
+                        }
+                    } else throw new ServiceException (
+                        StackedException.DEFAULT_DOMAIN,
+                        StackedException.NOT_SUPPORTED,
+                        "The context feature supports piggy backing with 'THERE EXISTS context EQUAL TO' clauses only",
+                        new BasicException.Parameter [] {
+                            new BasicException.Parameter("quantor", Quantors.toString(quantor)),
+                            new BasicException.Parameter("feature", featureName),
+                            new BasicException.Parameter("operator", FilterOperators.toString(operator))
+                        }
+                    );
+                } else {
+                    List<Path> paths = new ArrayList<Path>();
+                    for(
+                            Iterator<?> i = value.iterator();
+                            i.hasNext();
+                    ) {
+                        Object v = i.next();
+                        if(v instanceof RefObject_1_0){
+                            RefObject_1_0 e = (RefObject_1_0) v;
+                            String objectClass = e.refClass().refMofId();
+                            Model_1_0 m = getModel();
+                            if(
+                                    m.isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
+                                    m.isSubtypeOf(objectClass, "org:openmdx:compatibility:state1:BasicState") &&
+                                    JDOHelper.isPersistent(e) &&
+                                    !JDOHelper.isNew(e) &&
+                                    !JDOHelper.isDeleted(e)
+                            ) try {
+                                paths.add(new Path((String)e.refGetValue(SystemAttributes.OBJECT_IDENTITY)));
+                            } catch (Exception exception) {
+                                paths.add(e.refGetPath());
+                            } else {
+                                paths.add(e.refGetPath());
+                            }
+                        } else if (v instanceof Path){
+                            paths.add((Path)v);
+                        } else {
+                            paths.add(new Path((String)v));
+                        }
                     }
+                    filterProperties.add(
+                        new FilterProperty(
+                            quantor,
+                            featureName,
+                            operator,
+                            paths.toArray()
+                        )
+                    );
+                }   
+            } else if(this.getModel().isAttributeType(featureDef)) {
+                ModelElement_1_0 featureType = this.getModel().getElement(featureDef.values("type").get(0));
+                FilterProperty p = null;
+
+                // dateTime
+                if(PrimitiveTypes.DATETIME.equals(featureType.values("qualifiedName").get(0))) {
+                    p = new FilterProperty(
+                        quantor,
+                        featureName,
+                        operator,
+                        new MarshallingList<Object>(
+                                DateTimeMarshaller.getInstance(false),
+                                new ArrayList<Object>(value)
+                        ).toArray()
+                    );
                 }
-            } else throw new ServiceException (
-                StackedException.DEFAULT_DOMAIN,
-                StackedException.NOT_SUPPORTED,
-                new BasicException.Parameter [] {
-                  new BasicException.Parameter("quantor", Quantors.toString(quantor)),
-                  new BasicException.Parameter("feature", featureName),
-                  new BasicException.Parameter("operator", FilterOperators.toString(operator))
-                },
-                "The context feature supports piggy backing with 'THERE EXISTS context EQUAL TO' clauses only"
-            );
-        } else {
-            List<Path> paths = new ArrayList<Path>();
-            for(
-              Iterator<?> i = value.iterator();
-              i.hasNext();
-            ) {
-              Object v = i.next();
-              if(v instanceof RefObject_1_0){
-                  RefObject_1_0 e = (RefObject_1_0) v;
-                  String objectClass = e.refClass().refMofId();
-                  Model_1_0 m = getModel();
-                  if(
-                      m.isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
-                      m.isSubtypeOf(objectClass, "org:openmdx:compatibility:state1:BasicState") &&
-                      JDOHelper.isPersistent(e) &&
-                      !JDOHelper.isNew(e) &&
-                      !JDOHelper.isDeleted(e)
-                  ) try {
-                      paths.add(new Path((String)e.refGetValue(SystemAttributes.OBJECT_IDENTITY)));
-                  } catch (Exception exception) {
-                      paths.add(e.refGetPath());
-                  } else {
-                      paths.add(e.refGetPath());
-                  }
-              } else if (v instanceof Path){
-                  paths.add((Path)v);
-              } else {
-                  paths.add(new Path((String)v));
-              }
+
+                // date
+                else if(PrimitiveTypes.DATE.equals(featureType.values("qualifiedName").get(0))) {
+                    p = new FilterProperty(
+                        quantor,
+                        featureName,
+                        operator,
+                        new MarshallingList<Object>(
+                                DateMarshaller.getInstance(false),
+                                new ArrayList<Object>(value)
+                        ).toArray()
+                    );
+                }
+
+                // anyURI
+                else if(PrimitiveTypes.ANYURI.equals(featureType.values("qualifiedName").get(0))) {
+                    p = new FilterProperty(
+                        quantor,
+                        featureName,
+                        operator,
+                        new MarshallingList<Object>(
+                                URIMarshaller.getInstance(false),
+                                new ArrayList<Object>(value)
+                        ).toArray()
+                    );
+                }
+                
+                // duration
+                else if(PrimitiveTypes.DURATION.equals(featureType.values("qualifiedName").get(0))) {
+                    p = new FilterProperty(
+                        quantor,
+                        featureName,
+                        operator,
+                        new MarshallingList<Object>(
+                                DurationMarshaller.getInstance(false),
+                                new ArrayList<Object>(value)
+                        ).toArray()
+                    );
+                }
+
+                // other primitive types require no unmarshalling
+                else {
+                    p = new FilterProperty(
+                        quantor,
+                        featureName,
+                        operator,
+                        value.toArray()
+                    );
+                }
+                this.filterProperties.add(p);
             }
-            filterProperties.add(
-              new FilterProperty(
-                quantor,
-                featureName,
-                operator,
-                paths.toArray()
-              )
+
+            // unsupported feature type
+            else {
+                throw new ServiceException (
+                    StackedException.DEFAULT_DOMAIN,
+                    StackedException.ASSERTION_FAILURE,
+                    "unsupported feature type. Must be [Attribute|Reference]",
+                    new BasicException.Parameter [] {
+                        new BasicException.Parameter("feature", featureName)
+                    }
+                );
+            }
+        }
+        catch(ServiceException e) {
+            throw new JmiServiceException(e);
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    public void refAddValue(
+        ModelElement_1_0 featureDef,
+        int index, 
+        short order
+    ) {
+
+        try {
+            assertAttributeOrReferenceStoredAsAttribute(featureDef);
+            SysLog.trace("feature", featureDef);
+            SysLog.trace("order", Orders.toString(order));
+            this.attributeSpecifiers.add(
+                new AttributeSpecifier(
+                    (String)featureDef.values("name").get(0),
+                    index,
+                    order
+                )
             );
-        }   
-      } else if(this.getModel().isAttributeType(featureDef)) {
-        ModelElement_1_0 featureType = this.getModel().getElement(featureDef.values("type").get(0));
-        FilterProperty p = null;
-
-        // dateTime
-        if(PrimitiveTypes.DATETIME.equals(featureType.values("qualifiedName").get(0))) {
-          p = new FilterProperty(
-            quantor,
-            featureName,
-            operator,
-            new MarshallingList<Object>(
-              DateTimeMarshaller.getInstance(false),
-              new ArrayList<Object>(value)
-            ).toArray()
-          );
         }
-
-        // date
-        else if(PrimitiveTypes.DATE.equals(featureType.values("qualifiedName").get(0))) {
-          p = new FilterProperty(
-            quantor,
-            featureName,
-            operator,
-            new MarshallingList<Object>(
-              DateMarshaller.getInstance(false),
-              new ArrayList<Object>(value)
-            ).toArray()
-          );
+        catch(ServiceException e) {
+            throw new JmiServiceException(e);
         }
-
-        // duration
-        else if(PrimitiveTypes.DURATION.equals(featureType.values("qualifiedName").get(0))) {
-          p = new FilterProperty(
-            quantor,
-            featureName,
-            operator,
-            new MarshallingList<Object>(
-              DurationMarshaller.getInstance(false),
-              new ArrayList<Object>(value)
-            ).toArray()
-          );
-        }
-
-        // other primitive types require no unmarshalling
-        else {
-          p = new FilterProperty(
-            quantor,
-            featureName,
-            operator,
-            value.toArray()
-          );
-        }
-        this.filterProperties.add(p);
-      }
-
-      // unsupported feature type
-      else {
-        throw new ServiceException (
-          StackedException.DEFAULT_DOMAIN,
-          StackedException.ASSERTION_FAILURE,
-          new BasicException.Parameter [] {
-            new BasicException.Parameter("feature", featureName)
-          },
-          "unsupported feature type. Must be [Attribute|Reference]"
-        );
-      }
     }
-    catch(ServiceException e) {
-      throw new JmiServiceException(e);
-    }
-  }
-
-  //-------------------------------------------------------------------------
-  public void refAddValue(
-    ModelElement_1_0 featureDef,
-    int index, 
-    short order
-  ) {
-
-    try {
-      assertAttributeOrReferenceStoredAsAttribute(featureDef);
-      SysLog.trace("feature", featureDef);
-      SysLog.trace("order", Orders.toString(order));
-      this.attributeSpecifiers.add(
-        new AttributeSpecifier(
-          (String)featureDef.values("name").get(0),
-          index,
-          order
-        )
-      );
-    }
-    catch(ServiceException e) {
-      throw new JmiServiceException(e);
-    }
-  }
 
     //-------------------------------------------------------------------------
     public Object refGetOrder(
@@ -425,12 +436,12 @@ public class RefFilter_1
     ) {
         String multiplicity = (String)featureDef.values("multiplicity").get(0);
         return 
-            Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-            Multiplicities.OPTIONAL_VALUE.equals(multiplicity) 
-                ? (Object)new SimpleTypeOrder_1(this, featureDef) 
-                : new MultivaluedTypeOrder_1(this, featureDef);
+        Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
+        Multiplicities.OPTIONAL_VALUE.equals(multiplicity) 
+        ? (Object)new SimpleTypeOrder_1(this, featureDef) 
+        : new MultivaluedTypeOrder_1(this, featureDef);
     }
-  
+
     //-------------------------------------------------------------------------
     public Object refGetPredicate(
         String fieldName
@@ -461,7 +472,7 @@ public class RefFilter_1
             featureDef
         );
     }
-  
+
     //-------------------------------------------------------------------------
     public Object refGetPredicate(
         short quantor,
@@ -471,7 +482,7 @@ public class RefFilter_1
             return refGetPredicate(
                 quantor,
                 this.getFeature(fieldName)
-          );
+            );
         } 
         catch (ServiceException exception) {
             throw new JmiServiceException(exception);
@@ -483,77 +494,77 @@ public class RefFilter_1
         short quantor,
         ModelElement_1_0 featureDef
     ){
-      try {
-          String name = (String) featureDef.values("qualifiedName").get(0);
-          ModelElement_1_0 typeDef = this.getModel().getDereferencedType(
-              this.getModel().getElement(featureDef.values("type").get(0))
-          );
-          String type = (String) typeDef.values("qualifiedName").get(0);
-          if(this.getModel().isPrimitiveType(typeDef)) {
-              return PrimitiveTypes.BOOLEAN.equals(type) ? (AbstractPredicate_1) new BooleanTypePredicate_1(
-                  this,
-                  featureDef,
-                  quantor
-              ) : PrimitiveTypes.STRING.equals(type) ? new StringTypePredicate_1(
-                  this,
-                  featureDef,
-                  quantor
-              ) : PrimitiveTypes.ANYURI.equals(type) ? new ResourceIdentifierTypePredicate_1<URI>(
-                  this,
-                  featureDef,
-                  quantor
-              ) : PrimitiveTypes.DATETIME.equals(type) ? new ComparableTypePredicate_1<Date>(
-                  this,
-                  featureDef,
-                  quantor
-              ) : PrimitiveTypes.DECIMAL.equals(type) ? new ComparableTypePredicate_1<BigDecimal>(
-                  this,
-                  featureDef,
-                  quantor
-              ) : PrimitiveTypes.INTEGER.equals(type) ? new ComparableTypePredicate_1<BigInteger>(
-                  this,
-                  featureDef,
-                  quantor
-              ) : PrimitiveTypes.LONG.equals(type) ? new ComparableTypePredicate_1<Long>(
-                  this,
-                  featureDef,
-                  quantor
-              ) : PrimitiveTypes.SHORT.equals(type) ? new ComparableTypePredicate_1<Short>(
-                  this,
-                  featureDef,
-                  quantor
-              ) : PrimitiveTypes.DATE.equals(type) ? new PartiallyOrderedTypePredicate_1<XMLGregorianCalendar>(
-                  this,
-                  featureDef,
-                  quantor
-              ) : PrimitiveTypes.DURATION.equals(type) ? new PartiallyOrderedTypePredicate_1<Duration>(
-                  this,
-                  featureDef,
-                  quantor
-              ) : new SimpleTypePredicate_1(
-                  this,
-                  featureDef,
-                  quantor
-              ); 
-          } else {
-              RefPackage outermostPackage = this.refPackage.refOutermostPackage();
-              RefPackage_1_1 filterPackage = (RefPackage_1_1)outermostPackage.refPackage(
-                 type.substring(0, type.lastIndexOf(':'))
-              );
-              return filterPackage.refCreateFilter(
-                  type,
-                  null,
-                  null,
-                  this, 
-                  new Short(quantor), 
-                  name
-              );
-          }
-      } catch (ServiceException exception) {
-          throw new JmiServiceException(exception);
-      }
-  }
-  
+        try {
+            String name = (String) featureDef.values("qualifiedName").get(0);
+            ModelElement_1_0 typeDef = this.getModel().getDereferencedType(
+                this.getModel().getElement(featureDef.values("type").get(0))
+            );
+            String type = (String) typeDef.values("qualifiedName").get(0);
+            if(this.getModel().isPrimitiveType(typeDef)) {
+                return PrimitiveTypes.BOOLEAN.equals(type) ? (AbstractPredicate_1) new BooleanTypePredicate_1(
+                    this,
+                    featureDef,
+                    quantor
+                ) : PrimitiveTypes.STRING.equals(type) ? new StringTypePredicate_1(
+                    this,
+                    featureDef,
+                    quantor
+                ) : PrimitiveTypes.DATETIME.equals(type) ? new ComparableTypePredicate_1<Date>(
+                        this,
+                        featureDef,
+                        quantor
+                ) : PrimitiveTypes.DECIMAL.equals(type) ? new ComparableTypePredicate_1<BigDecimal>(
+                        this,
+                        featureDef,
+                        quantor
+                ) : PrimitiveTypes.INTEGER.equals(type) ? new ComparableTypePredicate_1<BigInteger>(
+                        this,
+                        featureDef,
+                        quantor
+                ) : PrimitiveTypes.LONG.equals(type) ? new ComparableTypePredicate_1<Long>(
+                        this,
+                        featureDef,
+                        quantor
+                ) : PrimitiveTypes.SHORT.equals(type) ? new ComparableTypePredicate_1<Short>(
+                        this,
+                        featureDef,
+                        quantor
+                ) : PrimitiveTypes.DATE.equals(type) ? new PartiallyOrderedTypePredicate_1<XMLGregorianCalendar>(
+                        this,
+                        featureDef,
+                        quantor
+                ) : PrimitiveTypes.ANYURI.equals(type) ? new ResourceIdentifierTypePredicate_1<URI>(
+                        this,
+                        featureDef,
+                        quantor
+                ) : PrimitiveTypes.DURATION.equals(type) ? new PartiallyOrderedTypePredicate_1<Duration>(
+                        this,
+                        featureDef,
+                        quantor
+                ) : new SimpleTypePredicate_1(
+                    this,
+                    featureDef,
+                    quantor
+                ); 
+            } else {
+                RefPackage outermostPackage = this.refPackage.refOutermostPackage();
+                RefPackage_1_1 filterPackage = (RefPackage_1_1)outermostPackage.refPackage(
+                    type.substring(0, type.lastIndexOf(':'))
+                );
+                return filterPackage.refCreateFilter(
+                    type,
+                    null,
+                    null,
+                    this, 
+                    new Short(quantor), 
+                    name
+                );
+            }
+        } catch (ServiceException exception) {
+            throw new JmiServiceException(exception);
+        }
+    }
+
     //-------------------------------------------------------------------------
     // RefFilter_1_0
     //-------------------------------------------------------------------------
@@ -652,15 +663,15 @@ public class RefFilter_1
         "attributeSpecifiers=" + this.attributeSpecifiers +
         "}";
     }
-   
+
     //-------------------------------------------------------------------------
     private static UUIDGenerator uuidGenerator(
     ){
         return RefFilter_1.uuidGenerator == null 
-            ? RefFilter_1.uuidGenerator = UUIDs.getGenerator() 
+        ? RefFilter_1.uuidGenerator = UUIDs.getGenerator() 
             : RefFilter_1.uuidGenerator;
     }
-  
+
     //------------------------------------------------------------------------
     public FeatureMapper getFeatureMapper(
     ) {
@@ -690,7 +701,7 @@ public class RefFilter_1
             throw new JmiServiceException(e);
         }
     }
-      
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
@@ -704,7 +715,7 @@ public class RefFilter_1
     private final List<FilterProperty> filterProperties;
     private final List<AttributeSpecifier> attributeSpecifiers;
     private final RefPackage_1_0 refPackage;
-    
+
 }
 
 //--- End of File -----------------------------------------------------------

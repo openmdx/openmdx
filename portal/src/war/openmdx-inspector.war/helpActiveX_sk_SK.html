@@ -1,0 +1,91 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>Features based on ActiveX Control</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onLoad="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(50, 50);">
+<table class="objectTitle">
+<tr>
+  <td>ActiveX</td>
+  <td align="right">
+	<script>
+	  <!--
+	  document.write('<a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+	  -->
+	</script>
+  </td>
+</tr>
+</table>
+<p>Použitie funkcií založených na ActiveX komponentoch vyžaduje, aby<br />
+<ul>
+  <li>váš prehliadač bol <strong>schopný využívať ActiveX komponenty</strong> (napr. Internet Explorer v MS Windows) a</li>
+  <li>bezpečnostné nastavenia umožňovali <strong>načítavanie a spúšťanie ActiveX komponentov.</strong></p></li>
+</ul>
+<p>V závislosti na funkciách môžu byť tiež vyžadované niektoré programové balíčky tretích strán:</p>
+<table class="browserHints">
+  <tbody>
+  <tr>
+    <td><b>Funkcia</b></td>
+	<td><b>Požiadavka</b></td>
+  <td><strong>Dodatočné tipy</strong></td>
+  </tr>
+  <tr>
+    <td>MS Word XML Merge</td>
+    <td>klientská inštalácia MS Word 2000 alebo novšieho</td>
+  <td><a href="#trustedsites">Trusted Sites</a>, <a href="#activexsettings">ActiveX Permissions</a></td>
+  </tr>
+  <tr>
+    <td>MS Excel XML Merge </td>
+    <td>klientská inštalácia MS Excel 2000 alebo novšieho</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>XML Export do MS Outlook</td>
+    <td>klientská inštalácia MS Outlook 2000 alebo novšieho</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>XML Import z MS Outlook</td>
+    <td>klientská inštalácia MS Outlook 2000 alebo novšieho</td>
+  <td>&nbsp;</td>
+  </tr>
+  </tbody>
+</table>
+<a name="trustedsites"></a><p class="hh1">Trusted Sites (Internet Explorer)</p>
+<p>Z bezpečnostných dôvodov nedoporučujeme povoliť ActiveS prvky pre  <strong>Zónu Internet</strong>. Je lepšie pridať stránku spúšťajúcu openCRX do <strong>Trusted sites zone</strong> alebo do <strong>Local intranet zone</strong> (iba ak sa stránka nachádza v Intranete) a potom <a href="#activexsettings">povoliť ActiveX controls</a> pre zodpovedajúcu zónu. Nižšie je príklad ako pridať openCRX demo server (<strong><font color="#FF0000">demo.opencrx.org</font></strong>) do Trusted sites zone a pridať lokálny openCRX server (<strong><font color="#FF0000">10.1.1.20</font></strong>) do Local intranet zone. </p>
+<p><img src="images/ie_trusted_sites.png" width="384" height="342"> <img src="images/ie_local_intranet_zone.png" width="384" height="342"></p>
+<a name="activexsettings"></a>
+<p class="hh1">ActiveX Permissions  (Internet Explorer)</p>
+<p>Z bezpečnostných dôvodov neodporúčame povolenie ActiveX prvkov pre <strong>Internet Zone</strong>. Je lepšie pridať stránku spúšťajúcu openCRX do <strong><a href="#trustedsites">Trusted sites zone</a></strong> alebo do <strong><a href="#trustedsites">Local intranet zone</a></strong> (iba ak sa stránka nachádza v Intranete) a potom povoliť ActiveX prvky pre zodpovedajúcu zónu ako je uvedené v nasledujúcom:</p>
+<p class="hh1">Kde nájsť ActiveX bezpečnostné nastavenia:</p>
+
+<table class="activeXHints">
+  <tr>
+    <td><b>Platforma</b></td>
+    <td colSpan=2><b>Prehliadač</b> &amp; <b>Version</b></td>
+    <td><b>Nájsť ActiveX nastavenia v ...</b></td>
+    <td><strong>ActiveX povoliť (s varovaním)</strong></td>
+    <td><strong>ActiveX povoliť (bez varovania)</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img height=38 src="images/icon-windows.gif" width=38 /><br />
+	  <strong>Microsoft<br />
+	  Windows</strong>	</td>
+    <td align="center">
+	  <img height=38 src="images/icon-ie.gif" width=38><br />
+	  <FONT size=-1>Internet<br />Explorer</FONT>
+	</td>
+    <td>6.x</td>
+    <td>Tools &gt; Internet Options &gt; Security ...<br />
+      ... Custom Levels &gt; ActiveX controls and plug-ins</td>
+    <td><img src="images/ie_activex_settings_secure.png" width="352" height="666"></td>
+    <td><img src="images/ie_activex_settings_convenient.png" width="352" height="666"></td>
+  </tr>
+</table>
+</body>
+</html>

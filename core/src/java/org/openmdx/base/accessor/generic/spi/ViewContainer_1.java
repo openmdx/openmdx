@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewContainer_1.java,v 1.36 2008/06/28 00:21:44 hburger Exp $
+ * Name:        $Id: ViewContainer_1.java,v 1.39 2008/09/10 08:55:21 hburger Exp $
  * Description: ViewContainer_1 
- * Revision:    $Revision: 1.36 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:44 $
+ * Date:        $Date: 2008/09/10 08:55:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -91,8 +91,8 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 class ViewContainer_1
-    extends AbstractMap
-    implements ViewContainer_1_0, FilterableMap
+extends AbstractMap
+implements ViewContainer_1_0, FilterableMap
 {
 
     /**
@@ -148,39 +148,37 @@ class ViewContainer_1
     final ViewConnection_1 marshaller;
 
     final ViewObject_1 parent;
-    
+
     private final String feature;
-    
+
     final FilterProperty[] attributeFilter;
 
     private final boolean dateStateRequest;
-    
+
     Map transientObjects;
-    
+
     private Boolean dateStateContainer;
 
     private transient FilterableMap persistentObjects = null;
-    
+
     private transient ModelAwareFilter filter = null;
 
     private transient Set entries = null;
-    
+
     private static final FilterProperty[] EMPTY_FILTER = new FilterProperty[] {};
 
-    private static final List VALIDITY_ATTRIBUTES = Arrays.asList(
-        new String[]{
-            SystemAttributes.CREATED_AT,
-            State_1_Attributes.INVALIDATED_AT,
-            State_1_Attributes.STATE_VALID_FROM,
-            State_1_Attributes.STATE_VALID_TO
-        }
+    private static final List<String> VALIDITY_ATTRIBUTES = Arrays.asList(
+        SystemAttributes.CREATED_AT,
+        State_1_Attributes.INVALIDATED_AT,
+        State_1_Attributes.STATE_VALID_FROM,
+        State_1_Attributes.STATE_VALID_TO
     );
-    
+
     /**
      * Do not throw an exception when removing non-existent objects
      */
     private static final Object NULL = new Object();
-    
+
     /**
      * Tests whether this container contains instances of DateState
      * 
@@ -197,7 +195,7 @@ class ViewContainer_1
         }
         return this.dateStateContainer.booleanValue();
     }
-    
+
     /**
      * Tests whether it is a request for states or objects
      * 
@@ -206,7 +204,7 @@ class ViewContainer_1
     boolean isDateStateRequest(){
         return this.dateStateRequest;
     }
-    
+
     /**
      * Test whether a given object is involved in the view's context
      * 
@@ -234,12 +232,12 @@ class ViewContainer_1
     boolean isPersistent(){
         return this.parent.objIsPersistent();
     }
-    
+
     Path getPath(
     ) throws ServiceException{
         return this.parent.objGetPath().getChild(this.feature);
     }
-    
+
     FilterableMap getSinkContainer(
     ){
         if(this.persistentObjects == null) try {
@@ -279,12 +277,12 @@ class ViewContainer_1
             return null;
         }
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements ViewContainer_1_0
     //------------------------------------------------------------------------
-    
+
     /**
      * Retrieve all states of an object
      * 
@@ -304,12 +302,12 @@ class ViewContainer_1
         ViewObject_1_0 object = (ViewObject_1_0) get(qualifier);
         return object.allStates(invalidated, deleted);
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Extends FilterableMap
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see java.util.AbstractMap#entrySet()
      */
@@ -331,8 +329,8 @@ class ViewContainer_1
             int i = State_1_Attributes.indexOfStatedObject(source);
             boolean dateStateRequest = i >= 0;
             FilterProperty[] target = new FilterProperty[
-                 this.attributeFilter.length + source.length - (dateStateRequest ? 1 : 0)
-            ];
+                                                         this.attributeFilter.length + source.length - (dateStateRequest ? 1 : 0)
+                                                         ];
             System.arraycopy(this.attributeFilter, 0, target, 0, this.attributeFilter.length);
             if(dateStateRequest) {
                 if(i > 0) {
@@ -366,9 +364,9 @@ class ViewContainer_1
     ) {
         if(attributeSpecifiers != null) {
             for(
-                int i = 0;
-                i < attributeSpecifiers.length;
-                i++
+                    int i = 0;
+                    i < attributeSpecifiers.length;
+                    i++
             ){
                 if(attributeSpecifiers[i].order() != Orders.ANY) {
                     return true;
@@ -377,7 +375,7 @@ class ViewContainer_1
         }
         return false;
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#values(java.lang.Object)
      */
@@ -391,13 +389,11 @@ class ViewContainer_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "criteria-class",
-                        criteria.getClass().getName()
-                    )
-                },
-                "The criteria argument should be an instance of AttributeSpecifier[]"
+                "The criteria argument should be an instance of AttributeSpecifier[]",
+                new BasicException.Parameter(
+                    "criteria-class",
+                    criteria.getClass().getName()
+                )
             ); 
         }
     }
@@ -414,13 +410,13 @@ class ViewContainer_1
             clear();
         }
     }
-    
+
     private Object_1_0 get(
         String qualifier
     ) throws ServiceException {
         return this.parent.toViewValue(
             this.parent.objGetPath().getDescendant(
-                new String[]{this.feature, qualifier}
+                this.feature, qualifier
             ), 
             isDateStateContainer(), false
         );
@@ -441,10 +437,8 @@ class ViewContainer_1
                     new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.DUPLICATE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("qualifer", key)
-                        },
-                        "Transient container contains already an object with the given qualifier"
+                        "Transient container contains already an object with the given qualifier",
+                        new BasicException.Parameter("qualifer", key)
                     );
                 }
                 this.transientObjects.put(key, value);
@@ -504,9 +498,9 @@ class ViewContainer_1
 
     FilterProperty[] getStateFilter(){
         for(
-            int i = 0;
-            i < this.attributeFilter.length;
-            i++
+                int i = 0;
+                i < this.attributeFilter.length;
+                i++
         ){
             if(VALIDITY_ATTRIBUTES.contains(this.attributeFilter[i].name())) {
                 return this.attributeFilter;
@@ -521,8 +515,7 @@ class ViewContainer_1
                 new FilterProperty(
                     Quantors.FOR_ALL,
                     State_1_Attributes.INVALIDATED_AT,
-                    FilterOperators.IS_IN,
-                    new String[]{}
+                    FilterOperators.IS_IN
                 )
             );
             if(context.getValidTo() != null) {
@@ -531,9 +524,7 @@ class ViewContainer_1
                         Quantors.FOR_ALL,
                         State_1_Attributes.STATE_VALID_FROM,
                         FilterOperators.IS_LESS_OR_EQUAL,
-                        new String[]{
-                           DateStateContexts.toBasicFormat(context.getValidTo())
-                        }
+                        DateStateContexts.toBasicFormat(context.getValidTo())
                     )
                 );
             }
@@ -543,9 +534,7 @@ class ViewContainer_1
                         Quantors.FOR_ALL,
                         State_1_Attributes.STATE_VALID_TO,
                         FilterOperators.IS_GREATER_OR_EQUAL,
-                        new String[]{
-                           DateStateContexts.toBasicFormat(context.getValidFrom())
-                        }
+                        DateStateContexts.toBasicFormat(context.getValidFrom())
                     )
                 );
             }
@@ -557,7 +546,7 @@ class ViewContainer_1
                         Quantors.FOR_ALL,
                         State_1_Attributes.STATE_VALID_FROM,
                         FilterOperators.IS_LESS_OR_EQUAL,
-                        new String[]{validFor}
+                        validFor
                     )
                 );
                 stateFilter.add(
@@ -565,7 +554,7 @@ class ViewContainer_1
                         Quantors.FOR_ALL,
                         State_1_Attributes.STATE_VALID_TO,
                         FilterOperators.IS_GREATER_OR_EQUAL,
-                        new String[]{validFor}
+                        validFor
                     )
                 );
             }
@@ -574,8 +563,7 @@ class ViewContainer_1
                     new FilterProperty(
                         Quantors.FOR_ALL,
                         State_1_Attributes.INVALIDATED_AT,
-                        FilterOperators.IS_IN,
-                        new String[]{}
+                        FilterOperators.IS_IN
                     )
                 );
             } else {
@@ -585,7 +573,7 @@ class ViewContainer_1
                         Quantors.FOR_ALL,
                         SystemAttributes.CREATED_AT,
                         FilterOperators.IS_LESS_OR_EQUAL,
-                        new String[]{validAt}
+                        validAt
                     )
                 );
                 stateFilter.add(
@@ -593,7 +581,7 @@ class ViewContainer_1
                         Quantors.FOR_ALL,
                         State_1_Attributes.INVALIDATED_AT,
                         FilterOperators.IS_GREATER,
-                        new String[]{validAt}
+                        validAt
                     )
                 );
             }
@@ -602,7 +590,7 @@ class ViewContainer_1
             new FilterProperty[stateFilter.size()]
         );
     }
-    
+
     AbstractFilter getFilter(
     ){
         if(this.filter == null) {
@@ -619,11 +607,11 @@ class ViewContainer_1
         this.transientObjects = null;
         return transientObjects;
     }
-   
+
     //------------------------------------------------------------------------
     // Extends Object
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see java.util.AbstractCollection#toString()
      */
@@ -665,7 +653,7 @@ class ViewContainer_1
         ).toString();
     }
 
-    
+
     //------------------------------------------------------------------------
     // Extends AbstractMap
     //------------------------------------------------------------------------
@@ -674,17 +662,17 @@ class ViewContainer_1
      * Persistent Date State Entries
      */
     class EntrySet extends AbstractSet {
-                  
+
         /* (non-Javadoc)
          * @see java.util.AbstractCollection#iterator()
          */
         public Iterator iterator(
         ) {
             return 
-                !isPersistent() ? new TransientIterator() : 
+            !isPersistent() ? new TransientIterator() : 
                 !isDateStateContainer() ? new NonDateStateViewIterator() :
-                !isDateStateRequest() ? new DateStateViewIterator() :
-                (Iterator) new StateIterator(); 
+                    !isDateStateRequest() ? new DateStateViewIterator() :
+                        (Iterator) new StateIterator(); 
         }
 
         /* (non-Javadoc)
@@ -693,8 +681,8 @@ class ViewContainer_1
         public int size() {
             int s = 0;
             for(
-                Iterator i = iterator();
-                i.hasNext();
+                    Iterator i = iterator();
+                    i.hasNext();
             ){
                 i.next();
                 s++;
@@ -708,9 +696,9 @@ class ViewContainer_1
         public boolean isEmpty() {
             return !iterator().hasNext();
         }
-        
-        
-        
+
+
+
     }
 
     /**
@@ -723,23 +711,23 @@ class ViewContainer_1
             this.delegate = ViewContainer_1.this.transientObjects.entrySet().iterator();
             this.filter = getFilter();
         }
-            
+
         private final Iterator delegate ;
 
         private final AbstractFilter filter;
-        
+
         private Map.Entry prefetched = null;
 
         private Map.Entry entry = null;
-        
-        
+
+
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
         public boolean hasNext() {
             while(
-                this.prefetched == null &&
-                this.delegate.hasNext()
+                    this.prefetched == null &&
+                    this.delegate.hasNext()
             ){
                 Map.Entry prefetched = (Map.Entry) this.delegate.next();
                 Object_1_0 object = (Object_1_0) prefetched.getValue();
@@ -783,7 +771,7 @@ class ViewContainer_1
                 this.entry = null;
             }
         }
-        
+
     }
 
     /**
@@ -801,23 +789,23 @@ class ViewContainer_1
         }
 
         private final Collection beforeImage;
-        
+
         private final AbstractFilter filter;
 
         private final Iterator delegate ;
-        
+
         private Object_1_0 prefetched = null;
-        
+
         private Map.Entry entry = null;
-                
+
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
         public boolean hasNext() {
             try {
                 while(
-                    this.prefetched == null &&
-                    this.delegate.hasNext()
+                        this.prefetched == null &&
+                        this.delegate.hasNext()
                 ){
                     SinkObject_1 sinkObject = (SinkObject_1) this.delegate.next();
                     Path path = sinkObject.objGetPath();
@@ -832,7 +820,7 @@ class ViewContainer_1
                             false
                         ); 
                         if(
-                            this.filter.accept(viewObject)
+                                this.filter.accept(viewObject)
                         ){
                             this.prefetched = viewObject;
                         }
@@ -876,9 +864,9 @@ class ViewContainer_1
                 throw new RuntimeServiceException(exception);
             }
         }
-        
+
     }
-    
+
     /**
      * Non-DateState View Iterator
      */
@@ -900,23 +888,23 @@ class ViewContainer_1
         }
 
         private final AbstractFilter filter;
-                    
+
         private final Collection beforeImage;
 
         private final Iterator delegate;
-        
+
         private Path prefetched = null;
-        
+
         private Map.Entry entry = null;
-        
+
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
         public boolean hasNext() {
             try {
                 while(
-                    this.prefetched == null &&
-                    this.delegate.hasNext()
+                        this.prefetched == null &&
+                        this.delegate.hasNext()
                 ){
                     if(this.beforeImage == null){
                         Object_1_0 sinkDelegate = (Object_1_0) this.delegate.next();
@@ -927,8 +915,8 @@ class ViewContainer_1
                         SinkObject_1 sinkObject = (SinkObject_1) this.delegate.next();
                         Object_1_0 sinkDelegate = sinkObject.getDelegate();
                         if(
-                            (!sinkObject.isDirty() || !sinkDelegate.objIsDeleted()) &&
-                            this.filter.accept(sinkDelegate)
+                                (!sinkObject.isDirty() || !sinkDelegate.objIsDeleted()) &&
+                                this.filter.accept(sinkDelegate)
                         ) {
                             this.prefetched = sinkObject.objGetPath();
                         }
@@ -976,7 +964,7 @@ class ViewContainer_1
                 throw new RuntimeServiceException(exception);
             }
         }
-        
+
     }
 
     /**
@@ -993,24 +981,24 @@ class ViewContainer_1
         }
 
         private final AbstractFilter filter;
-        
+
         private final Iterator sinkObjects;
-        
+
         private Iterator states = Collections.EMPTY_SET.iterator();
 
         SinkObject_1 current = null; 
-        
+
         Object_1_0 prefetched = null;
-        
+
         Map.Entry entry = null;
-        
+
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
         public boolean hasNext() {
             while(
-                this.prefetched == null && 
-                (this.states.hasNext() || this.sinkObjects.hasNext()) 
+                    this.prefetched == null && 
+                    (this.states.hasNext() || this.sinkObjects.hasNext()) 
             ){
                 if(this.states.hasNext()) {
                     Object_1_0 object = (Object_1_0) this.states.next();
@@ -1050,7 +1038,7 @@ class ViewContainer_1
             }
             return this.entry;
         }
-        
+
         /* (non-Javadoc)
          * @see java.util.Iterator#remove()
          */
@@ -1065,9 +1053,9 @@ class ViewContainer_1
                 throw new RuntimeServiceException(exception);
             }
         }
-        
+
     }
-    
+
     /**
      * ViewEntry
      */
@@ -1080,9 +1068,9 @@ class ViewContainer_1
             this.key = key;
             this.value = value;
         }
-        
+
         final private String key;
-        
+
         final private Object_1_0 value;
 
         /* (non-Javadoc)
@@ -1105,7 +1093,7 @@ class ViewContainer_1
         public Object setValue(Object value) {
             throw new UnsupportedOperationException();
         }
-        
+
     }
 
     /**
@@ -1123,14 +1111,14 @@ class ViewContainer_1
         ){
             this.comparator = order(attributeSpecifiers) ?
                 new ViewComparator_1(attributeSpecifiers) :
-                null;
+                    null;
         }
-        
+
         /**
          * 
          */
         private final Comparator comparator;
-        
+
         /* (non-Javadoc)
          * @see java.util.AbstractSequentialList#listIterator(int)
          */
@@ -1154,7 +1142,7 @@ class ViewContainer_1
         public int size() {
             return ViewContainer_1.this.size();
         }
-        
+
     }
-    
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderObjectMarshaller.java,v 1.9 2008/07/07 15:11:30 wfro Exp $
+ * Name:        $Id: DataproviderObjectMarshaller.java,v 1.18 2008/09/17 15:51:03 hburger Exp $
  * Description: DataproviderObjectMarshaller
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/07 15:11:30 $
+ * Date:        $Date: 2008/09/17 15:51:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -83,8 +83,6 @@ import org.ietf.jgss.Oid;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
-import org.openmdx.base.collection.MarshallingList;
-import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.format.DateFormat;
@@ -121,12 +119,12 @@ class DataproviderObjectMarshaller {
     protected DataproviderObjectMarshaller(){
         // Avoid instantiation
     }
-    
+
     /**
      * Maximal number of iterations to complete fetch group
      */
     private static final int FETCH_ITERATION_LIMIT = 5;
-    
+
     /**
      * Return an object's path if it is an instance of RefObject_1_0
      * adding it to the bag unless the object is hollow or return the
@@ -146,8 +144,8 @@ class DataproviderObjectMarshaller {
         if(source instanceof RefObject_1_0){
             Path path = ((RefObject_1_0)source).refGetPath();
             if(
-                bag != null && // !isHollow  TODO 
-                (bag instanceof Set || !bag.contains(path))
+                    bag != null && // !isHollow  TODO 
+                    (bag instanceof Set || !bag.contains(path))
             ) bag.add(path);
             return path;
         } else {
@@ -167,8 +165,8 @@ class DataproviderObjectMarshaller {
                 ((List<?>)targetValue).clear();
             }
             for(
-                ListIterator<?> j = sourceValue.listIterator();
-                j.hasNext();
+                    ListIterator<?> j = sourceValue.listIterator();
+                    j.hasNext();
             ) {
                 if(j.nextIndex() < ((List)targetValue).size()) {
                     ((List)targetValue).set(
@@ -187,8 +185,8 @@ class DataproviderObjectMarshaller {
                 ((Set)targetValue).clear();
             }
             for(
-                Iterator j = sourceValue.iterator();
-                j.hasNext();
+                    Iterator j = sourceValue.iterator();
+                    j.hasNext();
             ) {
                 ((Set)targetValue).add(
                     marshaller.marshal(j.next())
@@ -199,8 +197,8 @@ class DataproviderObjectMarshaller {
                 ((SparseArray)targetValue).clear();
             }  
             for(
-                ListIterator j = sourceValue.populationIterator();
-                j.hasNext();
+                    ListIterator j = sourceValue.populationIterator();
+                    j.hasNext();
             ) {
                 ((SparseArray)targetValue).put(
                     j.nextIndex(),
@@ -212,8 +210,8 @@ class DataproviderObjectMarshaller {
                 ((SortedMap)targetValue).clear();
             }  
             for(
-                ListIterator j = sourceValue.populationIterator();
-                j.hasNext();
+                    ListIterator j = sourceValue.populationIterator();
+                    j.hasNext();
             ) {
                 ((SortedMap)targetValue).put(
                     Integer.valueOf(j.nextIndex()),
@@ -238,8 +236,8 @@ class DataproviderObjectMarshaller {
                 ModelElement_1_0 classDef = model.getElement(className);
                 SparseList<?> allFeatures = classDef.getValues("feature");
                 for(
-                    Iterator<?> f = allFeatures.populationIterator();
-                    f.hasNext();
+                        Iterator<?> f = allFeatures.populationIterator();
+                        f.hasNext();
                 ){
                     ModelElement_1_0 feature = model.getElement(f.next());
                     if(isAttribute(feature, model)) {
@@ -260,8 +258,8 @@ class DataproviderObjectMarshaller {
         Model_1_0 model
     ) throws ServiceException{
         return !ModelAttributes.REFERENCE.equals(feature.values(SystemAttributes.OBJECT_CLASS).get(0)) || (
-            "none".equals(model.getElement(feature.values("exposedEnd").get(0)).values("aggregation").get(0)) &&
-            "none".equals(model.getElement(feature.values("referencedEnd").get(0)).values("aggregation").get(0))
+                "none".equals(model.getElement(feature.values("exposedEnd").get(0)).values("aggregation").get(0)) &&
+                "none".equals(model.getElement(feature.values("referencedEnd").get(0)).values("aggregation").get(0))
         );
     }
 
@@ -339,6 +337,23 @@ class DataproviderObjectMarshaller {
     }
 
     //------------------------------------------------------------------------
+    static Path extractPath(
+        Exception e
+    ) throws ServiceException {
+        ServiceException e0 = new ServiceException(e);
+        if(
+                (e0.getExceptionCode() != BasicException.Code.NOT_FOUND) && 
+                (e0.getExceptionCode() != BasicException.Code.AUTHORIZATION_FAILURE)
+        ) {
+            throw e0;
+        }
+        String path = e0.getExceptionStack().getParameter("path");
+        return path == null ?
+            null :
+                new Path(path);
+    }
+
+    //------------------------------------------------------------------------
     static DataproviderObject toDataproviderObject(
         Path path,
         RefObject_1_0 source,
@@ -367,19 +382,14 @@ class DataproviderObjectMarshaller {
                 true
             );
             if(
-                featureDef != null &&
-                model.referenceIsStoredAsAttribute(featureDef) && 
-                Multiplicities.MAP.equals(featureDef.values("multiplicity").get(0))
+                    featureDef != null &&
+                    model.referenceIsStoredAsAttribute(featureDef) && 
+                    Multiplicities.MAP.equals(featureDef.values("multiplicity").get(0))
             ){
-                RefObject_1_0 lock = (RefObject_1_0) ((RefContainer) source.refGetValue(
-                    SystemAttributes.CONTEXT_CAPABLE_CONTEXT
-                )).refGet(
-                    RefContainer.REASSIGNABLE,
-                    SystemAttributes.LOCK_CONTEXT
-                );
+                RefObject_1_0 lock = lenientGetContext(source,SystemAttributes.LOCK_CONTEXT);
                 if(
-                    (lock != null) &&
-                    SystemAttributes.OPTIMISTIC_LOCK_CLASS.equals(lock.refClass().refMofId())
+                        (lock != null) &&
+                        SystemAttributes.OPTIMISTIC_LOCK_CLASS.equals(lock.refClass().refMofId())
                 ) {
                     target.setDigest((byte[])lock.refGetValue(SystemAttributes.OBJECT_DIGEST));
                 }
@@ -390,20 +400,19 @@ class DataproviderObjectMarshaller {
         // Restrict to 5 iterations to prevent endless loops
         //
         Set<String> fetchedGroup = new HashSet<String>();
-        Set<String> fetchGroup = requiredSet;
+        List<String> fetchGroup = new ArrayList<String>(requiredSet);
+        // Assert that identity is fetched first
         for(
-            int step = 0;
-            step < FETCH_ITERATION_LIMIT;
-            step++
+                int step = 0;
+                step < FETCH_ITERATION_LIMIT;
+                step++
         ) {
             for(String feature : fetchGroup){
                 Map<String,RefObject_1_0> namespaces = null;
                 String namespaceType = null;
                 if(!sourceIsView){ // test for attribute with namespace, ignore nested namespaces
                     if(
-                        SystemAttributes.CONTEXT_CAPABLE_CONTEXT.equals(feature) ||
-                        SystemAttributes.ROLE_CAPABLE_ROLE.equals(feature) ||
-                        SystemAttributes.VIEW_CAPABLE_VIEW.equals(feature)
+                            SystemAttributes.CONTEXT_CAPABLE_CONTEXT.equals(feature)
                     ){
                         ModelElement_1_0 featureDef = model.getFeatureDef(
                             classDef,
@@ -413,34 +422,27 @@ class DataproviderObjectMarshaller {
                         if(featureDef == null) throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_FOUND, 
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("class", classDef.values("qualifiedName").get(0)),
-                                new BasicException.Parameter("feature", feature)
-                            },
-                            "feature not member of classifier"
+                            "feature not member of classifier",
+                            new BasicException.Parameter("class", classDef.values("qualifiedName").get(0)),
+                            new BasicException.Parameter("feature", feature)
                         );
                         if(
-                            ModelAttributes.REFERENCE.equals(featureDef.values(SystemAttributes.OBJECT_CLASS).get(0)) && ( // isReference
-                                SystemAttributes.VIEW_CAPABLE_VIEW.equals(feature) || 
-                                model.referenceIsStoredAsAttribute(featureDef) && Multiplicities.MAP.equals(featureDef.values("multiplicity").get(0))
-                            )
+                                ModelAttributes.REFERENCE.equals(featureDef.values(SystemAttributes.OBJECT_CLASS).get(0)) && ( // isReference
+                                        model.referenceIsStoredAsAttribute(featureDef) && Multiplicities.MAP.equals(featureDef.values("multiplicity").get(0))
+                                )
                         ){ 
                             namespaceType = feature;
-// TODO                     namespaces =   
                             source.refGetValue(feature);
                         }
                     } else if (
-                        feature.startsWith(SystemAttributes.CONTEXT_PREFIX) ||
-                        feature.startsWith(SystemAttributes.ROLE_PREFIX) ||
-                        feature.startsWith(SystemAttributes.VIEW_PREFIX)
+                            feature.startsWith(SystemAttributes.CONTEXT_PREFIX)
                     ) {
                         namespaceType = feature.substring(0, feature.indexOf(':'));
                         String namespaceId = feature.substring(feature.indexOf(':') + 1, feature.lastIndexOf(':'));                
                         namespaces = new HashMap<String,RefObject_1_0>();
-                        RefContainer container = (RefContainer) source.refGetValue(namespaceType);
                         namespaces.put(
                             namespaceId,
-                            (RefObject_1_0) container.refGet(RefContainer.REASSIGNABLE, namespaceId)
+                            lenientGetContext(source, namespaceId)
                         );
                     }
                 }
@@ -460,8 +462,8 @@ class DataproviderObjectMarshaller {
                         );
                         // move attribute values of view to target
                         for(
-                            Iterator<String> k = view.attributeNames().iterator();
-                            k.hasNext();
+                                Iterator<String> k = view.attributeNames().iterator();
+                                k.hasNext();
                         ) {
                             String attributeName = k.next();
                             target.clearValues(namespaceType + ':' + namespaceId + ":" + attributeName).addAll(
@@ -486,11 +488,9 @@ class DataproviderObjectMarshaller {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_FOUND, 
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("class", classDef.values("qualifiedName").get(0)),
-                                new BasicException.Parameter("feature", feature)
-                            },
-                            "feature not member of classifier"
+                            "feature not member of classifier",
+                            new BasicException.Parameter("class", classDef.values("qualifiedName").get(0)),
+                            new BasicException.Parameter("feature", feature)
                         );
                     }
                     boolean isAttribute = ModelAttributes.ATTRIBUTE.equals(featureDef.values(SystemAttributes.OBJECT_CLASS).get(0));
@@ -508,12 +508,10 @@ class DataproviderObjectMarshaller {
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.INVALID_CONFIGURATION, 
-                                new BasicException.Parameter[]{
-                                    new BasicException.Parameter("object", source),
-                                    new BasicException.Parameter("feature", feature),
-                                    new BasicException.Parameter("type", featureType)
-                                },
-                                "structure types can not be transferred to DataproviderObjects"
+                                "structure types can not be transferred to DataproviderObjects",
+                                new BasicException.Parameter("object", source),
+                                new BasicException.Parameter("feature", feature),
+                                new BasicException.Parameter("type", featureType)
                             );
                         }
 
@@ -527,7 +525,7 @@ class DataproviderObjectMarshaller {
                             ModelElement_1_0 referencedEnd = model.getElement(
                                 featureDef.values("referencedEnd").get(0)
                             );
-                            if(referencedEnd.values("qualifierType").size() > 0) {
+                            if(!referencedEnd.values("qualifierType").isEmpty()) {
                                 ModelElement_1_0 qualifierType = model.getDereferencedType(referencedEnd.values("qualifierType").get(0));
                                 if(model.isNumericType(qualifierType)) {
                                     multiplicity = Multiplicities.LIST;
@@ -546,39 +544,32 @@ class DataproviderObjectMarshaller {
                         // Copy value 
                         SparseList<Object> targetValues = target.clearValues(feature);
                         if(
-                            Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-                            Multiplicities.OPTIONAL_VALUE.equals(multiplicity) 
+                                Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
+                                Multiplicities.OPTIONAL_VALUE.equals(multiplicity) 
                         ) {
                             Object sourceValue = null;
                             try {
                                 sourceValue = source.refGetValue(feature);
                             }
                             catch(Exception e) {
-                                ServiceException e0 = new ServiceException(e);
-                                if(
-                                    (e0.getExceptionCode() != BasicException.Code.NOT_FOUND) && 
-                                    (e0.getExceptionCode() != BasicException.Code.AUTHORIZATION_FAILURE)
-                                ) {
-                                    throw e0;
-                                }
-                                // Try to find path of not found object
-                                // Get the object's path as value instead of the object itself
-                                BasicException.Parameter[] params = e0.getParameters();
-                                boolean found = false;
-                                for(int i = 0; i < params.length; i++) {
-                                    if("path".equals(params[i].getName())) {
-                                        sourceValue = new Path(params[i].getValue());
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                                if(!found) {
-                                    throw e0;
-                                }
+                                SysLog.warning("Error when retrieving object value", 
+                                    Arrays.asList(
+                                        (Object)path, 
+                                        feature,
+                                        e.getMessage()
+                                    )
+                                );
                             }
                             if(sourceValue == null) {
                                 if(Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
-                                    SysLog.warning("value of non-optional multiplicity is null", Arrays.asList(path, feature, multiplicity));
+                                    SysLog.warning(
+                                        "value of non-optional multiplicity is null", 
+                                        Arrays.asList(
+                                            (Object)path, 
+                                            feature, 
+                                            multiplicity
+                                        )
+                                    );
                                 }
                             }
                             else {
@@ -588,23 +579,49 @@ class DataproviderObjectMarshaller {
                             }
                         }
                         else if(
-                            Multiplicities.LIST.equals(multiplicity) ||
-                            Multiplicities.MULTI_VALUE.equals(multiplicity)
+                                Multiplicities.LIST.equals(multiplicity) ||
+                                Multiplicities.MULTI_VALUE.equals(multiplicity)
                         ) {
-                            targetValues.addAll(
-                                new MarshallingList<Object>(
-                                    new ToPathMarshaller(bag),
-                                    (List<?>)source.refGetValue(feature)
-                                )
-                            );
+                            List<?> sourceValues = (List<?>)source.refGetValue(feature);
+                            Iterator<?> i = sourceValues.iterator();
+                            while(true) {
+                                Object sourceValue = null;
+                                try {
+                                    if(!i.hasNext()) break;
+                                    sourceValue = i.next();
+                                }
+                                catch(Exception e) {
+                                    sourceValue = extractPath(e);
+                                    SysLog.warning("Error when retrieving object value", Arrays.asList(path, feature, e.getMessage(), sourceValue));
+                                }
+                                targetValues.add(
+                                    toDataproviderValue(
+                                        sourceValue, 
+                                        bag
+                                    )
+                                );
+                            }
                         }
                         else if(Multiplicities.SET.equals(multiplicity)) {
-                            targetValues.addAll(
-                                new MarshallingSet<Object>(
-                                    new ToPathMarshaller(bag),
-                                    (Set<?>)source.refGetValue(feature)
-                                )
-                            );
+                            Set<?> sourceValues = (Set<?>)source.refGetValue(feature);
+                            Iterator<?> i = sourceValues.iterator();
+                            while(true) {
+                                Object sourceValue = null;
+                                try {
+                                    if(!i.hasNext()) break;
+                                    sourceValue = i.next();
+                                }
+                                catch(Exception e) {
+                                    sourceValue = extractPath(e);
+                                    SysLog.warning("Error when retrieving object value", Arrays.asList(path, feature, e.getMessage(), sourceValue));
+                                }
+                                targetValues.add(
+                                    toDataproviderValue(
+                                        sourceValue, 
+                                        bag
+                                    )
+                                );
+                            }
                         }
                         else if(Multiplicities.MAP.equals(multiplicity)) {
                             Map<?,?> map = (Map<?, ?>) source.refGetValue(feature);
@@ -622,8 +639,8 @@ class DataproviderObjectMarshaller {
                                 );
                                 // move attribute values of view to target
                                 for(
-                                    Iterator<String> k = view.attributeNames().iterator();
-                                    k.hasNext();
+                                        Iterator<String> k = view.attributeNames().iterator();
+                                        k.hasNext();
                                 ) {
                                     String attributeName = k.next();
                                     target.clearValues(feature + ':' + namespaceId + ":" + attributeName).addAll(
@@ -634,8 +651,8 @@ class DataproviderObjectMarshaller {
                         }
                         else if(Multiplicities.SPARSEARRAY.equals(multiplicity)) {
                             SortedMap<Integer,Object> sourceValues = new MarshallingSortedMap<Integer,Object>(
-                                new ToPathMarshaller(bag),
-                                (SparseArray<?>)source.refGetValue(feature)
+                                    new ToPathMarshaller(bag),
+                                    (SparseArray<?>)source.refGetValue(feature)
                             );
                             for(Map.Entry<Integer,Object> entry :  sourceValues.entrySet()) {
                                 targetValues.set(
@@ -711,8 +728,8 @@ class DataproviderObjectMarshaller {
                             Collection<Path> children = new ArrayList<Path>();
                             Collection<?> container = (Collection<?>) source.refGetValue(feature);
                             for(
-                                Iterator<?> j = container.iterator();
-                                (incomplete = j.hasNext()) && bag.size() < bagCapacity;
+                                    Iterator<?> j = container.iterator();
+                                    (incomplete = j.hasNext()) && bag.size() < bagCapacity;
                             ) {
                                 children.add((Path) toDataproviderValue(j.next(), bag));
                             }
@@ -724,7 +741,7 @@ class DataproviderObjectMarshaller {
                 }
             }
             fetchedGroup.addAll(fetchGroup);
-            fetchGroup = source.refDefaultFetchGroup();
+            fetchGroup = new ArrayList<String>(source.refDefaultFetchGroup());
             fetchGroup.removeAll(fetchedGroup);
             if(fetchGroup.isEmpty()) break;
         }
@@ -743,7 +760,7 @@ class DataproviderObjectMarshaller {
         }
         return mofName.toString();
     }
-    
+
     //------------------------------------------------------------------------
     @SuppressWarnings("unchecked")    
     public static DataproviderObject toDataproviderObject(
@@ -756,8 +773,8 @@ class DataproviderObjectMarshaller {
             toMofName(source.refTypeName())
         );
         for(
-            Iterator i = source.refFieldNames().iterator();
-            i.hasNext();
+                Iterator i = source.refFieldNames().iterator();
+                i.hasNext();
         ) {
             String fieldName = (String)i.next();
             if(!fieldName.equals(SystemAttributes.OBJECT_INSTANCE_OF)) {
@@ -765,8 +782,8 @@ class DataproviderObjectMarshaller {
                 SparseList targetValue = target.values(fieldName);  
                 if(fieldValue instanceof SparseArray){
                     for(
-                        ListIterator j = ((SparseArray)fieldValue).populationIterator();
-                        j.hasNext();
+                            ListIterator j = ((SparseArray)fieldValue).populationIterator();
+                            j.hasNext();
                     ) {
                         targetValue.set(
                             j.nextIndex(),
@@ -776,8 +793,8 @@ class DataproviderObjectMarshaller {
                 } 
                 else if(fieldValue instanceof SortedMap){
                     for(
-                        Iterator j = ((SortedMap)fieldValue).entrySet().iterator();
-                        j.hasNext();
+                            Iterator j = ((SortedMap)fieldValue).entrySet().iterator();
+                            j.hasNext();
                     ) {
                         Map.Entry k = (Entry)j.next();
                         targetValue.set(
@@ -788,8 +805,8 @@ class DataproviderObjectMarshaller {
                 } 
                 else if(fieldValue instanceof Collection) {
                     for(
-                        Iterator j = ((Collection)fieldValue).iterator();
-                        j.hasNext();
+                            Iterator j = ((Collection)fieldValue).iterator();
+                            j.hasNext();
                     ) {
                         targetValue.add(
                             toDataproviderValue(j.next(), bag)
@@ -806,7 +823,7 @@ class DataproviderObjectMarshaller {
         }
         return target;
     }
-        
+
     //------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     public static void toObject(
@@ -822,11 +839,9 @@ class DataproviderObjectMarshaller {
         String typeName = (String)source.values(namespacePrefix + SystemAttributes.OBJECT_CLASS).get(0);
         Marshaller marshaller = new ToObjectMarshaller(objectCache, objectFactory);
         Set<String> contexts = new HashSet<String>();
-        Set<String> roles = new HashSet<String>();
-        Set<String> views = new HashSet<String>();
         for(
-            Iterator<String> i = source.attributeNames().iterator();
-            i.hasNext();
+                Iterator<String> i = source.attributeNames().iterator();
+                i.hasNext();
         ) try {
             String featureName = i.next();
             SparseList<Object> featureValues = source.values(featureName);
@@ -841,26 +856,6 @@ class DataproviderObjectMarshaller {
                     featureName.substring(
                         SystemAttributes.CONTEXT_PREFIX.length(), 
                         featureName.indexOf(':', SystemAttributes.CONTEXT_PREFIX.length())
-                    )
-                );
-            } else if(featureName.startsWith(SystemAttributes.ROLE_PREFIX)){
-                //
-                // Remember the roles to be processed
-                //
-                roles.add(
-                    featureName.substring(
-                        SystemAttributes.ROLE_PREFIX.length(), 
-                        featureName.indexOf(':', SystemAttributes.ROLE_PREFIX.length())
-                    )
-                );
-            } else if(featureName.startsWith(SystemAttributes.VIEW_PREFIX)){
-                //
-                // Remember the views to be processed
-                //
-                views.add(
-                    featureName.substring(
-                        SystemAttributes.VIEW_PREFIX.length(), 
-                        featureName.indexOf(':', SystemAttributes.VIEW_PREFIX.length())
                     )
                 );
             } else {
@@ -878,11 +873,9 @@ class DataproviderObjectMarshaller {
                 if(featureDef == null) throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_MEMBER_NAME, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("class", classDef),
-                        new BasicException.Parameter("attribute name", featureName)
-                    },
-                    "attribute not found in class"
+                    "attribute not found in class",
+                    new BasicException.Parameter("class", classDef),
+                    new BasicException.Parameter("attribute name", featureName)
                 );        
                 String multiplicity = (String)featureDef.values("multiplicity").get(0);
                 if(model.isReferenceType(featureDef)) {
@@ -946,11 +939,9 @@ class DataproviderObjectMarshaller {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_SUPPORTED, 
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("multiplicity", multiplicity),
-                                new BasicException.Parameter("attribute name", featureName)
-                            },
-                            "Stream value not supported. Supported are [Reader|InputStream]"
+                            "Stream value not supported. Supported are [Reader|InputStream]",
+                            new BasicException.Parameter("multiplicity", multiplicity),
+                            new BasicException.Parameter("attribute name", featureName)
                         );        
                     }
                 }
@@ -988,11 +979,9 @@ class DataproviderObjectMarshaller {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_SUPPORTED, 
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("multiplicity", multiplicity),
-                            new BasicException.Parameter("attribute name", featureName)
-                        },
-                        "multiplicity not supported. Supported are [0..1|1..1|0..n|list|set|sparsearray]"
+                        "multiplicity not supported. Supported are [0..1|1..1|0..n|list|set|sparsearray]",
+                        new BasicException.Parameter("multiplicity", multiplicity),
+                        new BasicException.Parameter("attribute name", featureName)
                     );        
                 }
             }
@@ -1005,22 +994,18 @@ class DataproviderObjectMarshaller {
         byte[] digest = source.getDigest();
         if(digest != null) contexts.add(SystemAttributes.LOCK_CONTEXT);
         if(! contexts.isEmpty()) {
-            // TODO: refGetValue() should return a RefContainer instead of a Map
-//            RefContainer container = (RefContainer) target.refGetValue(SystemAttributes.CONTEXT_CAPABLE_CONTEXT);
             Map container = (Map) target.refGetValue(SystemAttributes.CONTEXT_CAPABLE_CONTEXT);
             for(
-                Iterator i = contexts.iterator();
-                i.hasNext();
+                    Iterator i = contexts.iterator();
+                    i.hasNext();
             ){
                 String name = (String)i.next();
                 RefObject_1_0 object = (RefObject_1_0)container.get(name); 
                 if(object == null) throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter(SystemAttributes.CONTEXT_CAPABLE_CONTEXT,name)
-                    },
-                    "This embedded object can't be created or modified"
+                    "This embedded object can't be created or modified",
+                    new BasicException.Parameter(SystemAttributes.CONTEXT_CAPABLE_CONTEXT,name)
                 );
                 if(SystemAttributes.LOCK_CONTEXT.equals(name)){
                     object.refSetValue(SystemAttributes.OBJECT_DIGEST, digest);
@@ -1037,52 +1022,10 @@ class DataproviderObjectMarshaller {
                 }
             }
         }
-
-        /**
-         * Process roles
-         */
-        if(! roles.isEmpty()) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("role", roles)
-            },
-            "Roles are sipported"
-        );
-
-        /**
-         * Process views
-         */
-        if(! views.isEmpty()) {
-            RefContainer container = (RefContainer) target.refGetValue(SystemAttributes.VIEW_CAPABLE_VIEW);
-            for(
-                Iterator<String> i = views.iterator();
-                i.hasNext();
-            ){
-                String name = i.next();
-                RefObject_1_0 object = (RefObject_1_0)container.refGet(RefContainer.REASSIGNABLE, name); 
-                if(object == null) throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter(SystemAttributes.VIEW_CAPABLE_VIEW,name)
-                    },
-                    "This embedded object can't be created or modified"
-                );
-                toObject(
-                    SystemAttributes.VIEW_PREFIX + name,
-                    source,
-                    object,
-                    objectCache,
-                    objectFactory,
-                    model, 
-                    replace
-                );
-            }
-        }
     }
 
     //------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public static List<?> toStructureValues(
         DataproviderObject source,
         Map<Path,RefObject_1_0> objectCache,
@@ -1119,7 +1062,7 @@ class DataproviderObjectMarshaller {
             if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
                 targetValues.add(
                     source.values(fieldName).size() > 0 
-                        ? marshaller.marshal(source.values(fieldName).get(0))
+                    ? marshaller.marshal(source.values(fieldName).get(0))
                         : null
                 );
             }
@@ -1166,11 +1109,9 @@ class DataproviderObjectMarshaller {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("multiplicity", multiplicity),
-                        new BasicException.Parameter("attribute name", fieldName)
-                    },
-                    "multiplicity not supported. Supported are [0..1|1..1|0..n|list|set|sparsearray]"
+                    "multiplicity not supported. Supported are [0..1|1..1|0..n|list|set|sparsearray]",
+                    new BasicException.Parameter("multiplicity", multiplicity),
+                    new BasicException.Parameter("attribute name", fieldName)
                 );        
             }
         }
@@ -1197,25 +1138,25 @@ class DataproviderObjectMarshaller {
             '.'
         );
     }
-        
+
     //------------------------------------------------------------------------
     private static Class<?> toClass(
         String qualifiedTypeName
     ){
         return 
-            PrimitiveTypes.STRING.equals(qualifiedTypeName) ? String.class :
+        PrimitiveTypes.STRING.equals(qualifiedTypeName) ? String.class :
             PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName) ? Boolean.class :
-            PrimitiveTypes.DATETIME.equals(qualifiedTypeName) ? Date.class :
-            PrimitiveTypes.DATE.equals(qualifiedTypeName) ? XMLGregorianCalendar.class :
-            PrimitiveTypes.DURATION.equals(qualifiedTypeName) ? Duration.class :
-            PrimitiveTypes.SHORT.equals(qualifiedTypeName) ? Short.class :
-            PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ? Integer.class :
-            PrimitiveTypes.LONG.equals(qualifiedTypeName) ? Long.class :
-            PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? BigDecimal.class :
-            PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ? URI.class :
-            PrimitiveTypes.OID.equals(qualifiedTypeName) ? Oid.class :
-            PrimitiveTypes.UUID.equals(qualifiedTypeName) ? UUID.class :
-            Object.class;
+                PrimitiveTypes.DATETIME.equals(qualifiedTypeName) ? Date.class :
+                    PrimitiveTypes.DATE.equals(qualifiedTypeName) ? XMLGregorianCalendar.class :
+                        PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ? URI.class :
+                            PrimitiveTypes.DURATION.equals(qualifiedTypeName) ? Duration.class :
+                                PrimitiveTypes.SHORT.equals(qualifiedTypeName) ? Short.class :
+                                    PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ? Integer.class :
+                                        PrimitiveTypes.LONG.equals(qualifiedTypeName) ? Long.class :
+                                            PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? BigDecimal.class :
+                                                PrimitiveTypes.OID.equals(qualifiedTypeName) ? Oid.class :
+                                                    PrimitiveTypes.UUID.equals(qualifiedTypeName) ? UUID.class :
+                                                        Object.class;
     }
 
     //------------------------------------------------------------------------
@@ -1238,24 +1179,24 @@ class DataproviderObjectMarshaller {
             (String) value
         ) : value;
     }
-    
+
     //------------------------------------------------------------------------
     private static Object unmarshal(
         Object source
     ){
         return 
-            source instanceof String || source instanceof Path || source instanceof Boolean || source instanceof Number || source instanceof byte[] ? source :
+        source instanceof String || source instanceof Path || source instanceof Boolean || source instanceof Number || source instanceof byte[] ? source :
             source instanceof Date ? DateFormat.getInstance().format((Date)source) :
-            source instanceof XMLGregorianCalendar ? toBasicFormat(source.toString()) : 
-            source == null ? null : source.toString();
+                source instanceof XMLGregorianCalendar ? toBasicFormat(source.toString()) : 
+                    source == null ? null : source.toString();
     }
-    
+
     //------------------------------------------------------------------------
     // Class ToPathMarshaller
     //------------------------------------------------------------------------
 
     static class ToPathMarshaller 
-        implements Marshaller 
+    implements Marshaller 
     {
 
         /**
@@ -1283,13 +1224,13 @@ class DataproviderObjectMarshaller {
 
     }
 
-    
+
     //-------------------------------------------------------------------------
     // class ToObjectMarshaller
     //-------------------------------------------------------------------------
 
     static class ToObjectMarshaller 
-        implements Marshaller 
+    implements Marshaller 
     {
 
         /**
@@ -1310,9 +1251,9 @@ class DataproviderObjectMarshaller {
             Object source
         ) throws ServiceException {
             return source instanceof Path ? (
-               this.objectCache.containsKey(source) ? 
-                   this.objectCache.get(source) :
-                   this.objectFactory.getObjectById(source)
+                    this.objectCache.containsKey(source) ? 
+                        this.objectCache.get(source) :
+                            this.objectFactory.getObjectById(source)
             ) : source;
         }
 
@@ -1336,7 +1277,7 @@ class DataproviderObjectMarshaller {
     //------------------------------------------------------------------------
 
     static class BinaryReadOnce implements BinaryLargeObject {
-        
+
         /**
          * Constructor 
          *
@@ -1349,7 +1290,7 @@ class DataproviderObjectMarshaller {
             this.source = source;
             this.length = null;
         }
-        
+
         /**
          * 
          */
@@ -1359,7 +1300,7 @@ class DataproviderObjectMarshaller {
          * 
          */
         Long length;
-        
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
@@ -1397,13 +1338,13 @@ class DataproviderObjectMarshaller {
 
     }
 
-    
+
     //------------------------------------------------------------------------
     // class CharacterReadOnce
     //------------------------------------------------------------------------
 
     static class CharacterReadOnce implements CharacterLargeObject {
-        
+
         /**
          * Constructor 
          *
@@ -1416,7 +1357,7 @@ class DataproviderObjectMarshaller {
             this.source = source;
             this.length = null;
         }
-        
+
         /**
          * 
          */
@@ -1426,7 +1367,7 @@ class DataproviderObjectMarshaller {
          * 
          */
         Long length;
-        
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
@@ -1462,6 +1403,27 @@ class DataproviderObjectMarshaller {
             return this.length;
         }
 
+    }
+
+    /**
+     * Lenient context accessor, accepting former RefContainer as well as current Map container
+     * 
+     * @param source
+     * @param name
+     * 
+     * @return a named context
+     */
+    private static RefObject_1_0 lenientGetContext(
+        RefObject_1_0 source,
+        String name
+    ){
+        Object container = source.refGetValue(
+            SystemAttributes.CONTEXT_CAPABLE_CONTEXT
+        );
+        Object context = container instanceof RefContainer ? 
+            ((RefContainer) container).refGet(RefContainer.REASSIGNABLE, name) :
+                ((Map<?,?>)container).get(name);
+            return (RefObject_1_0)context;
     }
 
 }

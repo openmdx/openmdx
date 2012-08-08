@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UnitOfWorkRequest.java,v 1.13 2008/03/21 18:45:25 hburger Exp $
+ * Name:        $Id: UnitOfWorkRequest.java,v 1.14 2008/09/09 14:20:01 hburger Exp $
  * Description: UnitOfWorkRequest class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:45:25 $
+ * Date:        $Date: 2008/09/09 14:20:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,6 +53,8 @@ package org.openmdx.compatibility.base.dataprovider.cci;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.resource.ResourceException;
 
@@ -146,7 +148,7 @@ public class UnitOfWorkRequest
      * @see org.openmdx.compatibility.base.dataprovider.cci.DataproviderContext#keys()
      */
     protected Collection keys() {
-        return Arrays.asList(new String[]{"requests","contexts"});
+        return KEYS;
     }
 
     /* (non-Javadoc)
@@ -200,6 +202,13 @@ public class UnitOfWorkRequest
      *
      */
     private boolean transactionalUnit;
+
+    private static final List<String> KEYS = Collections.unmodifiableList(
+        Arrays.asList(
+            "requests",
+            "contexts"
+        )
+    );
 
 }
 

@@ -1,15 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Condition.java,v 1.5 2008/04/25 23:34:29 wfro Exp $
+ * Name:        $Id: Condition.java,v 1.8 2008/09/09 12:06:39 hburger Exp $
  * Description: Condition
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 23:34:29 $
+ * Date:        $Date: 2008/09/09 12:06:39 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.query;
 
@@ -56,7 +55,6 @@ import java.util.Arrays;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
 import org.openmdx.compatibility.base.query.Quantors;
 
@@ -65,7 +63,7 @@ public abstract class Condition
 
     //-----------------------------------------------------------------------    
     protected Condition(
-        Object[] values
+        Object... values
     ) {
         this((short)-1, null, false, values);
     }
@@ -75,7 +73,7 @@ public abstract class Condition
         short quantor,
         String feature,
         boolean fulfils,
-        Object[] values
+        Object... values
     ) {
         this.quantor = quantor;
         this.feature = feature;
@@ -163,12 +161,7 @@ public abstract class Condition
             return Records.getRecordFactory().asMappedRecord(
                 getClass().getName(), 
                 Quantors.toString(quantor) + ' ' + feature + ' ' + getName() + ' ' + Arrays.asList(values),
-                new String[]{
-                    "quantor",
-                    "feature",
-                    "operator",
-                    "values"
-                }, 
+                TO_STRING_FIELDS, 
                 new Object[]{
                     Quantors.toString(quantor),
                     feature, 
@@ -177,15 +170,25 @@ public abstract class Condition
                 }
             ).toString();
         } catch (ResourceException exception) {
-            throw new RuntimeServiceException(exception);
+            return super.toString();
         }
     }
   
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
+    protected final static Object[] EMPTY_OBJECT_ARRAY = new Object[]{};
+    
     private short quantor;
     private String feature;
     private boolean fulfils;
     protected Object[] values;
+    
+    private static final String[] TO_STRING_FIELDS = {
+        "quantor",
+        "feature",
+        "operator",
+        "values"
+    };
+    
 }

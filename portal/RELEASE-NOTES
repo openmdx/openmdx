@@ -1,5 +1,5 @@
-Release Name: openMDX/Portal 2.1.0
-Release Date: 2008-07-10
+Release Name: openMDX/Portal 2.2.0
+Release Date: 2008-09-10
 
 ---------------------------------------------------------------------
 Notes:
@@ -49,41 +49,22 @@ Notes:
 Changes:
 
 0.    SUMMARY
-      * Script-based customizing
-      * Ajax-based, in-place editing
-      * Migrate to openMDX 2 PersistenceManager
-      * Bugs fixed
+      * Redesign root menu
                         
 1.    NEW FEATURES
-
-      CR10007738
-      Portal: all controls are script enabled. All controls are script enabled, 
-      i.e. if a control does not implement the method 
-      paint(HtmlPage p, String frame, boolean forEditing) the default 
-      implementation executes a Groovy-script located in 
-      ./config/control/{control-id}
-      
+      none
+            
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
 
-      CR10007629
-      Redesign edit mode. The edit mode is Ajax-based now. Ajax.Updaters switch
-      the attribute pane between show and edit mode. Painting the full view in
-      show and edit mode is not required anymore.
-       
-      CR20010100
-      Portal: migrate to PersistenceManager. Migrate from openMDX 1 cci RefPackage
-      and openMDX 1 compatibility RequestCollection to openMDX 2 PersistenceManager.
-      
+      CR10007941
+      GUI: horizontal root menu control. Replace vertical root menu by 
+      horizontal menu. At the same time remove yuiext layout manager. 
+                  
 2.1.  FIXED BUGS
+      none
 
-      CR10007763
-      Multi-valued code tables with '. In edit mode, multi-valued code tables with 
-      code values containing single quotes (') do not work (pop-up does not appear) 
-      because the single quotes are not escaped.
-
-      
 2.2.  DEPRECATED FEATURES
       none
             

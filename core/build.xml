@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.188 2008/07/02 23:29:12 hburger Exp $
+= Name:        $Id: build.xml,v 1.189 2008/07/28 18:23:35 hburger Exp $
 = Description: openMDX/Core Build File
-= Revision:    $Revision: 1.188 $
-= Date:        $Date: 2008/07/02 23:29:12 $
+= Revision:    $Revision: 1.189 $
+= Date:        $Date: 2008/07/28 18:23:35 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -509,7 +509,7 @@
 				<include name="${build.target.platform}/core/src/*"/>
 				<exclude name="${build.target.platform}/core/src/*/*.jsl.*"/>
 				<include name="openmdx.version.properties"/>
-				<include name="jre-1.3/ant/lib/*"/>
+				<include name="jre-1.5/ant/lib/*"/>
 				<include name="ant/etc/ant/*"/>
 				<include name="apache/jre-1.2/contribution/lib/*"/>
 				<include name="java2/${build.target.platform}/**"/>
