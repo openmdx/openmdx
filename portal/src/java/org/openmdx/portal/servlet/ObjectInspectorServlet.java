@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectInspectorServlet.java,v 1.86 2009/03/08 18:03:20 wfro Exp $
+ * Name:        $Id: ObjectInspectorServlet.java,v 1.91 2009/06/09 12:50:34 hburger Exp $
  * Description: ObjectInspectorServlet 
- * Revision:    $Revision: 1.86 $
+ * Revision:    $Revision: 1.91 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:20 $
+ * Date:        $Date: 2009/06/09 12:50:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -105,6 +105,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -123,13 +124,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
 
-import org.openmdx.application.dataprovider.transport.ejb.cci.Jmi1AccessorFactory_2;
 import org.openmdx.application.log.AppLog;
-import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.application.persistence.ejb.Jmi1AccessorFactory_2;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
@@ -161,7 +162,6 @@ import org.openmdx.portal.servlet.view.LayoutFactory;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
-import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 import org.openmdx.uses.org.apache.commons.fileupload.DiskFileUpload;
 import org.openmdx.uses.org.apache.commons.fileupload.FileItem;
 import org.openmdx.uses.org.apache.commons.fileupload.FileUpload;
@@ -939,7 +939,7 @@ public class ObjectInspectorServlet
                           null,
                           requestedObjectIdentity,
                           application,
-                          MapUtils.orderedMap(new HashMap()),
+                          new LinkedHashMap<Path,Action>(),
                           null,
                           null
                       );
@@ -970,7 +970,7 @@ public class ObjectInspectorServlet
                       null,
                       homeObjectIdentity,
                       application,
-                      MapUtils.orderedMap(new HashMap()),
+                      new LinkedHashMap<Path,Action>(),
                       null,
                       null
                   );
@@ -1070,9 +1070,7 @@ public class ObjectInspectorServlet
                         this.uiRefreshedAt
                     );                        
                 }
-                EventHandlerHelper.notifyObjectModified(
-                    showViewsCache
-                );                
+                showViewsCache.evictViews();
             }
             catch(ServiceException e) {
                 throw new ServletException("Can not refresh application", e);
@@ -1260,7 +1258,7 @@ public class ObjectInspectorServlet
                             null,
                             application.getRootObject()[0].refGetPath(),
                             application,
-                            MapUtils.orderedMap(new HashMap()),
+                            new LinkedHashMap<Path,Action>(),
                             null,
                             null
                         );
@@ -1341,7 +1339,7 @@ public class ObjectInspectorServlet
     private PortalExtension_1_0 evaluator = null;
     private HtmlEncoder_1_0 htmlEncoder = null;
     private RoleMapper_1_0 roleMapper = null;
-    private Model_1_3 model = null;
+    private Model_1_0 model = null;
     private List<Path> retrieveByPathPatterns = null;
     private Map filters = new HashMap();
     private Codes codes = null;

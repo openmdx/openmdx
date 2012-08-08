@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ImmutableDatatype.java,v 1.2 2008/09/25 23:35:39 hburger Exp $
+ * Name:        $Id: ImmutableDatatype.java,v 1.3 2009/05/25 09:34:37 hburger Exp $
  * Description: Immutable Datatype 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 23:35:39 $
+ * Date:        $Date: 2009/05/25 09:34:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,7 +53,7 @@ package org.w3c.spi;
 /**
  * Immutable Datatype
  */
-public interface ImmutableDatatype {
+public interface ImmutableDatatype<T> extends Cloneable {
 
     /**
      * Return the value in basic format according to ISO8601:2000
@@ -68,5 +68,12 @@ public interface ImmutableDatatype {
      * @return a <code>String</code> representing the value in basic format
      */
     String toXMLFormat();
+    
+    /**
+     * <p>Creates and returns a mutable copy of this object.</p>
+     * 
+     * @return copy of this <code>ImmutableDatatype</code>
+     */
+   T clone();    
 
 }

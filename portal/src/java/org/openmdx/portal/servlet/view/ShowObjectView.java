@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectView.java,v 1.68 2009/03/08 18:03:23 wfro Exp $
+ * Name:        $Id: ShowObjectView.java,v 1.69 2009/05/26 12:41:16 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.68 $
+ * Revision:    $Revision: 1.69 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:23 $
+ * Date:        $Date: 2009/05/26 12:41:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,8 +57,8 @@ package org.openmdx.portal.servlet.view;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -72,7 +72,6 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.control.ShowInspectorControl;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
-import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
 // ---------------------------------------------------------------------------
 public class ShowObjectView 
@@ -197,10 +196,9 @@ public class ShowObjectView
     }
 
     // -------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public Map createHistoryAppendCurrent(
     ) {
-        Map historyActions = MapUtils.orderedMap(new HashMap());
+        Map<Path,Action> historyActions = new LinkedHashMap<Path,Action>();
         historyActions.putAll(this.historyActions);
         // Remove first (oldest) history entry in case MAX_HISTORY_ENTRIES is
         // reached

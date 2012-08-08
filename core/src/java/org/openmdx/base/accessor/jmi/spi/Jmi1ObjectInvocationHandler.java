@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ObjectInvocationHandler.java,v 1.98 2009/03/03 17:23:07 hburger Exp $
+ * Name:        $Id: Jmi1ObjectInvocationHandler.java,v 1.122 2009/06/09 12:45:17 hburger Exp $
  * Description: JMI 1 Object Invocation Handler 
- * Revision:    $Revision: 1.98 $
+ * Revision:    $Revision: 1.122 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 17:23:07 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,9 +58,10 @@ import java.io.Writer;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -68,19 +69,27 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.jdo.JDOHelper;
+import javax.jdo.listener.ClearCallback;
+import javax.jdo.listener.DeleteCallback;
+import javax.jdo.listener.LoadCallback;
+import javax.jdo.listener.StoreCallback;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.RefBaseObject;
+import javax.jmi.reflect.RefClass;
+import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
+import javax.resource.cci.Record;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Identifier;
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_1;
-import org.openmdx.base.accessor.jmi.spi.RefObjectFactory_1.LegacyContainer;
+import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.MarshallingCollection;
@@ -91,8 +100,12 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.jdo.listener.ConstructCallback;
+import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
@@ -121,10 +134,9 @@ public class Jmi1ObjectInvocationHandler
         Jmi1Class_1_0 refClass
     ) {
         this(
-            new StandardRefObject_1(delegate, refClass),
+            new DelegatingRefObject_1(delegate, refClass),
             refClass,
-            false, // ignoreImpls, 
-            false // legacyDelegate
+            false // ignoreImpls, 
         );
     }
 
@@ -154,10 +166,9 @@ public class Jmi1ObjectInvocationHandler
         boolean ignoreImpls
     ) {
         this(
-            new LegacyRefObject_1(delegation,refClass),
+            new RefObject_1(delegation, refClass),
             refClass,
-            ignoreImpls, 
-            true // legacyDelegate
+            ignoreImpls 
         );
     }
 
@@ -165,10 +176,8 @@ public class Jmi1ObjectInvocationHandler
     private Jmi1ObjectInvocationHandler(
         RefObject delegate,
         Jmi1Class_1_0 refClass,
-        boolean ignoreImpls, 
-        boolean legacyDelegate
+        boolean ignoreImpls 
     ) {
-        this.legacyDelegate = legacyDelegate;
         this.refDelegate = delegate;
         this.ignoreImpls = ignoreImpls;
         this.refClass = refClass;
@@ -177,12 +186,11 @@ public class Jmi1ObjectInvocationHandler
         this.featureMapper = refClass.getFeatureMapper();
     }
 
-    /**
-     * Implements <code>Serializable</code>
-     */
+    //-----------------------------------------------------------------------
+    // Members
+    //-----------------------------------------------------------------------
     private static final long serialVersionUID = 7709571315051480193L;
     
-    protected final boolean legacyDelegate;
     protected final RefObject refDelegate;
     protected final boolean ignoreImpls;
     protected final Jmi1Class_1_0 refClass;
@@ -190,6 +198,535 @@ public class Jmi1ObjectInvocationHandler
     protected final Set<ModelElement_1_0> featuresHavingNoImpl;
     protected final FeatureMapper featureMapper;
 
+    //-----------------------------------------------------------------------
+    private static class DelegatingRefObject_1 
+        implements DelegatingRefObject_1_0, org.openmdx.base.persistence.spi.Cloneable<RefObject>, Serializable {
+
+        /**
+         * Constructor 
+         *
+         * @param delegate
+         * @param refClass
+         */
+        DelegatingRefObject_1(
+            Object delegate,
+            RefClass refClass
+        ){
+            this.cciDelegate = delegate;
+            this.refClass = refClass;
+        }
+
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = 8761679181457452801L;
+        
+        private Object cciDelegate;
+        private final RefClass refClass;        
+        private RefObject metaObject = null;
+        
+        private final static String REFLECTIVE = 
+            "This reflective method should be dispatched by the invocation " +
+            "handler to its non-reflective counterpart"; 
+
+        private final static String STANDARD = 
+            "This JMI method is not supported by CCI delegates"; 
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refGetPath()
+         */
+        public Path refGetPath(
+        ) {
+            return (Path) JDOHelper.getObjectId(this.cciDelegate);
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefObject#refClass()
+         */
+        public RefClass refClass() {
+            return this.refClass;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefObject#refDelete()
+         */
+        public void refDelete() {
+            JDOHelper.getPersistenceManager(
+                this.cciDelegate
+            ).deletePersistent(
+                this.cciDelegate
+            );
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefObject#refImmediateComposite()
+         */
+        public RefFeatured refImmediateComposite() {
+            Path objectId = refGetPath();
+            if(objectId == null) {
+                return null;
+            } 
+            else {
+                int s = objectId.size();
+                return s == 1 ? this : refOutermostPackage().refObject(objectId.getPrefix(s - 2));
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefObject#refIsInstanceOf(javax.jmi.reflect.RefObject, boolean)
+         */
+        public boolean refIsInstanceOf(
+            RefObject objType,
+            boolean considerSubtypes
+        ) {
+            try {
+                Model_1_0 model = refOutermostPackage().refModel();
+                if (model.isClassType(objType)) {
+                    return model.isSubtypeOf(this.refClass.refMofId(), objType.refMofId());
+                } 
+                else {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "objType must be a class type",
+                        new BasicException.Parameter("objType.refClass", objType.refClass().refMofId())
+                    );
+                }
+            } 
+            catch (ServiceException e) {
+                throw new JmiServiceException(e, this);
+            }  
+            catch (RuntimeServiceException e) {
+                throw new JmiServiceException(e, this);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefObject#refOutermostComposite()
+         */
+        public RefFeatured refOutermostComposite() {
+            Path objectId = refGetPath();
+            if(objectId == null) {
+                return null;
+            } 
+            else {
+                int s = objectId.size();
+                return s == 1 ? this : refOutermostPackage().refObject(objectId.getPrefix(1));
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refGetValue(javax.jmi.reflect.RefObject)
+         */
+        public Object refGetValue(
+            RefObject feature
+        ) {
+            throw newUnsupportedOperationException(REFLECTIVE, feature);
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refGetValue(java.lang.String)
+         */
+        public Object refGetValue(
+            String featureName
+        ) {
+            throw newUnsupportedOperationException(REFLECTIVE, featureName);
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refInvokeOperation(javax.jmi.reflect.RefObject, java.util.List)
+         */
+        @SuppressWarnings("unchecked")
+        public Object refInvokeOperation(
+            RefObject requestedOperation, 
+            List args
+        ) throws RefException {
+            throw newUnsupportedOperationException(REFLECTIVE, requestedOperation);
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refInvokeOperation(java.lang.String, java.util.List)
+         */
+        @SuppressWarnings("unchecked")
+        public Object refInvokeOperation(
+            String requestedOperation, 
+            List args
+        ) throws RefException {
+            throw newUnsupportedOperationException(REFLECTIVE, requestedOperation);
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refSetValue(javax.jmi.reflect.RefObject, java.lang.Object)
+         */
+        public void refSetValue(
+            RefObject feature, 
+            Object value
+        ) {
+            throw newUnsupportedOperationException(REFLECTIVE, feature);
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refSetValue(java.lang.String, java.lang.Object)
+         */
+        public void refSetValue(
+            String featureName, 
+            Object value
+        ) {
+            throw newUnsupportedOperationException(REFLECTIVE, featureName);
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
+         */
+        public RefPackage refImmediatePackage() {
+            return this.refClass.refImmediatePackage();
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
+         */
+        public RefObject refMetaObject(
+        ) {
+            if (this.metaObject == null) try {
+                this.metaObject = new RefMetaObject_1(
+                   refOutermostPackage().refModel().getElement(this.refClass().refMofId())
+                );
+            } 
+            catch (ServiceException e) {
+                throw new JmiServiceException(e, this);
+            }
+            return this.metaObject;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refMofId()
+         */
+        public String refMofId(
+        ) {
+            Path objectId = refGetPath();
+            return 
+                objectId == null ? null : 
+                objectId.toXRI();
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refOutermostPackage()
+         */
+        public Jmi1Package_1_0 refOutermostPackage(
+        ) {
+            return (Jmi1Package_1_0) this.refClass.refOutermostPackage();
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
+         */
+        @SuppressWarnings("unchecked")
+        public Collection refVerifyConstraints(
+            boolean deepVerify
+        ) {
+            if(this.cciDelegate instanceof RefObject) {
+                return ((RefObject)this.cciDelegate).refVerifyConstraints(deepVerify);
+            } 
+            else {
+                throw newUnsupportedOperationException(
+                    STANDARD, "refVerifyConstraints"
+                );
+            }
+        }
+
+        /* (non-Javadoc)
+         * org.openmdx.base.persistence.spi.Entity_2_0#openmdxjdoGetDelegate()
+         */
+        public Object openmdxjdoGetDelegate(
+        ) {
+            return this.cciDelegate;
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.Entity_2_0#openmdxjdoGetDataObject()
+         */
+        public Object openmdxjdoGetDataObject(
+        ) {
+            return this.cciDelegate instanceof DelegatingRefObject_1_0 ?
+                ((DelegatingRefObject_1_0)this.cciDelegate).openmdxjdoGetDataObject() :
+                this.cciDelegate;
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.Entity_2_0#openmdxjdoSetDelegate(java.lang.Object)
+         */
+        public void openmdxjdoSetDelegate(
+            Object delegate
+        ) {
+            this.cciDelegate = delegate;
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refAddEventListener(java.lang.String, java.util.EventListener)
+         */
+        public void refAddEventListener(
+            EventListener listener
+        ){
+            if(this.cciDelegate instanceof RefObject_1_0) {
+                ((RefObject_1_0)this.cciDelegate).refAddEventListener(
+                    listener
+                );
+            } 
+            else {
+                throw newUnsupportedOperationException(
+                    STANDARD, "refAddEventListener"
+                );
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refAddValue(java.lang.String, java.lang.Object, java.lang.Object)
+         */
+        public void refAddValue(
+            String featureName,
+            Object qualifier,
+            Object value
+        ) {
+            throw newUnsupportedOperationException(REFLECTIVE, featureName);
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refDefaultFetchGroup()
+         */
+        public Set<String> refDefaultFetchGroup(
+        ) {
+            if(this.cciDelegate instanceof RefObject_1_0) {
+                return ((RefObject_1_0)this.cciDelegate).refDefaultFetchGroup();
+            } 
+            else {
+                throw newUnsupportedOperationException(
+                    STANDARD,
+                    "refDefaultFetchGroup"
+                );
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refDelegate()
+         */
+        public ObjectView_1_0 refDelegate(
+        ) {
+            throw newUnsupportedOperationException(
+                STANDARD,
+                "refDelegate"
+            );        
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refGetEventListeners(java.lang.String, java.lang.Class)
+         */
+        public <T extends EventListener> T[] refGetEventListeners(
+            Class<T> listenerType
+        ){
+            if(this.cciDelegate instanceof RefObject_1_0) {
+                return ((RefObject_1_0)this.cciDelegate).refGetEventListeners(
+                    listenerType
+                );
+            } 
+            else {
+                throw newUnsupportedOperationException(
+                    STANDARD,
+                    "refGetEventListeners"
+                );
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refGetValue(javax.jmi.reflect.RefObject, java.lang.Object, boolean)
+         */
+        public Object refGetValue(
+            RefObject feature,
+            Object qualifier,
+            boolean marshal
+        ) {
+            throw newUnsupportedOperationException(REFLECTIVE, feature);
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refGetValue(java.lang.String, java.lang.Object, long)
+         */
+        public long refGetValue(
+            String feature, 
+            Object value, 
+            long position
+        ) {
+            throw newUnsupportedOperationException(REFLECTIVE, feature);
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refInitialize(javax.jmi.reflect.RefObject)
+         */
+        public void refInitialize(
+            RefObject source
+        ) {
+            if(this.cciDelegate instanceof RefObject_1_0) {
+                ((RefObject_1_0)this.cciDelegate).refInitialize(
+                    source
+                );
+            } 
+            else {
+                throw newUnsupportedOperationException(
+                    STANDARD,
+                    "refInitialize"
+                );
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refInitialize(boolean, boolean)
+         */
+        public void refInitialize(
+            boolean setRequiredToNull,
+            boolean setOptionalToNull
+        ) {
+            if(this.cciDelegate instanceof RefObject_1_0) {
+                ((RefObject_1_0)this.cciDelegate).refInitialize(
+                    setRequiredToNull,
+                    setOptionalToNull
+                );
+            } 
+            else {
+                throw newUnsupportedOperationException(
+                    STANDARD,
+                    "refInitialize"
+                );
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refRemoveEventListener(java.lang.String, java.util.EventListener)
+         */
+        public void refRemoveEventListener(
+            EventListener listener
+        ){
+            if(this.cciDelegate instanceof RefObject_1_0) {
+                ((RefObject_1_0)this.cciDelegate).refRemoveEventListener(
+                    listener
+                );
+            } 
+            else {
+                throw newUnsupportedOperationException(
+                    STANDARD,
+                    "refRemoveEventListener"
+                );
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refRemoveValue(java.lang.String, java.lang.Object)
+         */
+        public void refRemoveValue(
+            String featureName, 
+            Object qualifier
+        ) {
+            throw newUnsupportedOperationException(REFLECTIVE, featureName);
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refRemoveValue(java.lang.String, javax.jmi.reflect.RefObject)
+         */
+        public void refRemoveValue(
+            String featureName, 
+            RefObject value
+        ) {
+            throw newUnsupportedOperationException(REFLECTIVE, featureName);
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.cci.RefObject_1_0#refSetValue(java.lang.String, java.lang.Object, long)
+         */
+        public void refSetValue(
+            String feature, 
+            Object newValue, 
+            long length
+        ) {
+            throw newUnsupportedOperationException(REFLECTIVE, feature);
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.spi.RefObject_2_0#setDelegate(java.lang.Object)
+         */
+        public void setDelegate(
+            Object delegate
+        ) {
+            this.cciDelegate = delegate;
+        }
+
+        private UnsupportedOperationException newUnsupportedOperationException(
+            String message,
+            String feature
+        ){
+            return new UnsupportedOperationException(
+                newExceptionMessage(
+                    message + ": Feature " + feature + " in class " + this.refClass.refMofId()
+                )
+            );
+        }
+
+        private UnsupportedOperationException newUnsupportedOperationException(
+            String message,
+            RefObject feature
+        ){
+            return new UnsupportedOperationException(
+                newExceptionMessage(
+                    message + ": Feature " + feature.refMofId()
+                )
+            );
+        }
+
+        private String newExceptionMessage(
+            String message
+        ){
+            Object objectId = JDOHelper.getObjectId(this.cciDelegate);
+            return objectId == null ?
+                message :
+                message + " on object " + objectId;
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            return this.cciDelegate.hashCode();
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return this.cciDelegate.toString();
+        }
+        
+        //--------------------------------------------------------------------
+        // Implements Cloneable
+        //--------------------------------------------------------------------
+        
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.Cloneable#openmdxjdoClone()
+         */
+        public RefObject openmdxjdoClone() {
+            return this.refClass.refCreateInstance(
+                Collections.singletonList(
+                    PersistenceHelper.clone(this.cciDelegate)
+                )
+            );
+        }
+        
+    }
+    
+    //-----------------------------------------------------------------------
+    private boolean isDelegatingRefObject(
+    ) {
+        return this.refDelegate instanceof DelegatingRefObject_1;
+    }
+    
     //-----------------------------------------------------------------------
     private InvocationTarget getInvocationTarget(
         Object object,
@@ -225,7 +762,7 @@ public class Jmi1ObjectInvocationHandler
     }
 
     //-----------------------------------------------------------------------
-    private Object getInstance(
+    private Object getImpl(
         String qualifiedClassName,
         Object self,
         Object next
@@ -235,14 +772,16 @@ public class Jmi1ObjectInvocationHandler
             return null;
         } else if (instance == null){ 
             RefRootPackage_1 refPackage = (RefRootPackage_1) refClass.refOutermostPackage();
-            instance = this.legacyDelegate ? refPackage.refCreateImpl(
-                qualifiedClassName, 
-                (RefObject_1_0)self
-            ) : refPackage.refCreateImpl(
-                qualifiedClassName, 
-                self,
-                next
-            );
+            instance = this.isDelegatingRefObject() ? 
+                refPackage.refCreateImpl(
+                    qualifiedClassName, 
+                    self,
+                    next
+                ) :
+                refPackage.refCreateImpl(
+                    qualifiedClassName, 
+                    (RefObject_1_0)self
+                );
             this.impls.put(
                 qualifiedClassName, 
                 instance == null ? Maps.NULL : instance
@@ -269,8 +808,8 @@ public class Jmi1ObjectInvocationHandler
                 instanceQualifiedClassName, 
                 declaringClass
             ); 
-            return classImplementingInterface == null ? null : getInvocationTarget(
-                getInstance(classImplementingInterface, self, next),
+            return classImplementingInterface == null ? null : this.getInvocationTarget(
+                this.getImpl(classImplementingInterface, self, next),
                 method, 
                 lenient
             );
@@ -284,8 +823,8 @@ public class Jmi1ObjectInvocationHandler
         if(this.featuresHavingNoImpl.contains(feature)) {
             return null;
         }
-        InvocationTarget invocationTarget = getInvocationTarget(
-            getInstance(instanceQualifiedClassName, self, next), 
+        InvocationTarget invocationTarget = this.getInvocationTarget(
+            this.getImpl(instanceQualifiedClassName, self, next), 
             method, 
             lenient
         );
@@ -299,7 +838,7 @@ public class Jmi1ObjectInvocationHandler
             qualifiedFeatureName.lastIndexOf(":")
         );
         invocationTarget = this.getInvocationTarget(
-            getInstance(declaredQualifiedClassName, self, next), 
+            this.getImpl(declaredQualifiedClassName, self, next), 
             method, 
             lenient
         );
@@ -340,203 +879,218 @@ public class Jmi1ObjectInvocationHandler
                     return left == null ? args[0] == proxy : left.equals(right);
                 } 
             } 
-            else if (this.legacyDelegate) {
-                //
-                // Object_1_0 delegate
-                //
+            //
+            // ref delegation
+            //
+            else if(!this.isDelegatingRefObject()) {
                 if(
                     declaringClass == PersistenceCapable.class ||
                     declaringClass == org.openmdx.base.persistence.spi.Cloneable.class
+                ) {                    
+                    return method.invoke(
+                        this.refDelegate, 
+                        args
+                    );
+                } 
+                else if(
+                    declaringClass == LoadCallback.class ||
+                    declaringClass == StoreCallback.class ||
+                    declaringClass == ClearCallback.class ||
+                    declaringClass == DeleteCallback.class ||
+                    declaringClass == ConstructCallback.class
+                ) {
+                    throw new UnsupportedOperationException("Callbacks not supported for non-cci delegates. Callback was " + method);
+                }
+                else if (
+                    (declaringClass == RefBaseObject.class) ||
+                    (declaringClass == RefObject.class) ||
+                    (declaringClass == RefFeatured.class) ||
+                    (declaringClass == RefObject_1_0.class) ||
+                    (declaringClass == Jmi1Object_1_0.class)
                 ) {
                     return method.invoke(
                         this.refDelegate, 
                         args
                     );
                 } 
-                else if (declaringClass == RefBaseObject.class){
-                    return 
-                        "refImmediatePackage".equals(methodName) ? this.refClass.refImmediatePackage() :
-                        "refOutermostPackage".equals(methodName) ? this.refClass.refOutermostPackage() :
-                        method.invoke(this.refDelegate, args);
-                } 
-                else if (declaringClass == RefObject.class){
-                    return
-                        "refClass".equals(methodName) ? this.refClass :
-                        method.invoke(this.refDelegate, args);
-                } 
-                else if (
-                    (declaringClass == RefFeatured.class) ||
-                    (declaringClass == RefObject_1_0.class) ||
-                    (declaringClass == Jmi1Object_1_0.class)
-                ){
-                    return method.invoke(this.refDelegate, args);
-                } 
                 else {
-                    InvocationTarget invocationTarget = this.getImpl(
-                        proxy,
-                        null,
-                        method, 
-                        false // lenient
+                    // Dispatch cci method to generic ref-methods
+                    ModelElement_1_0 feature = this.featureMapper.getFeature(
+                        methodName, 
+                        method.getReturnType() == void.class ? 
+                            FeatureMapper.MethodSignature.RETURN_IS_VOID : 
+                            FeatureMapper.MethodSignature.DEFAULT
                     );
-                    // Dispatch to user-defined implementation
-                    if(invocationTarget != null) {
-                        return invocationTarget.invoke(args);
-                    }
-                    // Generic delegate 
-                    else {
-                        ModelElement_1_0 feature = this.featureMapper.getFeature(
-                            methodName, 
-                            method.getReturnType() == void.class ? 
-                                FeatureMapper.MethodSignature.RETURN_IS_VOID : 
-                                FeatureMapper.MethodSignature.DEFAULT
-                        );
-                        boolean isOperation = feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION);
-                        String featureName = (String)feature.objGetValue("name");
-                        // Getters
-                        if(!isOperation && methodName.startsWith("get")) {
-                            if((args == null) || (args.length == 0)) {           
-                                Object value = this.refDelegate.refGetValue(
-                                    featureName
-                                );
-                                return value instanceof InputStream ? new Jmi1BinaryLargeObject(
-                                    featureName, 
-                                    (InputStream)value
-                                ) : value instanceof SortedMap ? SortedMaps.asSparseArray(
-                                    (SortedMap<Integer,?>)value
-                                ) : value instanceof RefContainer ? Classes.newProxyInstance(
-                                    new Jmi1ContainerInvocationHandler((RefContainer)value),
-                                    method.getReturnType(), RefContainer.class, Serializable.class, LegacyContainer.class
-                                ) : value;
-                            }
-                            // Query
-                            else if(args.length == 1 && args[0] instanceof AnyTypePredicate) {
-                                return ((RefContainer)
-                                    this.refDelegate.refGetValue(featureName)
-                                ).refGetAll(
-                                    args[0]
-                                );
-                            }
-                            // Qualifier
-                            else {
-                                Object qualifier;
-                                if(args.length == 2 && args[0] instanceof Boolean) {
-                                    qualifier = ((Boolean)args[0]).booleanValue() ? "!" + args[1] : args[1];
-                                } 
-                                else {
-                                    qualifier = args[0];
-                                }
-                                return ((Jmi1Object_1_0)this.refDelegate).refGetValue(
-                                    featureName,
-                                    qualifier
-                                );
-                            }
-                        }
-                        // Boolean getters
-                        else if(!isOperation && methodName.startsWith("is")) {
-                            if((args == null) || (args.length == 0)) {  
-                                return this.refDelegate.refGetValue(
-                                    featureName
-                                );
-                            }
-                        }
-                        // Setters
-                        else if(!isOperation && methodName.startsWith("set")) {
-                            if((args != null) && (args.length == 1)) {                      
-                                this.refDelegate.refSetValue(
-                                    featureName,
-                                    args[0] instanceof BinaryLargeObject ? 
-                                        ((BinaryLargeObject)args[0]).getContent() : 
-                                        args[0]
-                                );
-                                return null;
-                            }
-                        }
-                        // Adders with signature (boolean idIsPersistent, PrimitiveType qualifier, Object object)
-                        else if(
-                            methodName.startsWith("add") &&
-                            (args != null) && 
-                            (args.length == 3) && 
-                            (args[0].getClass() == Boolean.class) && (
-                                args[1] instanceof String ||
-                                args[1] instanceof Number ||
-                                args[1].getClass().isPrimitive() 
-                            )
-                        ) {
-                            ((Jmi1Object_1_0)this.refDelegate).refAddValue(
-                                Identifier.ATTRIBUTE_NAME.toIdentifier(
-                                    featureName,
-                                    "add", // removablePrefix
-                                    null, // prependablePrefix
-                                    null, // removableSuffix
-                                    null // appendableSuffix
-                                ), 
-                                ((Boolean)args[0]).booleanValue() ? "!" + args[1] : args[1], 
-                                args[2]
+                    boolean isOperation = feature.objGetClass().equals(ModelAttributes.OPERATION);
+                    String featureName = (String)feature.objGetValue("name");
+                    // Getters
+                    if(!isOperation && methodName.startsWith("get")) {
+                        if((args == null) || (args.length == 0)) {           
+                            Object value = this.refDelegate.refGetValue(
+                                featureName
                             );
-                            return null;
-                        }
-                        // Adders with signature (PrimitiveType qualifier, Object object)
-                        else if(
-                            methodName.startsWith("add") &&
-                            (args != null) && 
-                            (args.length == 2) && (
-                                args[0] instanceof String ||
-                                args[0] instanceof Number ||
-                                args[0].getClass().isPrimitive() 
-                            )
-                        ) {
-                            ((Jmi1Object_1_0)this.refDelegate).refAddValue(
-                                Identifier.ATTRIBUTE_NAME.toIdentifier(
-                                    featureName,
-                                    "add", // removablePrefix
-                                    null, // prependablePrefix
-                                    null, // removableSuffix
-                                    null // appendableSuffix
-                                ), 
-                                args[0], 
-                                args[1]
-                            );
-                            return null;
-                        }
-                        // Operations
-                        else {
-                            List<Object> iargs = new ArrayList<Object>();
-                            if(args != null) {
-                                for(int i = 0; i < args.length; i++) {
-                                    iargs.add(args[i]);
-                                }
-                            }
-                            return this.refDelegate.refInvokeOperation(
+                            return value instanceof InputStream ? new Jmi1BinaryLargeObject(
                                 featureName, 
-                                iargs
+                                (InputStream)value
+                            ) : value instanceof SortedMap ? SortedMaps.asSparseArray(
+                                (SortedMap<Integer,?>)value
+                            ) : value instanceof RefContainer ? Classes.newProxyInstance(
+                                new Jmi1ContainerInvocationHandler(null, (RefContainer)value),
+                                method.getReturnType(), RefContainer.class, Serializable.class, LegacyContainer.class
+                            ) : value;
+                        }
+                        // Query
+                        else if(args.length == 1 && args[0] instanceof AnyTypePredicate) {
+                            return ((RefContainer)
+                                this.refDelegate.refGetValue(featureName)
+                            ).refGetAll(
+                                args[0]
                             );
                         }
+                        // Qualifier
+                        else {
+                            Object qualifier;
+                            if(args.length == 2 && args[0] instanceof Boolean) {
+                                qualifier = ((Boolean)args[0]).booleanValue() ? "!" + args[1] : args[1];
+                            } 
+                            else {
+                                qualifier = args[0];
+                            }
+                            return ((Jmi1Object_1_0)this.refDelegate).refGetValue(
+                                featureName,
+                                qualifier
+                            );
+                        }
+                    }
+                    // Boolean getters
+                    else if(!isOperation && methodName.startsWith("is")) {
+                        if((args == null) || (args.length == 0)) {  
+                            return this.refDelegate.refGetValue(
+                                featureName
+                            );
+                        }
+                    }
+                    // Setters
+                    else if(!isOperation && methodName.startsWith("set")) {
+                        if((args != null) && (args.length == 1)) {                      
+                            this.refDelegate.refSetValue(
+                                featureName,
+                                args[0] instanceof BinaryLargeObject ? 
+                                    ((BinaryLargeObject)args[0]).getContent() : 
+                                    args[0]
+                            );
+                            return null;
+                        }
+                    }
+                    // Adders with signature (boolean idIsPersistent, PrimitiveType qualifier, Object object)
+                    else if(
+                        methodName.startsWith("add") &&
+                        (args != null) && 
+                        (args.length == 3) && 
+                        (args[0].getClass() == Boolean.class) && (
+                            args[1] instanceof String ||
+                            args[1] instanceof Number ||
+                            args[1].getClass().isPrimitive() 
+                        )
+                    ) {
+                        ((Jmi1Object_1_0)this.refDelegate).refAddValue(
+                            Identifier.ATTRIBUTE_NAME.toIdentifier(
+                                featureName,
+                                "add", // removablePrefix
+                                null, // prependablePrefix
+                                null, // removableSuffix
+                                null // appendableSuffix
+                            ), 
+                            ((Boolean)args[0]).booleanValue() ? "!" + args[1] : args[1], 
+                            args[2]
+                        );
+                        return null;
+                    }
+                    // Adders with signature (PrimitiveType qualifier, Object object)
+                    else if(
+                        methodName.startsWith("add") &&
+                        (args != null) && 
+                        (args.length == 2) && (
+                            args[0] instanceof String ||
+                            args[0] instanceof Number ||
+                            args[0].getClass().isPrimitive() 
+                        )
+                    ) {
+                        ((Jmi1Object_1_0)this.refDelegate).refAddValue(
+                            Identifier.ATTRIBUTE_NAME.toIdentifier(
+                                featureName,
+                                "add", // removablePrefix
+                                null, // prependablePrefix
+                                null, // removableSuffix
+                                null // appendableSuffix
+                            ), 
+                            args[0], 
+                            args[1]
+                        );
+                        return null;
+                    }
+                    // Operations
+                    else {
+                        return this.refDelegate.refInvokeOperation(
+                            featureName, 
+                            args == null ? Collections.EMPTY_LIST : Arrays.asList(args)
+                        );
                     }
                 }
             } 
+            //
+            // cci delegation
+            //
             else {
-                //
-                // Standard Delegate
-                //
                 if(declaringClass == PersistenceCapable.class) {
                     if("jdoGetPersistenceManager".equals(methodName)) {
-                        return ((RefPackage_1_1)this.refClass.refOutermostPackage()).refPersistenceManager();
+                        return ((RefPackage_1_0)this.refClass.refOutermostPackage()).refPersistenceManager();
                     } 
                     else {
                         return method.invoke(
-                            ((DelegatingRefObject)this.refDelegate).openmdxjdoGetDataObject(), 
+                            ((DelegatingRefObject_1_0)this.refDelegate).openmdxjdoGetDataObject(), 
                             args
                         );
                     }
                 } 
                 else if(
-                    declaringClass == DelegatingRefObject.class ||
+                    declaringClass == DelegatingRefObject_1_0.class ||
                     declaringClass == org.openmdx.base.persistence.spi.Cloneable.class
                 ) {
                     return method.invoke(
                         this.refDelegate, 
                         args
                     );
+                } 
+                else if(
+                    declaringClass == LoadCallback.class ||
+                    declaringClass == StoreCallback.class ||
+                    declaringClass == ClearCallback.class ||
+                    declaringClass == DeleteCallback.class ||
+                    declaringClass == ConstructCallback.class
+                ) {
+                    boolean done = false;
+                    // Assert existence of impls
+                    this.getImpl(
+                    	this.refClass.refMofId(), 
+                    	proxy, 
+                       ((DelegatingRefObject_1_0)this.refDelegate).openmdxjdoGetDelegate()
+                    );
+                    for(Object impl : this.impls.values()) {
+                        if(declaringClass.isInstance(impl)) {
+                            method.invoke(impl, args);
+                            done = true;
+                        }
+                    }
+                    if(done) {
+                        return null;
+                    } 
+                    else if (declaringClass.isInstance(this.refDelegate)) {
+                        return method.invoke(this.refDelegate, args);
+                    } 
+                    else {
+                    	return null;
+                    } 
                 } 
                 else if(
                     declaringClass == RefBaseObject.class ||
@@ -546,19 +1100,21 @@ public class Jmi1ObjectInvocationHandler
                 ){
                     if("refGetValue".equals(methodName)) {
                         if(args.length == 1) {
-                            return this.standardDelegation(
+                            return this.invokeCci(
                                 proxy, 
                                 this.featureMapper.getAccessor(args[0]), 
                                 null, 
-                                this.refClass.getMarshaller()
+                                this.refClass.getMarshaller(), 
+                                false // operation
                             );
                         }
                         if(args.length == 3) {
-                            LargeObject largeObject = (LargeObject) this.standardDelegation(
+                            LargeObject largeObject = (LargeObject)this.invokeCci(
                                 proxy, 
                                 this.featureMapper.getAccessor(args[0]), 
                                 null, 
-                                this.refClass.getMarshaller()
+                                this.refClass.getMarshaller(), 
+                                false // operation
                             );
                             long position = args[2] == null ? 0l : (Long)args[2];
                             if(largeObject instanceof BinaryLargeObject) {
@@ -577,19 +1133,21 @@ public class Jmi1ObjectInvocationHandler
                         }
                     } 
                     else if ("refSetValue".equals(methodName) && args.length == 2) {
-                        return this.standardDelegation(
+                        return this.invokeCci(
                             proxy,
                             this.featureMapper.getMutator(args[0]), 
                             new Object[]{args[1]}, 
-                            this.refClass.getMarshaller()
+                            this.refClass.getMarshaller(), 
+                            false // operation
                         );
                     } 
                     else if("refInvokeOperation".equals(methodName) && args.length == 2){
-                        return this.standardDelegation(
+                        return this.invokeCci(
                             proxy,
                             this.featureMapper.getOperation(args[0]), 
                             ((List)args[1]).toArray(), 
-                            this.refClass.getMarshaller()
+                            this.refClass.getMarshaller(), 
+                            true // operation
                         );
                     } 
                     else {
@@ -605,11 +1163,12 @@ public class Jmi1ObjectInvocationHandler
                 else {
                     RefRootPackage_1 refPackage = (RefRootPackage_1)this.refClass.refOutermostPackage();
                     if(refPackage.getMixedInInterfaces(refClass.refMofId()).contains(declaringClass)) {
-                        return this.standardDelegation(
+                        return this.invokeCci(
                             proxy,
                             method, 
                             args, 
-                            this.refClass.getMarshaller()
+                            this.refClass.getMarshaller(), 
+                            false // operation
                         );
                     } else {
                         ModelElement_1_0 feature = this.featureMapper.getFeature(
@@ -618,8 +1177,9 @@ public class Jmi1ObjectInvocationHandler
                                 FeatureMapper.MethodSignature.RETURN_IS_VOID : 
                                 FeatureMapper.MethodSignature.DEFAULT
                         );
+                        boolean operation = feature.objGetClass().equals(ModelAttributes.OPERATION); 
                         if(
-                            !feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION) &&
+                            !operation &&
                             (methodName.length() > 3) &&
                             (args != null && args.length > 0)
                         ) {
@@ -631,11 +1191,12 @@ public class Jmi1ObjectInvocationHandler
                                 //
                                 // RefContainer operations
                                 //
-                                RefContainer container = (RefContainer) this.standardDelegation(
+                                RefContainer container = (RefContainer) this.invokeCci(
                                     proxy,
                                     this.featureMapper.getAccessor(feature.objGetValue("name")), 
                                     null, 
-                                    this.refClass.getMarshaller()
+                                    this.refClass.getMarshaller(), 
+                                    false // operation
                                 );
                                 if(makePersistent) {
                                     //
@@ -663,11 +1224,12 @@ public class Jmi1ObjectInvocationHandler
                                     //
                                     // Replace collection content
                                     //
-                                    Collection collection = (Collection) this.standardDelegation(
+                                    Collection collection = (Collection) this.invokeCci(
                                         proxy,
                                         this.featureMapper.getCollection(methodName), 
                                         null, 
-                                        this.refClass.getMarshaller()
+                                        this.refClass.getMarshaller(), 
+                                        false // operation
                                     );
                                     collection.clear();
                                     collection.addAll(
@@ -677,11 +1239,12 @@ public class Jmi1ObjectInvocationHandler
                                 }
                             }
                         }
-                        return this.standardDelegation(
+                        return this.invokeCci(
                             proxy,
                             this.featureMapper.getMethod(method), 
                             args, 
-                            this.refClass.getMarshaller()
+                            this.refClass.getMarshaller(), 
+                            operation
                         );
                     }
                 }
@@ -731,13 +1294,14 @@ public class Jmi1ObjectInvocationHandler
     }
 
     //-----------------------------------------------------------------------
-    protected Object standardDelegation(
+    protected Object invokeCci(
         Object proxy,
         Method method, 
         Object[] args, 
-        StandardMarshaller marshaller
+        StandardMarshaller marshaller, 
+        boolean operation
     ) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, ServiceException, SecurityException, NoSuchMethodException{
-        Object next = ((DelegatingRefObject)this.refDelegate).openmdxjdoGetDelegate(); 
+        Object next = ((DelegatingRefObject_1_0)this.refDelegate).openmdxjdoGetDelegate(); 
         InvocationTarget invocationTarget = this.getImpl(
             proxy,
             next,
@@ -749,18 +1313,40 @@ public class Jmi1ObjectInvocationHandler
             (args != null) && (args.length == 1) && 
             (args[0] instanceof org.openmdx.base.cci2.Void);
         if(invocationTarget == null) {
-            return marshaller.marshal(
-                method.invoke(
-                    next, 
-                    hasVoidArg ? null : marshaller.unmarshal(args)
-                )
-            );
-        } 
-        else {
+            if(
+                operation && 
+                next instanceof RefObject && 
+                args != null && 
+                args.length == 1 &&
+                args[0] instanceof RefStruct_1_0
+            ) {
+                RefStruct_1_0 in = (RefStruct_1_0) args[0];
+                RefStruct_1_0 out = null;
+                if(hasVoidArg) {
+                    out = (RefStruct_1_0)method.invoke(next);
+                }
+                else {
+                    out = (RefStruct_1_0)method.invoke(
+                        next,
+                        in == null ? null : ((RefPackage_1_0) ((RefObject)next).refOutermostPackage()).refCreateStruct(in.refDelegate())
+                    );                    
+                }
+                return out == null ? 
+                    null : 
+                    ((RefPackage_1_0) ((RefObject)proxy).refOutermostPackage()).refCreateStruct(out.refDelegate());
+            } else {
+                return marshaller.marshal(
+                    method.invoke(
+                        next, 
+                        hasVoidArg ? null : marshaller.unmarshal(args)
+                    )
+                );
+            } 
+        }  else {
             Object reply = invocationTarget.invoke(
                 hasVoidArg ? null : args
             );
-            if(reply instanceof Container && !(reply instanceof RefContainer)) {
+            if(reply instanceof Container<?> && !(reply instanceof RefContainer)) {
                 return Classes.newProxyInstance(
                     new Jmi1ContainerInvocationHandler(
                         null, // marshaller
@@ -768,8 +1354,7 @@ public class Jmi1ObjectInvocationHandler
                     ),
                     method.getReturnType(), RefContainer.class, Serializable.class
                 );
-            } 
-            else {
+            } else {
                 return reply;
             }
         }
@@ -895,14 +1480,23 @@ public class Jmi1ObjectInvocationHandler
     public static class StandardMarshaller implements Marshaller {
 
         StandardMarshaller(
-            org.openmdx.base.marshalling.Marshaller delegate
+            RefRootPackage_1 delegate
         ){
             this.delegate = delegate;
         }
 
         private static final long serialVersionUID = 3399640551686160240L;
-        private final org.openmdx.base.marshalling.Marshaller delegate;
+        private final RefRootPackage_1 delegate;
 
+        /**
+         * Retrieve the marshaller's delegate
+         * 
+         * @return the outermost package
+         */
+        Jmi1Package_1_0 getOutermostPackage(){
+            return this.delegate;
+        }
+        
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.Marshaller#unmarshal(java.lang.Object)
          */
@@ -911,7 +1505,8 @@ public class Jmi1ObjectInvocationHandler
         ){
             try {
                 return 
-                source instanceof Object[] ? unmarshal((Object[])source) :
+                    source instanceof RefStruct_1_0 ? ((RefStruct_1_0)source).refDelegate() :  
+                    source instanceof Object[] ? unmarshal((Object[])source) : 
                     this.delegate.unmarshal(source);
             } catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
@@ -926,19 +1521,28 @@ public class Jmi1ObjectInvocationHandler
             Object source
         ){
             try {
-                return 
-                source instanceof Object[] ? marshal((Object[])source) :
-                    source instanceof PersistenceCapable ? this.delegate.marshal(source) : 
-                        source instanceof List ? marshal((List)source) :
-                            source instanceof Set ? new MarshallingSet(this, (Set)source) :
-                                source instanceof SparseArray ? SortedMaps.asSparseArray(new MarshallingSortedMap(this, (SparseArray)source)) :
-                                    source instanceof Iterator ? new MarshallingIterator((Iterator)source) :
-                                        source instanceof Container ? Classes.newProxyInstance(
-                                            new Jmi1ContainerInvocationHandler(this, (Container)source),
-                                            source.getClass().getInterfaces()[0], RefContainer.class, Serializable.class 
-                                        ) : source;
-            } 
-            catch (ServiceException exception) {
+                return source instanceof Object[] ? marshal(
+                    (Object[])source
+                ) : source instanceof PersistenceCapable ? this.delegate.marshal(
+                    source
+                ) : source instanceof List ? marshal(
+                    (List)source
+                ) : source instanceof Set ? new MarshallingSet(
+                    this, 
+                    (Set)source
+                ) : source instanceof SparseArray ? SortedMaps.asSparseArray(
+                    new MarshallingSortedMap(this, (SparseArray)source)
+                ) : source instanceof Iterator ? new MarshallingIterator(
+                    (Iterator)source
+                ) : source instanceof Container ? Classes.newProxyInstance(
+                    new Jmi1ContainerInvocationHandler(this, (Container)source),
+                    source.getClass().getInterfaces()[0], 
+                    RefContainer.class, 
+                    Serializable.class 
+                ) : source instanceof Record ? delegate.refCreateStruct(
+                    (Record)source
+                ) : source;
+            }  catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
             }
         }
@@ -1066,42 +1670,6 @@ public class Jmi1ObjectInvocationHandler
 
     }
 
-    //------------------------------------------------------------------------
-    // StandardRefObject_1
-    //------------------------------------------------------------------------
-
-    public interface DelegatingRefObject {
-
-        /**
-         * Retrieve the persistence capable proxy's delegate
-         * 
-         * @return the persistence capable proxy's delegate
-         */
-        Object openmdxjdoGetDelegate(
-        );
-
-        /**
-         * Replace the persistence capable proxy's delegate
-         * 
-         * @param delegate the persistence capable proxy's new delegate
-         */
-        void openmdxjdoSetDelegate(
-            Object delegate
-        );
-
-        /**
-         * Retrieve the persistence capable proxy's data object
-         * 
-         * @return the persistence capable proxy's data object
-         */
-        Object openmdxjdoGetDataObject();
-
-    }
-    
-    //------------------------------------------------------------------------
-    // Class Jmi1BinaryLargeObject
-    //------------------------------------------------------------------------
-
     /**
      * 
      */
@@ -1129,6 +1697,7 @@ public class Jmi1ObjectInvocationHandler
             InputStream value = this.initialValue == null ? 
                 (InputStream)Jmi1ObjectInvocationHandler.this.refDelegate.refGetValue(this.featureName) : 
                 this.initialValue;
+            this.initialValue = null;
             return value;
         }
 

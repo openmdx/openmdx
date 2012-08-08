@@ -4,9 +4,9 @@
 	<enterprise-beans>
 	    <session>
 			<ejb-name>EntityManagerFactory</ejb-name>
-			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2LocalHome</local-home>
-			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2_0Local</local>
-			<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.EntityManagerFactory_2Bean</ejb-class>
+			<local-home>org.openmdx.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2LocalHome</local-home>
+			<local>org.openmdx.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2_0Local</local>
+			<ejb-class>org.openmdx.application.dataprovider.transport.ejb.server.EntityManagerFactory_2Bean</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
 			<env-entry>
@@ -47,12 +47,12 @@
 			<env-entry>
 			  <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+			  <env-entry-value>org.openmdx.application.dataprovider.spi.DelegatingLayer_0</env-entry-value>
 			</env-entry>
 			<env-entry>
 			  <env-entry-name>KERNEL/TYPE</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+			  <env-entry-value>org.openmdx.application.dataprovider.spi.DelegatingLayer_0</env-entry-value>
 			</env-entry>
 			<env-entry>
 			  <env-entry-name>KERNEL/APPLICATION</env-entry-name>
@@ -62,7 +62,7 @@
 			<env-entry>
 			  <env-entry-name>KERNEL/MODEL</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+			  <env-entry-value>org.openmdx.application.dataprovider.spi.DelegatingLayer_0</env-entry-value>
 			</env-entry>
 			<env-entry>
 			  <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
@@ -77,39 +77,39 @@
 			<ejb-local-ref>
 			  <ejb-ref-name>ejb/dataprovider[0]</ejb-ref-name>
 			  <ejb-ref-type>Session</ejb-ref-type>
-			  <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			  <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			  <local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			  <local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
 			  <ejb-link>provider1.jar#Default</ejb-link>
 			</ejb-local-ref>
 			<ejb-local-ref>
 			  <ejb-ref-name>ejb/dataprovider[1]</ejb-ref-name>
 			  <ejb-ref-type>Session</ejb-ref-type>
-			  <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			  <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			  <local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			  <local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
 			  <ejb-link>provider1.jar#Numeric</ejb-link>
 			</ejb-local-ref>
 			<ejb-local-ref>
 			  <ejb-ref-name>ejb/dataprovider[2]</ejb-ref-name>
 			  <ejb-ref-type>Session</ejb-ref-type>
-			  <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			  <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			  <local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			  <local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
 			  <ejb-link>provider1.jar#Native</ejb-link>
 			</ejb-local-ref>
 			<ejb-local-ref>
 			  <ejb-ref-name>ejb/dataprovider[3]</ejb-ref-name>
 			  <ejb-ref-type>Session</ejb-ref-type>
-			  <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			  <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			  <local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			  <local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
 			  <ejb-link>provider1.jar#Volatile</ejb-link>
 			</ejb-local-ref>
 		</session>
 	    <session>
 			<ejb-name>Gateway</ejb-name>
-			<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
-			<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
-			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-	  		<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Gateway_1Bean</ejb-class>
+			<home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+			<remote>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+			<local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			<local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+	  		<ejb-class>org.openmdx.application.dataprovider.transport.ejb.transaction.Gateway_1Bean</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
 			<env-entry>
@@ -160,8 +160,8 @@
 			<ejb-local-ref>
 				<ejb-ref-name>ejb/dataprovider[0]</ejb-ref-name>
 				<ejb-ref-type>Session</ejb-ref-type>
-				<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-				<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_1Local</local>
+				<local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+				<local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_1Local</local>
 				<ejb-link>EntityManagerFactory</ejb-link>
 			</ejb-local-ref>
 		</session>

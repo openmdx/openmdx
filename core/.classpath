@@ -4,11 +4,10 @@
 	<classpathentry kind="src" path="build/jre-1.5/src/java"/>
 	<classpathentry exported="true" kind="lib" path="src/resource"/>
 	<classpathentry exported="true" kind="lib" path="build/jre-1.5/src/resource"/>
-	<classpathentry exported="true" kind="lib" path="/openMDX Thirdparty ~ Java2 Extension (jre-1.5)/lib/icu4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="build/jre-1.5/model/openmdx-core.openmdx-xmi.zip"/>
-	<classpathentry exported="true" kind="lib" path="build/jre-1.5/lib/openmdx-core.rmi.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Java2 Enterprise (jre-1.5)"/>
 	<classpathentry kind="src" path="/openMDX Thirdparty ~ Java2 Extension (jre-1.5)"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="build/jre-1.5/lib/openmdx-core.rmi.jar"/>
 	<classpathentry kind="output" path="build/jre-1.5/eclipse"/>
 </classpath>

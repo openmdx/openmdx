@@ -4,11 +4,12 @@
 	<enterprise-beans>
 	    <session>
 			<ejb-name>EntityManagerFactory</ejb-name>
-			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2LocalHome</local-home>
-			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2_0Local</local>
-			<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.EntityManagerFactory_2Bean</ejb-class>
+			<local-home>org.openmdx.application.persistence.ejb.EntityManagerFactory_2LocalHome</local-home>
+			<local>org.openmdx.application.persistence.ejb.EntityManagerFactory_2_0Local</local>
+			<ejb-class>org.openmdx.application.persistence.ejb.EntityManagerFactory_2Bean</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
+			
 			<env-entry>
 				<env-entry-name>EntityManager/plugIn[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
@@ -32,7 +33,7 @@
 			<env-entry>
 				<env-entry-name>EntityManager/App1/PriceCalculator/class</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.test.app1.aop2.standard.PriceCalculator</env-entry-value>
+				<env-entry-value>org.openmdx.test.app1.aop2.PriceCalculator</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>EntityManager/App1/PriceCalculator/duration</env-entry-name>
@@ -45,130 +46,31 @@
 		        <env-entry-value>true</env-entry-value>
 			</env-entry>
 			<env-entry>
-			  <env-entry-name>KERNEL/exposedPath[1]</env-entry-name>
+			  <env-entry-name>PersistenceManager/xriPattern[0]</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>xri:@openmdx:org.openmdx.compatibility.datastore1</env-entry-value>
+			  <env-entry-value>xri://@openmdx*org.openmdx.test.app1/provider/JmiJdbc/($...)</env-entry-value>
 			</env-entry>
 			<env-entry>
-			  <env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
+			  <env-entry-name>PersistenceManager/restProvider[0]</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>xri:@openmdx:org.openmdx.test.app1/provider/JmiJdbc</env-entry-value>
+			  <env-entry-value>ejb/dataprovider[0]</env-entry-value>
 			</env-entry>
 			<env-entry>
-			  <env-entry-name>KERNEL/namespaceId</env-entry-name>
+			  <env-entry-name>PersistenceManager/xriPattern[1]</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>Manager</env-entry-value>
+			  <env-entry-value>xri://@openmdx*org.openmdx.compatibility.datastore1/($...)</env-entry-value>
 			</env-entry>
 			<env-entry>
-			  <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
+			  <env-entry-name>PersistenceManager/restProvider[1]</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+			  <env-entry-value>ejb/dataprovider[0]</env-entry-value>
 			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/TYPE</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/APPLICATION</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.runtime1.layer.application.Explorer_1</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/MODEL</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.delegation.Delegation_1</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>APPLICATION/runtimeSegment</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>xri:@openmdx:org.openmdx.compatibility.runtime1/provider/org:openmdx/segment/test</env-entry-value>
-			</env-entry>
-			<ejb-local-ref>
-			  <ejb-ref-name>ejb/dataprovider[1]</ejb-ref-name>
-			  <ejb-ref-type>Session</ejb-ref-type>
-			  <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			  <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_1Local</local>
-			  <ejb-link>DataProvider</ejb-link>
-			</ejb-local-ref>
 			<ejb-local-ref>
 			  <ejb-ref-name>ejb/dataprovider[0]</ejb-ref-name>
 			  <ejb-ref-type>Session</ejb-ref-type>
-			  <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			  <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_1Local</local>
+			  <local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			  <local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
 			  <ejb-link>DataProvider</ejb-link>
-			</ejb-local-ref>
-		</session>
-	    <session>
-			<ejb-name>Gateway</ejb-name>
-			<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
-			<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
-			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-	  		<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Gateway_1Bean</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-			<env-entry>
-			  <env-entry-name>KERNEL/namespaceId</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>Gateway</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/exposedPath[1]</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>xri:@openmdx:org.openmdx.compatibility.datastore1</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>xri:@openmdx:org.openmdx.test.app1/provider/JmiJdbc</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.interception.Entity_1</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/TYPE</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Standard_1</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/APPLICATION</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.Layer_1</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/MODEL</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.Layer_1</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
-			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.delegation.Entity_1</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>APPLICATION/disableRouter</env-entry-name>
-			  <env-entry-type>java.lang.Boolean</env-entry-type>
-			  <env-entry-value>true</env-entry-value>
-			</env-entry>
-			<env-entry>
-			  <env-entry-name>PERSISTENCE/retrievalSize</env-entry-name>
-			  <env-entry-type>java.lang.Integer</env-entry-type>
-			  <env-entry-value>1000</env-entry-value>
-			</env-entry>
-			<ejb-local-ref>
-				<ejb-ref-name>ejb/dataprovider[0]</ejb-ref-name>
-				<ejb-ref-type>Session</ejb-ref-type>
-				<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-				<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_1Local</local>
-				<ejb-link>EntityManagerFactory</ejb-link>
 			</ejb-local-ref>
 		</session>
 	</enterprise-beans>
@@ -200,13 +102,6 @@
 				<method-name>commit</method-name>
 			</method>
 			<trans-attribute>RequiresNew</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>Gateway</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Never</trans-attribute>
 		</container-transaction>
 	</assembly-descriptor>
 </ejb-jar>

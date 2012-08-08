@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OrderSpecifier.java,v 1.9 2009/01/06 10:21:19 wfro Exp $
+ * Name:        $Id: OrderSpecifier.java,v 1.10 2009/05/16 22:17:51 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2009/05/16 22:17:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,7 +55,6 @@ import java.io.Serializable;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.application.dataprovider.cci.Orders;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
 

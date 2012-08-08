@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HardWiredObjects_1.java,v 1.1 2009/02/04 11:06:37 hburger Exp $
+ * Name:        $Id: HardWiredObjects_1.java,v 1.6 2009/05/27 23:14:18 wfro Exp $
  * Description: Hard-Wired Objects Layer
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/04 11:06:37 $
+ * Date:        $Date: 2009/05/27 23:14:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,25 +51,27 @@
 package org.openmdx.test.app1.layer.application;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.layer.application.Standard_1;
 import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.compatibility.base.dataprovider.layer.application.Standard_1;
 import org.openmdx.kernel.exception.BasicException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Hard-wired Objects Layer
@@ -104,7 +106,7 @@ public class HardWiredObjects_1
     /**
      * 
      */
-    private final Logger logger = LoggerFactory.getLogger(HardWiredObjects_1.class);
+    private final Logger logger = Logger.getLogger(HardWiredObjects_1.class.getName());
 
 
     //------------------------------------------------------------------------
@@ -212,7 +214,7 @@ public class HardWiredObjects_1
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-        this.logger.trace("Get request for {}", request.path());
+        this.logger.log(Level.FINEST,"Get request for {0}", request.path());
         String referenceName = getReferenceName(request);
         if("nameFormat" == referenceName) {
             //
@@ -250,7 +252,7 @@ public class HardWiredObjects_1
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-        this.logger.trace("Create request for {}", request.path());
+        this.logger.log(Level.FINEST,"Create request for {0}", request.path());
         String referenceName = getReferenceName(request);
         if("nameFormat" == referenceName || "addressFormat" == referenceName) {
             //
@@ -338,7 +340,7 @@ public class HardWiredObjects_1
             //
             // hard-wired NameFormat
             //
-            List<DataproviderObject> formats = new ArrayList<DataproviderObject>();
+            List<DataproviderObject_1_0> formats = new ArrayList<DataproviderObject_1_0>();
             for(String id : this.nameFormats.keySet()) {
                 formats.add(
                     getFormat(
@@ -347,14 +349,12 @@ public class HardWiredObjects_1
                     )
                 );
             }
-            DataproviderReply reply = new DataproviderReply(formats);
-            reply.context(DataproviderReplyContexts.HAS_MORE).set(0, Boolean.FALSE);
-            return reply;
+            return getSlice(request, formats);
         } else if("addressFormat" == referenceName) {
             //
             // hard-wired AddressFormat
             //
-            List<DataproviderObject> formats = new ArrayList<DataproviderObject>();
+            List<DataproviderObject_1_0> formats = new ArrayList<DataproviderObject_1_0>();
             for(String id : this.addressFormats.keySet()) {
                 formats.add(
                     getFormat(
@@ -363,15 +363,40 @@ public class HardWiredObjects_1
                     )
                 );
             }
-            DataproviderReply reply = new DataproviderReply(formats);
-            reply.context(DataproviderReplyContexts.HAS_MORE).set(0, Boolean.FALSE);
-            return reply;
+            return getSlice(request, formats);
         } else {
             //
             // non hard-wired objects
             //
             return super.find(header, request);
         }
+    }
+
+    private DataproviderReply getSlice(
+        DataproviderRequest request,
+        List<DataproviderObject_1_0> values
+    ){
+        boolean hasMore;
+        if(request.position() >= values.size()) {
+            values = Collections.emptyList();
+            hasMore = false;
+        } else {
+            int fromPosition = request.position();
+            long toPosition = fromPosition;
+            toPosition += request.size();
+            if(toPosition >= values.size()) {
+                toPosition = values.size();
+                hasMore = false;
+            } else {
+                hasMore = true;
+            }
+            if(fromPosition > 0 || hasMore) {
+                values = values.subList(fromPosition, (int)toPosition);
+            }
+        }
+        DataproviderReply reply = new DataproviderReply(values);
+        reply.context(DataproviderReplyContexts.HAS_MORE).set(0, Boolean.valueOf(hasMore));
+        return reply;
     }
 
 }

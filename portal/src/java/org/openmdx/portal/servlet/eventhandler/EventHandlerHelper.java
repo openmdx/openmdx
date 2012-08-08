@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: EventHandlerHelper.java,v 1.10 2008/09/30 21:47:38 wfro Exp $
+ * Name:        $Id: EventHandlerHelper.java,v 1.11 2009/05/27 14:45:23 wfro Exp $
  * Description: EventHandlerHelper
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/09/30 21:47:38 $
+ * Date:        $Date: 2009/05/27 14:45:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -83,17 +83,4 @@ public class EventHandlerHelper {
         return new PrintWriter(os);
     }
     
-    //-------------------------------------------------------------------------
-    public static void notifyObjectModified(
-        ViewsCache notifyViews
-    ) {
-        for(
-            Iterator i = notifyViews.getViews().values().iterator(); 
-            i.hasNext(); 
-        ) {
-            ObjectView view = (ObjectView)i.next();
-            view.getPersistenceManager().evictAll();
-        }
-    }
-           
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LocalHomeHandler.java,v 1.2 2009/03/04 19:08:01 hburger Exp $
+ * Name:        $Id: LocalHomeHandler.java,v 1.3 2009/03/11 16:03:39 hburger Exp $
  * Description: Local Home Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/04 19:08:01 $
+ * Date:        $Date: 2009/03/11 16:03:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,10 +81,11 @@ public class LocalHomeHandler<H extends EJBLocalHome>
         Class<EJBLocalObject> ejbLocalObjectClass
     ){
         this.ejbLocalObjectClass = ejbLocalObjectClass;
-        this.ejbLocalHome = Classes.newProxyInstance (
+        Object ejbLocalHome = Classes.newProxyInstance (
             this,
             EJBLocalHome.class, ejbLocalHomeClass
         );
+        this.ejbLocalHome = (H) ejbLocalHome;
         this.localObjectHandler = new LocalObjectHandler(this);
     }
 

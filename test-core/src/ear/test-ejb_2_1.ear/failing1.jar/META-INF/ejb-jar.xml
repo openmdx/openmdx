@@ -2,11 +2,11 @@
 <!--
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ejb-jar.xml,v 1.4 2007/05/31 08:40:09 hburger Exp $
+ * Name:        $Id: ejb-jar.xml,v 1.5 2009/03/09 18:15:47 hburger Exp $
  * Description: Enterprise JavaBeans 2.1 Descriptor
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/05/31 08:40:09 $
+ * Date:        $Date: 2009/03/09 18:15:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,7 +57,7 @@
 	<display-name>openMDX/Test RollbackOnly</display-name>
 	<enterprise-beans>
 	    <session>
-			<ejb-name>transaction-RollbackOnly</ejb-name>
+			<ejb-name>ejb21RollbackOnly</ejb-name>
 			<local-home>org.openmdx.test.kernel.application.container.ejb.cci.Runnable_1LocalHome</local-home>
 			<local>org.openmdx.test.kernel.application.container.ejb.cci.Runnable_1_0Local</local>
 			<ejb-class>org.openmdx.test.kernel.application.container.ejb.spi.Failing_1Bean</ejb-class>
@@ -68,7 +68,7 @@
   <assembly-descriptor>
     <container-transaction>
       <method>
-        <ejb-name>transaction-RollbackOnly</ejb-name>
+        <ejb-name>ejb21RollbackOnly</ejb-name>
         <method-name>*</method-name>
       </method>
       <trans-attribute>Mandatory</trans-attribute>

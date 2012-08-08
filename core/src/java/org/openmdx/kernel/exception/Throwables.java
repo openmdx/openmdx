@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Throwables.java,v 1.12 2009/03/05 13:53:30 hburger Exp $
+ * Name:        $Id: Throwables.java,v 1.13 2009/03/31 17:05:16 hburger Exp $
  * Description: Throwables
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 13:53:30 $
+ * Date:        $Date: 2009/03/31 17:05:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,10 +51,11 @@
  */
 package org.openmdx.kernel.exception;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.openmdx.kernel.exception.BasicException.Parameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.spi.LocationAwareLogger;
+import org.openmdx.kernel.log.LoggerFactory;
 
 /**
  * JRE dependent exception handling methods. 
@@ -68,7 +69,7 @@ public class Throwables {
     /**
      * The Throwables' Standard Logger
      */
-    private final static Logger logger = LoggerFactory.getLogger(Throwables.class);
+    private final static Logger logger = LoggerFactory.getLogger();
     
     /**
      * Log the throwable at warning level.
@@ -81,21 +82,11 @@ public class Throwables {
         T throwable
     ){
         BasicException exceptionStack = BasicException.toExceptionStack(throwable);
-        String message = exceptionStack.getDescription();
-        if(logger instanceof LocationAwareLogger) {
-            ((LocationAwareLogger)logger).log(
-                null, // marker
-                Throwables.class.getName(), 
-                LocationAwareLogger.WARN_INT, 
-                message, 
-                exceptionStack
-             );
-        } else {
-            logger.warn(
-                message, 
-                exceptionStack
-            );
-        }
+        logger.log(
+            Level.WARNING,
+            exceptionStack.getDescription(), 
+            exceptionStack
+         ); // TODO make location aware
         return throwable;
     }
 

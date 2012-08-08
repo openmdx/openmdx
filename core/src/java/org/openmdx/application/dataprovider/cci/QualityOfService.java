@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: QualityOfService.java,v 1.1 2009/01/05 13:44:50 wfro Exp $
- * Description: spice/dataprovider: Quality of Service
- * Revision:    $Revision: 1.1 $
+ * Name:        $Id: QualityOfService.java,v 1.3 2009/06/09 15:39:58 hburger Exp $
+ * Description: Quality of Service
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:50 $
+ * Date:        $Date: 2009/06/09 15:39:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,10 +61,6 @@ public class QualityOfService
 {
 
     /**
-     * 
-     */
-    private static final long serialVersionUID = 3257844389827981365L;
-    /**
      * With the default qaulity of service the client waits until the server
      * has completed the requests in the given order.
      */
@@ -73,7 +69,31 @@ public class QualityOfService
         super();
     }
     
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3257844389827981365L;
 
+    /**
+     * TODO Replace by constant
+     */
+    final private short synchronizationScope = -1;
+    
+    /**
+     * TODO Replace by constant
+     */
+    final private short routingType = -1; 
+    
+    /**
+     * TODO Replace by constant
+     */
+    final private short orderingType = -1; 
+
+    /**
+     * The standard quality of service
+     */
+    public static final QualityOfService STANDARD = new QualityOfService();
+    
     /**
      *
      */
@@ -98,8 +118,4 @@ public class QualityOfService
         return this.orderingType;
     }
 
-    final private short synchronizationScope = -1; //... Replace by constant
-    final private short routingType = -1; //... Replace by constant
-    final private short orderingType = -1; //... Replace by constant
-    
 }

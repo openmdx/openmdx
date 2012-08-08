@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BinaryLargeObjects.java,v 1.11 2009/01/12 12:54:16 wfro Exp $
+ * Name:        $Id: BinaryLargeObjects.java,v 1.12 2009/05/26 14:00:11 wfro Exp $
  * Description: Binary Large Object Factory 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:54:16 $
+ * Date:        $Date: 2009/05/26 14:00:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,8 +61,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.openmdx.application.dataprovider.transport.rmi.InprocessMarshaller;
 
 /**
  * Binary Large Object Factory
@@ -134,6 +132,23 @@ public class BinaryLargeObjects {
 
     }
        
+    //------------------------------------------------------------------------
+    private static class BinarySource_1InputStream 
+    extends ByteStringInputStream {
+
+        public BinarySource_1InputStream(
+            ByteString bytes
+        ) {
+            super(bytes);
+        }
+
+        public long length(
+        ) {
+            return getString().length();
+        }
+
+    }
+    
     public static BinaryLargeObject valueOf(
         URL source
     ){
@@ -316,9 +331,9 @@ public class BinaryLargeObjects {
          * 
          * @return a newly created input stream
          */
-        public InprocessMarshaller.BinarySource_1InputStream toStream(
+        public BinarySource_1InputStream toStream(
         ){
-            return new InprocessMarshaller.BinarySource_1InputStream(this.string);
+            return new BinarySource_1InputStream(this.string);
         }
     
     }

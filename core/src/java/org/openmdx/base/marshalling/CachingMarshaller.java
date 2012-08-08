@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CachingMarshaller.java,v 1.3 2009/01/07 15:48:47 wfro Exp $
+ * Name:        $Id: CachingMarshaller.java,v 1.5 2009/05/22 19:07:50 hburger Exp $
  * Description: Caching Marshaller 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/07 15:48:47 $
+ * Date:        $Date: 2009/05/22 19:07:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,11 +71,6 @@ public abstract class CachingMarshaller
 {
 
     /**
-     * 
-     */
-    private static final long serialVersionUID = -3481011691338894388L;
-
-    /**
      * Constructs a new, empty caching marshaller with the default initial
      * cache size. 
      */
@@ -84,6 +79,11 @@ public abstract class CachingMarshaller
         initialize();
     }
     
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = -3481011691338894388L;
+
     /**
      * The unmarshalled objects
      */ 
@@ -148,7 +148,7 @@ public abstract class CachingMarshaller
      *            The object to be marshalled
      * 
      * @return    The marshalled object;
-     *            or null if source is null
+     *            or null if source is nullcacheObject
      * 
      * @exception       ServiceException MARSHAL_FAILURE
      *                  Object can't be unmarshalled
@@ -163,14 +163,8 @@ public abstract class CachingMarshaller
             target = this.mapping.get(source);
             if(target == null) {
                 target = createMarshalledObject(source);
-                if(target != null) {
-                    Object concurrent = this.mapping.putIfAbsent(
-                        source, 
-                        target
-                    );
-                    if(concurrent != null) {
-                        target = concurrent;
-                    }
+                if(!cacheObject(source, target)) {
+                    target = this.mapping.get(source);
                 }
             }
         }

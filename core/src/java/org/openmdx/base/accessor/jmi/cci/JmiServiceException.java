@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JmiServiceException.java,v 1.22 2009/03/05 13:53:30 hburger Exp $
+ * Name:        $Id: JmiServiceException.java,v 1.23 2009/06/05 15:28:41 hburger Exp $
  * Description: JmiServiceException class
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 13:53:30 $
+ * Date:        $Date: 2009/06/05 15:28:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import javax.jmi.reflect.JmiException;
-import javax.jmi.reflect.RefClass;
 import javax.jmi.reflect.RefObject;
 
 import org.openmdx.kernel.exception.BasicException;
@@ -74,6 +73,43 @@ public class JmiServiceException extends JmiException
     private static final long serialVersionUID = 3688792466186909232L;
 
     /**
+     * Creates a new <code>ServiceException</code>.
+     *
+     * @param   cause
+     *          The exception cause.
+     * @param   exceptionDomain
+     *          The exception domain or <code>null</code> for the
+     *          default exception domain containing negative exception codes
+     *          only.
+     * @param   exceptionCode
+     *          The exception code. Negative codes are shared by all exception
+     *          domains, while positive ones are (non-default) exception
+     *          domain specific.
+     * @param   description
+     *          A readable description usually not including the parameters.
+     * @param   parameters
+     *          The exception specific parameters.
+     */
+    public JmiServiceException(
+        Exception cause,
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        BasicException.Parameter... parameters
+    ){
+        super.initCause(
+            new BasicException(
+                cause,
+                exceptionDomain,
+                exceptionCode,
+                parameters,
+                description,
+                this
+            )
+        );
+    }
+
+    /**
      * Constructor
      * 
      * @param cause a <code>BasicException</code> wrapper
@@ -83,13 +119,10 @@ public class JmiServiceException extends JmiException
     ){
         super(cause.getMessage());
         super.initCause(
-            BasicException.toStackedException(
-                cause,
-                this
-            )
+            BasicException.toExceptionStack(cause == null ? this : cause)
         );
     }
-
+    
     /**
      * Constructor
      * 
@@ -102,51 +135,10 @@ public class JmiServiceException extends JmiException
     ) {
         super(null, elementInError, cause.getMessage());
         super.initCause(
-            BasicException.toStackedException(
-                cause,
-                this,
-                getParameters(elementInError)
-            )
+            BasicException.toExceptionStack(cause == null ? this : cause)
         );
     }
-
-    /**
-     * Retrieve attributes of the element in error
-     * 
-     * @param elementInError
-     * 
-     * @return some attributes of the element in error
-     */
-    protected static BasicException.Parameter[] getParameters(
-        RefObject elementInError
-    ){
-        if(elementInError == null) return null;
-        try {
-            RefClass refClass = elementInError.refClass();
-            return new BasicException.Parameter[]{
-                new BasicException.Parameter(
-                    "object.java.class", 
-                    elementInError.getClass().getName()
-                ),
-                new BasicException.Parameter(
-                    "object.mof.id", 
-                    elementInError.refMofId()
-                ),
-                new BasicException.Parameter(
-                    "object.mof.class", 
-                    refClass == null ? null : refClass.refMofId()
-                )
-            };
-        } catch (RuntimeException exception) {
-            return new BasicException.Parameter[]{
-                new BasicException.Parameter(
-                    "object.java.class", 
-                    elementInError.getClass().getName()
-                )
-            };
-        }
-    }
-
+    
     /**
      * Log the exception at warning level.
      *

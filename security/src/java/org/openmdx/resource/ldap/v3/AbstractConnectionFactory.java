@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractConnectionFactory.java,v 1.6 2009/03/08 18:52:20 wfro Exp $
+ * Name:        $Id: AbstractConnectionFactory.java,v 1.7 2009/03/12 17:12:30 hburger Exp $
  * Description: Managed LDAP Connection Factory
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:20 $
+ * Date:        $Date: 2009/03/12 17:12:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,12 +64,14 @@ import javax.resource.spi.SecurityException;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
+import org.openmdx.kernel.resource.spi.ShareableConnectionManager;
 import org.openmdx.resource.ldap.spi.ConnectionFactory;
 import org.openmdx.resource.ldap.spi.ManagedConnection;
 
 /**
  * Managed LDAP Connection Factory
  */
+@SuppressWarnings("serial")
 public abstract class AbstractConnectionFactory
     implements ManagedConnectionFactory {
 
@@ -122,19 +124,17 @@ public abstract class AbstractConnectionFactory
      */
     public final Object createConnectionFactory(
     ) throws ResourceException {
-        throw new UnsupportedOperationException();
-//        throw new UnsupportedOperationException();
-//        if(this.connectionManager == null) {
-//            this.connectionManager = new ShareableConnectionManager(
-//                Collections.singleton(
-//                    new PasswordCredential(
-//                        this.userName,
-//                        (this.password == null ? "" : this.password).toCharArray()
-//                    )
-//                )
-//            );
-//        }
-//        return createConnectionFactory(this.connectionManager);
+        if(this.connectionManager == null) {
+            this.connectionManager = new ShareableConnectionManager(
+                Collections.singleton(
+                    new PasswordCredential(
+                        this.userName,
+                        (this.password == null ? "" : this.password).toCharArray()
+                    )
+                )
+            );
+        }
+        return createConnectionFactory(this.connectionManager);
     }
 
     /* (non-Javadoc)

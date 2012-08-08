@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightDeploymentManager.java,v 1.3 2009/01/21 16:32:03 hburger Exp $
+ * Name:        $Id: LightweightDeploymentManager.java,v 1.4 2009/03/31 17:06:10 hburger Exp $
  * Description: Lightweight Deployment Manager
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/21 16:32:03 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,6 +60,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.deploy.model.DeployableObject;
 import javax.enterprise.deploy.shared.ActionType;
@@ -82,9 +84,9 @@ import javax.enterprise.deploy.spi.status.ProgressObject;
 
 import org.openmdx.kernel.application.configuration.Report;
 import org.openmdx.kernel.application.container.lightweight.LightweightContainer;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.url.URLInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Lightweight Deployment Manager
@@ -100,14 +102,13 @@ public class LightweightDeploymentManager implements DeploymentManager {
 		LightweightContainer.Mode mode
 	) {
 		this.locale = null;
-		this.logger = LoggerFactory.getLogger(LightweightDeploymentManager.class);
 		this.mode = mode;
 		this.targets = new Target[]{new Type()};
 	}
 
 	private Locale locale;
 
-	private Logger logger;
+	private final Logger logger = LoggerFactory.getLogger();
 	
 	final LightweightContainer.Mode mode;
 	
@@ -177,7 +178,7 @@ public class LightweightDeploymentManager implements DeploymentManager {
 		InputStream deploymentPlan
 	) throws IllegalStateException {
 		throw new UnsupportedOperationException(
-			"This deprecated methiod is not supported"
+			"This deprecated method is not supported"
 		);
 	}
 
@@ -428,38 +429,41 @@ public class LightweightDeploymentManager implements DeploymentManager {
 				);
 				for(Map.Entry<Integer,URL> resourceAdapter : resourceAdapters.entrySet()){
 					Report report = lightweightContainer.deployConnector(resourceAdapter.getValue());
+					Object[] logParameters = new Object[]{resourceAdapter.getKey(),report};
 					if(report.isSuccess()){
 						completed.add(moduleIDList[resourceAdapter.getKey()]);
-						this.logger.info(
-							"Deployment of resource adapter {} succeeded: {}",
-							resourceAdapter.getKey(),
-							report
+						this.logger.log(
+							Level.INFO,
+							"Deployment of resource adapter {0} succeeded: {1}",
+							logParameters
 						);
 					} else {
-						this.logger.warn(
-							"Deployment of resource adapter {} failed: {}",
-							resourceAdapter.getKey(),
-							report
+						this.logger.log(
+							Level.INFO,
+							"Deployment of resource adapter {0} failed: {1}",
+							logParameters
 						);
 					}
 				}
 				for(Map.Entry<Integer,URL> application : applications.entrySet()){
 					Report[] reports = lightweightContainer.deployApplication(application.getValue());
+					Object[] logParameters = new Object[]{application.getKey(),reports[0]}; 
 					if(reports[0].isSuccess()){
-						this.logger.info(
-							"Deployment of enterprise application {} succeeded: {}",
-							application.getKey(),
-							reports[0]
+						this.logger.log(
+							Level.INFO,
+							"Deployment of enterprise application {0} succeeded: {1}",
+							logParameters
+							
 						);
 					} else {
-						this.logger.warn(
-							"Deployment of enterprise application {} failed: {}",
-							application.getKey(),
-							reports[0]
+						this.logger.log(
+							Level.WARNING,
+							"Deployment of enterprise application {0} failed: {1}",
+							logParameters
 						);
 					}
 					for(int i = 1; i < reports.length; i++) {
-						this.logger.info("Module {}: {}", i, reports[i]);
+						this.logger.log(Level.INFO,"Module {0}: {1}", new Object[]{i, reports[i]});
 					}
 				}
 				return new Progress(
@@ -469,6 +473,19 @@ public class LightweightDeploymentManager implements DeploymentManager {
 					completed.toArray(new TargetModuleID[completed.size()])							
 				);
 			} catch (Exception exception) {
+                this.logger.log(
+                    Level.WARNING,
+                    "Could not start target",
+                    BasicException.newStandAloneExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ACTIVATION_FAILURE,
+                        "Could not start target",
+                        new BasicException.Parameter("name", target.getName()),
+                        new BasicException.Parameter("description", target.getDescription()),
+                        new BasicException.Parameter("mode", target.getMode())
+                    )
+                );
 				return new Progress(
 					ActionType.EXECUTE,
 					CommandType.START,

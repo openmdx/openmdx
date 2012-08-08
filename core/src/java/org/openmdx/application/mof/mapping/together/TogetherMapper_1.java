@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TogetherMapper_1.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: TogetherMapper_1.java,v 1.6 2009/06/09 12:45:18 hburger Exp $
  * Description: TogetherCppExternalizer_1
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,8 +62,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.mapping.cci.AliasDef;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
@@ -73,8 +71,9 @@ import org.openmdx.application.mof.mapping.cci.StructDef;
 import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
 import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.log.SysLog;
 
 @SuppressWarnings("unchecked")
@@ -369,7 +368,7 @@ public class TogetherMapper_1
   //-------------------------------------------------------------------------
   public void externalize(
     String qualifiedPackageName,
-    Model_1_3 model, 
+    Model_1_0 model, 
     ZipOutputStream jar
   ) throws ServiceException {
   
@@ -401,7 +400,7 @@ public class TogetherMapper_1
           SysLog.trace("processing package element", modelElement.objGetValue("qualifiedName"));
     
           // org:omg:model1:Class
-          if(modelElement.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.CLASS)) {
+          if(modelElement.objGetClass().equals(ModelAttributes.CLASS)) {
     
             SysLog.trace("processing class", modelElement.objGetValue("qualifiedName"));
   
@@ -433,21 +432,21 @@ public class TogetherMapper_1
               ) {
                 ModelElement_1_0 feature = this.model.getElement(j.next());
   
-                if(feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)) {
+                if(feature.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
                   attributes.add(feature);
   
                   // add include for type of this attribute
                   ModelElement_1_0 featureType = this.model.getElement(feature.objGetValue("type"));
                   includeTypes.add(featureType.objGetValue("qualifiedName"));
                 }
-                else if(feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
+                else if(feature.objGetClass().equals(ModelAttributes.REFERENCE)) {
                   references.add(feature);
   
                   // add include for type of this reference
                   ModelElement_1_0 featureType = this.model.getElement(feature.objGetValue("type"));
                   includeTypes.add(featureType.objGetValue("qualifiedName"));
                 }
-                else if(feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)) {
+                else if(feature.objGetClass().equals(ModelAttributes.OPERATION)) {
                   operations.add(feature);
                 }
               }              
@@ -495,7 +494,7 @@ public class TogetherMapper_1
           }
   
           // org:omg:model1:PrimitiveType
-          else if(modelElement.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE)) {
+          else if(modelElement.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE)) {
             SysLog.trace("processing primitive type", modelElement.objGetValue("qualifiedName"));
             // only generate for types which are content of the modelPackage. 
             if(this.model.isLocal(modelElement, currentPackageName)) {
@@ -510,7 +509,7 @@ public class TogetherMapper_1
           }
     
           // org:omg:model1:AliasType
-          else if(modelElement.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ALIAS_TYPE)) {  
+          else if(modelElement.objGetClass().equals(ModelAttributes.ALIAS_TYPE)) {  
             SysLog.trace("processing alias type", modelElement.objGetValue("qualifiedName"));
             // only generate for types which are content of the modelPackage.
             // IMPORTANT: model.isLocal() does not work to test whether an ALIAS is
@@ -531,7 +530,7 @@ public class TogetherMapper_1
           }
   
           // org:omg:model1:StructureType
-          else if(modelElement.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_TYPE)) {
+          else if(modelElement.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)) {
     
             SysLog.trace("processing structure type", modelElement.objGetValue("qualifiedName"));
   
@@ -562,7 +561,7 @@ public class TogetherMapper_1
                 j.hasNext();
               ) {
                 ModelElement_1_0 feature = this.model.getElement(j.next());  
-                if(feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_FIELD)) {
+                if(feature.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
                   fields.add(feature);  
                   // add include for type of this attribute
                   ModelElement_1_0 featureType = this.model.getElement(feature.objGetValue("type"));

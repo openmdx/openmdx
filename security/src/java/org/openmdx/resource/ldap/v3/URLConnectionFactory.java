@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URLConnectionFactory.java,v 1.4 2009/03/08 18:52:19 wfro Exp $
+ * Name:        $Id: URLConnectionFactory.java,v 1.5 2009/03/12 17:12:30 hburger Exp $
  * Description: Managed LDAP Connection Factory
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:19 $
+ * Date:        $Date: 2009/03/12 17:12:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,21 +78,11 @@ public class URLConnectionFactory
 	private static final long serialVersionUID = -9174010615999827478L;
 
 	/**
-	 * The default comment pattern includes all lines starting with '#'
-	 */
-	private static final String DEFAULT_COMMENT_PATTERN = "^#(.*)$";
-	
-	/**
-	 * Tells whether string comparison is case sensitive by default or not.
-	 */
-	private static final boolean DEFAULT_CASE_SENSITIVE = false;
-
-	/**
 	 * The regular expression's groups are<ol>
 	 * <li>the LDAP entry's distinguished name
 	 * </ol>
 	 */
-	private String distinguishedNamePattern;
+	private String distinguishedNamePattern = "^dn: (.*)$";
 
 	/**
 	 * The regular expression's groups are<ol>
@@ -100,12 +90,20 @@ public class URLConnectionFactory
 	 * <li>the attribute's value
 	 * </ol>
 	 */
-	private String attributePattern;
+	private String attributePattern = "^([^:]+): (.*)$";
+
+	/**
+	 * The regular expression's groups are<ol>
+	 * <li>the attribute's name
+	 * <li>the attribute's value
+	 * </ol>
+	 */
+	private String binaryAttributePattern = "^([^:]+):: (.*)$";
 
 	/**
 	 * Tells whether string comparison is case sensitive or not
 	 */
-	private boolean caseSensitive = URLConnectionFactory.DEFAULT_CASE_SENSITIVE;
+	private boolean caseSensitive = false;
 
 	/**
 	 * The regular expression's groups are<ol>
@@ -113,7 +111,7 @@ public class URLConnectionFactory
 	 * <li>the attribute's value
 	 * </ol>
 	 */
-	private String commentPattern = URLConnectionFactory.DEFAULT_COMMENT_PATTERN;
+	private String commentPattern = "^#(.*)$";
 	
 	/**
 	 * The LDAP cache
@@ -129,7 +127,9 @@ public class URLConnectionFactory
 				this.toURL("ConnectionURL", this.getConnectionURL()),
 				this.toPattern("DistinguishedNamePattern", this.getDistinguishedNamePattern()),
 				this.toPattern("AttributePattern", this.getAttributePattern()),
-				this.toPattern("CommentPattern", this.getCommentPattern()), this.caseSensitive
+				this.toPattern("BinaryAttributePattern", this.getBinaryAttributePattern()), 
+				this.toPattern("CommentPattern", this.getCommentPattern()), 
+				this.caseSensitive
 			);
     	}
         return new ManagedConnection(
@@ -203,6 +203,21 @@ public class URLConnectionFactory
 	 */
 	public void setAttributePattern(String attributePattern) {
 		this.attributePattern = attributePattern;
+	}
+
+	/**
+	 * @return the attributePattern
+	 */
+	public String getBinaryAttributePattern() {
+		return this.binaryAttributePattern;
+	}
+
+
+	/**
+	 * @param attributePattern the attributePattern to set
+	 */
+	public void setBinaryAttributePattern(String binaryAttributePattern) {
+		this.binaryAttributePattern = binaryAttributePattern;
 	}
 
 	/**

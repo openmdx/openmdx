@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateViewContext.java,v 1.4 2009/03/03 15:24:38 hburger Exp $
+ * Name:        $Id: StateViewContext.java,v 1.6 2009/04/28 13:58:52 hburger Exp $
  * Description: AbstractStateContext 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 15:24:38 $
+ * Date:        $Date: 2009/04/28 13:58:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -205,9 +205,18 @@ public abstract class StateViewContext<V>
      */
     public V getValidAt(
     ){
-        return this.validAt;
+        return 
+            this.validAt == null && this.viewKind == ViewKind.TIME_POINT_VIEW ? newValidAt() : 
+            this.validAt;
     }
 
+    /**
+     * Retrieve validAt's default value
+     * 
+     * @return validAt's default value
+     */
+    protected abstract V newValidAt();
+    
     /**
      * Tells from when on modifications are valid
      * 
@@ -250,7 +259,7 @@ public abstract class StateViewContext<V>
     @Override
     public boolean equals(Object obj) {
         return 
-            obj instanceof StateViewContext &&
+            obj instanceof StateViewContext<?> &&
             this.id.equals(((StateViewContext<?>)obj).id);
     }
 

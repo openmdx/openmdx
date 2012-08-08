@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FilterLoader.java,v 1.22 2009/03/08 18:03:21 wfro Exp $
+ * Name:        $Id: FilterLoader.java,v 1.28 2009/06/09 12:50:34 hburger Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:21 $
+ * Date:        $Date: 2009/06/09 12:50:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,9 +55,7 @@
  */
 package org.openmdx.portal.servlet.loader;
 
-import java.beans.ExceptionListener;
-import java.beans.XMLDecoder;
-import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -65,21 +63,22 @@ import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.log.AppLog;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantors;
+import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.Filters;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 import org.openmdx.portal.servlet.UiContext;
 import org.openmdx.portal.servlet.WebKeys;
+import org.w3c.cci2.BinaryLargeObjects;
 
 public class FilterLoader
     extends Loader {
@@ -88,7 +87,7 @@ public class FilterLoader
     public FilterLoader(
         ServletContext context,
         RoleMapper_1_0 roleMapper,
-        Model_1_3 model
+        Model_1_0 model
     ) {
         super(
             context,
@@ -160,13 +159,10 @@ public class FilterLoader
                         System.out.println("WARNING: no inspector found for " + inspectorQualifiedName);
                     } 
                     else {
-                        if(inspector.getIconKey() == null) {
-                            AppLog.warning("No icon key found for inspector", inspectorQualifiedName);
-                            System.out.println("WARNING: no icon key found for inspector " + inspectorQualifiedName);
-                        }
-                        String iconKey = (inspector == null) || (inspector.getIconKey() == null)
-                        ? WebKeys.ICON_DEFAULT
-                            : inspector.getIconKey().substring(inspector.getIconKey().lastIndexOf(":") + 1) + ".gif";
+                    	String iconKey = inspector.getIconKey();
+                        iconKey = iconKey == null ? 
+                        	WebKeys.ICON_DEFAULT : 
+                        	iconKey.substring(iconKey.lastIndexOf(":") + 1) + ".gif";
                         Integer[] order = null;
                         if(inspector.getOrder() != null) {
                             order = (Integer[])inspector.getOrder().toArray(new Integer[inspector.getOrder().size()]);
@@ -209,7 +205,7 @@ public class FilterLoader
     @SuppressWarnings("unchecked")
     synchronized public boolean loadFilters(
         UiContext uiContext,
-        Map target
+        Map filterStore
     ) throws ServiceException {
 
         boolean resetSession = false;
@@ -220,51 +216,44 @@ public class FilterLoader
         if(crc != filterCRC) {
 
             // load filters from config
-            target.clear();
+            filterStore.clear();
             Set reourcePaths = this.context.getResourcePaths("/WEB-INF/config/filters/");
             if(reourcePaths != null) {
                 System.out.println("Loading /WEB-INF/config/filters/");
                 Set filterResources = new TreeSet(reourcePaths);
                 for(
-                        Iterator i = filterResources.iterator(); 
-                        i.hasNext(); 
+                    Iterator i = filterResources.iterator(); 
+                    i.hasNext(); 
                 ) {
                     try {
                         String path = (String)i.next();
                         if(!path.endsWith("/")) {
-                            InputStream is = this.context.getResourceAsStream(path);
                             try {
-                                XMLDecoder decoder = new XMLDecoder(
-                                    is,
-                                    null,
-                                    new ExceptionListener() {
-                                        public void exceptionThrown(Exception e) {
-                                            if(
-                                                !(e instanceof ClassNotFoundException) || 
-                                                !"org.openmdx.uses.java.beans.XMLDecoder".equals(e.getMessage())
-                                            ) {
-                                                throw new RuntimeException(e);
-                                            }
-                                        }                                    
-                                    }                
+                            	ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                                BinaryLargeObjects.streamCopy(
+                                	this.context.getResourceAsStream(path), 
+                                	0L, 
+                                	bos
                                 );
-                                Filters f = (Filters)decoder.readObject();
+                                bos.close();
+                                Filters f = (Filters)JavaBeans.fromXML(
+                                	new String(bos.toByteArray(), "UTF-8")
+                                );
                                 // merge loaded filter with existing
                                 for(int j = 0; j < f.getForReference().length; j++) {
-                                    if(target.get(f.getForReference()[j]) == null) {
-                                        target.put(
+                                    if(filterStore.get(f.getForReference()[j]) == null) {
+                                        filterStore.put(
                                             f.getForReference()[j],
                                             new Filters()
                                         );
                                     }
-                                    Filters existing = (Filters)target.get(f.getForReference()[j]);
+                                    Filters existing = (Filters)filterStore.get(f.getForReference()[j]);
                                     for(int k = 0; k < f.getFilter().length; k++) {
                                         existing.addFilter(
                                             f.getFilter(k)
                                         );
                                     }
                                 }
-                                is.close();
                             }
                             catch(Exception e) {
                                 System.out.println(e.getMessage());
@@ -290,13 +279,13 @@ public class FilterLoader
                         j.hasNext(); 
                     ) {
                         ModelElement_1_0 feature = (ModelElement_1_0)j.next();
-                        if(this.model.isReferenceType(feature)) {                            
+                        if(this.model.isReferenceType(feature) && !this.model.referenceIsStoredAsAttribute(feature)) {                            
                             String qualifiedReferenceName = element.objGetValue("qualifiedName") + ":" + feature.objGetValue("name");
                             ModelElement_1_0 referencedType = this.model.getElement(feature.objGetValue("type"));                            
                             this.createDefaultFilters(
                                 qualifiedReferenceName, 
                                 referencedType, 
-                                target, 
+                                filterStore, 
                                 uiContext, 
                                 this.model
                             );
@@ -319,9 +308,9 @@ public class FilterLoader
                             ) {
                                 ModelElement_1_0 referencedType = this.model.getElement(structuralFeature.getType());                            
                                 this.createDefaultFilters(
-                                    qualifiedReferenceName, 
+                                    element.objGetValue("qualifiedName") + ":" + qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1), 
                                     referencedType, 
-                                    target, 
+                                    filterStore, 
                                     uiContext, 
                                     this.model
                                 );                                
@@ -332,7 +321,7 @@ public class FilterLoader
             }
             this.filterCRC = crc;
             resetSession = true;
-            System.out.println("Loaded filters #" + target.keySet().size());
+            System.out.println("Loaded filters #" + filterStore.keySet().size());
         }
         return resetSession;
     }
@@ -342,7 +331,7 @@ public class FilterLoader
     private final static String FILTER_GROUP_NAME_CLASSES = "1";
 
     private long filterCRC = -1L;
-    private final Model_1_3 model;
+    private final Model_1_0 model;
 
 }
 

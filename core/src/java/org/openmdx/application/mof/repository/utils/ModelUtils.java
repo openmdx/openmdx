@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelUtils.java,v 1.1 2009/01/13 02:10:46 wfro Exp $
+ * Name:        $Id: ModelUtils.java,v 1.3 2009/06/01 15:41:37 wfro Exp $
  * Description: model1 model elements
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:46 $
+ * Date:        $Date: 2009/06/01 15:41:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -56,10 +56,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.application.mof.repository.accessor.ModelElement_1;
+import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 
 @SuppressWarnings("unchecked")
 public class ModelUtils {
@@ -74,13 +78,13 @@ public class ModelUtils {
      */
     public static List getallSupertype(
         String forClass
-    ) {
+    ) throws ServiceException {
         //SysLog.trace("> getallSupertype for " + forClass);
-        DataproviderObject modelElement = (DataproviderObject)modelTypeNames.get(forClass);
+        ModelElement_1_0 modelElement = modelTypeNames.get(forClass);
         //SysLog.trace("modelElement=" + modelElement);
-        return modelElement == null 
-        ? null
-            : modelElement.values("allSupertype");
+        return modelElement == null ? 
+            null : 
+            modelElement.objGetList("allSupertype");
     }
 
     //-------------------------------------------------------------------------
@@ -93,11 +97,11 @@ public class ModelUtils {
      */
     public static List getsubtype(
         String forClass
-    ) {
-        DataproviderObject modelElement = (DataproviderObject)modelTypeNames.get(forClass);
-        return modelElement == null 
-        ? null
-            : modelElement.values("subtype");
+    ) throws ServiceException {
+        ModelElement_1_0 modelElement = modelTypeNames.get(forClass);
+        return modelElement == null ? 
+            null : 
+            modelElement.objGetList("subtype");
     }
 
     //-------------------------------------------------------------------------
@@ -110,15 +114,15 @@ public class ModelUtils {
      */
     public static List getsupertype(
         String forClass
-    ) {
-        DataproviderObject modelElement = (DataproviderObject)modelTypeNames.get(forClass);
-        return modelElement == null 
-        ? null
-            : modelElement.values("supertype");
+    ) throws ServiceException {
+        ModelElement_1_0 modelElement = modelTypeNames.get(forClass);
+        return modelElement == null ? 
+            null : 
+            modelElement.objGetList("supertype");
     }
 
     //-------------------------------------------------------------------------
-    private static HashMap modelTypeNames = new HashMap();
+    private static HashMap<String,ModelElement_1_0> modelTypeNames = new HashMap<String,ModelElement_1_0>();
 
     //-------------------------------------------------------------------------
     /**
@@ -126,33 +130,29 @@ public class ModelUtils {
      * the 'allSupertype' attribute of all of its direct subtypes.
      */
     private static void setallSupertype(
-        DataproviderObject modelElement
-    ) {
-
-        //SysLog.trace("> setallSupertype for " + modelElement.path());
-
+        ModelElement_1_0 modelElement
+    ) throws ServiceException {
         // set supertypes of supertypes
         for(
-                Iterator i = modelElement.values("supertype").iterator();
-                i.hasNext();
+            Iterator i = modelElement.objGetList("supertype").iterator();
+            i.hasNext();
         ) {
             setallSupertype(
-                (DataproviderObject)modelTypeNames.get(i.next())
+                modelTypeNames.get(i.next())
             );
         }
-
         // collect allSupertype
         ArrayList allSupertype = new ArrayList();
         for(
-                Iterator i = modelElement.values("supertype").iterator();
-                i.hasNext();
+            Iterator i = modelElement.objGetList("supertype").iterator();
+            i.hasNext();
         ) {
-            DataproviderObject supertype = (DataproviderObject)modelTypeNames.get(
+            ModelElement_1_0 supertype = modelTypeNames.get(
                 i.next()
             );
             for(
-                    Iterator j = supertype.values("allSupertype").iterator();
-                    j.hasNext();
+                Iterator j = supertype.objGetList("allSupertype").iterator();
+                j.hasNext();
             ) {
                 Object type = null;
                 if(!allSupertype.contains(type = j.next())) {
@@ -163,14 +163,12 @@ public class ModelUtils {
 
         // add modelElement itself
         allSupertype.add(
-            modelElement.path().get(0)
+            modelElement.jdoGetObjectId().get(0)
         );
-
-        modelElement.clearValues("allSupertype").addAll(
+        modelElement.objGetList("allSupertype").clear();
+        modelElement.objGetList("allSupertype").addAll(
             allSupertype
         );
-
-        //SysLog.trace("< setallSupertype");
     }
 
     //-------------------------------------------------------------------------
@@ -179,341 +177,367 @@ public class ModelUtils {
      * 'allSupertype' attribute is available.
      */
     private static void setSubtype(
-        DataproviderObject modelElement
-    ) {
-
-        //SysLog.trace("> setSubtype for " + modelElement.path());
-
+        ModelElement_1_0 modelElement
+    ) throws ServiceException {
         ArrayList subtypes = new ArrayList();
-        DataproviderObject supertype = null;
-
+        ModelElement_1_0 supertype = null;
         for(
-                Iterator i = modelTypeNames.values().iterator();
-                i.hasNext();
+            Iterator i = modelTypeNames.values().iterator();
+            i.hasNext();
         ) {
             if(
-                    (supertype = (DataproviderObject)i.next()).values("allSupertype").contains(
-                        modelElement.path().get(0)
-                    ) &&
-                    !subtypes.contains(supertype.path().get(0))
+                (supertype = (ModelElement_1_0)i.next()).objGetList("allSupertype").contains(
+                    modelElement.jdoGetObjectId().get(0)
+                ) &&
+                !subtypes.contains(supertype.jdoGetObjectId().get(0))
             ) {
                 subtypes.add(
-                    supertype.path().get(0)
+                    supertype.jdoGetObjectId().get(0)
                 );
             }
         } 
-        modelElement.clearValues("subtype").addAll(
+        modelElement.objGetList("subtype").clear();
+        modelElement.objGetList("subtype").addAll(
             subtypes
         );
-
-        //SysLog.trace("< setSubtype");
-
     }
 
     //-------------------------------------------------------------------------
     static {
 
-        DataproviderObject e = null;
-
-        // ModelPrimitiveType
-        modelTypeNames.put(
-            ModelAttributes.PRIMITIVE_TYPE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.PRIMITIVE_TYPE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.PRIMITIVE_TYPE);
-        e.values("supertype").add(ModelAttributes.DATATYPE);
-
-        // ModelEnumerationType
-        modelTypeNames.put(
-            ModelAttributes.ENUMERATION_TYPE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.ENUMERATION_TYPE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.ENUMERATION_TYPE);
-        e.values("supertype").add(ModelAttributes.DATATYPE);
-
-        // ModelStructureType
-        modelTypeNames.put(
-            ModelAttributes.STRUCTURE_TYPE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.STRUCTURE_TYPE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.STRUCTURE_TYPE);
-        e.values("supertype").add(ModelAttributes.DATATYPE);
-
-        // ModelCollectionType
-        modelTypeNames.put(
-            ModelAttributes.COLLECTION_TYPE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.COLLECTION_TYPE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.COLLECTION_TYPE);
-        e.values("supertype").add(ModelAttributes.DATATYPE);
-        e.values("supertype").add(ModelAttributes.TYPED_ELEMENT);
-
-        // ModelAliasType
-        modelTypeNames.put(
-            ModelAttributes.ALIAS_TYPE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.ALIAS_TYPE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.ALIAS_TYPE);
-        e.values("supertype").add(ModelAttributes.DATATYPE);
-        e.values("supertype").add(ModelAttributes.TYPED_ELEMENT);
-
-        // ModelDatatype
-        modelTypeNames.put(
-            ModelAttributes.DATATYPE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.DATATYPE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.DATATYPE);
-        e.values("supertype").add(ModelAttributes.CLASSIFIER);
-
-        // ModelAssociation
-        modelTypeNames.put(
-            ModelAttributes.ASSOCIATION,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.ASSOCIATION})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.ASSOCIATION);
-        e.values("supertype").add(ModelAttributes.CLASSIFIER);
-
-        // ModelClass
-        modelTypeNames.put(
-            ModelAttributes.CLASS,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.CLASS})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.CLASS);
-        e.values("supertype").add(ModelAttributes.CLASSIFIER);
-
-        // ModelClassifier
-        modelTypeNames.put(
-            ModelAttributes.CLASSIFIER,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.CLASSIFIER})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.CLASSIFIER);
-        e.values("supertype").add(ModelAttributes.GENERALIZABLE_ELEMENT);
-
-        // ModelPackage
-        modelTypeNames.put(
-            ModelAttributes.PACKAGE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.PACKAGE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.PACKAGE);
-        e.values("supertype").add(ModelAttributes.GENERALIZABLE_ELEMENT);
-
-        // ModelGeneralizableElement
-        modelTypeNames.put(
-            ModelAttributes.GENERALIZABLE_ELEMENT,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.GENERALIZABLE_ELEMENT})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.GENERALIZABLE_ELEMENT);
-        e.values("supertype").add(ModelAttributes.NAMESPACE);
-
-        // ModelOperation
-        modelTypeNames.put(
-            ModelAttributes.OPERATION,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.OPERATION})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.OPERATION);
-        e.values("supertype").add(ModelAttributes.BEHAVIOURAL_FEATURE);
-
-        // ModelException
-        modelTypeNames.put(
-            ModelAttributes.EXCEPTION,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.EXCEPTION})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.EXCEPTION);
-        e.values("supertype").add(ModelAttributes.BEHAVIOURAL_FEATURE);
-
-        // ModelBehaviouralFeature
-        modelTypeNames.put(
-            ModelAttributes.BEHAVIOURAL_FEATURE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.BEHAVIOURAL_FEATURE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.BEHAVIOURAL_FEATURE);
-        e.values("supertype").add(ModelAttributes.FEATURE);
-        e.values("supertype").add(ModelAttributes.NAMESPACE);
-
-        // ModelNamespace
-        modelTypeNames.put(
-            ModelAttributes.NAMESPACE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.NAMESPACE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.NAMESPACE);
-        e.values("supertype").add(ModelAttributes.ELEMENT);
-
-        // ModelTag
-        modelTypeNames.put(
-            ModelAttributes.TAG,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.TAG})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.TAG);
-        e.values("supertype").add(ModelAttributes.ELEMENT);
-
-        // ModelImport
-        modelTypeNames.put(
-            ModelAttributes.IMPORT,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.IMPORT})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.IMPORT);
-        e.values("supertype").add(ModelAttributes.ELEMENT);
-
-        // ModelConstraint
-        modelTypeNames.put(
-            ModelAttributes.CONSTRAINT,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.CONSTRAINT})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.CONSTRAINT);
-        e.values("supertype").add(ModelAttributes.ELEMENT);
-
-        // ModelAttribute
-        modelTypeNames.put(
-            ModelAttributes.ATTRIBUTE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.ATTRIBUTE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.ATTRIBUTE);
-        e.values("supertype").add(ModelAttributes.STRUCTURAL_FEATURE);
-
-        // ModelReference
-        modelTypeNames.put(
-            ModelAttributes.REFERENCE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.REFERENCE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.REFERENCE);
-        e.values("supertype").add(ModelAttributes.STRUCTURAL_FEATURE);
-
-        // ModelStructuralFeature
-        modelTypeNames.put(
-            ModelAttributes.STRUCTURAL_FEATURE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.STRUCTURAL_FEATURE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.STRUCTURAL_FEATURE);
-        e.values("supertype").add(ModelAttributes.FEATURE);
-        e.values("supertype").add(ModelAttributes.TYPED_ELEMENT);
-
-        // ModelFeature
-        modelTypeNames.put(
-            ModelAttributes.FEATURE,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.FEATURE})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.FEATURE);
-        e.values("supertype").add(ModelAttributes.ELEMENT);
-
-        // ModelAssociationEnd
-        modelTypeNames.put(
-            ModelAttributes.ASSOCIATION_END,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.ASSOCIATION_END})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.ASSOCIATION_END);
-        e.values("supertype").add(ModelAttributes.TYPED_ELEMENT);
-
-        // ModelParameter
-        modelTypeNames.put(
-            ModelAttributes.PARAMETER,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.PARAMETER})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.PARAMETER);
-        e.values("supertype").add(ModelAttributes.TYPED_ELEMENT);
-
-        // ModelConstant
-        modelTypeNames.put(
-            ModelAttributes.CONSTANT,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.CONSTANT})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.CONSTANT);
-        e.values("supertype").add(ModelAttributes.TYPED_ELEMENT);
-
-        // ModelStructureField
-        modelTypeNames.put(
-            ModelAttributes.STRUCTURE_FIELD,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.STRUCTURE_FIELD})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.STRUCTURE_FIELD);
-        e.values("supertype").add(ModelAttributes.TYPED_ELEMENT);
-
-        // ModelTypedElement
-        modelTypeNames.put(
-            ModelAttributes.TYPED_ELEMENT,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.TYPED_ELEMENT})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.TYPED_ELEMENT);
-        e.values("supertype").add(ModelAttributes.ELEMENT);
-
-        // ModelElement
-        modelTypeNames.put(
-            ModelAttributes.ELEMENT,
-            e = new DataproviderObject(
-                new Path(new String[]{ModelAttributes.ELEMENT})
-            )
-        );
-        e.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.ELEMENT);
-
-        // calculate for all model elements allSupertype
-        for(
-                Iterator i = modelTypeNames.values().iterator();
+        ObjectHolder_2Facade e = null;
+        try {
+            // ModelPrimitiveType
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.PRIMITIVE_TYPE}),
+                ModelAttributes.PRIMITIVE_TYPE
+            );        
+            e.attributeValues("supertype").add(ModelAttributes.DATATYPE);
+            modelTypeNames.put(
+                ModelAttributes.PRIMITIVE_TYPE,
+                new ModelElement_1(e.getDelegate(), null)
+            );
+    
+            // ModelEnumerationType
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.ENUMERATION_TYPE}),
+                ModelAttributes.ENUMERATION_TYPE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.DATATYPE);
+            modelTypeNames.put(
+                ModelAttributes.ENUMERATION_TYPE,
+                new ModelElement_1(e.getDelegate(), null)
+            );
+    
+            // ModelStructureType
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.PRIMITIVE_TYPE}),
+                ModelAttributes.PRIMITIVE_TYPE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.DATATYPE);
+            modelTypeNames.put(
+                ModelAttributes.STRUCTURE_TYPE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelCollectionType
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.COLLECTION_TYPE}),
+                ModelAttributes.COLLECTION_TYPE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.DATATYPE);
+            e.attributeValues("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.COLLECTION_TYPE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelAliasType
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.ALIAS_TYPE}),
+                ModelAttributes.ALIAS_TYPE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.DATATYPE);
+            e.attributeValues("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.ALIAS_TYPE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelDatatype
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.DATATYPE}),
+                ModelAttributes.DATATYPE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.CLASSIFIER);
+            modelTypeNames.put(
+                ModelAttributes.DATATYPE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelAssociation
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.ASSOCIATION}),
+                ModelAttributes.ASSOCIATION
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.CLASSIFIER);
+            modelTypeNames.put(
+                ModelAttributes.ASSOCIATION,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelClass
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.CLASS}),
+                ModelAttributes.CLASS
+            );                
+            e.attributeValues(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.CLASS);
+            e.attributeValues("supertype").add(ModelAttributes.CLASSIFIER);
+            modelTypeNames.put(
+                ModelAttributes.CLASS,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelClassifier
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.CLASSIFIER}),
+                ModelAttributes.CLASSIFIER
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.GENERALIZABLE_ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.CLASSIFIER,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelPackage
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.PACKAGE}),
+                ModelAttributes.PACKAGE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.GENERALIZABLE_ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.PACKAGE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelGeneralizableElement
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.GENERALIZABLE_ELEMENT}),
+                ModelAttributes.GENERALIZABLE_ELEMENT
+            );        
+            e.attributeValues("supertype").add(ModelAttributes.NAMESPACE);
+            modelTypeNames.put(
+                ModelAttributes.GENERALIZABLE_ELEMENT,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelOperation
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.OPERATION}),
+                ModelAttributes.OPERATION
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.BEHAVIOURAL_FEATURE);
+            modelTypeNames.put(
+                ModelAttributes.OPERATION,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelException
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.EXCEPTION}),
+                ModelAttributes.EXCEPTION
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.BEHAVIOURAL_FEATURE);
+            modelTypeNames.put(
+                ModelAttributes.EXCEPTION,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelBehaviouralFeature
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.BEHAVIOURAL_FEATURE}),
+                ModelAttributes.BEHAVIOURAL_FEATURE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.FEATURE);
+            e.attributeValues("supertype").add(ModelAttributes.NAMESPACE);
+            modelTypeNames.put(
+                ModelAttributes.BEHAVIOURAL_FEATURE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelNamespace
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.NAMESPACE}),
+                ModelAttributes.NAMESPACE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.NAMESPACE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelTag
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.TAG}),
+                ModelAttributes.TAG
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.TAG,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelImport
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.IMPORT}),
+                ModelAttributes.IMPORT
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.IMPORT,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelConstraint
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.CONSTRAINT}),
+                ModelAttributes.CONSTRAINT
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.CONSTRAINT,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelAttribute
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.ATTRIBUTE}),
+                ModelAttributes.ATTRIBUTE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.STRUCTURAL_FEATURE);
+            modelTypeNames.put(
+                ModelAttributes.ATTRIBUTE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelReference
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.REFERENCE}),
+                ModelAttributes.REFERENCE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.STRUCTURAL_FEATURE);
+            modelTypeNames.put(
+                ModelAttributes.REFERENCE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelStructuralFeature
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.STRUCTURAL_FEATURE}),
+                ModelAttributes.STRUCTURAL_FEATURE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.FEATURE);
+            e.attributeValues("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.STRUCTURAL_FEATURE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelFeature
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.FEATURE}),
+                ModelAttributes.FEATURE
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.FEATURE,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelAssociationEnd
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.ASSOCIATION_END}),
+                ModelAttributes.ASSOCIATION_END
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.ASSOCIATION_END,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelParameter
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.PARAMETER}),
+                ModelAttributes.PARAMETER
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.PARAMETER,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelConstant
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.CONSTANT}),
+                ModelAttributes.CONSTANT
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.CONSTANT,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelStructureField
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.STRUCTURE_FIELD}),
+                ModelAttributes.STRUCTURE_FIELD
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.TYPED_ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.STRUCTURE_FIELD,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelTypedElement
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.TYPED_ELEMENT}),
+                ModelAttributes.TYPED_ELEMENT
+            );                
+            e.attributeValues("supertype").add(ModelAttributes.ELEMENT);
+            modelTypeNames.put(
+                ModelAttributes.TYPED_ELEMENT,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // ModelElement
+            e = ObjectHolder_2Facade.newInstance(
+                new Path(new String[]{ModelAttributes.ELEMENT}),
+                ModelAttributes.ELEMENT
+            );                
+            modelTypeNames.put(
+                ModelAttributes.ELEMENT,
+                new ModelElement_1(e.getDelegate(), null)            
+            );
+    
+            // calculate for all model elements allSupertype
+            for(
+                Iterator<ModelElement_1_0> i = modelTypeNames.values().iterator();
                 i.hasNext();
-        ) { 
-            setallSupertype((DataproviderObject)i.next());
-        }
-
-        // calculate for all model elements the subtype
-        for(
-                Iterator i = modelTypeNames.values().iterator();
+            ) { 
+                setallSupertype(i.next());
+            }
+    
+            // calculate for all model elements the subtype
+            for(
+                Iterator<ModelElement_1_0> i = modelTypeNames.values().iterator();
                 i.hasNext();
-        ) {
-            setSubtype((DataproviderObject)i.next());
+            ) {
+                setSubtype(i.next());
+            }
         }
-
+        catch(Exception ex) {
+            throw new RuntimeServiceException(ex);
+        }
     }
 
 }

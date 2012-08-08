@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractHomeHandler.java,v 1.2 2009/02/24 16:02:51 hburger Exp $
+ * Name:        $Id: AbstractHomeHandler.java,v 1.3 2009/03/31 17:06:10 hburger Exp $
  * Description: Abstract Enterprise Java Bean Home Invocation Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 16:02:51 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,8 @@ package org.openmdx.kernel.application.container.spi.ejb;
 
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
@@ -62,9 +64,8 @@ import javax.ejb.SessionBean;
 import javax.transaction.TransactionManager;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract Enterprise Java Bean Home Invocation Handler
@@ -94,7 +95,7 @@ implements HomeConfiguration
     /**
      * Instance logger
      */
-    private Logger logger = LoggerFactory.getLogger(AbstractHomeHandler.class);
+    private Logger logger = LoggerFactory.getLogger();
 
     /**
      * Obtain a Bean instance from the pool.
@@ -131,7 +132,8 @@ implements HomeConfiguration
         try {
             this.instancePool.returnObject(ejbInstance);
         } catch (Exception exception) {
-            this.logger.warn(
+            this.logger.log(
+            	Level.WARNING,
                 "Enterprise Java Bean release failure: " + this,
                 exception
             );
@@ -149,7 +151,8 @@ implements HomeConfiguration
         try {
             this.instancePool.invalidateObject(ejbInstance);
         } catch (Exception exception) {
-            this.logger.warn(
+            this.logger.log(
+            	Level.WARNING,
                 "Enterprise Java Bean invalidation failure: " + this,
                 exception
             );

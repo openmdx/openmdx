@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RefQuery_1.java,v 1.9 2009/02/02 15:49:23 hburger Exp $
+ * Name:        $Id: RefQuery_1.java,v 1.14 2009/06/02 23:18:31 hburger Exp $
  * Description: RefQuery_1 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/02 15:49:23 $
+ * Date:        $Date: 2009/06/02 23:18:31 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,9 +57,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
+import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -67,13 +69,13 @@ import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
 
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_1;
-import org.openmdx.base.collection.Lists;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.persistence.cci.Queries;
+import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.FilterProperty;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * RefQuery_1
@@ -86,8 +88,6 @@ public class RefQuery_1
 
     private boolean unique = false;
     private boolean unmodifiable = false;
-    private Long from = Long.valueOf(0);
-    private Long to = null;
     private boolean ignoreCache = false;
     private Map<String,Object> extensions = new HashMap<String,Object>();
     private transient Collection<?> pcs = null;
@@ -103,6 +103,9 @@ public class RefQuery_1
 
     private static final String PARSING = 
         "Expression parsing and arguments not supported";
+
+    private static final String SETRANGE = 
+        "set range operations are not supported. Use listIterator(position) instead";
 
     private static final String RESULT  = 
         "Result clases, projections and aggregate function results not supported";
@@ -222,7 +225,24 @@ public class RefQuery_1
      */
     public void addExtension(String key, Object value) {
         assertModifiable();
-        this.extensions.put(key, value);
+        if(key.startsWith("org.openmdx.")) {
+            if(Queries.FORCE_CACHE.equals(key)) {
+                this.extensions.put(key, value);
+            } else {
+                throw BasicException.initHolder(
+                    new JDOFatalUserException(
+                        "Invalid openMDX extension",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            new BasicException.Parameter("key", key),
+                            new BasicException.Parameter("value", value),
+                            new BasicException.Parameter("supported", Queries.FORCE_CACHE)
+                        )
+                    )
+                );
+            }
+        } 
     }
 
     /* (non-Javadoc)
@@ -270,37 +290,18 @@ public class RefQuery_1
     /* (non-Javadoc)
      * @see javax.jdo.Query#deletePersistentAll()
      */
-    public long deletePersistentAll() {
+    public long deletePersistentAll(
+    ) {
         if(this.pcs instanceof RefContainer) {
             RefContainer refContainer = (RefContainer) this.pcs;
-            List<?> result = refContainer.refGetAll(this);
-            if(this.to == null) {
-                if(this.from == null) {
-                    return refContainer.refRemoveAll(this);
-                } else {
-                    long deleted = 0;
-                    for(
-                        Iterator<?> i = result.listIterator(this.from.intValue());
-                        i.hasNext();
-                    ){
-                        i.remove();
-                        deleted++;
-                    }
-                    return deleted;
-                }
-            } else {
-                Lists.subList(
-                    result, 
-                    this.from,
-                    this.to
-                ).clear();
-                return this.from == null ? this.to : this.to - this.from;
-            }
-        } else if (this.pcs == null) {
+            return refContainer.refRemoveAll(this);
+        } 
+        else if (this.pcs == null) {
             throw new JDOUserException(
                 "No candidates set"
             );
-        } else {
+        } 
+        else {
             throw new JDOUserException(
                 "Unsupported candidate class: " + this.pcs.getClass().getName()
             );
@@ -325,25 +326,29 @@ public class RefQuery_1
     /* (non-Javadoc)
      * @see javax.jdo.Query#execute()
      */
-    public Object execute() {
+    public Object execute(
+    ) {
         if(this.pcs instanceof RefContainer) {
+            if(Boolean.TRUE.equals(this.extensions.get(Queries.FORCE_CACHE))) {
+                RefPackage_1_0 refPackage = (RefPackage_1_0) ((RefContainer)this.pcs).refOutermostPackage();
+                refPackage.refPersistenceManager().retrieveAll(this.pcs);
+            }
             RefContainer refContainer = (RefContainer) this.pcs;
             List<?> result = refContainer.refGetAll(this);
             if(this.unique) {
                 Iterator<?> i = result.iterator();
                 return i.hasNext() ? i.next() : null;
-            } else {
-                return Lists.subList(
-                    result,
-                    this.from,
-                    this.to
-                );
             }
-        } else if (this.pcs == null) {
+            else {
+                return result;
+            }
+        } 
+        else if (this.pcs == null) {
             throw new JDOUserException(
                 "No candidates set"
             );
-        } else {
+        } 
+        else {
             throw new JDOUserException(
                 "Unsupported candidate class: " + this.pcs.getClass().getName()
             );
@@ -405,9 +410,7 @@ public class RefQuery_1
      */
     public PersistenceManager getPersistenceManager() {
         RefPackage_1_0 refPackage = refGetPackage();
-        return refPackage instanceof RefPackage_1_1 ? 
-            ((RefPackage_1_1)refPackage).refPersistenceManager() :
-            null;
+        return refPackage == null ? null : refPackage.refPersistenceManager();
     }
 
     /* (non-Javadoc)
@@ -463,7 +466,15 @@ public class RefQuery_1
         Map extensions
     ) {
         assertModifiable();
-        this.extensions.putAll(extensions);
+        this.extensions.clear();
+        for(Map.Entry extension : (Set<Map.Entry<?,?>>)extensions.entrySet()) {
+            Object key = extension.getKey();
+            if(key instanceof String) {
+                addExtension((String) key, extension.getValue());
+            } else {
+                throw new JDOUserException("The extension key must be a non-null String");
+            }
+        }
     }
 
     /* (non-Javadoc)
@@ -503,9 +514,11 @@ public class RefQuery_1
     /* (non-Javadoc)
      * @see javax.jdo.Query#setRange(long, long)
      */
-    public void setRange(long fromIncl, long toExcl) {
-        this.from = fromIncl == 0 ? null : Long.valueOf(fromIncl);
-        this.to = toExcl == Long.MAX_VALUE ? null : Long.valueOf(toExcl);
+    public void setRange(
+        long fromIncl, 
+        long toExcl
+    ) {
+        throw new UnsupportedOperationException(SETRANGE);
     }
 
     /* (non-Javadoc)

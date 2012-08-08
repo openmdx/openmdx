@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ArraysExtension.java,v 1.8 2009/01/12 16:46:09 wfro Exp $
+ * Name:        $Id: ArraysExtension.java,v 1.9 2009/05/08 16:10:06 hburger Exp $
  * Description: Arrays Extension 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 16:46:09 $
+ * Date:        $Date: 2009/05/08 16:10:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -85,7 +85,7 @@ public class ArraysExtension {
 	 * @exception ClassCastException 
 	 * 			  if the array argument is not an array
 	 */
-    public static List asList(
+    public static <V> List<V> asList(
 		Object array
 	){
 		return new AsList(array);
@@ -104,7 +104,7 @@ public class ArraysExtension {
 	 * @exception IllegalArgumentException
      *            if the values argument is not an array
 	 */
-    public static Map asMap(
+    public static <K,V> Map<K,V> asMap(
         Object keys,
         Object values
     ){

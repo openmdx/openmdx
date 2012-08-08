@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Condition.java,v 1.9 2009/01/06 10:21:19 wfro Exp $
+ * Name:        $Id: Condition.java,v 1.10 2009/05/15 00:26:36 hburger Exp $
  * Description: Condition
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2009/05/15 00:26:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,11 +60,19 @@ import org.openmdx.base.resource.Records;
 public abstract class Condition
     implements Serializable, Cloneable {
 
+
+    /**
+     * Constructor 
+     */
+    protected Condition(){
+        // For encoding and decoding
+    }
+    
     //-----------------------------------------------------------------------    
     protected Condition(
         Object... values
     ) {
-        this((short)-1, null, false, values);
+        this(null, null, false, values);
     }
   
     //-----------------------------------------------------------------------    
@@ -74,7 +82,20 @@ public abstract class Condition
         boolean fulfils,
         Object... values
     ) {
-        this.quantor = quantor;
+        this.quantifier = Quantifier.valueOf(quantor);
+        this.feature = feature;
+        this.fulfils = fulfils;
+        this.values = values;
+    }
+
+    //-----------------------------------------------------------------------    
+    protected Condition(
+        Quantifier quantifier,
+        String feature,
+        boolean fulfils,
+        Object... values
+    ) {
+        this.quantifier = quantifier;
         this.feature = feature;
         this.fulfils = fulfils;
         this.values = values;
@@ -87,15 +108,25 @@ public abstract class Condition
     }
 
     //-----------------------------------------------------------------------    
+    /**
+     * Retrieve the quantor's <code>enum</code> representation
+     * 
+     * @return the quantor's <code>enum</code> representation
+     */
+    public Quantifier quantifier() {
+        return this.quantifier;
+    }
+  
+    //-----------------------------------------------------------------------    
     public short getQuantor() {
-        return this.quantor;
+        return this.quantifier == null ? 0 : this.quantifier.code();
     }
   
     //-----------------------------------------------------------------------    
     public void setQuantor(
         short quantor
     ) {
-        this.quantor = quantor;
+        this.quantifier = Quantifier.valueOf(quantor);
     }
 
     //-----------------------------------------------------------------------    
@@ -159,10 +190,10 @@ public abstract class Condition
         try {
             return Records.getRecordFactory().asMappedRecord(
                 getClass().getName(), 
-                Quantors.toString(quantor) + ' ' + feature + ' ' + getName() + ' ' + Arrays.asList(values),
+                quantifier.toString() + ' ' + feature + ' ' + getName() + ' ' + Arrays.asList(values),
                 TO_STRING_FIELDS, 
                 new Object[]{
-                    Quantors.toString(quantor),
+                    quantifier,
                     feature, 
                     getName(), 
                     Arrays.asList(values)
@@ -176,11 +207,10 @@ public abstract class Condition
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
-    private static final long serialVersionUID = 2403064228735670905L;
 
     protected final static Object[] EMPTY_OBJECT_ARRAY = new Object[]{};
     
-    private short quantor;
+    private Quantifier quantifier;
     private String feature;
     private boolean fulfils;
     protected Object[] values;
@@ -192,4 +222,9 @@ public abstract class Condition
         "values"
     };
     
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = -3115618018740431736L;
+
 }

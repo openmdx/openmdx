@@ -1,14 +1,14 @@
 /*
  * ====================================================================
  * Description: Abstract Object_1
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/19 16:30:57 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,13 +54,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.jdo.InstanceCallbacks;
 import javax.jdo.JDODataStoreException;
+import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.resource.cci.InteractionSpec;
 
-import org.openmdx.application.dataprovider.accessor.PerformanceHelper;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.spi.Delegating_1;
@@ -72,7 +71,6 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Model_1_6;
 import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.state1.aop1.StateCapableContainer_1;
 import org.openmdx.compatibility.state1.aop1.StateContainer_1;
@@ -86,8 +84,8 @@ import org.openmdx.state2.cci.DateTimeStateContext;
  * Registers the the delegates with their manager
  */
 class ObjectView_1 
-    extends MarshallingObject_1<Manager_1> 
-    implements ObjectView_1_0, Serializable, InstanceCallbacks
+    extends MarshallingObject_1<ViewManager_1> 
+    implements ObjectView_1_0, Serializable
 {
 
     /**
@@ -100,7 +98,7 @@ class ObjectView_1
      * @throws ServiceException
      */
     ObjectView_1(
-        Manager_1 marshaller,
+        ViewManager_1 marshaller,
         DataObject_1_0 dataObject
     ) throws ServiceException{
         super(
@@ -110,7 +108,6 @@ class ObjectView_1
         this.dataObject = dataObject;
         this.hollow = true;
         dataObject.objAddEventListener(
-            null, // feature 
             marshaller
         );
     }
@@ -241,6 +238,44 @@ class ObjectView_1
     }
         
     //--------------------------------------------------------------------------
+    // Unit of work boundaries
+    //--------------------------------------------------------------------------
+
+    /**
+     * After this call the object observes unit of work boundaries.
+     * <p>
+     * This method is idempotent.
+     *
+     * @exception   ServiceException ILLEGAL_STATE
+     *              if the object is locked 
+     * @exception   ServiceException 
+     *              if the object can't be added to the unit of work for
+     *        another reason.
+     */
+    public void objMakeTransactional(
+    ) throws ServiceException {
+        DataObject_1_0 delegate = objGetDelegate();
+        JDOHelper.getPersistenceManager(delegate).makeTransactional(delegate);
+    }
+     
+    /**
+     * After this call the object ignores unit of work boundaries.
+     * <p>
+     * This method is idempotent.
+     *
+     * @exception   ServiceException ILLEGAL_STATE
+     *              if the object is dirty.
+     * @exception   ServiceException 
+     *              if the object can't be removed from its unit of work for
+     *        another reason 
+     */
+    public void objMakeNontransactional(
+    ) throws ServiceException {
+        DataObject_1_0 delegate = objGetDelegate();
+        JDOHelper.getPersistenceManager(delegate).makeNontransactional(delegate);
+    }
+
+    //--------------------------------------------------------------------------
     // Implements ObjectView_1_0
     //--------------------------------------------------------------------------
     
@@ -269,7 +304,7 @@ class ObjectView_1
     /* (non-Javadoc)
      * @see org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0#getModel()
      */
-    public Model_1_6 getModel() {
+    public Model_1_0 getModel() {
         return this.getMarshaller().getModel();
     }
 
@@ -320,10 +355,10 @@ class ObjectView_1
      *          or null for transient objects
      */
     @Override
-    public Object jdoGetObjectId(
+    public Path jdoGetObjectId(
     ) {
         try {
-            Path resourceIdentifier = (Path)this.dataObject.jdoGetObjectId();
+            Path resourceIdentifier = this.dataObject.jdoGetObjectId();
             if(
                  this.getInteractionSpec() == null &&
                  "org:openmdx:compatibility:state1:StateCapable".equals(getRecordName())
@@ -339,6 +374,14 @@ class ObjectView_1
                 this
             );
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.DelegatingObject_1#jdoGetTransactionalObjectId()
+     */
+    @Override
+    public Path jdoGetTransactionalObjectId() {
+        return this.dataObject.jdoGetTransactionalObjectId();
     }
 
     /**
@@ -381,7 +424,7 @@ class ObjectView_1
         InteractionSpec interactionSpec = getInteractionSpec();
         Model_1_0 model = this.getModel();
         if(interactionSpec == null && "org:openmdx:compatibility:state1:StateCapable".equals(this.objGetClass())) {
-            ModelElement_1_0 reference = model.getReferenceType((Path)this.dataObject.jdoGetObjectId());
+            ModelElement_1_0 reference = model.getReferenceType(this.dataObject.jdoGetObjectId());
             String type = ((Path)reference.objGetValue("type")).getBase();
             if(model.isSubtypeOf(type, "org:openmdx:compatibility:state1:DateState")) {
                 return new StateContainer_1(
@@ -432,7 +475,6 @@ class ObjectView_1
     /**
      * Hollow -> Persistent-Clean Transition
      */
-    @SuppressWarnings("unchecked")
     protected synchronized void initialize(
     ) throws ServiceException {
         if(this.hollow) {
@@ -440,12 +482,18 @@ class ObjectView_1
             PlugIn_1 delegate = new PlugIn_1(this);
             String recordName = getRecordName();
             if(recordName == null){
-                Path objectId = (Path) this.dataObject.jdoGetObjectId();
+                Path objectId = this.dataObject.jdoGetObjectId();
                 if(objectId != null && objectId.size() > 1) {
                     ModelElement_1_0 referencedType = model.getTypes(objectId)[2];
                     for(Object superType : referencedType.objGetList("allSupertype")) {
                         if("org:openmdx:state2:StateCapable".equals(((Path)superType).getBase())) {
-                            PerformanceHelper.retrieveContainer(this.dataObject);
+                            // Performance
+                            try {
+                                this.dataObject.getAspects().isEmpty();
+                            } 
+                            catch (ServiceException exception) {
+                                // ignore
+                            }
                         }
                     }
                 }
@@ -469,7 +517,7 @@ class ObjectView_1
                 if(model.isSubtypeOf(dataObjectType, "org:openmdx:compatibility:state1:StateCapable")) {
                     if(
                         !this.dataObject.jdoIsPersistent() || 
-                        !StateCapables.isCoreObject((Path)this.jdoGetObjectId())
+                        !StateCapables.isCoreObject(this.jdoGetObjectId())
                     ) {
                         //
                         // org::openmdx::compatibility::state1::DateState view
@@ -647,13 +695,6 @@ class ObjectView_1
      */
     public void jdoPreDelete() {
         next().jdoPreDelete();
-    }
-
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.LoadCallback#jdoPostLoad()
-     */
-    public void jdoPostLoad() {
-        next().jdoPostLoad();
     }
 
     /* (non-Javadoc)

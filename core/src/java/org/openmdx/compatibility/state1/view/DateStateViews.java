@@ -1,9 +1,9 @@
 /*
  * ====================================================================
  * Description: Date State Views 
- * Revision:    $Revision: 1.50 $
+ * Revision:    $Revision: 1.57 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/19 19:41:07 $
+ * Date:        $Date: 2009/05/29 17:04:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,19 +70,18 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_2;
+import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.cci2.ExtentCapable;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.FilterProperty;
@@ -158,12 +157,12 @@ public class DateStateViews {
         return new Path(refContainer.refMofId()).add(qualifier);
     }
     
-    private static RefPackage_1_2 getPackageForContext(
+    private static RefPackage_1_0 getPackageForContext(
         RefBaseObject refContext,
         DateStateViewContext context
     ){
-        RefPackageFactory_1_0 refPackageFactory = (RefPackageFactory_1_0)refContext.refOutermostPackage(); 
-        return refPackageFactory.getRefPackage(context);
+        RefPackage_1_0 refPackageFactory = (RefPackage_1_0)refContext.refOutermostPackage(); 
+        return refPackageFactory.refPackage(context);
     }
     
     /**
@@ -226,7 +225,7 @@ public class DateStateViews {
     }
    
     private static RefObject getView(
-        RefPackage_1_2 refPackage,
+        RefPackage_1_0 refPackage,
         Path resourceIdentifier
     ){
         try {
@@ -239,7 +238,7 @@ public class DateStateViews {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.BAD_PARAMETER,
                             "Even resource identifier size",
-                            new BasicException.Parameter("resourceIdentifier", resourceIdentifier.toResourceIdentifier()),
+                            new BasicException.Parameter("resourceIdentifier", resourceIdentifier.toXRI()),
                             new BasicException.Parameter("size", limit)
                         );
                     }
@@ -274,7 +273,7 @@ public class DateStateViews {
     ){
         if(state == null) {
             return null;
-        } else if(state.refIsDeleted()) {
+        } else if(JDOHelper.isDeleted(state)) {
             return state;
         } else if(state.getRemovedAt() == null) {
             return getViewForTimeRange(
@@ -311,7 +310,7 @@ public class DateStateViews {
     // Time Point Views (read-only for DateTime instances)
     //------------------------------------------------------------------------
     
-    private static RefPackage_1_2 getPackageForTimePoint(
+    private static RefPackage_1_0 getPackageForTimePoint(
         RefBaseObject refContext,
         XMLGregorianCalendar validFor,
         Date validAt
@@ -412,7 +411,7 @@ public class DateStateViews {
     // Time Range Views (write-only for DateTime instances)
     //------------------------------------------------------------------------
 
-    private static RefPackage_1_2 getPackageForTimeRange(
+    private static RefPackage_1_0 getPackageForTimeRange(
         RefBaseObject refContext,
         XMLGregorianCalendar validFrom,
         XMLGregorianCalendar validTo        
@@ -624,7 +623,7 @@ public class DateStateViews {
         }
         Path resourceIdentifier = getResourceIdentifier(source);
         String classId = source.refClass().refMofId();
-        RefPackage_1_2 refPackage = getPackageForTimeRange(
+        RefPackage_1_0 refPackage = getPackageForTimeRange(
             source,
             validFrom,
             validTo
@@ -632,7 +631,7 @@ public class DateStateViews {
         T range = (T) refPackage.refObject(
             resourceIdentifier
         );
-        if(range != null && !range.refIsDeleted()) {
+        if(range != null && !JDOHelper.isDeleted(range)) {
             if(override) {
                 range.refDelete();
             } else {
@@ -703,7 +702,7 @@ public class DateStateViews {
             validFrom,
             validTo
         );
-        RefPackage_1_2 refPackage = getPackageForContext(
+        RefPackage_1_0 refPackage = getPackageForContext(
             source,
             viewContext
         ); 
@@ -770,7 +769,7 @@ public class DateStateViews {
         XMLGregorianCalendar validFrom,
         XMLGregorianCalendar validTo
     ){
-        return dateStateView == null ? null : getViewForPropagatedState(
+        return getViewForPropagatedState(
             dateStateView,
             validFrom,
             validTo,
@@ -1076,8 +1075,8 @@ public class DateStateViews {
      * </ul>
      * @return a collection of DateState instances matching the given criteria
      */
-    public static List<? extends DateState> getStates(
-        DateState dateState,
+    public static <T extends DateState> List<T>getStates(
+        T dateState,
         Boolean invalidated, 
         Boolean deleted
     ){
@@ -1190,8 +1189,8 @@ public class DateStateViews {
     ){
         if(refBaseObject != null) {
             RefPackage refPackage = refBaseObject.refOutermostPackage();
-            if(refPackage instanceof RefPackage_1_2) {
-                InteractionSpec interactionSpec = ((RefPackage_1_2)refPackage).refInteractionSpec();
+            if(refPackage instanceof RefPackage_1_0) {
+                InteractionSpec interactionSpec = ((RefPackage_1_0)refPackage).refInteractionSpec();
                 if(interactionSpec instanceof DateStateContext) {
                     return (DateStateContext)interactionSpec;
                 }
@@ -1328,12 +1327,12 @@ public class DateStateViews {
     ){
         SortedSet<T> set = new TreeSet<T>(getComparator());
         for(T state : dateStates) {
-            if(deleted == null || (deleted.booleanValue() == state.refIsDeleted())) {
+            if(deleted == null || (deleted.booleanValue() == JDOHelper.isDeleted(state))) {
                 if(
-                    state.refIsDeleted() || (    
+                    JDOHelper.isDeleted(state) || (    
                         (invalidated == null || invalidated.booleanValue() == (state.getRemovedAt() != null)) &&
-                        (validFrom == null || Order.compareValidTo(state.getStateValidTo(), validFrom) >= 0) &&
-                        (validTo == null || Order.compareValidFrom(state.getStateValidFrom(), validTo) <= 0) &&
+                        Order.compareValidFromToValidTo(validFrom, state.getStateValidTo()) <= 0 &&
+                        Order.compareValidFromToValidTo(state.getStateValidFrom(), validTo) <= 0 &&
                         (asView || (existsAt == null ? state.getRemovedAt() == null : (
                               existsAt.compareTo(state.getCreatedAt()) >= 0 && 
                               Order.compareRemovedAt(existsAt, state.getRemovedAt()) < 0
@@ -1471,10 +1470,10 @@ public class DateStateViews {
          * Implements <code>Comparable</code>
          */
         public int compare(DateState o1, DateState o2) {
-            if(o1.refIsDeleted()) {
-                return o2.refIsDeleted() ? 0 : 1;
+            if(JDOHelper.isDeleted(o1)) {
+                return JDOHelper.isDeleted(o2) ? 0 : 1;
             }
-            if(o2.refIsDeleted()) {
+            if(JDOHelper.isDeleted(o2)) {
                 return -1;
             }
             int validFrom = Order.compareValidFrom(

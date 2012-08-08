@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersonImpl.java,v 1.2 2009/02/18 13:00:20 hburger Exp $
+ * Name:        $Id: PersonImpl.java,v 1.9 2009/05/27 23:14:18 wfro Exp $
  * Description: Person 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/18 13:00:20 $
+ * Date:        $Date: 2009/05/27 23:14:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,10 +55,14 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+import javax.jdo.listener.StoreCallback;
+import javax.jmi.reflect.RefObject;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.aop2.AbstractObject;
 import org.openmdx.base.collection.TreeSparseArray;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.jmi1.Void;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.test.app1.jmi1.Address;
@@ -77,7 +81,10 @@ import org.w3c.cci2.SparseArray;
 /**
  * Person
  */
-public class PersonImpl extends AbstractObject<org.openmdx.test.app1.jmi1.Person,org.openmdx.test.app1.cci2.Person> {
+public class PersonImpl 
+    extends AbstractObject<org.openmdx.test.app1.jmi1.Person,org.openmdx.test.app1.cci2.Person,Void> 
+    implements StoreCallback
+{
 
     /**
      * Constructor 
@@ -101,7 +108,7 @@ public class PersonImpl extends AbstractObject<org.openmdx.test.app1.jmi1.Person
     
     private final static String[] COUNTRY_NAME = new String[]{
         "Austria", "Germany", "Switzerland", 
-        "Österreich", "Deutschland", "Schweiz",
+        "\u00D6sterreich", "Deutschland", "Schweiz",
         "Autriche", "Allemagne", "Suisse",
         "Austria", "Germania", "Svizzera"
     };
@@ -185,8 +192,10 @@ public class PersonImpl extends AbstractObject<org.openmdx.test.app1.jmi1.Person
      * @see org.openmdx.test.app1.cci2.Person#assignAddress(org.openmdx.test.app1.cci2.PersonAssignAddressParams)
      */
     public Void assignAddress(PersonAssignAddressParams in) {
-        Person same = sameObject();
-        System.out.println("Assigning addresses to " + same.refMofId() + ": " + in.getAddress());
+        RefPackage_1_0 nextPackage = (RefPackage_1_0) ((RefObject)nextObject()).refOutermostPackage();
+        org.openmdx.test.app1.cci2.PersonAssignAddressParams nextInput = (org.openmdx.test.app1.cci2.PersonAssignAddressParams) nextPackage.refCreateStruct(in.refDelegate());
+//        nextObject().assignAddress(nextInput);
+        System.out.println("Assigning addresses to " + sameObject().refMofId() + ": " + in.getAddress());
 //        List<Address> target = this.same.getAssignedAddress();
 //        List<Address> source = in.getAddress();
 //        List<Address> set = new ArrayList<Address>(source);
@@ -242,21 +251,30 @@ public class PersonImpl extends AbstractObject<org.openmdx.test.app1.jmi1.Person
         return app1Package.createPersonDateOpResult(in.getDateIn(), in.getDateTimeIn());        
     }
 
-    
-//    public void preStore(InstanceCallbackEvent event) throws ServiceException {
-//        //System.out.println(this.getClass().getName() + ".objPreStore"); 
-//        int sex = ((Number)super.objGetValue("sex")).intValue();
-//        String salutation = (String)super.objGetValue("salutation");
-//        if((0 == sex) && !("Herr".equals(salutation) || "Mister".equals(salutation) || "Monsieur".equals(salutation))) {
-//          throw new ServiceException(
-//            BasicException.Code.DEFAULT_DOMAIN,
-//            BasicException.Code.ASSERTION_FAILURE, 
-//            new BasicException.Parameter[]{
-//              new BasicException.Parameter("object", this)
-//            },
-//            "sex 0 implies salutation [Herr|Mister|Monsieur]"
-//          );
-//        }
-//    }
+    /* (non-Javadoc)
+     * @see org.openmdx.base.aop2.AbstractObject#jdoPreStore()
+     */
+    @Override
+    public void jdoPreStore() {
+      //System.out.println(this.getClass().getName() + ".objPreStore"); 
+      short sex = nextObject().getSex();
+      String salutation = nextObject().getSalutation();
+      if(
+        0 == sex && 
+        !"Herr".equals(salutation) && 
+        !"Mister".equals(salutation) &&
+        !"Monsieur".equals(salutation)
+      ) {
+        throw new RuntimeServiceException(
+          BasicException.Code.DEFAULT_DOMAIN,
+          BasicException.Code.ASSERTION_FAILURE, 
+          "sex 0 implies salutation [Herr|Mister|Monsieur]",
+          new BasicException.Parameter("xri", super.sameObject().refGetPath().toXRI()),
+          new BasicException.Parameter("Sex", sex),
+          new BasicException.Parameter("salutation", salutation)
+        );
+      }
+      super.jdoPreStore();
+    }
 
 }

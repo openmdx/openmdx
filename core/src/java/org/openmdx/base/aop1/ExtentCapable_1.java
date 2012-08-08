@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtentCapable_1.java,v 1.2 2009/01/17 02:37:22 hburger Exp $
+ * Name:        $Id: ExtentCapable_1.java,v 1.4 2009/05/27 22:49:41 hburger Exp $
  * Description: Extent Capable
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/17 02:37:22 $
+ * Date:        $Date: 2009/05/27 22:49:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,7 @@
  */
 package org.openmdx.base.aop1;
 
-import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.accessor.view.PlugIn_1;
 import org.openmdx.base.exception.ServiceException;
@@ -88,7 +88,7 @@ public class ExtentCapable_1 extends PlugIn_1 {
             Object resourceIdentifier = this.jdoGetObjectId();
             return resourceIdentifier == null ? null : ( 
                 resourceIdentifier instanceof Path ? ((Path)resourceIdentifier) : new Path(resourceIdentifier.toString())
-            ).toResourceIdentifier();
+            ).toXRI();
         } else {
             return super.objGetValue(feature);
         }

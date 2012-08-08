@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Uml2ModelMapper.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: Uml2ModelMapper.java,v 1.3 2009/05/16 22:17:50 wfro Exp $
  * Description: Uml2ModelMapper
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/05/16 22:17:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,11 +58,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.openmdx.application.mof.cci.AggregationKind;
-import org.openmdx.application.mof.cci.Multiplicities;
-import org.openmdx.application.mof.cci.Stereotypes;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.text.conversion.HtmlEncoder;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.id.UUIDs;

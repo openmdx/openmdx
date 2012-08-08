@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencedObjectDataBinding.java,v 1.2 2008/11/17 14:28:04 wfro Exp $
+ * Name:        $Id: ReferencedObjectDataBinding.java,v 1.3 2009/04/07 19:29:13 hburger Exp $
  * Description: ReferencedObjectDataBinding 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/17 14:28:04 $
+ * Date:        $Date: 2009/04/07 19:29:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -149,7 +149,7 @@ public class ReferencedObjectDataBinding implements DataBinding_1_0 {
             String attributeName = this.getAttributeName(qualifiedFeatureName);      
             Object oldValue = referenced.refGetValue(attributeName);
             if(oldValue instanceof Collection) {
-                Collection<Object> values = (Collection<Object>)oldValue;
+                Collection values = (Collection)oldValue;
                 values.clear();
                 if(newValue instanceof Collection) {
                     values.addAll((Collection)newValue);

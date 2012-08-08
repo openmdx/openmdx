@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StructuralFeatureDef.java,v 1.1 2009/01/13 02:10:40 wfro Exp $
+ * Name:        $Id: StructuralFeatureDef.java,v 1.2 2009/05/16 22:17:49 wfro Exp $
  * Description: VelocityStructuralFeatureDef class
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:40 $
+ * Date:        $Date: 2009/05/16 22:17:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,8 +54,8 @@ package org.openmdx.application.mof.mapping.cci;
 import java.util.Set;
 
 import org.omg.mof.spi.AbstractNames;
-import org.openmdx.application.mof.cci.Multiplicities;
-import org.openmdx.application.mof.cci.PrimitiveTypes;
+import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.PrimitiveTypes;
 
 @SuppressWarnings("unchecked")
 public abstract class StructuralFeatureDef

@@ -17,15 +17,12 @@
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/imap.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/pop3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j-over-slf4j.jar" sourcepath="src/log4j-over-slf4j.java.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdo2-api.jar" sourcepath="src/jdo2-api.java.zip">
 		<attributes>
 			<attribute name="javadoc_location" value="http://db.apache.org/jdo/api21/apidocs/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/smtp.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jcl-over-slf4j.jar" sourcepath="src/jcl-over-slf4j.java.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/slf4j-api.jar" sourcepath="src/slf4j-api.java.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 5.0"/>
 	<classpathentry kind="lib" path="lib/icu4j.jar" sourcepath="src/icu4j.java.zip"/>
 	<classpathentry kind="lib" path="lib/icu4j-charsets.jar" sourcepath="src/icu4j-charsets.java.zip"/>

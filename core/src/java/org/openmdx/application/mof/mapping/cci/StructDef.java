@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StructDef.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: StructDef.java,v 1.3 2009/06/09 12:45:18 hburger Exp $
  * Description: VelocityStructDef class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,7 +60,6 @@ import java.util.Set;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
 
 @SuppressWarnings("unchecked")
 public class StructDef
@@ -121,7 +120,7 @@ public class StructDef
       fields.add(
         new AttributeDef(
           model.getElement(it.next()),
-          (Model_1_3)model 
+          model 
         )
       );
     }

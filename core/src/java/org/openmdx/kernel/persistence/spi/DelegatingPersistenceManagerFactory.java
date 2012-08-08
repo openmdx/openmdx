@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingPersistenceManagerFactory.java,v 1.2 2009/01/14 14:39:24 wfro Exp $
+ * Name:        $Id: DelegatingPersistenceManagerFactory.java,v 1.3 2009/05/15 00:26:41 hburger Exp $
  * Description: Delegating Persistence Manager Factory 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/14 14:39:24 $
+ * Date:        $Date: 2009/05/15 00:26:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -86,11 +86,7 @@ public abstract class DelegatingPersistenceManagerFactory
     @SuppressWarnings("unchecked")
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
-
-
-
         Class[] classes
-
     ) {
         delegate().addInstanceLifecycleListener(listener, classes);
     }

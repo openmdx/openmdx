@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Layer_1.java,v 1.3 2009/02/10 10:23:26 hburger Exp $
+ * Name:        $Id: Layer_1.java,v 1.8 2009/06/09 12:45:19 hburger Exp $
  * Description: User Profile Service
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/10 10:23:26 $
+ * Date:        $Date: 2009/06/09 12:45:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,7 +66,8 @@ import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Model_1_6;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -151,9 +152,9 @@ public class Layer_1
      *
      * @return Returns the model.
      */
-    protected Model_1_6 getModel(
+    protected Model_1_0 getModel(
     ) {
-        return this.model;
+        return this.model == null ? this.model = Model_1Factory.getModel() : this.model;
     }
     
     
@@ -261,18 +262,12 @@ public class Layer_1
         Layer_1_0 delegation
     ) throws ServiceException{
         super.activate(id, configuration, delegation);
-        this.statistics = (LayerStatistics_1_0)configuration.values(
-            SharedConfigurationEntries.LAYER_STATISTICS
-        ).get(
-            id
-        );
         this.configuration = configuration;
         this.delegation = delegation;
         this.id = id;
         this.bypassedByLenientRequests = configuration.isOn(
             SharedConfigurationEntries.BYPASSED_BY_LENIENT_REQUESTS
         );
-        this.model = (Model_1_6) configuration.values(SharedConfigurationEntries.MODEL).get(0);
         SysLog.detail(
             "Activating " + DataproviderLayers.toString(id) + " layer " + getClass().getName(),
             configuration
@@ -654,10 +649,6 @@ public class Layer_1
             index++
         ) {
             DataproviderRequest request = requests[index];
-            SysLog.trace(
-                DataproviderLayers.toString(this.id),
-                request
-            );
             replies[index] = process(header,request);
         }
         epilog(
@@ -680,18 +671,18 @@ public class Layer_1
         ServiceHeader header,
         UnitOfWorkRequest unitOfWorkRequest
     ){
-        if(unitOfWorkRequest.isTransactionalUnit()) {
-            RuntimeServiceException assertionFailure = new RuntimeServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "A layer can't handle transactions"
-            );
-            SysLog.error(
-                assertionFailure.getMessage(),
-                assertionFailure.getCause()
-            );
-            throw assertionFailure;
-        }
+//        if(unitOfWorkRequest.isTransactionalUnit()) {
+//            RuntimeServiceException assertionFailure = new RuntimeServiceException(
+//                BasicException.Code.DEFAULT_DOMAIN,
+//                BasicException.Code.ASSERTION_FAILURE,
+//                "A layer can't handle transactions"
+//            );
+//            SysLog.error(
+//                assertionFailure.getMessage(),
+//                assertionFailure.getCause()
+//            );
+//            throw assertionFailure;
+//        }
         DataproviderRequest[] requests = unitOfWorkRequest.getRequests();
         DataproviderReply[] replies = new DataproviderReply[requests.length];
         try {
@@ -715,10 +706,6 @@ public class Layer_1
                     );
                 }
                 process(header,requests,replies);
-                if (this.statistics != null) this.statistics.update(
-                    requests,
-                    replies
-                );
                 UnitOfWorkReply unitOfWorkReply = new UnitOfWorkReply(replies); 
                 if(this.id == DataproviderLayers.INTERCEPTION) {
                     epilog(
@@ -772,15 +759,11 @@ public class Layer_1
                 new BasicException.Parameter("requests", requests.length),
                 new BasicException.Parameter("lenient requests", lenient)
             );
-        } catch (ServiceException exception) {
-            if (this.statistics != null) this.statistics.update(
-                requests,
-                replies
-            );
+        } 
+        catch (ServiceException exception) {
             return new UnitOfWorkReply(exception);
         }
     }
-
 
     //------------------------------------------------------------------------
     // Variables
@@ -810,13 +793,8 @@ public class Layer_1
     private Configuration configuration;
 
     /**
-     * statistics object
-     */
-    private LayerStatistics_1_0 statistics;
-    
-    /**
      * 
      */
-    private Model_1_6 model;
+    private Model_1_0 model;
     
 }

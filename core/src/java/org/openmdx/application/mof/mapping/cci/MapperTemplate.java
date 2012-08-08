@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapperTemplate.java,v 1.1 2009/01/13 02:10:40 wfro Exp $
+ * Name:        $Id: MapperTemplate.java,v 1.2 2009/06/09 12:45:18 hburger Exp $
  * Description: JMITemplate 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:40 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,19 +55,19 @@ package org.openmdx.application.mof.mapping.cci;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
 
 public class MapperTemplate {
     
     protected MapperTemplate(
         Writer writer,
-        Model_1_3 model
+        Model_1_0 model
     ) {
         this.pw = new PrintWriter(writer);
         this.model = model;
     }
         
     protected final PrintWriter pw;
-    protected final Model_1_3 model;
+    protected final Model_1_0 model;
     
 }

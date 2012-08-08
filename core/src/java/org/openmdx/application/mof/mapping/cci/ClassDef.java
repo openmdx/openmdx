@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClassDef.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: ClassDef.java,v 1.3 2009/05/16 22:17:49 wfro Exp $
  * Description: VelocityClassDef class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/05/16 22:17:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,10 +58,10 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
-import org.openmdx.application.mof.cci.Stereotypes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
 
 @SuppressWarnings("unchecked")

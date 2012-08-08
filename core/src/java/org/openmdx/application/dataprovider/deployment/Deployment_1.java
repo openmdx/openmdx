@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Deployment_1.java,v 1.10 2009/03/09 17:11:21 hburger Exp $
+ * Name:        $Id: Deployment_1.java,v 1.14 2009/05/20 15:49:35 wfro Exp $
  * Description: Deployment
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/09 17:11:21 $
+ * Date:        $Date: 2009/05/20 15:49:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,6 +56,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.jdo.JDOHelper;
@@ -65,13 +66,10 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
 import javax.resource.ResourceException;
-import javax.resource.spi.security.PasswordCredential;
-import javax.security.auth.Subject;
 
 import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
 import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1ConnectionFactoryImpl;
-import org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1;
 import org.openmdx.base.deploy.LazyDeployment;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -277,7 +275,7 @@ public class Deployment_1
     private static String toOpenMdxProviderURI(
         boolean inProcess
     ){
-        return "xri://@openmdx*(+lightweight)*" + (
+        return "xri://ejb.openmdx.org*" + (
             inProcess ? "ENTERPRISE_APPLICATION_CONTAINER" : "ENTERPRISE_JAVA_BEAN_SERVER"
         );
     }
@@ -333,9 +331,15 @@ public class Deployment_1
 	        try {
 	            getInitialContext();
 	        } catch (ServiceException exception) {
-	            throw new ResourceException(
-	                "Deployment failure",
-	                exception
+	            throw BasicException.initHolder(
+		            new ResourceException(
+		                "Deployment failure",
+		                BasicException.newEmbeddedExceptionStack(
+			                exception,
+			                BasicException.Code.DEFAULT_DOMAIN,
+			                BasicException.Code.INITIALIZATION_FAILURE
+			            )
+			        )
 	            );
 	        } catch (NamingException exception) {
 	            new ServiceException(exception).log();
@@ -343,7 +347,7 @@ public class Deployment_1
 	        Map<String,Object> properties = new HashMap<String,Object>();
 	        properties.put(
 	            ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(),
-	            "org.openmdx.application.dataprovider.transport.ejb.cci.Jmi1AccessorFactory_2"
+	            "org.openmdx.application.persistence.ejb.Jmi1AccessorFactory_2"
 	        );
 	        properties.put(
 	            ConfigurableProperty.ConnectionFactoryName.qualifiedName(),
@@ -378,12 +382,11 @@ public class Deployment_1
      * @see org.openmdx.base.persistence.spi.ManagerFactory_2_0#createManager(javax.security.auth.Subject)
      */
     public PersistenceManager getEntityManager(
-        Subject subject
+        List<String> principalChain
     ) throws ResourceException {
-        PasswordCredential credential = AbstractPersistenceManagerFactory_1.getCredential(subject);
         return getPersistenceManagerFactory(this.entityManagerFactoryURI).getPersistenceManager(
-            credential.getUserName(),
-            String.valueOf(credential.getPassword())
+            principalChain.toString(),
+            null
         );
     }
 

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RoseExternalizer.java,v 1.1 2009/01/13 02:10:46 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: RoseExternalizer.java,v 1.3 2009/06/09 15:39:58 hburger Exp $
  * Description: RoseExporterMain command-line tool
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:46 $
+ * Date:        $Date: 2009/06/09 15:39:58 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.mof.externalizer.rose;
 
@@ -64,17 +63,20 @@ import org.openmdx.application.mof.externalizer.spi.Model_1Accessor;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 
-//---------------------------------------------------------------------------  
-@SuppressWarnings("unchecked")
+/**
+ * Rose Externalizer
+ */
 public class RoseExternalizer {
 
-    //-------------------------------------------------------------------------  
-    static class Runner {
-
-        //-----------------------------------------------------------------------  
-        public void run(
-            String args[]
-        ) throws ServiceException, Exception {
+    /**
+     * Main
+     * 
+     * @param args
+     */
+    public static void main(
+        String[] args
+    ) {
+        try {
 
             // get options
             Getopt g = new Getopt(
@@ -92,14 +94,14 @@ public class RoseExternalizer {
                 }
             );
 
-            List formats = new ArrayList();
-            List modelNames = new ArrayList();
+            List<String> formats = new ArrayList<String>();
+            List<String> modelNames = new ArrayList<String>();
             String mdlDir = null;
             String mdlFile = null;
             String openmdxjdoDir = null;
             String outFileName = "./out.jar";
-            List pathMapSymbols = new ArrayList();
-            List pathMapPaths = new ArrayList();
+            List<String> pathMapSymbols = new ArrayList<String>();
+            List<String> pathMapPaths = new ArrayList<String>();
 
             int c;
             while ((c = g.getopt()) != -1) {
@@ -152,7 +154,6 @@ public class RoseExternalizer {
             }
 
             // pathMap
-            Map pathMap = new HashMap();
             if(pathMapSymbols.size() != pathMapPaths.size()) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
@@ -162,8 +163,7 @@ public class RoseExternalizer {
                     new BasicException.Parameter("pathMapPath", pathMapPaths)
                 );
             }
-
-            pathMap = new HashMap();
+            Map<String,String> pathMap = new HashMap<String,String>();
             for(
                     int i = 0; 
                     i < pathMapSymbols.size();
@@ -193,35 +193,16 @@ public class RoseExternalizer {
             );
             fos.write(
                 modelExternalizer.externalizePackageAsJar(
-                    (String)modelNames.get(0),
+                    modelNames.get(0),
                     formats
                 )
             );  
             fos.close();
+        } catch(ServiceException e) {
+            e.printStackTrace();
+        } catch(Exception e) {
+            new ServiceException(e).printStackTrace();
         }
     }
-
-    //---------------------------------------------------------------------------  
-    public static void main(
-        String[] args
-    ) {
-        try {
-            new Runner().run(args);
-        }
-        catch(ServiceException e) {
-            System.err.println(e.toString());
-        }
-        catch(Exception e) {
-            System.err.println(
-                new ServiceException(e).toString()
-            );
-        }
-    }
-
-    //---------------------------------------------------------------------------
-    // Variables  
-    //---------------------------------------------------------------------------  
 
 }
-
-//--- End of File -----------------------------------------------------------

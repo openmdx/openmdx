@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ServiceHeader.java,v 1.2 2009/02/13 13:29:34 wfro Exp $
+ * Name:        $Id: ServiceHeader.java,v 1.5 2009/04/24 01:07:43 hburger Exp $
  * Description: Service Header
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/13 13:29:34 $
+ * Date:        $Date: 2009/04/24 01:07:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -240,7 +240,7 @@ public final class ServiceHeader
             NO_PRINCIPALS, // principalChain
             null, // correlationId
             false, // traceRequest
-            new QualityOfService(),
+            QualityOfService.STANDARD,
             null, // requestedAt
             null // requestedFor
         );
@@ -369,14 +369,14 @@ public final class ServiceHeader
      * 
      * @return a principal name collection
      */
-    private static Collection<String> toPrincipalNames(
+    public static List<String> toPrincipalChain(
         String connectionUsername
     ){
         if(
             connectionUsername == null || 
             "".equals(connectionUsername)
         ) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         } else if (
             (connectionUsername.startsWith("[") && connectionUsername.endsWith("]")) ||
             (connectionUsername.startsWith("{") && connectionUsername.endsWith("}"))
@@ -393,7 +393,7 @@ public final class ServiceHeader
             }
             return principalChain;
         } else {
-            return Collections.singleton(connectionUsername);
+            return Collections.singletonList(connectionUsername);
         }
     }
 
@@ -404,10 +404,10 @@ public final class ServiceHeader
      * 
      * @return a principal array
      */
-    private static String[] toPrincipalChain(
+    private static String[] toPrincipalArray(
         String connectionUsername
     ){
-        Collection<String> principalNames = toPrincipalNames(
+        Collection<String> principalNames = toPrincipalChain(
             connectionUsername
         );
         return principalNames.toArray(
@@ -470,10 +470,10 @@ public final class ServiceHeader
         String connectionPassword
     ){
         return  new ServiceHeader(
-            toPrincipalChain(connectionUsername),
+            toPrincipalArray(connectionUsername),
             "".equals(connectionPassword) ? null : connectionPassword, // correlationId,
             false, // traceRequest
-            new QualityOfService(),
+            QualityOfService.STANDARD,
             null, // requestedAt,
             null // requestedFor
         );

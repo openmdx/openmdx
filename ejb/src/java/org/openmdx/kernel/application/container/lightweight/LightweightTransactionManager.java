@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightTransactionManager.java,v 1.1 2009/01/12 12:49:24 wfro Exp $
+ * Name:        $Id: LightweightTransactionManager.java,v 1.2 2009/03/31 17:06:10 hburger Exp $
  * Description: Lightweight Transaction Manager
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:24 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,6 +53,8 @@
 package org.openmdx.kernel.application.container.lightweight;
 
 import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -67,8 +69,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 
 import org.openmdx.kernel.application.container.transaction.TransactionIdFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 
 /**
  * JTA Transaction manager implementation.
@@ -95,9 +96,7 @@ final class LightweightTransactionManager implements TransactionManager {
     /**
      * The logger instance
      */
-    private final Logger logger = LoggerFactory.getLogger(
-        LightweightTransactionManager.class
-    );
+    private final Logger logger = LoggerFactory.getLogger();
     
     /**
      * Transaction bindings thread id <-> transaction object.
@@ -155,7 +154,7 @@ final class LightweightTransactionManager implements TransactionManager {
         );
         bindings.put(Thread.currentThread(), currentTransaction);
 
-        this.logger.trace("Begin {}", currentTransaction);
+        this.logger.log(Level.FINEST,"Begin {0}", currentTransaction);
 
     }
 
@@ -192,7 +191,7 @@ final class LightweightTransactionManager implements TransactionManager {
             throw new IllegalStateException();
 
 
-        this.logger.trace("Commit {}", currentTransaction);
+        this.logger.log(Level.FINEST,"Commit {0}", currentTransaction);
         try {
             currentTransaction.commit();
         } finally {
@@ -225,7 +224,7 @@ final class LightweightTransactionManager implements TransactionManager {
 
         timeouts.remove(currentThread);
 
-        this.logger.trace("Rollback {}", currentTransaction);
+        this.logger.log(Level.FINEST,"Rollback {0}", currentTransaction);
         currentTransaction.rollback();
 
     }
@@ -247,7 +246,7 @@ final class LightweightTransactionManager implements TransactionManager {
         Transaction currentTransaction = getTransaction();
         if (currentTransaction == null)
             throw new IllegalStateException();
-        this.logger.info("Set {} to rollback-only", currentTransaction);
+        this.logger.log(Level.INFO,"Set {0} to rollback-only", currentTransaction);
         currentTransaction.setRollbackOnly();
     }
 

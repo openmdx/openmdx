@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ValidatingDocumentBuilder.java,v 1.5 2008/01/20 00:19:47 hburger Exp $
+ * Name:        $Id: ValidatingDocumentBuilder.java,v 1.6 2009/03/31 17:05:18 hburger Exp $
  * Description: Validating Document Builder 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/20 00:19:47 $
+ * Date:        $Date: 2009/03/31 17:05:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,6 +56,8 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.CharBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,8 +65,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -194,7 +195,11 @@ public class ValidatingDocumentBuilder {
                 }
             }
         } else {
-            this.logger.warn("Don't know how to validate the document at URL {}", url);
+            logger.log(
+                Level.WARNING, 
+                "Don't know how to validate the document at URL {0}", 
+                url
+            );
         }
         return null;
     }
@@ -202,7 +207,7 @@ public class ValidatingDocumentBuilder {
     /**
      * The logger 
      */
-    private final Logger logger = LoggerFactory.getLogger(ValidatingDocumentBuilder.class);
+    static final Logger logger = LoggerFactory.getLogger();
 
     /**
      * Schema Document Builder Factory 
@@ -260,11 +265,6 @@ public class ValidatingDocumentBuilder {
          */
         private final URL documentURL;
         
-        /**
-         * The logger belongs to the ValidatingDocumentBuilder class
-         */
-        private final Logger logger = LoggerFactory.getLogger(ValidatingDocumentBuilder.class);
-        
         /* (non-Javadoc)
          * @see org.xml.sax.ErrorHandler#error(org.xml.sax.SAXParseException)
          */
@@ -272,7 +272,7 @@ public class ValidatingDocumentBuilder {
             SAXParseException exception
         ) throws SAXException {
             String message = newMessage(exception, "error");
-            this.logger.error(message);
+            logger.log(Level.SEVERE, message);
             System.err.println(message);
         }
 
@@ -283,7 +283,7 @@ public class ValidatingDocumentBuilder {
             SAXParseException exception
         ) throws SAXException {
             String message = newMessage(exception, "fatal error");
-            this.logger.error(message);
+            logger.log(Level.SEVERE, message);
             System.err.println(message);
         }
         
@@ -294,7 +294,7 @@ public class ValidatingDocumentBuilder {
             SAXParseException exception
         ) throws SAXException {
             String message = newMessage(exception, "warning");
-            this.logger.warn(message);
+            logger.log(Level.WARNING,message);
             System.err.println(message);
         }
 

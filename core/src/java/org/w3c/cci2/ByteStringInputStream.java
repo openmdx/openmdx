@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ByteStringInputStream.java,v 1.1 2009/01/12 12:54:16 wfro Exp $
+ * Name:        $Id: ByteStringInputStream.java,v 1.2 2009/05/15 00:26:39 hburger Exp $
  * Description: ByteStringInputStream 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:54:16 $
+ * Date:        $Date: 2009/05/15 00:26:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,8 @@ package org.w3c.cci2;
 
 import java.io.ByteArrayInputStream;
 
+import org.w3c.spi.Reusable;
+
 /**
  * A <code>ByteStringInputStream</code> contains
  * an internal byte string that contains bytes that
@@ -62,22 +64,24 @@ import java.io.ByteArrayInputStream;
  */
 public class ByteStringInputStream
     extends ByteArrayInputStream
+    implements Reusable
 {
 
     /**
      * Constructor 
      *
-     * @param characterString
+     * @param byteString
      */
     public ByteStringInputStream(
-        ByteString characterString
+        ByteString byteString
     ) {
         super(
-            characterString.buffer(),
-            characterString.offset(),
-            characterString.length()
+            byteString.buffer(),
+            byteString.offset(),
+            byteString.length()
         );
-        this.string = characterString;
+        super.mark(Integer.MAX_VALUE);
+        this.string = byteString;
     }
 
     /**
@@ -95,4 +99,12 @@ public class ByteStringInputStream
         return this.string;
     }
 
+    /**
+     * Prepare the stream for re-use
+     * 
+     */
+    public void reUse(){
+        super.pos = 0;
+    }
+        
 }

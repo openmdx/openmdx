@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AuthenticationContextThread.java,v 1.17 2009/03/08 18:52:19 wfro Exp $
+ * Name:        $Id: AuthenticationContextThread.java,v 1.18 2009/03/31 17:30:55 hburger Exp $
  * Description: Authentication Context Thread
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:19 $
+ * Date:        $Date: 2009/03/31 17:30:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,6 +55,8 @@ import java.util.EnumSet;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -64,12 +66,12 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.openmdx.base.concurrent.StateTransitions;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.security.auth.context.spi.AuthenticationContext;
 import org.openmdx.security.auth.context.spi.Invalidator;
 import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
 import org.openmdx.uses.org.apache.commons.pool.impl.GenericObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 /**
  * Authenticator
  */
@@ -148,7 +150,7 @@ public class AuthenticationContextThread
 	/**
 	 * The logger instance
 	 */
-	private final static Logger logger = LoggerFactory.getLogger(AuthenticationContextThread.class);
+	private final static Logger logger = LoggerFactory.getLogger();
 	
 	/**
 	 * Retrieve the id.
@@ -209,7 +211,6 @@ public class AuthenticationContextThread
 	 * @param idleTimeout
 	 * @param callbackTimeout
 	 * @param debug 
-	 * @param logger 
 	 * @param invalidator 
 	 * @return a new <code>Authenticator</code> pool
 	 * 
@@ -255,7 +256,7 @@ public class AuthenticationContextThread
 			}
 		} 
 		catch (Exception exception) {
-			AuthenticationContextThread.logger.warn("Authenticator pool population failed", exception);
+			AuthenticationContextThread.logger.log(Level.WARNING,"Authenticator pool population failed", exception);
 		}
 		return pool;
 	}
@@ -321,30 +322,50 @@ public class AuthenticationContextThread
 						if(
 							!this.status.awaitState(AuthenticationContextThread.ACTIVE_OR_PASSIVE, this.iterate, configuration.getSuspendTimeout())
 						) {
-							AuthenticationContextThread.logger.debug("Authentication context thread has timed out and will be terminated", this.getName());
+							AuthenticationContextThread.logger.log(
+								Level.FINER,
+								"Authentication context thread {0} has timed out and will be terminated", 
+								this.getName()
+							);
 							break reUse;
 						}
 					} 
 					catch (InterruptedException exception) {
-						AuthenticationContextThread.logger.debug("Authentication context thread has been interrupted and will be terminated", this.getName());
+						AuthenticationContextThread.logger.log(
+							Level.FINER,
+							"Authentication context thread {0} has been interrupted and will be terminated", 
+							this.getName()
+						);
 						break reUse;
 					}
 				}
 			}
 		} 
 		catch (LoginException exception){
-			AuthenticationContextThread.logger.warn("LoginContext acquisition failed", exception);
+			AuthenticationContextThread.logger.log(
+				Level.WARNING,
+				"LoginContext acquisition failed", 
+				exception
+			);
 		} 
 		finally {
 			this.status.setState(Status.FINALIZABLE);
 			this.lock.unlock();
 		}
-		AuthenticationContextThread.logger.debug("Terminating authentication context thread", this.getName());
+		AuthenticationContextThread.logger.log(
+			Level.FINER,
+			"Terminating authentication context thread {0}", 
+			this.getName()
+		);
 		try {
 			configuration.invalidateObject(this);
 		} 
 		catch (Exception exception) {
-			AuthenticationContextThread.logger.warn("Authentication context invalidation failed", exception);
+			AuthenticationContextThread.logger.log(
+				Level.WARNING,
+				"Authentication context invalidation failed", 
+				exception
+			);
 		}
 	}
 

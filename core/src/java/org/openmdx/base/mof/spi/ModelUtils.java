@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ModelUtils.java,v 1.2 2009/01/13 17:33:49 wfro Exp $
+ * Name:        $Id: ModelUtils.java,v 1.3 2009/05/16 22:17:54 wfro Exp $
  * Description: ModelUtils
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:33:49 $
+ * Date:        $Date: 2009/05/16 22:17:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,10 +51,10 @@
 package org.openmdx.base.mof.spi;
 
 
-import org.openmdx.application.mof.cci.Multiplicities;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
 
 public class ModelUtils {
 

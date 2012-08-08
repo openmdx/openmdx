@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: OperationAwareLayer_1.java,v 1.1 2009/03/02 13:38:15 wfro Exp $
+ * Name:        $Id: OperationAwareLayer_1.java,v 1.3 2009/06/01 15:39:40 wfro Exp $
  * Description: Stream Operation Aware Layer_1_0 Implementation
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/02 13:38:15 $
+ * Date:        $Date: 2009/06/01 15:39:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,8 +51,9 @@
  */
 package org.openmdx.application.dataprovider.spi;
 
+import javax.resource.cci.MappedRecord;
+
 import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
@@ -116,14 +117,19 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-        DataproviderObject response = null;
+        MappedRecord response = null;
         String operationName = request.path().get(
             request.path().size() - 2
         );
         Path replyPath = request.path().getDescendant(
             "reply", super.uidAsString()
         );
-        response = otherOperation(header, request, operationName, replyPath); 
+        response = this.otherOperation(
+            header, 
+            request, 
+            operationName, 
+            replyPath
+        ); 
         return response == null ?
             super.operation(header, request) :
             new DataproviderReply(response);         
@@ -141,7 +147,7 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
      * 
      * @throws ServiceException
      */
-    protected DataproviderObject otherOperation(
+    protected MappedRecord otherOperation(
         ServiceHeader header,
         DataproviderRequest request,
         String operation, 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RequestedObject.java,v 1.2 2009/01/06 13:14:45 wfro Exp $
- * Description: spice: dataprovider object proxy
- * Revision:    $Revision: 1.2 $
+ * Name:        $Id: RequestedObject.java,v 1.6 2009/06/09 15:39:58 hburger Exp $
+ * Description: Request Object
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 13:14:45 $
+ * Date:        $Date: 2009/06/09 15:39:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,12 +52,15 @@
 package org.openmdx.application.dataprovider.cci;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
-import org.openmdx.base.collection.SparseList;
+import javax.resource.cci.MappedRecord;
+
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 
 
@@ -66,132 +69,26 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 public class RequestedObject
-implements DataproviderReplyListener, Serializable, DataproviderObject_1_0
+implements DataproviderReplyListener, Serializable, MappedRecord
 {
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 3257565088054654263L;
 
-    /**
-     *
-     */
-    protected DataproviderObject getObject(
-    ){
-        if (this.object == null) throw new RuntimeServiceException(
-            this.exception == null ?
-                new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.ILLEGAL_STATE,
-                    "The corresponding request has not been processed yet"
-                ) :
+    protected MappedRecord getObject(
+    ) {
+        if (this.object == null) {
+            throw new RuntimeServiceException(
+                this.exception == null ?
+                    new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN, 
+                        BasicException.Code.ILLEGAL_STATE,
+                        "The corresponding request has not been processed yet"
+                    ) :
                     this.exception
-        );
+            );
+        }
         return this.object;
     }
-
-
-    //------------------------------------------------------------------------
-    // Implements Dataprovider_1_0
-    //------------------------------------------------------------------------
-
-    /**
-     * Returns the dataprovider object's path object.
-     */
-    public Path path(
-    ){
-        return getObject().path(); 
-    }
-
-    /**
-     * Returns the attribute value list.
-     *
-     * @param       attributeName
-     *              the attribute's name
-     *
-     * @return      the attribute value list; or null if no list with this
-     *              name exists
-     */
-    public SparseList getValues(
-        String attributeName
-    ){
-        return getObject().getValues(attributeName);
-    }
-
-    /**
-     * Returns the existing or newly created attribute value list (optional
-     * method).
-     *
-     * @param       attributeName
-     *              the attribute's name
-     *
-     * @return      the attribute value list (never null)
-     */
-    public SparseList values(
-        String attributeName
-    ){
-        return getObject().values(attributeName);
-    }
-
-    /**
-     * Returns the existing and cleared or newly created attribute value list
-     * (optional method).
-     *
-     * @param       attributeName
-     *              the attribute's name
-     *
-     * @return      the attribute value list (never null)
-     */
-    public SparseList clearValues(
-        String attributeName
-    ){
-        return getObject().clearValues(attributeName);
-    }
-
-    /**
-     * Clear the dataprovider object's attributes (optional operation).
-     */
-    public void clear(
-    ){
-        getObject().clear();
-    }
-
-    /**
-     * Get a set view of the dataprovider object's attribute names
-     */
-    public Set<String> attributeNames(
-    ){
-        return getObject().attributeNames();
-    }
-
-    /**
-     * Checks whether the dataprovider object contains an attribute with the
-     * given name.
-     */
-    public boolean containsAttributeName(
-        String attributeName
-    ){
-        return getObject().containsAttributeName(attributeName);
-    }
-
-    /**
-     * Get the object's digest (which must not be modified!)
-     */
-    public byte[] getDigest(
-    ){
-        return getObject().getDigest();
-    }
-
-    /** 
-     * Set the object's digest (optional operation)
-     */
-    public void setDigest(
-        byte[] digest
-    ){
-        getObject().setDigest(digest);
-    }
-
 
     //------------------------------------------------------------------------
     // Implements DataproviderReplyListener
@@ -216,7 +113,6 @@ implements DataproviderReplyListener, Serializable, DataproviderObject_1_0
         this.object = null;
         this.exception = exception;
     }
-
 
     //------------------------------------------------------------------------
     // Extends Object
@@ -246,11 +142,145 @@ implements DataproviderReplyListener, Serializable, DataproviderObject_1_0
     /**
      * The object if the request succeeds; null otherwise.
      */
-    protected DataproviderObject object = null;
+    protected MappedRecord object = null;
 
     /**
      * The exception if the request fails; null otherwise.
      */
     protected ServiceException exception = null;
+
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.cci.DataproviderObject_1_0#addClones(org.openmdx.application.dataprovider.cci.DataproviderObject_1_0, boolean)
+     */
+    public boolean addClones(
+        MappedRecord source, 
+        boolean overwrite
+    ) {
+        throw new UnsupportedOperationException(); 
+    }
+
+    /* (non-Javadoc)
+     * @see javax.resource.cci.Record#getRecordName()
+     */
+    public String getRecordName(
+    ) {
+        return this.getObject().getRecordName();
+    }
+
+    /* (non-Javadoc)
+     * @see javax.resource.cci.Record#getRecordShortDescription()
+     */
+    public String getRecordShortDescription() {
+        return this.getObject().getRecordShortDescription();
+    }
+
+    /* (non-Javadoc)
+     * @see javax.resource.cci.Record#setRecordName(java.lang.String)
+     */
+    public void setRecordName(String name) {
+        this.getObject().setRecordName(name);
+    }
+
+    /* (non-Javadoc)
+     * @see javax.resource.cci.Record#setRecordShortDescription(java.lang.String)
+     */
+    public void setRecordShortDescription(String description) {
+        this.getObject().setRecordShortDescription(description);
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#clear()
+     */
+    public void clear() {
+       this.getObject().clear();
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#containsKey(java.lang.Object)
+     */
+    public boolean containsKey(Object key) {
+        return this.getObject().containsKey(key);
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#containsValue(java.lang.Object)
+     */
+    public boolean containsValue(Object value) {
+        return this.getObject().containsValue(value);
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#entrySet()
+     */
+    public Set entrySet() {
+        return this.getObject().entrySet();
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#get(java.lang.Object)
+     */
+    public Object get(Object key) {
+        return this.getObject().get(key);
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#isEmpty()
+     */
+    public boolean isEmpty() {
+        return this.getObject().isEmpty();
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#keySet()
+     */
+    public Set keySet() {
+        return this.getObject().keySet();
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#put(java.lang.Object, java.lang.Object)
+     */
+    public Object put(Object key, Object value) {
+        return this.getObject().put(key, value);
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#putAll(java.util.Map)
+     */
+    public void putAll(Map t) {
+        this.getObject().putAll(t);
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#remove(java.lang.Object)
+     */
+    public Object remove(Object key) {
+        return this.getObject().remove(key);
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#size()
+     */
+    public int size() {
+        return this.getObject().size();
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#values()
+     */
+    public Collection values() {
+        return this.getObject().values();
+    }
+
+    @Override
+    public Object clone(
+    ) throws CloneNotSupportedException {
+        try {
+            return ObjectHolder_2Facade.cloneObject(this.getObject());
+        }
+        catch(Exception e) {
+            throw new RuntimeServiceException(e);
+        }
+    }
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateState_1.java,v 1.6 2009/02/18 21:50:11 hburger Exp $
+ * Name:        $Id: DateState_1.java,v 1.8 2009/05/26 14:38:49 wfro Exp $
  * Description: Compatibility Date State
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/18 21:50:11 $
+ * Date:        $Date: 2009/05/26 14:38:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,10 +55,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
+import org.openmdx.base.aop1.State_1_Attributes;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes;
 
 /**
  * To make the class org::openmdx::compatibiliy::state1::DateState public 

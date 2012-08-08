@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: QueryMapper.java,v 1.1 2009/01/13 02:10:35 wfro Exp $
+ * Name:        $Id: QueryMapper.java,v 1.3 2009/06/09 12:45:18 hburger Exp $
  * Description: JMI Query Mapper
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:35 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,14 +56,14 @@ import java.io.Writer;
 import java.util.Iterator;
 
 import org.omg.mof.spi.Identifier;
-import org.openmdx.application.mof.cci.Multiplicities;
 import org.openmdx.application.mof.mapping.cci.ClassifierDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.ReferenceDef;
 import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
 
 /**
  * JMI Query Mapper
@@ -83,7 +83,7 @@ public class QueryMapper
      */
     public QueryMapper(
         Writer writer,
-        Model_1_3 model,
+        Model_1_0 model,
         Format format, 
         String packageSuffix, MetaData_1_0 metaData
     ) {

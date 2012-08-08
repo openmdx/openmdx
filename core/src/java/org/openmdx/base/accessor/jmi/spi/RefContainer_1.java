@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefContainer_1.java,v 1.33 2009/02/24 15:48:54 hburger Exp $
+ * Name:        $Id: RefContainer_1.java,v 1.39 2009/06/03 17:36:22 hburger Exp $
  * Description: RefContainer_1 class
- * Revision:    $Revision: 1.33 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 15:48:54 $
+ * Date:        $Date: 2009/06/03 17:36:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,6 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -75,6 +74,7 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.FilterOperators;
@@ -88,7 +88,7 @@ import org.openmdx.kernel.exception.BasicException;
 @SuppressWarnings("deprecation")
 public class RefContainer_1
     extends AbstractCollection<RefObject_1_0>
-    implements Serializable, org.openmdx.base.accessor.jmi.spi.RefObjectFactory_1.LegacyContainer, RefContainer
+    implements Serializable, LegacyContainer, RefContainer
 {
 
     /**
@@ -144,7 +144,7 @@ public class RefContainer_1
      */
     public String refMofId(
     ) {
-        return ((Path)this.container.getContainerId()).toResourceIdentifier();
+        return ((Path)this.container.getContainerId()).toXRI();
     }
 
     /* (non-Javadoc)
@@ -196,7 +196,7 @@ public class RefContainer_1
                 mapped[i] = new FilterProperty(
                     condition.getQuantor(),
                     condition.getFeature(),
-                    (short)FilterOperators.fromString(condition.getName()),
+                    FilterOperators.fromString(condition.getName()),
                     condition.getValue()
                 );
             }
@@ -254,7 +254,7 @@ public class RefContainer_1
                 conditions[i] = new FilterProperty(
                     condition.getQuantor(),
                     condition.getFeature(),
-                    (short)FilterOperators.fromString(condition.getName()),
+                    FilterOperators.fromString(condition.getName()),
                     condition.getValue()
                 );
             }
@@ -304,6 +304,13 @@ public class RefContainer_1
     @Override
     public boolean isEmpty() {
         return this.container.isEmpty();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.collection.Container#retrieveAll(boolean)
+     */
+    public void retrieveAll(boolean useFetchPlan) {
+        this.container.retrieveAll(useFetchPlan);
     }
 
     /* (non-Javadoc)
@@ -447,5 +454,35 @@ public class RefContainer_1
         }        
     }
 
+    
+    //------------------------------------------------------------------------
+    // Extends AbstractCollection
+    //------------------------------------------------------------------------
 
+    /* (non-Javadoc)
+     * @see java.util.AbstractCollection#toString()
+     */
+    @Override
+    public String toString() {
+        return String.valueOf(this.container.getContainerId());
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        // TODO test for manager, container id and filter
+        return super.equals(obj);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        // TODO mingle persistence manager id, container id and filter
+        return super.hashCode();
+    }
+    
 }

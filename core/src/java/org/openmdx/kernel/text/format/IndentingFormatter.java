@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMEX, http://www.openmdx.org/
- * Name:        $Id: IndentingFormatter.java,v 1.6 2008/02/19 18:49:46 hburger Exp $
+ * Name:        $Id: IndentingFormatter.java,v 1.7 2009/04/28 13:58:52 hburger Exp $
  * Description: Intending Formatter
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/19 18:49:46 $
+ * Date:        $Date: 2009/04/28 13:58:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -118,9 +118,9 @@ public class IndentingFormatter
                 target,
                 (Record)source
             );
-            if(source instanceof List){
+            if(source instanceof List<?>){
                 appendList(target, (List<?>)source);
-            } else if (source instanceof Map){
+            } else if (source instanceof Map<?,?>){
                 appendMap(target, (Map<?,?>)source);
             } else {
                 target.append(
@@ -131,9 +131,9 @@ public class IndentingFormatter
                     System.identityHashCode(source)
                 );
             }
-        } else if(source instanceof List){
+        } else if(source instanceof List<?>){
             appendList(target, (List<?>)source);
-        } else if (source instanceof Map){
+        } else if (source instanceof Map<?,?>){
             appendMap(target, (Map<?,?>)source);
         } else if (source instanceof byte[]){
             target.append(new HexadecimalFormatter((byte[])source));

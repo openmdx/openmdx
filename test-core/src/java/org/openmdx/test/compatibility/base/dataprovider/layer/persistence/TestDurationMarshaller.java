@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestDurationMarshaller.java,v 1.4 2007/01/22 15:41:04 hburger Exp $
+ * Name:        $Id: TestDurationMarshaller.java,v 1.5 2009/05/27 23:14:18 wfro Exp $
  * Description: class TestRecord
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/22 15:41:04 $
+ * Date:        $Date: 2009/05/27 23:14:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,9 +62,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.openmdx.application.dataprovider.layer.persistence.jdbc.DurationMarshaller;
+import org.openmdx.application.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc.DurationMarshaller;
-import org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc.LayerConfigurationEntries;
 import org.openmdx.kernel.exception.BasicException;
 
 public class TestDurationMarshaller extends TestCase {

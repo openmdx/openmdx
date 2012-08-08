@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicState_1.java,v 1.11 2009/02/19 09:55:23 hburger Exp $
+ * Name:        $Id: BasicState_1.java,v 1.18 2009/05/29 17:04:10 hburger Exp $
  * Description: Compatibility State
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/19 09:55:23 $
+ * Date:        $Date: 2009/05/29 17:04:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,15 +51,15 @@
 package org.openmdx.compatibility.state1.aop1;
 
 
-import static org.openmdx.application.cci.SystemAttributes.CONTEXT_CAPABLE_CONTEXT;
-import static org.openmdx.application.cci.SystemAttributes.CREATED_AT;
-import static org.openmdx.application.cci.SystemAttributes.REMOVED_AT;
-import static org.openmdx.application.cci.SystemAttributes.REMOVED_BY;
-import static org.openmdx.application.cci.SystemAttributes.VERSION;
-import static org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes.CREATED_AT_ALIAS;
-import static org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes.REMOVED_AT_ALIAS;
-import static org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes.REMOVED_BY_ALIAS;
-import static org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes.STATED_OBJECT;
+import static org.openmdx.base.accessor.cci.SystemAttributes.CONTEXT_CAPABLE_CONTEXT;
+import static org.openmdx.base.accessor.cci.SystemAttributes.CREATED_AT;
+import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_AT;
+import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_BY;
+import static org.openmdx.base.accessor.cci.SystemAttributes.VERSION;
+import static org.openmdx.base.aop1.State_1_Attributes.CREATED_AT_ALIAS;
+import static org.openmdx.base.aop1.State_1_Attributes.REMOVED_AT_ALIAS;
+import static org.openmdx.base.aop1.State_1_Attributes.REMOVED_BY_ALIAS;
+import static org.openmdx.base.aop1.State_1_Attributes.STATED_OBJECT;
 
 import java.util.AbstractSet;
 import java.util.Collections;
@@ -71,7 +71,7 @@ import javax.jmi.reflect.RefBaseObject;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
+import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.accessor.view.PlugIn_1;
@@ -140,7 +140,7 @@ public class BasicState_1 extends org.openmdx.base.aop1.Aspect_1 {
         DataObject_1_0 oldValue = getCore(false);
         if(
             oldValue != null &&
-            !StateCapables.isCoreObject((Path)oldValue.jdoGetObjectId()) &&
+            !StateCapables.isCoreObject(oldValue.jdoGetObjectId()) &&
             getModel().isInstanceof(oldValue, "org:openmdx:compatibility:state1:StateCapable")
         ) {
             throw new ServiceException(
@@ -166,6 +166,7 @@ public class BasicState_1 extends org.openmdx.base.aop1.Aspect_1 {
     /* (non-Javadoc)
      * @see org.openmdx.base.aop2.core.Aspect_1#objMove(org.openmdx.base.collection.FilterableMap, java.lang.String)
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void objMove(
         Container_1_0 there, 
@@ -179,10 +180,10 @@ public class BasicState_1 extends org.openmdx.base.aop1.Aspect_1 {
             new BasicException.Parameter("criteria", criteria == null ? "<null>" : criteria)
         );
         try {
-            PersistenceManager_1_0 persistenceManager = (PersistenceManager_1_0)JDOHelper.getPersistenceManager(
+            DataObjectManager_1_0 persistenceManager = (DataObjectManager_1_0)JDOHelper.getPersistenceManager(
                 super.self.objGetDelegate()
             );
-            Container_1_0 container = ((Container_1_0) ((Delegating_1_0)there).objGetDelegate()).superSet(); 
+            Container_1_0 container = ((Delegating_1_0<Container_1_0>)there).objGetDelegate().superSet(); 
             Path containerId = (Path) container.getContainerId();
             DataObject_1_0 coreObject = null;            
             boolean validTimeUnique = false;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InternalMethodInvocationArguments.java,v 1.3 2009/02/24 16:02:51 hburger Exp $
+ * Name:        $Id: InternalMethodInvocationArguments.java,v 1.4 2009/04/28 14:07:06 hburger Exp $
  * Description: Value Holder
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 16:02:51 $
+ * Date:        $Date: 2009/04/28 14:07:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -84,11 +84,6 @@ public class InternalMethodInvocationArguments {
     private final static boolean VALIDATE_SERIALIZED_OBJECT = false;
 
     /**
-     * Reusing improves performance
-     */
-    static final boolean REUSE_VALUE_OBJECTS = true;
-    
-    /**
      * The marker character
      */
     static final char MARKER_CHARACTER = 0x5A29;
@@ -106,7 +101,7 @@ public class InternalMethodInvocationArguments {
     /**
      * The list of saved values is re-used between the sane thread's invocations
      */
-    private final List<Object> values = REUSE_VALUE_OBJECTS ? new ArrayList<Object>() : null;
+    private final List<Object> values = new ArrayList<Object>();
     
     /**
      * The index is reset before de-serialization
@@ -196,7 +191,7 @@ public class InternalMethodInvocationArguments {
         Object object
     ) throws RemoteException {
         try {
-            if(REUSE_VALUE_OBJECTS) {
+            if(true) {
                 this.values.clear();
             }
             ObjectOutputStream sink = this.buffer.newSink();
@@ -228,12 +223,12 @@ public class InternalMethodInvocationArguments {
     private Object deserialize(
     ) throws RemoteException {
         try {
-            if(REUSE_VALUE_OBJECTS) {
+            if(true) {
                 this.index = 0;
             }
             ObjectInputStream source = this.buffer.newSource();
             Object object = source.readObject(); 
-            if(REUSE_VALUE_OBJECTS && this.index != this.values.size()) {
+            if(true && this.index != this.values.size()) {
                 throw new StreamCorruptedException(
                     "Number of non-retrieved saved objects: " + (this.values.size() - this.index)
                 );
@@ -297,7 +292,7 @@ public class InternalMethodInvocationArguments {
             OutputStream out
         ) throws IOException {
             super(out);
-            super.enableReplaceObject(REUSE_VALUE_OBJECTS);
+            super.enableReplaceObject(true);
         }
 
         /* (non-Javadoc)
@@ -340,7 +335,7 @@ public class InternalMethodInvocationArguments {
         public Source(InputStream in)
         throws IOException {
             super(in);
-            super.enableResolveObject(REUSE_VALUE_OBJECTS);
+            super.enableResolveObject(true);
         }
 
         /**

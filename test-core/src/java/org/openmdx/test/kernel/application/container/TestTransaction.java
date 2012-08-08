@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: TestTransaction.java,v 1.24 2009/03/04 19:09:19 hburger Exp $
+ * Name:        $Id: TestTransaction.java,v 1.26 2009/04/03 08:06:10 hburger Exp $
  * Description: Lightweight container transaction management test
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/04 19:09:19 $
+ * Date:        $Date: 2009/04/03 08:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -49,28 +49,22 @@
  */
 package org.openmdx.test.kernel.application.container;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+
 import javax.jdo.JDOFatalDataStoreException;
-import javax.jdo.JDOHelper;
+import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
+import javax.resource.ResourceException;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
-
-import org.openmdx.application.dataprovider.accessor.Connection_1;
-import org.openmdx.application.dataprovider.cci.QualityOfService;
-import org.openmdx.application.dataprovider.cci.RequestCollection;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
-import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_1;
-import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
-import org.openmdx.base.accessor.view.Manager_1;
-import org.openmdx.base.exception.ServiceException;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.openmdx.application.dataprovider.deployment.Deployment_1;
+import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
-import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.test.app1.jmi1.App1Package;
 import org.openmdx.test.app1.jmi1.ProductGroup;
@@ -79,131 +73,77 @@ import org.openmdx.test.app1.jmi1.Segment;
 /**
  * Test the lightweight container's transaction management
  */
-public class TestTransaction extends TestCase {
+public class TestTransaction {
 
     /**
-     * Constructor
-     * 
-     * @param name
+     * Entity Manager Factory
      */
-    public TestTransaction(
-        String name
-    ){
-        super(name);
-    }  
-  
-    /**
-     * Main
-     * 
-     * @param args arguments
-     */
-    public static void main(
-        String[] args
-    ){
-        TestRunner.run(suite());
-    }
-    
-    /**
-     * Define Test Suite
-     * 
-     * @return the test suite
-     */
-    public static Test suite(
-    ) {
-        TestSuite suite = new TestSuite();
-        suite.addTest(new TestTransaction("transactional_prolog"));
-        suite.addTest(new TestTransaction("transactional_ejb-2.0"));
-        suite.addTest(new TestTransaction("transactional_ejb-2.1"));
-//      suite.addTest(new TestTransaction("non-transactional_ejb-2.0"));
-//      suite.addTest(new TestTransaction("non-transactional_ejb-2.1"));
-        return suite;
-    }
-  
-    /**
-     * Set-up
-     */
-    protected synchronized void setUp(
-    ) throws Exception {
-        System.out.println("Creating connection to " + this.getName() + "...");
-        this.transactional = getName().startsWith("transactional_");
-        this.schema = !getName().endsWith("_ejb-2.0");
-//        this.dataprovider = new Dataprovider_1Deployment(
-//            dataproviderDeployment,
-//            modelDeployment,
-//            this.schema ? "org/openmdx/test-ejb-2_1/gateway1/NoOrNew" : "org/openmdx/test/gateway1/NoOrNew"
-//        );
-        this.connection = new Connection_1(
-            new RequestCollection(
-                new ServiceHeader(
-                    PRINCIPALS[0],
-                    this.getName(),
-                    false, // traceRequest,
-                    new QualityOfService()
-                ),
-                dataprovider.createConnection()
-            ),
-            this.transactional,
-            false
-        );
-        Segment segment = getSegment();
-        Transaction unitOfWork = JDOHelper.getPersistenceManager(this.provider).currentTransaction();
+    protected static Deployment_1 entityManagerFactory;
 
-        if(segment != null) {
+    /**
+     * The resource adapter URIs
+     */
+    private final static String[] CONNECTOR_URIS = {
+        //      "file:../test-core/src/connector/openmdx-2/sql-server-2000.rar",
+        //      "file:../test-core/src/connector/openmdx-xa/sql-server-2000.rar",
+        //      "file:../test-core/src/connector/openmdx-xa/sql-server-2005.rar",
+        //      "file:../test-core/src/connector/openmdx-xa/oracle-8.rar",
+        "file:../test-core/src/connector/openmdx-2/sql-server-2005.rar"
+    };
+
+    /**
+     * The enterprice applucation URIs
+     */
+    private final static String[] APPLICATION_URIS = {
+        "file:../test-core/src/ear/test-transaction.ear", // DTD_BASED_APPLICATION_URL
+        "file:../test-core/src/ear/test-ejb_2_1.ear" // SCHEMA_BASED_APPLICATION_URL
+    };
+
+    /**
+     * The models to be loaded
+     */
+    private final static String[] MODELS = {
+        "org:openmdx:test:app1"
+    };
+
+    /**
+     * Define whether deployment details should logged to the console
+     */
+    final private static boolean LOG_DEPLOYMENT_DETAILS = false;
+
+    @Test
+    public void ejb20Transaction() throws ResourceException{
+        runTest("transactional_ejb-2.0", "test/openmdx/ejb20/EntityManagerFactory");
+    }
+
+    @Test
+    public void ejb21Transaction() throws ResourceException{
+        runTest("transactional_ejb-2.1", "test/openmdx/ejb21/EntityManagerFactory");
+    }    
+
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#runTest()
+     */
+    protected void runTest(
+        String name,
+        String connectionFactoryName
+    ) throws ResourceException{
+        // TODO handle transactional flag
+        PersistenceManager entityManager = entityManagerFactory.getEntityManager(connectionFactoryName);
+        Transaction unitOfWork = entityManager.currentTransaction();
+        Authority authority = entityManager.getObjectById(Authority.class, App1Package.AUTHORITY_XRI);
+        Provider provider = authority.getProvider("ch:omex:test:junit");
+        Segment segment = (Segment) provider.getSegment(name);
+        if(segment != null) {            
             unitOfWork.begin();
             segment.refDelete();
             unitOfWork.commit();
         }
         unitOfWork.begin();
+        App1Package app1 = (App1Package) provider.refOutermostPackage().refPackage("org:openmdx:test:app1");
         segment = app1.getSegment().createSegment();
-        this.provider.addSegment(false, getName(), segment);
+        provider.addSegment(false, name, segment);
         unitOfWork.commit();
-    }
-
-    /**
-     * Tear-down
-     */
-    protected void tearDown(
-    ) {
-        System.out.println("Tearing down " + this.getName() + "...");
-    }
-
-    /**
-     * Return the segment
-     * 
-     * @return the (maybe newly created) segment
-     * @throws ServiceException  
-     */
-    private Segment getSegment(
-    ) throws ServiceException {
-        Manager_1 manager = new Manager_1(this.connection);
-//        manager.setModel(Model_1Factory.getModel());
-        RefPackage_1_1 rootPkg = new RefRootPackage_1(
-            manager
-        );
-        this.provider = (Provider) rootPkg.refPersistenceManager().getObjectById(
-            Provider.class,
-            new Path(PROVIDER_PATH)
-        );
-        this.app1 = (App1Package)rootPkg.refPackage(
-            "org:openmdx:test:app1"
-        );
-        try {
-            return (Segment) this.provider.getSegment(getName());
-        } catch (JmiServiceException exception) {
-            if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
-                return null;
-            } else {
-                throw new ServiceException(exception);
-            }
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see junit.framework.TestCase#runTest()
-     */
-    protected void runTest() throws Throwable {
-        Segment segment = getSegment();
-        Transaction unitOfWork = JDOHelper.getPersistenceManager(provider).currentTransaction();
         try {
             unitOfWork.begin();
             ProductGroup productGroup = app1.getProductGroup().createProductGroup();
@@ -214,28 +154,14 @@ public class TestTransaction extends TestCase {
             segment.addProductGroup(false, "ok", productGroup);
             unitOfWork.commit();
             fail("Empty description should have been rejected");
-        } catch (NullPointerException prologException) {
-            if(getName().endsWith("prolog")) {
-                return; // TODO find the reason for this exception
-            } else {
-                throw prologException;
-            }
         } catch (JDOFatalDataStoreException jdoException) {
-            ServiceException exception = (ServiceException) jdoException.getCause();
-            if(this.transactional) {
-                assertEquals(
-                    "Rollback", 
-                    BasicException.Code.ROLLBACK, 
-                    exception.getExceptionCode()
-                 );
-            } else {
-                assertEquals(
-                    "Abort", 
-                    BasicException.Code.ABORT, 
-                    exception.getExceptionCode()
-                );
-                segment = getSegment();
-            }
+            BasicException exception = (BasicException) jdoException.getCause();
+            exception.printStackTrace();
+            assertEquals(
+                "Unit fo work failure", 
+                BasicException.Code.ROLLBACK,
+                exception.getExceptionCode()
+            );
         }
         unitOfWork.begin();
         ProductGroup productGroup = app1.getProductGroup().createProductGroup();
@@ -243,89 +169,29 @@ public class TestTransaction extends TestCase {
         segment.addProductGroup(false, "ok", productGroup);
         unitOfWork.commit();
     }
-    
-    /**
-     * 
-     */
-    protected PersistenceManager_1_0 connection;
-    
-    /**
-     * 
-     */
-    protected App1Package app1;
 
-    /**
-     * 
-     */
-    protected Provider provider;
-    
-    /**
-     * 
-     */
-    protected boolean transactional;
-
-    /**
-     * <code>false</code> in case of EJB 2.0, <code>true</code> otherweise.
-     */
-    protected boolean schema;
-    
-    /**
-     * 
-     */
-    private static final String PROVIDER_PATH = "xri:@openmdx:org.openmdx.test.app1/provider/ch:omex:test:junit";
-    
     /**
      * The JUnit principal
      */
     static protected final String[] PRINCIPALS = {"anonymous", "authenticated"};
-    
-    /**
-     * Define whether deployment details should logged to the console
-     */
-    final private static boolean LOG_DEPLOYMENT_DETAIL = false;
 
-    private final static String CONNECTOR_URL = 
-//      "file:../test-core/src/connector/openmdx-2/sql-server-2000.rar";
-        "file:../test-core/src/connector/openmdx-2/sql-server-2005.rar";
-//      "file:../test-core/src/connector/openmdx-xa/sql-server-2000.rar";
-//      "file:../test-core/src/connector/openmdx-xa/sql-server-2005.rar";
-//      "file:../test-core/src/connector/openmdx-xa/oracle-8.rar";
-    final private static String DTD_BASED_APPLICATION_URL = 
-        "file:../test-core/src/ear/test-transaction.ear";
-    final private static String SCHEMA_BASED_APPLICATION_URL = 
-        "file:../test-core/src/ear/test-ejb_2_1.ear";
-    
-//    /**
-//     * The model deployment is shared
-//     */
-//    final private static Deployment modelDeployment = new Model_1Deployment(
-//        new String[]{
-//            "org:openmdx:base",
-//            "org:openmdx:state2",
-//            "org:openmdx:generic1",
-//            "org:openmdx:test:app1",
-//            "org:w3c"
-//        }
-//    );    
+    @BeforeClass
+    public static void deploy(){
+        entityManagerFactory = new Deployment_1(
+            true, // IN_PROCESS_LIGHTWEIGHT_CONTAINER
+            CONNECTOR_URIS,
+            APPLICATION_URIS,
+            LOG_DEPLOYMENT_DETAILS,
+            null, // ENTITY_MANAGER_FACTORY_JNDI_NAME
+            null, // GATEWAY_JNDI_NAME
+            MODELS
+        );
+    }
 
-//    /**
-//     * The dataprovider deployment is shared
-//     */
-//    protected final static Deployment dataproviderDeployment = new InProcessDeployment(
-//        new String[]{
-//            CONNECTOR_URL
-//         },
-//        new String[]{
-//            DTD_BASED_APPLICATION_URL,
-//            SCHEMA_BASED_APPLICATION_URL
-//        },
-//        LOG_DEPLOYMENT_DETAIL ? System.out : null,
-//        System.err
-//    );
-    
-    /**
-     * Test specific data provider
-     */
-    protected Dataprovider_1ConnectionFactory dataprovider;
+    @AfterClass
+    public static void close(
+    ) throws IOException{
+        entityManagerFactory.close();
+    }
 
 }

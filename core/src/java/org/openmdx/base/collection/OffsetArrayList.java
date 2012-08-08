@@ -1,16 +1,17 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: OffsetArrayList.java,v 1.2 2009/01/11 21:19:32 wfro Exp $
- * Description: Sparsely Populated List Implementation
- * Revision:    $Revision: 1.2 $
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: OffsetArrayList.java,v 1.5 2009/06/14 00:27:17 wfro Exp $
+ * Description: OffsetArrayList 
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/11 21:19:32 $
+ * Date:        $Date: 2009/06/14 00:27:17 $
  * ====================================================================
  *
- * This software is published under the BSD license as listed below.
+ * This software is published under the BSD license
+ * as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -26,8 +27,8 @@
  *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -48,6 +49,7 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
+
 package org.openmdx.base.collection;
 
 import java.io.Serializable;
@@ -62,6 +64,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
+
 /**
  * Sparsely Populated List Implementation
  * <p>
@@ -71,454 +74,10 @@ public class OffsetArrayList<E>
     implements SparseList<E>, Cloneable, Serializable
 {
 
-    //------------------------------------------------------------------------
-    // Classes
-    //------------------------------------------------------------------------
-
     /**
      * 
      */
     private static final long serialVersionUID = 3977857388844168754L;
-
-    /**
-     *
-     */
-    static class NonContiguousIterator<E>
-        implements ListIterator<E>
-    {
-
-
-        /**
-         * Index into values
-         */
-        protected int nextIndex = 0;
-
-        /**
-         * Index into values
-         */
-        protected int previousIndex = - 1;
-
-        /**
-         * Index into values
-         */
-        protected int currentIndex = - 1;
-
-        /**
-         * 
-         */
-        protected final List<E> values; 
-
-        /**
-         * 
-         */
-        protected final int offset; 
-
-        /**
-         * 
-         */
-        protected NonContiguousIterator(
-            int offset,
-            List<E> values
-        ) {
-            super();
-            this.values = values;
-            this.offset = offset;
-        }
-
-        /**
-         * Returns true if this list iterator has more elements when
-         * traversing the list in the forward direction. (In other words,
-         * returns true if next would return an element rather than throwing
-         * an exception.)
-         *
-         * @return      true if the list iterator has more elements when
-         *              traversing the list in the forward direction.
-         */
-        public boolean hasNext(
-            )
-        {
-            return this.nextIndex < values.size();
-        }
-
-        /**
-         * Returns the next element in the list. This method may be called
-         * repeatedly to iterate through the list, or intermixed with calls to
-         * previous to go back and forth. (Note that alternating calls to next
-         * and previous will return the same element repeatedly.)
-         *
-         * @return      the next element in the list.
-         *
-         * @exception   NoSuchElementException
-         *              if the iteration has no next element.
-         */
-        public E next(
-            )
-        {
-            this.currentIndex = this.previousIndex = this.nextIndex;
-            if (
-                ++this.nextIndex < values.size()
-                ) while (
-                      values.get(this.nextIndex) == null
-                      ) this.nextIndex++;
-            return values.get(this.currentIndex);
-        }
-
-        /**
-         * Returns true if this list iterator has more elements when
-         * traversing the list in the reverse direction. (In other words,
-         * returns true if previous would return an element rather than
-         * throwing an exception.)
-         *
-         * @return      true if the list iterator has more elements when
-         *              traversing the list in the reverse direction.
-         */
-        public boolean hasPrevious(
-            )
-        {
-            return this.previousIndex >= 0;
-        }
-
-        /**
-         * Returns the previous element in the list. This method may be called
-         * repeatedly to iterate through the list backwards, or intermixed
-         * with calls to next to go back and forth. (Note that alternating
-         * calls to next and previous will return the same element
-         * repeatedly.)
-         *
-         * @return      the previous element in the list.
-         *
-         * @exception   NoSuchElementException
-         *              if the iteration has no previous element.
-         */
-        public E previous(
-            )
-        {
-            this.currentIndex = this.nextIndex = previousIndex;
-            if (
-                --this.previousIndex >= 0
-                ) while (
-                      values.get(this.previousIndex) == null
-                      ) this.previousIndex--;
-            return values.get(this.currentIndex);
-        }
-
-        /**
-         * Returns the index of the element that would be returned by a
-         * subsequent call to next. (Returns list size if the list iterator is
-         * at the end of the list.)
-         *
-         * @return      the index of the element that would be returned by a
-         *              subsequent call to next, or list size if list iterator
-         *              is at end of list.
-         */
-        public int nextIndex(
-            )
-        {
-            return this.nextIndex + offset;
-        }
-
-        /**
-         * Returns the index of the element that would be returned by a
-         * subsequent call to previous. (Returns -1 if the list iterator is at
-         * the beginning of the list.)
-         *
-         * @return      the index of the element that would be returned by a
-         *              subsequent call to previous, or -1 if list iterator is
-         *              at beginning of list.
-         */
-        public int previousIndex(
-            )
-        {
-            return this.previousIndex + offset;
-        }
-
-        /**
-         * Removes from the list the last element that was returned by next or
-         * previous (optional operation). This call can only be made once per
-         * call to next or previous. It can be made only if ListIterator.add
-         * has not been called after the last call to next or previous.
-         *
-         * @exception   UnsupportedOperationException
-         *              if the remove operation is not supported by this list
-         *              iterator.
-         * @exception   IllegalStateException
-         *              neither next nor previous have been called, or remove
-         *              or add have been called after the last call to
-         *              next or previous.
-         */
-        public void remove(
-            )
-        {
-            throw new UnsupportedOperationException(); 
-        }
-
-        /**
-         * Replaces the last element returned by next or previous with the
-         * specified element (optional operation). This call can be made only
-         * if neither ListIterator.remove nor ListIterator.add have been
-         * called after the last call to next or previous.
-         *
-         * @param       o
-         *              the element with which to replace the last element
-         *              returned by next or previous.
-         *
-         * @exception   UnsupportedOperationException
-         *              if the set operation is not supported by this list
-         *              iterator.
-         * @exception   ClassCastException
-         *              if the class of the specified element prevents it from
-         *              being added to this list.
-         * @exception   IllegalArgumentException
-         *              if some aspect of the specified element prevents it
-         *              from being added to this list.
-         * @exception   IllegalStateException
-         *              if neither next nor previous have been called, or
-         *              remove or add have been called after the last call to
-         *              next or previous.
-         */
-        public void set(
-            E o
-            )
-        {
-            values.set(this.currentIndex,o);
-        }
-
-        /**
-         * Inserts the specified element into the list (optional operation).
-         * The element is inserted immediately before the next element that
-         * would be returned by next, if any, and after the next element that
-         * would be returned by previous, if any. (If the list contains no
-         * elements, the new element becomes the sole element on the list.)
-         * The new element is inserted before the implicit cursor: a
-         * subsequent call to next would be unaffected, and a subsequent call
-         * to previous would return the new element. (This call increases by
-         * one the value that would be returned by a call to nextIndex or
-         * previousIndex.)
-         *
-         * @param       o
-         *              the element to insert.
-         *
-         * @exception   UnsupportedOperationException
-         *              if the add method is not supported by this list
-         *              iterator.
-         * @exception   ClassCastException
-         *              if the class of the specified element prevents it from
-         *              being added to this Set.
-         * @exception   IllegalArgumentException
-         *              if some aspect of this element prevents it from being
-         *              added to this Collection.
-         */
-        public void add(
-            E o
-            )
-        {
-            throw new UnsupportedOperationException(); 
-        }
-
-    }
-
-    /**
-     *
-     */
-    static class ContiguousIterator<E>
-        extends NonContiguousIterator<E>
-    {
-
-        /**
-         * Constructor
-         *
-         * @param       _index
-         *              index of first element to be returned from the list
-         *              iterator (by a call to the next method).
-         *
-         * @exception   IndexOutOfBoundsException
-         *              if the index is out of range (index < 0 || index >
-         *              size()).
-         */
-        ContiguousIterator(
-            int offset,
-            List<E> values,
-            int _index
-        ) {
-            super(offset,values);
-            int index = _index;
-            cursor = index;
-            if (index < 0) throw new IndexOutOfBoundsException(
-                               "Index out of bounds: " + index
-                               );
-            try 
-            {
-                while(index-- > 0) super.next();
-            } 
-            catch (NoSuchElementException exception) 
-            {
-                throw new IndexOutOfBoundsException(
-                    "Index out of bounds: " + index
-                    );
-            }
-        }
-
-        /**
-         *
-         */
-        int cursor;
-
-        /**
-         * Returns the index of the element that would be returned by a
-         * subsequent call to next. (Returns list size if the list iterator is
-         * at the end of the list.)
-         *
-         * @return      the index of the element that would be returned by a
-         *              subsequent call to next, or list size if list iterator
-         *              is at end of list.
-         */
-        public int nextIndex(
-            )
-        {
-            return cursor;
-        }
-
-        /**
-         * Returns the next element in the list. This method may be called
-         * repeatedly to iterate through the list, or intermixed with calls to
-         * previous to go back and forth. (Note that alternating calls to next
-         * and previous will return the same element repeatedly.)
-         *
-         * @return      the next element in the list.
-         *
-         * @exception   NoSuchElementException
-         *              if the iteration has no next element.
-         */
-        public E next(
-            )
-        {
-            cursor++;
-            return super.next();
-        }
-
-        /**
-         * Returns the index of the element that would be returned by a
-         * subsequent call to next. (Returns list size if the list iterator is
-         * at the end of the list.)
-         *
-         * @return      the index of the element that would be returned by a
-         *              subsequent call to next, or list size if list iterator
-         *              is at end of list.
-         */
-        public int previousIndex(
-            )
-        {
-            return cursor - 1;
-        }
-
-        /**
-         * Returns the previous element in the list. This method may be called
-         * repeatedly to iterate through the list backwards, or intermixed
-         * with calls to next to go back and forth. (Note that alternating
-         * calls to next and previous will return the same element
-         * repeatedly.)
-         *
-         * @return      the previous element in the list.
-         *
-         * @exception   NoSuchElementException
-         *              if the iteration has no previous element.
-         */
-        public E previous(
-            )
-        {
-            cursor--;
-            return super.previous();
-        }
-
-    }
-    /**
-     *
-     */
-    static class PopulationList<E>
-        extends AbstractSequentialList<E>
-    {
-
-        
-        /**
-         * 
-         */
-        protected final int offset;
-        
-        /**
-         * 
-         */
-        protected final List<E> values;
-
-        /**
-         * 
-         */
-        public PopulationList(
-            int offset,
-            List<E> values
-        ) {
-            super();
-            this.offset = offset;
-            this.values = values;
-        }
-
-        /**
-         * Returns the number of elements in this list. If this list contains
-         * more than Integer.MAX_VALUE elements, returns Integer.MAX_VALUE.
-         *
-         * @return      the number of elements in this list.
-         */
-        public int size(
-            )
-        {
-            // Population size could be cached for improved efficiency
-            int count = 0;
-            for(
-                int pointer = 0;
-                pointer < values.size();
-                pointer++
-                ) if(values.get(pointer) != null) count++;
-            return count;
-        }
-
-        /**
-         * Returns a list iterator of the elements in this list (in proper
-         * sequence), starting at the specified position in this list. The
-         * specified index indicates the first element that would be returned
-         * by an initial call to the next method. An initial call to the
-         * previous method would return the element with the specified index
-         * minus one.
-         *
-         * @param       index
-         *              index of first element to be returned from the list
-         *              iterator (by a call to the next method).
-         *
-         * @return      a list iterator of the elements in this list (in
-         *              proper sequence), starting at the specified position
-         *              in this list.
-         *
-         * @exception   IndexOutOfBoundsException
-         *              if the index is out of range (index < 0 || index >
-         *              size()).
-         */
-        public ListIterator<E> listIterator(
-            int index
-        ){
-            return new ContiguousIterator<E>(
-                this.offset,
-                this.values,
-                index
-            );
-        }
-
-        /**
-         * NOTE: Must be implemented for J#
-         */
-        public ListIterator<E> listIterator(
-        ) {
-          return listIterator(0);
-        }
-
-    }
 
     /**
      * Creates a <code>OffsetArrayList</code> object.
@@ -557,7 +116,7 @@ public class OffsetArrayList<E>
     public OffsetArrayList(
         Collection<? extends E>  collection
     ){
-        if(collection instanceof SparseList) {
+        if(collection instanceof SparseList<?>) {
             SparseList<? extends E> list = (SparseList<? extends E>) collection;
             this.values = new ArrayList<E>(
                 list.subList(list.firstIndex(),list.size())
@@ -824,7 +383,7 @@ public class OffsetArrayList<E>
     ){
         int index = _index;
         boolean modified = false;
-        if (c instanceof SparseList) {
+        if (c instanceof SparseList<?>) {
             for (
                 ListIterator<? extends E> iterator = ((SparseList<? extends E>)c).populationIterator();
                 iterator.hasNext();
@@ -920,7 +479,7 @@ public class OffsetArrayList<E>
     public boolean equals (Object object)
     {
         if (this == object) return true;
-        if (! (object instanceof SparseList)) return false;
+        if (! (object instanceof SparseList<?>)) return false;
         final SparseList<?> that = (SparseList<?>)object;
         return
             this.firstIndex() == that.firstIndex() &&
@@ -1695,4 +1254,446 @@ public class OffsetArrayList<E>
     return modified;
     }
 
+    /**
+    *
+    */
+   static class NonContiguousIterator<E>
+       implements ListIterator<E>
+   {
+
+
+       /**
+        * Index into values
+        */
+       protected int nextIndex = 0;
+
+       /**
+        * Index into values
+        */
+       protected int previousIndex = - 1;
+
+       /**
+        * Index into values
+        */
+       protected int currentIndex = - 1;
+
+       /**
+        * 
+        */
+       protected final List<E> values; 
+
+       /**
+        * 
+        */
+       protected final int offset; 
+
+       /**
+        * 
+        */
+       protected NonContiguousIterator(
+           int offset,
+           List<E> values
+       ) {
+           super();
+           this.values = values;
+           this.offset = offset;
+       }
+
+       /**
+        * Returns true if this list iterator has more elements when
+        * traversing the list in the forward direction. (In other words,
+        * returns true if next would return an element rather than throwing
+        * an exception.)
+        *
+        * @return      true if the list iterator has more elements when
+        *              traversing the list in the forward direction.
+        */
+       public boolean hasNext(
+           )
+       {
+           return this.nextIndex < values.size();
+       }
+
+       /**
+        * Returns the next element in the list. This method may be called
+        * repeatedly to iterate through the list, or intermixed with calls to
+        * previous to go back and forth. (Note that alternating calls to next
+        * and previous will return the same element repeatedly.)
+        *
+        * @return      the next element in the list.
+        *
+        * @exception   NoSuchElementException
+        *              if the iteration has no next element.
+        */
+       public E next(
+           )
+       {
+           this.currentIndex = this.previousIndex = this.nextIndex;
+           if (
+               ++this.nextIndex < values.size()
+               ) while (
+                     values.get(this.nextIndex) == null
+                     ) this.nextIndex++;
+           return values.get(this.currentIndex);
+       }
+
+       /**
+        * Returns true if this list iterator has more elements when
+        * traversing the list in the reverse direction. (In other words,
+        * returns true if previous would return an element rather than
+        * throwing an exception.)
+        *
+        * @return      true if the list iterator has more elements when
+        *              traversing the list in the reverse direction.
+        */
+       public boolean hasPrevious(
+           )
+       {
+           return this.previousIndex >= 0;
+       }
+
+       /**
+        * Returns the previous element in the list. This method may be called
+        * repeatedly to iterate through the list backwards, or intermixed
+        * with calls to next to go back and forth. (Note that alternating
+        * calls to next and previous will return the same element
+        * repeatedly.)
+        *
+        * @return      the previous element in the list.
+        *
+        * @exception   NoSuchElementException
+        *              if the iteration has no previous element.
+        */
+       public E previous(
+           )
+       {
+           this.currentIndex = this.nextIndex = previousIndex;
+           if (
+               --this.previousIndex >= 0
+               ) while (
+                     values.get(this.previousIndex) == null
+                     ) this.previousIndex--;
+           return values.get(this.currentIndex);
+       }
+
+       /**
+        * Returns the index of the element that would be returned by a
+        * subsequent call to next. (Returns list size if the list iterator is
+        * at the end of the list.)
+        *
+        * @return      the index of the element that would be returned by a
+        *              subsequent call to next, or list size if list iterator
+        *              is at end of list.
+        */
+       public int nextIndex(
+           )
+       {
+           return this.nextIndex + offset;
+       }
+
+       /**
+        * Returns the index of the element that would be returned by a
+        * subsequent call to previous. (Returns -1 if the list iterator is at
+        * the beginning of the list.)
+        *
+        * @return      the index of the element that would be returned by a
+        *              subsequent call to previous, or -1 if list iterator is
+        *              at beginning of list.
+        */
+       public int previousIndex(
+           )
+       {
+           return this.previousIndex + offset;
+       }
+
+       /**
+        * Removes from the list the last element that was returned by next or
+        * previous (optional operation). This call can only be made once per
+        * call to next or previous. It can be made only if ListIterator.add
+        * has not been called after the last call to next or previous.
+        *
+        * @exception   UnsupportedOperationException
+        *              if the remove operation is not supported by this list
+        *              iterator.
+        * @exception   IllegalStateException
+        *              neither next nor previous have been called, or remove
+        *              or add have been called after the last call to
+        *              next or previous.
+        */
+       public void remove(
+           )
+       {
+           throw new UnsupportedOperationException(); 
+       }
+
+       /**
+        * Replaces the last element returned by next or previous with the
+        * specified element (optional operation). This call can be made only
+        * if neither ListIterator.remove nor ListIterator.add have been
+        * called after the last call to next or previous.
+        *
+        * @param       o
+        *              the element with which to replace the last element
+        *              returned by next or previous.
+        *
+        * @exception   UnsupportedOperationException
+        *              if the set operation is not supported by this list
+        *              iterator.
+        * @exception   ClassCastException
+        *              if the class of the specified element prevents it from
+        *              being added to this list.
+        * @exception   IllegalArgumentException
+        *              if some aspect of the specified element prevents it
+        *              from being added to this list.
+        * @exception   IllegalStateException
+        *              if neither next nor previous have been called, or
+        *              remove or add have been called after the last call to
+        *              next or previous.
+        */
+       public void set(
+           E o
+           )
+       {
+           values.set(this.currentIndex,o);
+       }
+
+       /**
+        * Inserts the specified element into the list (optional operation).
+        * The element is inserted immediately before the next element that
+        * would be returned by next, if any, and after the next element that
+        * would be returned by previous, if any. (If the list contains no
+        * elements, the new element becomes the sole element on the list.)
+        * The new element is inserted before the implicit cursor: a
+        * subsequent call to next would be unaffected, and a subsequent call
+        * to previous would return the new element. (This call increases by
+        * one the value that would be returned by a call to nextIndex or
+        * previousIndex.)
+        *
+        * @param       o
+        *              the element to insert.
+        *
+        * @exception   UnsupportedOperationException
+        *              if the add method is not supported by this list
+        *              iterator.
+        * @exception   ClassCastException
+        *              if the class of the specified element prevents it from
+        *              being added to this Set.
+        * @exception   IllegalArgumentException
+        *              if some aspect of this element prevents it from being
+        *              added to this Collection.
+        */
+       public void add(
+           E o
+           )
+       {
+           throw new UnsupportedOperationException(); 
+       }
+
+   }
+
+   /**
+    *
+    */
+   static class ContiguousIterator<E>
+       extends NonContiguousIterator<E>
+   {
+
+       /**
+        * Constructor
+        *
+        * @param       _index
+        *              index of first element to be returned from the list
+        *              iterator (by a call to the next method).
+        *
+        * @exception   IndexOutOfBoundsException
+        *              if the index is out of range (index < 0 || index >
+        *              size()).
+        */
+       ContiguousIterator(
+           int offset,
+           List<E> values,
+           int _index
+       ) {
+           super(offset,values);
+           int index = _index;
+           cursor = index;
+           if (index < 0) throw new IndexOutOfBoundsException(
+                              "Index out of bounds: " + index
+                              );
+           try 
+           {
+               while(index-- > 0) super.next();
+           } 
+           catch (NoSuchElementException exception) 
+           {
+               throw new IndexOutOfBoundsException(
+                   "Index out of bounds: " + index
+                   );
+           }
+       }
+
+       /**
+        *
+        */
+       int cursor;
+
+       /**
+        * Returns the index of the element that would be returned by a
+        * subsequent call to next. (Returns list size if the list iterator is
+        * at the end of the list.)
+        *
+        * @return      the index of the element that would be returned by a
+        *              subsequent call to next, or list size if list iterator
+        *              is at end of list.
+        */
+       public int nextIndex(
+           )
+       {
+           return cursor;
+       }
+
+       /**
+        * Returns the next element in the list. This method may be called
+        * repeatedly to iterate through the list, or intermixed with calls to
+        * previous to go back and forth. (Note that alternating calls to next
+        * and previous will return the same element repeatedly.)
+        *
+        * @return      the next element in the list.
+        *
+        * @exception   NoSuchElementException
+        *              if the iteration has no next element.
+        */
+       public E next(
+           )
+       {
+           cursor++;
+           return super.next();
+       }
+
+       /**
+        * Returns the index of the element that would be returned by a
+        * subsequent call to next. (Returns list size if the list iterator is
+        * at the end of the list.)
+        *
+        * @return      the index of the element that would be returned by a
+        *              subsequent call to next, or list size if list iterator
+        *              is at end of list.
+        */
+       public int previousIndex(
+           )
+       {
+           return cursor - 1;
+       }
+
+       /**
+        * Returns the previous element in the list. This method may be called
+        * repeatedly to iterate through the list backwards, or intermixed
+        * with calls to next to go back and forth. (Note that alternating
+        * calls to next and previous will return the same element
+        * repeatedly.)
+        *
+        * @return      the previous element in the list.
+        *
+        * @exception   NoSuchElementException
+        *              if the iteration has no previous element.
+        */
+       public E previous(
+           )
+       {
+           cursor--;
+           return super.previous();
+       }
+
+   }
+   
+   /**
+    *
+    */
+   static class PopulationList<E>
+       extends AbstractSequentialList<E>
+   {
+
+       
+       /**
+        * 
+        */
+       protected final int offset;
+       
+       /**
+        * 
+        */
+       protected final List<E> values;
+
+       /**
+        * 
+        */
+       public PopulationList(
+           int offset,
+           List<E> values
+       ) {
+           super();
+           this.offset = offset;
+           this.values = values;
+       }
+
+       /**
+        * Returns the number of elements in this list. If this list contains
+        * more than Integer.MAX_VALUE elements, returns Integer.MAX_VALUE.
+        *
+        * @return      the number of elements in this list.
+        */
+       public int size(
+           )
+       {
+           // Population size could be cached for improved efficiency
+           int count = 0;
+           for(
+               int pointer = 0;
+               pointer < values.size();
+               pointer++
+               ) if(values.get(pointer) != null) count++;
+           return count;
+       }
+
+       /**
+        * Returns a list iterator of the elements in this list (in proper
+        * sequence), starting at the specified position in this list. The
+        * specified index indicates the first element that would be returned
+        * by an initial call to the next method. An initial call to the
+        * previous method would return the element with the specified index
+        * minus one.
+        *
+        * @param       index
+        *              index of first element to be returned from the list
+        *              iterator (by a call to the next method).
+        *
+        * @return      a list iterator of the elements in this list (in
+        *              proper sequence), starting at the specified position
+        *              in this list.
+        *
+        * @exception   IndexOutOfBoundsException
+        *              if the index is out of range (index < 0 || index >
+        *              size()).
+        */
+       public ListIterator<E> listIterator(
+           int index
+       ){
+           return new ContiguousIterator<E>(
+               this.offset,
+               this.values,
+               index
+           );
+       }
+
+       /**
+        * NOTE: Must be implemented for J#
+        */
+       public ListIterator<E> listIterator(
+       ) {
+         return listIterator(0);
+       }
+
+   }
+
 }
+

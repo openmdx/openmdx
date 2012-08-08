@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractPredicate_1.java,v 1.5 2009/01/13 02:10:32 wfro Exp $
+ * Name:        $Id: AbstractPredicate_1.java,v 1.6 2009/06/09 12:45:17 hburger Exp $
  * Description: Abstract Predicate Class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:32 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,7 @@ package org.openmdx.base.accessor.jmi.spi;
 
 import java.util.Collection;
 
-import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
+import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
@@ -67,7 +67,7 @@ abstract class AbstractPredicate_1 {
      * @param fature
      */
     protected AbstractPredicate_1 (
-        RefFilter_1_1 delegate, 
+        RefFilter_1_0 delegate, 
         ModelElement_1_0 featureDef
     ){
         this.delegate = delegate;
@@ -77,7 +77,7 @@ abstract class AbstractPredicate_1 {
     /**
      * 
      */
-    private final RefFilter_1_1 delegate;
+    private final RefFilter_1_0 delegate;
 
     /**
      * 

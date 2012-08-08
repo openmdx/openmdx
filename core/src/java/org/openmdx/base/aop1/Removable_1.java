@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Removable_1.java,v 1.3 2009/01/17 02:37:22 hburger Exp $
+ * Name:        $Id: Removable_1.java,v 1.4 2009/05/16 22:17:47 wfro Exp $
  * Description: Removable_1 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/17 02:37:22 $
+ * Date:        $Date: 2009/05/16 22:17:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,13 +51,13 @@
 
 package org.openmdx.base.aop1;
 
-import static org.openmdx.application.cci.SystemAttributes.REMOVED_AT;
-import static org.openmdx.application.cci.SystemAttributes.REMOVED_BY;
+import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_AT;
+import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_BY;
 
 import java.util.Date;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.accessor.view.PlugIn_1;
 import org.openmdx.base.exception.ServiceException;

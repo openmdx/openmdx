@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PathTest.java,v 1.1 2009/03/06 10:38:42 hburger Exp $
+ * Name:        $Id: PathTest.java,v 1.3 2009/06/02 00:27:38 hburger Exp $
  * Description: class TestPath 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/06 10:38:42 $
+ * Date:        $Date: 2009/06/02 00:27:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -236,27 +236,27 @@ public class PathTest extends TestCase {
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
      */
-    public void testToString (
+    public void testToXRI (
     ) throws Throwable {
         assertEquals(
-            "Path('').toString()",
-            "",
-            path1.toString()
+            "Path('').toXRI()",
+            "xri://@openmdx",
+            path1.toXRI()
         );
         assertEquals(
-            "Path('a').toString()",
-            "a",
-            path2.toString()
+            "Path('a').toXRI()",
+            "xri://@openmdx*a",
+            path2.toXRI()
         );
         assertEquals(
-            "Path('a/b0//b1/c').toString()",
-            "a/b0//b1/c",
-            path3.toString()
+            "Path('a/b0//b1/c').toXRI()",
+            "xri://@openmdx*a/(@openmdx*b0/b1)/c",
+            path3.toXRI()
         );
         assertEquals(
-            "Path('a/b;x=0;y=1,2,3,z=false/c').toString()",
-            "a/b;x=0;y=1,2,3,z=false/c",
-            path4.toString()
+            "Path('a/b;x=0;y=1,2,3,z=false/c').toXRI()",
+            "xri://@openmdx*a/($t*ces*b%3Bx%3D0%3By%3D1%2C2%2C3%2Cz%3Dfalse)/c",
+            path4.toXRI()
         );
     }
 
@@ -264,6 +264,7 @@ public class PathTest extends TestCase {
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
      */
+    @SuppressWarnings("deprecation")
     public void testToUri (
     ) throws Throwable {
         assertEquals(
@@ -400,25 +401,26 @@ public class PathTest extends TestCase {
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
      */
+    @SuppressWarnings("deprecation")
     public void testCrossReferences (
     ) throws Throwable {
         Path p1 = new Path("xri:@openmdx:a/b/c");
         Path p2 = new Path("xri:@openmdx:1/2/3");
         assertEquals("p1", new Path(new String[]{"a","b","c"}), p1);
         assertEquals("p2", new Path(new String[]{"1","2","3"}), p2);
-        assertEquals("p1", "a/b/c", p1.toString());
-        assertEquals("p2", "1/2/3", p2.toString());
+        assertEquals("p1", "xri://@openmdx*a/b/c", p1.toXRI());
+        assertEquals("p2", "xri://@openmdx*1/2/3", p2.toXRI());
         assertEquals("p1", "xri:@openmdx:a/b/c", p1.toXri());
         assertEquals("p2", "xri:@openmdx:1/2/3", p2.toXri());
         Path unwise = p1.getChild(p2.toXri());
-        Path recommended = p1.getChild(p2.toString());
+        Path recommended = p1.getChild(p2);
         Path alternative = new Path(p1.toXri() + "/(" + p2.toXri().substring(4) + ')');
         assertEquals("unwise", new Path(new String[]{"a","b","c", "xri:@openmdx:1/2/3"}), unwise);
         assertEquals("recommended", new Path(new String[]{"a","b","c", "1/2/3"}), recommended);
         assertEquals("alternative", new Path(new String[]{"a","b","c", "1/2/3"}), alternative);
-        assertEquals("unwise", "a/b/c/xri::@openmdx::1//2//3", unwise.toString());
-        assertEquals("recommended", "a/b/c/1//2//3", recommended.toString());
-        assertEquals("alternative", "a/b/c/1//2//3", alternative.toString());
+        assertEquals("unwise","xri://@openmdx*a/b/c/(@openmdx*1/2/3)", unwise.toXRI());
+        assertEquals("recommended", "xri://@openmdx*a/b/c/(@openmdx*1/2/3)", recommended.toXRI());
+        assertEquals("alternative", "xri://@openmdx*a/b/c/(@openmdx*1/2/3)", alternative.toXRI());
         assertEquals("unwise", "xri:@openmdx:a/b/c/(@openmdx:1/2/3)", unwise.toXri());
         assertEquals("recommended", "xri:@openmdx:a/b/c/(@openmdx:1/2/3)", recommended.toXri());
         assertEquals("alternative", "xri:@openmdx:a/b/c/(@openmdx:1/2/3)", alternative.toXri());
@@ -429,7 +431,15 @@ public class PathTest extends TestCase {
         assertEquals("recommended", recommended, new Path(recommended.toXri()));
         assertEquals("alternative", alternative, new Path(alternative.toXri()));
         assertEquals("unwise", p2, new Path(unwise.getBase()));
-        assertEquals("recommended", p2.toString(), recommended.getBase());
-        assertEquals("alternative", p2.toString(), alternative.getBase());
+        assertEquals("recommended", p2, new Path(recommended.getBase()));
+        assertEquals("alternative", p2, new Path(alternative.getBase()));
     }
+    
+    public void testURI(
+    ){
+        assertEquals("A/B B/C+C/D&D/E-E/F:F/G=G", "xri://@openmdx*A/($t*ces*B%20B)/($t*ces*C%2BC)/D&D/E-E/F:F/($t*ces*G%3DG)", new Path(new String[]{"A","B B","C+C","D&D","E-E","F:F","G=G"}).toXRI());
+        assertEquals("A/B B/C+C/D&D/E-E/F:F/G=G", "@openmdx*A/($t*ces*B%2520B)/($t*ces*C%252BC)/D&D/E-E/F:F/($t*ces*G%253DG)", new Path(new String[]{"A","B B","C+C","D&D","E-E","F:F","G=G"}).toURI());
+        assertEquals("A/B B/C+C/D&D/E-E/F:F/G=G", new Path(new String[]{"A","B B","C+C","D&D","E-E","F:F","G=G"}),new Path("@openmdx*A/($t*ces*B%2520B)/($t*ces*C%252BC)/D&D/E-E/F:F/($t*ces*G%253DG)"));
+    }
+
 }

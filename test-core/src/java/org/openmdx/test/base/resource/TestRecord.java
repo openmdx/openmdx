@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestRecord.java,v 1.6 2004/06/22 18:27:02 hburger Exp $
+ * Name:        $Id: TestRecord.java,v 1.7 2009/04/08 14:51:58 hburger Exp $
  * Description: class TestRecord
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/06/22 18:27:02 $
+ * Date:        $Date: 2009/04/08 14:51:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -103,26 +103,26 @@ public class TestRecord extends TestCase {
     protected void setUp(
     ) throws Exception {
       this.factory = Records.getRecordFactory();
-      this.map2 = new TreeMap();
+      this.map2 = new TreeMap<String,String>();
       this.map2.put("A","a");
       this.map2.put("C","c");
-      this.map3 = new TreeMap(map2);
+      this.map3 = new TreeMap<String,String>(map2);
       this.map3.put("B","b");
-      this.map23 = new TreeMap();
-      this.map23.put(new Integer(2),this.map2);
-      this.map23.put(new Integer(3),this.map3);
+      this.map23 = new TreeMap<Integer,Map<String,String>>();
+      this.map23.put(Integer.valueOf(2),this.map2);
+      this.map23.put(Integer.valueOf(3),this.map3);
       this.array2=new String[]{"a","c"};
       this.array3=new String[]{"a","b","c"};
       this.array23=new String[][]{this.array2,this.array3};
       this.list2 = Arrays.asList(this.array2);
       this.list3 = Arrays.asList(this.array3);
-      this.list23 = Arrays.asList(new List[]{this.list2,this.list3});
+      this.list23 = Arrays.asList(this.list2,this.list3);
       this.array0 = new int[0];
       this.array1 = new int[]{99};
       this.array01 = new int[][]{this.array0,this.array1};
       this.list0 = Arrays.asList(new Integer[0]);
       this.list1 = Arrays.asList(new Integer[]{new Integer(99)});
-      this.list01 = Arrays.asList(new List[]{this.list0,this.list1});
+      this.list01 = Arrays.asList(this.list0,this.list1);
     }
     
     /**
@@ -235,9 +235,9 @@ public class TestRecord extends TestCase {
       );
 
         // Nested VariableSizeMappedRecords
-      Map m23 = new TreeMap();
-      m23.put(new Integer(2),r2md);
-      m23.put(new Integer(3),factory.createMappedRecord("r3",null,map3));
+      Map<Integer,Map<String,String>> m23 = new TreeMap<Integer,Map<String,String>>();
+      m23.put(Integer.valueOf(2),r2md);
+      m23.put(Integer.valueOf(3),factory.createMappedRecord("r3",null,map3));
       Record r23 = factory.createMappedRecord(
         "r23", "Nested Utilities", m23
       );
@@ -527,8 +527,8 @@ public class TestRecord extends TestCase {
       );
 
         // VariableSizeIndexedRecord with description
-      List l23 = Arrays.asList(
-        new Record[]{r2id,factory.createIndexedRecord("r3",null,list3)}
+      List<Record> l23 = Arrays.asList(
+        r2id,factory.createIndexedRecord("r3",null,list3)
       );
       Record r23 = factory.createIndexedRecord(
         "r23", "Nested Utilities", l23
@@ -683,8 +683,8 @@ public class TestRecord extends TestCase {
       );
 
         // Nested VariableSizeIndexedRecords
-      List l23 = Arrays.asList(
-        new Record[]{r2id,factory.createIndexedRecord("r3",null,list3)}
+      List<? extends Record> l23 = Arrays.asList(
+        r2id,factory.createIndexedRecord("r3",null,list3)
       );
       Record r23 = factory.createIndexedRecord(
         "r23", "Nested Utilities", l23
@@ -1105,52 +1105,52 @@ for(
     /**
    * {A=a, C=c}
    */
-    Map map2;
+    Map<String,String> map2;
 
     /**
    * {A=a, B=b, C=c}
    */
-    Map map3;
+    Map<String,String> map3;
 
     /**
    * {2={A=a, C=c}, 3={A=a, B=b, C=c}}
    */
-    Map map23;
+    Map<Integer,Map<String,String>> map23;
   
     /**
    * [a, c]
    */
-    List list2;
+    List<String> list2;
     String[] array2;
 
     /**
    * [a, b, c]
    */
-    List list3;
+    List<String> list3;
     String[] array3;
 
     /**
    * [[a, c], [a, b, c]]
    */
-    List list23;
+    List<List<String>> list23;
     String[][] array23;
 
     /**
    * []
    */
-  List list0;
+  List<Integer> list0;
     int[] array0;
 
     /**
    * [99]
    */
-  List list1;
+  List<Integer> list1;
     int[] array1;
 
     /**
    * [[], [99]]
    */
-  List list01;
+  List<List<Integer>> list01;
     int[][] array01;
 
 

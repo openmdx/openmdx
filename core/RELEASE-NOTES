@@ -1,7 +1,7 @@
 Distribution Name: openMDX/Core
-Release Date: 2009-03-09
-Specification Version: 2.4
-Implementation Version: 2.4.0
+Release Date: 2009-06-14
+Specification Version: 2.5
+Implementation Version: 2.5.0
 
 ---------------------------------------------------------------------
 Notes:
@@ -50,91 +50,207 @@ Notes:
 
 0.    SUMMARY
 
-      * Support for JPA. Generation of JPA-compliant persistence classes
-        and ORM mappings. Ant task create-schema creates OpenJPA schema.
-        Ant task create-sql creates SQL scripts based on OpenJPA schema.
-        Ant the same time removed support for JPOX.
-      * Removed old features
-      * Fixed bugs
-      
+      * Transport API unification
+      * Use of JDK logger
+      * Refactoring and clean-up
+      * Fixed bugs      
             
 1.    NEW FEATURES
+
+      CR20018712
+      containsWildcard
       
-      CR20018509
-      Optimistic Locking
+      The method conainsWildcard() tests, whether the path contains a wildcard.
+      It returns true if the path contains any of the following XRI cross references
+      * $.
+      * $..
+      * $... 
       
-      The MODEL/optimisticLocking configuration entry has now three possible
-      values:
-      * false
-        disables optimistic locking
-      * whenModified
-        enables optimistic locking for modified objects
-      * true
-        enables optimistic locking even for unmodified objects
+      CR20018662
+      SessionBean configuration. In addition to the deployment 
+      descriptor env entries, session beans can be configured with the 
+      META-INF/<namespace-id>.properties file. The properties override the
+      properties defined as env entries.  
+
+      CR20018666 
+      Callbacks must be invoked for all dirty objects 
       
-      CR20018534
-      Replace JPOX by OpenJPA. The model mapper now generates JPA compliant
-      persistence classes and a default persistence mapping (orm.xml). The
-      JDO2 mapping is not supported anymore. The ant build-library provides
-      the following targets:
-      * enhance: enhances the classes listed in orm.xml
-      * create-schema: orm.xml --> openjpa-schema.xml
-      * create-sql: openjpa-schema --> sql build and upgrade script
-      CR20018528
-      library-directory 
-                
-      The lightweight container supports the library-directory entry in the
-      application XML
-      * no library-directory entry leads to the default value "lib"
-      * an empty library-directory entry disables the library-directory 
-        feature
-      * a non-empty library-directory entry such as "APP-INF/lib" for example
-        includes all files which are located in the given directory and end 
-        with ".jar" in the application class path 
+      Callbacks must be invoked for all dirty objects whether they are created 
+      or fetched by the accessor or a plug-in.
+      
+      CR20018579
+      LateBindingDataSource
+      
+      CR20018656
+      BasicException
+      
+      Configure
+      * exception mappers with openmdxExceptionMapper.properties files in the
+        META-INF directory
+      * exception domains with resource bundles in the 
+        org.openmdx.exception.domain directory 
+      
+      CR20018649
+      StandardFileHandler extends FileHandler
+      
+      The StandardFileHandler is able to stream throwables directly to the 
+      underlying stream when using an AbstractFormatter sub-class telling that
+      throwables remain to be processed. 
+      
+      The corresponding Java Logging compliant classes are:
+      * org.openmdx.kernel.log.StandardFileHandler
+      * org.openmdx.kernel.log.BasicFormatter
        
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
-     
-			CR10008387
-			Migrate models to RSM 7.5.
 
-      CR20018576
-      JMI 1 v/s Standard Mapping
-      
-      The standard mapping differs in the following aspects from the 
-      strict JMI 1 mapping:
-      * Each upper case letter starts a new word
-      * Underscores do not start a new word
-      * Dollar signs behave the same way as digits
-      
-      CR20018534
-      Replace JPOX by OpenJPA. The model mapper now generates JPA compliant
-      persistence classes and a default persistence mapping (orm.xml). The
-      JDO2 mapping is not supported anymore. The ant build-library provides
-      the following targets:
-      * enhance: enhances the classes listed in orm.xml
-      * create-schema: orm.xml --> openjpa-schema.xml
-      * create-sql: openjpa-schema --> sql build and upgrade script
+      CR20018660
+      Transport API Unification. Migration to JCA-APIs using REST-based interactions. 
 
-      CR20018521
-      NoClassDefFoundError in BasicException
+      CR20018701
+      refMofId
       
-      BasicException should not throw a NoClassDefFoundError if the J2EE 
-      exception classes it refers to are not bundled with a client for example. 
+      Current behaviour:
+      * The refMofId is derived from the identity in case of ExtentCapable 
+         classes unless the identity attribute is not yet loaded or null.
+      * The refMofId is the objects XRI in all other cases.
+      
+      In future
+      * shall the refMofId be the objects XRI in all cases
+      * shall the identity attribute be used explicitely if its value is required.
+      
+      CR20018696 
+      XRI support
+      
+      Get rid of openxri classes.
+      Implement the required XRI 2 support natively.
+
+      CR20018696 
+      XRI 2 Marshaller
+      
+      Do not replace '=' signs by ':'. 
+      
+      Sub-segments with '=' signs will be transformed into case exact string 
+      cross references. 
+      
+      CR20018674
+      UID
+      
+      Use uppercase only
+      
+      A UID consists now of 25 digits based on base 36 encoding, while legacy
+      UIDs consist of 22 digits based on base 64 encoding.
+      
+      The new encoding is as following:
+      * Digit 0 contains sum of
+            6 times (bits 1 to 63 divided by 36^12 plus 3 if bit 0 is set)
+            bits 65 to 127 divided by 36^12 plus 3 if bit 64 is set
+      * Digits 1 to 12 contain bits 1 to 63 modulo 36^12
+      * Digits 13 to 24 contain bits 65 to 127 modulo 36^12
+
+      Legacy UIDs may still be decoded but no longer encoded.
+                  
+      CR20018665
+      Struct Marshalling
+      
+      Structures should have their proper persistence manager 
+       
+      CR20018660
+      Authorization
+      
+      Provide the principal chain (a List<String>) instead of the principal set
+      (a Set<? extends Principal>) as user object.
+      
+      CR20018579
+      DbConnectionManager_1_0 & LateBindingDataSource
+      
+      DbConnectionManager_1_0 and its implementations replaced by LateBindingDataSource 
+      
+      CR20018657
+      JPA3 warnings
+      
+      Correct the usage of
+      * unchecked
+      * cast
+      * unused  
+      
+      CR20018653
+      SLF4J 1.5.6
+      
+      * Support both singleton lookup mechanisms
+      * Add "1.5.6" to its API compliance list  
       
 2.1.  FIXED BUGS
-
-      CR20018536
-      Filter values for persistent-new objects
       
-      Filter values (Path) are now able to match their persistent-new object's
-      representation (Object_1_0) 
+      SF329844
+      So I did a post with the following settings:  
+      POST http://localhost:8080/opencrx-rest-CRX/org.opencrx.kernel.account1/provider/CRX/segment/Standard/account/7wmWgCjdEd6ri3Nu6Dapag/member 
+      <?xml version="1.0"?> 
+      <org.opencrx.kernel.account1.Member> 
+        <name>MyName</name> 
+        <account>xri://@openmdx*org.opencrx.kernel.account1/provider/CRX/segment/Standard/account/NI7XwEIBEd29BeMf4vj8cA</account> 
+      </org.opencrx.kernel.account1.Member> 
+      NI7XwEIBEd29BeMf4vj8cA should become a member of 7wmWgCjdEd6ri3Nu6Dapag. 
+      Anyway, I get a server error, without using the account argument all is fine.
+      
+      CR20018668
+      Large Object Update
+      
+      Large object updates are no longer ignored.  
 
 2.2.  DEPRECATED FEATURES
-      none
+      
+      CR20018651
+      Container.remove()
+      
+      This method should be deprecated for the following reasons:
+      * container.remove(qualifier) does not what one expcects: It just returns 
+        false because the container contains persistence capable objects and 
+        not qualifiers
+      * container.remove(object) should only be used to remove a transient 
+        object from its container
+       
+      CR20018652
+      RefObject_1_0.refAddValue(containerId, qualifier, object) 
+      
+      This method belongs no longer to the supported API
 
 2.3.  REMOVED FEATURES
-      none
+      
+      CR20018718 	
+      Replicating refMethods
+      
+      Get rid of refMethods replicating PersistenceManager functionality.
+       
+      CR20018712
+      getUriReference
+      
+      The Path's getUriReference() method has been removed
+      
+      CR20018660
+      Rest Connector
+      
+      The deprecated IndexedRecordFormatter and its format method have been removed.
+      
+      CR20018579
+      DbConnectionManager_1_0 
+      
+      Get rid of DbConnectionManager_1_0 and its implementations.
+      
+      We can get rid of these implementations as xri://@openmdx*org.openmdx.deployment1 
+      based clients are no longer supported. 
+      
+      CR20018656
+      BasicException
+      
+      Got rid of ShortEnumeration and IntegerEnumeration 
+      
+      CR20018654
+      SLF4J
+      
+      Dependency on SLF4J removed from openMDX.
+      openMDX uses the plain Java Logging API.
+      
 
 ---

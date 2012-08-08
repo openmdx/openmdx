@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AnyTypeCondition.java,v 1.2 2009/01/06 10:21:19 wfro Exp $
+ * Name:        $Id: AnyTypeCondition.java,v 1.3 2009/05/15 00:26:36 hburger Exp $
  * Description: AnyTypeCondition 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2009/05/15 00:26:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,15 @@ package org.openmdx.base.query;
  */
 public class AnyTypeCondition extends Condition {
 
+    /**
+     * Constructor 
+     *
+     * @deprecated for encoding and decoding
+     */
+    public AnyTypeCondition(){
+        super();
+    }
+    
     //-----------------------------------------------------------------------
     public AnyTypeCondition(
         FilterProperty p
@@ -82,10 +91,23 @@ public class AnyTypeCondition extends Condition {
         return this.name;
     }
 
+    /**
+     * Set the condition name
+     * 
+     * @param name
+     * 
+     * @deprecated For encoding and decoding
+     */
+    public void setName(
+        String name
+    ){
+        this.name = name;
+    }
+    
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------    
     private static final long serialVersionUID = -1838250727743324443L;
-    protected final String name;
+    protected String name;
     
 }

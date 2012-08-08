@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightContainer.java,v 1.4 2009/02/24 16:02:51 hburger Exp $
+ * Name:        $Id: LightweightContainer.java,v 1.6 2009/03/31 17:06:10 hburger Exp $
  * Description: Lightweight Container
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 16:02:51 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -79,6 +79,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.LinkRef;
@@ -125,6 +127,7 @@ import org.openmdx.kernel.application.process.Subprocess;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.naming.Contexts;
 import org.openmdx.kernel.naming.component.java.ComponentContextFactory;
 import org.openmdx.kernel.naming.container.jdbc.jdbcURLContextFactory;
@@ -133,13 +136,12 @@ import org.openmdx.kernel.naming.container.openmdx.openmdxURLContextFactory;
 import org.openmdx.kernel.naming.spi.ClassLoadertContextFactory;
 import org.openmdx.kernel.naming.spi.rmi.Context_1;
 import org.openmdx.kernel.naming.tomcat.LinkReference;
+import org.openmdx.kernel.resource.spi.ShareableConnectionManager;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.openmdx.kernel.url.protocol.AbstractURLConnection;
 import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
 import org.openmdx.uses.org.apache.commons.pool.impl.GenericObjectPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Lightweight Container
@@ -168,7 +170,7 @@ public class LightweightContainer {
         InitialContextFactory componentContextFactory, 
         ContextSwitcher contextSwitcher
     ) throws NamingException {
-        logger.info("Starting {}", mode);
+        logger.log(Level.INFO,"Starting {0}", mode);
         LightweightContainer.instance = this;
         this.mode = mode;
         System.setProperty(
@@ -264,7 +266,7 @@ public class LightweightContainer {
                     i.hasNext();
             ){
                 String url = i.next();
-                logger.info("Auto-deploying connector {}", url);
+                logger.log(Level.INFO,"Auto-deploying connector {0}", url);
                 try {
                     Report report = deployConnector(new URL(url));
                     log("connector", url, report);
@@ -280,7 +282,7 @@ public class LightweightContainer {
                     i.hasNext();
             ){
                 String url = i.next();
-                logger.info("Auto-deploying application {}", url);
+                logger.log(Level.INFO,"Auto-deploying application {0}", url);
                 try {
                     Report[] reports = deployApplication(new URL(url));
                     log("application", url, reports);
@@ -304,7 +306,7 @@ public class LightweightContainer {
             );
         } catch (ParserConfigurationException exception) {            
             System.err.println("Deplyoment manager acquisition failed: " + exception.getMessage());
-            logger.error("Deplyoment manager acquisition failed", exception);
+            logger.log(Level.SEVERE,"Deplyoment manager acquisition failed", exception);
             return null;
         }
     }
@@ -324,10 +326,10 @@ public class LightweightContainer {
     ){
         String values = System.getProperty(name);
         if(values == null || values.length() == 0){
-            logger.info(
-                "Set system property {} to \"{}\"",
-                name,
-                value
+            logger.log(
+                Level.INFO,
+                "Set system property {0} to \"{1}\"",
+                new Object[]{name,value}
             );
             System.setProperty(
                 name, 
@@ -335,8 +337,9 @@ public class LightweightContainer {
             );
         } else if ((separator + values + separator).indexOf(separator + value + separator) < 0) {
             String newValue = value + separator + values; 
-            logger.info(
-                "Change system property {} from \"{}\" to \"{}\"",
+            logger.log(
+                Level.INFO,
+                "Change system property {0} from \"{1}\" to \"{2}\"",
                 new Object[]{name, values, newValue}
             );
             System.setProperty(
@@ -359,13 +362,14 @@ public class LightweightContainer {
         Report report
     ){
         String message = "Deployment of " + type + " '" + url + "' ";
+        Object[] logParameters = new Object[]{message, report}; 
         if(report.isSuccess()){
             message += "completed";
             System.out.println(message + " (see log for details)");
-            logger.info("{}|{}", message, report);
+            logger.log(Level.INFO,"{0}|{1}", logParameters);
         } else {
             System.err.println(message + " (see log for reason)");
-            logger.warn("{}|{}", message, report);
+            logger.log(Level.WARNING,"{0}|{1}", logParameters);
         }
     }
 
@@ -393,19 +397,20 @@ public class LightweightContainer {
             "' "
         );
         MultiLineStringRepresentation detail = new IndentingFormatter(reports);
+        Object[] logParameters = new Object[]{message, detail};
         if(reports[0].isSuccess()){
             if(reports[0].hasWarning()) {
                 message.append("completed, but some modules failed");
-                logger.warn("{}|{}", message, detail);
+                logger.log(Level.WARNING,"{0}|{1}", logParameters);
                 System.err.println(message.append(" (see log for reason)"));
             } else {
                 message.append("successfully completed");
-                logger.info("{}|{}", message, detail);
+                logger.log(Level.INFO,"{0}|{1}", logParameters);
                 System.out.println(message.append(" (see log for details)"));
             }
         } else {
             message.append("failed");
-            logger.warn("{}|{}", message, detail);
+            logger.log(Level.WARNING,"{}|{}", logParameters);
             System.err.println(message.append(" (see log for reason)"));
         }
     }
@@ -423,7 +428,7 @@ public class LightweightContainer {
         Throwable exception
     ){
         String message = type + " '" + url + "' aborted";
-        logger.warn(message, exception);
+        logger.log(Level.WARNING,message, exception);
         System.err.println(message + ": " + exception);
     }
 
@@ -479,7 +484,7 @@ public class LightweightContainer {
                 contextSwitcher
             );
         } catch (NamingException exception) {
-            logger.error( "Lightweight Container Activation Failure", exception);
+            logger.log(Level.SEVERE,"Lightweight Container Activation Failure", exception);
             return null;
         }
     }
@@ -496,7 +501,8 @@ public class LightweightContainer {
         if(hasInstance()) {
             return LightweightContainer.instance;
         } else {
-            logger.warn(
+            logger.log(
+                Level.WARNING,
                 "LightweightContainer.getInstance() in order to acquire an instance is deprecated. " +
                 "Use getInstance(Mode.ENTERPRISE_APPLICATION_CONTAINER) instead"
             );
@@ -1953,9 +1959,9 @@ public class LightweightContainer {
     ){
         reports.add(report);
         if(report.isSuccess()){
-            logger.info("Successfully validated|{}", report);
+            logger.log(Level.INFO,"Successfully validated|{0}", report);
         } else {
-            logger.warn("Validation failed|{}", report);
+            logger.log(Level.WARNING,"Validation failed|{0}", report);
         }
         return report.isSuccess();
     }
@@ -2082,8 +2088,9 @@ public class LightweightContainer {
                 providerURL
             );
             System.out.flush();
-            logger.info(
-                "ENTERPRISE_JAVA_BEAN_SERVER is listening at {}",
+            logger.log(
+                Level.INFO,
+                "ENTERPRISE_JAVA_BEAN_SERVER is listening at {0}",
                 providerURL
             );
         } catch (Exception e) {
@@ -2214,7 +2221,7 @@ public class LightweightContainer {
     /**
      * We have to log in static and instance methods.
      */
-    private static final Logger logger = LoggerFactory.getLogger(LightweightContainer.class); 
+    private static final Logger logger = LoggerFactory.getLogger(); 
 
     
     //------------------------------------------------------------------------

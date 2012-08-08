@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.2 2009/01/13 11:47:35 wfro Exp $
+ * Name:        $Id: Model_1.java,v 1.7 2009/06/14 00:03:43 wfro Exp $
  * Description: model1 application plugin
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 11:47:35 $
+ * Date:        $Date: 2009/06/14 00:03:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,21 +69,20 @@ import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.zip.ZipOutputStream;
 
-import org.openmdx.application.cci.SystemAttributes;
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
+
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.DataproviderRequestContexts;
-import org.openmdx.application.dataprovider.cci.Directions;
 import org.openmdx.application.dataprovider.cci.RequestCollection;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.dataprovider.spi.Layer_1_0;
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelExceptions;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
@@ -91,12 +90,16 @@ import org.openmdx.application.mof.mapping.cci.Mapper_1_1;
 import org.openmdx.application.mof.mapping.cci.MappingTypes;
 import org.openmdx.application.mof.mapping.spi.MapperFactory_1;
 import org.openmdx.application.mof.repository.utils.ModelUtils;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Model_1_6;
+import org.openmdx.base.mof.cci.AggregationKind;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.Directions;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.Quantors;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -175,7 +178,7 @@ extends Layer_1 {
     //---------------------------------------------------------------------------
     private String getReferenceName(
         DataproviderRequest request
-    ) {
+    ) throws ServiceException {
         Path path = request.path();    
         return
         path.size() % 2 == 0 ?
@@ -191,33 +194,47 @@ extends Layer_1 {
 
         long startedAt = System.currentTimeMillis();    
 
-        Map classifiers = new HashMap();
+        Map<Path,MappedRecord> classifiers = new HashMap<Path,MappedRecord>();
         for(
-                Iterator i = elements.values().iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = elements.values().iterator();
+            i.hasNext();
         ) {
-            DataproviderObject element = (DataproviderObject)i.next();
+            MappedRecord element = i.next();
+            ObjectHolder_2Facade elementFacade;
+            try {
+                elementFacade = ObjectHolder_2Facade.newInstance(element);
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
             // collect classifier
-            if(element.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
+            if(elementFacade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
                 classifiers.put(
-                    element.path(),
+                    elementFacade.getPath(),
                     element
                 );
             }
             // qualified name
-            element.clearValues("qualifiedName").add(
-                element.path().getBase()
+            elementFacade.clearAttributeValues("qualifiedName").add(
+                elementFacade.getPath().getBase()
             );
         }
 
         // allSupertype
         for(
-                Iterator i = elements.values().iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = elements.values().iterator();
+            i.hasNext();
         ) { 
-            DataproviderObject classifier = (DataproviderObject)i.next();
-            if(classifier.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
-                classifier.clearValues("allSupertype").addAll(
+            MappedRecord classifier = i.next();
+            ObjectHolder_2Facade classifierFacade;
+            try {
+                classifierFacade = ObjectHolder_2Facade.newInstance(classifier);
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }            
+            if(classifierFacade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
+                classifierFacade.clearAttributeValues("allSupertype").addAll(
                     this.getAllSupertype(
                         classifier,
                         elements
@@ -233,12 +250,19 @@ extends Layer_1 {
 
         // allSubtype
         for(
-                Iterator i = elements.values().iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = elements.values().iterator();
+            i.hasNext();
         ) {
-            DataproviderObject classifier = (DataproviderObject)i.next();
-            if(classifier.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
-                classifier.clearValues("allSubtype").addAll(
+            MappedRecord classifier = i.next();
+            ObjectHolder_2Facade classifierFacade;
+            try {
+                classifierFacade = ObjectHolder_2Facade.newInstance(classifier);
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }                        
+            if(classifierFacade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
+                classifierFacade.clearAttributeValues("allSubtype").addAll(
                     this.getAllSubtype(
                         classifier,
                         elements
@@ -254,12 +278,19 @@ extends Layer_1 {
 
         // feature
         for(
-                Iterator i = elements.values().iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = elements.values().iterator();
+            i.hasNext();
         ) {
-            DataproviderObject classifier = (DataproviderObject)i.next();
-            if(classifier.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {      
-                classifier.clearValues("feature").addAll(
+            MappedRecord classifier = i.next();
+            ObjectHolder_2Facade classifierFacade;
+            try {
+                classifierFacade = ObjectHolder_2Facade.newInstance(classifier);
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }                                    
+            if(classifierFacade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {      
+                classifierFacade.clearAttributeValues("feature").addAll(
                     this.getFeatures(
                         header,
                         classifier,
@@ -280,22 +311,22 @@ extends Layer_1 {
     }
 
     //---------------------------------------------------------------------------
-    private List getNamespaceContent(
+    private List<MappedRecord> getNamespaceContent(
         ServiceHeader header,
-        DataproviderObject namespace
+        MappedRecord namespace
     ) throws ServiceException {
         RequestCollection channel = new RequestCollection(
             header,
             this.getDelegation()
         );
         return channel.addFindRequest(
-            namespace.path().getParent(),
+            ObjectHolder_2Facade.getPath(namespace).getParent(),
             new FilterProperty[]{
                 new FilterProperty(
                     Quantors.THERE_EXISTS,
                     "container",
                     FilterOperators.IS_IN,
-                    namespace.path()
+                    ObjectHolder_2Facade.getPath(namespace)
                 )        
             },
             AttributeSelectors.ALL_ATTRIBUTES,
@@ -309,7 +340,7 @@ extends Layer_1 {
     //---------------------------------------------------------------------------
     private List getNamespaceContentAsPaths(
         ServiceHeader header,
-        DataproviderObject namespace
+        MappedRecord namespace
     ) throws ServiceException {
         List content = this.getNamespaceContent(
             header,
@@ -317,11 +348,11 @@ extends Layer_1 {
         );
         List contentAsPaths = new ArrayList();
         for(
-                Iterator i = content.iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = content.iterator();
+            i.hasNext();
         ) {
             contentAsPaths.add(
-                ((DataproviderObject)i.next()).path()
+                ObjectHolder_2Facade.getPath(i.next())
             );
         }
         return contentAsPaths;
@@ -332,34 +363,39 @@ extends Layer_1 {
      * Gets all direct and indirect supertypes for a given Classifier
      */
     private Set getAllSupertype(
-        DataproviderObject classifier,
-        Map elements
+        MappedRecord classifier,
+        Map<Path,MappedRecord> elements
     ) throws ServiceException {
-        Set allSupertype = new TreeSet();
-        for(
-                Iterator i = classifier.values("supertype").iterator();
+        Set<Path> allSupertype = new TreeSet<Path>();
+        try {
+            for(
+                Iterator i = ObjectHolder_2Facade.newInstance(classifier).attributeValues("supertype").iterator();
                 i.hasNext();
-        ) {
-            Path supertypePath = (Path)i.next();
-            DataproviderObject supertype = (DataproviderObject)elements.get(supertypePath);
-            if(supertype == null) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE, 
-                    "type not found in set of loaded models (HINT: probably not configured as 'modelPackage')",
-                    new BasicException.Parameter("classifier", classifier.path()),
-                    new BasicException.Parameter("supertype", supertypePath)
+            ) {
+                Path supertypePath = (Path)i.next();
+                MappedRecord supertype = elements.get(supertypePath);
+                if(supertype == null) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE, 
+                        "type not found in set of loaded models (HINT: probably not configured as 'modelPackage')",
+                        new BasicException.Parameter("classifier", ObjectHolder_2Facade.getPath(classifier)),
+                        new BasicException.Parameter("supertype", supertypePath)
+                    );
+                }
+                allSupertype.addAll(
+                    this.getAllSupertype(
+                        supertype,
+                        elements
+                    )
                 );
             }
-            allSupertype.addAll(
-                this.getAllSupertype(
-                    supertype,
-                    elements
-                )
-            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
         }
         allSupertype.add(
-            classifier.path()
+            ObjectHolder_2Facade.getPath(classifier)
         );
         return allSupertype;
     }
@@ -369,41 +405,60 @@ extends Layer_1 {
      * Set feature 'subtype' of classifiers
      */
     private void setSubtype(
-        Map classifiers
-    ) {    
+        Map<Path,MappedRecord> classifiers
+    ) throws ServiceException {    
         // clear feature subtype
         for(
-                Iterator i = classifiers.values().iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = classifiers.values().iterator();
+            i.hasNext();
         ) {
-            DataproviderObject classifier = (DataproviderObject)i.next();
-            classifier.clearValues("subtype");
+            MappedRecord classifier = i.next();
+            try {
+                ObjectHolder_2Facade.newInstance(classifier).clearAttributeValues("subtype");
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
         }
-
         // recalc subtype
         for(
-                Iterator i = classifiers.values().iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = classifiers.values().iterator();
+            i.hasNext();
         ) {
-            DataproviderObject classifier = (DataproviderObject)i.next();
-            for(
-                    Iterator j = classifier.values("supertype").iterator();
-                    j.hasNext();
-            ) {
-                Object next = j.next();
-                DataproviderObject supertype = (DataproviderObject)classifiers.get(next);
-                if(supertype == null) {
-                    SysLog.error("supertype " + next + " of classifier " + classifier.path() + " not found in repository");
-                }
-                else if(!supertype.values("subtype").contains(classifier.path())) {
-                    supertype.values("subtype").add(
-                        classifier.path()
-                    );
-                }
+            MappedRecord classifier = i.next();
+            ObjectHolder_2Facade classifierFacade;
+            try {
+                classifierFacade = ObjectHolder_2Facade.newInstance(classifier);
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
             }
-            if(!classifier.values("subtype").contains(classifier.path())) {
-                classifier.values("subtype").add(
-                    classifier.path()
+            try {
+                for(
+                    Iterator j = ObjectHolder_2Facade.newInstance(classifier).attributeValues("supertype").iterator();
+                    j.hasNext();
+                ) {
+                    Object next = j.next();
+                    MappedRecord supertype = classifiers.get(next);
+                    if(supertype == null) {
+                        SysLog.error("supertype " + next + " of classifier " + ObjectHolder_2Facade.getPath(classifier) + " not found in repository");
+                    }
+                    else {
+                        ObjectHolder_2Facade superTypeFacade = ObjectHolder_2Facade.newInstance(supertype);
+                        if(!superTypeFacade.attributeValues("subtype").contains(classifierFacade.getPath())) {
+                            superTypeFacade.attributeValues("subtype").add(
+                                classifierFacade.getPath()
+                            );
+                        }
+                    }
+                }
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
+            if(!classifierFacade.attributeValues("subtype").contains(classifierFacade.getPath())) {
+                classifierFacade.attributeValues("subtype").add(
+                    classifierFacade.getPath()
                 );
             }
         }
@@ -414,34 +469,54 @@ extends Layer_1 {
      * Set feature 'content' of namespaces
      */
     private void setContent(
-        Map elements
-    ) {    
+        Map<Path,MappedRecord> elements
+    ) throws ServiceException {    
         // clear feature subtype
         for(
-                Iterator i = elements.values().iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = elements.values().iterator();
+            i.hasNext();
         ) {
-            DataproviderObject element = (DataproviderObject)i.next();
-            element.clearValues("content");
+            MappedRecord element = i.next();
+            try {
+                ObjectHolder_2Facade.newInstance(element).clearAttributeValues("content");
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
         }
-
         // recalc content
         for(
-                Iterator i = elements.values().iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = elements.values().iterator();
+            i.hasNext();
         ) {
-            DataproviderObject content = (DataproviderObject)i.next();
-            if(content.getValues("container") != null) {
-                DataproviderObject container = (DataproviderObject)elements.get(
-                    content.values("container").get(0)
+            MappedRecord content = i.next();
+            ObjectHolder_2Facade contentFacade;
+            try {
+                contentFacade = ObjectHolder_2Facade.newInstance(content);
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
+            if(contentFacade.getAttributeValues("container") != null) {
+                MappedRecord container = elements.get(
+                    contentFacade.attributeValue("container")
                 );
                 if(container == null) {
-                    SysLog.error("container " + content.values("container").get(0) + " of element " + content.path() + " not found in repository");
+                    SysLog.error("container " + contentFacade.attributeValue("container") + " of element " + contentFacade.getPath() + " not found in repository");
                 }
-                else if(!container.values("content").contains(content.path())) {
-                    container.values("content").add(
-                        content.path()
-                    );
+                else { 
+                    ObjectHolder_2Facade containerFacade;
+                    try {
+                        containerFacade = ObjectHolder_2Facade.newInstance(container);
+                    } 
+                    catch (ResourceException e) {
+                        throw new ServiceException(e);
+                    }
+                    if(!containerFacade.attributeValues("content").contains(contentFacade.getPath())) {
+                        containerFacade.attributeValues("content").add(
+                            contentFacade.getPath()
+                        );
+                    }
                 }
             }      
         } 
@@ -449,15 +524,22 @@ extends Layer_1 {
         // sort content by path
         // TODO: sort content by order as defined in model
         for(
-                Iterator i = elements.values().iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = elements.values().iterator();
+            i.hasNext();
         ) {
-            DataproviderObject container = (DataproviderObject)i.next();
-            if(container.getValues("content") != null) {
+            MappedRecord container = i.next();
+            ObjectHolder_2Facade containerFacade;
+            try {
+                containerFacade = ObjectHolder_2Facade.newInstance(container);
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
+            if(containerFacade.getAttributeValues("content") != null) {
                 Set content = new TreeSet(
-                    container.values("content")
+                    containerFacade.attributeValues("content")
                 );
-                container.clearValues("content").addAll(
+                containerFacade.clearAttributeValues("content").addAll(
                     content
                 );
             }
@@ -467,108 +549,40 @@ extends Layer_1 {
 
     //---------------------------------------------------------------------------
     /**
-     * Gets all direct and indirect subtypes for a given GeneralizableElement
-     * PRECONDITION: for the GeneralizableElement the attribute 'subtype'
-     *               must have been computed and assigned
-     */
-//  private Set getAllSubtype(
-//  ServiceHeader header,
-//  DataproviderObject classifier,
-//  Map elements
-//  ) throws ServiceException {
-//  Set allSubtype = new TreeSet();
-//  for(
-//  Iterator i = classifier.values("subtype").iterator();
-//  i.hasNext();
-//  ) {
-//  DataproviderObject subtype = (DataproviderObject)elements.get((Path)i.next());
-//  allSubtype.addAll(
-//  this.getAllSubtype(
-//  header,
-//  subtype,
-//  elements
-//  )
-//  );
-//  }
-//  allSubtype.add(
-//  classifier.path()
-//  );
-//  return allSubtype;
-//  }
-
-    //---------------------------------------------------------------------------
-    /**
      * When object is of type ModelClass completes the features allOperations,
      * allAttributes and allReferences. Precondition: allSupertype and content
      * must be set.
      */
     private Set getFeatures(
         ServiceHeader header,
-        DataproviderObject classifier,
-        Map elements
+        MappedRecord classifier,
+        Map<Path,MappedRecord> elements
     ) throws ServiceException {
-        Set features = new TreeSet();    
-        for(
-                Iterator i = classifier.values("allSupertype").iterator();
-                i.hasNext();
-        ) {
-            DataproviderObject supertype = (DataproviderObject)elements.get(i.next());
+        Set<Path> features = new TreeSet<Path>();    
+        try {
             for(
-                    Iterator j = supertype.values("content").iterator();
-                    j.hasNext();
+                Iterator i = ObjectHolder_2Facade.newInstance(classifier).attributeValues("allSupertype").iterator();
+                i.hasNext();
             ) {
-                DataproviderObject feature = (DataproviderObject)elements.get(j.next());
-                if(feature.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.FEATURE)) {
-                    features.add(
-                        feature.path()
-                    );
+                MappedRecord supertype = elements.get(i.next());
+                for(
+                    Iterator j = ObjectHolder_2Facade.newInstance(supertype).attributeValues("content").iterator();
+                    j.hasNext();
+                ) {
+                    MappedRecord feature = elements.get(j.next());
+                    if(ObjectHolder_2Facade.newInstance(feature).attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.FEATURE)) {
+                        features.add(
+                            ObjectHolder_2Facade.getPath(feature)
+                        );
+                    }
                 }
             }
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
         }
         return features;
     }
-
-    //-------------------------------------------------------------------------
-//  /**
-//  * Sets the 'allSupertype' attribute of modelElement. Implicitely sets
-//  * the 'allSupertype' attribute of all of its direct subtypes.
-//  */
-//  private void setAllSupertype(
-//  DataproviderObject modelElement,
-//  Map allNamespaceContent
-//  ) {
-
-//  // set supertypes of supertypes
-//  for(
-//  Iterator i = modelElement.values("supertype").iterator();
-//  i.hasNext();
-//  ) {
-//  this.setAllSupertype(
-//  (DataproviderObject)allNamespaceContent.get(i.next()),
-//  allNamespaceContent
-//  );
-//  }
-
-//  // collect allSupertype of supertypes
-//  Set allSupertype = new TreeSet();
-//  for(
-//  Iterator i = modelElement.values("supertype").iterator();
-//  i.hasNext();
-//  ) {
-//  DataproviderObject supertype = (DataproviderObject)allNamespaceContent.get(
-//  i.next()
-//  );
-//  allSupertype.addAll(
-//  supertype.values("allSupertype")
-//  );
-//  } 
-//  allSupertype.add(
-//  modelElement.path()
-//  );   
-//  modelElement.clearValues("allSupertype").addAll(
-//  allSupertype
-//  );
-//  }
 
     //-------------------------------------------------------------------------
     /** 
@@ -576,27 +590,32 @@ extends Layer_1 {
      * 'subtype' attribute is available.
      */
     private Set getAllSubtype(
-        DataproviderObject classifier,
-        Map elements
-    ) {
-        Set allSubtypes = new TreeSet();
-        for(
-                Iterator i = classifier.values("subtype").iterator();
+        MappedRecord classifier,
+        Map<Path,MappedRecord> elements
+    ) throws ServiceException {
+        Set<Path> allSubtypes = new TreeSet<Path>();
+        try {
+            for(
+                Iterator i = ObjectHolder_2Facade.newInstance(classifier).attributeValues("subtype").iterator();
                 i.hasNext();
-        ) {
-            DataproviderObject subtype = (DataproviderObject)elements.get(i.next());
-            // classifier is member of its subtypes
-            if(subtype != classifier) {
-                allSubtypes.addAll(
-                    this.getAllSubtype(
-                        subtype,
-                        elements
-                    )
-                );
+            ) {
+                MappedRecord subtype = elements.get(i.next());
+                // classifier is member of its subtypes
+                if(subtype != classifier) {
+                    allSubtypes.addAll(
+                        this.getAllSubtype(
+                            subtype,
+                            elements
+                        )
+                    );
+                }
             }
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
         }
         allSubtypes.add(
-            classifier.path()
+            ObjectHolder_2Facade.getPath(classifier)
         ); 
         return allSubtypes;
     }
@@ -606,44 +625,70 @@ extends Layer_1 {
      * set feature 'compositeReference' of classifiers
      */
     private void setCompositeReference(
-        Map classifiers,
-        Map elements
-    ) {
-
+        Map<Path,MappedRecord> classifiers,
+        Map<Path,MappedRecord> elements
+    ) throws ServiceException {
         // set 'compositeReference' of all referenced classes with composite aggregation
         for(
-                Iterator i = elements.values().iterator();
-                i.hasNext();
+            Iterator<MappedRecord> i = elements.values().iterator();
+            i.hasNext();
         ) {
-            DataproviderObject reference = (DataproviderObject)i.next();
-            if(reference.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.REFERENCE)) {
-                DataproviderObject type = (DataproviderObject)classifiers.get(
-                    reference.values("type").get(0)
+            MappedRecord reference = i.next();
+            ObjectHolder_2Facade referenceFacade;
+            try {
+                referenceFacade = ObjectHolder_2Facade.newInstance(reference);
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
+            if(referenceFacade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.REFERENCE)) {
+                MappedRecord type = classifiers.get(
+                    referenceFacade.attributeValue("type")
                 );
                 if(type == null) {
-                    SysLog.error("type " + reference.values("type").get(0) + " of reference " + reference.path() + " is not found in repository");
+                    SysLog.error("type " + referenceFacade.attributeValue("type") + " of reference " + referenceFacade.getPath() + " is not found in repository");
                 }
                 else {
-                    DataproviderObject referencedEnd = (DataproviderObject)elements.get(
-                        reference.values("referencedEnd").get(0)
+                    ObjectHolder_2Facade typeFacade;
+                    try {
+                        typeFacade = ObjectHolder_2Facade.newInstance(type);
+                    } 
+                    catch (ResourceException e) {
+                        throw new ServiceException(e);
+                    }
+                    MappedRecord referencedEnd = elements.get(
+                        referenceFacade.attributeValue("referencedEnd")
                     );
                     if(referencedEnd == null) {
-                        SysLog.error("association end " + reference.values("referencedEnd").get(0) + " of reference " + reference.path() + " is not found in repository");
+                        SysLog.error("association end " + referenceFacade.attributeValue("referencedEnd") + " of reference " + referenceFacade.getPath() + " is not found in repository");
                     }
-                    else if(AggregationKind.COMPOSITE.equals(referencedEnd.values("aggregation").get(0))) {
-                        type.clearValues("compositeReference").add(
-                            reference.path()
-                        );
-
-                        // set 'compositeReference' for all subtypes of type
-                        for(
-                                Iterator j = type.values("allSubtype").iterator();
-                                j.hasNext();
-                        ) {
-                            DataproviderObject subtype = (DataproviderObject)classifiers.get(j.next());
-                            subtype.clearValues("compositeReference").add(
-                                reference.path()
+                    else {
+                        ObjectHolder_2Facade referencedEndFacade;
+                        try {
+                            referencedEndFacade = ObjectHolder_2Facade.newInstance(referencedEnd);
+                        } 
+                        catch (ResourceException e) {
+                            throw new ServiceException(e);
+                        }
+                        if(AggregationKind.COMPOSITE.equals(referencedEndFacade.attributeValue("aggregation"))) {
+                            typeFacade.clearAttributeValues("compositeReference").add(
+                                referenceFacade.getPath()
                             );
+                            // set 'compositeReference' for all subtypes of type
+                            for(
+                                Iterator j = typeFacade.attributeValues("allSubtype").iterator();
+                                j.hasNext();
+                            ) {
+                                MappedRecord subtype = classifiers.get(j.next());
+                                try {
+                                    ObjectHolder_2Facade.newInstance(subtype).clearAttributeValues("compositeReference").add(
+                                        referenceFacade.getPath()
+                                    );
+                                } 
+                                catch (ResourceException e) {
+                                    throw new ServiceException(e);
+                                }
+                            }
                         }
                     }
                 }        
@@ -655,17 +700,23 @@ extends Layer_1 {
     /**
      * complete derived attribute 'name' and 'qualifiedName'
      */
-    DataproviderObject completeNames(
-        DataproviderObject object
+    MappedRecord completeNames(
+        MappedRecord object
     ) throws ServiceException {
-
+        ObjectHolder_2Facade facade;
+        try {
+            facade = ObjectHolder_2Facade.newInstance(object);
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         // qualifiedName = last path component
         // name = last component of qualifiedName
-        String qualifiedName = object.path().getBase();
-        object.clearValues("qualifiedName").add(
+        String qualifiedName = facade.getPath().getBase();
+        facade.clearAttributeValues("qualifiedName").add(
             qualifiedName
         );
-        object.clearValues("name").add(
+        facade.attributeValues("name").add(
             qualifiedName.substring(qualifiedName.lastIndexOf(':') + 1)
         );
         return object;
@@ -678,72 +729,85 @@ extends Layer_1 {
     void completeObject(
         ServiceHeader header,
         DataproviderRequest request,
-        DataproviderObject object
+        MappedRecord object
     ) throws ServiceException {
 
-        //SysLog.trace("> completeObject");
-
+        ObjectHolder_2Facade facade;
+        try {
+            facade = ObjectHolder_2Facade.newInstance(object);
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
+        
         // INSTANCEOF
-        List allSupertype = ModelUtils.getallSupertype((String)object.values(SystemAttributes.OBJECT_CLASS).get(0));
-        object.clearValues(SystemAttributes.OBJECT_INSTANCE_OF);
+        List allSupertype = ModelUtils.getallSupertype(facade.getObjectClass());
+        facade.clearAttributeValues(SystemAttributes.OBJECT_INSTANCE_OF);
         if(allSupertype != null) {
-            object.values(SystemAttributes.OBJECT_INSTANCE_OF).addAll(allSupertype);
+            facade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).addAll(allSupertype);
         }
 
         // calculate derived attributes only if attributes have to be returned
         // and if it is a class of org:omg:model1
         if(
-                (request.attributeSelector() != AttributeSelectors.NO_ATTRIBUTES) &&
-                object.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ELEMENT)
+            (request.attributeSelector() != AttributeSelectors.NO_ATTRIBUTES) &&
+            facade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ELEMENT)
         ) {
-
             // Reference.referencedEndIsNavigable
             if(
-                    object.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-                        ModelAttributes.REFERENCE
-                    )
+                facade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(
+                    ModelAttributes.REFERENCE
+                )
             ) {
-                DataproviderRequest getRequest = new DataproviderRequest(
-                    new DataproviderObject((Path)object.values("referencedEnd").get(0)),
-                    DataproviderOperations.OBJECT_RETRIEVAL,
-                    AttributeSelectors.ALL_ATTRIBUTES,
-                    null
-                );
+                DataproviderRequest getRequest;
+                try {
+                    getRequest = new DataproviderRequest(
+                        ObjectHolder_2Facade.newInstance((Path)facade.attributeValue("referencedEnd")).getDelegate(),
+                        DataproviderOperations.OBJECT_RETRIEVAL,
+                        AttributeSelectors.ALL_ATTRIBUTES,
+                        null
+                    );
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
                 getRequest.contexts().putAll(request.contexts());
-                DataproviderObject referencedEnd = this.get(
+                MappedRecord referencedEnd = this.get(
                     header,
                     getRequest
                 ).getObject();
-                object.clearValues("referencedEndIsNavigable").addAll(
-                    referencedEnd.values("isNavigable")
-                );
+                try {
+                    facade.clearAttributeValues("referencedEndIsNavigable").addAll(
+                        ObjectHolder_2Facade.newInstance(referencedEnd).attributeValues("isNavigable")
+                    );
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
             }
-
             // Operation.parameter
             if(
-                    object.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-                        ModelAttributes.OPERATION
-                    )
+                facade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(
+                    ModelAttributes.OPERATION
+                )
             ) {
-                object.clearValues("parameter").addAll(
+                facade.clearAttributeValues("parameter").addAll(
                     this.getNamespaceContentAsPaths(
                         header,
                         object
                     )
                 );
             }
-
             // GeneralizableElement.allSupertype
             if(
-                    object.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-                        ModelAttributes.GENERALIZABLE_ELEMENT
-                    )
+                facade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(
+                    ModelAttributes.GENERALIZABLE_ELEMENT
+                )
             ) {
                 // should this statement really be empty? TODO  
             }         
-
             // ModelElement.name, qualifiedName
-            completeNames(
+            this.completeNames(
                 object
             );
 
@@ -758,9 +822,9 @@ extends Layer_1 {
     ) throws ServiceException {
 
         for(
-                int i = 0;
-                i < reply.getObjects().length;
-                i++
+            int i = 0;
+            i < reply.getObjects().length;
+            i++
         ) {
             //SysLog.trace("completing object: " + reply.getObjects()[i]);
             this.completeObject(
@@ -780,43 +844,47 @@ extends Layer_1 {
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-
         Path accessPath = new Path(request.path().toString());
         DataproviderReply reply = null;
-
         // get ModelElement by 'content' reference
         if(
-                ModelAttributes.ELEMENT.equals(
-                    request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
-                ) && 
-                "content".equals(getReferenceName(request))
+            ModelAttributes.ELEMENT.equals(
+                request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
+            ) && 
+            "content".equals(getReferenceName(request))
         ) {
-
             // rewrite to .../element/<id> path
-            request.object().path().setTo(
-                accessPath.getPrefix(accessPath.size()-3).getChild(accessPath.getBase())
-            );
-
+            try {
+                ObjectHolder_2Facade.newInstance(request.object()).setPath(
+                    accessPath.getPrefix(accessPath.size()-3).getChild(accessPath.getBase())
+                );
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
             reply = super.get(
                 header,
                 request
             );
-
             // test whether container is correct
-            if(
-                    !((Path)reply.getObject().values("container").get(0)).equals(
+            try {
+                if(
+                    !((Path)ObjectHolder_2Facade.newInstance(reply.getObject()).attributeValue("container")).equals(
                         accessPath.getPrefix(accessPath.size()-2)
                     )
-            ) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_FOUND, 
-                    "no such member",
-                    new BasicException.Parameter("path", accessPath)
-                );
+                ) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_FOUND, 
+                        "no such member",
+                        new BasicException.Parameter("path", accessPath)
+                    );
+                }
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
             }
         }
-
         // non-derived access
         else {
             reply = super.get(
@@ -824,18 +892,21 @@ extends Layer_1 {
                 request
             );
         }
-
         // reset to access path
-        completeReply(
+        this.completeReply(
             header,
             request,
             reply
         );
-        reply.getObject().path().setTo(
-            accessPath
-        );
+        try {
+            ObjectHolder_2Facade.newInstance(reply.getObject()).setPath(
+                accessPath
+            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         return reply;
-
     }
 
     //---------------------------------------------------------------------------
@@ -843,15 +914,11 @@ extends Layer_1 {
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-
-//      Path accessPath = new Path(request.path().toString());
-//      DataproviderReply reply = null;
-
         // references on ModelElement
         if(
-                ModelAttributes.ELEMENT.equals(
-                    request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
-                )
+            ModelAttributes.ELEMENT.equals(
+                request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
+            )
         ) {
 
             // element
@@ -865,7 +932,6 @@ extends Layer_1 {
                     )
                 );    
             }
-
             else {
                 if(request.operation() == DataproviderOperations.ITERATION_CONTINUATION) {
                     throw new ServiceException(
@@ -874,25 +940,28 @@ extends Layer_1 {
                         "ITERATION_CONTINUATION not supported on derived reference"
                     );
                 }
-
                 // namespaceContent
                 else if("namespaceContent".equals(getReferenceName(request))) {
-                    return completeReply(
-                        header,
-                        request,
-                        new DataproviderReply(
-                            new ArrayList(
-                                this.getNamespaceContent(
-                                    header,
-                                    new DataproviderObject(request.object().path().getParent())
+                    try {
+                        return this.completeReply(
+                            header,
+                            request,
+                            new DataproviderReply(
+                                new ArrayList(
+                                    this.getNamespaceContent(
+                                        header,
+                                        ObjectHolder_2Facade.newInstance(ObjectHolder_2Facade.getPath(request.object()).getParent()).getDelegate()
+                                    )
                                 )
                             )
-                        )
-                    );
+                        );
+                    } 
+                    catch (ResourceException e) {
+                        throw new ServiceException(e);
+                    }
                 }
             }
         }
-
         // non-derived references
         else {
             return completeReply(
@@ -904,7 +973,6 @@ extends Layer_1 {
                 )
             );    
         }
-
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ASSERTION_FAILURE, 
@@ -1004,41 +1072,54 @@ extends Layer_1 {
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-
-//      Path accessPath = new Path(request.path().toString());
         String operationName = getReferenceName(request);
-        DataproviderObject params = request.object();
-
+        MappedRecord params = request.object();
+        ObjectHolder_2Facade paramsFacade;
+        try {
+            paramsFacade = ObjectHolder_2Facade.newInstance(params);
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         // Operations on ModelElements
         if(
-                ModelAttributes.ELEMENT.equals(
-                    request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
-                )
+            ModelAttributes.ELEMENT.equals(
+                request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
+            )
         ) {
-
             // lookupElement
             if("lookupElement".equals(operationName)) {
-
                 // get content  
                 // search elements with matching name
-                List contents = this.getNamespaceContent(
-                    header,
-                    new DataproviderObject(request.path().getPrefix(request.path().size()-2))
-                );  
+                List<MappedRecord> contents;
+                try {
+                    contents = this.getNamespaceContent(
+                        header,
+                        ObjectHolder_2Facade.newInstance(request.path().getPrefix(request.path().size()-2)).getDelegate()
+                    );
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }  
                 for(
-                        Iterator i = contents.iterator();
-                        i.hasNext();
+                    Iterator<MappedRecord> i = contents.iterator();
+                    i.hasNext();
                 ) {
-                    DataproviderObject content = (DataproviderObject)i.next();
-                    completeNames(
+                    MappedRecord content = i.next();                 
+                    this.completeNames(
                         content
                     );
-                    if(content.values("name").get(0).equals(params.values("name").get(0))) {
-                        params.values("result").add(content.path());
-                        break;
+                    try {
+                        if(ObjectHolder_2Facade.newInstance(content).attributeValue("name").equals(paramsFacade.attributeValue("name"))) {
+                            paramsFacade.attributeValues("result").add(ObjectHolder_2Facade.getPath(content));
+                            break;
+                        }
+                    } 
+                    catch (ResourceException e) {
+                        throw new ServiceException(e);
                     }
                 }
-                if(!params.containsAttributeName("result")) {
+                if(!paramsFacade.getValue().keySet().contains("result")) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND, 
@@ -1050,31 +1131,41 @@ extends Layer_1 {
                     params
                 );
             }
-
             // resolveQualifiedName
             else if("resolveQualifiedName".equals(operationName)) {
-
                 // get content  
                 // search elements with matching qualifiedName
-                List contents = this.getNamespaceContent(
-                    header,
-                    new DataproviderObject(request.path().getPrefix(request.path().size()-2))
-                );  
+                List contents;
+                try {
+                    contents = this.getNamespaceContent(
+                        header,
+                        ObjectHolder_2Facade.newInstance(request.path().getPrefix(request.path().size()-2)).getDelegate()
+                    );
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }  
                 for(
-                        Iterator i = contents.iterator();
-                        i.hasNext();
+                    Iterator<MappedRecord> i = contents.iterator();
+                    i.hasNext();
                 ) {
-                    DataproviderObject content = (DataproviderObject)i.next();
-                    completeNames(
+                    MappedRecord content = i.next();
+                    this.completeNames(
                         content
                     );
-                    //SysLog.trace("qualifiedName=" + content.values("qualifiedName").get(0));
-                    if(content.values("qualifiedName").get(0).equals(params.values("qualifiedName").get(0))) {
-                        params.values("result").add(content.path());
-                        break;
+                    try {
+                        if(ObjectHolder_2Facade.newInstance(content).attributeValue("qualifiedName").equals(paramsFacade.attributeValues("qualifiedName").get(0))) {
+                            paramsFacade.attributeValues("result").add(
+                                ObjectHolder_2Facade.getPath(content)
+                            );
+                            break;
+                        }
+                    } 
+                    catch (ResourceException e) {
+                        throw new ServiceException(e);
                     }
                 }
-                if(!params.containsAttributeName("result")) {
+                if(!paramsFacade.getValue().keySet().contains("result")) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND, 
@@ -1086,55 +1177,69 @@ extends Layer_1 {
                     params
                 );
             }
-
             // findElementsByType
             else if("findElementsByType".equals(operationName)) {
-
                 // get content ...
-                List contents = this.getNamespaceContent(
-                    header,
-                    new DataproviderObject(request.path().getPrefix(request.path().size()-2))
-                );
-
+                List contents;
+                try {
+                    contents = this.getNamespaceContent(
+                        header,
+                        ObjectHolder_2Facade.newInstance(request.path().getPrefix(request.path().size()-2)).getDelegate()
+                    );
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
                 // search elements with matching types
-                boolean includeSubtypes = ((Boolean)params.values("includeSubtypes").get(0)).booleanValue();
+                boolean includeSubtypes = ((Boolean)paramsFacade.attributeValue("includeSubtypes")).booleanValue();
                 for(
-                        Iterator i = contents.iterator();
-                        i.hasNext();
+                    Iterator<MappedRecord> i = contents.iterator();
+                    i.hasNext();
                 ) {
-                    DataproviderObject content = (DataproviderObject)i.next();
-
+                    MappedRecord content = i.next();
                     if(includeSubtypes) {
                         List subtypes = ModelUtils.getsubtype(
-                            (String)params.values("ofType").get(0)
+                            (String)paramsFacade.attributeValue("ofType")
                         );
                         for(
-                                Iterator j = subtypes.iterator();
-                                j.hasNext();
+                            Iterator j = subtypes.iterator();
+                            j.hasNext();
                         ) {
-                            if(content.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(j.next())) {
-                                params.values("result").add(content.path());
-                                break;
+                            try {
+                                if(ObjectHolder_2Facade.newInstance(content).attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(j.next())) {
+                                    paramsFacade.attributeValues("result").add(
+                                        ObjectHolder_2Facade.getPath(content)
+                                    );
+                                    break;
+                                }
+                            } 
+                            catch (ResourceException e) {
+                                throw new ServiceException(e);
                             }
                         }
-                    }
-                    else if(content.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(params.values("ofType").get(0))) {
-                        params.values("result").add(content.path());
-                    }
+                    } else
+                        try {
+                            if(ObjectHolder_2Facade.newInstance(content).attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(paramsFacade.attributeValues("ofType").get(0))) {
+                                paramsFacade.attributeValues("result").add(
+                                    ObjectHolder_2Facade.getPath(content)
+                                );
+                            }
+                        } 
+                        catch (ResourceException e) {
+                            throw new ServiceException(e);
+                        }
                 }
                 return new DataproviderReply(
                     params
                 );
             }
         }
-
         // Operations on ModelClassifier
         else if(
-                ModelAttributes.CLASSIFIER.equals(
-                    request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
-                )
+            ModelAttributes.CLASSIFIER.equals(
+                request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
+            )
         ) {
-
             // externalizeClassifier
             if("externalizeClassifier".equals(operationName)) {
                 return new DataproviderReply(
@@ -1142,21 +1247,17 @@ extends Layer_1 {
                 );
             }
         }
-
         // Operations on ModelPackage
         else if(
-                ModelAttributes.PACKAGE.equals(
-                    request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
-                )
+            ModelAttributes.PACKAGE.equals(
+                request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
+            )
         ) {
-
             // externalizePackage
             if("externalizePackage".equals(operationName)) {
-
                 try {
-
                     SysLog.trace("activating model");
-                    Model_1_6 model = org.openmdx.application.mof.repository.accessor.Model_1.getInstance(
+                    Model_1_0 model = org.openmdx.application.mof.repository.accessor.Model_1.getInstance(
                         this,
                         true
                     );
@@ -1167,8 +1268,8 @@ extends Layer_1 {
 
                     // only test for existence if not wildcard export
                     if(
-                            (qualifiedPackageName.indexOf("%") < 0) &&
-                            (model.findElement(modelPackagePath) == null)
+                        (qualifiedPackageName.indexOf("%") < 0) &&
+                        (model.findElement(modelPackagePath) == null)
                     ) {
                         throw new ServiceException(
                             ModelExceptions.MODEL_DOMAIN,
@@ -1184,8 +1285,8 @@ extends Layer_1 {
                     ZipOutputStream zip = new ZipOutputStream(
                         bs = new ByteArrayOutputStream()         
                     );
-                    List formats = request.object().values("format").size() > 0 ? 
-                        request.object().values("format") : 
+                    List formats = !paramsFacade.attributeValues("format").isEmpty() ? 
+                        paramsFacade.attributeValues("format") : 
                         STANDARD_FORMAT;
                     for(
                         Iterator i = formats.iterator();
@@ -1203,7 +1304,8 @@ extends Layer_1 {
                                 zip,
                                 this.openmdxjdoMetadataDirectory
                             );
-                        } else {
+                        } 
+                        else {
                             mapper.externalize(
                                 modelPackagePath.getBase(),
                                 model,
@@ -1212,17 +1314,21 @@ extends Layer_1 {
                         }
                     }
                     zip.close();
-                    DataproviderObject result = new DataproviderObject(
-                        params.path()
-                    );
-                    result.values(SystemAttributes.OBJECT_CLASS).add(
-                        "org:omg:model1:PackageExternalizeResult"
-                    );
-                    result.values("packageAsJar").add(
+                    ObjectHolder_2Facade resultFacade;
+                    try {
+                        resultFacade = ObjectHolder_2Facade.newInstance(
+                            paramsFacade.getPath(),
+                            "org:omg:model1:PackageExternalizeResult"
+                        );
+                    } 
+                    catch (ResourceException e) {
+                        throw new ServiceException(e);
+                    }
+                    resultFacade.attributeValues("packageAsJar").add(
                         bs.toByteArray()
                     );
                     return new DataproviderReply(
-                        result
+                        resultFacade.getDelegate()
                     );          
                 }
                 catch(IOException e) {
@@ -1230,30 +1336,30 @@ extends Layer_1 {
                 }
             }
         }
-
         // beginImport
         else if("beginImport".equals(operationName)) {
             this.importing = true;
-            DataproviderObject result = new DataproviderObject(
-                params.path().getDescendant("reply", super.uidAsString())
-            );
-            result.values(SystemAttributes.OBJECT_CLASS).add(
-                "org:openmdx:base:Void"
-            );
+            ObjectHolder_2Facade resultFacade;
+            try {
+                resultFacade = ObjectHolder_2Facade.newInstance(
+                    paramsFacade.getPath().getDescendant("reply", super.uidAsString()),
+                    "org:openmdx:base:Void"
+                );
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
             return new DataproviderReply(
-                result
+                resultFacade.getDelegate()
             );
         }
-
         // endImport
         else if("endImport".equals(operationName)) {
-
             // recalculate all derived attributes and update repository
             RequestCollection channel = new RequestCollection(
                 header,
                 this.getDelegation()
             );
-
             // get full repository content ...
             List segments = channel.addFindRequest(
                 PROVIDER_ROOT_PATH.getChild("segment"),
@@ -1261,12 +1367,12 @@ extends Layer_1 {
             );
             Map completedElements = new HashMap();
             for(
-                    Iterator i = segments.iterator();
-                    i.hasNext();
+                Iterator<MappedRecord> i = segments.iterator();
+                i.hasNext();
             ) {
-                DataproviderObject segment = (DataproviderObject)i.next();
-                List elements = channel.addFindRequest(
-                    segment.path().getChild("element"),
+                MappedRecord segment = i.next();
+                List<MappedRecord> elements = channel.addFindRequest(
+                    ObjectHolder_2Facade.getPath(segment).getChild("element"),
                     null,
                     AttributeSelectors.ALL_ATTRIBUTES,
                     null,
@@ -1275,49 +1381,48 @@ extends Layer_1 {
                     Directions.ASCENDING
                 );
                 for(
-                        Iterator j = elements.iterator();
-                        j.hasNext();  
+                    Iterator<MappedRecord> j = elements.iterator();
+                    j.hasNext();  
                 ) {
-                    DataproviderObject element = (DataproviderObject)j.next();
+                    MappedRecord element = j.next();
                     completedElements.put(
-                        element.path(),
+                        ObjectHolder_2Facade.getPath(element),
                         element
                     );
                 }
             }
-
             // ... complete it ...
             this.completeElements(
                 header,
                 completedElements
             );
-
             // ... and replace the existing elements with the completed
             for(
-                    Iterator i = completedElements.values().iterator();
-                    i.hasNext();
+                Iterator<MappedRecord> i = completedElements.values().iterator();
+                i.hasNext();
             ) {
-                DataproviderObject element = (DataproviderObject)i.next();
+                MappedRecord element = i.next();
                 channel.addReplaceRequest(
                     element
                 );
             }
             SysLog.trace("completed elements", completedElements.size());
-
             // Void reply      
-            DataproviderObject result = new DataproviderObject(
-                params.path().getDescendant("reply", super.uidAsString())
-            );
-            result.values(SystemAttributes.OBJECT_CLASS).add(
-                "org:openmdx:base:Void"
-            );
-
+            ObjectHolder_2Facade resultFacade;
+            try {
+                resultFacade = ObjectHolder_2Facade.newInstance(
+                    paramsFacade.getPath().getDescendant("reply", super.uidAsString()),
+                    "org:openmdx:base:Void"
+                );
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
             this.importing = false;
             return new DataproviderReply(
-                result
+                resultFacade.getDelegate()
             );
         }
-
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ASSERTION_FAILURE, 
@@ -1325,7 +1430,6 @@ extends Layer_1 {
             new BasicException.Parameter("operation", operationName),
             new BasicException.Parameter("object type", request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0))
         );
-
     }
 
     //---------------------------------------------------------------------------

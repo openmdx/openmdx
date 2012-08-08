@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MultiValuedAttributePredicate_1.java,v 1.11 2009/01/13 02:10:32 wfro Exp $
+ * Name:        $Id: MultiValuedAttributePredicate_1.java,v 1.12 2009/06/09 12:45:17 hburger Exp $
  * Description: Mullti-Valued Attribute Predicate implementation
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:32 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,7 +53,7 @@ package org.openmdx.base.accessor.jmi.spi;
 
 import java.util.Collections;
 
-import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
+import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.Quantors;
@@ -75,7 +75,7 @@ class MultiValuedAttributePredicate_1
      * @param fieldName
      */
     MultiValuedAttributePredicate_1 (
-        RefFilter_1_1 delegate, 
+        RefFilter_1_0 delegate, 
         ModelElement_1_0 feature
     ){
         super(delegate, feature);

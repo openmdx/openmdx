@@ -30,6 +30,21 @@
 
 </Container>
 
+<Container id="My Stateful Container" type="STATEFUL">
+  #  Specifies the time to wait between invocations. This
+  #  value is measured in milliseconds.  A value of 5 would
+  #  result in a time-out of 5 milliseconds between invocations.
+  #  A value of zero would mean no timeout.
+
+  TimeOut  0
+
+  #  Specifies the size of the bean pools for this
+  #  stateless SessionBean container.
+
+  PoolSize  1000
+
+</Container>
+
 <!-- @@OPENCRX_JDBC@@ -->
 
 <!-- @@OPENCRX_MAIL@@ -->

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ManagerFactoryConfigurationEntries.java,v 1.1 2009/01/05 13:44:55 wfro Exp $
+ * Name:        $Id: ManagerFactoryConfigurationEntries.java,v 1.3 2009/05/20 15:12:55 hburger Exp $
  * Description: Common Configuration Entries 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:55 $
+ * Date:        $Date: 2009/05/20 15:12:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,6 +64,7 @@ public class ManagerFactoryConfigurationEntries extends SharedConfigurationEntri
         // avoid instantiation
     }
 
+    
     //------------------------------------------------------------------------
     // Configuration Options
     //------------------------------------------------------------------------
@@ -84,9 +85,24 @@ public class ManagerFactoryConfigurationEntries extends SharedConfigurationEntri
     static public final String PLUG_IN = "plugIn";
 
     /**
-     * Lenient flag
+     * The object id pattern
      */
-    static public final String LENIENT = "lenient";
+    static public final String PATTERN = "xriPattern";
+
+    /**
+     * The REST provider names
+     */
+    static public final String REST_PROVIDER = "restProvider";
+    
+    /**
+     * The REST plug-in names
+     */
+    static public final String REST_PLUG_IN = "restPlugIn";
+    
+    /**
+     * The user object's class must be a java bean implementing RestConnection
+     */
+    public final static String PLUG_IN_CLASS = "class";
 
     
     //------------------------------------------------------------------------
@@ -109,8 +125,28 @@ public class ManagerFactoryConfigurationEntries extends SharedConfigurationEntri
     //------------------------------------------------------------------------
     
     /**
-     * The persistence manager's legacy plug-in name
+     * The persistence manager's plug-in name
      */
-    public final static String LEGACY_PLUG_IN = "LegacyPlugIn";
+    public final static String AOP2_PLUG_IN = "AOP2";
 
+    
+    //------------------------------------------------------------------------
+    // State Capable Configuration Entries
+    //------------------------------------------------------------------------
+
+    /**
+     * The <code>transactionTimeUnique<code> configuration field  
+     * <p>
+     * It's values consist of the string representation of path patterns.
+     */
+    static public final String TRANSACTION_TIME_UNIQUE = "transactionTimeUnique";
+
+    /**
+     * The <code>validTimeUnique<code> configuration field  
+     * <p>
+     * It's values consist of the string representation of path patterns.
+     */
+    static public final String VALID_TIME_UNIQUE = "validTimeUnique";
+
+    
 }

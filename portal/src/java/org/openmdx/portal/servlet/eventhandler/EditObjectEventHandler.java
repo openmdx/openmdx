@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectEventHandler.java,v 1.31 2009/03/08 18:03:21 wfro Exp $
+ * Name:        $Id: EditObjectEventHandler.java,v 1.34 2009/06/09 12:50:34 hburger Exp $
  * Description: EditObjectEventHandler 
- * Revision:    $Revision: 1.31 $
+ * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:21 $
+ * Date:        $Date: 2009/06/09 12:50:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -120,7 +121,7 @@ public class EditObjectEventHandler {
                 catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
                     AppLog.warning(e0.getMessage(), e0.getMessage());
-                    AppLog.detail(e0.getMessage(), e0.getCause());
+                    AppLog.warning(e0.getMessage(), e0.getCause());
                     currentView.handleCanNotCommitException(e0.getCause());                    
                     hasErrors = true;
                 }
@@ -169,7 +170,8 @@ public class EditObjectEventHandler {
                     nextView = currentView.getPreviousView(showViewsCache);
                     if(!currentView.isEditMode() && (nextView instanceof ShowObjectView)) {
                         // Refresh derived attributes of newly created objects
-                        currentView.getRefObject().refRefresh();
+                    	RefObject_1_0 pcView = currentView.getRefObject();
+                        JDOHelper.getPersistenceManager(pcView).refresh(pcView);
                         // Set created object as result if next view is ShowObjectView
                         // This shows the reference to the newly created object the same
                         // way as an operation result
@@ -187,9 +189,7 @@ public class EditObjectEventHandler {
                             )
                         );
                     }
-                    EventHandlerHelper.notifyObjectModified(
-                        showViewsCache
-                    );
+                    showViewsCache.evictViews();
                     // Object is saved. EditObjectView is not required any more. Remove 
                     // it from the set of open EditObjectViews.
                     editViewsCache.removeView(

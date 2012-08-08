@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtendedRecordFactory.java,v 1.7 2009/02/19 16:30:58 hburger Exp $
+ * Name:        $Id: ExtendedRecordFactory.java,v 1.8 2009/05/07 13:13:05 hburger Exp $
  * Description: Java Connector Architecture: Initialized Record Factory
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/19 16:30:58 $
+ * Date:        $Date: 2009/05/07 13:13:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -182,7 +182,29 @@ public interface ExtendedRecordFactory
     Object values
   ) throws ResourceException;
   	
+  /**
+   * Creates a MappedRecord with the given name, short description and
+   * content.  
+   * 
+   * @param     recordName
+   *            The name of the record acts as a pointer to the meta
+   *            information (stored in the metadata repository) for a specific 
+   *            record type. 
+   * @param     recordShortDescription
+   *            The short description of the Record; or <code>null</null>.
+   * @param     key
+   *            The key of the single mapped record entry
+   * @param     value
+   *            The value of the single mapped record entry
+   */
+  MappedRecord singletonMappedRecord(
+    String recordName,
+    String recordShortDescription,
+    Object key,
+    Object value
+  );
 
+  
   //--------------------------------------------------------------------------
   // IndexedRecord Factory
   //--------------------------------------------------------------------------
@@ -249,7 +271,7 @@ public interface ExtendedRecordFactory
    *            information (stored in the metadata repository) for a specific
    *            record type. 
    * @param     recordShortDescription
-   *            The short description of the Record; or null.
+   *            The short description of the Record; or <code>null</null>.
    * @param     values
    *            The values of the indexed record represented by a List or an 
    *            array of objects or primitive types.
@@ -267,5 +289,23 @@ public interface ExtendedRecordFactory
     String recordShortDescription,
     Object values
   ) throws ResourceException;
+
+  /**
+   * Creates an IndexedRecord with the given name, description and content.  
+   *
+   * @param     recordName
+   *            The name of the record acts as a pointer to the meta 
+   *            information (stored in the metadata repository) for a specific
+   *            record type. 
+   * @param     recordShortDescription
+   *            The short description of the Record; or <code>null</null>.
+   * @param     value
+   *            The single value of the indexed record.
+   */
+  IndexedRecord singletonIndexedRecord(
+    String recordName,
+    String recordShortDescription,
+    Object value
+  );
 
 }

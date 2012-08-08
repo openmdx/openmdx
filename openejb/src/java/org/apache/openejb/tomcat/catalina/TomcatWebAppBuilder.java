@@ -17,38 +17,21 @@
  */
 package org.apache.openejb.tomcat.catalina;
 
-import static org.apache.openejb.tomcat.catalina.BackportUtil.getNamingContextListener;
 import static org.apache.openejb.tomcat.catalina.BackportUtil.getServlet;
+import static org.apache.openejb.tomcat.catalina.BackportUtil.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import javax.ejb.spi.HandleDelegate;
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.persistence.EntityManagerFactory;
-import javax.servlet.ServletContext;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionSynchronizationRegistry;
-
+import org.apache.openejb.tomcat.common.LegacyAnnotationProcessor;
+import org.apache.openejb.tomcat.common.TomcatVersion;
 import org.apache.catalina.Container;
 import org.apache.catalina.Engine;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.ServerFactory;
 import org.apache.catalina.Service;
 import org.apache.catalina.Wrapper;
-import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.core.StandardServer;
+import org.apache.catalina.core.ContainerBase;
 import org.apache.catalina.deploy.ContextEnvironment;
 import org.apache.catalina.deploy.ContextResource;
 import org.apache.catalina.deploy.ContextResourceLink;
@@ -57,16 +40,20 @@ import org.apache.catalina.startup.ContextConfig;
 import org.apache.catalina.startup.HostConfig;
 import org.apache.naming.ContextAccessController;
 import org.apache.naming.ContextBindings;
-import org.apache.openejb.ClassLoaderUtil;
-import org.apache.openejb.Injection;
 import org.apache.openejb.OpenEJBException;
+import org.apache.openejb.Injection;
+import org.apache.openejb.ClassLoaderUtil;
+import org.apache.openejb.spi.ContainerSystem;
+import org.apache.openejb.server.webservices.WsServlet;
+import org.apache.openejb.server.webservices.WsService;
 import org.apache.openejb.assembler.classic.AppInfo;
 import org.apache.openejb.assembler.classic.Assembler;
-import org.apache.openejb.assembler.classic.ConnectorInfo;
-import org.apache.openejb.assembler.classic.EjbJarInfo;
-import org.apache.openejb.assembler.classic.InjectionBuilder;
+import org.apache.openejb.util.LinkResolver;
 import org.apache.openejb.assembler.classic.WebAppBuilder;
 import org.apache.openejb.assembler.classic.WebAppInfo;
+import org.apache.openejb.assembler.classic.EjbJarInfo;
+import org.apache.openejb.assembler.classic.ConnectorInfo;
+import org.apache.openejb.assembler.classic.InjectionBuilder;
 import org.apache.openejb.config.AnnotationDeployer;
 import org.apache.openejb.config.AppModule;
 import org.apache.openejb.config.ConfigurationFactory;
@@ -75,27 +62,40 @@ import org.apache.openejb.config.EjbModule;
 import org.apache.openejb.config.ReadDescriptors;
 import org.apache.openejb.config.UnknownModuleTypeException;
 import org.apache.openejb.config.WebModule;
-import org.apache.openejb.core.CoreContainerSystem;
-import org.apache.openejb.core.CoreWebDeploymentInfo;
+import org.apache.openejb.config.ClientModule;
 import org.apache.openejb.core.ivm.naming.SystemComponentReference;
 import org.apache.openejb.core.webservices.JaxWsUtils;
-import org.apache.openejb.finder.ResourceFinder;
-import org.apache.openejb.finder.UrlSet;
+import org.apache.openejb.core.CoreWebDeploymentInfo;
+import org.apache.openejb.core.CoreContainerSystem;
 import org.apache.openejb.jee.EnvEntry;
 import org.apache.openejb.jee.FacesConfig;
 import org.apache.openejb.jee.ParamValue;
 import org.apache.openejb.jee.WebApp;
 import org.apache.openejb.loader.SystemInstance;
-import org.apache.openejb.server.webservices.WsService;
-import org.apache.openejb.server.webservices.WsServlet;
-import org.apache.openejb.spi.ContainerSystem;
-import org.apache.openejb.tomcat.common.LegacyAnnotationProcessor;
-import org.apache.openejb.tomcat.common.TomcatVersion;
-import org.apache.openejb.util.LinkResolver;
 import org.apache.openejb.util.LogCategory;
 import org.apache.openejb.util.Logger;
 import org.apache.openejb.util.URLs;
+import org.apache.xbean.finder.ResourceFinder;
+import org.apache.xbean.finder.UrlSet;
 import org.omg.CORBA.ORB;
+
+import javax.ejb.spi.HandleDelegate;
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.persistence.EntityManagerFactory;
+import javax.servlet.ServletContext;
+import javax.transaction.TransactionManager;
+import javax.transaction.TransactionSynchronizationRegistry;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class TomcatWebAppBuilder implements WebAppBuilder, ContextListener {
     public static final String IGNORE_CONTEXT = TomcatWebAppBuilder.class.getName() + ".IGNORE";
@@ -163,14 +163,19 @@ public class TomcatWebAppBuilder implements WebAppBuilder, ContextListener {
         for (WebAppInfo webApp : appInfo.webApps) {
             if (getContextInfo(webApp) == null) {
                 StandardContext standardContext = new StandardContext();
-                standardContext.setConfigFile(
-                    webApp.codebase + "/META-INF/context.xml"
-                );
-                WebAppContextConfig.initContext(standardContext);
+                String contextXmlFile = webApp.codebase + "/META-INF/context.xml";
+                if (new File(contextXmlFile).exists()) {
+                    standardContext.setConfigFile(contextXmlFile);
+                    standardContext.setOverride(true);
+                }
+                ContextConfig contextConfig = new ContextConfig();
+                standardContext.addLifecycleListener(contextConfig);
+
                 standardContext.setPath("/" + webApp.contextRoot);
                 standardContext.setDocBase(webApp.codebase);
                 standardContext.setParentClassLoader(classLoader);
                 standardContext.setDelegate(true);
+
                 String host = webApp.host;
                 if (host == null) host = "localhost";
                 HostConfig deployer = deployers.get(host);
@@ -260,7 +265,7 @@ public class TomcatWebAppBuilder implements WebAppBuilder, ContextListener {
         // appInfo is null when deployment fails
         if (contextInfo.appInfo != null) {
             for (WebAppInfo w : contextInfo.appInfo.webApps) {
-                if (("/" + w.contextRoot).equals(standardContext.getPath())) {
+                if (("/" + w.contextRoot).equals(standardContext.getPath()) || isRootApplication(standardContext)) {
                     webAppInfo = w;
                     break;
                 }
@@ -344,7 +349,7 @@ public class TomcatWebAppBuilder implements WebAppBuilder, ContextListener {
 
             // add context to WebDeploymentInfo
             for (WebAppInfo webAppInfo : contextInfo.appInfo.webApps) {
-                if (("/" + webAppInfo.contextRoot).equals(standardContext.getPath())) {
+                if (("/" + webAppInfo.contextRoot).equals(standardContext.getPath()) || isRootApplication(standardContext)) {
                     CoreWebDeploymentInfo webDeploymentInfo = (CoreWebDeploymentInfo) getContainerSystem().getWebDeploymentInfo(webAppInfo.moduleId);
                     if (webDeploymentInfo != null) {
                         webDeploymentInfo.setJndiEnc(comp);
@@ -519,6 +524,10 @@ public class TomcatWebAppBuilder implements WebAppBuilder, ContextListener {
 
         return file.isFile() && standardHost.findChild(name) != null;
     }
+    
+    private boolean isRootApplication(StandardContext standardContext) {
+	return "".equals(standardContext.getPath());
+    }
 
     protected File appBase(StandardHost standardHost) {
         File file = new File(standardHost.getAppBase());
@@ -563,12 +572,15 @@ public class TomcatWebAppBuilder implements WebAppBuilder, ContextListener {
                     
                     // create the ejb module and set its moduleId to the webapp context root name
                     EjbModule ejbModule = new EjbModule(webModule.getClassLoader(), getEjbModuleId(standardContext),file.getAbsolutePath(), null, null);
+                    ejbModule.setClientModule(new ClientModule(null, ejbModule.getClassLoader(), ejbModule.getJarLocation(), null, ejbModule.getModuleId()));
 
                     // EJB deployment descriptors
                     try {
                         ResourceFinder ejbResourceFinder = new ResourceFinder("", standardContext.getLoader().getClassLoader(), file.toURL());
                         Map<String, URL> descriptors = ejbResourceFinder.getResourcesMap("META-INF/");
+                        descriptors = DeploymentLoader.altDDSources(descriptors, true);
                         ejbModule.getAltDDs().putAll(descriptors);
+                        ejbModule.getClientModule().getAltDDs().putAll(descriptors);
                     } catch (IOException e) {
                         logger.error("Unable to determine descriptors in jar.", e);
                     }
@@ -849,28 +861,6 @@ public class TomcatWebAppBuilder implements WebAppBuilder, ContextListener {
         public LinkResolver<EntityManagerFactory> emfLinkResolver;
     }
 
-    private static class WebAppContextConfig extends ContextConfig {
-    
-        private void init(
-            StandardContext standardContext
-        ) {
-            standardContext.addLifecycleListener(this);
-            this.context = standardContext;
-            boolean tmpOverride = standardContext.getOverride();
-            standardContext.setOverride(true);
-            this.contextConfig();            
-            standardContext.setOverride(tmpOverride);
-        }
-        
-        public static void initContext(
-            StandardContext standardContext
-        ) {
-            WebAppContextConfig config = new WebAppContextConfig();
-            config.init(standardContext);
-        }
-                
-    }
-    
     private static class DeployedApplication {
         private AppInfo appInfo;
         private final Map<File,Long> watchedResource = new HashMap<File,Long>();

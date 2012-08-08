@@ -1,7 +1,7 @@
 
 (object Petal
-    version    	45
-    _written   	"Rose 7.6.0109.2314"
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
     charSet    	0)
 
 (object Class_Category "compatibility"
@@ -29,12 +29,7 @@
 	    is_unit    	TRUE
 	    is_loaded  	FALSE
 	    file_name  	"$curdir\\compatibility\\sequence1.cat"
-	    quid       	"41C3075B0029")
-	(object Class_Category "document1"
-	    is_unit    	TRUE
-	    is_loaded  	FALSE
-	    file_name  	"$curdir\\compatibility\\document1.cat"
-	    quid       	"41DC31AE020F"))
+	    quid       	"41C3075B0029"))
     logical_presentations 	(list unit_reference_list
 	(object ClassDiagram "Contains"
 	    quid       	"400E55C40281"
@@ -143,30 +138,5 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"41C3075B0029"
-		    width      	300
-		    height     	180)
-		(object CategoryView "Logical View::org::openmdx::compatibility::document1" @5
-		    location   	(653, 221)
-		    font       	(object Font
-			size       	8
-			face       	"Arial"
-			bold       	FALSE
-			italics    	FALSE
-			underline  	FALSE
-			strike     	FALSE
-			color      	0
-			default_color 	TRUE)
-		    label      	(object ItemLabel
-			Parent_View 	@5
-			location   	(509, 137)
-			fill_color 	13434879
-			nlines     	2
-			max_width  	288
-			justify    	0
-			label      	"document1")
-		    icon_style 	"Icon"
-		    line_color 	3342489
-		    fill_color 	13434879
-		    quidu      	"41DC31AE020F"
 		    width      	300
 		    height     	180)))))

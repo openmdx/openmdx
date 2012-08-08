@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JavaClock_1.java,v 1.6 2009/02/04 11:06:38 hburger Exp $
+ * Name:        $Id: JavaClock_1.java,v 1.7 2009/05/18 13:06:57 hburger Exp $
  * Description: Java Clock Provider
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/04 11:06:38 $
+ * Date:        $Date: 2009/05/18 13:06:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,12 +57,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Date;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.format.DateFormat;

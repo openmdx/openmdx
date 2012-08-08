@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderReply.java,v 1.1 2009/01/05 13:44:50 wfro Exp $
+ * Name:        $Id: DataproviderReply.java,v 1.3 2009/06/01 15:36:57 wfro Exp $
  * Description: DataproviderReply class
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:50 $
+ * Date:        $Date: 2009/06/01 15:36:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
@@ -74,16 +75,16 @@ public class DataproviderReply
      */
     public DataproviderReply(
     ){
-        this.objects = new DataproviderObject[]{};
+        this.objects = new MappedRecord[]{};
     }
 
     /**
      * Reply to successfull requests returning a single object
      */
     public DataproviderReply(
-        DataproviderObject object
+        MappedRecord object
     ){
-        this.objects = new DataproviderObject[]{
+        this.objects = new MappedRecord[]{
             object
         };
     }
@@ -92,10 +93,10 @@ public class DataproviderReply
      * Reply to successfull requests returning a collection of objects
      */
     public DataproviderReply(
-        List<DataproviderObject> objects
+        List<MappedRecord> objects
     ){
         this.objects = objects.toArray(
-            new DataproviderObject[objects.size()]
+            new MappedRecord[objects.size()]
         );
     }
 
@@ -121,7 +122,7 @@ public class DataproviderReply
      *
      * @return      a list containing objects of class DataproviderObject
      */
-    public DataproviderObject[] getObjects(
+    public MappedRecord[] getObjects(
     ){
         return this.objects;
     }
@@ -131,7 +132,7 @@ public class DataproviderReply
      *
      * @return      the dataprovider object
      */
-    public DataproviderObject getObject(
+    public MappedRecord getObject(
     ){
         return this.objects[0];
     }
@@ -167,7 +168,7 @@ public class DataproviderReply
     public Object get(Object key) {
         try {
             return "objects".equals(key) ? Records.getRecordFactory().asIndexedRecord(
-                "list", null, getObjects()
+                "list", null, this.getObjects()
             ) : super.get(key);
         } catch (ResourceException e) {
             throw new RuntimeServiceException(e);
@@ -177,7 +178,7 @@ public class DataproviderReply
     //------------------------------------------------------------------------
     // Variables
     //------------------------------------------------------------------------
-    private DataproviderObject[] objects;
+    private MappedRecord[] objects;
 
     private static final List<String> KEYS = Collections.unmodifiableList(
         Arrays.asList(

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelConstraintsChecker_1.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: ModelConstraintsChecker_1.java,v 1.5 2009/06/02 21:54:51 wfro Exp $
  * Description: check MOF Model Constraints
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/02 21:54:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,15 +63,15 @@ import java.util.Set;
 import org.omg.mof.cci.DirectionKind;
 import org.omg.mof.cci.ScopeKind;
 import org.omg.mof.cci.VisibilityKind;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelConstraints;
 import org.openmdx.application.mof.cci.ModelExceptions;
-import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
@@ -103,27 +103,9 @@ public class ModelConstraintsChecker_1 {
     private ModelElement_1_0 getType(
         ModelElement_1_0 typedElementDef
     ) throws ServiceException {
-        try {
-            SysLog.trace("try to retrieve the dereferenced type for " + typedElementDef.objGetValue("type"));
-            ModelElement_1_0 typeDef = this.model.getElementType(
-                typedElementDef
-            );
-            return typeDef;
-        }
-        catch(ServiceException ex) {
-            if (ex.getCause().getExceptionCode() == BasicException.Code.NOT_FOUND)
-            {
-                throw new ServiceException(
-                    ex,
-                    ModelExceptions.MODEL_DOMAIN,
-                    ModelExceptions.REFERENCED_ELEMENT_TYPE_NOT_FOUND_IN_REPOSITORY,
-                    "model repository does not contain the defined type",
-                    new BasicException.Parameter("element", typedElementDef.jdoGetObjectId()),
-                    new BasicException.Parameter("referenced element type", typedElementDef.objGetValue("type"))
-                );
-            }
-            throw ex;
-        }
+        return this.model.getElementType(
+            typedElementDef
+        );
     }
 
     //---------------------------------------------------------------------------
@@ -187,47 +169,40 @@ public class ModelConstraintsChecker_1 {
 
         SysLog.trace("checking all applicable constraints for element " + elementDef.objGetValue("qualifiedName"));
 
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ATTRIBUTE)) {
+        if(elementDef.isAttributeType()) {
             SysLog.trace("checking all ATTRIBUTE constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyCannotBeDerivedAndChangeable(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ELEMENT)) {
+        if(elementDef.isElementType()) {
             SysLog.trace("checking all ELEMENT constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyMustBeContainedUnlessPackage(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.NAMESPACE)) {
+        if(elementDef.isNamespaceType()) {
             SysLog.trace("checking all NAMESPACE constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyContentNamesMustNotCollide(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.GENERALIZABLE_ELEMENT)) {
+        if(elementDef.isGeneralizableElementType()) {
             SysLog.trace("checking all GENERALIZABLE_ELEMENT constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifySupertypeKindMustBeSame(elementDef, violations);
             this.verifyContentsMustNotCollideWithSupertypes(elementDef, violations);
             this.verifyDiamondRuleMustBeObeyed(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.TYPED_ELEMENT)) {
+        if(elementDef.isTypedElementType() && !elementDef.isPrimitiveType()) {
             SysLog.trace("checking all TYPED_ELEMENT constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyAssociationsCannotBeTypes(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASS)) {
+        if(elementDef.isClassType()) {
             SysLog.trace("checking all CLASS constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyAbstractClassesCannotBeSingleton(elementDef, violations);
             this.verifyClassContainmentRules(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.DATATYPE)) {
+        if(elementDef.isDataType()) {
             SysLog.trace("checking all DATATYPE constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyDataTypeContainmentRules(elementDef, violations);
             this.verifyDataTypesHaveNoSupertypes(elementDef, violations);
             this.verifyDataTypesCannotBeAbstract(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.REFERENCE)) {
+        if(elementDef.isReferenceType()) {
             SysLog.trace("checking all REFERENCE constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyReferenceMultiplicityMustMatchEnd(elementDef, violations);
             this.verifyReferenceMustBeInstanceScoped(elementDef, violations);
@@ -236,22 +211,19 @@ public class ModelConstraintsChecker_1 {
             this.verifyReferencedEndMustBeNavigable(elementDef, violations);
             this.verifyContainerMustMatchExposedType(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.OPERATION)) {
+        if(elementDef.isOperationType()) {
             SysLog.trace("checking all OPERATION constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyOperationContainmentRules(elementDef, violations);
             this.verifyOperationsHaveAtMostOneReturn(elementDef, violations);
             this.verifyOperationParametersMustBeParameterClasses(elementDef, violations);
             this.verifyOperationExceptionsMustBeExceptionClasses(elementDef, violations);
         }    
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.EXCEPTION)) {
+        if(elementDef.isExceptionType()) {
             SysLog.trace("checking all EXCEPTION constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyExceptionContainmentRules(elementDef, violations);
             this.verifyExceptionsHaveOnlyOutParameters(elementDef, violations);
         }    
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ASSOCIATION)) {
+        if(elementDef.isAssociationType()) {
             SysLog.trace("checking all ASSOCIATION constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyAssociationContainmentRules(elementDef, violations);
             this.verifyAssociationsHaveNoSupertypes(elementDef, violations);
@@ -260,8 +232,7 @@ public class ModelConstraintsChecker_1 {
             this.verifyAssociationsMustBeBinary(elementDef, violations);
             this.verifyAssociationEnds(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ASSOCIATION_END)) {
+        if(elementDef.isAssociationEndType()) {
             SysLog.trace("checking all ASSOCIATION_END constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyEndTypeMustBeClass(elementDef, violations);
             this.verifyCannotHaveTwoAggregateEnds(elementDef, violations);
@@ -270,48 +241,41 @@ public class ModelConstraintsChecker_1 {
             this.verifyMultiplicityForPrimitiveQualifier(elementDef, violations);
             this.verifyChangeabilityForNonPrimitiveQualifier(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.PACKAGE)) {
+        if(elementDef.isPackageType()) {
             SysLog.trace("checking all PACKAGE constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyPackageContainmentRules(elementDef, violations);
             this.verifyPackagesCannotBeAbstract(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.IMPORT)) {
+        if(elementDef.isImportType()) {
             SysLog.trace("checking all IMPORT constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyCanOnlyImportPackagesAndClasses(elementDef, violations);
             this.verifyCannotImportSelf(elementDef, violations);
             this.verifyCannotImportNestedComponents(elementDef, violations);
             this.verifyNestedPackagesCannotImport(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CONSTRAINT)) {
+        if(elementDef.isConstraintType()) {
             SysLog.trace("checking all CONSTRAINT constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyCannotConstrainThisElement(elementDef, violations);
             this.verifyConstraintsLimitedToContainer(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CONSTANT)) {
+        if(elementDef.isConstantType()) {
             SysLog.trace("checking all CONSTANT constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyConstantsTypeMustBePrimitive(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.STRUCTURE_FIELD)) {
+        if(elementDef.isStructureFieldType()) {
             SysLog.trace("checking all STRUCTURE_FIELD constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyStructureFieldContainmentRules(elementDef, violations);
         }
-
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.STRUCTURE_TYPE)) {
+        if(elementDef.isStructureType()) {
             SysLog.trace("checking all STRUCTURE_TYPE constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyMustHaveFields(elementDef, violations);
         }
-
         if(
-                elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.STRUCTURAL_FEATURE) ||
-                elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ASSOCIATION_END) ||
-                elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.PARAMETER) ||
-                elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.STRUCTURE_FIELD) ||
-                elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.COLLECTION_TYPE)
+            elementDef.isStructuralFeatureType() ||
+            elementDef.isAssociationEndType() ||
+            elementDef.isParameterType() ||
+            elementDef.isStructureFieldType() ||
+            elementDef.isCollectionType()
         ) {
             SysLog.trace("checking all STRUCTURAL_FEATURE/ASSOCIATION_END/PARAMETER/STRUCTURE_FIELD/COLLECTION_TYPE constraints for element " + elementDef.objGetValue("qualifiedName"));
             this.verifyMultiplicity(elementDef, violations);
@@ -373,8 +337,8 @@ public class ModelConstraintsChecker_1 {
         if(associationEndDef.objGetList("qualifierType").size() > 0) {
             ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.objGetValue("qualifierType"));      
             if(
-                    !qualifierType.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.PRIMITIVE_TYPE) &&
-                    !Multiplicities.MULTI_VALUE.equals(associationEndDef.objGetValue("multiplicity"))
+                !qualifierType.isPrimitiveType() &&
+                !Multiplicities.MULTI_VALUE.equals(associationEndDef.objGetValue("multiplicity"))
             ) {
                 violations.add(
                     new BasicException.Parameter(
@@ -400,8 +364,8 @@ public class ModelConstraintsChecker_1 {
         if(associationEndDef.objGetList("qualifierType").size() > 0) {
             ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.objGetValue("qualifierType"));      
             if(
-                    qualifierType.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.PRIMITIVE_TYPE) &&
-                    !((String)associationEndDef.objGetValue("multiplicity")).endsWith("..1")
+                qualifierType.isPrimitiveType() &&
+                !((String)associationEndDef.objGetValue("multiplicity")).endsWith("..1")
             ) {
                 violations.add(
                     new BasicException.Parameter(
@@ -430,7 +394,7 @@ public class ModelConstraintsChecker_1 {
             ) {        
                 ModelElement_1_0 parameterDef = this.model.getElement(it.next());
                 // check argument to be PARAMETER
-                if(!ModelAttributes.PARAMETER.equals(parameterDef.objGetValue(SystemAttributes.OBJECT_CLASS))) {
+                if(!ModelAttributes.PARAMETER.equals(parameterDef.objGetClass())) {
                     violations.add(
                         new BasicException.Parameter(
                             ModelConstraints.OPERATION_ARGUMENTS_MUST_BE_PARAMETER,
@@ -475,7 +439,7 @@ public class ModelConstraintsChecker_1 {
                 try {
                     ModelElement_1_0 exceptionDef = this.model.getElement(qualifiedExceptionName);
                     // check argument to be PARAMETER
-                    if(!ModelAttributes.EXCEPTION.equals(exceptionDef.objGetValue(SystemAttributes.OBJECT_CLASS))) {
+                    if(!ModelAttributes.EXCEPTION.equals(exceptionDef.objGetClass())) {
                         violations.add(
                             new BasicException.Parameter(
                                 ModelConstraints.OPERATION_EXCEPTION_MUST_BE_EXCEPTION,
@@ -514,7 +478,7 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 elementDef,
         List violations
     ) throws ServiceException {
-        if(!elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.PACKAGE)) {
+        if(!elementDef.isPackageType()) {
             if (elementDef.objGetList("container").size() != 1) {
                 violations.add(
                     new BasicException.Parameter(
@@ -573,11 +537,7 @@ public class ModelConstraintsChecker_1 {
             it.hasNext();
         ) {        
             ModelElement_1_0 elementDef = this.model.getElement(it.next());
-            if (
-                !modelGeneralizableElement.objGetValue(SystemAttributes.OBJECT_CLASS).equals(
-                    elementDef.objGetValue(SystemAttributes.OBJECT_CLASS)
-                )
-            ) {
+            if (!modelGeneralizableElement.objGetClass().equals(elementDef.objGetClass())) {
                 violations.add(
                     new BasicException.Parameter(
                         ModelConstraints.SUPERTYPE_KIND_MUST_BE_SAME,
@@ -683,7 +643,7 @@ public class ModelConstraintsChecker_1 {
     ) throws ServiceException {
 
         ModelElement_1_0 elementDef = this.getType(typedElementDef);
-        if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ASSOCIATION)) {
+        if(elementDef.isAssociationType()) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.ASSOCIATIONS_CANNOT_BE_TYPES,
@@ -701,7 +661,7 @@ public class ModelConstraintsChecker_1 {
         if(associationEndDef.objGetList("qualifierType").size() > 0) {
             ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.objGetValue("qualifierType"));      
             if(
-                !qualifierType.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.PRIMITIVE_TYPE) &&
+                !qualifierType.isPrimitiveType() &&
                 ((Boolean)associationEndDef.objGetValue("isChangeable")).booleanValue()
             ) {
                 violations.add(
@@ -772,14 +732,14 @@ public class ModelConstraintsChecker_1 {
         ) {        
             ModelElement_1_0 elementDef = this.model.getElement(it.next());
             if(
-                (!elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ALIAS_TYPE)) &&
-                (!elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CONSTRAINT)) &&
-                (!elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.TAG))
+                (!elementDef.objGetClass().equals(ModelAttributes.ALIAS_TYPE)) &&
+                (!elementDef.objGetClass().equals(ModelAttributes.CONSTRAINT)) &&
+                (!elementDef.objGetClass().equals(ModelAttributes.TAG))
             ) {
 
                 if (
-                    !dataTypeDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.STRUCTURE_TYPE) ||
-                    !elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.STRUCTURE_FIELD)
+                    !dataTypeDef.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE) ||
+                    !elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)
                 ) {
                     violations.add(
                         new BasicException.Parameter(
@@ -1353,7 +1313,7 @@ public class ModelConstraintsChecker_1 {
         List violations
     ) throws ServiceException {
         ModelElement_1_0 type = this.getType(associationEndDef);
-        if (!type.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASS)) {
+        if (!type.isClassType()) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.END_TYPE_MUST_BE_CLASS,
@@ -1454,15 +1414,15 @@ public class ModelConstraintsChecker_1 {
         List violations
     ) throws ServiceException {
         for (
-                Iterator it = importDef.objGetList("importedNamespace").iterator();
-                it.hasNext();
+            Iterator it = importDef.objGetList("importedNamespace").iterator();
+            it.hasNext();
         ) {
             ModelElement_1_0 elementDef = this.model.getElement(
                 it.next()
             );
             if (
-                    !elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASS) &&
-                    !elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.PACKAGE)
+                !elementDef.isClassType() &&
+                !elementDef.isPackageType()
             ) {
                 violations.add(
                     new BasicException.Parameter(
@@ -1590,11 +1550,8 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 constantDef,
         List violations
     ) throws ServiceException {
-
         ModelElement_1_0 type = this.getType(constantDef);
-        if (!type.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-            ModelAttributes.PRIMITIVE_TYPE)
-        ) {
+        if(!type.isPrimitiveType()) {
             violations.add(
                 new BasicException.Parameter(
                     ModelConstraints.CONSTANTS_TYPE_MUST_BE_PRIMITIVE,
@@ -1630,8 +1587,8 @@ public class ModelConstraintsChecker_1 {
          * <<stream>> implies primitive types
          */
         if(
-                Multiplicities.STREAM.equals(multiplicity) &&
-                !type.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.PRIMITIVE_TYPE)
+            Multiplicities.STREAM.equals(multiplicity) &&
+            !type.isPrimitiveType()
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -1640,21 +1597,19 @@ public class ModelConstraintsChecker_1 {
                 )
             );
         }     
-
         // check for valid multiplicities
         if(
-                Multiplicities.LIST.equals(multiplicity) || 
-                Multiplicities.SET.equals(multiplicity) || 
-                Multiplicities.SPARSEARRAY.equals(multiplicity) ||
-                Multiplicities.STREAM.equals(multiplicity) ||
-                Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ||
-                Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-                Multiplicities.MULTI_VALUE.equals(multiplicity) ||      
-                Multiplicities.MAP.equals(multiplicity)      
+            Multiplicities.LIST.equals(multiplicity) || 
+            Multiplicities.SET.equals(multiplicity) || 
+            Multiplicities.SPARSEARRAY.equals(multiplicity) ||
+            Multiplicities.STREAM.equals(multiplicity) ||
+            Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ||
+            Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
+            Multiplicities.MULTI_VALUE.equals(multiplicity) ||      
+            Multiplicities.MAP.equals(multiplicity)      
         ) {
             return;
         }
-
         violations.add(
             new BasicException.Parameter(
                 ModelConstraints.INVALID_MULTIPLICITY,
@@ -1692,29 +1647,15 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 modelStructureType,
         List violations
     ) throws ServiceException {
-
         for(
-                Iterator it = modelStructureType.objGetList("content").iterator();
-                it.hasNext();
+            Iterator it = modelStructureType.objGetList("content").iterator();
+            it.hasNext();
         ) {        
-            if((this.model.getElement(it.next())).objGetList(
-                SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.STRUCTURE_FIELD)
-            ) {
+            if(this.model.getElement(it.next()).isStructureFieldType()) {
                 return;
             }
         }
         return;
-        /*
-         * Structs may have 0 fields (e.g. required to model Void)
-         */
-        /*
-    violations.add(
-      new BasicException.Parameter(
-        ModelConstraints.MUST_HAVE_FIELDS,
-        modelStructureType.getValue("qualifiedName")
-      )
-    );
-         */
     }
 
     //--------------------------------------------------------------------------- 
@@ -1767,10 +1708,7 @@ public class ModelConstraintsChecker_1 {
             it.hasNext();
         ) {        
             ModelElement_1_0 elementDef = this.model.getElement(it.next());
-            if(elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-                ModelAttributes.ASSOCIATION_END
-            )
-            ) {
+            if(elementDef.isAssociationEndType()) {
                 associationEnds.add(elementDef);
             }
         }
@@ -1786,19 +1724,16 @@ public class ModelConstraintsChecker_1 {
     private Set getAllContents(
         ModelElement_1_0 namespaceDef
     ) throws ServiceException {
-
         Set allContents = new HashSet(namespaceDef.objGetList("content"));
         for (
             Iterator it = namespaceDef.objGetList("content").iterator();
             it.hasNext();
         ) {
             ModelElement_1_0 elementDef = this.model.getElement(it.next());
-            if (elementDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.NAMESPACE)
-            ) {
+            if (elementDef.isNamespaceType()) {
                 allContents.addAll(getAllContents(elementDef));
             }
         }
-
         return allContents; 
     }
 

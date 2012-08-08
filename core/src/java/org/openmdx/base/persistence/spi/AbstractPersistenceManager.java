@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: AbstractPersistenceManager.java,v 1.3 2009/03/03 17:23:08 hburger Exp $
+ * Name:        $Id: AbstractPersistenceManager.java,v 1.7 2009/05/17 22:41:14 wfro Exp $
  * Description: Abstract PersistenceManager
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 17:23:08 $
+ * Date:        $Date: 2009/05/17 22:41:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,9 +51,7 @@ package org.openmdx.base.persistence.spi;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -61,7 +59,6 @@ import javax.jdo.Extent;
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
-import javax.jdo.ObjectState;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.listener.InstanceLifecycleListener;
 
@@ -72,9 +69,7 @@ import org.openmdx.kernel.persistence.resource.Connection_2;
  *
  * @since openMDX 2.0
  */
-@SuppressWarnings({
-    "unchecked"
-})
+@SuppressWarnings("unchecked")
 public abstract class AbstractPersistenceManager
     extends Connection_2
 {
@@ -88,7 +83,6 @@ public abstract class AbstractPersistenceManager
      */
     protected AbstractPersistenceManager(
     ){
-        super();
         this.instanceLifecycleNotifier = new InstanceLifecycleNotifier();
     }
 
@@ -622,34 +616,6 @@ public abstract class AbstractPersistenceManager
      * @see javax.jdo.PersistenceManager#getFetchGroup(java.lang.Class, java.lang.String)
      */
     public FetchGroup getFetchGroup(Class arg0, String arg1) {
-        throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
-    }
-
-    /* (non-Javadoc)
-     * @see javax.jdo.PersistenceManager#getManagedObjects()
-     */
-    public Set getManagedObjects() {
-        throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
-    }
-
-    /* (non-Javadoc)
-     * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet)
-     */
-    public Set getManagedObjects(EnumSet<ObjectState> states) {
-        throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
-    }
-
-    /* (non-Javadoc)
-     * @see javax.jdo.PersistenceManager#getManagedObjects(java.lang.Class[])
-     */
-    public Set getManagedObjects(Class... classes) {
-        throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
-    }
-
-    /* (non-Javadoc)
-     * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet, java.lang.Class[])
-     */
-    public Set getManagedObjects(EnumSet<ObjectState> states, Class... classes) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LazyDeployment.java,v 1.8 2009/03/09 17:11:21 hburger Exp $
+ * Name:        $Id: LazyDeployment.java,v 1.11 2009/04/02 14:56:21 hburger Exp $
  * Description: Lazy Deployment
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/09 17:11:21 $
+ * Date:        $Date: 2009/04/02 14:56:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,6 +60,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.deploy.shared.ModuleType;
 import javax.enterprise.deploy.shared.factories.DeploymentFactoryManager;
@@ -77,9 +79,9 @@ import javax.naming.spi.InitialContextFactory;
 
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.url.URLInputStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Lazy Deployment
@@ -158,7 +160,7 @@ public class LazyDeployment implements InitialContextFactory {
     /**
      * 
      */
-    private static Logger logger = LoggerFactory.getLogger(LazyDeployment.class);
+    private static Logger logger = LoggerFactory.getLogger();
     
     /**
      * Convert a String[] to the corresponding URL[]
@@ -223,7 +225,7 @@ public class LazyDeployment implements InitialContextFactory {
                 );
                 Target[] inProcess = deploymentManager.getTargets();
                 List<TargetModuleID> deploymentUnits = new ArrayList<TargetModuleID>();
-                logger.info("Deploy {}", Arrays.asList(this.resourceArchives));
+                logger.log(Level.INFO, "Deploy {0}", Arrays.asList(this.resourceArchives));
                 if(this.resourceArchives != null) {
                     for(URL resourceArchive : this.resourceArchives) {
                         ProgressObject selectionProgress = deploymentManager.distribute(
@@ -234,11 +236,11 @@ public class LazyDeployment implements InitialContextFactory {
                         );
                         for(TargetModuleID id : selectionProgress.getResultTargetModuleIDs()) {
                             deploymentUnits.add(id);
-                            logger.debug("Selecting resource adapter {}", id);
+                            logger.log(Level.FINER,"Selecting resource adapter {0}", id);
                         }
                     }
                 }
-                logger.info("Deploy {}", Arrays.asList(this.enterpriseApplicationArchives));
+                logger.log(Level.INFO,"Deploy {0}", Arrays.asList(this.enterpriseApplicationArchives));
                 if(this.enterpriseApplicationArchives != null) {
                     for(URL enterpriseApplicationArchive : this.enterpriseApplicationArchives) {
                         ProgressObject selectionProgress = deploymentManager.distribute(
@@ -249,17 +251,17 @@ public class LazyDeployment implements InitialContextFactory {
                         );
                         for(TargetModuleID id : selectionProgress.getResultTargetModuleIDs()) {
                             deploymentUnits.add(id);
-                            logger.debug("Selecting enterprise application {}", id);
+                            logger.log(Level.FINER,"Selecting enterprise application {0}", id);
                         }
                     }
                 }
-                logger.info("Starting {}", deploymentUnits);
+                logger.log(Level.INFO,"Starting {0}", deploymentUnits);
                 ProgressObject startProgress = deploymentManager.start(
                     deploymentUnits.toArray(
                         new TargetModuleID[deploymentUnits.size()]
                     )
                 );
-                logger.info("Waiting for {}", deploymentUnits);
+                logger.log(Level.INFO,"Waiting for {0}", deploymentUnits);
                 for(
                 	long timer = TIMEOUT;
                 	startProgress.getDeploymentStatus().isRunning();
@@ -284,7 +286,7 @@ public class LazyDeployment implements InitialContextFactory {
                         new BasicException.Parameter("requested", deploymentUnits),
                         new BasicException.Parameter("started", (Object[])startProgress.getResultTargetModuleIDs())                    
                     );
-                    logger.warn(
+                    logger.log(Level.WARNING,
                         "Deployment failure",
                         this.exception
                     );
@@ -299,7 +301,7 @@ public class LazyDeployment implements InitialContextFactory {
                     "Deployment Manager Acquisition Failure",
                     new BasicException.Parameter(Context.PROVIDER_URL, providerURL)
                 );
-                logger.warn(
+                logger.log(Level.WARNING,
                     "Deployment Manager Acquisition Failure",
                     this.exception
                 );
@@ -319,10 +321,11 @@ public class LazyDeployment implements InitialContextFactory {
         if(this.exception == null) {
             return this.initialContext;
         }
-        throw (NamingException) new NoInitialContextException(
-            "Initial Context Acquisition Failure"
-        ).initCause(
-            exception.getCause()
+        throw Throwables.initCause(
+            new NoInitialContextException("Initial Context Acquisition Failure"), 
+            exception,
+            exception.getExceptionDomain(), 
+            exception.getExceptionCode()
         );
     }
 
@@ -332,7 +335,7 @@ public class LazyDeployment implements InitialContextFactory {
      */
     static {
         try {
-            Enumeration<URL> manifestURLs = LazyDeployment.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+            Enumeration<URL> manifestURLs = Classes.getResources("META-INF/MANIFEST.MF");
             while(manifestURLs.hasMoreElements()) {
                 URL manifestURL = manifestURLs.nextElement();
                 Manifest manifest = new Manifest(manifestURL.openStream());
@@ -340,7 +343,7 @@ public class LazyDeployment implements InitialContextFactory {
                     "J2EE-DeploymentFactory-Implementation-Class"
                 );
                 if(classNames != null) {
-                    logger.info("Registering deployment factory {}", classNames);
+                    logger.log(Level.INFO,"Registering deployment factory {0}", classNames);
                     for(
                         StringTokenizer tokenizer = new StringTokenizer(classNames);
                         tokenizer.hasMoreTokens();
@@ -353,19 +356,19 @@ public class LazyDeployment implements InitialContextFactory {
                                     className
                                 )
                             );
-                        } catch (Exception exception) {
-                              logger.info(
+                        } catch (Throwable throwable) {
+                              logger.log(Level.INFO,
                                   "J2EE deployment factory class '" + className + 
                                   "' specified in '" + manifestURL + 
                                   "' could not be instantiated and registered",
-                                  exception
+                                  throwable
                               );
                         }
                     }
                 }
             }
         } catch (Exception exception) {
-            logger.info(
+            logger.log(Level.INFO,
                 "J2EE deployment factory discovery failure",
                 exception
             );

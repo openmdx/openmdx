@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EntityManagerFactory.java,v 1.1 2009/01/15 15:10:18 hburger Exp $
+ * Name:        $Id: EntityManagerFactory.java,v 1.2 2009/04/07 19:55:48 hburger Exp $
  * Description: Entity Manager Factory Interface
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/15 15:10:18 $
+ * Date:        $Date: 2009/04/07 19:55:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,9 +50,10 @@
  */
 package org.openmdx.base.persistence.cci;
 
+import java.util.List;
+
 import javax.jdo.PersistenceManager;
 import javax.resource.ResourceException;
-import javax.security.auth.Subject;
 
 /**
  * Entity Manager Factory
@@ -60,25 +61,24 @@ import javax.security.auth.Subject;
 public interface EntityManagerFactory {
 
     /** 
-     * Create a new entity or persistence manager
+     * Create a new entity manager
      *
-     * @param subject the subject to be used; 
-     * this argument must not be <code>null</code>
+     * @param principalChain the principal chain to be used
      * 
-     * @return an entity or persistence manager instance
+     * @return an entity manager instance
      * 
-     * @throws ResourceException if the manager acquisition fails
+     * @throws ResourceException if the entity manager acquisition fails
      */
     PersistenceManager getEntityManager(
-        Subject subject
+        List<String> principalChain
     ) throws ResourceException;
     
     /** 
-     * Create a new entity or persistence manager
+     * Create a new entity manager
      *
-     * @return an entity or persistence manager instance
+     * @return an entity manager instance
      * 
-     * @throws ResourceException if the manager acquisition fails
+     * @throws ResourceException if the entity manager acquisition fails
      */
     PersistenceManager getEntityManager(
     ) throws ResourceException;

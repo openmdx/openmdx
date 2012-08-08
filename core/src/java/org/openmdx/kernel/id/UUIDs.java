@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UUIDs.java,v 1.6 2008/03/21 18:35:50 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: UUIDs.java,v 1.7 2009/04/24 00:01:40 hburger Exp $
  * Description: UUIDs
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:35:50 $
+ * Date:        $Date: 2009/04/24 00:01:40 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,20 +45,19 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.id;
+
+import java.util.UUID;
 
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.id.cci.UUIDBuilder;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
+import org.openmdx.kernel.id.plugin.RandomBasedUUIDGenerator;
 import org.openmdx.kernel.id.plugin.TimeBasedUUIDGeneratorUsingRandomBasedNode;
-
-
-import java.util.UUID;
-
-
+import org.openmdx.kernel.log.SysLog;
 
 
 /**
@@ -70,7 +68,30 @@ import java.util.UUID;
  * <li>-Dorg.openmdx.uuid.generator=org.openmdx.kernel.id.plugin.RandomBasedUUIDGenerator
  * </ol>
  */
-public class UUIDs {
+public final class UUIDs {
+
+    /**
+     * Constructor 
+     */
+    private UUIDs() {
+        // TODO Avoid instantiation
+    }
+
+    /**
+     * The NIL UUID as specified in 
+     * http://www.ietf.org/internet-drafts/draft-mealling-uuid-urn-03.txt.
+     */
+    public static final UUID NIL = new UUID(0l, 0l);
+
+    /**
+     * The UUID generator class
+     */
+    private static final Class<? extends UUIDGenerator> uuidGenerator = getGeneratorClass();
+
+    /**
+     * The UUID provider system property.
+     */
+    public static final String GENERATOR = "org.openmdx.uuid.generator";
 
     /**
      * Returns an URN representation of a UUID according to 
@@ -83,7 +104,7 @@ public class UUIDs {
      * 
      * @return an URN corresponding to the provided uuid
      */
-    public static final String toURN(
+    public static String toURN(
          UUID uuid
     ){
          return "urn:uuid:" + uuid;
@@ -100,13 +121,16 @@ public class UUIDs {
     public static UUIDGenerator getGenerator(
     ){
         try {
-            return (UUIDGenerator) UUIDs.uuidGenerator.newInstance();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            return UUIDs.uuidGenerator.newInstance();
+        } catch (Throwable throwable) {
+            SysLog.error(
+                "UUID generator acquisition failure",
+                throwable
+            );
+            throw new RuntimeException(
+                "UUID generator acquisition failure",
+                throwable
+            );
         }
     }
 
@@ -125,32 +149,26 @@ public class UUIDs {
     }
 
     /**
-     * The NIL UUID as specified in 
-     * http://www.ietf.org/internet-drafts/draft-mealling-uuid-urn-03.txt.
+     * Retrieve the configured UUID generator class
+     * 
+     * @return the configured UUID generator class or 
+     * <code>RandomBasedUUIDGenerator.class</code> in case of failure
      */
-    public final static UUID NIL = new UUID(0l, 0l);
-
-    /**
-     * The UUID generator class
-     */
-    private static Class<?> uuidGenerator;
-
-    /**
-     * The UUID provider system property.
-     */
-    public static final String GENERATOR = "org.openmdx.uuid.generator";
-
-    static {
+    private static Class<? extends UUIDGenerator> getGeneratorClass(
+    ){
         try {
-            uuidGenerator = Classes.getApplicationClass(
+            return Classes.getApplicationClass(
                 System.getProperty(
                     GENERATOR,
                     TimeBasedUUIDGeneratorUsingRandomBasedNode.class.getName()
                 )
             );
-        } catch (ClassNotFoundException e) {
-            uuidGenerator = null;
-            e.printStackTrace();
+        } catch (Throwable throwable) {
+            SysLog.error(
+                "UUID generator class acquisition failure, falling back to " + RandomBasedUUIDGenerator.class.getName(),
+                throwable
+            );
+            return RandomBasedUUIDGenerator.class;
         }
     }
 

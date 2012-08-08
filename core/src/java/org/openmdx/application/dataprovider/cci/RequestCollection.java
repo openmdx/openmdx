@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RequestCollection.java,v 1.5 2009/01/06 13:14:45 wfro Exp $
+ * Name:        $Id: RequestCollection.java,v 1.12 2009/06/01 15:36:57 wfro Exp $
  * Description: RequestCollection class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 13:14:45 $
+ * Date:        $Date: 2009/06/01 15:36:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,10 +54,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.resource.cci.MappedRecord;
+
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.AttributeSpecifier;
+import org.openmdx.base.query.Directions;
 import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
@@ -68,7 +73,7 @@ import org.openmdx.kernel.log.SysLog;
  * An object request
  */
 public final class RequestCollection
-    implements Serializable, Cloneable, IterationProcessor, DataproviderProcessor_1_0
+    implements Serializable, Cloneable, IterationProcessor
 {
 
     /**
@@ -113,42 +118,9 @@ public final class RequestCollection
         }
     }
 
-    /**
-     * Creates a new RequestCollection
-     * 
-     * @param header
-     * 
-     * @return a new request collection with the same provider and the specified header.
-     **/
-    public RequestCollection createRequestCollection(
-        ServiceHeader header
-    ) {
-        return new RequestCollection(
-            header,
-            this.dataprovider,
-            this.lenient
-        );
-    }
-
     //------------------------------------------------------------------------
     // Implements DataproviderProcessor_1_0
     //------------------------------------------------------------------------
-
-    /**
-     * Clear the request and reply list.
-     *
-     * @return  the old reply list
-     */
-    public void clear(
-    ){
-        this.batchRequests.clear();
-        this.batchListeners.clear();
-        this.workingUnitRequests.clear();
-        this.workingUnitListeners.clear();
-        this.inBatch = false;
-        this.inUnitOfWork = false;
-        this.transactionalUnit = false;
-    }
 
     /**
      * Calling beginBatch() postpones request processing until endBatch() is
@@ -275,7 +247,7 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addGetRequest(
+    public MappedRecord addGetRequest(
         Path path
     ) throws ServiceException {
         return addGetRequest(
@@ -304,13 +276,13 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addGetRequest(
+    public MappedRecord addGetRequest(
         Path path,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
     ) throws ServiceException {
         RequestedObject target = new RequestedObject();
-        addGetRequest(
+        this.addGetRequest(
             path,
             attributeSelector,
             attributeSpecifier,
@@ -344,17 +316,22 @@ public final class RequestCollection
         AttributeSpecifier[] attributeSpecifier,
         DataproviderReplyListener listener
     ) throws ServiceException {
-        dispatch(
-            new DataproviderRequest(
-                new DataproviderObject(path),
-                DataproviderOperations.OBJECT_RETRIEVAL,
-                attributeSelector,
-                attributeSpecifier
-            ),
-            listener
-        );
+        try {
+            ObjectHolder_2Facade object = ObjectHolder_2Facade.newInstance(path);
+            this.dispatch(
+                new DataproviderRequest(
+                    object.getDelegate(),
+                    DataproviderOperations.OBJECT_RETRIEVAL,
+                    attributeSelector,
+                    attributeSpecifier
+                ),
+                listener
+            );
+        }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-
 
     /**
      * Adds a create request retrieving the typical attributes.
@@ -367,8 +344,8 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addCreateRequest(
-        DataproviderObject object
+    public MappedRecord addCreateRequest(
+        MappedRecord object
     ) throws ServiceException {
         return addCreateRequest(
             object,
@@ -396,8 +373,8 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addCreateRequest(
-        DataproviderObject object,
+    public MappedRecord addCreateRequest(
+        MappedRecord object,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
     ) throws ServiceException {
@@ -431,7 +408,7 @@ public final class RequestCollection
      *              if no valid request can be added
      */
     public void addCreateRequest(
-        DataproviderObject object,
+        MappedRecord object,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier,
         DataproviderReplyListener listener
@@ -459,8 +436,8 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addReplaceRequest(
-        DataproviderObject object
+    public MappedRecord addReplaceRequest(
+        MappedRecord object
     ) throws ServiceException {
         return addReplaceRequest(
             object,
@@ -488,8 +465,8 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addReplaceRequest(
-        DataproviderObject object,
+    public MappedRecord addReplaceRequest(
+        MappedRecord object,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
     ) throws ServiceException {
@@ -523,7 +500,7 @@ public final class RequestCollection
      *              if no valid request can be added
      */
     public void addReplaceRequest(
-        DataproviderObject object,
+        MappedRecord object,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier,
         DataproviderReplyListener listener
@@ -551,8 +528,8 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addSetRequest(
-        DataproviderObject object
+    public MappedRecord addSetRequest(
+        MappedRecord object
     ) throws ServiceException {
         return addSetRequest(
             object,
@@ -580,8 +557,8 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addSetRequest(
-        DataproviderObject object,
+    public MappedRecord addSetRequest(
+        MappedRecord object,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
     ) throws ServiceException {
@@ -615,7 +592,7 @@ public final class RequestCollection
      *              if no valid request can be added
      */
     public void addSetRequest(
-        DataproviderObject object,
+        MappedRecord object,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier,
         DataproviderReplyListener listener
@@ -643,7 +620,7 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addRemoveRequest(
+    public MappedRecord addRemoveRequest(
         Path path
     ) throws ServiceException {
         return addRemoveRequest(
@@ -672,7 +649,7 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addRemoveRequest(
+    public MappedRecord addRemoveRequest(
         Path path,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
@@ -712,17 +689,22 @@ public final class RequestCollection
         AttributeSpecifier[] attributeSpecifier,
         DataproviderReplyListener listener
     ) throws ServiceException {
-        dispatch(
-            new DataproviderRequest(
-                new DataproviderObject(path),
-                DataproviderOperations.OBJECT_REMOVAL,
-                attributeSelector,
-                attributeSpecifier
-            ),
-            listener
-        );
+        try {
+            ObjectHolder_2Facade object = ObjectHolder_2Facade.newInstance(path);
+            this.dispatch(
+                new DataproviderRequest(
+                    object.getDelegate(),
+                    DataproviderOperations.OBJECT_REMOVAL,
+                    attributeSelector,
+                    attributeSpecifier
+                ),
+                listener
+            );
+        }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-
 
     /**
      * Adds a find request selecting all objects where the
@@ -788,7 +770,7 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      *
-     * @see org.openmdx.application.dataprovider.cci.Directions
+     * @see org.openmdx.base.query.Directions
      */
     @SuppressWarnings("unchecked")
     public List addFindRequest(
@@ -841,7 +823,7 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      *
-     * @see org.openmdx.application.dataprovider.cci.Directions
+     * @see org.openmdx.base.query.Directions
      */
     @SuppressWarnings("unchecked")
     public List addFindRequest(
@@ -901,7 +883,7 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      *
-     * @see org.openmdx.application.dataprovider.cci.Directions
+     * @see org.openmdx.base.query.Directions
      */
     public void addFindRequest(
         Path referenceFilter,
@@ -912,7 +894,7 @@ public final class RequestCollection
         short direction,
         DataproviderReplyListener listener
     ) throws ServiceException {
-        addFindRequest(
+        this.addFindRequest(
             referenceFilter,
             attributeFilter,
             attributeSelector,
@@ -950,12 +932,13 @@ public final class RequestCollection
      * @param       direction   
      *              either ASCENDING or DESCENDING
      * @param       listener
-     *              The dataprovider reply listener
+     *              The dataprovider reply listener            object.setObjectId(path);
+
      *
      * @exception   ServiceException
      *              if no valid request can be added
      *
-     * @see org.openmdx.application.dataprovider.cci.Directions
+     * @see org.openmdx.base.query.Directions
      */
     public void addFindRequest(
         Path referenceFilter,
@@ -967,19 +950,25 @@ public final class RequestCollection
         short direction,
         DataproviderReplyListener listener
     ) throws ServiceException {
-        dispatch(
-            new DataproviderRequest(
-                new DataproviderObject(referenceFilter),
-                DataproviderOperations.ITERATION_START,
-                attributeFilter,
-                position,
-                size,
-                direction,
-                attributeSelector,
-                attributeSpecifier
-            ),
-            listener
-        );
+        try {
+            ObjectHolder_2Facade object = ObjectHolder_2Facade.newInstance(referenceFilter);
+            this.dispatch(
+                new DataproviderRequest(
+                    object.getDelegate(),
+                    DataproviderOperations.ITERATION_START,
+                    attributeFilter,
+                    position,
+                    size,
+                    direction,
+                    attributeSelector,
+                    attributeSpecifier
+                ),
+                listener
+            );
+        }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
 
 
@@ -996,32 +985,38 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addOperationRequest(
-        DataproviderObject request
+    public MappedRecord addOperationRequest(
+        MappedRecord request
     ) throws ServiceException {
-        if(
-                request.path().size() % 2 != 0
-        ) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.BAD_PARAMETER,
-            "The request's path must end in the requested operation's name",
-            new BasicException.Parameter("path",request.path())
-        );  
-
-        // Append request id
-        request.path().add(uuidAsString());
-
-        final RequestedObject reply = new RequestedObject();
-        dispatch(
-            new DataproviderRequest(
-                request,
-                DataproviderOperations.OBJECT_OPERATION,
-                AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
-                null
-            ),
-            reply
-        );
-        return reply;
+        try {
+            if(ObjectHolder_2Facade.getPath(request).size() % 2 != 0) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.BAD_PARAMETER,
+                    "The request's path must end in the requested operation's name",
+                    new BasicException.Parameter("path", ObjectHolder_2Facade.getPath(request))
+                );  
+            }
+            // Append request id
+            ObjectHolder_2Facade requestFacade = ObjectHolder_2Facade.newInstance(request);
+            requestFacade.setPath(
+                requestFacade.getPath().add(uuidAsString())
+            );    
+            final RequestedObject reply = new RequestedObject();
+            this.dispatch(
+                new DataproviderRequest(
+                    requestFacade.getDelegate(),
+                    DataproviderOperations.OBJECT_OPERATION,
+                    AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
+                    null
+                ),
+                reply
+            );
+            return reply;
+        }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
 
     /**
@@ -1038,32 +1033,37 @@ public final class RequestCollection
      *              if no valid request can be added
      */
     public void addOperationRequest(
-        DataproviderObject request,
+        MappedRecord request,
         DataproviderReplyListener listener
     ) throws ServiceException {
-        if(
-                request.path().size() % 2 != 0
-        ) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.BAD_PARAMETER,
-            "The request's path must end in the requested operation's name",
-            new BasicException.Parameter("path",request.path())
-        );  
-
-        // Append request id
-        request.path().add(uuidAsString());
-
-        dispatch(
-            new DataproviderRequest(
-                request,
-                DataproviderOperations.OBJECT_OPERATION,
-                AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
-                null
-            ),
-            listener
-        );
+        try {
+            if(ObjectHolder_2Facade.getPath(request).size() % 2 != 0) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.BAD_PARAMETER,
+                    "The request's path must end in the requested operation's name",
+                    new BasicException.Parameter("path", ObjectHolder_2Facade.getPath(request))
+                );
+            }
+            // Append request id
+            ObjectHolder_2Facade requestFacade = ObjectHolder_2Facade.newInstance(request);
+            requestFacade.setPath(
+                requestFacade.getPath().add(uuidAsString())
+            );    
+            this.dispatch(
+                new DataproviderRequest(
+                    request,
+                    DataproviderOperations.OBJECT_OPERATION,
+                    AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
+                    null
+                ),
+                listener
+            );
+        }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-
 
     //------------------------------------------------------------------------
     // Implements IterationProcessor
@@ -1084,7 +1084,7 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      *
-     * @see org.openmdx.application.dataprovider.cci.Directions
+     * @see org.openmdx.base.query.Directions
      */
     public void addIterationRequest(
         Path referenceFilter,
@@ -1095,26 +1095,33 @@ public final class RequestCollection
         int size,
         short direction, DataproviderReplyListener listener
     ) throws ServiceException {
-        if(referenceFilter == null) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.BAD_PARAMETER,
-            "Reference filter must not be null"
-        );
-        DataproviderRequest request = new DataproviderRequest (
-            new DataproviderObject(referenceFilter),
-            DataproviderOperations.ITERATION_CONTINUATION,
-            null,
-            position,
-            size,
-            direction,
-            attributeSelector,
-            attributeSpecifiers
-        );
-        request.context(DataproviderReplyContexts.ITERATOR).add(iterator);
-        dispatch(
-            request,
-            listener
-        );
+        try {
+            if(referenceFilter == null) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.BAD_PARAMETER,
+                    "Reference filter must not be null"
+                );
+            }
+            DataproviderRequest request = new DataproviderRequest (
+                ObjectHolder_2Facade.newInstance(referenceFilter).getDelegate(),
+                DataproviderOperations.ITERATION_CONTINUATION,
+                null,
+                position,
+                size,
+                direction,
+                attributeSelector,
+                attributeSpecifiers
+            );
+            request.context(DataproviderReplyContexts.ITERATOR).add(iterator);
+            this.dispatch(
+                request,
+                listener
+            );
+        }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
 
 
@@ -1122,9 +1129,6 @@ public final class RequestCollection
     // Dispatching
     //------------------------------------------------------------------------
 
-    /**
-     *
-     */
     protected void dispatch(
         DataproviderRequest request,
         DataproviderReplyListener listener
@@ -1146,9 +1150,6 @@ public final class RequestCollection
         }
     }
 
-    /**
-     *
-     */
     protected void dispatch(
         UnitOfWorkRequest request,
         DataproviderReplyListener[] listeners
@@ -1168,7 +1169,8 @@ public final class RequestCollection
         if (this.inBatch){
             this.batchRequests.add(request);
             this.batchListeners.add(listeners);
-        } else {
+        } 
+        else {
             UnitOfWorkReply reply = dispatch(
                 new UnitOfWorkRequest[]{request},
                 new DataproviderReplyListener[][]{listeners}
@@ -1210,9 +1212,9 @@ public final class RequestCollection
             throw assertionFailure;
         }
         for (
-                int workingUnitIndex = 0;
-                workingUnitIndex < requests.length;
-                workingUnitIndex++
+            int workingUnitIndex = 0;
+            workingUnitIndex < requests.length;
+            workingUnitIndex++
         ) try {
             UnitOfWorkReply source = replies[workingUnitIndex];
             DataproviderReplyListener[] target = listeners[workingUnitIndex];
@@ -1224,16 +1226,18 @@ public final class RequestCollection
                 ) target[requestIndex].onException(
                     source.getStatus()
                 );
-            } else {
+            } 
+            else {
                 for (
-                        int requestIndex = 0;
-                        requestIndex < target.length;
-                        requestIndex++
+                    int requestIndex = 0;
+                    requestIndex < target.length;
+                    requestIndex++
                 ) target[requestIndex].onReply(
                     source.getReplies()[requestIndex]
                 );
             }
-        } catch (Exception exception) {
+        } 
+        catch (Exception exception) {
             new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -1248,16 +1252,6 @@ public final class RequestCollection
         return replies;     
     }
 
-    /**
-     * Retrieve the service headers's principal chain
-     * 
-     * @return the service headers's principal chain
-     */
-    public List<String> getPrincipalChain(){
-        return this.serviceHeader.getPrincipalChain();
-    }
-
-    
     //------------------------------------------------------------------------
     // Implements Cloneable
     //------------------------------------------------------------------------

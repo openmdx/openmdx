@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1LocalHome.java,v 1.1 2009/01/05 13:44:51 wfro Exp $
+ * Name:        $Id: Dataprovider_1LocalHome.java,v 1.2 2009/05/15 00:26:37 hburger Exp $
  * Description: Enterprise JavaBean stateless session example
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:51 $
+ * Date:        $Date: 2009/05/15 00:26:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,12 +52,13 @@
 package org.openmdx.application.dataprovider.transport.ejb.cci;
 
 import javax.ejb.CreateException;
-import javax.ejb.EJBLocalHome;
+
+import org.openmdx.application.rest.ejb.Connection_2LocalHome;
 
 /**
  * 
  */
-public interface Dataprovider_1LocalHome extends EJBLocalHome {
+public interface Dataprovider_1LocalHome extends Connection_2LocalHome {
 
   /**
    * This method corresponds to the ejbCreate method in the dataprovider bean.

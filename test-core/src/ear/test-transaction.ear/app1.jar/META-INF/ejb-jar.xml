@@ -4,12 +4,10 @@
 	<display-name>openMDX/Document</display-name>
 	<enterprise-beans>
 		<session>
-			<ejb-name>transaction-Persistent</ejb-name>
-			<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
-			<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
-			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-			<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
+			<ejb-name>ejb20DataObjects</ejb-name>
+			<local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			<local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			<ejb-class>org.openmdx.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
 			<env-entry>
@@ -178,7 +176,7 @@
 				<ejb-ref-type>Session</ejb-ref-type>
 				<local-home>org.openmdx.test.kernel.application.container.cci.Runnable_1LocalHome</local-home>
 				<local>org.openmdx.test.kernel.application.container.cci.Runnable_1_0Local</local>
-				<ejb-link>transaction-RollbackOnly</ejb-link>
+				<ejb-link>ejb20RollbackOnly</ejb-link>
 			</ejb-local-ref>
 			<resource-ref id="jdbc_datasource_0">
 				<res-ref-name>jdbc/datasource[0]</res-ref-name>
@@ -190,10 +188,10 @@
 	<assembly-descriptor>
 		<container-transaction>
 			<method>
-				<ejb-name>transaction-Persistent</ejb-name>
+				<ejb-name>ejb20DataObjects</ejb-name>
 				<method-name>*</method-name>
 			</method>
-			<trans-attribute>Required</trans-attribute>
+			<trans-attribute>Mandatory</trans-attribute>
 		</container-transaction>
 	</assembly-descriptor>
 </ejb-jar>

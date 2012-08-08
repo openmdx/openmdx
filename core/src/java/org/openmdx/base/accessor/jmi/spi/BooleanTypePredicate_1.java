@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BooleanTypePredicate_1.java,v 1.10 2009/01/13 02:10:32 wfro Exp $
+ * Name:        $Id: BooleanTypePredicate_1.java,v 1.11 2009/06/09 12:45:17 hburger Exp $
  * Description: BooleanValuePredicate_1 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:32 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,7 +53,7 @@ package org.openmdx.base.accessor.jmi.spi;
 import java.util.Collections;
 import java.util.Set;
 
-import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
+import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.query.FilterOperators;
 import org.w3c.cci2.BooleanTypePredicate;
@@ -73,7 +73,7 @@ public class BooleanTypePredicate_1
      * @param featureDef 
      */
     BooleanTypePredicate_1(
-        RefFilter_1_1 delegate, 
+        RefFilter_1_0 delegate, 
         ModelElement_1_0 featureDef,
         short quantor
     ) {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1Accessor.java,v 1.1 2009/01/13 02:10:44 wfro Exp $
+ * Name:        $Id: Model_1Accessor.java,v 1.7 2009/06/14 00:03:42 wfro Exp $
  * Description: Wrapper for a org::omg::model1 compliant in-process dataprovider.
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:44 $
+ * Date:        $Date: 2009/06/14 00:03:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,12 +58,11 @@ package org.openmdx.application.mof.externalizer.spi;
 import java.util.List;
 import java.util.Map;
 
+import javax.resource.ResourceException;
+
 import org.openmdx.application.cci.ConfigurationProvider_1_0;
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.DataproviderLayers;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
-import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.application.dataprovider.cci.RequestCollection;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
@@ -73,6 +72,7 @@ import org.openmdx.application.mof.externalizer.cci.ModelImporter_1_0;
 import org.openmdx.application.mof.repository.layer.application.LayerConfigurationEntries;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.kernel.log.SysLog;
 
 //---------------------------------------------------------------------------  
@@ -113,8 +113,7 @@ public class Model_1Accessor {
       this.configurationProvider.activate();
       this.dataprovider = new Dataprovider_1(
         new Configuration(),
-        this.configurationProvider, 
-        null
+        this.configurationProvider
       );
     }
     catch(ServiceException e) {
@@ -171,7 +170,7 @@ public class Model_1Accessor {
   
           // layers
           configuration.values(DataproviderLayers.toString(DataproviderLayers.INTERCEPTION)).add(
-            org.openmdx.compatibility.base.dataprovider.layer.interception.Standard_1.class.getName()
+            org.openmdx.application.dataprovider.layer.interception.Standard_1.class.getName()
           );
           configuration.values(DataproviderLayers.toString(DataproviderLayers.TYPE)).add(
             org.openmdx.application.mof.repository.layer.type.Model_1.class.getName()
@@ -183,7 +182,7 @@ public class Model_1Accessor {
             org.openmdx.application.mof.repository.layer.model.Model_1.class.getName()
           );
           configuration.values(DataproviderLayers.toString(DataproviderLayers.PERSISTENCE)).add(
-            org.openmdx.compatibility.base.dataprovider.layer.persistence.none.InMemory_1.class.getName()
+            org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
           );
         }
 
@@ -257,21 +256,31 @@ public class Model_1Accessor {
 
     // Call externalizePackage
     SysLog.trace("> Externalize package");
-    DataproviderObject params = new DataproviderObject(
-        modelPackagePath.getChild("externalizePackage")
-    );
-    params.values(SystemAttributes.OBJECT_CLASS).add(
-        "org:omg:model1:PackageExternalizeParams"
-    );
-    params.values("format").addAll(
+    ObjectHolder_2Facade params;
+    try {
+        params = ObjectHolder_2Facade.newInstance(
+            modelPackagePath.getChild("externalizePackage"),
+            "org:omg:model1:PackageExternalizeParams"            
+        );
+    } 
+    catch (ResourceException e) {
+        throw new ServiceException(e);
+    }
+    params.attributeValues("format").addAll(
         formats
     );
-    DataproviderObject_1_0 result = requests.addOperationRequest(
-        params
-    );
-    SysLog.trace("< Externalize package");
-
-    return (byte[])result.values("packageAsJar").get(0);
+    ObjectHolder_2Facade result;
+    try {
+        result = ObjectHolder_2Facade.newInstance(
+            requests.addOperationRequest(
+                params.getDelegate()
+            )
+        );
+    } 
+    catch (ResourceException e) {
+        throw new ServiceException(e);
+    }
+    return (byte[])result.attributeValue("packageAsJar");
   }
 
   //---------------------------------------------------------------------------  

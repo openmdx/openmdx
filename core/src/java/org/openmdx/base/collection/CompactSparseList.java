@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CompactSparseList.java,v 1.1 2009/01/05 13:47:16 wfro Exp $
+ * Name:        $Id: CompactSparseList.java,v 1.4 2009/06/14 00:27:17 wfro Exp $
  * Description: Property
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:47:16 $
+ * Date:        $Date: 2009/06/14 00:27:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -264,7 +264,7 @@ public class CompactSparseList<E>
      */
     public boolean equals(Object o) {
         if(this.delegate == null) {
-            if(o instanceof SparseList) {
+            if(o instanceof SparseList<?>) {
                 SparseList<?> l = (SparseList<?>)o;
                 if(this.value == null) {
                     return l.isEmpty();
@@ -602,11 +602,10 @@ public class CompactSparseList<E>
     //------------------------------------------------------------------------
     // Class NonDelegateIterator
     //------------------------------------------------------------------------
-    
-    //------------------------------------------------------------------------
-    // Class NonDelegateIterator
-    //------------------------------------------------------------------------
-    
+
+    /**
+     * 
+     */
     class NonDelegateIterator implements ListIterator<E> {
 
         /**

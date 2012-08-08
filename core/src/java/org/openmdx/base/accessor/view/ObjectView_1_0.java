@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectView_1_0.java,v 1.10 2009/02/10 16:36:37 hburger Exp $
+ * Name:        $Id: ObjectView_1_0.java,v 1.13 2009/06/09 12:45:17 hburger Exp $
  * Description: Object 1.6 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/10 16:36:37 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,13 +56,13 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
-import org.openmdx.base.mof.cci.Model_1_6;
+import org.openmdx.base.mof.cci.Model_1_0;
 
 /**
  * ObjectView_1_0 
  */
 public interface ObjectView_1_0
-    extends Delegating_1_0, DataObject_1_0
+    extends Delegating_1_0<DataObject_1_0>, DataObject_1_0
 {
     
     /**
@@ -70,7 +70,8 @@ public interface ObjectView_1_0
      * 
      * @return the model repository
      */
-    Model_1_6 getModel();
+    Model_1_0 getModel();
+
     
     //------------------------------------------------------------------------
     // Synchronization
@@ -91,14 +92,6 @@ public interface ObjectView_1_0
      * @return <code>null</code> or the interaction specification associated with this object
      */
     InteractionSpec getInteractionSpec(
-    ) throws ServiceException;
-    
-    /**
-     * Retrieve the delegate
-     * 
-     * @return the delegate
-     */
-    DataObject_1_0 objGetDelegate(
     ) throws ServiceException;
     
     /**

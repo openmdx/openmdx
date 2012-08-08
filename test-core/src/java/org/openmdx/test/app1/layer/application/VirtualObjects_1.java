@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VirtualObjects_1.java,v 1.1 2009/02/04 11:06:37 hburger Exp $
+ * Name:        $Id: VirtualObjects_1.java,v 1.4 2009/05/27 23:38:20 hburger Exp $
  * Description: Hard-Wired Objects Layer
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/04 11:06:37 $
+ * Date:        $Date: 2009/05/27 23:38:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,8 +51,9 @@
 package org.openmdx.test.app1.layer.application;
 
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
@@ -60,11 +61,10 @@ import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Hard-wired Objects Layer
@@ -124,7 +124,7 @@ extends HardWiredObjects_1
     /**
      * 
      */
-    private final Logger logger = LoggerFactory.getLogger(VirtualObjects_1.class);
+    private final Logger logger = Logger.getLogger(VirtualObjects_1.class.getName());
 
 
     //------------------------------------------------------------------------
@@ -183,7 +183,7 @@ extends HardWiredObjects_1
         DataproviderRequest request
     ) throws ServiceException {
         Path objectId = request.path();
-        this.logger.trace("Get request for {}", objectId);
+        this.logger.log(Level.FINEST,"Get request for {0}", objectId);
         if(objectId.isLike(PRODUCT_GROUP_PATTERN)) {
             //
             // virtual ProductGroup instances
@@ -221,7 +221,7 @@ extends HardWiredObjects_1
         DataproviderRequest request
     ) throws ServiceException {
         Path objectId = request.path();
-        this.logger.trace("Create request for {}", objectId);
+        this.logger.log(Level.FINEST,"Create request for {0}", objectId);
         if(
                 objectId.isLike(PRODUCT_GROUP_PATTERN) ||
                 objectId.isLike(PRODUCT_PATTERN)
@@ -233,7 +233,7 @@ extends HardWiredObjects_1
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
                 "Virtual objects can't be created",
-                new BasicException.Parameter("objectId", objectId.toXri())
+                new BasicException.Parameter("objectId", objectId.toXRI())
             );
         } else {
             //
@@ -252,7 +252,7 @@ extends HardWiredObjects_1
         DataproviderRequest request
     ) throws ServiceException {
         Path objectId = request.path();
-        this.logger.trace("Remove request for {}", objectId);
+        this.logger.log(Level.FINEST,"Remove request for {0}", objectId);
         if(
                 objectId.isLike(PRODUCT_GROUP_PATTERN) ||
                 objectId.isLike(PRODUCT_PATTERN)
@@ -265,7 +265,7 @@ extends HardWiredObjects_1
                 BasicException.Code.ASSERTION_FAILURE, 
                 "Virtual objects can't be removed",
                 new BasicException.Parameter[]{
-                    new BasicException.Parameter("objectId", objectId.toXri())
+                    new BasicException.Parameter("objectId", objectId.toXRI())
                 }
             );
         } else {
@@ -285,7 +285,7 @@ extends HardWiredObjects_1
         DataproviderRequest request
     ) throws ServiceException {
         Path objectId = request.path();
-        this.logger.trace("Replace request for {}", objectId);
+        this.logger.log(Level.FINEST,"Replace request for {0}", objectId);
         if(
                 objectId.isLike(PRODUCT_GROUP_PATTERN) ||
                 objectId.isLike(PRODUCT_PATTERN)
@@ -297,7 +297,7 @@ extends HardWiredObjects_1
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
                 "Virtual objects can't be replaced",
-                new BasicException.Parameter("objectId", objectId.toXri())
+                new BasicException.Parameter("objectId", objectId.toXRI())
             );
         } else {
             //
@@ -316,7 +316,7 @@ extends HardWiredObjects_1
         DataproviderRequest request
     ) throws ServiceException {
         Path objectId = request.path();
-        this.logger.trace("Find request for {}", objectId);
+        this.logger.log(Level.FINEST,"Find request for {0}", objectId);
         if(
                 objectId.isLike(PRODUCT_GROUP_PATTERN) ||
                 objectId.isLike(PRODUCT_PATTERN)

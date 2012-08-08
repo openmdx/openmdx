@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: VariableSizeIndexedRecord.java,v 1.8 2008/03/21 18:31:20 hburger Exp $
+ * Name:        $Id: VariableSizeIndexedRecord.java,v 1.10 2009/05/11 11:56:43 hburger Exp $
  * Description: JCA: variable-size IndexedRecord implementation
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:31:20 $
+ * Date:        $Date: 2009/05/11 11:56:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import java.util.ListIterator;
 
 import javax.resource.cci.IndexedRecord;
 
+import org.openmdx.base.resource.cci.ResultRecord;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 
@@ -68,209 +69,259 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  */
 @SuppressWarnings("unchecked")
 class VariableSizeIndexedRecord 
-  extends ArrayList
-  implements IndexedRecord, MultiLineStringRepresentation
+    extends ArrayList
+    implements IndexedRecord, ResultRecord, MultiLineStringRepresentation
 {
 
-  /**
-   * Creates an IndexedRecord with the specified name and the given content.  
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta 
-   *            information (stored in the metadata repository) for a specific
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or null.
-   */
-  VariableSizeIndexedRecord(
-    String recordName,
-    String recordShortDescription
-  ){
-    super();
-    this.recordName = recordName;
-    this.recordShortDescription = recordShortDescription;
-  }
+    /**
+     * Creates an IndexedRecord with the specified name and the given content.  
+     *
+     * @param     recordName
+     *            The name of the record acts as a pointer to the meta 
+     *            information (stored in the metadata repository) for a specific
+     *            record type. 
+     * @param     recordShortDescription
+     *            The short description of the Record; or null.
+     */
+    VariableSizeIndexedRecord(
+        String recordName,
+        String recordShortDescription
+    ){
+        super();
+        this.recordName = recordName;
+        this.description = recordShortDescription;
+    }
 
-  /**
-   * Creates an IndexedRecord with the specified name and the given content.  
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta 
-   *            information (stored in the metadata repository) for a specific
-   *            record type. 
-   */
-  VariableSizeIndexedRecord(
-    String recordName
-  ){
-  	this(recordName,null);
-  }
+    /**
+     * Creates an IndexedRecord with the specified name and the given content.  
+     *
+     * @param     recordName
+     *            The name of the record acts as a pointer to the meta 
+     *            information (stored in the metadata repository) for a specific
+     *            record type. 
+     */
+    VariableSizeIndexedRecord(
+        String recordName
+    ){
+        this(recordName,null);
+    }
 
-  /**
-   * Creates an IndexedRecord with the specified name and the given content.  
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta 
-   *            information (stored in the metadata repository) for a specific
-   *            record type. 
-   * @param     description
-   *            The description of the Record; or null.
-   * @param     initialContent
-   *            The list's initial content
-   */
-  VariableSizeIndexedRecord(
-    String recordName,
-    String description,
-    Collection initialContent
-  ){
-    super(initialContent);
-    this.recordName = recordName;
-    this.recordShortDescription = description;
-  }
+    /**
+     * Creates an IndexedRecord with the specified name and the given content.  
+     *
+     * @param     recordName
+     *            The name of the record acts as a pointer to the meta 
+     *            information (stored in the metadata repository) for a specific
+     *            record type. 
+     * @param     description
+     *            The description of the Record; or null.
+     * @param     initialContent
+     *            The list's initial content
+     */
+    VariableSizeIndexedRecord(
+        String recordName,
+        String description,
+        Collection initialContent
+    ){
+        super(initialContent);
+        this.recordName = recordName;
+        this.description = description;
+    }
+
+    /**
+     * The record name
+     */
+    private String recordName;    
+
+    /**
+     * The record short description
+     */
+    private String description;
+
+    /**
+     * The base collections size
+     */
+    private Long total;
+    
+    /**
+     * Tells whether more elements can be found on the base collection
+     */
+    private Boolean hasMore;
+
+    
+    //------------------------------------------------------------------------
+    // Implements Serializable
+    //------------------------------------------------------------------------
+
+    /**
+     * Constructor
+     */
+    protected VariableSizeIndexedRecord(){
+        // for de-serialization
+    }
+    
+    /**
+     * Serial Version UID
+     */
+    private static final long serialVersionUID = 8633465662532489653L;
 
 
-	//------------------------------------------------------------------------
-	// Implements Serializable
-	//------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+    // Implements Record
+    //--------------------------------------------------------------------------
 
-	/**
-	 *
-	 */
-	static final long serialVersionUID = 8109472570592748673L;
-	
-	
-  //--------------------------------------------------------------------------
-  // Implements Record
-  //--------------------------------------------------------------------------
+    /**
+     * Gets the name of the Record. 
+     *
+     * @return  String representing name of the Record
+     */
+    public final String getRecordName(
+    ){
+        return this.recordName;
+    }
 
-  /**
-   * Gets the name of the Record. 
-   *
-   * @return  String representing name of the Record
-   */
-  public final String getRecordName(
-  ){
-    return this.recordName;
-  }
+    /**
+     * Sets the name of the Record. 
+     *
+     * @param name
+     *        Name of the Record
+     */
+    public final void setRecordName(
+        String name
+    ){
+        this.recordName = name;
+    }
 
-  /**
-   * Sets the name of the Record. 
-   *
-   * @param name
-   *        Name of the Record
-   */
-  public final void setRecordName(
-    String name
-  ){
-    this.recordName = name;
-  }
+    /**
+     * Gets a short description string for the Record.
+     * This property is used primarily by application development tools. 
+     *
+     * @return   String representing a short description of the Record
+     */
+    public final String getRecordShortDescription(
+    ){
+        return this.description;
+    }
 
-  /**
-   * Gets a short description string for the Record.
-   * This property is used primarily by application development tools. 
-   *
-   * @return   String representing a short description of the Record
-   */
-  public final String getRecordShortDescription(
-  ){
-    return this.recordShortDescription;
-  }
+    /**
+     * Sets a short description string for the Record.
+     * This property is used primarily by application development tools. 
+     *
+     * @param description
+     *        Description of the Record
+     */
+    public final void setRecordShortDescription(
+        String description
+    ){
+        this.description = description;
+    }
 
-  /**
-   * Sets a short description string for the Record.
-   * This property is used primarily by application development tools. 
-   *
-   * @param description
-   *        Description of the Record
-   */
-  public final void setRecordShortDescription(
-    String description
-  ){
-    this.recordShortDescription = description;
-  }
+    
+    //--------------------------------------------------------------------------
+    // Implements OutputRecord
+    //--------------------------------------------------------------------------
 
-  /**
-   * Check if this instance has the same content as another List.
-   * <p>
-   * The Record's name and short description are ignored.
-   *
-   * @return  true if two instances are equal
-   */
-  public boolean equals(
-    Object other
-  ){
-      if (other == this) return true;
-      if (!(other instanceof List)) return false;
-      ListIterator e1 = listIterator();
-      ListIterator e2 = ((List) other).listIterator();
-      while(e1.hasNext() && e2.hasNext()) {
-          Object o1 = e1.next();
-          Object o2 = e2.next();
-          if (!(o1==null ? o2==null : o1.equals(o2))) return false;
-      }
-      return !(e1.hasNext() || e2.hasNext());
-  }
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.spi.OutputRecord#setMore(boolean)
+     */
+    public void setHasMore(boolean hasMore) {
+        this.hasMore = Boolean.valueOf(hasMore);
+    }
 
-  /**
-   * Returns the hash code for the Record instance. 
-   *
-   * @return hash code
-   */
-  public int hashCode(
-  ){
-      int hashCode = 1;
-      for(
-          Iterator i = iterator();
-          i.hasNext();
-      ){
-          Object obj = i.next();
-          hashCode = 31*hashCode + (obj==null ? 0 : obj.hashCode());
-      }
-      return hashCode;
-  }
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.spi.OutputRecord#getMore()
+     */
+    public Boolean getHasMore() {
+        return this.hasMore;
+    }
 
-  /**
-   * Creates and returns a copy of this object.
-   *
-   * @return  a copy of this IndexedRecord instance
-   */
-  public Object clone(
-  ){
-    return new VariableSizeIndexedRecord(
-      this.recordName,
-      this.recordShortDescription,
-      this
-    );
-  }
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.spi.OutputRecord#setTotal(long)
+     */
+    public void setTotal(long total) {
+        this.total = Long.valueOf(total);
+    }
 
-  /**
-   * Returns a multi-line string representation of this IndexedRecord.
-   * <p>
-   * The string representation consists of the record name, follwed by the
-   * optional short description enclosed in parenthesis (" (...)"), followed 
-   * by a colon and the values enclosed in square brackets (": [...]"). Each
-   * value is written on a separate line and indented while embedded lines are
-   * indented as well.
-   *
-   * @return   a multi-line String representation of this Record.
-   */
-  public String toString(
-  ){
-	return IndentingFormatter.toString(this);
-  }
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.spi.OutputRecord#getTotal()
+     */
+    public Long getTotal() {
+        return this.total;
+    }
+    
 
-  
-  //--------------------------------------------------------------------------
-  // Instance members
-  //--------------------------------------------------------------------------
-  
-  /**
-   * 
-   */
-  private String recordName;    
+    //--------------------------------------------------------------------------
+    // Implements List
+    //--------------------------------------------------------------------------
 
-  /**
-   *
-   */
-  private String recordShortDescription;
+    /**
+     * Check if this instance has the same content as another List.
+     * <p>
+     * The Record's name and short description are ignored.
+     *
+     * @return  true if two instances are equal
+     */
+    public boolean equals(
+        Object other
+    ){
+        if (other == this) return true;
+        if (!(other instanceof List)) return false;
+        ListIterator e1 = listIterator();
+        ListIterator e2 = ((List) other).listIterator();
+        while(e1.hasNext() && e2.hasNext()) {
+            Object o1 = e1.next();
+            Object o2 = e2.next();
+            if (!(o1==null ? o2==null : o1.equals(o2))) return false;
+        }
+        return !(e1.hasNext() || e2.hasNext());
+    }
+
+    /**
+     * Returns the hash code for the Record instance. 
+     *
+     * @return hash code
+     */
+    public int hashCode(
+    ){
+        int hashCode = 1;
+        for(
+            Iterator i = iterator();
+            i.hasNext();
+        ){
+            Object obj = i.next();
+            hashCode = 31*hashCode + (obj==null ? 0 : obj.hashCode());
+        }
+        return hashCode;
+    }
+
+    /**
+     * Creates and returns a copy of this object.
+     *
+     * @return  a copy of this IndexedRecord instance
+     */
+    public Object clone(
+    ){
+        return new VariableSizeIndexedRecord(
+            this.recordName,
+            this.description,
+            this
+        );
+    }
+
+    /**
+     * Returns a multi-line string representation of this IndexedRecord.
+     * <p>
+     * The string representation consists of the record name, follwed by the
+     * optional short description enclosed in parenthesis (" (...)"), followed 
+     * by a colon and the values enclosed in square brackets (": [...]"). Each
+     * value is written on a separate line and indented while embedded lines are
+     * indented as well.
+     *
+     * @return   a multi-line String representation of this Record.
+     */
+    public String toString(
+    ){
+        return IndentingFormatter.toString(this);
+    }
 
 }

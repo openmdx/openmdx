@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SimpleTypeOrder_1.java,v 1.7 2009/01/13 02:10:32 wfro Exp $
+ * Name:        $Id: SimpleTypeOrder_1.java,v 1.9 2009/06/09 12:45:17 hburger Exp $
  * Description: SimpleTypeOrder_1 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:32 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,9 @@
 
 package org.openmdx.base.accessor.jmi.spi;
 
-import org.openmdx.application.dataprovider.cci.Directions;
-import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
+import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.Directions;
 import org.w3c.cci2.SimpleTypeOrder;
 
 /**
@@ -72,7 +72,7 @@ class SimpleTypeOrder_1
      * @param featureDef TODO
      */
     SimpleTypeOrder_1(
-        RefFilter_1_1 delegate, 
+        RefFilter_1_0 delegate, 
         ModelElement_1_0 featureDef
     ) {
         super(delegate, featureDef);

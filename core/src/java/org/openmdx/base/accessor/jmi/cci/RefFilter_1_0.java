@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefFilter_1_0.java,v 1.9 2009/01/06 10:21:20 wfro Exp $
+ * Name:        $Id: RefFilter_1_0.java,v 1.12 2009/06/09 12:45:18 hburger Exp $
  * Description: RefFilter_1_0 interface
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:20 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,7 +53,8 @@ package org.openmdx.base.accessor.jmi.cci;
 import java.io.Serializable;
 import java.util.Collection;
 
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.FilterProperty;
 
 /**
@@ -117,11 +118,48 @@ public interface RefFilter_1_0
   );
 
   /**
+   * Retrieve the filter's MOF id
+   * 
+   * @return the filter's MOF id
+   */
+  public String refMofId();
+  
+  /**
    * Clears the filter and removes all previously added filter values. 
    */
   public void clear(
   );
   
+  /**
+   * Allows to specify the sort order for a field.
+   * 
+   * @param featureDef
+   * @param index
+   * @param order
+   */
+  void refAddValue(
+    ModelElement_1_0 featureDef,
+    int index,
+    short order
+  );
+  
+  /**
+   * This operation allows to set a filter value with the semantics
+   * <quantor> <fieldName> <operator> <values>. The value constants for
+   * the quantor and operator parameters are implementation-specific.
+   * 
+   * @param featureDef
+   * @param quantor
+   * @param operator
+   * @param values
+   */
+  void refAddValue(
+    ModelElement_1_0 featureDef,
+    short quantor,
+    short operator,
+    Collection<?> values
+  );
+
 }
 
 //--- End of File -----------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Clock_1Servlet.java,v 1.4 2009/01/13 11:46:46 wfro Exp $
+ * Name:        $Id: Clock_1Servlet.java,v 1.5 2009/04/08 14:51:58 hburger Exp $
  * Description: Clock_1Servlet 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 11:46:46 $
+ * Date:        $Date: 2009/04/08 14:51:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,6 @@ package org.openmdx.test.clock1.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;

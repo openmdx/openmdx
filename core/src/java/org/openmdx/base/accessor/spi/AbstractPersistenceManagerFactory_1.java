@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractPersistenceManagerFactory_1.java,v 1.5 2009/02/13 13:29:34 wfro Exp $
+ * Name:        $Id: AbstractPersistenceManagerFactory_1.java,v 1.10 2009/05/29 17:04:09 hburger Exp $
  * Description: Abstract Manager Factory
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/13 13:29:34 $
+ * Date:        $Date: 2009/05/29 17:04:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,19 +69,17 @@ import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.datastore.DataStoreCache;
 import javax.jdo.listener.InstanceLifecycleListener;
-import javax.resource.cci.InteractionSpec;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
-import org.openmdx.base.accessor.cci.PersistenceManagerFactory_1_0;
-import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.base.collection.MapBackedSet;
 import org.openmdx.base.persistence.spi.StandardFetchGroup;
 import org.openmdx.kernel.Version;
 import org.openmdx.kernel.callback.CloseCallback;
 import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.openmdx.kernel.persistence.cci.NonConfigurableProperty;
 import org.openmdx.kernel.persistence.resource.Connection_2;
-import org.openmdx.uses.org.apache.commons.collections.set.MapBackedSet;
 
 /**
  * Abstract Data Access Service Factory
@@ -232,11 +230,6 @@ public abstract class AbstractPersistenceManagerFactory_1
     protected static final Set<Object> NO_CREDENTIALS = Collections.emptySet();
     
     /**
-     * 
-     */
-    private static final char[] NO_PASSWORD = new char[]{};
-    
-    /**
      * Return <code>true</code> if the property's value is
      * <code>"true"</code> ignoring case.
      * 
@@ -355,7 +348,7 @@ public abstract class AbstractPersistenceManagerFactory_1
      * @return a new persistence manager
      */
     protected abstract PersistenceManager newManager(
-        Subject subject
+        List<String> principalChain
     );
 
     /**
@@ -372,19 +365,13 @@ public abstract class AbstractPersistenceManagerFactory_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManagerFactory#getPersistenceManager()
      */
-    public final PersistenceManager getPersistenceManager(
+    public PersistenceManager getPersistenceManager(
     ){
         freeze();
         String connectionUsername = this.getConnectionUserName();
-        String connectionPassword = (String) this.configurableProperties.get(
-            ConfigurableProperty.ConnectionPassword.qualifiedName()
-        );
-        PersistenceManager persistenceManager = (
-            (connectionUsername != null && connectionUsername.length() != 0) ||
-            (connectionPassword != null && connectionPassword.length() != 0) 
-        ) ? newManager (
-            toSubject(connectionUsername,connectionPassword)
+        PersistenceManager persistenceManager = connectionUsername == null || connectionUsername.length() == 0 ? newManager(
         ) : newManager (
+            ServiceHeader.toPrincipalChain(connectionUsername)
         );
         initialize(persistenceManager);
         return persistenceManager;
@@ -399,18 +386,12 @@ public abstract class AbstractPersistenceManagerFactory_1
     ) {
         freeze();
         PersistenceManager persistenceManager = newManager (
-            toSubject(userid,password)
+            ServiceHeader.toPrincipalChain(userid)
         );
         initialize(persistenceManager);
         return persistenceManager;
     }
 
-    public PersistenceManager_1_0 getPersistenceManager(
-        InteractionSpec interactionSpec
-    ) {
-        throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManagerFactory_1");
-    }
-        
     protected final void initialize(
         PersistenceManager persistenceManager,
         boolean setFactory
@@ -960,52 +941,6 @@ public abstract class AbstractPersistenceManagerFactory_1
         );
     }    
     
-    /**
-     * Create a read only subject based on the given credentials
-     * 
-     * @param username
-     * @param password
-     * 
-     * @return a new subject
-     */
-    protected Subject toSubject(
-        String username,
-        String password
-    ){
-        return toSubject(
-            username, 
-            password, 
-            NO_CREDENTIALS
-        );
-    }
-
-    /**
-     * Create a read only subject based on the given credentials
-     * 
-     * @param username
-     * @param password
-     * @param publicCredentials 
-     * 
-     * @return a new subject
-     */
-   public static Subject toSubject(
-        String username,
-        String password, 
-        Set<?> publicCredentials
-    ){
-        return new Subject(
-            true, // readOnly, 
-            NO_PRINCIPALS,
-            publicCredentials == null ? NO_CREDENTIALS : publicCredentials,
-            Collections.singleton(
-                new PasswordCredential(
-                    username,
-                    password == null ? NO_PASSWORD : password.toCharArray()
-                )
-            ) // private credentials           
-        );
-    }
-
     /**
      * Retrieve a subject's password credential
      * 

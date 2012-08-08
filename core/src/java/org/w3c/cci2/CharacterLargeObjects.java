@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CharacterLargeObjects.java,v 1.10 2009/01/12 12:54:16 wfro Exp $
+ * Name:        $Id: CharacterLargeObjects.java,v 1.11 2009/05/26 14:00:11 wfro Exp $
  * Description: Object Relational Mapping 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:54:16 $
+ * Date:        $Date: 2009/05/26 14:00:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,8 +63,6 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.openmdx.application.dataprovider.transport.rmi.InprocessMarshaller;
 
 /**
  * Object Relational Mapping
@@ -222,6 +220,26 @@ public class CharacterLargeObjects {
         
     }
 
+    //------------------------------------------------------------------------
+    private static class CharacterSource_1Reader extends CharacterStringReader {
+        /**
+         * Constructor 
+         *
+         * @param chars
+         */
+        public CharacterSource_1Reader(
+            CharacterString chars
+        ) {
+            super(chars);
+        }
+
+        public long length(
+        ) {
+            return getString().length();
+        }
+
+    }
+    
     public static CharacterLargeObject valueOf(
         File source
     ){
@@ -327,9 +345,9 @@ public class CharacterLargeObjects {
          * 
          * @return a newly created input stream
          */
-        public InprocessMarshaller.CharacterSource_1Reader toStream(
+        public CharacterSource_1Reader toStream(
         ){
-            return new InprocessMarshaller.CharacterSource_1Reader(this.string);
+            return new CharacterSource_1Reader(this.string);
         }
     
     }

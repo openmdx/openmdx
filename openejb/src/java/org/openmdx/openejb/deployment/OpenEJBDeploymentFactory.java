@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/OpenEJB, http://www.openmdx.org/
- * Name:        $Id: OpenEJBDeploymentFactory.java,v 1.2 2009/01/22 10:25:04 wfro Exp $
+ * Name:        $Id: OpenEJBDeploymentFactory.java,v 1.3 2009/04/21 16:19:48 hburger Exp $
  * Description: OpenEJBDeploymentFactory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/22 10:25:04 $
+ * Date:        $Date: 2009/04/21 16:19:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -108,7 +108,10 @@ public class OpenEJBDeploymentFactory implements DeploymentFactory {
         Mode.values().length                                                          
     ];                                                             
 
-    private static final String URI_PREFIX = "xri://@openmdx*(+openejb)*";  
+	private static final String[] URI_PREFIX = {
+		"xri://openejb.apache.org*", // preferred
+		"xri://@openmdx*(+openejb)*" // deprecated	
+	};
     
     public DeploymentManager getDisconnectedDeploymentManager(
         String uri
@@ -127,14 +130,17 @@ public class OpenEJBDeploymentFactory implements DeploymentFactory {
     static Mode getMode(
         String uri
     ){
-        if(uri != null && uri.toLowerCase().startsWith(URI_PREFIX)) {
-            String mode = uri.substring(URI_PREFIX.length());
-            for(Mode candidate : Mode.values()) {
-                if(candidate.name().equalsIgnoreCase(mode)) {
-                    return candidate;
-                }
-            }
-        }
+		if(uri != null) try {
+			for (String uriPrefix : URI_PREFIX) {
+				if(uri.toLowerCase().startsWith(uriPrefix)) {
+					return Mode.valueOf(
+						uri.substring(uriPrefix.length()).toUpperCase()
+					);
+				}
+			}
+		} catch (Exception exception) {
+			// Tell the caller that we are not going to handle the uri
+		}
         return null;
     }
     

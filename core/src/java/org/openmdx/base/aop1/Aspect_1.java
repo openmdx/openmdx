@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Aspect_1.java,v 1.8 2009/02/18 21:50:14 hburger Exp $
+ * Name:        $Id: Aspect_1.java,v 1.12 2009/04/22 16:20:58 hburger Exp $
  * Description: Aspect_1 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/18 21:50:14 $
+ * Date:        $Date: 2009/04/22 16:20:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,17 +56,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
+import javax.resource.ResourceException;
+import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.Record;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.LargeObject_1_0;
-import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.accessor.view.PlugIn_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.spi.MethodInvocationSpec;
 import org.openmdx.compatibility.state1.spi.StateCapables;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -147,7 +149,7 @@ public class Aspect_1 extends PlugIn_1 {
     ){
         DataObject_1_0 core = getCore(false);
         if(core != null && core.jdoIsPersistent()) {
-            Path coreId = (Path) core.jdoGetObjectId();
+            Path coreId = core.jdoGetObjectId();
             if(StateCapables.isCoreObject(coreId)) try {
                 return super.getDelegate();
             } catch (ServiceException exception) {
@@ -195,10 +197,10 @@ public class Aspect_1 extends PlugIn_1 {
      * @see org.openmdx.base.aop2.core.StaticallyDelegatingObject_1#objGetPath()
      */
     @Override
-    public Object jdoGetObjectId(
+    public Path jdoGetObjectId(
     ) {
         DataObject_1_0 core = getCoreOrDelegate(); 
-        return core == null ? null : (Path)core.jdoGetObjectId();
+        return core == null ? null : core.jdoGetObjectId();
     }
 
     /* (non-Javadoc)
@@ -212,13 +214,9 @@ public class Aspect_1 extends PlugIn_1 {
     }
 
     @Override
-    public Object jdoGetTransactionalObjectId() {
-        try {
-            DataObject_1_0 core = getCoreOrDelegate(); 
-            return core == null ? null : core.jdoGetTransactionalObjectId();
-        } catch (Exception exception) {
-            return null;
-        }
+    public Path jdoGetTransactionalObjectId() {
+        DataObject_1_0 core = getCoreOrDelegate(); 
+        return core == null ? null : core.jdoGetTransactionalObjectId();
     }
     
     /* (non-Javadoc)
@@ -231,39 +229,6 @@ public class Aspect_1 extends PlugIn_1 {
         return getCore(true).getAspect(aspectClass);
     }
 
-    /**
-     * @throws ServiceException
-     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objMakeTransactional()
-     */
-    public void objMakeTransactional(
-    ) throws ServiceException {
-        DataObject_1_0 core = getCore(true);
-        JDOHelper.getPersistenceManager(core).makeTransactional(core);
-        super.objMakeTransactional();
-    }
-
-    /**
-     * @throws ServiceException
-     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objMakeNontransactional()
-     */
-    public void objMakeNontransactional(
-    ) throws ServiceException {
-        DataObject_1_0 core = getCore(true);
-        JDOHelper.getPersistenceManager(core).makeNontransactional(core);
-        super.objMakeNontransactional();
-    }
-
-    /**
-     * @throws ServiceException
-     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objRefresh()
-     */
-    public void objRefresh(
-    )throws ServiceException {
-        DataObject_1_0 core = this.getCore(true);
-        JDOHelper.getPersistenceManager(core).refresh(core);
-        super.objRefresh();
-    }
-    
     /**
      * @return
      * @throws ServiceException
@@ -407,34 +372,36 @@ public class Aspect_1 extends PlugIn_1 {
         return getDelegate(feature).objGetSparseArray(feature);
     }
 
-    /**
-     * @param operation
-     * @param arguments
-     * @return
-     * @throws ServiceException
-     * @see org.openmdx.base.accessor.generic.cci.Featured_1_0#objInvokeOperation(java.lang.String, org.openmdx.base.accessor.cci.Structure_1_0)
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.DelegatingObject_1#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
-    public Structure_1_0 objInvokeOperation(
-        String operation,
-        Structure_1_0 arguments
-    ) throws ServiceException {
-        return getDelegate(operation).objInvokeOperation(operation, arguments);
+    @Override
+    public boolean execute(
+        InteractionSpec ispec, 
+        Record input, 
+        Record output
+    ) throws ResourceException {
+        if(ispec instanceof MethodInvocationSpec) try {
+            return getDelegate(((MethodInvocationSpec)ispec).getFunctionName()).execute(ispec, input, output);
+        } catch (ServiceException exception) {
+            throw BasicException.initHolder(
+                new ResourceException(
+                    "Method invocation failure",
+                    BasicException.newEmbeddedExceptionStack(exception)
+                )
+            );
+        } else throw BasicException.initHolder(
+            new ResourceException(
+                "Method invocation failure",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_PARAMETER,
+                    new BasicException.Parameter("interactionSpec", ispec == null ? "<null>" : ispec.getClass().getName())
+                )
+            )
+        );
     }
 
-    /**
-     * @param operation
-     * @param arguments
-     * @return
-     * @throws ServiceException
-     * @see org.openmdx.base.accessor.generic.cci.Featured_1_0#objInvokeOperationInUnitOfWork(java.lang.String, org.openmdx.base.accessor.cci.Structure_1_0)
-     */
-    public Structure_1_0 objInvokeOperationInUnitOfWork(
-        String operation,
-        Structure_1_0 arguments
-    ) throws ServiceException {
-        return getDelegate(operation).objInvokeOperationInUnitOfWork(operation, arguments);
-    }
-    
     /**
      * Validate the core value to be set
      * 

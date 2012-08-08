@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DatatypeFactories.java,v 1.1 2008/09/25 16:44:31 hburger Exp $
+ * Name:        $Id: DatatypeFactories.java,v 1.2 2009/03/31 17:05:17 hburger Exp $
  * Description: DatatypeFactories 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 16:44:31 $
+ * Date:        $Date: 2009/03/31 17:05:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,12 +51,14 @@
 package org.w3c.spi;
 
 
+import java.util.logging.Level;
+
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
-import org.slf4j.LoggerFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 
 /**
  * DatatypeFactories
@@ -121,9 +123,8 @@ public class DatatypeFactories {
             factory = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException exception) {
             failure = exception;
-            LoggerFactory.getLogger(
-                DatatypeFactories.class
-            ).error(
+            LoggerFactory.getLogger().log(
+                Level.SEVERE,
                 "XML Datatype Factory Acquisition Failure",
                 failure
             );

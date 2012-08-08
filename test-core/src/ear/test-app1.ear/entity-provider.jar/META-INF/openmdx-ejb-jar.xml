@@ -4,7 +4,7 @@
   	<enterprise-beans>
     	<session>
       		<ejb-name>EntityManagerFactory</ejb-name>
-			<local-jndi-name>org/openmdx/test/app1/EntityProviderFactory</local-jndi-name>
+			<local-jndi-name>test/openmdx/test/app1/EntityProviderFactory</local-jndi-name>
 	      	<pool>
 	        	<initial-capacity>1</initial-capacity>
 	        	<maximum-capacity>10</maximum-capacity>
@@ -13,7 +13,7 @@
     	</session>
     	<session>
       		<ejb-name>Gateway</ejb-name>
-			<jndi-name>org/openmdx/test/app1/Gateway</jndi-name>
+			<jndi-name>test/openmdx/test/app1/Gateway</jndi-name>
 	      	<pool>
 	        	<initial-capacity>1</initial-capacity>
 	        	<maximum-capacity>10</maximum-capacity>

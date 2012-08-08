@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValueFactory.java,v 1.27 2009/03/08 18:03:22 wfro Exp $
+ * Name:        $Id: AttributeValueFactory.java,v 1.28 2009/05/16 23:02:56 wfro Exp $
  * Description: AttributeMapper
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:22 $
+ * Date:        $Date: 2009/05/16 23:02:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,8 +62,8 @@ import java.util.Map;
 
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.log.AppLog;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.accessor.jmi.spi.RefPackage_1;

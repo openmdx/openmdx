@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: javaURLContextFactory.java,v 1.1 2009/01/12 12:49:24 wfro Exp $
+ * Name:        $Id: javaURLContextFactory.java,v 1.2 2009/03/31 17:06:10 hburger Exp $
  * Description: java URL Context Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:24 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,6 +51,8 @@
 package org.openmdx.kernel.naming.component.java;
 
 import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.Name;
@@ -58,11 +60,9 @@ import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
 import javax.naming.spi.ObjectFactory;
 
-import org.openmdx.kernel.naming.container.openmdx.openmdxURLContextFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.naming.spi.ClassLoaderContext;
 import org.openmdx.kernel.naming.spi.ClassLoadertContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * java URL Context Factory
@@ -82,7 +82,8 @@ public class javaURLContextFactory implements ObjectFactory {
         try {
             return initialContext.getContext(contextName, classLoader);
         } catch (NamingException exception) {
-            logger.error(
+            logger.log(
+            	Level.SEVERE,
             	"Initialization of class loader specific context \"" +
 				contextName + "\" in namespace \"" + URL_PREFIX + "\" failed",            		
             	exception
@@ -124,7 +125,7 @@ public class javaURLContextFactory implements ObjectFactory {
     /**
      * To log instantiation failures
      */
-    final static private Logger logger = LoggerFactory.getLogger(openmdxURLContextFactory.class);
+    final static private Logger logger = LoggerFactory.getLogger();
     
     /**
      * The URL scheme supported by this factory

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1PredicateInvocationHandler.java,v 1.15 2009/01/13 17:33:49 wfro Exp $
+ * Name:        $Id: Jmi1PredicateInvocationHandler.java,v 1.18 2009/06/09 12:45:17 hburger Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:33:49 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,11 +60,10 @@ import java.util.Collections;
 
 import javax.jdo.Query;
 
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.Quantors;
 import org.w3c.cci2.AnyTypePredicate;
@@ -133,8 +132,7 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
         } 
         else if (
             declaringClass == Query.class ||
-            declaringClass == RefFilter_1_0.class ||
-            declaringClass == RefFilter_1_1.class 
+            declaringClass == RefFilter_1_0.class 
         ) {
             try {
                 return method.invoke(
@@ -165,7 +163,7 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
                     );
                     return null;
                 } 
-                else if (args[0] instanceof Collection){
+                else if (args[0] instanceof Collection<?>){
                     this.delegate.elementOf(
                         (Collection<?>)args[0]
                     );
@@ -188,7 +186,7 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
                     );
                     return null;
                 } 
-                else if (args[0] instanceof Collection){
+                else if (args[0] instanceof Collection<?>){
                     this.delegate.notAnElementOf(
                         (Collection<?>)args[0]
                     );

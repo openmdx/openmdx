@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1Package_1_0.java,v 1.3 2009/02/24 15:48:54 hburger Exp $
+ * Name:        $Id: Jmi1Package_1_0.java,v 1.11 2009/05/29 17:04:10 hburger Exp $
  * Description: RefPackage Interface 1.5
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 15:48:54 $
+ * Date:        $Date: 2009/05/29 17:04:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,19 +50,16 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
-import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.jdo.datastore.JDOConnection;
 
-import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
+import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_2;
 
 /**
  * RefPackage Interface 1.5
  */
-public interface Jmi1Package_1_0 extends RefPackage_1_2 {
+public interface Jmi1Package_1_0 extends RefPackage_1_0 {
 
     /**
      * Lookup the implementation specified by <code>qualifiedClassName</code> and create
@@ -92,32 +89,16 @@ public interface Jmi1Package_1_0 extends RefPackage_1_2 {
     /**
      * Tells whether the RefPackage's delegate is an ObjectFactory_1_0 or
      * a PersistenceManager.
-     * <p>
-     * <code>refObjectFactory()</code> may be called if 
-     * <code>refLegacyDelegate()</code> returns <code>true</code>,
-     * <code>refDelegate()</code> may be called if 
-     * <code>refLegacyDelegate()</code> returns <code>false</code>.
      * 
      * @return <code>true</code> if the RefPackage's delegate is an 
-     * ObjectFactory_1_0 instance, <code>false</code> if the RefPackage's 
+     * PersistenceManager_1_1 instance, <code>false</code> if the RefPackage's 
      * delegate is a PersistenceManager instance
      * 
-     * @see RefPackage_1_0#refObjectFactory()
+     * @see DataObjectManager_1_0
+     * @see #refDelegate()
      */
-    boolean hasLegacyDelegate();
+    boolean isTerminal();
     
-    /**
-     * Retrieve the RefPackage's delegate 
-     * <p>
-     * This method must not be called if <code>refLegacyDelegate()</code>
-     * evaluates to <code>true</code>.
-     * 
-     * @return the RefPackage's delegate
-     * 
-     * @see PersistenceManager_1_0
-     */
-    PersistenceManager getDelegate();
-
     /**
      * Retrieve the implementation package name
      * 
@@ -143,19 +124,4 @@ public interface Jmi1Package_1_0 extends RefPackage_1_2 {
         Object next
     );
 
-    /**
-     * In order to retrieve the native connection
-     * 
-     * @return a JDOConnection
-     */
-    JDOConnection getDataStoreConnection();
-    
-    /**
-     * Mark all persistent-nontransactional instances as no longer needed 
-     * in the cache.
-     * <p> 
-     * It transitions all persistent-nontransactional instances to hollow.
-     */
-    void evictAll();
-    
 }

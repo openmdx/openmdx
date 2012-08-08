@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: PasscodeLoginModule.java,v 1.8 2009/03/08 18:52:19 wfro Exp $
+ * Name:        $Id: PasscodeLoginModule.java,v 1.9 2009/06/05 16:23:42 hburger Exp $
  * Description: Passcode Login Module
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:19 $
+ * Date:        $Date: 2009/06/05 16:23:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,6 +71,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.security.auth.callback.StandardCallbackPrompts;
 import org.openmdx.security.auth.passcode.exception.NewPINRequiredException;
 import org.openmdx.security.auth.passcode.exception.WaitForNextTokenException;
@@ -449,11 +450,12 @@ public class PasscodeLoginModule implements LoginModule {
 			String message,
 			Throwable cause
 	){
-		LoginException exception = new LoginException(message);
-		exception.initCause(
-				BasicException.toStackedException(cause, exception)
+	    return Throwables.initCause(
+			new LoginException(message),
+		    cause, 
+		    BasicException.Code.DEFAULT_DOMAIN, 
+		    BasicException.Code.GENERIC
 		);
-		return exception;
 	}
 
 	/**

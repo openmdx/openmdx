@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CompositeObjectDataBinding.java,v 1.15 2009/03/08 18:03:26 wfro Exp $
+ * Name:        $Id: CompositeObjectDataBinding.java,v 1.16 2009/04/07 19:29:13 hburger Exp $
  * Description: CompositeObjectDataBinding 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:26 $
+ * Date:        $Date: 2009/04/07 19:29:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -353,7 +353,7 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
                 try {
                     Object value = object.refGetValue(parameter.getKey());
                     if(value instanceof Collection) {
-                        Collection<Object> values = (Collection)value;
+                        Collection values = (Collection)value;
                         values.add(
                             this.getParameterValue(parameter.getValue())
                         );
@@ -499,7 +499,7 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
                 String attributeName = this.getAttributeName(qualifiedFeatureName);      
                 Object oldValue = composite.refGetValue(attributeName);
                 if(oldValue instanceof Collection) {
-                    Collection<Object> values = (Collection<Object>)oldValue;
+                    Collection values = (Collection)oldValue;
                     values.clear();
                     if(newValue instanceof Collection) {
                         values.addAll((Collection)newValue);

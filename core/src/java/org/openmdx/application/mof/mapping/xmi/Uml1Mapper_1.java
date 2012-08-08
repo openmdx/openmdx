@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Uml1Mapper_1.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: Uml1Mapper_1.java,v 1.5 2009/06/09 12:45:18 hburger Exp $
  * Description: XMIExternalizer_1
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,12 +63,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipOutputStream;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.log.SysLog;
 
 //---------------------------------------------------------------------------
@@ -85,7 +84,7 @@ public class Uml1Mapper_1
   //---------------------------------------------------------------------------
   public void externalize(
     String qualifiedPackageName,
-    Model_1_3 model, 
+    Model_1_0 model, 
     ZipOutputStream zip
   ) throws ServiceException {
     
@@ -161,7 +160,7 @@ public class Uml1Mapper_1
     ) {
       ModelElement_1_0 elementDef = (ModelElement_1_0)iterator.next();
 
-      if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PACKAGE))
+      if(elementDef.objGetClass().equals(ModelAttributes.PACKAGE))
       {
         String qualifiedName = ((String)elementDef.objGetValue("qualifiedName")).substring(
           0,
@@ -278,15 +277,15 @@ public class Uml1Mapper_1
 //    // only write model elements contained in the defining model (segment name)
 //    // @see CR0001066 
 //    if(packageName.startsWith(elementDef.path().get(4))) {
-    if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE)) {
+    if(elementDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE)) {
       writer.writePrimitiveType(elementDef);
     }
-    else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ALIAS_TYPE)) {
+    else if(elementDef.objGetClass().equals(ModelAttributes.ALIAS_TYPE)) {
       ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
-      boolean refTypeIsPrimitive = typeDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE);
+      boolean refTypeIsPrimitive = typeDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE);
       writer.writeAliasType(elementDef, typeDef, refTypeIsPrimitive);
     }
-    else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.CLASS)) {
+    else if(elementDef.objGetClass().equals(ModelAttributes.CLASS)) {
 
       // determine the direct subtypes
       List subtypePaths = elementDef.objGetList("subtype");
@@ -341,14 +340,14 @@ public class Uml1Mapper_1
         hasStructuralFeatures
       );
     }
-    else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)) {
+    else if(elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
       ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
-      boolean refTypeIsPrimitive = typeDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE);
+      boolean refTypeIsPrimitive = typeDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE);
       boolean isDerived = ((Boolean)elementDef.objGetValue("isDerived")).booleanValue();
       boolean isChangeable = ((Boolean)elementDef.objGetValue("isChangeable")).booleanValue();
       writer.writeAttribute(elementDef, isDerived, isChangeable, typeDef, refTypeIsPrimitive);
     }
-    else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ASSOCIATION)) {
+    else if(elementDef.objGetClass().equals(ModelAttributes.ASSOCIATION)) {
       writer.writeAssociationHeader(elementDef);
       ModelElement_1_0 associationEnd0Def = this.model.getElement(
         elementDef.objGetList("content").get(0)
@@ -393,7 +392,7 @@ public class Uml1Mapper_1
       );      
       writer.writeAssociationFooter(elementDef);
     }
-    else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)) {
+    else if(elementDef.objGetClass().equals(ModelAttributes.OPERATION)) {
       List exceptions = new ArrayList();
       for(
         Iterator it = elementDef.objGetList("exception").iterator();
@@ -418,7 +417,7 @@ public class Uml1Mapper_1
       
       writer.writeOperationFooter(elementDef);
     }
-    else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.EXCEPTION)) {
+    else if(elementDef.objGetClass().equals(ModelAttributes.EXCEPTION)) {
       writer.writeExceptionHeader(elementDef);
       for(
         Iterator iterator = elementDef.objGetList("content").iterator();
@@ -431,12 +430,12 @@ public class Uml1Mapper_1
       }
       writer.writeExceptionFooter(elementDef);
     }
-    else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PARAMETER)) {
+    else if(elementDef.objGetClass().equals(ModelAttributes.PARAMETER)) {
       ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
-      boolean paramTypeIsPrimitive = typeDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE);
+      boolean paramTypeIsPrimitive = typeDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE);
       writer.writeParameter(elementDef, typeDef, paramTypeIsPrimitive);
     }
-    else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_TYPE)) {
+    else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)) {
       
       // according to MOF every structure type must have at least one structure
       // field; however in openMDX 'Void' has no structure field, therefore
@@ -459,9 +458,9 @@ public class Uml1Mapper_1
       
       writer.writeStructureTypeFooter(elementDef, hasStructureFields);
     }
-    else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_FIELD)) {
+    else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
       ModelElement_1_0 typeDef = this.model.getElement(elementDef.objGetValue("type"));
-      boolean refTypeIsPrimitive = typeDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE);
+      boolean refTypeIsPrimitive = typeDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE);
       writer.writeStructureField(elementDef, typeDef, refTypeIsPrimitive);
     }
   }
@@ -477,7 +476,7 @@ public class Uml1Mapper_1
         iterator.hasNext();
       ) {
         ModelElement_1_0 elementDef = this.model.getElement(iterator.next());
-        if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_FIELD)) {
+        if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
           return true;
         }
       }
@@ -496,15 +495,15 @@ public class Uml1Mapper_1
         iterator.hasNext();
       ) {
         ModelElement_1_0 elementDef = this.model.getElement(iterator.next());
-        if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)) {
+        if(elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
           return true;
         }
-        else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)) {
+        else if(elementDef.objGetClass().equals(ModelAttributes.OPERATION)) {
           return true;
         }
         // in openMDX exceptions are modeled as operations and are therefore 
         // structural features as well in the broadest sense
-        else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.EXCEPTION)) {
+        else if(elementDef.objGetClass().equals(ModelAttributes.EXCEPTION)) {
           return true;
         }
       }

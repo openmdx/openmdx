@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestManager.java,v 1.10 2009/02/19 16:39:12 hburger Exp $
+ * Name:        $Id: TestManager.java,v 1.11 2009/05/20 15:53:57 wfro Exp $
  * Description: Test Manager
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/19 16:39:12 $
+ * Date:        $Date: 2009/05/20 15:53:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,7 +62,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.openmdx.application.dataprovider.transport.ejb.cci.Jmi1AccessorFactory_2;
+import org.openmdx.application.persistence.ejb.Jmi1AccessorFactory_2;
 import org.openmdx.base.Version;
 
 /**

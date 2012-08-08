@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LateBindingConnection_2.java,v 1.2 2009/01/11 21:19:36 wfro Exp $
+ * Name:        $Id: LateBindingConnection_2.java,v 1.4 2009/06/08 17:12:04 hburger Exp $
  * Description: Late Binding Connection
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/11 21:19:36 $
+ * Date:        $Date: 2009/06/08 17:12:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,11 +53,11 @@ package org.openmdx.application.dataprovider.transport.ejb.cci;
 
 import java.util.Hashtable;
 
+import javax.resource.spi.LocalTransactionException;
 import javax.transaction.Synchronization;
 
-import org.openmdx.application.dataprovider.cci.OptimisticTransaction_2_0;
 import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1_3Connection;
-import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.resource.spi.TransactionManager;
 
 /**
  * Late Binding Connection
@@ -106,8 +106,8 @@ public class LateBindingConnection_2
      */
     public void commit(
         Synchronization synchronization
-    ) throws ServiceException {
-        ((OptimisticTransaction_2_0)getDelegate()).commit(synchronization);
+    ) throws LocalTransactionException {
+        ((TransactionManager)getDelegate()).commit(synchronization);
     }
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefFilter_1.java,v 1.42 2009/02/10 16:36:37 hburger Exp $
+ * Name:        $Id: RefFilter_1.java,v 1.48 2009/06/09 12:45:17 hburger Exp $
  * Description: RefFilter_1 class
- * Revision:    $Revision: 1.42 $
+ * Revision:    $Revision: 1.48 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/10 16:36:37 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
 
 import javax.jdo.JDOHelper;
 import javax.jmi.reflect.JmiException;
@@ -70,25 +71,23 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.application.dataprovider.cci.Orders;
 import org.openmdx.application.mof.cci.ModelAttributes;
-import org.openmdx.application.mof.cci.Multiplicities;
-import org.openmdx.application.mof.cci.PrimitiveTypes;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_1;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Orders;
 import org.openmdx.base.query.Quantors;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
@@ -101,22 +100,23 @@ import org.w3c.spi.ImmutableDatatypeFactory;
 /**
  * RefFilter_1_0 implementation
  */
-public class RefFilter_1
-implements RefFilter_1_1 {
+public class RefFilter_1 implements RefFilter_1_0 {
 
     //-------------------------------------------------------------------------
-    public RefFilter_1(
+    protected RefFilter_1(
         RefPackage_1_0 refPackage,
         String filterType,
         FilterProperty[] filterProperties,
         AttributeSpecifier[] attributeSpecifiers
     ) {
-        this.filterProperties = filterProperties == null
-        ? new ArrayList<FilterProperty>()
-            : new ArrayList<FilterProperty>(Arrays.asList(filterProperties));
-        this.attributeSpecifiers = attributeSpecifiers == null
-        ? new ArrayList<AttributeSpecifier>()
-            : new ArrayList<AttributeSpecifier>(Arrays.asList(attributeSpecifiers));
+        this.filterProperties = filterProperties == null ? new ArrayList<FilterProperty>(
+        ) : new ArrayList<FilterProperty>(
+            Arrays.asList(filterProperties)
+        );
+        this.attributeSpecifiers = attributeSpecifiers == null ? new ArrayList<AttributeSpecifier>(
+        ) : new ArrayList<AttributeSpecifier>(
+            Arrays.asList(attributeSpecifiers)
+        );
         this.filterType = filterType;
         this.filterProperties.add(
             this.filterTypeProperty = new FilterProperty(
@@ -170,16 +170,14 @@ implements RefFilter_1_1 {
     ) throws ServiceException {
 
         if(
-                !elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE) &&
-                !this.getModel().referenceIsStoredAsAttribute(elementDef)
+            !elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE) &&
+            !this.getModel().referenceIsStoredAsAttribute(elementDef)
         ) {
             throw new ServiceException (
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
                 "model element not of type " + ModelAttributes.ATTRIBUTE + " and not " + ModelAttributes.REFERENCE + " stored as attribute",
-                new BasicException.Parameter [] {
-                    new BasicException.Parameter("model element", elementDef)
-                }
+                new BasicException.Parameter("model element", elementDef)
             );
         }
     }
@@ -239,7 +237,7 @@ implements RefFilter_1_1 {
                                                 Quantors.PIGGY_BACK,
                                                 namespace + attribute,
                                                 FilterOperators.PIGGY_BACK,
-                                                v instanceof Collection ? ((Collection<?>)v).toArray() : new Object[]{v}
+                                                v instanceof Collection<?> ? ((Collection<?>)v).toArray() : new Object[]{v}
                                             )
                                         );
                                     }
@@ -247,13 +245,11 @@ implements RefFilter_1_1 {
                                     BasicException.Code.DEFAULT_DOMAIN,
                                     BasicException.Code.ASSERTION_FAILURE,
                                     "Object can't be piggy backed as context unless it is an instance of org::openmdx::base::Context",
-                                    new BasicException.Parameter [] {
-                                        new BasicException.Parameter("quantor", Quantors.toString(quantor)),
-                                        new BasicException.Parameter("feature", featureName),
-                                        new BasicException.Parameter("operator", FilterOperators.toString(operator)),
-                                        new BasicException.Parameter("index", ii),
-                                        new BasicException.Parameter("class", objectClass)
-                                    }
+                                    new BasicException.Parameter("quantor", Quantors.toString(quantor)),
+                                    new BasicException.Parameter("feature", featureName),
+                                    new BasicException.Parameter("operator", FilterOperators.toString(operator)),
+                                    new BasicException.Parameter("index", ii),
+                                    new BasicException.Parameter("class", objectClass)
                                 );
                             }
                         }
@@ -261,11 +257,9 @@ implements RefFilter_1_1 {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_SUPPORTED,
                         "The context feature supports piggy backing with 'THERE EXISTS context EQUAL TO' clauses only",
-                        new BasicException.Parameter [] {
-                            new BasicException.Parameter("quantor", Quantors.toString(quantor)),
-                            new BasicException.Parameter("feature", featureName),
-                            new BasicException.Parameter("operator", FilterOperators.toString(operator))
-                        }
+                        new BasicException.Parameter("quantor", Quantors.toString(quantor)),
+                        new BasicException.Parameter("feature", featureName),
+                        new BasicException.Parameter("operator", FilterOperators.toString(operator))
                     );
                 } else {
                     List<Path> paths = new ArrayList<Path>();
@@ -353,9 +347,7 @@ implements RefFilter_1_1 {
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
                     "unsupported feature type. Must be [Attribute|Reference]",
-                    new BasicException.Parameter [] {
-                        new BasicException.Parameter("feature", featureName)
-                    }
+                    new BasicException.Parameter("feature", featureName)
                 );
             }
         }
@@ -386,11 +378,11 @@ implements RefFilter_1_1 {
 
         try {
             assertAttributeOrReferenceStoredAsAttribute(featureDef);
-            SysLog.trace("feature", featureDef);
-            SysLog.trace("order", Orders.toString(order));
+            String name = (String)featureDef.objGetValue("name"); 
+            SysLog.log(Level.FINEST, "Order by {} {}", name, Orders.toString(order));
             this.attributeSpecifiers.add(
                 new AttributeSpecifier(
-                    (String)featureDef.objGetValue("name"),
+                    name,
                     index,
                     order
                 )
@@ -533,7 +525,7 @@ implements RefFilter_1_1 {
                 ); 
             } else {
                 RefPackage outermostPackage = this.refPackage.refOutermostPackage();
-                RefPackage_1_1 filterPackage = (RefPackage_1_1)outermostPackage.refPackage(
+                RefPackage_1_0 filterPackage = (RefPackage_1_0)outermostPackage.refPackage(
                     type.substring(0, type.lastIndexOf(':'))
                 );
                 return filterPackage.refCreateFilter(
@@ -560,6 +552,14 @@ implements RefFilter_1_1 {
         this.filterProperties.clear();
         this.attributeSpecifiers.clear();
         this.filterProperties.add(this.filterTypeProperty);
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.cci.RefFilter_1_0#refMofId()
+     */
+    public String refMofId() {
+        return this.filterType + "Query";
     }
 
     //-------------------------------------------------------------------------

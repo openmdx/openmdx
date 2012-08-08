@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RoseImporter_1.java,v 1.1 2009/01/13 02:10:45 wfro Exp $
+ * Name:        $Id: RoseImporter_1.java,v 1.8 2009/06/14 00:03:42 wfro Exp $
  * Description: model.importer.RoseImporter
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:45 $
+ * Date:        $Date: 2009/06/14 00:03:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,19 +69,21 @@ import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
+
 import org.omg.mof.cci.DirectionKind;
 import org.omg.mof.cci.ScopeKind;
 import org.omg.mof.cci.VisibilityKind;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.application.mof.cci.ModelAttributes;
-import org.openmdx.application.mof.cci.Stereotypes;
 import org.openmdx.application.mof.externalizer.spi.ModelImporter_1;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
+import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -467,10 +469,10 @@ extends ModelImporter_1 {
     /**
      * Parse an operation parameter as STRUCTURE_FIELD
      */
-    private DataproviderObject parseRoseParameter(
+    private MappedRecord parseRoseParameter(
         RoseLexer lexer,
         List scope,
-        DataproviderObject parameterType
+        MappedRecord parameterType
     ) throws ServiceException {
 
         lexer.assertToken("(");
@@ -478,7 +480,6 @@ extends ModelImporter_1 {
         lexer.assertToken("Parameter");
 
         String parameterName = lexer.getToken();
-//      int posOfFirstChar = 0;
 
         // because Rose does not support multiplicity for parameters they are put
         // in front of the parameter name: <<x..>> parameterName
@@ -489,24 +490,26 @@ extends ModelImporter_1 {
             parameterName,
             multiplicity
         );
-        DataproviderObject parameterDef = new DataproviderObject(
-            new Path(
-                parameterType.path().toString() + "::" + parameterName
-            ) 
-        );
-
-        // object_class
-        parameterDef.values(SystemAttributes.OBJECT_CLASS).add(
-            ModelAttributes.STRUCTURE_FIELD
-        );
-
+        ObjectHolder_2Facade parameterDefFacade;
+        try {
+            parameterDefFacade = ObjectHolder_2Facade.newInstance(
+                newFeaturePath(
+                    ObjectHolder_2Facade.getPath(parameterType),
+                    parameterName
+                ),
+                ModelAttributes.STRUCTURE_FIELD
+            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         // container
-        parameterDef.values("container").add(
-            parameterType.path()
+        parameterDefFacade.attributeValues("container").add(
+            ObjectHolder_2Facade.getPath(parameterType)
         );
 
-        parameterDef.values("maxLength").add(new Integer(1000000));
-        parameterDef.values("multiplicity").add(multiplicity.toString());
+        parameterDefFacade.attributeValues("maxLength").add(new Integer(1000000));
+        parameterDefFacade.attributeValues("multiplicity").add(multiplicity.toString());
 
         // quid
         if("quid".equals(lexer.peekToken())) {
@@ -517,7 +520,7 @@ extends ModelImporter_1 {
         // documentation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            parameterDef.values("annotation").add(
+            parameterDefFacade.attributeValues("annotation").add(
                 lexer.getToken()
             );
         }
@@ -525,7 +528,7 @@ extends ModelImporter_1 {
         // type
         if("type".equals(lexer.peekToken())) {
             lexer.assertToken("type");
-            parameterDef.values("type").add(
+            parameterDefFacade.attributeValues("type").add(
                 roseNameToPath(lexer.getToken())
             );
         }
@@ -538,14 +541,14 @@ extends ModelImporter_1 {
 
         lexer.assertToken(")");
 
-        return parameterDef;
+        return parameterDefFacade.getDelegate();
     }
 
     //---------------------------------------------------------------------------
     private void parseRoseOperation(
         RoseLexer lexer,
         List scope,
-        DataproviderObject classDef
+        MappedRecord classDef
     ) throws ServiceException {
 
         lexer.assertToken("(");
@@ -554,24 +557,26 @@ extends ModelImporter_1 {
 
         String operationName = lexer.getToken();
 
-        DataproviderObject operationDef = new DataproviderObject(
-            new Path(
-                classDef.path().toString() + "::" + operationName
-            ) 
-        );
-
-        // object_class
-        operationDef.values(SystemAttributes.OBJECT_CLASS).add(
-            ModelAttributes.OPERATION
-        );
-
+        ObjectHolder_2Facade operationDefFacade;
+        try {
+            operationDefFacade = ObjectHolder_2Facade.newInstance(
+                newFeaturePath(
+                    ObjectHolder_2Facade.getPath(classDef),
+                    operationName
+                ),
+                ModelAttributes.OPERATION
+            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         // container
-        operationDef.values("container").add(
-            classDef.path()
+        operationDefFacade.attributeValues("container").add(
+            ObjectHolder_2Facade.getPath(classDef)
         );
 
         // default values
-        operationDef.values("isQuery").add(
+        operationDefFacade.attributeValues("isQuery").add(
             new Boolean(false)
         );
 
@@ -604,12 +609,12 @@ extends ModelImporter_1 {
                 //SysLog.trace("tool=" + toolName + "; attribute=" + attrName + "; value=", attrValue);
                 if("SPICE".equals(toolName)) {
                     if("true".equals(attrValue) || "false".equals(attrValue)) {
-                        operationDef.clearValues(attrName).add(
+                        operationDefFacade.clearAttributeValues(attrName).add(
                             new Boolean((String)attrValue)
                         );
                     }
                     else {
-                        operationDef.clearValues(attrName).add(
+                        operationDefFacade.clearAttributeValues(attrName).add(
                             attrValue 
                         );
                     }
@@ -628,7 +633,7 @@ extends ModelImporter_1 {
         // documentation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            operationDef.values("annotation").add(
+            operationDefFacade.attributeValues("annotation").add(
                 lexer.getToken()
             );
         }
@@ -637,25 +642,24 @@ extends ModelImporter_1 {
         boolean isException = false;
         if("stereotype".equals(lexer.peekToken())) {
             lexer.assertToken("stereotype");
-            operationDef.values("stereotype").addAll(
+            operationDefFacade.attributeValues("stereotype").addAll(
                 this.parseStereotype(lexer.getToken())
             );
-
-            // well-known stereotype <<exception>>
-            if(operationDef.values("stereotype").contains(Stereotypes.EXCEPTION)) {
-                operationDef.clearValues(SystemAttributes.OBJECT_CLASS).add(
+            // Stereotype <<exception>>
+            if(operationDefFacade.attributeValues("stereotype").contains(Stereotypes.EXCEPTION)) {
+                operationDefFacade.getValue().setRecordName(
                     ModelAttributes.EXCEPTION
                 );
-                operationDef.clearValues("stereotype");
+                operationDefFacade.clearAttributeValues("stereotype");
                 isException = true;
             }
         }
-
+        
         // parameters
         if("parameters".equals(lexer.peekToken())) {
 
             /**
-             * In SPICE all operations have excatly one parameter with name 'in'. The importer
+             * In openMDX all operations have exactly one parameter with name 'in'. The importer
              * supports two forms how parameters may be specified:
              * 1) p0:t0, p1:t1, ..., pn:tn. In this case a class with stereotype <parameter> is created
              *    and p0, ..., pn are added as class attributes. Finally, a parameter with name 'in'
@@ -670,20 +674,28 @@ extends ModelImporter_1 {
             String capOperationName = 
                 operationName.substring(0,1).toUpperCase() +
                 operationName.substring(1);
-
-            DataproviderObject parameterType = new DataproviderObject(
-                new Path(
-                    classDef.path().toString() + capOperationName + "Params"
-                )
-            );
-            parameterType.values(SystemAttributes.OBJECT_CLASS).add(
-                ModelAttributes.STRUCTURE_TYPE
-            );
-            parameterType.values("visibility").add(VisibilityKind.PUBLIC_VIS);
-            parameterType.values("isAbstract").add(new Boolean(false));
-            parameterType.values("container").addAll(
-                classDef.values("container")
-            );
+            ObjectHolder_2Facade parameterTypeFacade;
+            try {
+                parameterTypeFacade = ObjectHolder_2Facade.newInstance(
+                    new Path(
+                        ObjectHolder_2Facade.getPath(classDef).toString() + capOperationName + "Params"
+                    ),
+                    ModelAttributes.STRUCTURE_TYPE
+                );
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
+            parameterTypeFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
+            parameterTypeFacade.attributeValues("isAbstract").add(new Boolean(false));
+            try {
+                parameterTypeFacade.attributeValues("container").addAll(
+                    ObjectHolder_2Facade.newInstance(classDef).attributeValues("container")
+                );
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
 
             // parse parameters (features of modelInParameterType)
             lexer.assertToken("parameters");
@@ -699,47 +711,47 @@ extends ModelImporter_1 {
             boolean parametersCreated = false;
 
             while(!lexer.isRightParam()) {
-
-                DataproviderObject parameterDef = this.parseRoseParameter(
+                MappedRecord parameterDef = this.parseRoseParameter(
                     lexer,
                     scope,
-                    parameterType
+                    parameterTypeFacade.getDelegate()
                 );
-
                 /**
                  * Case 2: Parameter with name 'in'. Create object as PARAMETER.
                  */
-                String fullQualifiedParameterName = parameterDef.path().getBase();
+                String fullQualifiedParameterName = ObjectHolder_2Facade.getPath(parameterDef).getBase();
                 if("in".equals(fullQualifiedParameterName.substring(fullQualifiedParameterName.lastIndexOf(':') + 1))) {
-
                     // 'in' is the only allowed parameter
                     if(parametersCreated) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.ASSERTION_FAILURE, 
                             "Parameter format must be [p0:T0...pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE,
-                            new BasicException.Parameter("operation", operationDef)
-                        );        		
+                            new BasicException.Parameter("operation", operationDefFacade.getDelegate())
+                        );              
                     }
-                    parameterType = new DataproviderObject(
-                        (Path)parameterDef.values("type").get(0)
-                    );
+                    try {
+                        parameterTypeFacade = ObjectHolder_2Facade.newInstance(
+                            (Path)ObjectHolder_2Facade.newInstance(parameterDef).attributeValues("type").get(0)
+                        );
+                    } 
+                    catch (ResourceException e) {
+                        throw new ServiceException(e);
+                    }
                     createParameterType = false;
                 }
-
                 /**
                  * Case 1: Parameter is attribute of parameter type. Create object as STRUCTURE_FIELD.
                  */
                 else {
-
                     // 'in' is the only allowed parameter
                     if(!createParameterType) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.ASSERTION_FAILURE, 
                             "Parameter format must be [p0:T0, ... ,pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE,
-                            new BasicException.Parameter("operation", operationDef)
-                        );        		
+                            new BasicException.Parameter("operation", operationDefFacade.getDelegate())
+                        );              
                     }
                     this.createModelElement(
                         scope,
@@ -749,103 +761,115 @@ extends ModelImporter_1 {
                 }
             }
             lexer.assertToken(")");
-
             /**
              * Case 1: parameter type must be created
              */
             if(createParameterType) {
                 this.createModelElement(
                     scope,
-                    parameterType
+                    parameterTypeFacade.getDelegate()
                 );
             }
-
             // in-parameter
-            DataproviderObject inParameterDef = new DataproviderObject(
-                new Path(
-                    operationDef.path().toString() + "::in"
-                ) 
-            );
-            inParameterDef.values(SystemAttributes.OBJECT_CLASS).add(
-                ModelAttributes.PARAMETER
+            ObjectHolder_2Facade inParameterDefFacade;
+            try {
+                inParameterDefFacade = ObjectHolder_2Facade.newInstance(
+                    newFeaturePath(
+                        operationDefFacade.getPath(),
+                        "in"
+                    ),
+                    ModelAttributes.PARAMETER
+                );
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
+            inParameterDefFacade.attributeValues("container").add(
+                operationDefFacade.getPath()
             );  
-            inParameterDef.values("container").add(
-                operationDef.path()
-            );  
-            inParameterDef.values("direction").add(
+            inParameterDefFacade.attributeValues("direction").add(
                 DirectionKind.IN_DIR
             );
-            inParameterDef.values("multiplicity").add(
+            inParameterDefFacade.attributeValues("multiplicity").add(
                 "1..1"
             );
-            inParameterDef.values("type").add(
-                parameterType.path()
+            inParameterDefFacade.attributeValues("type").add(
+                parameterTypeFacade.getPath()
             );
             this.createModelElement(
                 scope,
-                inParameterDef
+                inParameterDefFacade.getDelegate()
             );
-
         }
 
         // void in-parameter
         else {
-            DataproviderObject inParameterDef = new DataproviderObject(
-                new Path(
-                    operationDef.path().toString() + "::in"
-                ) 
-            );
-            inParameterDef.values(SystemAttributes.OBJECT_CLASS).add(
-                ModelAttributes.PARAMETER
+            ObjectHolder_2Facade inParameterDefFacade;
+            try {
+                inParameterDefFacade = ObjectHolder_2Facade.newInstance(
+                    newFeaturePath(
+                        operationDefFacade.getPath(),
+                        "in"
+                    ),
+                    ModelAttributes.PARAMETER
+                );
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
+            inParameterDefFacade.attributeValues("container").add(
+                operationDefFacade.getPath()
             );  
-            inParameterDef.values("container").add(
-                operationDef.path()
-            );  
-            inParameterDef.values("direction").add(
+            inParameterDefFacade.attributeValues("direction").add(
                 DirectionKind.IN_DIR
             );
-            inParameterDef.values("multiplicity").add(
+            inParameterDefFacade.attributeValues("multiplicity").add(
                 "1..1"
             );
-            inParameterDef.values("type").add(
+            inParameterDefFacade.attributeValues("type").add(
                 roseNameToPath("org::openmdx::base::Void")
             );
             this.createModelElement(
                 scope,
-                inParameterDef
+                inParameterDefFacade.getDelegate()
             );
         }
 
         // result
-        DataproviderObject resultDef = new DataproviderObject(
-            new Path(
-                operationDef.path().toString() + "::result"
-            ) 
-        );
-        resultDef.values(SystemAttributes.OBJECT_CLASS).add(
-            ModelAttributes.PARAMETER
+        ObjectHolder_2Facade resultDefFacade;
+        try {
+            resultDefFacade = ObjectHolder_2Facade.newInstance(
+                newFeaturePath(
+                    operationDefFacade.getPath(),
+                    "result"
+                ),
+                ModelAttributes.PARAMETER
+            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
+        resultDefFacade.attributeValues("container").add(
+            operationDefFacade.getPath()
         );  
-        resultDef.values("container").add(
-            operationDef.path()
-        );  
-        resultDef.values("direction").add(
+        resultDefFacade.attributeValues("direction").add(
             DirectionKind.RETURN_DIR
         );
-        resultDef.values("multiplicity").add(
+        resultDefFacade.attributeValues("multiplicity").add(
             "1..1"
         );
 
         // result type
         if("result".equals(lexer.peekToken())) {
             lexer.assertToken("result");
-            resultDef.values("type").add(
+            resultDefFacade.attributeValues("type").add(
                 this.roseNameToPath(
                     lexer.getToken()
                 )
             );
         }
         else {
-            resultDef.values("type").add(
+            resultDefFacade.attributeValues("type").add(
                 this.roseNameToPath(
                     "org:openmdx:base:Void"
                 )
@@ -853,10 +877,10 @@ extends ModelImporter_1 {
         }
 
         // only create result for operations
-        if(!isException) {    	
+        if(!isException) {      
             this.createModelElement(
                 scope,
-                resultDef
+                resultDefFacade.getDelegate()
             );
         }
 
@@ -867,15 +891,14 @@ extends ModelImporter_1 {
             while(exceptions.hasMoreTokens()) {
                 String qualifiedExceptionName = exceptions.nextToken();
                 String qualifiedClassName = qualifiedExceptionName.substring(0, qualifiedExceptionName.lastIndexOf(':'));
-                operationDef.values("exception").add(
-                    new Path(
+                operationDefFacade.attributeValues("exception").add(
+                    newFeaturePath(
                         this.roseNameToPath(
                             qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'))
-                        ).toString() + 
-                        "::" + 
+                        ),
                         qualifiedExceptionName.substring(qualifiedExceptionName.lastIndexOf(':') + 1)
                     )
-                );      	
+                );          
             }
         }
 
@@ -892,7 +915,7 @@ extends ModelImporter_1 {
             lexer.assertToken("object");
             lexer.assertToken("Semantic_Info");
             lexer.assertToken("PDL");
-            operationDef.values("semantics").add(
+            operationDefFacade.attributeValues("semantics").add(
                 lexer.getToken()
             );
             lexer.assertToken(")");
@@ -915,18 +938,18 @@ extends ModelImporter_1 {
             lexer.assertToken("exportControl");
             lexer.getToken();
         }
-        operationDef.values("visibility").add(
+        operationDefFacade.attributeValues("visibility").add(
             VisibilityKind.PUBLIC_VIS
         );
 
         // scope
-        operationDef.values("scope").add(
+        operationDefFacade.attributeValues("scope").add(
             ScopeKind.INSTANCE_LEVEL
         );
 
         this.createModelElement(
             scope,
-            operationDef
+            operationDefFacade.getDelegate()
         );
 
         lexer.assertToken(")");
@@ -934,10 +957,10 @@ extends ModelImporter_1 {
     }
 
     //---------------------------------------------------------------------------
-    private DataproviderObject parseRoseAssociationEnd(
+    private MappedRecord parseRoseAssociationEnd(
         RoseLexer lexer,
         List scope,
-        DataproviderObject associationDef
+        MappedRecord associationDef
     ) throws ServiceException {
 
         lexer.assertToken("(");
@@ -945,33 +968,34 @@ extends ModelImporter_1 {
         lexer.assertToken("Role");
         String roleName = lexer.getToken();
 
-        DataproviderObject associationEndDef = new DataproviderObject(
-            new Path(
-                associationDef.path().toString() + "::" + roleName
-            ) 
-        );
+        ObjectHolder_2Facade associationEndDefFacade;
+        try {
+            associationEndDefFacade = ObjectHolder_2Facade.newInstance(
+                newFeaturePath(
+                    ObjectHolder_2Facade.getPath(associationDef),
+                    roleName
+                ),
+                ModelAttributes.ASSOCIATION_END
+            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
 
         // warning if assocation end is unnamed
         if(roleName.startsWith("$UNNAMED$")) {
             printWarning(
-                "association end " +
-                associationEndDef.path() +
-                " is not named"
+                "association end " + associationEndDefFacade.getPath() + " is not named"
             );
         }
 
-        // object_class
-        associationEndDef.values(SystemAttributes.OBJECT_CLASS).add(
-            ModelAttributes.ASSOCIATION_END
-        );
-
         // container
-        associationEndDef.values("container").add(
-            associationDef.path()
+        associationEndDefFacade.attributeValues("container").add(
+            ObjectHolder_2Facade.getPath(associationDef)
         );   
 
         // name
-        associationEndDef.values("name").add(
+        associationEndDefFacade.attributeValues("name").add(
             roleName
         );
 
@@ -987,7 +1011,7 @@ extends ModelImporter_1 {
         // documentation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            associationEndDef.values("annotation").add(
+            associationEndDefFacade.attributeValues("annotation").add(
                 lexer.getToken()
             );
         }
@@ -1001,7 +1025,7 @@ extends ModelImporter_1 {
         // supplier
         if("supplier".equals(lexer.peekToken())) {
             lexer.assertToken("supplier");
-            associationEndDef.values("type").add(
+            associationEndDefFacade.attributeValues("type").add(
                 roseNameToPath(lexer.getToken())
             );
         }
@@ -1022,13 +1046,13 @@ extends ModelImporter_1 {
                 lexer.assertToken("(");
                 lexer.assertToken("object");
                 lexer.assertToken("ClassAttribute");
-                associationEndDef.values("qualifierName").add(
+                associationEndDefFacade.attributeValues("qualifierName").add(
                     lexer.getToken()
                 );
                 lexer.assertToken("quid");
                 lexer.getToken();
                 lexer.assertToken("type");
-                associationEndDef.values("qualifierType").add(
+                associationEndDefFacade.attributeValues("qualifierType").add(
                     roseNameToPath(lexer.getToken())
                 );
                 if("quidu".equals(lexer.peekToken())) {
@@ -1053,7 +1077,7 @@ extends ModelImporter_1 {
                 roleName,
                 multiplicity
             );
-            associationEndDef.values("multiplicity").add(
+            associationEndDefFacade.attributeValues("multiplicity").add(
                 multiplicity.toString()
             );
             lexer.assertToken(")");
@@ -1064,33 +1088,36 @@ extends ModelImporter_1 {
             lexer.assertToken("Constraints");
             String constraints = lexer.getToken();
             boolean constraintIsFrozen = "isFrozen".equals(constraints);
-            associationEndDef.values("isChangeable").add(
+            associationEndDefFacade.attributeValues("isChangeable").add(
                 new Boolean(!constraintIsFrozen)
             );
             if(!constraintIsFrozen) {
                 // add new constraint
-                DataproviderObject associationEndConstraintDef = new DataproviderObject(
-                    new Path(
-                        associationEndDef.path().toString() + "::" + constraints
-                    ) 
-                );
-                // object_class
-                associationEndConstraintDef.values(SystemAttributes.OBJECT_CLASS).add(
-                    ModelAttributes.CONSTRAINT
-                );
-
+                ObjectHolder_2Facade associationEndConstraintDefFacade;
+                try {
+                    associationEndConstraintDefFacade = ObjectHolder_2Facade.newInstance(
+                        newFeaturePath(
+                            associationEndDefFacade.getPath(),
+                            constraints
+                        ),
+                        ModelAttributes.CONSTRAINT
+                    );
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
                 // container
-                associationEndConstraintDef.values("container").add(
-                    associationEndDef.path()
+                associationEndConstraintDefFacade.attributeValues("container").add(
+                    associationEndDefFacade.getPath()
                 );   
                 this.createModelElement(
                     scope,
-                    associationEndConstraintDef
+                    associationEndConstraintDefFacade.getDelegate()
                 );
             }
         }
         else {
-            associationEndDef.values("isChangeable").add(
+            associationEndDefFacade.attributeValues("isChangeable").add(
                 new Boolean(true)
             );
         }
@@ -1102,19 +1129,19 @@ extends ModelImporter_1 {
         }
 
         // aggregation (none = link)    
-        associationEndDef.values("aggregation").add(
+        associationEndDefFacade.attributeValues("aggregation").add(
             AggregationKind.NONE
         );
         if("Containment".equals(lexer.peekToken())) {
             lexer.assertToken("Containment");
             String containment = lexer.getToken();
             if("By Reference".equals(containment)) {
-                associationEndDef.clearValues("aggregation").add(
+                associationEndDefFacade.clearAttributeValues("aggregation").add(
                     AggregationKind.SHARED
                 );
             }
             else if("By Value".equals(containment)) {
-                associationEndDef.clearValues("aggregation").add(
+                associationEndDefFacade.clearAttributeValues("aggregation").add(
                     AggregationKind.COMPOSITE
                 );
             }
@@ -1123,12 +1150,12 @@ extends ModelImporter_1 {
         // isNavigable
         if("is_navigable".equals(lexer.peekToken())) {
             lexer.assertToken("is_navigable");
-            associationEndDef.values("isNavigable").add(
+            associationEndDefFacade.clearAttributeValues("isNavigable").add(
                 new Boolean("TRUE".equals(lexer.getToken()))
             );
         }
         else { 
-            associationEndDef.values("isNavigable").add(
+            associationEndDefFacade.clearAttributeValues("isNavigable").add(
                 new Boolean(false)
             );
         }
@@ -1142,25 +1169,23 @@ extends ModelImporter_1 {
         lexer.assertToken(")");
 
         // Print aggregation!=NONE should be navigable
-        if(!AggregationKind.NONE.equals(associationEndDef.values("aggregation").get(0))) {
-            if(!((Boolean)associationEndDef.values("isNavigable").get(0)).booleanValue()) {
+        if(!AggregationKind.NONE.equals(associationEndDefFacade.attributeValue("aggregation"))) {
+            if(!((Boolean)associationEndDefFacade.attributeValue("isNavigable")).booleanValue()) {
                 printWarning(
                     "Probably wrong value for isNavigable for " + 
-                    associationEndDef.path() +
+                    associationEndDefFacade.getPath() +
                     "; association ends with aggregation 'composite|shared' should be navigable." 
                 );
             }
         }
-
-        return associationEndDef;
-
+        return associationEndDefFacade.getDelegate();
     }
 
     //---------------------------------------------------------------------------
     private void parseRoseAttribute(
         RoseLexer lexer,
         List scope,
-        DataproviderObject classDef,
+        MappedRecord classDef,
         boolean isStructureField
     ) throws ServiceException {
 
@@ -1169,30 +1194,40 @@ extends ModelImporter_1 {
         lexer.assertToken("ClassAttribute");
         String attributeName = lexer.getToken();
 
-        DataproviderObject attributeDef = new DataproviderObject(
-            new Path(classDef.path().toString() + "::" + attributeName)
-        );
+        ObjectHolder_2Facade attributeDefFacade;
+        try {
+            attributeDefFacade = ObjectHolder_2Facade.newInstance(
+                newFeaturePath(
+                    ObjectHolder_2Facade.getPath(classDef),
+                    attributeName
+                ),
+                ModelAttributes.STRUCTURE_FIELD
+            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
 
         if(isStructureField) {
-            attributeDef.values(SystemAttributes.OBJECT_CLASS).add(
+            attributeDefFacade.getValue().setRecordName(
                 ModelAttributes.STRUCTURE_FIELD
             );
         }
         else {
-            attributeDef.values(SystemAttributes.OBJECT_CLASS).add(
+            attributeDefFacade.getValue().setRecordName(
                 ModelAttributes.ATTRIBUTE
             );
         }
 
         // container
-        attributeDef.values("container").add(
-            classDef.path()
+        attributeDefFacade.attributeValues("container").add(
+            ObjectHolder_2Facade.getPath(classDef)
         );
 
         // user-defined attributes. set default values for
         // maxLength, uniqueValues, isLanguageNeutral, isChangeable
-        attributeDef.values("maxLength").add(new Integer(DEFAULT_ATTRIBUTE_MAX_LENGTH));
-        attributeDef.values("isChangeable").add(new Boolean(true));
+        attributeDefFacade.attributeValues("maxLength").add(new Integer(DEFAULT_ATTRIBUTE_MAX_LENGTH));
+        attributeDefFacade.attributeValues("isChangeable").add(new Boolean(true));
 
         // overwrite default values if set
         if("attributes".equals(lexer.peekToken())) {
@@ -1223,7 +1258,7 @@ extends ModelImporter_1 {
                 //SysLog.trace("tool=" + toolName + "; attribute=" + attrName + "; value=", attrValue);
                 if("SPICE".equals(toolName)) {
                     if("true".equals(attrValue) || "false".equals(attrValue)) {
-                        attributeDef.clearValues(attrName).add(
+                        attributeDefFacade.clearAttributeValues(attrName).add(
                             new Boolean((String)attrValue)
                         );
                     }
@@ -1231,7 +1266,8 @@ extends ModelImporter_1 {
                         Integer intVal = null;
                         try {
                             intVal = new Integer((String)attrValue);
-                        } catch(NumberFormatException ex) {
+                        } 
+                        catch(NumberFormatException ex) {
                             printWarning(
                                 "Illegal number format for value for attribute " + 
                                 attrName + 
@@ -1239,10 +1275,10 @@ extends ModelImporter_1 {
                             );
                             intVal = new Integer(DEFAULT_ATTRIBUTE_MAX_LENGTH); 
                         }
-                        attributeDef.clearValues("maxLength").add(intVal);
+                        attributeDefFacade.clearAttributeValues("maxLength").add(intVal);
                     }
                     else {
-                        attributeDef.clearValues(attrName).add(
+                        attributeDefFacade.clearAttributeValues(attrName).add(
                             attrValue 
                         );
                     }
@@ -1261,7 +1297,7 @@ extends ModelImporter_1 {
         // annotation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            attributeDef.values("annotation").add(
+            attributeDefFacade.attributeValues("annotation").add(
                 lexer.getToken()
             );
         }
@@ -1276,12 +1312,12 @@ extends ModelImporter_1 {
                 attributeName,
                 multiplicity
             );
-            attributeDef.values("multiplicity").add(
+            attributeDefFacade.clearAttributeValues("multiplicity").add(
                 multiplicity.toString()
             );
         }
         else {
-            attributeDef.values("multiplicity").add(
+            attributeDefFacade.clearAttributeValues("multiplicity").add(
                 "1..1"
             );
         }
@@ -1289,7 +1325,7 @@ extends ModelImporter_1 {
         // type
         if("type".equals(lexer.peekToken())) {
             lexer.assertToken("type");
-            attributeDef.values("type").add(
+            attributeDefFacade.clearAttributeValues("type").add(
                 roseNameToPath(lexer.getToken())
             );
         }
@@ -1304,12 +1340,12 @@ extends ModelImporter_1 {
         if("exportControl".equals(lexer.peekToken())) {
             lexer.assertToken("exportControl");
             lexer.getToken();
-            attributeDef.values("visibility").add(
+            attributeDefFacade.attributeValues("visibility").add(
                 VisibilityKind.PUBLIC_VIS
             );
         }
         else {
-            attributeDef.values("visibility").add(
+            attributeDefFacade.attributeValues("visibility").add(
                 VisibilityKind.PRIVATE_VIS
             );
         }
@@ -1317,18 +1353,18 @@ extends ModelImporter_1 {
         // isDerived
         if("derived".equals(lexer.peekToken())) {
             lexer.assertToken("derived");
-            attributeDef.values("isDerived").add(
+            attributeDefFacade.attributeValues("isDerived").add(
                 new Boolean("TRUE".equals(lexer.getToken()))
             );
         }
         else {
-            attributeDef.values("isDerived").add(
+            attributeDefFacade.attributeValues("isDerived").add(
                 new Boolean(false)
             );
         }
 
         // scope
-        attributeDef.values("scope").add(
+        attributeDefFacade.attributeValues("scope").add(
             ScopeKind.INSTANCE_LEVEL
         );
 
@@ -1336,15 +1372,15 @@ extends ModelImporter_1 {
 
         // remove non StructureField attributes
         if(isStructureField) {
-            attributeDef.clearValues("visibility");
-            attributeDef.clearValues("isDerived");
-            attributeDef.clearValues("scope");
-            attributeDef.clearValues("isChangeable");
+            attributeDefFacade.clearAttributeValues("visibility");
+            attributeDefFacade.clearAttributeValues("isDerived");
+            attributeDefFacade.clearAttributeValues("scope");
+            attributeDefFacade.clearAttributeValues("isChangeable");
         }
 
         this.createModelElement(
             scope,
-            attributeDef
+            attributeDefFacade.getDelegate()
         );
     }
 
@@ -1391,20 +1427,22 @@ extends ModelImporter_1 {
         String associationName = lexer.getToken();
 
         // ModelAssociation object
-        DataproviderObject modelAssociation = new DataproviderObject(
-            toElementPath(
-                scope,
-                associationName
-            )
-        );
-
-        // object_class
-        modelAssociation.values(SystemAttributes.OBJECT_CLASS).add(
-            ModelAttributes.ASSOCIATION
-        );
+        ObjectHolder_2Facade modelAssociationFacade;
+        try {
+            modelAssociationFacade = ObjectHolder_2Facade.newInstance(
+                toElementPath(
+                    scope,
+                    associationName
+                ),
+                ModelAttributes.ASSOCIATION
+            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
 
         // container
-        modelAssociation.values("container").add(
+        modelAssociationFacade.attributeValues("container").add(
             toElementPath(
                 scope,
                 (String)scope.get(scope.size()-1)
@@ -1418,87 +1456,88 @@ extends ModelImporter_1 {
         // documentation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            modelAssociation.values("annotation").add(
+            modelAssociationFacade.attributeValues("annotation").add(
                 lexer.getToken()
             );
         }
 
         // association ends
-        DataproviderObject modelAssociationEnd1 = null;
-        DataproviderObject modelAssociationEnd2 = null;
-
+        MappedRecord modelAssociationEnd1 = null;
+        MappedRecord modelAssociationEnd2 = null;
         if("roles".equals(lexer.peekToken())) {
             lexer.assertToken("roles");
             lexer.assertToken("(");
             lexer.assertToken("list");
             lexer.assertToken("role_list");
-            modelAssociationEnd1 = parseRoseAssociationEnd(
+            modelAssociationEnd1 = this.parseRoseAssociationEnd(
                 lexer,
                 scope,
-                modelAssociation
+                modelAssociationFacade.getDelegate()
             );
-            modelAssociationEnd2 = parseRoseAssociationEnd(
+            modelAssociationEnd2 = this.parseRoseAssociationEnd(
                 lexer,
                 scope,
-                modelAssociation
+                modelAssociationFacade.getDelegate()
             );
             lexer.assertToken(")");
         }
-
         // isDerived
         if("derived".equals(lexer.peekToken())) {
             lexer.assertToken("derived");
-            modelAssociation.values("isDerived").add(
+            modelAssociationFacade.attributeValues("isDerived").add(
                 new Boolean("TRUE".equals(lexer.getToken()))
             );
         }
         else {
-            modelAssociation.values("isDerived").add(
+            modelAssociationFacade.attributeValues("isDerived").add(
                 new Boolean(false)
             );
         }
-
-        verifyAndCompleteAssociationEnds(
+        this.verifyAndCompleteAssociationEnds(
             modelAssociationEnd1,
             modelAssociationEnd2
         );
-
-        exportAssociationEndAsReference(
+        this.exportAssociationEndAsReference(
             modelAssociationEnd1,
             modelAssociationEnd2,
-            modelAssociation,
+            modelAssociationFacade.getDelegate(),
             scope
         );
-        exportAssociationEndAsReference(
+        this.exportAssociationEndAsReference(
             modelAssociationEnd2,
             modelAssociationEnd1,
-            modelAssociation,
+            modelAssociationFacade.getDelegate(),
             scope
         );
-
         // remove name attributes before setting
-        modelAssociationEnd1.attributeNames().remove("name");
-        createModelElement(
+        try {
+            ObjectHolder_2Facade.newInstance(modelAssociationEnd1).getValue().keySet().remove("name");
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
+        this.createModelElement(
             scope,
             modelAssociationEnd1
         );
-
-        modelAssociationEnd2.attributeNames().remove("name");
-        createModelElement(
+        try {
+            ObjectHolder_2Facade.newInstance(modelAssociationEnd2).getValue().keySet().remove("name");
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
+        this.createModelElement(
             scope,
             modelAssociationEnd2
         );
-
         // complete association
-        modelAssociation.values("isAbstract").add(new Boolean(false));
-        modelAssociation.values("visibility").add(VisibilityKind.PUBLIC_VIS);
-        createModelElement(
+        modelAssociationFacade.attributeValues("isAbstract").add(new Boolean(false));
+        modelAssociationFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
+        this.createModelElement(
             scope,
-            modelAssociation
+            modelAssociationFacade.getDelegate()
         );
-
         lexer.assertToken(")");
-
     }
 
     //---------------------------------------------------------------------------
@@ -1508,23 +1547,24 @@ extends ModelImporter_1 {
     ) throws ServiceException {
 
         String className = lexer.getToken();
-        //SysLog.trace("> parseRoseClass=" + className);
 
         // ModelClass object
-        DataproviderObject classifierDef = new DataproviderObject(
-            toElementPath(
-                scope,
-                className
-            )
-        );
-
-        // object_class
-        classifierDef.values(SystemAttributes.OBJECT_CLASS).add(
-            ModelAttributes.CLASS
-        );
+        ObjectHolder_2Facade classifierDefFacade;
+        try {
+            classifierDefFacade = ObjectHolder_2Facade.newInstance(
+                toElementPath(
+                    scope,
+                    className
+                ),
+                ModelAttributes.CLASS
+            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
 
         // container
-        classifierDef.values("container").add(
+        classifierDefFacade.attributeValues("container").add(
             toElementPath(
                 scope,
                 (String)scope.get(scope.size()-1)
@@ -1541,7 +1581,7 @@ extends ModelImporter_1 {
         // documentation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            classifierDef.values("annotation").add(
+            classifierDefFacade.attributeValues("annotation").add(
                 lexer.getToken()
             );
         }
@@ -1552,40 +1592,40 @@ extends ModelImporter_1 {
 
         if("stereotype".equals(lexer.peekToken())) {
             lexer.assertToken("stereotype");
-            classifierDef.values("stereotype").addAll(
+            classifierDefFacade.attributeValues("stereotype").addAll(
                 this.parseStereotype(lexer.getToken())
             );
 
             // handle well-known stereotypes
-            if(classifierDef.values("stereotype").contains(Stereotypes.PRIMITIVE)) {
+            if(classifierDefFacade.attributeValues("stereotype").contains(Stereotypes.PRIMITIVE)) {
                 SysLog.trace("changing type to " + ModelAttributes.PRIMITIVE_TYPE);
-                classifierDef.clearValues(SystemAttributes.OBJECT_CLASS).add(
+                classifierDefFacade.getValue().setRecordName(
                     ModelAttributes.PRIMITIVE_TYPE
                 );
-                classifierDef.clearValues("stereotype");
+                classifierDefFacade.clearAttributeValues("stereotype");
             }
-            else if(classifierDef.values("stereotype").contains(Stereotypes.STRUCT)) {
+            else if(classifierDefFacade.attributeValues("stereotype").contains(Stereotypes.STRUCT)) {
                 isStructureType = true;
                 SysLog.trace("changing type to " + ModelAttributes.STRUCTURE_TYPE);
-                classifierDef.clearValues(SystemAttributes.OBJECT_CLASS).add(
+                classifierDefFacade.getValue().setRecordName(
                     ModelAttributes.STRUCTURE_TYPE
                 );
-                classifierDef.clearValues("stereotype");
+                classifierDefFacade.clearAttributeValues("stereotype");
             }
-            else if(classifierDef.values("stereotype").contains(Stereotypes.ALIAS)) {
+            else if(classifierDefFacade.attributeValues("stereotype").contains(Stereotypes.ALIAS)) {
                 isAliasType = true;
                 SysLog.trace("changing type to " + ModelAttributes.ALIAS_TYPE);
-                classifierDef.clearValues(SystemAttributes.OBJECT_CLASS).add(
+                classifierDefFacade.getValue().setRecordName(
                     ModelAttributes.ALIAS_TYPE
                 );
-                classifierDef.clearValues("stereotype");
+                classifierDefFacade.clearAttributeValues("stereotype");
             }
-            else if(classifierDef.values("stereotype").contains("parameter")) {
+            else if(classifierDefFacade.attributeValues("stereotype").contains("parameter")) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED, 
                     "Stereotype <<parameter>> is not supported anymore. Use stereotype <<" + Stereotypes.STRUCT + ">> instead",
-                    new BasicException.Parameter("classifier", classifierDef)
+                    new BasicException.Parameter("classifier", classifierDefFacade.getDelegate())
                 );
             }
         }
@@ -1619,31 +1659,28 @@ extends ModelImporter_1 {
 
             // add supertypes in sorted order
             for(
-                    Iterator it = superTypePaths.iterator();
-                    it.hasNext();
+                Iterator it = superTypePaths.iterator();
+                it.hasNext();
             ) {
-                classifierDef.values("supertype").add(
+                classifierDefFacade.attributeValues("supertype").add(
                     it.next()
                 );
             }
         }
-
         // operations
         if("operations".equals(lexer.peekToken())) {
-
             // operations not allowed on STRUCTURE_TYPE and ALIAS_TYPE
             if(
-                    ModelAttributes.STRUCTURE_TYPE.equals(classifierDef.values(SystemAttributes.OBJECT_CLASS).get(0)) ||
-                    ModelAttributes.ALIAS_TYPE.equals(classifierDef.values(SystemAttributes.OBJECT_CLASS).get(0))
+                ModelAttributes.STRUCTURE_TYPE.equals(classifierDefFacade.getObjectClass()) ||
+                ModelAttributes.ALIAS_TYPE.equals(classifierDefFacade.getObjectClass())
             ) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE, 
                     "operations not allowed on structure and alias types",
-                    new BasicException.Parameter("classifier", classifierDef)
+                    new BasicException.Parameter("classifier", classifierDefFacade.getDelegate())
                 );
             }
-
             lexer.assertToken("operations");      
             lexer.assertToken("(");
             lexer.assertToken("list");
@@ -1652,30 +1689,27 @@ extends ModelImporter_1 {
                 this.parseRoseOperation(
                     lexer,
                     scope,
-                    classifierDef
+                    classifierDefFacade.getDelegate()
                 );
             }
             lexer.assertToken(")");
         }
-
         // attributes
         if("class_attributes".equals(lexer.peekToken())) {
             lexer.assertToken("class_attributes");      
             lexer.assertToken("(");
             lexer.assertToken("list");
             lexer.assertToken("class_attribute_list");
-
             // get referenced type in case of AliasType
             if(isAliasType) {
                 lexer.assertToken("(");
                 lexer.assertToken("object");
                 lexer.assertToken("ClassAttribute");
-                classifierDef.values("type").add(
+                classifierDefFacade.attributeValues("type").add(
                     roseNameToPath(lexer.getToken())
                 );
                 // Ignore attributes
                 ignoreAttributes(lexer);
-
                 while(!lexer.isRightParam()) {
                     lexer.getToken();
                 }
@@ -1688,42 +1722,40 @@ extends ModelImporter_1 {
                     this.parseRoseAttribute(
                         lexer,
                         scope,
-                        classifierDef,
+                        classifierDefFacade.getDelegate(),
                         isStructureType
                     );
                 }
             }
             lexer.assertToken(")");
         }
-
         // {module, quidu}
         while("module".equals(lexer.peekToken()) || "quidu".equals(lexer.peekToken())) {
             lexer.getToken();
             lexer.getToken();
         }
-
         // isAbstract
         if("abstract".equals(lexer.peekToken())) {
             lexer.assertToken("abstract");      
-            classifierDef.values("isAbstract").add(
+            classifierDefFacade.attributeValues("isAbstract").add(
                 new Boolean(
                     "TRUE".equals(lexer.getToken())
                 )
             );
         }
         else {
-            classifierDef.values("isAbstract").add(
+            classifierDefFacade.attributeValues("isAbstract").add(
                 new Boolean(false)
             );      
         }  
 
         // visibility
-        classifierDef.values("visibility").add(
+        classifierDefFacade.attributeValues("visibility").add(
             VisibilityKind.PUBLIC_VIS
         );
 
         // isSingleton
-        classifierDef.values("isSingleton").add(new Boolean(false));
+        classifierDefFacade.attributeValues("isSingleton").add(new Boolean(false));
 
         // usage
         if("used_nodes".equals(lexer.peekToken())) {
@@ -1736,12 +1768,8 @@ extends ModelImporter_1 {
         // write object
         this.createModelElement(
             scope,
-            classifierDef
+            classifierDefFacade.getDelegate()
         );
-
-        //if(isAliasType) {
-        //  SysLog.detail("< parseRoseClass", modelClass);
-        //}
 
     }
 
@@ -1874,25 +1902,29 @@ extends ModelImporter_1 {
             // Container modelPackage. 
             // The container package can be overwritten at a later time depending 
             // on the structure of the mdl/cat files
-            DataproviderObject modelPackage = new DataproviderObject(
-                toElementPath(
-                    newScope,
-                    (String)newScope.get(newScope.size()-1)
-                )
-            );
-            modelPackage.values(SystemAttributes.OBJECT_CLASS).add(
-                ModelAttributes.PACKAGE
-            );
-            modelPackage.values("isAbstract").add(new Boolean(false));
-            modelPackage.values("visibility").add(VisibilityKind.PUBLIC_VIS);
+            ObjectHolder_2Facade modelPackageFacade;
+            try {
+                modelPackageFacade = ObjectHolder_2Facade.newInstance(
+                    toElementPath(
+                        newScope,
+                        (String)newScope.get(newScope.size()-1)
+                    ),
+                    ModelAttributes.PACKAGE
+                );
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
+            modelPackageFacade.attributeValues("isAbstract").add(new Boolean(false));
+            modelPackageFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
             createModelElement(
                 newScope,
-                modelPackage
+                modelPackageFacade.getDelegate()
             );
 
             // Nested modelPackage
             // modelPackage != null --> new model package
-            modelPackage = null;
+            modelPackageFacade = null;
 
             // is_unit
             if("is_unit".equals(lexer.peekToken())) {
@@ -1979,17 +2011,20 @@ extends ModelImporter_1 {
 
                 // internal unit --> ModelPackage
                 else {
-                    modelPackage = new DataproviderObject(
-                        toElementPath(
-                            newScope,
-                            (String)newScope.get(newScope.size()-1)
-                        )
-                    );
-                    modelPackage.values(SystemAttributes.OBJECT_CLASS).add(
-                        ModelAttributes.PACKAGE
-                    );
-                    modelPackage.values("isAbstract").add(new Boolean(false));
-                    modelPackage.values("visibility").add(VisibilityKind.PUBLIC_VIS);
+                    try {
+                        modelPackageFacade = ObjectHolder_2Facade.newInstance(
+                            toElementPath(
+                                newScope,
+                                (String)newScope.get(newScope.size()-1)
+                            ),
+                            ModelAttributes.PACKAGE
+                        );
+                    } 
+                    catch (ResourceException e) {
+                        throw new ServiceException(e);
+                    }
+                    modelPackageFacade.attributeValues("isAbstract").add(new Boolean(false));
+                    modelPackageFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
                 }
 
             }
@@ -2028,16 +2063,16 @@ extends ModelImporter_1 {
             // documentation
             if("documentation".equals(lexer.peekToken())) {
                 lexer.assertToken("documentation");
-                if(modelPackage != null) {
-                    modelPackage.values("annotation").add(lexer.getToken());
+                if(modelPackageFacade != null) {
+                    modelPackageFacade.attributeValues("annotation").add(lexer.getToken());
                 }
             }
 
             // dump modelPackage
-            if(modelPackage != null) {
-                createModelElement(
+            if(modelPackageFacade != null) {
+                this.createModelElement(
                     newScope,
-                    modelPackage
+                    modelPackageFacade.getDelegate()
                 );
             }
 
@@ -2054,7 +2089,7 @@ extends ModelImporter_1 {
 
         // Association
         else if("Association".equals(objectType)) {
-            parseRoseAssociation(
+            this.parseRoseAssociation(
                 lexer,
                 scope
             );

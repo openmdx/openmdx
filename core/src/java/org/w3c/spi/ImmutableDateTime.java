@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ImmutableDateTime.java,v 1.2 2008/09/25 23:35:39 hburger Exp $
+ * Name:        $Id: ImmutableDateTime.java,v 1.3 2009/05/25 09:34:37 hburger Exp $
  * Description: Unmodifiable Date-Time 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 23:35:39 $
+ * Date:        $Date: 2009/05/25 09:34:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,7 @@ import org.openmdx.base.text.format.DateFormat;
  */
 final class ImmutableDateTime
     extends Date
-    implements ImmutableDatatype
+    implements ImmutableDatatype<Date>
 {
 
     /**

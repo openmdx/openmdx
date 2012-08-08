@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIMapper_1.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: XMIMapper_1.java,v 1.10 2009/06/09 12:45:18 hburger Exp $
  * Description: XMIExternalizer_1
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,15 +61,12 @@ import java.util.StringTokenizer;
 import java.util.zip.ZipOutputStream;
 
 import org.omg.mof.cci.VisibilityKind;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
-import org.openmdx.base.naming.Path;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -89,7 +86,7 @@ extends AbstractMapper_1 {
     //---------------------------------------------------------------------------
     public void externalize(
         String qualifiedPackageName,
-        Model_1_3 model, 
+        Model_1_0 model, 
         ZipOutputStream zip
     ) throws ServiceException {
 
@@ -180,17 +177,16 @@ extends AbstractMapper_1 {
         Map allCompositeAssociationEnds = new HashMap();
 
         for(
-                Iterator i = this.model.getContent().iterator();
-                i.hasNext();
+            Iterator<ModelElement_1_0> i = this.model.getContent().iterator();
+            i.hasNext();
         ) {
-            DataproviderObject modelElement = (DataproviderObject)i.next();
-
+            ModelElement_1_0 modelElement = i.next();
             // Collect AssociationEnds of with containment='composite' for performance reasons.
             // The collection is used to determine the qualifiers of classes.
-            if(modelElement.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ASSOCIATION_END)) {
-                if(AggregationKind.COMPOSITE.equals(modelElement.values("aggregation").get(0))) {
+            if(modelElement.objGetClass().equals(ModelAttributes.ASSOCIATION_END)) {
+                if(AggregationKind.COMPOSITE.equals(modelElement.objGetValue("aggregation"))) {
                     allCompositeAssociationEnds.put(
-                        modelElement.values("type").get(0), 
+                        modelElement.objGetValue("type"), 
                         modelElement
                     );        
                 }
@@ -212,18 +208,15 @@ extends AbstractMapper_1 {
             SysLog.trace("elementDef=" + elementDef.jdoGetObjectId());
 
             // PrimitiveType
-            if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE)) {
+            if(elementDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE)) {
                 XMISchemaWriter.writePrimitiveType(elementDef);
             }
-
             // Class
             else if(
-                    elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.CLASS) ||
-                    elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_TYPE)
+                elementDef.objGetClass().equals(ModelAttributes.CLASS) ||
+                elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)
             ) {
-
                 XMISchemaWriter.writeComplexTypeHeader(elementDef);
-
                 int compositeReferenceCount = 0;
                 /**
                  * Write all class features
@@ -231,19 +224,18 @@ extends AbstractMapper_1 {
                  * phase 1: composite references
                  */
                 for(
-                        int featureType = 0;
-                        featureType < 2;
-                        featureType++
+                    int featureType = 0;
+                    featureType < 2;
+                    featureType++
                 ) {
-
                     if(featureType == 0) {
                         XMISchemaWriter.writeAttributeFeatureHeader(elementDef);
                     }
 
                     // iterate features
                     for(
-                            Iterator i = elementDef.objGetList("feature").iterator();
-                            i.hasNext();
+                        Iterator i = elementDef.objGetList("feature").iterator();
+                        i.hasNext();
                     ) {
                         ModelElement_1_0 featureDef = this.model.getElement(i.next());
                         SysLog.trace("processing feature", "" + featureDef.jdoGetObjectId());
@@ -261,9 +253,7 @@ extends AbstractMapper_1 {
                                         featureDef,
                                         this.model.getElementType(
                                             featureDef
-                                        ).objGetList(
-                                            SystemAttributes.OBJECT_CLASS
-                                        ).contains(ModelAttributes.CLASS)
+                                        ).isClassType()
                                     );
                                 }
                             }
@@ -278,7 +268,7 @@ extends AbstractMapper_1 {
                                 //
                                 // CR0004024
                                 //
-                                "org:openmdx:base:AuthorityHasProvider:provider".equals(((Path)referencedEnd.jdoGetObjectId()).getBase());
+                                "org:openmdx:base:AuthorityHasProvider:provider".equals(referencedEnd.jdoGetObjectId().getBase());
                             if(isPublic && isNavigable && (isChangeable || allFeatures)) {
                                 if(this.model.referenceIsStoredAsAttribute(featureDef)) {
                                     if(featureType == 0) {
@@ -338,7 +328,7 @@ extends AbstractMapper_1 {
 
             // StructureType
             else if(
-                elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_TYPE)
+                elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)
             ) {
                 XMISchemaWriter.writeComplexTypeHeader(elementDef);
                 XMISchemaWriter.writeStructureFieldHeader(elementDef);
@@ -351,14 +341,12 @@ extends AbstractMapper_1 {
                     ModelElement_1_0 featureDef = this.model.getElement(i.next());
 
                     // StructureField
-                    if(featureDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_FIELD)) {
+                    if(featureDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
                         XMISchemaWriter.writeStructureField(
                             featureDef,
                             this.model.getElementType(
                                 featureDef
-                            ).objGetList(
-                                SystemAttributes.OBJECT_CLASS
-                            ).contains(ModelAttributes.CLASS)
+                            ).isClassType()
                         );
                     }
                 }
@@ -398,8 +386,8 @@ extends AbstractMapper_1 {
             allFeatures
         );
         XMIModelWriter.writeModelHeader(
-            ((Path)this.model.getElement(forPackage).jdoGetObjectId()).get(2), 
-            ((Path)this.model.getElement(forPackage).jdoGetObjectId()).get(4), 
+            this.model.getElement(forPackage).jdoGetObjectId().get(2), 
+            this.model.getElement(forPackage).jdoGetObjectId().get(4), 
             getPathPrefix(forPackage) + "org/omg/model1/" + XMINames.XMI_PACKAGE_SUFFIX + "/model1" + 
             (allFeatures ? ".xsd" : "_edit.xsd")
         );
@@ -412,47 +400,47 @@ extends AbstractMapper_1 {
 
             // only write model elements contained in the defining model (segment name)
             // @see CR0001066 
-            if(forPackage.startsWith(((Path)elementDef.jdoGetObjectId()).get(4))) {
-                if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.CLASS)) {
+            if(forPackage.startsWith(elementDef.jdoGetObjectId().get(4))) {
+                if(elementDef.objGetClass().equals(ModelAttributes.CLASS)) {
                     XMIModelWriter.writeClass(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
                     XMIModelWriter.writeAttribute(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ASSOCIATION)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.ASSOCIATION)) {
                     XMIModelWriter.writeAssociation(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ASSOCIATION_END)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.ASSOCIATION_END)) {
                     XMIModelWriter.writeAssociationEnd(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.REFERENCE)) {
                     XMIModelWriter.writeReference(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.OPERATION)) {
                     XMIModelWriter.writeOperation(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.EXCEPTION)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.EXCEPTION)) {
                     XMIModelWriter.writeException(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PARAMETER)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.PARAMETER)) {
                     XMIModelWriter.writeParameter(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PACKAGE)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.PACKAGE)) {
                     XMIModelWriter.writePackage(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE)) {
                     XMIModelWriter.writePrimitiveType(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_TYPE)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)) {
                     XMIModelWriter.writeStructureType(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_FIELD)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
                     XMIModelWriter.writeStructureField(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ALIAS_TYPE)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.ALIAS_TYPE)) {
                     XMIModelWriter.writeAliasType(elementDef);
                 }
-                else if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.CONSTRAINT)) {
+                else if(elementDef.objGetClass().equals(ModelAttributes.CONSTRAINT)) {
                     // not exported in this version
                 }
                 else {
@@ -467,11 +455,6 @@ extends AbstractMapper_1 {
         }    
         XMIModelWriter.writeModelFooter();
     }
-
-    //---------------------------------------------------------------------------
-    // Variables
-    //---------------------------------------------------------------------------
-    static final String ROLE_TYPE = "ch:omex:generic:Role";
 
 }
 

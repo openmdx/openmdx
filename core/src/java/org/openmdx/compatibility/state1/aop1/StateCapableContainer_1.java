@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateCapableContainer_1.java,v 1.5 2009/01/17 02:37:21 hburger Exp $
+ * Name:        $Id: StateCapableContainer_1.java,v 1.9 2009/06/02 16:38:41 hburger Exp $
  * Description: State Object Container
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/17 02:37:21 $
+ * Date:        $Date: 2009/06/02 16:38:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,7 +53,7 @@ package org.openmdx.compatibility.state1.aop1;
 import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
-import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
+import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.collection.FilterableMap;
@@ -97,7 +97,7 @@ public class StateCapableContainer_1
 
     
     //------------------------------------------------------------------------
-    // Extends MarshallingFilterableMap
+    // Implements Container_1_0
     //------------------------------------------------------------------------
 
     /* (non-Javadoc)
@@ -109,12 +109,24 @@ public class StateCapableContainer_1
     }
     
     /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
+     */
+    public void retrieveAll(boolean useFetchPlan) {
+        throw new UnsupportedOperationException("Operation not supported by StateCapableContainer");
+    }
+
+    /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Container_1_0#getObjectId()
      */
     public Object getContainerId() {
         throw new UnsupportedOperationException("Operation not supported by StateCapableContainer");
     }
+
     
+    //------------------------------------------------------------------------
+    // Extends MarshallingFilterableMap
+    //------------------------------------------------------------------------
+
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.MarshallingFilterableMap#getDelegate()
      */
@@ -132,7 +144,7 @@ public class StateCapableContainer_1
     public DataObject_1_0 get(Object key) {
         try {
             return (DataObject_1_0) this.marshaller.marshal(
-                ((PersistenceManager_1_0)this.factory).getObjectById(key)
+                ((DataObjectManager_1_0)this.factory).getObjectById(key)
             );
         } catch (Exception exception) {
             return null;

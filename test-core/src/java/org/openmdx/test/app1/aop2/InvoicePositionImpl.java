@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InvoicePositionImpl.java,v 1.2 2009/02/18 13:00:20 hburger Exp $
+ * Name:        $Id: InvoicePositionImpl.java,v 1.5 2009/04/21 16:05:15 hburger Exp $
  * Description: ProductImpl 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/18 13:00:20 $
+ * Date:        $Date: 2009/04/21 16:05:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,11 @@
  */
 package org.openmdx.test.app1.aop2;
 
+import javax.jdo.listener.StoreCallback;
+
 import org.openmdx.base.aop2.AbstractObject;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.test.app1.jmi1.Invoice;
 import org.openmdx.test.app1.jmi1.InvoicePosition;
 import org.openmdx.test.app1.jmi1.Product;
@@ -59,7 +63,10 @@ import org.openmdx.test.app1.jmi1.Segment;
 /**
  * ProductImpl
  */
-public class InvoicePositionImpl extends AbstractObject<org.openmdx.test.app1.jmi1.InvoicePosition,org.openmdx.test.app1.cci2.InvoicePosition> {
+public class InvoicePositionImpl 
+    extends AbstractObject<org.openmdx.test.app1.jmi1.InvoicePosition,org.openmdx.test.app1.cci2.InvoicePosition,Void> 
+    implements StoreCallback
+{
 
     /**
      * Constructor 
@@ -81,12 +88,28 @@ public class InvoicePositionImpl extends AbstractObject<org.openmdx.test.app1.jm
     public Product getProduct() {
         InvoicePosition same = sameObject();
         Invoice invoice = same.getInvoice();
+        InvoicePosition sibling = sameManager().newInstance(InvoicePosition.class);
+        if(!(sibling instanceof StoreCallback)){
+            throw new RuntimeServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "Missing interface: " + StoreCallback.class.getName()
+            );
+        }
         Segment segment = (Segment) invoice.refImmediateComposite();
         return segment.getProductGroup(
             invoice.getProductGroupId()
         ).getProduct(
             same.getProductId()
         );
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.aop2.AbstractObject#jdoPreStore()
+     */
+    @Override
+    public void jdoPreStore() {
+        super.jdoPreStore();
     }
         
 }

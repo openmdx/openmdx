@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractExtensionTest_1.java,v 1.8 2009/02/19 16:39:12 hburger Exp $
+ * Name:        $Id: AbstractExtensionTest_1.java,v 1.10 2009/03/31 17:09:09 hburger Exp $
  * Description: Extension Unit Test
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/19 16:39:12 $
+ * Date:        $Date: 2009/03/31 17:09:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,7 @@ package org.openmdx.test.datatypes1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -70,13 +71,14 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.persistence.cci.EntityManagerFactory;
 import org.openmdx.base.text.format.DateFormat;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.test.datatypes1.cci2.NonStatedQuery;
 import org.openmdx.test.datatypes1.jmi1.Data;
 import org.openmdx.test.datatypes1.jmi1.Datatypes1Package;
@@ -210,7 +212,7 @@ public abstract class AbstractExtensionTest_1 {
             storeDatatypes("Persistent", "Default");
             retrieveDatatypes("Persistent", "Default");
         } catch(Exception exception) {
-            AppLog.error("Exception", exception);
+            SysLog.error("Exception", exception);
             throw exception;
         }
     }
@@ -222,7 +224,7 @@ public abstract class AbstractExtensionTest_1 {
             storeDatatypes("Persistent", "Numeric");
             retrieveDatatypes("Persistent", "Numeric");
         } catch(Exception exception) {
-            AppLog.error("Exception", exception);
+            SysLog.error("Exception", exception);
             throw exception;
         }
     }
@@ -234,7 +236,7 @@ public abstract class AbstractExtensionTest_1 {
             storeDatatypes("Persistent", "Native");
             retrieveDatatypes("Persistent", "Native");
         } catch(Exception exception) {
-            AppLog.error("Exception", exception);
+            SysLog.error("Exception", exception);
             throw exception;
         }
     }
@@ -246,7 +248,7 @@ public abstract class AbstractExtensionTest_1 {
             storeDatatypes("Volatile", "Native");
             retrieveDatatypes("Volatile", "Native");
         } catch(Exception exception) {
-            AppLog.error("Exception", exception);
+            SysLog.error("Exception", exception);
             throw exception;
         }
     }
@@ -415,4 +417,12 @@ public abstract class AbstractExtensionTest_1 {
         assertEquals("value11b", (Duration)source[VALUE11b], data.getValue11b());
     }
     
+    @AfterClass
+    public static void closePersistenceManagerFactory(
+    ) throws IOException{
+        if(managerFactory instanceof Closeable) {
+            ((Closeable)managerFactory).close();
+        }
+    }
+
 }

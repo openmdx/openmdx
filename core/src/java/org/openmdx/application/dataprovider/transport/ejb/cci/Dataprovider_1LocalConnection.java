@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1LocalConnection.java,v 1.5 2009/01/15 15:10:18 hburger Exp $
+ * Name:        $Id: Dataprovider_1LocalConnection.java,v 1.10 2009/06/08 17:12:04 hburger Exp $
  * Description: Local Dataprovider  Connection
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/15 15:10:18 $
+ * Date:        $Date: 2009/06/08 17:12:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,14 +50,15 @@
  */
 package org.openmdx.application.dataprovider.transport.ejb.cci;
 
+import java.util.List;
+
 import javax.ejb.EJBException;
 import javax.ejb.TransactionRolledbackLocalException;
 import javax.jdo.PersistenceManager;
 import javax.resource.ResourceException;
-import javax.security.auth.Subject;
+import javax.resource.spi.LocalTransactionException;
 import javax.transaction.Synchronization;
 
-import org.openmdx.application.dataprovider.cci.OptimisticTransaction_2_0;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
@@ -65,13 +66,14 @@ import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1_3Connec
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.cci.EntityManagerFactory;
+import org.openmdx.base.resource.spi.TransactionManager;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Local Dataprovider Connection
  */
 public class Dataprovider_1LocalConnection
-implements Dataprovider_1_3Connection
+    implements Dataprovider_1_3Connection
 {
 
     /**
@@ -201,35 +203,42 @@ implements Dataprovider_1_3Connection
         this.ejbLocalObject = null;
     }
 
-
     //------------------------------------------------------------------------
     // Implements OptimisticTransaction_2_0
     //------------------------------------------------------------------------
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.persistence.spi.OptimisticTransaction_2_0#commit(javax.transaction.Synchronization)
+     * @see org.openmdx.base.resource.spi.OptimisticTransaction#commit(javax.transaction.Synchronization)
      */
     public void commit(
         Synchronization synchronization
-    ) throws ServiceException {
+    ) throws LocalTransactionException {
         try {
-            getDelegate(
-                OptimisticTransaction_2_0.class
+            this.getDelegate(
+                TransactionManager.class
             ).commit(
                 synchronization
             );
-        } catch (TransactionRolledbackLocalException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ROLLBACK,
-                "Unit of work has been rolled back"
+        } 
+        catch (TransactionRolledbackLocalException e) {
+            throw BasicException.initHolder(
+                new LocalTransactionException(
+                    "Unit of work has been rolled back",
+                    BasicException.newEmbeddedExceptionStack(
+                        e,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ROLLBACK
+                    )
+                )
             );
-        } catch (EJBException exception) {
-            throw new ServiceException(exception);
+        } 
+        catch(ServiceException e) {
+            throw new LocalTransactionException(e);
+        }
+        catch (EJBException e) {
+            throw new LocalTransactionException(e);
         }
     }
-
 
     //------------------------------------------------------------------------
     // Implements EntityManagerFactory_2_0
@@ -239,13 +248,13 @@ implements Dataprovider_1_3Connection
      * @see org.openmdx.kernel.persistence.spi.EntityManagerFactory_2_0#createEntityManager(javax.security.auth.Subject)
      */
     public PersistenceManager getEntityManager(
-        Subject subject
+        List<String> principalChain
     ) throws ResourceException {
         try {
             return getDelegate(
                 EntityManagerFactory.class
             ).getEntityManager(
-                subject
+                principalChain
             );
         } catch (ServiceException exception) {
             throw new ResourceException(exception);

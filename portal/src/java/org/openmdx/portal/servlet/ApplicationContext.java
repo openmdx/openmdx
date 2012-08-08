@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ApplicationContext.java,v 1.84 2009/03/08 18:03:19 wfro Exp $
+ * Name:        $Id: ApplicationContext.java,v 1.88 2009/06/09 12:50:34 hburger Exp $
  * Description: ApplicationContext
- * Revision:    $Revision: 1.84 $
+ * Revision:    $Revision: 1.88 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:19 $
+ * Date:        $Date: 2009/06/09 12:50:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -76,6 +76,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
@@ -398,12 +399,12 @@ public final class ApplicationContext
             Path mappedIdentity = this.mapIdentity(this.rootObjectIdentities[i]);
             try {
                 rootObjects.add(
-                    pmControl.getObjectById(mappedIdentity)
+                    pmData.getObjectById(mappedIdentity)
                 );
             }
             catch(Exception e) {
-                AppLog.info("Can not get root object", mappedIdentity);
-                AppLog.info(e.getMessage(), e.getCause());              
+                AppLog.info("Can not get root object", "object.xri=" + mappedIdentity + "; message=" + e.getMessage());
+                AppLog.detail(e.getMessage(), e.getCause());              
             }
         }
         this.rootObjects = (RefObject_1_0[])rootObjects.toArray(new RefObject_1_0[rootObjects.size()]);      
@@ -417,7 +418,7 @@ public final class ApplicationContext
         try {
             if(this.userHomeIdentity != null) {
                 Path mappedIdentity = this.mapIdentity(this.userHomeIdentity);
-                this.userHome = (RefObject_1_0)pmControl.getObjectById(mappedIdentity);
+                this.userHome = (RefObject_1_0)pmData.getObjectById(mappedIdentity);
             }
         }
         catch(Exception e) {
@@ -562,7 +563,7 @@ public final class ApplicationContext
         if(this.userHome != null) {
             boolean saveSettings = true;
             try {
-                this.userHome.refRefresh();
+            	JDOHelper.getPersistenceManager(this.userHome).refresh(this.userHome);
                 if(logoff) {
                     Boolean storeSettingsOnLogoff = (Boolean)this.userHome.refGetValue("storeSettingsOnLogoff");
                     saveSettings = (storeSettingsOnLogoff == null) || storeSettingsOnLogoff.booleanValue();
@@ -709,6 +710,7 @@ public final class ApplicationContext
                                         this.getCurrentLocaleAsIndex() < tab.getTitle().size() ? 
                                             tab.getTitle().get(this.getCurrentLocaleAsIndex()) : 
                                             tab.getTitle().get(0);
+                                    if(title != null) {
                                         if(title.startsWith("\u00BB")) title = title.substring(1);
                                         if(title.length() > 1) {
                                             // EVENT_SELECT_OBJECT for reference jj
@@ -726,6 +728,7 @@ public final class ApplicationContext
                                                 )
                                             );
                                         }
+                                    }
                                 }
                                 paneIndex++;
                             }
@@ -1417,9 +1420,9 @@ public final class ApplicationContext
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = -8690003081285454886L;
 
-    private static final String PROPERTY_LOCALE_NAME = "Locale.Name";
-    private static final String PROPERTY_TIMEZONE_NAME = "TimeZone.Name";
-    private static final String PROPERTY_PERSPECTIVE_ID = "Perspective.ID";
+    public static final String PROPERTY_LOCALE_NAME = "Locale.Name";
+    public static final String PROPERTY_TIMEZONE_NAME = "TimeZone.Name";
+    public static final String PROPERTY_PERSPECTIVE_ID = "Perspective.ID";
   
     private final String loginPrincipal;
     private final ControlFactory controlFactory;

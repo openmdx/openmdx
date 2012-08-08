@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AssociationMapper.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: AssociationMapper.java,v 1.5 2009/06/09 12:45:18 hburger Exp $
  * Description: AssociationMapper 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,15 +53,15 @@ package org.openmdx.application.mof.mapping.java;
 import java.io.Writer;
 
 import org.omg.mof.spi.Identifier;
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.application.mof.mapping.cci.AssociationDef;
 import org.openmdx.application.mof.mapping.cci.AssociationEndDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.ReferenceDef;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
 
 /**
  * AssociationMapper
@@ -83,7 +83,7 @@ public class AssociationMapper
     public AssociationMapper(
         ModelElement_1_0 element,
         Writer writer,
-        Model_1_3 model,
+        Model_1_0 model,
         Format format,
         String packageSuffix,
         MetaData_1_0 metaData
@@ -175,9 +175,7 @@ public class AssociationMapper
         }
         this.pw.println("   */");
         this.pw.println(
-            "  interface " + name + "<E> extends " + (
-                    true ? QUALIFIED_CONTAINER_CLASS_NAME : QUALIFIED_COLLECTION_CLASS_NAME
-        )+ "<E> {"); 
+            "  interface " + name + "<E> extends " + QUALIFIED_CONTAINER_CLASS_NAME + "<E> {"); 
         this.pw.println();            
         this.pw.println("     E get(");
         this.pw.println("       " + InstanceMapper.QUALIFIER_TYPE_CLASS_NAME + " " + qualifierTypeName + ",");

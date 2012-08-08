@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DatabaseConnectionFactory.java,v 1.2 2009/02/24 16:02:52 hburger Exp $
+ * Name:        $Id: DatabaseConnectionFactory.java,v 1.3 2009/03/11 16:03:39 hburger Exp $
  * Description: Database Connection Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 16:02:52 $
+ * Date:        $Date: 2009/03/11 16:03:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,9 +64,9 @@ import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.security.PasswordCredential;
 import javax.sql.DataSource;
 
-import org.openmdx.kernel.application.container.lightweight.ShareableConnectionManager;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.resource.spi.ShareableConnectionManager;
 
 
 /**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Container.java,v 1.1 2008/04/04 01:12:23 hburger Exp $
+ * Name:        $Id: Container.java,v 1.2 2009/04/02 16:51:32 hburger Exp $
  * Description: Container 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 01:12:23 $
+ * Date:        $Date: 2009/04/02 16:51:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -79,5 +79,16 @@ public interface Container<E>
     void removeAll(
         AnyTypePredicate predicate
     );
-        
+
+    /**
+     * This method should only be used to remove an object itself from a transient
+     * container.
+     * <p>
+     * <em>Note:<br>
+     * It can never be used to remove an object by specifying its qualifier!
+     * 
+     * @deprecated validate, whether the argument is really the object and not its qualifier!
+     */
+    boolean remove(Object o);
+
 }

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelExceptions.java,v 1.2 2009/03/03 17:23:08 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ModelExceptions.java,v 1.3 2009/04/02 14:56:21 hburger Exp $
  * Description: Generated constants for ModelExceptions
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 17:23:08 $
+ * Date:        $Date: 2009/04/02 14:56:21 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,210 +45,139 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes or is based on software developed by other
+ * organizations as listed in the NOTICE file.
  */
 package org.openmdx.application.mof.cci;
 
 import org.openmdx.kernel.exception.BasicException;
 
-
 /**
  * The <code>ModelExceptions</code> class contains exceptions codes used for
  * importing or exporting MOF models.
  */
-@SuppressWarnings("deprecation")
 public class ModelExceptions extends BasicException.Code {
 
-  static public final String MODEL_DOMAIN = "ModelDomain";
+    /**
+     * Constructor 
+     */
+    protected ModelExceptions(){
+        // avoid instantiation
+    }
 
-  /**
-   * Invalid format was used to specify a multiplicity
-   */
-  static public final int INVALID_MULTIPLICITY_FORMAT = 1;
+    /**
+     * The model domain id
+     */
+    static public final String MODEL_DOMAIN = "ModelDomain";
 
-  /**
-   * The opposite end of a composite aggregation must have the property 
-   * 'aggregation' set to org.omg.model.model1.generic.AggregationKind.NONE
-   */
-  static public final int INVALID_OPPOSITE_AGGREGATION_FOR_COMPOSITE_AGGREGATION = 3;
+    /**
+     * Invalid format was used to specify a multiplicity
+     */
+    static public final int INVALID_MULTIPLICITY_FORMAT = 1;
 
-  /**
-   * The opposite end of a composite aggregation must have the property 
-   * 'multiplicity' set to '1..1' or '0..1'
-   */
-  static public final int INVALID_MULTIPLICITY_FOR_COMPOSITE_AGGREGATION = 4;
+    /**
+     * The opposite end of a composite aggregation must have the property 
+     * 'aggregation' set to org.omg.model.model1.generic.AggregationKind.NONE
+     */
+    static public final int INVALID_OPPOSITE_AGGREGATION_FOR_COMPOSITE_AGGREGATION = 3;
 
-  /**
-   * Association ends with aggregation 'composite' should be navigable 
-   */
-  static public final int COMPOSITE_AGGREGATION_NOT_NAVIGABLE = 6;
+    /**
+     * The opposite end of a composite aggregation must have the property 
+     * 'multiplicity' set to '1..1' or '0..1'
+     */
+    static public final int INVALID_MULTIPLICITY_FOR_COMPOSITE_AGGREGATION = 4;
 
-  /**
-   * Only navigable association ends need a unique identifying qualifier 
-   */
-  static public final int UNNECESSARY_QUALIFIER_FOUND = 7;
+    /**
+     * Association ends with aggregation 'composite' should be navigable 
+     */
+    static public final int COMPOSITE_AGGREGATION_NOT_NAVIGABLE = 6;
 
-  /**
-   * At least one model constraint is violated.
-   */
-  static public final int CONSTRAINT_VIOLATION = 101;
+    /**
+     * Only navigable association ends need a unique identifying qualifier 
+     */
+    static public final int UNNECESSARY_QUALIFIER_FOUND = 7;
 
-  /**
-   * The repository does not contain an element that is required, i.e.
-   * the repository is not complete.
-   */
-  static public final int REFERENCED_ELEMENT_TYPE_NOT_FOUND_IN_REPOSITORY = 102;
+    /**
+     * At least one model constraint is violated.
+     */
+    static public final int CONSTRAINT_VIOLATION = 101;
 
-  /**
-   * The repository does not contain an exception type that is thrown by an
-   * operation.
-   */
-  static public final int EXCEPTION_TYPE_NOT_FOUND_IN_REPOSITORY = 103;
+    /**
+     * The repository does not contain an element that is required, i.e.
+     * the repository is not complete.
+     */
+    static public final int REFERENCED_ELEMENT_TYPE_NOT_FOUND_IN_REPOSITORY = 102;
 
-  /**
-   * The desired package to externalize does not exist in the model repository.
-   */
-  static public final int PACKAGE_TO_EXTERNALIZE_DOES_NOT_EXIST = 111;
+    /**
+     * The repository does not contain an exception type that is thrown by an
+     * operation.
+     */
+    static public final int EXCEPTION_TYPE_NOT_FOUND_IN_REPOSITORY = 103;
 
-  /**
-   * An alias type must specify exactly one attribute.
-   */
-  static public final int ALIAS_TYPE_REQUIRES_EXACTLY_ONE_ATTRIBUTE = 121;
+    /**
+     * The desired package to externalize does not exist in the model repository.
+     */
+    static public final int PACKAGE_TO_EXTERNALIZE_DOES_NOT_EXIST = 111;
 
-  /**
-   * An alias type must specify exactly one attribute.
-   */
-  static public final int INVALID_ALIAS_ATTRIBUTE_NAME = 122;
+    /**
+     * An alias type must specify exactly one attribute.
+     */
+    static public final int ALIAS_TYPE_REQUIRES_EXACTLY_ONE_ATTRIBUTE = 121;
 
-  /**
-   * The name of an association cannot be empty.
-   */
-  static public final int ASSOCIATION_NAME_IS_EMPTY = 123;
-  
-  /**
-   * The name of an association end cannot be empty.
-   */
-  static public final int ASSOCIATION_END_NAME_IS_EMPTY = 124;
-  
-  /**
-   * Unexpected end of qualifier declaration.
-   */
-  static public final int UNEXPECTED_END_OF_QUALIFIER_DECLARATION = 125;
-  
-  /**
-   * A colon is missing in the qualifier declaration.
-   */
-  static public final int MISSING_COLON_IN_QUALIFIER_DECLARATION = 126;
+    /**
+     * An alias type must specify exactly one attribute.
+     */
+    static public final int INVALID_ALIAS_ATTRIBUTE_NAME = 122;
 
-  
-  /**
-   * A semicolon is missing in the qualifier declaration.
-   */
-  static public final int MISSING_SEMICOLON_IN_QUALIFIER_DECLARATION = 127;
-  
-  /**
-   * The parameter declaration is invalid.
-   */
-  static public final int INVALID_PARAMETER_DECLARATION = 128;
-  
-  /**
-   * No type was specified for an attribute.
-   */
-  static public final int NO_ATTRIBUTE_TYPE_SPECIFIED = 129;
-  
-  /**
-   * No type was specified for an attribute.
-   */
-  static public final int INVALID_ATTRIBUTE_TYPE = 130;
-  
-  /**
-   * The model element is toplevel and not in a package.
-   */
-  static public final int MODEL_ELEMENT_NOT_IN_PACKAGE = 131;
-  
-  /**
-   * Circular alias type definition found.
-   */
-  static public final int CIRCULAR_ALIAS_TYPE_DEFINITION = 132;
-  
-  /**
-   * @return never
-   * @exception UnsupportedOperationEception is always thrown
-   * @deprecated 
-   */
-  static public int min()
-  {
-      throw new UnsupportedOperationException("No longer supported");
-  }
+    /**
+     * The name of an association cannot be empty.
+     */
+    static public final int ASSOCIATION_NAME_IS_EMPTY = 123;
 
-  /**
-   * @return never
-   * @exception UnsupportedOperationEception is always thrown
-   * @deprecated 
-   */
-  static public int max()
-  {
-      throw new UnsupportedOperationException("No longer supported");
-  }
+    /**
+     * The name of an association end cannot be empty.
+     */
+    static public final int ASSOCIATION_END_NAME_IS_EMPTY = 124;
 
-  /**
-   * Returns the code of the passed code's string representation.
-   * The string representation is case insensitive.
-   *
-   * @exception  return 
-   * @param code a stringified code
-   * @return a code
-   * @deprecated use toValue() instead
-   */
-  static public int fromString(String code)
-  {  
-      return toValue(code.toUpperCase());
-  }
+    /**
+     * Unexpected end of qualifier declaration.
+     */
+    static public final int UNEXPECTED_END_OF_QUALIFIER_DECLARATION = 125;
+
+    /**
+     * A colon is missing in the qualifier declaration.
+     */
+    static public final int MISSING_COLON_IN_QUALIFIER_DECLARATION = 126;
 
 
-  //------------------------------------------------------------------------
-  // Extends IntegerEnumeration
-  //------------------------------------------------------------------------
-    
-  /**
-   * Finds the value corresponding to the String.
-   * <p>
-   * This method is case-sensitive.
-   * 
-   * @param source
-   * 
-   * @exception   IllegalArgumentException
-   *              if no such value is found
-   */
-  public static int toValue(
-      String string
-  ){
-      return ModelExceptions.mapper.toValue(string);
-  }
-    
-  /**
-   * Converst a value to the corresponding to the String.
-   * <p>
-   * The value's numeric string representation is returned if it can't be found.
-   */
-  public static String toString(
-      int value
-  ){
-      return ModelExceptions.mapper.toString(value);
-  }
+    /**
+     * A semicolon is missing in the qualifier declaration.
+     */
+    static public final int MISSING_SEMICOLON_IN_QUALIFIER_DECLARATION = 127;
 
-  /**
-   * 
-   */
-  protected static final ReflectiveMapper mapper = new ReflectiveMapper(
-        BasicException.Code.mapper,
-        ModelExceptions.class
-  );
+    /**
+     * The parameter declaration is invalid.
+     */
+    static public final int INVALID_PARAMETER_DECLARATION = 128;
 
-  static
-  {
-    BasicException.register(MODEL_DOMAIN, mapper);
-  }
-  
+    /**
+     * No type was specified for an attribute.
+     */
+    static public final int NO_ATTRIBUTE_TYPE_SPECIFIED = 129;
+
+    /**
+     * No type was specified for an attribute.
+     */
+    static public final int INVALID_ATTRIBUTE_TYPE = 130;
+
+    /**
+     * The model element is toplevel and not in a package.
+     */
+    static public final int MODEL_ELEMENT_NOT_IN_PACKAGE = 131;
+
+    /**
+     * Circular alias type definition found.
+     */
+    static public final int CIRCULAR_ALIAS_TYPE_DEFINITION = 132;
+
 }

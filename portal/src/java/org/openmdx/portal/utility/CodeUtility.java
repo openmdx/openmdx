@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeUtility.java,v 1.9 2009/03/08 18:03:26 wfro Exp $
+ * Name:        $Id: CodeUtility.java,v 1.16 2009/06/13 18:48:08 wfro Exp $
  * Description: CodeUtility
- * Revision:    $Revision: 1.9 $
- * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2009/03/08 18:03:26 $
+ * Revision:    $Revision: 1.16 $
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Date:        $Date: 2009/06/13 18:48:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, CRIXP Corp., Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -66,27 +66,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
-import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.application.shell.Application;
-import org.openmdx.application.shell.ApplicationController;
-import org.openmdx.application.shell.CmdLineOption;
+import org.openmdx.application.dataprovider.importer.XmlImporter;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.portal.text.conversion.XMLWriter;
-import java.beans.ExceptionListener;
-import org.openmdx.uses.org.apache.commons.collections.map.ListOrderedMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -100,57 +96,8 @@ import org.xml.sax.SAXException;
  * <p>
  */
 @SuppressWarnings("unchecked")
-public class CodeUtility
-  extends Application
-  implements ExceptionListener {
+public class CodeUtility {
     
-  //-------------------------------------------------------------------------    
-  public CodeUtility(
-  ) {
-    super(
-      APP_NAME, 
-      VERSION, 
-      HELP_TEXT, 
-      CodeUtility.createCmdLineOptions()
-    );        
-  }
-        
-  //-------------------------------------------------------------------------    
-  public void exceptionThrown(
-         Exception exception
-  ){
-     exception.printStackTrace();
-  }
-
-  //-------------------------------------------------------------------------  
-  protected void init(
-  ) throws Exception {
-      // locales. get locale and assert en_US to be the first in the list
-      this.locale = new ArrayList();
-      if(this.getCmdLineArgs().hasArg("locale")) {
-        this.locale.addAll(this.getCmdLineArgs().getValues("locale"));   
-      }
-      if((this.locale.size() == 0) || !"en_US".equals(this.locale.get(0))) {
-          this.locale.add(0, "en_US");
-      }
-      // sourceDir
-      this.sourceDir = null;
-      if(this.getCmdLineArgs().hasArg("sourceDir")) {
-          this.sourceDir = new File(this.getCmdLineArgs().getFirstValue("sourceDir"));
-      }
-      else {
-          this.sourceDir = new File(".");
-      }  
-      // targetDir
-      this.targetDir = null;
-      if(this.getCmdLineArgs().hasArg("targetDir")) {
-          this.targetDir = new File(this.getCmdLineArgs().getFirstValue("targetDir"));
-      }
-      else {
-          this.targetDir = new File(".");
-      }
-  }
-
   //-------------------------------------------------------------------------    
   private Map lookupCode(
       Document document,
@@ -219,7 +166,7 @@ public class CodeUtility
       // en_US files are leading. process all files
       for(int u = 0; u < en_US_files.length; u++) {
           // read files containing locale-specific texts and add to en_US
-          Map codes = ListOrderedMap.decorate(new HashMap());
+          Map<Path,MappedRecord> codes = new LinkedHashMap<Path,MappedRecord>();
           XmlImporter importer = new XmlImporter(
               codes,
               false
@@ -242,19 +189,26 @@ public class CodeUtility
           try {
               System.out.println("loading " + file.getAbsolutePath());
               org.w3c.dom.Document mergedCodes = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
-              for(Iterator i = codes.values().iterator(); i.hasNext(); ) {
-                  DataproviderObject code = (DataproviderObject)i.next();
+              for(Iterator<MappedRecord> i = codes.values().iterator(); i.hasNext(); ) {
+                  MappedRecord code = i.next();
+                  ObjectHolder_2Facade codeFacade;
+                  try {
+	                  codeFacade = ObjectHolder_2Facade.newInstance(code);
+                  }
+                  catch (ResourceException e) {
+                	  throw new ServiceException(e);
+                  }
                   Map mergedCode = 
                       this.lookupCode(
                           mergedCodes, 
-                          code.path().getParent().getParent().getBase(), 
-                          code.path().getBase()
+                          codeFacade.getPath().getParent().getParent().getBase(), 
+                          codeFacade.getPath().getBase()
                       );
                   for(int j = 1; j < locale.size(); j++) { // skip en_US
                       String shortText = (String)mergedCode.get(locale.get(j) + "_short");
                       String longText = (String)mergedCode.get(locale.get(j) + "_long");
-                      code.values("shortText").add(shortText == null ? "" : shortText);
-                      code.values("longText").add(longText == null ? "" : longText);
+                      codeFacade.attributeValues("shortText").add(shortText == null ? "" : shortText);
+                      codeFacade.attributeValues("longText").add(longText == null ? "" : longText);
                   }
               }
           }
@@ -292,9 +246,10 @@ public class CodeUtility
                   String providerName ="CRX"; // default
                   String segmentName = "Standard"; // default
                   if(codes.size() > 0) {
-                      DataproviderObject_1_0 obj = (DataproviderObject_1_0)codes.values().iterator().next();
-                      providerName = obj.path().get(2);
-                      segmentName = obj.path().get(4);
+                      MappedRecord obj = codes.values().iterator().next();
+                      Path objPath = ObjectHolder_2Facade.getPath(obj);
+                      providerName = objPath.get(2);
+                      segmentName = objPath.get(4);
                   }
                   String s = null;
                   s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -312,35 +267,42 @@ public class CodeUtility
                       "                <valueContainer>\n";
                   w.write(s, 0, s.length());
                   boolean firstContainer = true;
-                  for(Iterator i = codes.values().iterator(); i.hasNext(); ) {
-                      DataproviderObject_1_0 element = (DataproviderObject_1_0)i.next();
-                      if("org:opencrx:kernel:code1:CodeValueContainer".equals(element.values(SystemAttributes.OBJECT_CLASS).get(0))) {
+                  for(Iterator<MappedRecord> i = codes.values().iterator(); i.hasNext(); ) {
+                      MappedRecord element = i.next();
+                      ObjectHolder_2Facade elementFacade;
+                      try {
+	                      elementFacade = ObjectHolder_2Facade.newInstance(element);
+                      }
+                      catch (ResourceException e) {
+                    	  throw new ServiceException(e);
+                      }
+                      if("org:opencrx:kernel:code1:CodeValueContainer".equals(elementFacade.getObjectClass())) {
                           if(!firstContainer) {
                               s = "                      </entry>\n" +
                                   "                    </_content>\n" +
                                   "                  </org.opencrx.kernel.code1.CodeValueContainer>\n";
                               w.write(s, 0, s.length());
                           }
-                          s = "                  <org.opencrx.kernel.code1.CodeValueContainer name=\"" + element.path().getBase() + "\" _operation=\"create\">\n" +
+                          s = "                  <org.opencrx.kernel.code1.CodeValueContainer name=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
                               "                    <_object/>\n" +
                               "                    <_content>\n" +
                               "                      <entry>\n";
                           w.write(s, 0, s.length());
                           firstContainer = false;
                       }
-                      else if("org:opencrx:kernel:code1:CodeValueEntry".equals(element.values(SystemAttributes.OBJECT_CLASS).get(0))) {
+                      else if("org:opencrx:kernel:code1:CodeValueEntry".equals(elementFacade.getObjectClass())) {
                           // only write if there are texts
                           if(
-                            ((element.values("shortText").size() > j) && (((String)element.values("shortText").get(j)).length() > 0)) ||
-                            ((element.values("longText").size() > j) && (((String)element.values("longText").get(j)).length() > 0))
+                            ((elementFacade.attributeValues("shortText").size() > j) && (((String)elementFacade.attributeValues("shortText").get(j)).length() > 0)) ||
+                            ((elementFacade.attributeValues("longText").size() > j) && (((String)elementFacade.attributeValues("longText").get(j)).length() > 0))
                           ) {                          
-                              String shortText = element.values("shortText").size() > j
-                                ? (String)element.values("shortText").get(j)
+                              String shortText = elementFacade.attributeValues("shortText").size() > j
+                                ? (String)elementFacade.attributeValues("shortText").get(j)
                                 : "";
-                              String longText = element.values("longText").size() > j
-                                ? (String)element.values("longText").get(j)
+                              String longText = elementFacade.attributeValues("longText").size() > j
+                                ? (String)elementFacade.attributeValues("longText").get(j)
                                 : "";
-                              s = "                        <org.opencrx.kernel.code1.CodeValueEntry code=\"" + element.path().getBase() + "\" _operation=\"create\">\n" +
+                              s = "                        <org.opencrx.kernel.code1.CodeValueEntry code=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
                                   "                          <_object>\n";
                               w.write(s, 0, s.length());
                               if(shortText.length() > 0) {
@@ -420,13 +382,13 @@ public class CodeUtility
       for(int u = 0; u < en_US_files.length; u++) {
 
           // get all locale specific files for en_US_files[k]
-          Map mergedCodes = new TreeMap();
+          Map<Path,MappedRecord> mergedCodes = new TreeMap<Path,MappedRecord>();
           Set codeValueContainers = new HashSet(); // collect CodeValueContainer which are required in next step
           for(int i = 0; i < locale.size(); i++) {
               
               // read entries
               File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + locale.get(i) + File.separatorChar + en_US_files[u].getName());
-              Map codes = new HashMap();
+              Map<Path,MappedRecord> codes = new HashMap<Path,MappedRecord>();
               if(file.exists()) {
                   XmlImporter importer = new XmlImporter(
                     codes,
@@ -449,35 +411,37 @@ public class CodeUtility
               }
               
               // merge entries
-              Set keySet = i == 0 ? codes.keySet() : mergedCodes.keySet();
+              Set<Path> keySet = i == 0 ? codes.keySet() : mergedCodes.keySet();
               try {
-                  for(Iterator j = keySet.iterator(); j.hasNext(); ) {
+                  for(Iterator<Path> j = keySet.iterator(); j.hasNext(); ) {
                     Path key = (Path)j.next();
                     // merge entry
                     if(mergedCodes.get(key) != null) {
-                      DataproviderObject mergedCodeEntry = (DataproviderObject)mergedCodes.get(key);
-                      if("org:opencrx:kernel:code1:CodeValueEntry".equals(mergedCodeEntry.values(SystemAttributes.OBJECT_CLASS).get(0))) {
-                          DataproviderObject codeEntry = (DataproviderObject)codes.get(key);
-                          if(mergedCodeEntry.getValues("shortText") != null) {
-                            mergedCodeEntry.values("shortText").add(
-                              (codeEntry != null) && (codeEntry.values("shortText").size() > 0)
-                                ? codeEntry.values("shortText").get(0)
-                                : "" // empty string as default
+                      MappedRecord mergedCodeEntry = mergedCodes.get(key);
+                      ObjectHolder_2Facade mergedCodeEntryFacade = ObjectHolder_2Facade.newInstance(mergedCodeEntry);
+                      if("org:opencrx:kernel:code1:CodeValueEntry".equals(mergedCodeEntryFacade.getObjectClass())) {
+                          MappedRecord codeEntry = codes.get(key);
+                          ObjectHolder_2Facade codeEntryFacade = ObjectHolder_2Facade.newInstance(codeEntry);
+                          if(mergedCodeEntryFacade.getAttributeValues("shortText") != null) {
+                        	  mergedCodeEntryFacade.attributeValues("shortText").add(
+                              (codeEntryFacade != null) && (codeEntryFacade.attributeValues("shortText").size() > 0) ? 
+                            	  codeEntryFacade.attributeValue("shortText") : 
+                            	  "" // empty string as default
                             );
                           }
-                          if(mergedCodeEntry.getValues("longText") != null) {
-                            mergedCodeEntry.values("longText").add(
-                              (codeEntry != null) && (codeEntry.values("longText").size() > 0)
-                                ? codeEntry.values("longText").get(0)
-                                : ""  // empty string as default
+                          if(mergedCodeEntryFacade.getAttributeValues("longText") != null) {
+                        	  mergedCodeEntryFacade.attributeValues("longText").add(
+                              (codeEntryFacade != null) && (codeEntryFacade.attributeValues("longText").size() > 0) ? 
+                            	  codeEntryFacade.attributeValue("longText") : 
+                            	  ""  // empty string as default
                             );
                           }
                       }
                     }
                     // add if it does not exist. Only add for locale=0 (en_US)
                     else if(i == 0) {
-                        DataproviderObject_1_0 entry = (DataproviderObject_1_0)codes.get(key);
-                        if("org:opencrx:kernel:code1:CodeValueContainer".equals(entry.values(SystemAttributes.OBJECT_CLASS).get(0))) {
+                        MappedRecord entry = codes.get(key);
+                        if("org:opencrx:kernel:code1:CodeValueContainer".equals(ObjectHolder_2Facade.getObjectClass(entry))) {
                             codeValueContainers.add(entry);
                         }
                         else {                         
@@ -542,27 +506,35 @@ public class CodeUtility
               w.write(s, 0, s.length());
               s = "<CodeValueContainers>\n";
               w.write(s, 0, s.length());
-              for(Iterator i = codeValueContainers.iterator(); i.hasNext(); ) {
-                  DataproviderObject_1_0 codeValueContainer = (DataproviderObject_1_0)i.next();
-                  s = "  <CodeValueContainer name=\"" + codeValueContainer.path().getBase() + "\">\n";
+              for(Iterator<MappedRecord> i = codeValueContainers.iterator(); i.hasNext(); ) {
+                  MappedRecord codeValueContainer = i.next();
+                  Path codeValueContainerPath = ObjectHolder_2Facade.getPath(codeValueContainer);
+                  s = "  <CodeValueContainer name=\"" + codeValueContainerPath.getBase() + "\">\n";
                   w.write(s, 0, s.length());
-                  for(Iterator j = sortedCodes.values().iterator(); j.hasNext(); ) {
-                      DataproviderObject_1_0 entry = (DataproviderObject_1_0)j.next();
-                      if(codeValueContainer.path().getBase().equals(entry.path().getParent().getParent().getBase())) {
-                          s = "    <CodeValueEntry code=\"" + entry.path().getBase() + "\">\n";
+                  for(Iterator<MappedRecord> j = sortedCodes.values().iterator(); j.hasNext(); ) {
+                      MappedRecord entry = j.next();
+                      ObjectHolder_2Facade entryFacade;
+                      try {
+	                      entryFacade = ObjectHolder_2Facade.newInstance(entry);
+                      }
+                      catch (ResourceException e) {
+                    	  throw new ServiceException(e);
+                      }
+                      if(codeValueContainerPath.getBase().equals(entryFacade.getPath().getParent().getParent().getBase())) {
+                          s = "    <CodeValueEntry code=\"" + entryFacade.getPath().getBase() + "\">\n";
                           w.write(s, 0, s.length());
                           for(int k = 0; k < locale.size(); k++) {
                               // shortText
                               s = "      <" + locale.get(k) + "_short>";
                               w.write(s, 0, s.length());
-                              s = (String)entry.values("shortText").get(k);
+                              s = (String)entryFacade.attributeValues("shortText").get(k);
                               fw.write(s, 0, s.length());
                               s = "</" + locale.get(k) + "_short>\n";
                               w.write(s, 0, s.length());
                               // longText
                               s = "      <" + locale.get(k) + "_long>";
                               w.write(s, 0, s.length());
-                              s = (String)entry.values("longText").get(k);
+                              s = (String)entryFacade.attributeValues("longText").get(k);
                               fw.write(s, 0, s.length());
                               s = "</" + locale.get(k) + "_long>\n";
                               w.write(s, 0, s.length());
@@ -592,108 +564,65 @@ public class CodeUtility
   
   //-------------------------------------------------------------------------    
   protected void run(
-  ) throws Exception {
+	  String[] args
+  ) throws ServiceException {
+      this.locale = new ArrayList();
+      this.sourceDir = new File(".");
+      this.targetDir = new File(".");
       String command = "merge";
-      if (this.getCmdLineArgs().hasArg("merge")) {
-          command = "merge";
-      }
-      if (this.getCmdLineArgs().hasArg("split")) {
-          command = "split";
-      }
+	  for(int i = 0; i < args.length; i++) {
+	      // locales. get locale and assert en_US to be the first in the list
+	      if("--locale".equals(args[i])) {
+	    	  int j = i + 1;
+	    	  while(j < args.length && !args[j].startsWith("--")) {
+	    		  this.locale.add(args[j]);
+	    		  j++;
+	    	  }
+	      }
+	      // sourceDir
+	      else if("--sourceDir".equals(args[i]) && (i + 1 < args.length)) {
+	          this.sourceDir = new File(args[i+1]);
+	      }
+	      // targetDir
+	      else if("--targetDir".equals(args[i]) && (i + 1 < args.length)) {
+	          this.targetDir = new File(args[i+1]);
+	      }
+	      else if("--split".equals(args[i])) {
+	    	  command = "split";
+	      }
+	      else if("--merge".equals(args[i])) {
+	    	  command = "merge";
+	      }
+	  }
+      if(this.locale.isEmpty() || !"en_US".equals(this.locale.get(0))) {
+          this.locale.add(0, "en_US");
+      }	  
       if("merge".equals(command)){
-          this.merge(locale, sourceDir, targetDir);
+          this.merge(
+        	  this.locale, 
+        	  this.sourceDir, 
+        	  this.targetDir
+          );
       }
       else if("split".equals(command)){
-          this.split(locale, sourceDir, targetDir);
+          this.split(
+        	  this.locale, 
+        	  this.sourceDir, 
+        	  this.targetDir
+          );
       }
-  }
-
-  //-------------------------------------------------------------------------    
-  protected void release(
-  ) throws Exception {
-    System.out.println("shutdown");
   }
 
   //-------------------------------------------------------------------------    
   public static void main(
     String[] args
-  ) {
-    ApplicationController controller = new ApplicationController(args);
-    controller.initLogging(LOG_CONFIG_NAME, LOG_SOURCE);
-    controller.registerApplication(new CodeUtility());
-    controller.run();
-  }
-  
-  //-------------------------------------------------------------------------        
-  private static List createCmdLineOptions(
-  ) {
-    ArrayList options = new ArrayList();
-    
-    // merge command
-    options.add(
-      new CmdLineOption(
-        "merge",
-        "Merge locale separated files to one merged file"
-      )
-    );
-    
-    // merge command
-    options.add(
-      new CmdLineOption(
-        "split",
-        "Split merged file into locale separated files"
-      )
-    );
-    
-    // dir (split directory)
-    options.add(
-      new CmdLineOption(
-        "sourceDir",
-        "directory containing the source files",
-        1,
-        1
-      )
-    );    
-    options.add(
-      new CmdLineOption(
-        "targetDir",
-        "directory containing the target files",
-        1,
-        1
-      )
-    );    
-    // locale
-    options.add(
-      new CmdLineOption(
-        "locale",
-        "list of locales to process",
-        0,
-        Integer.MAX_VALUE
-      )
-    );    
-    return options;
+  ) throws ServiceException {
+	  new CodeUtility().run(args);
   }
   
   //-------------------------------------------------------------------------
   // Variables    
   //-------------------------------------------------------------------------    
-
-  // The version gets set by CVS
-  private static final String VERSION = "$Revision: 1.9 $";
-  
-  // The application name
-  private static final String APP_NAME = "CodeMapper";
-  
-  // The logging configuration name
-  private static final String LOG_CONFIG_NAME = "CodeMapper";
-  
-  // The logging log source name
-  private static final String LOG_SOURCE = CodeUtility.APP_NAME;
-  
-  // Application help
-  private static final String HELP_TEXT = "CodeMapper splits and merges code tables";
-  
-  // command line options
   private List locale = null;
   private File sourceDir = null;
   private File targetDir = null;

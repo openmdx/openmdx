@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SortedMaps.java,v 1.5 2008/10/02 17:16:48 hburger Exp $
+ * Name:        $Id: SortedMaps.java,v 1.6 2009/04/28 13:58:52 hburger Exp $
  * Description: Sorted Maps 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/02 17:16:48 $
+ * Date:        $Date: 2009/04/28 13:58:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -601,7 +601,7 @@ public class SortedMaps {
         public boolean equals(
             Object obj
         ) {
-            if(obj instanceof AsSparseArray) {
+            if(obj instanceof AsSparseArray<?>) {
                 AsSparseArray<?> that = (AsSparseArray<?>) obj;
                 return 
                     this.offset == that.offset &&

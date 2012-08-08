@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URLConnection.java,v 1.5 2009/03/08 18:52:20 wfro Exp $
+ * Name:        $Id: URLConnection.java,v 1.6 2009/03/12 17:12:30 hburger Exp $
  * Description: URL Connection 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:20 $
+ * Date:        $Date: 2009/03/12 17:12:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,7 +51,6 @@
  */
 package org.openmdx.resource.ldap.v3;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -79,6 +78,8 @@ import netscape.ldap.LDAPModificationSet;
 import netscape.ldap.LDAPSearchConstraints;
 import netscape.ldap.LDAPSearchResults;
 
+import org.openmdx.base.io.LineReader;
+import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.resource.ldap.cci.Connection;
 
 /**
@@ -93,6 +94,7 @@ class URLConnection
 	 * @param source
 	 * @param distinguishedNamePattern
 	 * @param attributePattern
+	 * @param binaryAttributePattern TODO
 	 * @param caseSensitive TODO
 	 * @throws LDAPException
 	 */
@@ -100,12 +102,13 @@ class URLConnection
 		URL source,
 		Pattern distinguishedNamePattern,
 		Pattern attributePattern,
+		Pattern binaryAttributePattern, 
 		Pattern commentPattern, 
 		boolean caseSensitive
 	) throws ResourceException {
 		this.caseSensitive = caseSensitive;
 		try {
-			BufferedReader reader = new BufferedReader(
+			LineReader reader = new LineReader(
 				new InputStreamReader(
 					source.openStream()
 				)
@@ -125,8 +128,7 @@ class URLConnection
 						this.directory.put(
 							this.toKey(name), entry
 						);
-					} 
-					else if (entry != null) {
+					} else if (entry != null) {
 						matcher = attributePattern.matcher(line);
 						if(matcher.matches()) {
 							String name = matcher.group(1).trim();
@@ -135,16 +137,28 @@ class URLConnection
 							if(attribute == null) {
 								attribute = new LDAPAttribute(name, value);
 								entry.getAttributeSet().add(attribute);
-							} 
-							else {
+							} else {
 								attribute.addValue(value);
+							}
+						} else {
+							matcher = binaryAttributePattern.matcher(line);
+							if(matcher.matches()) {
+								String name = matcher.group(1).trim();
+								String encoded = matcher.group(2).trim();
+								byte[] value = Base64.decode(encoded);
+								LDAPAttribute attribute = entry.getAttribute(name);
+								if(attribute == null) {
+									attribute = new LDAPAttribute(name, value);
+									entry.getAttributeSet().add(attribute);
+								} else {
+									attribute.addValue(value);
+								}
 							}
 						}
 					}
 				}
 			}
-		} 
-		catch (IOException exception) {
+		}  catch (IOException exception) {
 			throw new CommException(
 				"Population failed",
 				exception

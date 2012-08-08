@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultDataBinding.java,v 1.3 2008/04/13 11:39:31 wfro Exp $
+ * Name:        $Id: DefaultDataBinding.java,v 1.4 2009/05/01 22:08:09 wfro Exp $
  * Description: DefaultDataBinding 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/13 11:39:31 $
+ * Date:        $Date: 2009/05/01 22:08:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,14 @@ import javax.jmi.reflect.RefObject;
 public class DefaultDataBinding 
     implements DataBinding_1_0 {
 
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    static protected Collection<Object> valueAsCollection(
+    	Object value
+    ) {
+    	return (Collection<Object>)value;
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.DataBinding_1_0#getValue(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String)
      */
@@ -91,9 +99,11 @@ public class DefaultDataBinding
         Object newValue
     ) {
         if(newValue instanceof Collection) {
-            Collection newValues = (Collection)newValue;
-            Collection values = (Collection)object.refGetValue(
-                qualifiedFeatureName
+            Collection<Object> newValues = valueAsCollection(newValue);
+            Collection<Object> values = valueAsCollection(
+            	object.refGetValue(
+            		qualifiedFeatureName
+                )
             );
             values.clear();
             values.addAll(newValues);

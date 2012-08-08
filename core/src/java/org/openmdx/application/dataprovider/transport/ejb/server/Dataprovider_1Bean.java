@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Bean.java,v 1.2 2009/01/12 13:31:44 wfro Exp $
+ * Name:        $Id: Dataprovider_1Bean.java,v 1.5 2009/05/26 13:59:43 wfro Exp $
  * Description: A Dataprovider Service
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 13:31:44 $
+ * Date:        $Date: 2009/05/26 13:59:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,12 +57,10 @@ import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.application.dataprovider.kernel.Dataprovider_1;
 import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1_1Connection;
-import org.openmdx.application.dataprovider.transport.ejb.spi.AbstractDataprovider_1Bean;
-import org.openmdx.application.dataprovider.transport.rmi.RMIMapper;
 import org.openmdx.base.exception.ServiceException;
 
 /**
- * The dataprovider server
+ * A Dataprovider Service
  */
 public class Dataprovider_1Bean 
     extends AbstractDataprovider_1Bean 
@@ -70,18 +68,31 @@ public class Dataprovider_1Bean
 {
 
     /**
-     * 
+     * The delegate
      */    
     protected Dataprovider_1_1Connection kernel;
   
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 3256720688944854580L;
+    private static final long serialVersionUID = -8210685129844478326L;
 
     
     //------------------------------------------------------------------------
-    // Implements Manageable_1_0
+    // Extends AbstractDataprovider_1Bean
+    // -----------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.transport.ejb.spi.AbstractDataprovider_1Bean#getDelegate()
+     */
+    @Override
+    protected Dataprovider_1_0 getDelegate() {
+        return this.kernel;
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Extends SessionBean_1
     // -----------------------------------------------------------------------
   
     /**
@@ -94,20 +105,11 @@ public class Dataprovider_1Bean
     ) throws Exception {
         super.activate(configuration);
         //
-        // Get dataprovider connections
-        //
-        getDataproviderConnections(configuration);
-        //
-        // Get datasources
-        //
-        getDataSources(configuration);
-        //
         // Acquire kernel
         //
         this.kernel = new Dataprovider_1(
           configuration,
-          this, 
-          getSelf()
+          this
         );
     }
     
@@ -138,17 +140,16 @@ public class Dataprovider_1Bean
         UnitOfWorkRequest... workingUnits
     ) {      
         try {
-            UnitOfWorkReply[] replies = RMIMapper.marshal(
-                this.kernel.process(
-                    header,
-                    RMIMapper.unmarshal(workingUnits)
-                )
+            UnitOfWorkReply[] replies = this.kernel.process(
+                header,
+                workingUnits
             );
             return replies;
-       } catch (RuntimeException exception) {
+       } 
+       catch (RuntimeException exception) {
             new ServiceException(exception).log();
             throw exception;    
-        }
+       }
     }
 
 }  

@@ -5,9 +5,11 @@
 	<enterprise-beans>
 		<session>
 			<ejb-name>DataProvider</ejb-name>
-			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-			<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
+			<home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+			<remote>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+			<local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			<local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			<ejb-class>org.openmdx.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
 			<env-entry>
@@ -108,7 +110,7 @@
 			<env-entry>
 				<env-entry-name>APPLICATION/bypassedByLenientRequests</env-entry-name>
 				<env-entry-type>java.lang.Boolean</env-entry-type>
-				<env-entry-value>true</env-entry-value>
+				<env-entry-value>false</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>APPLICATION/sequenceSupported</env-entry-name>
@@ -206,6 +208,66 @@
 				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>xri:@openmdx:org.openmdx.test.app1/provider/:*/segment/:*/:*/:*/property/:*</env-entry-value>
 			</env-entry>			
+			
+			
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1Person</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[1]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1Document</env-entry-value>
+			</env-entry>			
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[2]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1Segment</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[3]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1Invoice</env-entry-value>
+			</env-entry>			
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[4]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1InvoicePosition</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[5]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1Address</env-entry-value>
+			</env-entry>			
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[6]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1PersonGroup</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[7]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1CycleMember1</env-entry-value>
+			</env-entry>			
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[8]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1CycleMember2</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[9]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1MessageTemplate</env-entry-value>
+			</env-entry>			
+			<env-entry>
+				<env-entry-name>PERSISTENCE/typeName[10]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>app1Property</env-entry-value>
+			</env-entry>			
+			
+			
+			
 			<env-entry>
 				<env-entry-name>PERSISTENCE/dbObject[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
@@ -393,6 +455,13 @@
 			<method>
 				<ejb-name>DataProvider</ejb-name>
 				<method-name>process</method-name>
+			</method>
+			<trans-attribute>Required</trans-attribute>
+		</container-transaction>
+		<container-transaction>
+			<method>
+				<ejb-name>DataProvider</ejb-name>
+				<method-name>execute</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

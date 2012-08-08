@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX http://www.openmdx.org/
- * Name:        $Id: RequestedList.java,v 1.2 2009/01/06 13:14:45 wfro Exp $
+ * Name:        $Id: RequestedList.java,v 1.4 2009/05/28 11:15:12 wfro Exp $
  * Description: RequestedList class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 13:14:45 $
+ * Date:        $Date: 2009/05/28 11:15:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,11 +58,14 @@ import java.io.Serializable;
 import java.util.AbstractSequentialList;
 import java.util.Arrays;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 import org.openmdx.base.collection.Reconstructable;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.AttributeSpecifier;
+import org.openmdx.base.query.Directions;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -655,78 +658,6 @@ public class RequestedList
         int previousIndex;
         int currentIndex;
         int nextIndex;
-
-    }
-
-    //------------------------------------------------------------------------
-    // MarshallingIterator
-    //------------------------------------------------------------------------
-    protected class MarshallingIterator 
-    extends BufferingIterator
-    {
-
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 3257288045601632562L;
-
-        MarshallingIterator(
-            int index,
-            DataproviderObjectMarshaller_1_0 marshaller
-        ){
-            super(index);
-            this.marshaller = marshaller;
-        }
-
-        /**
-         * Returns the next element in the list. This method may be called
-         * repeatedly to iterate through the list, or intermixed with calls to
-         * previous to go back and forth. (Note that alternating calls to next
-         * and previous will return the same element repeatedly.)
-         *
-         * @return    the next element in the list.
-         *
-         * @exception NoSuchElementException
-         *        if the iteration has no next element.
-         */
-        public Object next(
-        ){
-            try {
-                return marshaller.fromDataproviderObject(
-                    (DataproviderObject_1_0)super.next()
-                );
-            } catch (ServiceException exception) {
-                throw new RuntimeServiceException(exception);
-            }
-        }
-
-        /**
-         * Returns the previous element in the list. This method may be called
-         * repeatedly to iterate through the list backwards, or intermixed
-         * with calls to next to go back and forth. (Note that alternating
-         * calls to next and previous will return the same element
-         * repeatedly.)
-         *
-         * @return    the previous element in the list.
-         *
-         * @exception NoSuchElementException
-         *        if the iteration has no previous element.
-         */
-        public Object previous(
-        ){
-            try {
-                return marshaller.fromDataproviderObject(
-                    (DataproviderObject_1_0)super.previous()
-                );
-            } catch (ServiceException exception) {
-                throw new RuntimeServiceException(exception);
-            }
-        }
-
-        //------------------------------------------------------------------------
-        // Variables
-        //------------------------------------------------------------------------
-        protected transient DataproviderObjectMarshaller_1_0 marshaller;
 
     }
 

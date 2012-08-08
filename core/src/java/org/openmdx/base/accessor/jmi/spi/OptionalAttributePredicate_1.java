@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OptionalAttributePredicate_1.java,v 1.9 2009/01/13 02:10:33 wfro Exp $
+ * Name:        $Id: OptionalAttributePredicate_1.java,v 1.10 2009/06/09 12:45:17 hburger Exp $
  * Description: Optional Attribute Predicate implementation
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:33 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,7 +53,7 @@ package org.openmdx.base.accessor.jmi.spi;
 
 import java.util.Collections;
 
-import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
+import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.Quantors;
@@ -74,7 +74,7 @@ class OptionalAttributePredicate_1
      * @param fieldName
      */
     OptionalAttributePredicate_1 (
-        RefFilter_1_1 delegate, 
+        RefFilter_1_0 delegate, 
         ModelElement_1_0 feature
     ){
         super(delegate, feature);

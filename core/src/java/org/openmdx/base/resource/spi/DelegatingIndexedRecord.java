@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingIndexedRecord.java,v 1.6 2008/03/21 18:31:20 hburger Exp $
+ * Name:        $Id: DelegatingIndexedRecord.java,v 1.7 2009/05/07 14:30:50 hburger Exp $
  * Description: Delegating Indexed Record
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:31:20 $
+ * Date:        $Date: 2009/05/07 14:30:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -100,6 +100,13 @@ public class DelegatingIndexedRecord
         this.recordName = recordName;
         this.recordShortDescription = recordShortDescription;
         this.source = source;
+    }
+
+    /**
+     * Constructor 
+     */
+    protected DelegatingIndexedRecord(){
+        // for de-serialization
     }
 
     

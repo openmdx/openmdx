@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     OMEX/Security, http://www.omex.ch/
- * Name:        $Id: RemoteLoginModule.java,v 1.17 2009/03/08 18:52:21 wfro Exp $
+ * Name:        $Id: RemoteLoginModule.java,v 1.20 2009/05/27 23:16:26 hburger Exp $
  * Description: Remote Login Module
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:21 $
+ * Date:        $Date: 2009/05/27 23:16:26 $
  * ====================================================================
  *
  * Copyright (c) 2004-2006, OMEX AG, Switzerland
@@ -494,7 +494,7 @@ public class RemoteLoginModule implements LoginModule {
     ){
         return 
             this.echoOn instanceof Boolean ? ((Boolean)this.echoOn).booleanValue() :
-            this.echoOn instanceof Set ? ((Set<?>)this.echoOn).contains(code) :
+            this.echoOn instanceof Set<?> ? ((Set<?>)this.echoOn).contains(code) :
             false;
     }
 

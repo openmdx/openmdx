@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationTabControl.java,v 1.38 2009/03/08 18:03:25 wfro Exp $
+ * Name:        $Id: OperationTabControl.java,v 1.40 2009/04/30 11:48:40 wfro Exp $
  * Description: OperationTabControl
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.40 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:25 $
+ * Date:        $Date: 2009/04/30 11:48:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,6 +71,7 @@ import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.BinaryValue;
+import org.openmdx.portal.servlet.attribute.BooleanValue;
 import org.openmdx.portal.servlet.attribute.CodeValue;
 import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
@@ -319,7 +320,7 @@ public class OperationTabControl
                                                         field, 
                                                         application.getCurrentLocaleAsIndex(), 
                                                         false, 
-                                                        true
+                                                        false
                                                     );
                                                     p.write("<td>");
                                                     p.write("  <select class=\"valueL\" name=\"", field, "[", Integer.toString(tabIndex), "]", "\" tabindex=\"", Integer.toString(tabIndex), "\">");
@@ -421,6 +422,16 @@ public class OperationTabControl
                                                     p.write("  <input type=\"file\" class=\"valueL\" name=\"", field, "[" + tabIndex, "]", "\" tabindex=\"" + tabIndex, "\">");
                                                     p.write("</td>");
                                                     p.write("<td class=\"addon\"></td>");
+                                                }
+                                                else if(valueHolder instanceof BooleanValue) {
+                                                    // if checked sends (true,false). If not checked sends (false). The hidden field
+                                                    // guarantees that always a value is sent.
+                                                    String checkedModifier = "true".equals(stringifiedValue) ? "checked" : "";
+                                                    p.write("<td ", rowSpanModifier, ">");
+                                                    p.write("  <input name=\"", field, "[" + tabIndex, "].false\" type=\"hidden\" class=\"valueL", "\" value=\"false\">");
+                                                    p.write("  <input name=\"", field, "[" + tabIndex, "].true\" type=\"checkbox\" ", checkedModifier, " tabindex=\"" + tabIndex, "\" value=\"true\">");
+                                                    p.write("</td>");
+                                                    p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");                                                	
                                                 }
                                                 else {
                                                     p.write("<td ", rowSpanModifier, ">");

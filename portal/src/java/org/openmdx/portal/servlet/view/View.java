@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: View.java,v 1.60 2009/01/13 23:48:42 wfro Exp $
+ * Name:        $Id: View.java,v 1.61 2009/04/23 13:15:38 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.60 $
+ * Revision:    $Revision: 1.61 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 23:48:42 $
+ * Date:        $Date: 2009/04/23 13:15:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -455,6 +455,7 @@ public abstract class View
     public static final String VIEW_SHOW_OBJECT = "ShowObject";
     public static final String VIEW_USER_DEFINED = "UserDefined";
     public static final String REQUEST_ID_TEMPLATE = "REQUEST_ID";
+    public static final String CURRENT_OBJECT_XRI_TEMPLATE = "CURRENT_OBJECT_XRI";
     
     public static final short REQUEST_ID_FORMAT_NONE = 0;
     public static final short REQUEST_ID_FORMAT_UID = 1;

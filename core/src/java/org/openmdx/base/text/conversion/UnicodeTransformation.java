@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UnicodeTransformation.java,v 1.6 2007/10/10 16:05:53 hburger Exp $
+ * Name:        $Id: UnicodeTransformation.java,v 1.7 2009/05/26 13:10:13 wfro Exp $
  * Description: openMDX Character Conversions: Unicode Transformation 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:53 $
+ * Date:        $Date: 2009/05/26 13:10:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,7 +52,6 @@
 package org.openmdx.base.text.conversion;
 
 import org.openmdx.base.text.conversion.cci.UnicodeTransformer_1_0;
-import org.openmdx.base.text.conversion.jre.since1_2.StringUnicodeTransformer_1;
 
 
 

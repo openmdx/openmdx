@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.11 2009/01/11 21:19:33 wfro Exp $
+ * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.13 2009/05/26 12:40:30 hburger Exp $
  * Description: ContainerInvocationHandler 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/11 21:19:33 $
+ * Date:        $Date: 2009/05/26 12:40:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,12 +55,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+
+import javax.jmi.reflect.RefBaseObject;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.marshalling.Marshaller;
-import org.slf4j.LoggerFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
 
@@ -73,12 +76,14 @@ public class Jmi1ContainerInvocationHandler
 
     /**
      * Constructor 
+     * 
+     * @param marshaller 
      * @param delegate
      */
     public Jmi1ContainerInvocationHandler(
-        RefContainer delegate
+        Marshaller marshaller, RefContainer delegate
     ) {
-        this.marshaller = IdentityMarshaller.INSTANCE;
+        this.marshaller = marshaller == null ? IdentityMarshaller.INSTANCE : marshaller;
         this.refDelegate = delegate;
         this.cciDelegate = null;
     }
@@ -113,10 +118,6 @@ public class Jmi1ContainerInvocationHandler
     private final Container<?> cciDelegate;
     
             
-    //------------------------------------------------------------------------
-    // Implements InvocationHandler
-    //------------------------------------------------------------------------
-    
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
@@ -135,14 +136,22 @@ public class Jmi1ContainerInvocationHandler
                     // by the Jmi1ObjectInvocationHandler
                     //
                     if("add".equals(methodName)) {
-                        this.refDelegate.refAdd(args);
+                        this.refDelegate.refAdd(
+                            (Object[]) this.marshaller.unmarshal(args)
+                        );
                         return null;
                     } 
                     else if("get".equals(methodName)) {
-                        return this.refDelegate.refGet(args);
+                        return this.marshaller.marshal(
+                            this.refDelegate.refGet(
+                                (Object[]) this.marshaller.unmarshal(args)
+                            )
+                        );
                     } 
                     else if("remove".equals(methodName)) {
-                        this.refDelegate.refRemove(args);
+                        this.refDelegate.refRemove(
+                            (Object[]) this.marshaller.unmarshal(args)
+                        );
                         return null;
                     }
                 } 
@@ -153,16 +162,42 @@ public class Jmi1ContainerInvocationHandler
                     // by the Jmi1ObjectInvocationHandler
                     //
                     if("getAll".equals(methodName) && args.length == 1) {
-                        return this.refDelegate.refGetAll(args[0]);
+                        return this.marshaller.marshal(
+                            this.refDelegate.refGetAll(
+                                this.marshaller.unmarshal(args[0])
+                            )
+                        );
                     } 
                     else if("removeAll".equals(methodName) && args.length == 1) {
-                        return this.refDelegate.refRemoveAll(args[0]);
+                        this.refDelegate.refRemoveAll(
+                            this.marshaller.unmarshal(args[0])
+                        );
+                        return null;
                     }
                 }
-                return method.invoke(this.refDelegate, args);
+                return this.marshaller.marshal(
+                    method.invoke(this.refDelegate, 
+                        (Object[]) this.marshaller.unmarshal(args)
+                    )
+                );
             } 
             else {
-                if(declaringClass == RefContainer.class) {
+                if(declaringClass == RefBaseObject.class) {
+                        if(
+                            "refOutermostPackage".equals(methodName) && 
+                            this.marshaller instanceof Jmi1ObjectInvocationHandler.StandardMarshaller
+                         ) {
+                            return ((Jmi1ObjectInvocationHandler.StandardMarshaller)this.marshaller).getOutermostPackage();
+                        } else if(
+                            "refMofId".equals(methodName) && 
+                            this.cciDelegate instanceof RefBaseObject
+                        ){
+                            return ((RefBaseObject)this.cciDelegate).refMofId();
+                        } else throw new UnsupportedOperationException(
+                            declaringClass + ": " + methodName
+                        );
+                } 
+                else if(declaringClass == RefContainer.class) {
                     if("refAdd".equals(methodName)) {
                         ReferenceDef.getInstance(proxy.getClass()).add.invoke(
                             this.cciDelegate, 
@@ -310,9 +345,8 @@ public class Jmi1ContainerInvocationHandler
             try {
                 return Container.class.getMethod(methodName, AnyTypePredicate.class);
             } catch (NoSuchMethodException exception) {
-                LoggerFactory.getLogger(
-                    Jmi1ContainerInvocationHandler.class
-                ).error(
+                LoggerFactory.getLogger().log(
+                    Level.SEVERE,
                     "Expected getAll() and removeAll() being a member of " + Container.class.getName(),
                     exception
                 );

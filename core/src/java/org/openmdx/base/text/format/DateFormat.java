@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateFormat.java,v 1.11 2008/11/05 12:53:42 hburger Exp $
+ * Name:        $Id: DateFormat.java,v 1.12 2009/05/07 14:53:13 hburger Exp $
  * Description: infrastructure: date format
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/05 12:53:42 $
+ * Date:        $Date: 2009/05/07 14:53:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -65,11 +65,15 @@ public class DateFormat extends ThreadLocal<SimpleDateFormat> {
     /**
      * Creates a DateFormat object for the specified pattern.
      */
-    DateFormat(
-    	String pattern
+    protected DateFormat(
+    	String pattern,
+    	String timeZone,
+    	boolean lenient
     ){
     	this.pattern = pattern;
         this.rejectE = isPatternWithoutText(pattern);
+        this.timeZone = timeZone == null ? null : TimeZone.getTimeZone(timeZone);
+        this.lenient = lenient;
     }
         
     private static final boolean isPatternWithoutText(
@@ -102,14 +106,31 @@ public class DateFormat extends ThreadLocal<SimpleDateFormat> {
      * 
      * @return a DateFormat object for the  given pattern
      */
-    public static synchronized DateFormat getInstance(
+    public static DateFormat getInstance(
         String pattern
     ){
-        DateFormat instance = patternMap.get(pattern);
+        return getInstance(pattern,"UTC",false);
+    }
+
+    /**
+     * Returns a DateFormat object for the  given arguments
+     * 
+     * @param pattern the pattern to be used
+     * @param timeZone the time zone id, or <code>null</code> for local time zone
+     * @param lenient tells whether parsing is lenient or strict
+     * @return
+     */
+    public static DateFormat getInstance(
+        String pattern,
+        String timeZone,
+        boolean lenient
+    ){
+        String id = pattern + '*' + (timeZone == null ? "LOCAL" : timeZone) + '*' + (lenient ? "LENIENT" : "STRICT");
+        DateFormat instance = patternMap.get(id);
         if(instance == null) {
             DateFormat concurrent = patternMap.putIfAbsent(
-                pattern,
-                instance = new DateFormat(pattern)
+                id,
+                instance = new DateFormat(pattern, timeZone, lenient)
             );
             return concurrent == null ? instance : concurrent;
         } else {
@@ -117,13 +138,16 @@ public class DateFormat extends ThreadLocal<SimpleDateFormat> {
         }
     }
     
+    
     /* (non-Javadoc)
      * @see java.lang.ThreadLocal#initialValue()
      */
     protected SimpleDateFormat initialValue() {
     	SimpleDateFormat formatter = new SimpleDateFormat(pattern);
-    	formatter.setLenient(false);
-    	formatter.setTimeZone(UTC);
+    	formatter.setLenient(this.lenient);
+    	if(this.timeZone != null) {
+        	formatter.setTimeZone(this.timeZone);
+    	}
     	return formatter;
     }	
 
@@ -178,6 +202,16 @@ public class DateFormat extends ThreadLocal<SimpleDateFormat> {
      */
     final boolean rejectE;
 
+    /**
+     * The time zone to be used
+     */
+    final private TimeZone timeZone;
+    
+    /**
+     * Distinguish between lenient and strict parsers
+     */
+    final private boolean lenient;
+    
     
     //------------------------------------------------------------------------
     // Class members
@@ -194,11 +228,6 @@ public class DateFormat extends ThreadLocal<SimpleDateFormat> {
      */
     final static private DateFormat instance = new Lenient();    
     
-    /**
-     * The UTC time zone
-     */
-    final private static TimeZone UTC = TimeZone.getTimeZone("UTC");
-
     /**
      * 
      */
@@ -220,7 +249,7 @@ public class DateFormat extends ThreadLocal<SimpleDateFormat> {
          * @param pattern
          */
         Lenient() {
-            super(BASIC_FORMAT);
+            super(BASIC_FORMAT, "UTC", false);
         }
 
         /* (non-Javadoc)

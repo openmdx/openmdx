@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AssociationEndDef.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: AssociationEndDef.java,v 1.3 2009/06/09 12:45:18 hburger Exp $
  * Description: VelocityClassDef class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,7 +55,6 @@ import java.util.HashSet;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Model_1_4;
 
 public class AssociationEndDef extends ElementDef {
 
@@ -150,7 +149,7 @@ public class AssociationEndDef extends ElementDef {
      */
     public final ReferenceDef getReference() throws ServiceException {        
         if(this.referenceDef == null) {
-            Model_1_4 model = this.associationEndDef.getModel();
+            Model_1_0 model = this.associationEndDef.getModel();
             for(ModelElement_1_0 element : model.getContent()) {
                 if(model.isReferenceType(element)) {
                     if(element.objGetValue("referencedEnd").equals(this.associationEndDef.jdoGetObjectId())) {

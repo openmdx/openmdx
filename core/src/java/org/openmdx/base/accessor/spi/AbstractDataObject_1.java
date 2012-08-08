@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractDataObject_1.java,v 1.1 2009/01/13 17:33:49 wfro Exp $
+ * Name:        $Id: AbstractDataObject_1.java,v 1.2 2009/03/20 16:03:36 hburger Exp $
  * Description: SPICE Object Layer: Abstract Object_1_0 Implementation
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:33:49 $
+ * Date:        $Date: 2009/03/20 16:03:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -216,7 +216,7 @@ public abstract class AbstractDataObject_1
     ) {
         Path objectId;
         try {
-            objectId = (Path)source.jdoGetObjectId();
+            objectId = source.jdoGetObjectId();
         } 
         catch (Exception exception) {
             objectId = null;

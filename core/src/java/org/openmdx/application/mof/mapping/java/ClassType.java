@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClassType.java,v 1.1 2009/01/13 02:10:34 wfro Exp $
+ * Name:        $Id: ClassType.java,v 1.2 2009/05/16 22:17:47 wfro Exp $
  * Description: Class Type 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:34 $
+ * Date:        $Date: 2009/05/16 22:17:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,9 +55,9 @@ import java.util.List;
 
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
-import org.openmdx.application.mof.cci.Stereotypes;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
+import org.openmdx.base.mof.cci.Stereotypes;
 
 /**
  * Class Type

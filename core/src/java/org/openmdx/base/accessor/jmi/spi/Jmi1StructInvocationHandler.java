@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.29 2009/01/13 17:33:49 wfro Exp $
+ * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.35 2009/05/16 22:17:44 wfro Exp $
  * Description: Jmi1StructInvocationHandler 
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:33:49 $
+ * Date:        $Date: 2009/05/16 22:17:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,111 +55,106 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Iterator;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.jmi.reflect.RefStruct;
+import javax.resource.cci.MappedRecord;
+
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
-import org.openmdx.base.collection.MarshallingSortedMap;
+import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
-import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 
 /**
  * Jmi1StructInvocationHandler
  */
-public class Jmi1StructInvocationHandler implements InvocationHandler {
-    
+public class Jmi1StructInvocationHandler implements InvocationHandler, Marshaller {
+
     //-----------------------------------------------------------------------
+    /**
+     * Constructor
+     *
+     * @param refPackage
+     * @param delegate
+     */
     public Jmi1StructInvocationHandler(
-        String typeName,
         RefPackage_1_0 refPackage,
-        Object value
+        MappedRecord delegate
     ) {
-        this.delegation = new RefStruct_1Proxy(
-            typeName,
-            refPackage,
-            value
-        );
+        this.refPackage = refPackage;
+        this.delegate = delegate;
     }
 
     //-----------------------------------------------------------------------
-    // Members
-    //-----------------------------------------------------------------------
-    protected final RefStruct_1 delegation;
-    protected final static ConcurrentMap<String,ConcurrentMap<String,String>> allFields = 
-        new ConcurrentHashMap<String,ConcurrentMap<String,String>>();
-
-    
-    //-----------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    protected String getMofName(
+    protected ModelElement_1_0 getFieldDef(
         String methodName
     ) throws ServiceException {
-        String structName = this.delegation.refQualifiedTypeName();
-        ConcurrentMap<String,String> fields = allFields.get(structName);
+        String structName = this.delegate.getRecordName();
+        ConcurrentMap<String,ModelElement_1_0> fields = allFields.get(structName);
         if(fields == null) {
-            ConcurrentMap<String,String> concurrent = allFields.putIfAbsent(
+            ConcurrentMap<String,ModelElement_1_0> concurrent = allFields.putIfAbsent(
                 structName, 
-                fields = new ConcurrentHashMap<String,String>()
+                fields = new ConcurrentHashMap<String,ModelElement_1_0>()
             );
             if(concurrent != null) {
                 fields = concurrent;
             }
         }
-        String fieldName = fields.get(methodName);
-        if(fieldName == null) {
-            Model_1_0 model = this.delegation.getModel();
+        ModelElement_1_0 fieldDef = fields.get(methodName);
+        if(fieldDef == null) {
+            Model_1_0 model = Model_1Factory.getModel();
             ModelElement_1_0 structDef = model.getElement(structName);
-            for(
-                Iterator<String> i = ((Map)structDef.objGetValue("field")).keySet().iterator(); 
-                i.hasNext(); 
-            ) {
-                String name = i.next();
+            for(Map.Entry<String,ModelElement_1_0> field: ((Map<String,ModelElement_1_0>)structDef.objGetValue("field")).entrySet()) {
                 fields.putIfAbsent(
                     Identifier.OPERATION_NAME.toIdentifier(
                         AbstractNames.openmdx2AccessorName(
-                            name,
+                            field.getKey(),
                             true, // forQuery
                             false, // forBoolean
                             true // singleValued
                         )
                     ), 
-                    name
+                    field.getValue()
                 );
                 fields.putIfAbsent(
                     Identifier.OPERATION_NAME.toIdentifier(
                         AbstractNames.openmdx2AccessorName(
-                            name,
+                            field.getKey(),
                             true, // forQuery
                             true, // forBoolean
                             true // singleValued
                         )
                     ), 
-                    name
+                    field.getValue()
                 );
             }
-            fieldName = fields.get(methodName);
-            if(fieldName == null) {
+            fieldDef = fields.get(methodName);
+            if(fieldDef == null) {
                 throw new ServiceException (
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.NOT_FOUND, 
@@ -171,9 +166,9 @@ public class Jmi1StructInvocationHandler implements InvocationHandler {
                 );                
             }
         }
-        return fieldName;
+        return fieldDef;
     }
-        
+            
     //-----------------------------------------------------------------------
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
@@ -185,94 +180,114 @@ public class Jmi1StructInvocationHandler implements InvocationHandler {
         Object[] args
     ) throws Throwable {
         String methodName = method.getName();
-        // RefObject
-        if(
-            methodName.startsWith("ref") && 
-            (methodName.length() > 3) &&
-            Character.isUpperCase(methodName.charAt(3))
-        ) {
-            try {
-                return method.invoke(
-                    this.delegation, 
-                    args
+        Class<?> methodClass = method.getDeclaringClass();
+        if(methodClass == RefStruct.class) {
+            if("refFieldNames".equals(methodName)) {
+                return new ArrayList<String>(this.delegate.keySet());
+            } 
+            else if ("refGetValue".equals(methodName)) {
+                Model_1_0 model = Model_1Factory.getModel();
+                String fieldName = (String)args[0];
+                return getValue(                    
+                    fieldName.indexOf(":") > 0 ?
+                        model.getElement(fieldName) :
+                        ((Map<String,ModelElement_1_0>)model.getElement(this.delegate.getRecordName()).objGetValue("field")).get(fieldName)
                 );
+            } 
+            else if ("refTypeName".equals(methodName)) {
+                return Arrays.asList(this.delegate.getRecordName().split(":"));
             }
-            catch(InvocationTargetException e) {
-                throw e.getTargetException();
+        } else if (methodClass == RefStruct_1_0.class) {
+            if("refDelegate".equals(methodName)) {
+                return this.delegate;
             }
-        }
-        // Getters
-        else if(methodName.startsWith("get")) {
-            String fieldName = methodName.substring(3);
-            fieldName = Identifier.ATTRIBUTE_NAME.toIdentifier(fieldName);
-            if((args == null) || (args.length == 0)) {      
-                Object value = this.delegation.refGetValue(
-                    fieldName
-                );
-                return 
-                    value instanceof InputStream ? new Jmi1BinaryLargeObject(fieldName, (InputStream)value) :
-                    value instanceof SortedMap ? SortedMaps.asSparseArray((SortedMap<Integer,?>)value) :
-                    value instanceof Path ? this.delegation.toRefObject(((Path)value).toXri()) :
-                    value instanceof List ? new MarshallingList(new PathMarshaller(), (List)value) :
-                    value instanceof Set ? new MarshallingSet(new PathMarshaller(), (Set)value) :
-                    value instanceof SparseArray ? SortedMaps.asSparseArray(new MarshallingSortedMap(new PathMarshaller(), (SparseArray)value)) : 
-                    value;
-            }
-        }
-        // Boolean getters
-        else if(methodName.startsWith("is")) {
-            String fieldName = methodName.substring(2);
-            fieldName = Identifier.ATTRIBUTE_NAME.toIdentifier(fieldName);
-            if((args == null) || (args.length == 0)) {  
-                try {
-                    return this.delegation.refGetValue(
-                        method.getName()
-                    );                    
-                }
-                catch(JmiServiceException e) {
-                    if(e.getExceptionCode() != BasicException.Code.NOT_FOUND) {
-                        throw e;
+        } else if (methodClass == Object.class) {
+            if("equals".equals(methodName)) {
+                if(Proxy.isProxyClass(args[0].getClass())) {
+                    InvocationHandler invocationHandler = Proxy.getInvocationHandler(args[0]);
+                    if(invocationHandler instanceof Jmi1StructInvocationHandler) {
+                        Jmi1StructInvocationHandler that = (Jmi1StructInvocationHandler) invocationHandler;
+                        return this.delegate.equals(that.delegate);
                     }
-                    return this.delegation.refGetValue(
-                        fieldName
-                    );
                 }
+                return false;
+            } else if("hashCode".equals(methodName)) {
+                return this.delegate.hashCode();
+            } else if("toString".equals(methodName)) {
+                return this.delegate.toString();
             }
-        }
-        // Object
-        else if("toString".equals(methodName)) {
-            return this.delegation.toString();
-        }
+        } else if (args == null || args.length == 0){
+            return this.getValue(
+                this.getFieldDef(methodName)
+            );
+        } 
         throw new UnsupportedOperationException(method.getName());
     }
-    
-    //-----------------------------------------------------------------------
-    public static class RefStruct_1Proxy extends RefStruct_1 {
-        
-        public RefStruct_1Proxy(
-            String typeName,
-            RefPackage_1_0 refPackage,
-            Object value
-        ) {
-            super(
-                typeName,
-                refPackage,
-                value
-            );
-            this.qualifiedTypeName = typeName;
-        }
-                
-        protected String refQualifiedTypeName(
-        ) {
-            return this.qualifiedTypeName;
-        }
 
-        private static final long serialVersionUID = -6190748767632081058L;
-        private final String qualifiedTypeName;
+    /**
+     * Retrieve a structure field value
+     * 
+     * @param fieldName the structure field name
+     * 
+     * @return the structure field value
+     */
+    @SuppressWarnings("unchecked")
+    private Object getValue(
+        ModelElement_1_0 fieldDef
+    ) throws ServiceException {
+        String fieldName = (String)fieldDef.objGetValue("name");
+        String multiplicity = (String)fieldDef.objGetValue("multiplicity");
+        Object value = this.delegate.get(fieldName);
+        if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity) || Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
+            return marshal(
+                value instanceof Collection ? ((Collection)value).iterator().next() : value
+            );
+        } else if (Multiplicities.LIST.equals(multiplicity)) {
+            return  new MarshallingList(
+                this, 
+                value instanceof List ? (List)value : Collections.singletonList(value)
+            );
+        } else if (Multiplicities.SET.equals(multiplicity)) {
+            return  new MarshallingSet(
+                this, 
+                value instanceof Collection ? (Collection)value : Collections.singleton(value)
+            );
+        } else if (Multiplicities.SPARSEARRAY.equals(multiplicity) && value instanceof Map) {
+            SparseArray target = new TreeSparseArray();
+            for(Object e : ((Map)value).entrySet()) {
+                Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
+                target.put(entry.getKey(), marshal(entry.getValue()));
+            }
+            return target;
+        } else {
+            return value;
+        }
+    }
+
+    //------------------------------------------------------------------------
+    // Implements Marshaller
+    //------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.Marshaller#marshal(java.lang.Object)
+     */
+    public Object marshal(Object source) {
+        return source instanceof Path ?
+            refPackage.refObject((Path)source) :
+            source;    
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.Marshaller#unmarshal(java.lang.Object)
+     */
+    public Object unmarshal(Object source) {
+        return source instanceof RefObject_1_0 ?
+            ((RefObject_1_0)source).refGetPath() :
+            source;
     }
     
     //-----------------------------------------------------------------------
-    private class Jmi1BinaryLargeObject implements BinaryLargeObject {
+    class Jmi1BinaryLargeObject implements BinaryLargeObject {
 
         public Jmi1BinaryLargeObject(            
             String fieldName,
@@ -281,18 +296,18 @@ public class Jmi1StructInvocationHandler implements InvocationHandler {
             this.fieldName = fieldName;
             this.initialValue = value;
         }
-        
+
         protected transient InputStream initialValue = null;
         protected final String fieldName;
         protected transient Long length = null;
-        
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
         public InputStream getContent(
         ) throws IOException {
             InputStream value = this.initialValue == null
-                ? (InputStream)Jmi1StructInvocationHandler.this.delegation.refGetValue(this.fieldName)
+            ? (InputStream)Jmi1StructInvocationHandler.this.delegate.get(this.fieldName)
                 : this.initialValue;
             this.initialValue = null;
             return value;
@@ -305,7 +320,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler {
         ) throws IOException {
             return this.length;
         }
-        
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
          */
@@ -313,42 +328,27 @@ public class Jmi1StructInvocationHandler implements InvocationHandler {
             OutputStream stream, 
             long position
         ) throws IOException {
-            this.length = Jmi1StructInvocationHandler.this.delegation instanceof RefObject_1_0 ?
-                ((RefObject_1_0)Jmi1StructInvocationHandler.this.delegation).refGetValue(
+            this.length = Jmi1StructInvocationHandler.this.delegate instanceof RefObject_1_0 ?
+                ((RefObject_1_0)Jmi1StructInvocationHandler.this.delegate).refGetValue(
                     this.fieldName, 
                     stream, 
                     position
                 ) :
-                position + BinaryLargeObjects.streamCopy(
-                    getContent(), 
-                    position,
-                    stream
-                );            
+                    position + BinaryLargeObjects.streamCopy(
+                        getContent(), 
+                        position,
+                        stream
+                    );            
         }
 
     }
-        
+
     //-----------------------------------------------------------------------
-    class PathMarshaller implements Marshaller {
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.persistence.spi.Marshaller#marshal(java.lang.Object)
-         */
-        public Object marshal(Object source) {
-            return source instanceof Path ?
-                delegation.toRefObject(((Path)source).toXri()) :
-                source;    
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.persistence.spi.Marshaller#unmarshal(java.lang.Object)
-         */
-        public Object unmarshal(Object source) {
-            return source instanceof RefObject_1_0 ?
-                ((RefObject_1_0)source).refGetPath() :
-                source;
-        }
-        
-    }
+    // Members
+    //-----------------------------------------------------------------------
+    protected final static ConcurrentMap<String,ConcurrentMap<String,ModelElement_1_0>> allFields = 
+        new ConcurrentHashMap<String,ConcurrentMap<String,ModelElement_1_0>>();
+    protected final MappedRecord delegate;
+    protected final RefPackage_1_0 refPackage;
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FilterProperty.java,v 1.1 2009/01/06 10:21:19 wfro Exp $
+ * Name:        $Id: FilterProperty.java,v 1.3 2009/05/25 14:23:38 hburger Exp $
  * Description: Filter Property
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2009/05/25 14:23:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,6 +57,7 @@ import java.util.List;
 import javax.resource.ResourceException;
 
 import org.openmdx.base.resource.Records;
+import org.w3c.spi.ImmutableDatatype;
 
 
 /**
@@ -97,7 +98,7 @@ public final class FilterProperty implements Serializable  {
         this.quantor = quantor;
         this.name = name.intern();
         this.operator = operator;
-        this.values = values;
+        this.values = toCanonicalValues(values);
     }
 
     /**
@@ -115,9 +116,34 @@ public final class FilterProperty implements Serializable  {
         String name,
         short operator
     ) {
-        this(quantor,name,operator,NO_VALUES);
+        this.quantor = quantor;
+        this.name = name.intern();
+        this.operator = operator;
+        this.values = NO_VALUES;
     }
 
+    private static Object[] toCanonicalValues(
+        Object[] source
+    ){
+        boolean transform = false;
+        for(Object value : source){
+            if(value instanceof ImmutableDatatype) {
+                transform = true;
+                break;
+            }
+        }
+        if(transform) {
+            Object[] target = new Object[source.length];
+            int i = 0;
+            for(Object value : source){
+                target[i++] = value instanceof ImmutableDatatype<?> ? ((ImmutableDatatype<?>)value).clone() : value;
+            }
+            return target;
+        } else {
+            return source;
+        }
+    }
+    
     /**
      * The quantor
      * 

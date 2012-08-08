@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PriceCalculator.java,v 1.1 2009/02/04 11:06:37 hburger Exp $
+ * Name:        $Id: PriceCalculator.java,v 1.2 2009/03/31 17:09:09 hburger Exp $
  * Description: TariffCalculator 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/04 11:06:37 $
+ * Date:        $Date: 2009/03/31 17:09:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,8 +51,8 @@
 package org.openmdx.test.app1.aop2;
 
 import java.math.BigDecimal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * TariffCalculator
@@ -71,7 +71,7 @@ public class PriceCalculator {
      */
     private long duration = 1000l;
 
-    private final Logger logger = LoggerFactory.getLogger(PriceCalculator.class);
+    private final Logger logger = Logger.getLogger(PriceCalculator.class.getName());
     
     /**
      * Retrieve duration.
@@ -103,9 +103,9 @@ public class PriceCalculator {
                 // Simulate an expensive calculation
                 //
                 Thread.sleep(getDuration());
-                logger.debug("The price has been calculated in {} ms", duration);
+                logger.log(Level.FINER,"The price has been calculated in {0} ms", duration);
             } catch (InterruptedException exception) {
-                logger.info("The price calculator has been iterrupted", exception);
+                logger.log(Level.INFO,"The price calculator has been iterrupted", exception);
             }
             char last = mofId.charAt(mofId.length() - 1);
             if(last >= '0' && last <= '9') {

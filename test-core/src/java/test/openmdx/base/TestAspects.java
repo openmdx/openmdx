@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestAspects.java,v 1.2 2009/02/04 11:06:38 hburger Exp $
+ * Name:        $Id: TestAspects.java,v 1.3 2009/04/07 19:55:16 hburger Exp $
  * Description: Test Aspects 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/04 11:06:38 $
+ * Date:        $Date: 2009/04/07 19:55:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,8 +64,6 @@ import java.util.List;
 import javax.jdo.PersistenceManager;
 import javax.jdo.Transaction;
 import javax.resource.ResourceException;
-import javax.resource.spi.security.PasswordCredential;
-import javax.security.auth.Subject;
 
 import junit.framework.JUnit4TestAdapter;
 
@@ -124,14 +122,7 @@ public class TestAspects {
     public void acquirePersistenceManager() throws ResourceException{
         this.persistenceManager = principalName == null ? accessorFactory.getEntityManager(
         ) : accessorFactory.getEntityManager(
-            new Subject(
-                true,
-                Collections.EMPTY_SET,
-                Collections.EMPTY_SET,
-                Collections.singleton(
-                    new PasswordCredential(principalName, new char[0])
-                )
-            )
+            principalName
         );
     }
 

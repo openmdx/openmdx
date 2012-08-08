@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingMap.java,v 1.23 2009/01/11 21:28:59 wfro Exp $
+ * Name:        $Id: MarshallingMap.java,v 1.24 2009/04/28 13:58:52 hburger Exp $
  * Description: Marshalling Map
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/11 21:28:59 $
+ * Date:        $Date: 2009/04/28 13:58:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -313,7 +313,7 @@ public class MarshallingMap<K,V>
         public Object marshal(
             Object source
         ) {
-            return source instanceof Map.Entry ? new MarshallingMapEntry<K,V>(
+            return source instanceof Map.Entry<?,?> ? new MarshallingMapEntry<K,V>(
                 this.marshaller,
                 source
             ) : source;

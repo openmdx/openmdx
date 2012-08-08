@@ -33,11 +33,11 @@
 
 package test.slf4j;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 
 
 /**
@@ -50,8 +50,8 @@ public class TestLogging {
 
     @Test
     public void test1() {
-        Logger logger = LoggerFactory.getLogger("test1");
-        logger.debug("Hello world.");
+        Logger logger = Logger.getLogger("test1");
+        logger.log(Level.FINER,"Hello world.");
     }
 
     @Test
@@ -60,58 +60,39 @@ public class TestLogging {
         Integer i2 = new Integer(2);
         Integer i3 = new Integer(3);
         Exception e = new Exception("This is a test exception.");
-        Logger logger = LoggerFactory.getLogger("test2");
+        Logger logger = Logger.getLogger("test2");
 
-        logger.debug("Hello world 1.");
-        logger.debug("Hello world {}", i1);
-        logger.debug("val={} val={}", i1, i2);
-        logger.debug("val={} val={} val={}", new Object[]{i1, i2, i3});
+        logger.log(Level.FINER, "Hello world 1.");
+        logger.log(Level.FINER, "Hello world {0}", i1);
+        logger.log(Level.FINER, "val={0} val={1}", new Object[]{i1, i2});
+        logger.log(Level.FINER, "val={0} val={1} val={2}", new Object[]{i1, i2, i3});
 
-        logger.debug("Hello world 2", e);
-        logger.info("Hello world 2.");
-
-
-        logger.warn("Hello world 3.");
-        logger.warn("Hello world 3", e);
+        logger.log(Level.FINER, "Hello world 2", e);
+        logger.log(Level.INFO, "Hello world 2.");
 
 
-        logger.error("Hello world 4.");
-        logger.error("Hello world {}", new Integer(3)); 
-        logger.error("Hello world 4.", e);
+        logger.log(Level.WARNING, "Hello world 3.");
+        logger.log(Level.WARNING, "Hello world 3", e);
+
+
+        logger.log(Level.SEVERE,"Hello world 4.");
+        logger.log(Level.SEVERE,"Hello world {0}", Integer.valueOf(3)); 
+        logger.log(Level.SEVERE,"Hello world 4.", e);
     }
 
     @Test
     public void testNull() {
-        Logger logger = LoggerFactory.getLogger("testNull");
-        logger.debug(null);
+        Logger logger = LoggerFactory.getLogger();
+        logger.finer(null);
         logger.info(null);
-        logger.warn(null);
-        logger.error(null);
+        logger.warning(null);
+        logger.severe(null);
 
         Exception e = new Exception("This is a test exception.");
-        logger.debug(null, e);
-        logger.info(null, e);
-        logger.warn(null, e);
-        logger.error(null, e);
+        logger.log(Level.FINER,null, e);
+        logger.log(Level.INFO,null, e);
+        logger.log(Level.WARNING,null, e);
+        logger.log(Level.SEVERE,null, e);
     }
 
-    @Test
-    public void testMarker() {
-        Logger logger = LoggerFactory.getLogger("testMarker");
-        Marker blue = MarkerFactory.getMarker("BLUE");
-        logger.debug(blue, "hello");
-        logger.info(blue, "hello");
-        logger.warn(blue, "hello");
-        logger.error(blue, "hello");
-
-        logger.debug(blue, "hello {}", "world");
-        logger.info(blue, "hello {}", "world");
-        logger.warn(blue, "hello {}", "world");
-        logger.error(blue, "hello {}", "world");
-
-        logger.debug(blue, "hello {} and {} ", "world", "universe");
-        logger.info(blue, "hello {} and {} ", "world", "universe");
-        logger.warn(blue, "hello {} and {} ", "world", "universe");
-        logger.error(blue, "hello {} and {} ", "world", "universe");
-    }
 }

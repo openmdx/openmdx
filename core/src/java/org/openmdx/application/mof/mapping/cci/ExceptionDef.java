@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ExceptionDef.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: ExceptionDef.java,v 1.4 2009/06/09 12:45:18 hburger Exp $
  * Description: VelocityExceptionDef class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,6 @@ import java.util.Set;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
 import org.openmdx.kernel.exception.BasicException;
 
 @SuppressWarnings("unchecked")
@@ -79,7 +78,7 @@ extends FeatureDef {
             (String)exceptionDef.objGetValue("annotation"),
             new HashSet(exceptionDef.objGetList("stereotype")),
             (String)exceptionDef.objGetValue("visibility"),
-            getParameters(exceptionDef, (Model_1_3)model)
+            getParameters(exceptionDef, model)
         );
     }
 
@@ -93,7 +92,7 @@ extends FeatureDef {
     //-------------------------------------------------------------------------
     private static List getParameters(
         ModelElement_1_0 exceptionDef,
-        Model_1_3 model 
+        Model_1_0 model 
     ) throws ServiceException {  
 
         HashMap params = new HashMap();
@@ -167,11 +166,5 @@ extends FeatureDef {
     // Variables
     //-------------------------------------------------------------------------
     private final List parameters;
-
-    /**
-     * Tells whether "Exception" is appended to the MOD name of required by
-     * the JMI 1 spec
-     */
-    public static final boolean STANDARD_COMPLIANT = true;
 
 }

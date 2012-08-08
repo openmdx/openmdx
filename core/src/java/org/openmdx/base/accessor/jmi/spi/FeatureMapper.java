@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FeatureMapper.java,v 1.10 2009/01/13 17:33:49 wfro Exp $
+ * Name:        $Id: FeatureMapper.java,v 1.12 2009/05/16 22:17:44 wfro Exp $
  * Description: FeatureMapper
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:33:49 $
+ * Date:        $Date: 2009/05/16 22:17:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,12 +60,12 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
-import org.openmdx.application.mof.cci.Multiplicities;
-import org.openmdx.application.mof.cci.PrimitiveTypes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -264,8 +264,9 @@ public class FeatureMapper {
             );
             for(Method method : targetIntf.getMethods()) {
                 if(
-                        method.getName().equals(operationName)
-                ){
+                    method.getName().equals(operationName) &&
+                    (method.getReturnType() != void.class)
+                ) {
                     Method concurrent = this.operations.putIfAbsent(featureName, method);
                     return concurrent == null ? method : concurrent;
                 }

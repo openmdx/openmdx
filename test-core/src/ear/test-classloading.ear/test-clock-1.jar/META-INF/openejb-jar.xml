@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openejb-jar xmlns="http://www.openejb.org/xml/ns/openejb-jar-2.2">
+	<enterprise-beans>
+		<session>
+			<ejb-name>clock-1</ejb-name>
+			<local-jndi-name>clock-1</local-jndi-name>
+		</session>
+	</enterprise-beans>
+</openejb-jar>

@@ -57,8 +57,8 @@
 			<ejb-local-ref>
 			  <ejb-ref-name>ejb/dataprovider[0]</ejb-ref-name>
 			  <ejb-ref-type>Session</ejb-ref-type>
-			  <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			  <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_1Local</local>
+			  <local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			  <local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
 			  <ejb-link>clock-1</ejb-link>
 			</ejb-local-ref>
 		</session>

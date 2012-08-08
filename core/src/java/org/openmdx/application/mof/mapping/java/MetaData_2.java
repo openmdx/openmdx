@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MetaData_2.java,v 1.2 2009/03/03 17:23:08 hburger Exp $
+ * Name:        $Id: MetaData_2.java,v 1.3 2009/03/31 17:05:17 hburger Exp $
  * Description: Meta Data Provider
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 17:23:08 $
+ * Date:        $Date: 2009/03/31 17:05:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,6 +60,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -81,10 +83,9 @@ import org.openmdx.application.mof.mapping.java.metadata.MetaData_2_0;
 import org.openmdx.application.mof.mapping.java.metadata.PackageMetaData;
 import org.openmdx.application.mof.mapping.java.metadata.Visibility;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.xml.EntityMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -111,10 +112,10 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
             this.logger.info("No base directory specified for .openmdxjdo files");
         } else if (baseDirectory.exists()) {
             this.baseDirectory = baseDirectory;
-            this.logger.info("The base directory specified for .openmdxjdo files is {}", this.baseDirectory);
+            this.logger.log(Level.INFO, "The base directory specified for .openmdxjdo files is {0}", this.baseDirectory);
         } else {
             this.baseDirectory = null;
-            this.logger.warn("The base directory {} for .openmdxjdo files does not exist", base);
+            this.logger.log(Level.WARNING, "The base directory {0} for .openmdxjdo files does not exist", base);
         }
     }
 
@@ -193,20 +194,20 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
     ){
         Element child = (Element) parent.getElementsByTagName(tagName).item(0);
         if(child == null) {
-            logger.debug("{} contains no {} element", parent.getTagName(), tagName);
+            logger.log(Level.FINER,"{0} contains no {1} element", new Object[]{parent.getTagName(), tagName});
             return null;
         } else if (expectedName == null){ 
-            logger.debug("Processing {}", tagName);
+            logger.log(Level.FINER,"Processing {0}", tagName);
             return child;
         } else {
             String elementName = child.getAttribute("name");
             if(expectedName.equals(elementName)) {
-                logger.debug("Processing {}", tagName, elementName);
+                logger.log(Level.FINER,"Processing {0}", new Object[]{tagName, elementName});
                 return child;
             } else {
-                logger.warn(
-                    "Could not process {} {}, expected {} {}", 
-                    tagName, elementName, tagName, expectedName
+                logger.log(Level.WARNING,
+                    "Could not process {0} {1}, expected {2} {3}", 
+                    new Object[]{tagName, elementName, tagName, expectedName}
                 );
                 return null;
             }
@@ -230,11 +231,11 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
             value = null;
         }
         if(value == null) {
-            logger.debug("{}'s {} attribute is not set", element.getTagName(), attributeName);
+            logger.log(Level.FINER, "{0}'s {1} attribute is not set", new Object[]{element.getTagName(), attributeName});
         } else {
-            logger.debug(
-                "{}'s {} attribute is set to {}", 
-                element.getTagName(), attributeName, value
+            logger.log(Level.FINER, 
+                "{0}'s {1} attribute is set to {2}", 
+                new Object[]{element.getTagName(), attributeName, value}
             );
         }
         return value;
@@ -312,10 +313,10 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                 String key = child.getAttribute("key");
                 String value = child.getAttribute("key");
                 if(ignore) {
-                    logger.debug(
-                        "{} accepts extension only in package.openmdxjdo, " +
-                        "that's why the {} extension {} for target {} is not set to '{}' but ignored",
-                        element.getTagName(), vendor, key, target.toXMLFormat(), value
+                    logger.log(Level.FINER, 
+                        "{0} accepts extension only in package.openmdxjdo, " +
+                        "that's why the {1} extension {2} for target {3} is not set to '{4}' but ignored",
+                        new Object[]{element.getTagName(), vendor, key, target.toXMLFormat(), value}
                     );
                 } else {
                     Map<String,Map<String,String>> targetSpecificExtensions = this.extensions.get(target);
@@ -333,9 +334,9 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         );
                     }
                     vendorSpecificExtensions.put(key, value);
-                    logger.debug(
-                        "{} has its {} extension {} set to '{}' for target {}",
-                        element.getTagName(), vendor, key, value, target.toXMLFormat()
+                    logger.log(Level.FINER, 
+                        "{0} has its {1} extension {2} set to '{4}' for target {4}",
+                        new Object[]{element.getTagName(), vendor, key, value, target.toXMLFormat()}
                     );
                 }
             }
@@ -372,14 +373,14 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                 this.directory = directory.exists() ? directory : null;
                 try {
                     if(this.directory == null) {
-                        logger.info("There is no .openmdxjdo directory {} for package {}", directory, name);
+                        logger.log(Level.INFO,"There is no .openmdxjdo directory {0} for package {1}", new Object[]{directory, name});
                     } else {
-                        logger.info("The .openmdxjdo directory for package {} is {}", name, directory);
+                        logger.log(Level.INFO,"The .openmdxjdo directory for package {0} is {1}", new Object[]{name, directory});
                         File file = new File(directory, "package.openmdxjdo");
                         if(file.exists()) {
-                            logger.info(
-                                "The .openmdxjdo file for package {} is {}", 
-                                name, file
+                            logger.log(Level.INFO,
+                                "The .openmdxjdo file for package {0} is {1}", 
+                                new Object[]{name, file}
                             );
                             documentSource = new FileInputStream(file);
                             documentLocation = file.getAbsolutePath();
@@ -395,8 +396,8 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         }
                         if(documentSource != null) {
                             documentLocation = XRI_2Protocols.RESOURCE_PREFIX + documentPath;
-                            logger.info(
-                                "Found .openmdxjdo resource for package {}", 
+                            logger.log(Level.INFO,
+                                "Found .openmdxjdo resource for package {0}", 
                                 name
                             );
                         }
@@ -406,9 +407,9 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         document = newDocumentBuilder().parse(documentSource);
                     }
                 } catch (IOException exception) {
-                    logger.warn("Could not parse " + documentLocation, exception);
+                    logger.log(Level.WARNING,"Could not parse " + documentLocation, exception);
                 } catch (SAXException exception) {
-                    logger.warn("Could not parse " + documentLocation, exception);
+                    logger.log(Level.WARNING,"Could not parse " + documentLocation, exception);
                 }
             }
             if(document == null) {
@@ -419,15 +420,14 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                 //
                 Element openmdxjdoElement = document.getDocumentElement();
                 if("openmdxjdo".equals(openmdxjdoElement.getTagName())) {
-                    logger.debug(
+                    logger.log(Level.FINER,
                         "Processing 'openmdxjdo' document from {}", 
                         documentSource
                     );
                 } else {
-                    logger.warn(
-                        ".openmdxjdo document {} has type '{}' instead of 'openmdxjdo'", 
-                        documentLocation, 
-                        openmdxjdoElement.getTagName()
+                    logger.log(Level.WARNING,
+                        ".openmdxjdo document {0} has type '{1}' instead of 'openmdxjdo'", 
+                        new Object[]{documentLocation, openmdxjdoElement.getTagName()}
                     );
                     this.tablePrefix = null;
                     return;
@@ -511,9 +511,10 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         String documentName = name + ".openmdxjdo";
                         File file = new File(directory, documentName);
                         if(file.exists()) {
-                            logger.info(
-                                "The .openmdxjdo file for class {}.{} is {}", 
-                                Package.this.name, name, file
+                            logger.log(
+                                Level.INFO,
+                                "The .openmdxjdo file for class {0}.{1} is {2}", 
+                                new Object[]{Package.this.name, name, file}
                             );
                             System.out.println("INFO:    Loading meta data for " + Package.this.name + "." + name);
                             documentSource = new FileInputStream(file);
@@ -531,9 +532,10 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         if(documentSource != null) {
                             System.out.println("INFO:    Loading meta data for " + Package.this.name + "." + name);
                             documentLocation = XRI_2Protocols.RESOURCE_PREFIX + documentPath;
-                            logger.info(
-                                "Found .openmdxjdo resource for class {}.{}", 
-                                Package.this.name, name
+                            logger.log(
+                                Level.INFO,
+                                "Found .openmdxjdo resource for class {0}.{1}", 
+                                new Object[]{Package.this.name, name}
                             );
                         }
                     }
@@ -541,15 +543,16 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         Document document = newDocumentBuilder().parse(documentSource);
                         Element openmdxjdoElement = document.getDocumentElement();
                         if("openmdxjdo".equals(openmdxjdoElement.getTagName())) {
-                            logger.debug(
-                                "Processing 'openmdxjdo' document from {}", 
+                            logger.log(
+                                Level.FINER,
+                                "Processing 'openmdxjdo' document from {0}", 
                                 documentLocation
                             );
                         } else {
-                            logger.warn(
-                                ".openmdxjdo document {} has type '{}' instead of 'openmdxjdo'", 
-                                documentLocation, 
-                                openmdxjdoElement.getTagName()
+                            logger.log(
+                                Level.WARNING,
+                                ".openmdxjdo document {0} has type '{1}' instead of 'openmdxjdo'", 
+                                new Object[]{documentLocation, openmdxjdoElement.getTagName()}
                             );
                             return;
                         }
@@ -589,17 +592,18 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         }
                     } 
                     else {
-                        logger.info(
-                            "An openmdxjdo document for class {}.{} exists neither as file nor as resource", 
-                            Package.this.name, name
+                        logger.log(
+                            Level.INFO,
+                            "An openmdxjdo document for class {0}.{1} exists neither as file nor as resource", 
+                            new Object[]{Package.this.name, name}
                         );
                     }
                 } 
                 catch (SAXException exception) {
-                    logger.warn("Could not parse " + documentLocation, exception);
+                    logger.log(Level.WARNING,"Could not parse " + documentLocation, exception);
                 } 
                 catch (IOException exception) {
-                    logger.warn("Could not parse " + documentLocation, exception);
+                    logger.log(Level.WARNING,"Could not parse " + documentLocation, exception);
                 }
             }
             
@@ -726,7 +730,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                     Element fieldElement
                 ) {
                     this.name = fieldElement.getAttribute("name");
-                    logger.debug("Processing field {}", this.name);
+                    logger.log(Level.FINER,"Processing field {0}", this.name);
                     this.persistenceModifier = FieldPersistenceModifier.fromXMLFormat(
                         getAttribute(fieldElement, "persistence-modifier")
                     );
@@ -821,9 +825,9 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                     ) {
                         this.name = columnElement.getAttribute("name");
                         if(this.name == null) {
-                            logger.debug("Processing 1st column for field {}", Field.this.name);
+                            logger.log(Level.FINER,"Processing 1st column for field {0}", Field.this.name);
                         } else {
-                            logger.debug("Processing column {} for field {}", this.name, Field.this.name);
+                            logger.log(Level.FINER,"Processing column {0} for field {1}", new Object[]{this.name, Field.this.name});
                         }
                         String length = getAttribute(columnElement, "length");
                         this.length = length == null ? null : Integer.valueOf(length);
@@ -884,7 +888,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                  * @param inheritanceElement
                  */
                 Inheritance(Element inheritanceElement){
-                    logger.debug("Processing inheritance");
+                    logger.log(Level.FINER,"Processing inheritance");
                     this.strategy = InheritanceStrategy.fromXMLFormat(
                         getAttribute(inheritanceElement, "strategy")
                     );
@@ -918,7 +922,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
         public void error(
             SAXParseException exception
         ) throws SAXException {
-            logger.error("Could not read .openmdxjdo file", exception);
+            logger.log(Level.SEVERE,"Could not read .openmdxjdo file", exception);
         }
 
         /* (non-Javadoc)
@@ -936,7 +940,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
         public void warning(
             SAXParseException exception
         ) throws SAXException {
-            logger.warn("Could not read .openmdxjdo file", exception);
+            logger.log(Level.WARNING,"Could not read .openmdxjdo file", exception);
         }
         
     }
@@ -956,7 +960,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
             builder.setErrorHandler(this.errorHandler);
             return builder;
         } catch (ParserConfigurationException exception) {
-            this.logger.error("Document builder acquisition failed", exception);
+            this.logger.log(Level.SEVERE,"Document builder acquisition failed", exception);
             return null;
         }
     }
@@ -974,7 +978,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
     /**
      * The logger instance
      */
-    final Logger logger = LoggerFactory.getLogger(MetaData_2.class);
+    final Logger logger = LoggerFactory.getLogger();
 
     /**
      * The SAX error handler

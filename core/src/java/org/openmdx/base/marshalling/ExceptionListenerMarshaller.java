@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExceptionListenerMarshaller.java,v 1.2 2009/02/19 16:30:58 hburger Exp $
+ * Name:        $Id: ExceptionListenerMarshaller.java,v 1.3 2009/03/31 17:05:17 hburger Exp $
  * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/19 16:30:58 $
+ * Date:        $Date: 2009/03/31 17:05:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,10 +52,11 @@ package org.openmdx.base.marshalling;
 
 import java.beans.ExceptionListener;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openmdx.base.exception.ServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 
 
 /**
@@ -128,10 +129,10 @@ public class ExceptionListenerMarshaller
             return this.marshaller.marshal(source);
         } catch (ServiceException exception) {
             if(this.exceptionListener == null){
-                if (this.logger == null) this.logger = LoggerFactory.getLogger(
-                    ExceptionListenerMarshaller.class
-                );
-                this.logger.warn(
+                (
+                    this.logger == null ? this.logger = LoggerFactory.getLogger() : this.logger
+                ).log(
+                    Level.WARNING,
                     this.marshaller.getClass().getName(),
                     exception
                 );

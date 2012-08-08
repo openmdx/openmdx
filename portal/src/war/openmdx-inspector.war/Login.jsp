@@ -1,12 +1,12 @@
-﻿<%@ page contentType= "text/html;charset=UTF-8" language= "java" pageEncoding= "UTF-8" %><%
+<%@ page contentType= "text/html;charset=UTF-8" language= "java" pageEncoding= "UTF-8" %><%
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Login.jsp,v 1.58 2009/03/05 23:16:06 wfro Exp $
+ * Name:        $Id: Login.jsp,v 1.60 2009/06/09 12:48:14 cmu Exp $
  * Description: Login.jsp
- * Revision:    $Revision: 1.58 $
+ * Revision:    $Revision: 1.60 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 23:16:06 $
+ * Date:        $Date: 2009/06/09 12:48:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,15 +69,15 @@ org.openmdx.portal.servlet.*
 			"locale",
 			request.getParameter("locale")
 		);
-	} 
+	}
 	else {
 		ApplicationContext app = (ApplicationContext)session.getAttribute(WebKeys.APPLICATION_KEY);
 		request.getSession().setAttribute(
 			"locale",
-			app == null ? 
-				request.getHeader("accept-language") == null ? 
-					null : 
-					request.getHeader("accept-language").substring(0,2) + "_" + request.getHeader("accept-language").substring(3,5) : 
+			app == null ?
+				(request.getHeader("accept-language") == null || request.getHeader("accept-language").length()<5) ?
+					null :
+					request.getHeader("accept-language").substring(0,2) + "_" + request.getHeader("accept-language").substring(3) :
 				app.getCurrentLocaleAsString()
 		);
 	}

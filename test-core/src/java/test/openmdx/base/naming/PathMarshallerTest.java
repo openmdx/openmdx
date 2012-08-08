@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PathMarshallerTest.java,v 1.1 2009/03/06 10:38:42 hburger Exp $
+ * Name:        $Id: PathMarshallerTest.java,v 1.3 2009/06/02 00:27:38 hburger Exp $
  * Description: class TestPathMarshaller 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/06 10:38:42 $
+ * Date:        $Date: 2009/06/02 00:27:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +57,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 
 public class PathMarshallerTest extends TestCase {
@@ -111,7 +110,7 @@ public class PathMarshallerTest extends TestCase {
             new String[]{"A"},
             new String[]{"A","B:B0/B1","C"},
             new String[]{"A","B/B0::B1","C"},
-            new String[]{"François"},
+            new String[]{"Fran\u00E7ois"},
             new String[]{"A","provider","P","segment","S","object","RR_1:0:"},
             new String[]{"A","provider","P","segment","S","object",":012345"}
         };
@@ -129,29 +128,29 @@ public class PathMarshallerTest extends TestCase {
             "A",
             "A/B::B0//B1/C",
             "A/B//B0::::B1/C",
-            "François",
+            "Fran\u00E7ois",
             "A/provider/P/segment/S/object/RR_1::0::",
             "A/provider/P/segment/S/object/::012345"
         };
     }
 
-    /**
-     * Write the test case method in the fixture class.
-     * Be sure to make it public, or it can't be invoked through reflection. 
-     */
-    public void testEncode(
-    ) throws ServiceException {
-        for (
-            int index = 0;
-            index < components.length;
-            index++
-        ) assertEquals(
-            Arrays.asList(components[index]).toString(),
-            strings[index], 
-            paths[index].toString()
-        );
-    }
-
+//    /**
+//     * Write the test case method in the fixture class.
+//     * Be sure to make it public, or it can't be invoked through reflection. 
+//     */
+//    public void testEncode(
+//    ) throws ServiceException {
+//        for (
+//            int index = 0;
+//            index < components.length;
+//            index++
+//        ) assertEquals(
+//            Arrays.asList(components[index]).toString(),
+//            strings[index], 
+//            paths[index].toString()
+//        );
+//    }
+//
     /**
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 

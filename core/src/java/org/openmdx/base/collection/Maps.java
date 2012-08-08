@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Maps.java,v 1.1 2008/11/25 17:47:50 hburger Exp $
+ * Name:        $Id: Maps.java,v 1.2 2009/05/26 12:40:49 wfro Exp $
  * Description: Maps 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/25 17:47:50 $
+ * Date:        $Date: 2009/05/26 12:40:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,8 +53,6 @@ package org.openmdx.base.collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.openmdx.uses.org.apache.commons.collections.set.MapBackedSet;
 
 /**
  * Maps

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestOracle_1.java,v 1.4 2009/01/12 17:50:59 wfro Exp $
+ * Name:        $Id: TestOracle_1.java,v 1.5 2009/03/12 10:43:31 hburger Exp $
  * Description: Test Oracle
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 17:50:59 $
+ * Date:        $Date: 2009/03/12 10:43:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,10 +50,6 @@
  */
 package org.openmdx.test.datatypes1;
 
-import java.io.Closeable;
-import java.io.IOException;
-
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.openmdx.application.dataprovider.deployment.Deployment_1;
 
@@ -79,14 +75,6 @@ public class TestOracle_1 extends AbstractExtensionTest_1 {
             GATEWAY_JNDI_NAME,
             MODEL
         );
-    }
-
-    @AfterClass
-    public static void closePersistenceManagerFactory(
-    ) throws IOException{
-        if(managerFactory instanceof Closeable) {
-            ((Closeable)managerFactory).close();
-        }
     }
 
 }

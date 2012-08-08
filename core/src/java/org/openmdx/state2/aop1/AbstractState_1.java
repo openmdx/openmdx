@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractState_1.java,v 1.12 2009/03/04 12:07:22 hburger Exp $
+ * Name:        $Id: AbstractState_1.java,v 1.20 2009/05/23 10:14:16 wfro Exp $
  * Description: asic State Plug-In
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/04 12:07:22 $
+ * Date:        $Date: 2009/05/23 10:14:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,19 +71,22 @@ import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.Record;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.LargeObject_1_0;
-import org.openmdx.base.accessor.cci.Structure_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.accessor.view.PlugIn_1;
 import org.openmdx.base.aop1.Removable_1;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.StateContext;
@@ -197,9 +200,8 @@ public abstract class AbstractState_1<C extends StateContext<?>>
                         (Date)candidate.objGetValue(SystemAttributes.REMOVED_AT)
                     );
             } else {
-                return removed ?
-                    Removable_1.IN_THE_FUTURE.equals(candidate.objGetValue(SystemAttributes.REMOVED_AT)) :
-                    candidate.objGetValue(SystemAttributes.REMOVED_AT) == null;
+                Object removedAt = candidate.objGetValue(SystemAttributes.REMOVED_AT);
+                return removed ? Removable_1.IN_THE_FUTURE.equals(removedAt) : removedAt == null;
             }
         } else {
             return false;
@@ -462,7 +464,7 @@ public abstract class AbstractState_1<C extends StateContext<?>>
             DataObject_1_0 coreObject = (DataObject_1_0) to;
             dataObject.objSetValue(feature, coreObject);
             this.enabled = !isValidTimeUnique(coreObject);
-            this.view = this.enabled && this.self.getInteractionSpec() instanceof StateContext;
+            this.view = this.enabled && this.self.getInteractionSpec() instanceof StateContext<?>;
             if(this.view) {
                 this.self.objSetDelegate(coreObject);
             }
@@ -704,9 +706,9 @@ public abstract class AbstractState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
-    public Object jdoGetTransactionalObjectId() {
+    public Path jdoGetTransactionalObjectId() {
         if(this.enabled) {
-            throw new UnsupportedOperationException("Operation not supported for states");        
+            return this.self.jdoGetTransactionalObjectId();
         } else {
             return super.jdoGetTransactionalObjectId();
         }
@@ -717,7 +719,7 @@ public abstract class AbstractState_1<C extends StateContext<?>>
      */
     public Object jdoGetVersion() {
         if(this.enabled) {
-            throw new UnsupportedOperationException("Operation not supported for states");        
+            return this.self.jdoGetVersion();
         } else {
             return super.jdoGetVersion();
         }
@@ -860,13 +862,13 @@ public abstract class AbstractState_1<C extends StateContext<?>>
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objAddEventListener(java.lang.String, java.util.EventListener)
      */
     public void objAddEventListener(
-        String feature, 
         EventListener listener
     ) throws ServiceException {
         if(this.enabled) {
-            this.self.objGetDelegate().objAddEventListener(feature, listener);
-        } else {
-            super.objAddEventListener(feature, listener);
+            this.self.objGetDelegate().objAddEventListener(listener);
+        } 
+        else {
+            super.objAddEventListener(listener);
         }
     }
 
@@ -890,13 +892,12 @@ public abstract class AbstractState_1<C extends StateContext<?>>
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetEventListeners(java.lang.String, java.lang.Class)
      */
     public <T extends EventListener> T[] objGetEventListeners(
-        String feature,
         Class<T> listenerType
     ) throws ServiceException {
         if(this.enabled) {
             throw new UnsupportedOperationException("This operation must not be applied to state views");
         } else {
-            return super.objGetEventListeners(feature, listenerType);
+            return super.objGetEventListeners(listenerType);
         }
     }
 
@@ -904,13 +905,12 @@ public abstract class AbstractState_1<C extends StateContext<?>>
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objRemoveEventListener(java.lang.String, java.util.EventListener)
      */
     public void objRemoveEventListener(
-        String feature, 
         EventListener listener
     ) throws ServiceException {
         if(this.enabled) {
             throw new UnsupportedOperationException("This operation must not be applied to state views");            
         } else {
-            super.objRemoveEventListener(feature, listener);
+            super.objRemoveEventListener(listener);
         }
     }
 
@@ -929,7 +929,7 @@ public abstract class AbstractState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.PersistenceCapable_1_0#objGetPath()
      */
-    public Object jdoGetObjectId(
+    public Path jdoGetObjectId(
     ) {
         if(this.enabled) {
             return this.self.jdoGetObjectId();
@@ -1071,33 +1071,19 @@ public abstract class AbstractState_1<C extends StateContext<?>>
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Featured_1_0#objInvokeOperation(java.lang.String, org.openmdx.base.accessor.generic.cci.Structure_1_0)
+     * @see org.openmdx.base.accessor.spi.DelegatingObject_1#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
-    public Structure_1_0 objInvokeOperation(
-        String operation,
-        Structure_1_0 arguments
-    ) throws ServiceException {
+    @Override
+    public boolean execute(
+        InteractionSpec ispec, 
+        Record input, 
+        Record output
+    ) throws ResourceException {
         if(this.enabled) {
-            throw new UnsupportedOperationException("This operation must not be applied to state views");
+            throw new NotSupportedException("This operation must not be applied to state views");
         } else {
-            return super.objInvokeOperation(operation, arguments);
+            return super.execute(ispec, input, output);
         }
-        
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Featured_1_0#objInvokeOperationInUnitOfWork(java.lang.String, org.openmdx.base.accessor.generic.cci.Structure_1_0)
-     */
-    public Structure_1_0 objInvokeOperationInUnitOfWork(
-        String operation,
-        Structure_1_0 arguments
-    ) throws ServiceException {
-        if(this.enabled) {
-            throw new UnsupportedOperationException("This operation must not be applied to state views");
-        } else {
-            return super.objInvokeOperationInUnitOfWork(operation, arguments);
-        }
-        
     }
     
     /* (non-Javadoc)

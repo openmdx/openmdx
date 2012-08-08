@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectView.java,v 1.18 2009/03/08 18:03:23 wfro Exp $
+ * Name:        $Id: ObjectView.java,v 1.19 2009/05/26 12:41:16 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:23 $
+ * Date:        $Date: 2009/05/26 12:41:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,8 +57,8 @@ package org.openmdx.portal.servlet.view;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +72,6 @@ import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.control.InspectorControl;
-import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
 //---------------------------------------------------------------------------
 @SuppressWarnings("unchecked")
@@ -251,7 +250,7 @@ public abstract class ObjectView
         ViewsCache showViewsCache
     ) {
       if(this.historyActions != null) {
-          Map<Path,Action> historyActions = MapUtils.orderedMap(new HashMap());
+          Map<Path,Action> historyActions = new LinkedHashMap<Path,Action>();
           historyActions.putAll(this.historyActions);
           while(!historyActions.isEmpty()) {          
     
@@ -294,7 +293,7 @@ public abstract class ObjectView
               this.containerElementId,
               this.application.getRootObject()[0].refGetPath(),
               this.application,
-              MapUtils.orderedMap(new HashMap()),
+              new LinkedHashMap<Path,Action>(),
               null,
               null
           );

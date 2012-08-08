@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openejb-jar xmlns="http://www.openejb.org/openejb-jar/1.1">
+	<ejb-deployment ejb-name="Compatibility">
+		<resource-link res-ref-name="jdbc/datasource[0]" res-id="jdbc/dataproviders"/>
+	</ejb-deployment>
+	<ejb-deployment ejb-name="Standard">
+		<resource-link res-ref-name="jdbc/datasource[0]" res-id="jdbc/dataproviders"/>
+	</ejb-deployment>
+</openejb-jar>

@@ -127,7 +127,7 @@
 	textsLoginFailed.put("pl_PL", "Logowanie nieudane. Prosze sprobowac jeszcze raz");
 	textsLoginFailed.put("pt_BR", "Falha ao entrar. Favor tentar novamente");
 	textsLoginFailed.put("ro_RO", "Autentificare eşuata. Reâncearcă");
-	textsLoginFailed.put("ru_RU", "ϟе правильный вход в ПиПтему. ПожалуйПта попробуйте еще раз");
+	textsLoginFailed.put("ru_RU", "Не правильный вход в систему. Пожалуйста попробуйте еще раз");
 	textsLoginFailed.put("sk_SK", "Prihlásenie zlyhalo. Prosím skúste znova");
 	textsLoginFailed.put("sv_SE", "Inloggning misslyckades. Var god försök igen.");
 	textsLoginFailed.put("tr_TR", "Kayıt başarısızlığa uğradı. Lütfen yeniden deneyiniz");
@@ -147,7 +147,7 @@
 	textsUsername.put("pl_PL", "Uzytkownik");
 	textsUsername.put("pt_BR", "Usuário");
 	textsUsername.put("ro_RO", "Utilizator");
-	textsUsername.put("ru_RU", "ИмП пользователП");
+	textsUsername.put("ru_RU", "Имя пользователя");
 	textsUsername.put("sk_SK", "Meno používateľa");
 	textsUsername.put("sv_SE", "Användarnamn");
 	textsUsername.put("tr_TR", "Kullanıcı");
@@ -187,7 +187,7 @@
 	textsLogin.put("pl_PL", "Logowanie");
 	textsLogin.put("pt_BR", "Entrar");
 	textsLogin.put("ro_RO", "Acces");
-	textsLogin.put("ru_RU", "Вход в ПиПтему");
+	textsLogin.put("ru_RU", "Вход в систему");
 	textsLogin.put("sk_SK", "Prihlásiť sa");
 	textsLogin.put("sv_SE", "Inloggning");
 	textsLogin.put("tr_TR", "Kayıt Girişi");
@@ -207,7 +207,7 @@
 	textsLocale.put("pl_PL", "Polski (Polska)");
 	textsLocale.put("pt_BR", "Português (Brasil)");
 	textsLocale.put("ro_RO", "Românã (România)");
-	textsLocale.put("ru_RU", "РуППкий (РоППиП)");
+	textsLocale.put("ru_RU", "Русский (Россия)");
 	textsLocale.put("sk_SK", "Slovensky (Slovensko)");
 	textsLocale.put("sv_SE", "Svenska (Sverige)");
 	textsLocale.put("tr_TR", "Türkçe (Türkiye)");

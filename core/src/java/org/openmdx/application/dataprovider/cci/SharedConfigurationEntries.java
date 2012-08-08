@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SharedConfigurationEntries.java,v 1.2 2009/01/09 01:08:39 wfro Exp $
+ * Name:        $Id: SharedConfigurationEntries.java,v 1.6 2009/06/01 15:36:57 wfro Exp $
  * Description: Generated constants for SharedConfigurationEntries
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/09 01:08:39 $
+ * Date:        $Date: 2009/06/01 15:36:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,13 +78,6 @@ public class SharedConfigurationEntries {
   
   
   /**
-   * The THIS configuration entry
-   */
-  static public final String THIS_DATAPROVIDER = "thisDataprovider";
-
-  
-  
-  /**
    * The SERVER_ID configuration entry
    */
   static public final String SERVER_ID = "serverId";
@@ -98,13 +91,6 @@ public class SharedConfigurationEntries {
 
   
   
-  /**
-   * The LAYER_STATISTICS configuration entry  
-   */
-  static public final String LAYER_STATISTICS = "statistics";
-
-
-
   /**
    * The DATABASE_CONNECTION_FACTORY configuration entry  
    */
@@ -125,9 +111,6 @@ public class SharedConfigurationEntries {
    * <p>
    * Each DATAPROVIDER_CONNECTION entry requires a matching {@link 
    * org.openmdx.application.dataprovider.cci.SharedConfigurationEntries#DELEGATION_PATH 
-   * DELEGATION_PATH} entry in case of automatic {@link 
-   * org.openmdx.application.dataprovider.accessor.Switch_1 
-   * Switch_1} configuration in {@link 
    * org.openmdx.compatibility.base.dataprovider.transport.dispatching.Plugin_1 
    * Plugin_1}.
    */
@@ -141,9 +124,6 @@ public class SharedConfigurationEntries {
    * Each {@link 
    * org.openmdx.application.dataprovider.cci.SharedConfigurationEntries#DATAPROVIDER_CONNECTION 
    * DATAPROVIDER_CONNECTION} entry requires a matching DELEGATION_PATH entry 
-   * in case of automatic {@link 
-   * org.openmdx.application.dataprovider.accessor.Switch_1 
-   * Switch_1} configuration in {@link 
    * org.openmdx.compatibility.base.dataprovider.transport.dispatching.Plugin_1 
    * Plugin_1}.
    */
@@ -166,15 +146,6 @@ public class SharedConfigurationEntries {
    * implementation classes, i.e. 'org.omg.model1.plugin.application'.
    */
   static public final String PACKAGE_IMPL = "packageImpl";
-
-
-
-  /**
-   * The MODEL configuration entry. Contains an object of type
-   * Model_1_0. This configuration entry is set by the runtime.
-   */
-  static public final String MODEL = "model";
-
 
 
   /**

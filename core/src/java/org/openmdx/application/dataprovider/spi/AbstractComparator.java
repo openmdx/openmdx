@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractComparator.java,v 1.1 2009/01/05 13:44:51 wfro Exp $
+ * Name:        $Id: AbstractComparator.java,v 1.2 2009/05/16 22:17:52 wfro Exp $
  * Description: Abstract Comparator
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:51 $
+ * Date:        $Date: 2009/05/16 22:17:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,10 +55,10 @@ import java.util.Iterator;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.application.dataprovider.cci.Directions;
-import org.openmdx.application.dataprovider.cci.Orders;
 import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.query.AttributeSpecifier;
+import org.openmdx.base.query.Directions;
+import org.openmdx.base.query.Orders;
 import org.openmdx.base.resource.Records;
 
 

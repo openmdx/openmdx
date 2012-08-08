@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceManager_1.java,v 1.51 2009/03/03 17:23:07 hburger Exp $
+ * Name:        $Id: PersistenceManager_1.java,v 1.77 2009/06/09 12:45:17 hburger Exp $
  * Description: PersistenceManager_1 
- * Revision:    $Revision: 1.51 $
+ * Revision:    $Revision: 1.77 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 17:23:07 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,15 +53,16 @@ package org.openmdx.base.accessor.jmi.spi;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
-import javax.jdo.JDOException;
-import javax.jdo.JDOFatalDataStoreException;
-import javax.jdo.JDOOptimisticVerificationException;
-import javax.jdo.JDOUnsupportedOptionException;
+import javax.jdo.JDOFatalUserException;
+import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
+import javax.jdo.ObjectState;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
@@ -70,18 +71,23 @@ import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.RefObject;
-import javax.transaction.Synchronization;
+import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.MappedRecord;
 
-import org.openmdx.base.accessor.cci.Structure_1_0;
+import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.accessor.spi.AbstractTransaction_1;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
-import org.openmdx.base.accessor.spi.StructureFactory_1_0;
-import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
+import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.Queries;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManager;
 import org.openmdx.base.persistence.spi.InstanceLifecycleNotifier;
-import org.openmdx.base.transaction.UnitOfWork_1_0;
+import org.openmdx.base.rest.spi.Query_2Facade;
+import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 
@@ -90,7 +96,7 @@ import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
  */
 class PersistenceManager_1
     extends AbstractPersistenceManager
-    implements StructureFactory_1_0, Delegating_1_0
+    implements PersistenceManager_1_0, Delegating_1_0<RefRootPackage_1>
 {
 
     /**
@@ -111,19 +117,31 @@ class PersistenceManager_1
             notifier
         );
         this.refPackage = refPackage;
-        this.transaction = new Transaction_1();
-    }
+        this.transaction = new AbstractTransaction_1(){
 
-    /**
-     * 
-     */
-    private Transaction transaction;
+            @Override
+            protected Transaction getDelegate() {
+                return PersistenceManager_1.this.refPackage.refDelegate().currentTransaction();
+            }
+
+            public PersistenceManager getPersistenceManager() {
+                return PersistenceManager_1.this;
+            }
+         
+        };
+        
+    }
 
     /**
      * 
      */
     RefRootPackage_1 refPackage;
 
+    /**
+     * 
+     */
+    private final Transaction transaction;
+    
     /**
      * Only a subset of the JDO methods is already implemented 
      */
@@ -143,14 +161,13 @@ class PersistenceManager_1
     public void close() {
         this.refPackage.close();
         this.refPackage = null;
-        this.transaction = null;
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#currentTransaction()
      */
     public Transaction currentTransaction() {
-        return this.transaction; 
+        return this.transaction;
     }
 
     /* (non-Javadoc)
@@ -172,22 +189,62 @@ class PersistenceManager_1
      * @see javax.jdo.PersistenceManager#evictAll()
      */
     public void evictAll() {
-        this.refPackage.evictAll();
+        this.refPackage.refDelegate().evictAll();
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getManagedObjects()
+     */
+    @SuppressWarnings("unchecked")
+    public Set getManagedObjects() {
+        return new MarshallingSet(
+            this.refPackage,
+            this.refPackage.refDelegate().getManagedObjects()
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet)
+     */
+    @SuppressWarnings("unchecked")
+    public Set getManagedObjects(EnumSet<ObjectState> states) {
+        return new MarshallingSet(
+            this.refPackage,
+            this.refPackage.refDelegate().getManagedObjects(states)
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getManagedObjects(java.lang.Class[])
+     */
+    @SuppressWarnings("unchecked")
+    public Set getManagedObjects(Class... classes) {
+        return new MarshallingSet(
+            this.refPackage,
+            this.refPackage.refDelegate().getManagedObjects(classes)
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet, java.lang.Class[])
+     */
+    @SuppressWarnings("unchecked")
+    public Set getManagedObjects(EnumSet<ObjectState> states, Class... classes) {
+        return new MarshallingSet(
+            this.refPackage,
+            this.refPackage.refDelegate().getManagedObjects(states,classes)
+        );
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refresh(java.lang.Object)
      */
     public void refresh(Object pc) {
-        if(pc instanceof RefObject_1_0) try {
-            ((RefObject_1_0)pc).refRefresh();
-        } catch (JmiServiceException exception) {
-            throw BasicException.initHolder(
-            	new JDOException(
-            	    "Refresh failure",
-            	    BasicException.newEmbeddedExceptionStack(exception),
-            	    pc
-            	)
+        Object objectId = JDOHelper.getObjectId(pc);
+        if(objectId != null) {
+            PersistenceManager_1_0 delegate = this.refPackage.refDelegate(); 
+            delegate.refresh(
+                delegate.getObjectById(objectId)
             );
         }
     } 
@@ -226,8 +283,91 @@ class PersistenceManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.String, java.lang.Object)
      */
-    public Query newQuery(String language, Object query) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+    public Query newQuery(
+        String language, 
+        Object query
+    ) {
+        if(Queries.OPENMDXQL.equals(language)) {
+            Query_2Facade openmdxQuery = null;
+            try {
+                openmdxQuery = Query_2Facade.newInstance((MappedRecord)query);
+            } 
+            catch(Exception e) {}
+            if(openmdxQuery != null) {
+                String queryString = openmdxQuery.getQuery();
+                Path resourceIdentifier = openmdxQuery.getPath();
+                Collection<?> candidates = null;
+                if(resourceIdentifier != null) {
+                    candidates = (Collection<?>)this.refPackage.refContainer(
+                        resourceIdentifier, 
+                        null
+                    );
+                }                
+                Query cciQuery = null;
+                if((queryString != null) && queryString.startsWith("<?xml")) {
+                    org.openmdx.base.query.Filter filter = (org.openmdx.base.query.Filter)JavaBeans.fromXML(queryString);
+                    cciQuery = (Query)this.refPackage.refCreateFilter(
+                        openmdxQuery.getQueryType(),
+                        filter
+                    );
+                    return org.openmdx.base.persistence.spi.Queries.prepareQuery(
+                        cciQuery,
+                        candidates,
+                        null
+                    );                    
+                }
+                else {
+                    cciQuery = (Query)this.refPackage.refCreateFilter(
+                        openmdxQuery.getQueryType(),
+                        null,
+                        null
+                    );
+                    return org.openmdx.base.persistence.spi.Queries.prepareQuery(
+                        cciQuery,
+                        candidates,
+                        queryString
+                    );
+                }
+            } 
+            else {
+                throw BasicException.initHolder(
+                    new JDOFatalUserException(
+                        "Unknown predicate for query",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            new BasicException.Parameter(
+                                "expected", 
+                                Map.class.getName()
+                            ),
+                            new BasicException.Parameter(
+                                "actual",
+                                query == null ? null : query.getClass().getName()
+                            )
+                        )
+                    )
+                );
+            }
+        } 
+        else {
+            throw BasicException.initHolder(
+                new JDOFatalUserException(
+                    "Unsupported query language",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter(
+                            "accepted", 
+                            org.openmdx.base.persistence.cci.Queries.OPENMDXQL
+                        ),
+                        new BasicException.Parameter(
+                            "actual",
+                            language
+                        )
+                    )
+                )
+            );
+        }
     }
 
     /* (non-Javadoc)
@@ -310,29 +450,36 @@ class PersistenceManager_1
      * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object, boolean)
      */
     public Object getObjectById(Object oid, boolean validate) {
-        if(oid instanceof Path) {
-            Path resourceIdentifier = (Path) oid;
-            if(resourceIdentifier.size() % 2 == 1) {
-                return this.refPackage.refObject(resourceIdentifier);
-            } else {
-                return this.refPackage.refObject(
-                    resourceIdentifier.getParent()
-                ).refGetValue(
-                    resourceIdentifier.getBase()
-                );
-            }
-        } else {
-            return this.refPackage.refObject(
-                oid.toString()
-            );
-        }
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object)
      */
     public Object getObjectById(Object oid) {
-        return this.getObjectById(oid, true);
+        if(oid instanceof Path) {
+            Object pc;
+            Path resourceIdentifier = (Path) oid;
+            if(resourceIdentifier.size() % 2 == 1) {
+                pc = this.refPackage.refObject(resourceIdentifier);
+                this.refPackage.registerCallbacks((RefObject_1_0)pc);
+            } 
+            else {
+                pc = this.refPackage.refObject(
+                    resourceIdentifier.getParent()
+                ).refGetValue(
+                    resourceIdentifier.getBase()
+                );
+            }
+            return pc;
+        } 
+        else {
+            Object pc = this.refPackage.refObject(
+                oid.toString()
+            );
+            this.refPackage.registerCallbacks((RefObject_1_0)pc);
+            return pc;            
+        }
     }
 
     /* (non-Javadoc)
@@ -373,7 +520,7 @@ class PersistenceManager_1
             )
         ).refCreateInstance(
             null
-        );
+        ); 
     }
 
     /* (non-Javadoc)
@@ -434,25 +581,13 @@ class PersistenceManager_1
      * @see javax.jdo.PersistenceManager#makeTransactional(java.lang.Object)
      */
     public void makeTransactional(Object pc) {
-        if(pc instanceof PersistenceCapable && pc instanceof RefObject) {
-            PersistenceCapable jdoObject = (PersistenceCapable) pc;
-            if(this != jdoObject.jdoGetPersistenceManager()) throw new JDOUserException(
-                "The object is managed b a different PersistnceManager",
-                jdoObject
+        Object objectId = JDOHelper.getObjectId(pc);
+        if(objectId != null) {
+            PersistenceManager_1_0 delegate = this.refPackage.refDelegate(); 
+            delegate.makeTransactional(
+                delegate.getObjectById(objectId)
             );
-            RefObject_1_0 jmiObject = (RefObject_1_0) pc;
-            try {
-                jmiObject.refAddToUnitOfWork();
-            } catch (JmiServiceException exception) {
-                throw new JDOUserException(
-                    "Make transactional failure",
-                    exception,
-                    jdoObject
-                );
-            }
-        } else throw new JDOUserException(
-            "The object to be made transactional is not an instance of PersistenceCapable and RefObject"
-        );
+        }
     }
 
     /* (non-Javadoc)
@@ -466,14 +601,48 @@ class PersistenceManager_1
      * @see javax.jdo.PersistenceManager#retrieve(java.lang.Object, boolean)
      */
     public void retrieve(Object pc, boolean useFetchPlan) {
-        // TODO Auto-generated method stub
+        Object objectId = JDOHelper.getObjectId(pc);
+        if(objectId != null) {
+            PersistenceManager_1_0 delegate = this.refPackage.refDelegate(); 
+            delegate.retrieve(
+                delegate.getObjectById(objectId),
+                useFetchPlan
+            );
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.AbstractPersistenceManager#retrieveAll(java.util.Collection, boolean)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void retrieveAll(
+        Collection pcs, 
+        boolean useFetchPlan
+    ) {
+        if(pcs instanceof RefContainer) {
+            String refMofId = ((RefContainer)pcs).refMofId();
+            if(refMofId == null) {
+                super.retrieveAll(pcs, useFetchPlan);
+            } else if (this.refPackage.isTerminal()) {
+                PersistenceManager_1_0 delegate = this.refPackage.refDelegate();
+                Container_1_0 container =  (Container_1_0) delegate.getObjectById(new Path(refMofId));
+                container.retrieveAll(useFetchPlan);
+            } else {
+                PersistenceManager_1_0 delegate = this.refPackage.refDelegate();
+                RefContainer container =  (RefContainer) delegate.getObjectById(new Path(refMofId));
+                delegate.retrieveAll(container, useFetchPlan);
+            }
+        } else {
+            super.retrieveAll(pcs, useFetchPlan);
+        }
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectIdClass(java.lang.Class)
      */
     @SuppressWarnings("unchecked")
-    public Class getObjectIdClass(Class cls) {
+    public Class<Path> getObjectIdClass(Class cls) {
         return RefObject_1_0.class.isAssignableFrom(cls) ? Path.class : null;
     }
 
@@ -523,7 +692,7 @@ class PersistenceManager_1
      * @see org.openmdx.base.object.spi.AbstractPersistenceManager#getDataStoreConnection()
      */
     public JDOConnection getDataStoreConnection() {
-        return this.refPackage.getDataStoreConnection();
+        return this.refPackage.refDelegate().getDataStoreConnection();
     }
 
     /* (non-Javadoc)
@@ -571,260 +740,29 @@ class PersistenceManager_1
         return this.refPackage;
     }
     
+
     //------------------------------------------------------------------------
-    // Implements StructureFactory_1_0
+    // Implements PersistenceManager_1_0
     //------------------------------------------------------------------------
 
-    /**
-     * Test whether this persistence manager has a legacy delegate
-     * 
-     * @return <code>true</code> if this persistence manager has a legacy delegate
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getPersistenceManager(javax.resource.cci.InteractionSpec)
      */
-    protected boolean hasLegacyDelegate(){
-        return this.refPackage.hasLegacyDelegate();
+    public PersistenceManager_1_0 getPersistenceManager(
+        InteractionSpec interactionSpec
+    ) {
+        return this.refPackage.refPackage(interactionSpec).refPersistenceManager();
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.StructureFactory_1_0#createStructure(java.lang.String, java.util.List, java.util.List)
+     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getFeatureReplacingObjectById(java.lang.Object, java.lang.String)
      */
-    public Structure_1_0 createStructure(
-        String type,
-        List<String> fieldNames,
-        List<?> fieldValues
-    ) throws ServiceException {
-        StructureFactory_1_0 delegate = this.hasLegacyDelegate() ? 
-            this.refPackage.refObjectFactory() :
-                (StructureFactory_1_0)((Jmi1Package_1_0)this.refPackage).getDelegate();
-            return delegate.createStructure(
-                type,
-                fieldNames,
-                fieldValues
-            );
+    public Object getFeatureReplacingObjectById(
+        Object objectId,
+        String featureName
+    ) {
+        return this.refPackage.refDelegate().getFeatureReplacingObjectById(objectId, featureName);
     }
 
-
-    //------------------------------------------------------------------------
-    // Class Transaction_1
-    //------------------------------------------------------------------------
-
-    /**
-     * Transaction_1
-     */
-    class Transaction_1 implements Transaction {
-
-        private final UnitOfWork_1_0 getDelegate(
-        ) {
-            return refPackage.refUnitOfWork();
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#begin()
-         */
-        public void begin(
-        ) {
-            this.getDelegate().begin();
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#commit()
-         */
-        public void commit(
-        ) {
-            try {
-                getDelegate().commit();
-            }  catch (Exception exception) {
-            	BasicException exceptionStack = BasicException.toExceptionStack(exception);
-                BasicException initialCause = exceptionStack.getCause(null);
-                throw initialCause.getExceptionCode() == BasicException.Code.CONCURRENT_ACCESS_FAILURE ? new JDOOptimisticVerificationException(
-                    exception.getMessage(),
-                    new JDOOptimisticVerificationException[]{
-                        BasicException.initHolder(
-                        	new JDOOptimisticVerificationException(
-                        	    initialCause.getDescription(),
-                        	    BasicException.newEmbeddedExceptionStack(exceptionStack),
-                        	    lenientGetObjectById(initialCause.getParameter("path"))
-                        	)
-                        )
-                    }
-                ) : BasicException.initHolder(
-            		new JDOFatalDataStoreException(
-                        "Transaction commit failed",
-                        BasicException.newEmbeddedExceptionStack(exceptionStack)
-                    )
-                );
-            }
-        }
-
-        /**
-         * Retrieve the object to be added as exception argument
-         * 
-         * @param objectId
-         * 
-         * @return an object; or <code>null</code> if if can't be retrieved
-         */
-        private Object lenientGetObjectById(
-        	String objectId
-        ){
-            if(objectId == null) {
-                return null;
-            }
-            try {
-                 return getObjectById(objectId, false);
-            } catch (Exception ignore) {
-                return null;
-            }
-        }
-        
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#rollback()
-         */
-        public void rollback(
-        ) {
-            this.getDelegate().rollback();
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#isActive()
-         */
-        public boolean isActive(
-        ) {
-            return getDelegate().isActive();
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#getRollbackOnly()
-         */
-        public boolean getRollbackOnly(
-        ) {
-            return getDelegate().getRollbackOnly();
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#setRollbackOnly()
-         */
-        public void setRollbackOnly(
-        ) {
-            this.getDelegate().setRollbackOnly();
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#setNontransactionalRead(boolean)
-         */
-        public void setNontransactionalRead(boolean nontransactionalRead) {
-            if(nontransactionalRead != getNontransactionalRead()) throw new JDOUnsupportedOptionException(
-                "Non-transactional reads are enabled for optimistic or non-transactional units of work"
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#getNontransactionalRead()
-         */
-        public boolean getNontransactionalRead(
-        ) {
-            UnitOfWork_1_0 delegate = getDelegate();
-            return delegate.getOptimistic() || !delegate.isTransactional();
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#setNontransactionalWrite(boolean)
-         */
-        public void setNontransactionalWrite(boolean nontransactionalWrite) {
-            if(nontransactionalWrite != getNontransactionalWrite()) throw new JDOUnsupportedOptionException(
-                "Non-transactional writes are enabled for non-transactional units of work"
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#getNontransactionalWrite()
-         */
-        public boolean getNontransactionalWrite() {
-            return !getDelegate().isTransactional();
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#setRetainValues(boolean)
-         */
-        public void setRetainValues(boolean retainValues) {
-            if(retainValues != getRetainValues()) throw new JDOUnsupportedOptionException(
-                "The retain values flag can't be modified"
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#getRetainValues()
-         */
-        public boolean getRetainValues() {
-            return false;
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#setRestoreValues(boolean)
-         */
-        public void setRestoreValues(boolean restoreValues) {
-            if(restoreValues != getRestoreValues()) throw new JDOUnsupportedOptionException(
-                "The restore values flag can't be modified"
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#getRestoreValues()
-         */
-        public boolean getRestoreValues() {
-            return false;
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#setOptimistic(boolean)
-         */
-        public void setOptimistic(boolean optimistic) {
-            if(optimistic != getOptimistic()) throw new JDOUnsupportedOptionException(
-                "The optimistic flag can't be modified"
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#getOptimistic()
-         */
-        public boolean getOptimistic() {
-            return getDelegate().getOptimistic();
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#setSynchronization(javax.transaction.Synchronization)
-         */
-        public void setSynchronization(Synchronization sync) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#getSynchronization()
-         */
-        public Synchronization getSynchronization(
-        ) {
-            return this.getDelegate().getSynchronization();
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#getPersistenceManager()
-         */
-        public PersistenceManager getPersistenceManager() {
-            return PersistenceManager_1.this;
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#getIsolationLevel()
-         */
-        public String getIsolationLevel() {
-            throw new UnsupportedOperationException("Operation not supported by PersistenceManager_1.Transaction_1");
-        }
-
-        /* (non-Javadoc)
-         * @see javax.jdo.Transaction#setIsolationLevel(java.lang.String)
-         */
-        public void setIsolationLevel(String arg0) {
-            throw new UnsupportedOperationException("Operation not supported by PersistenceManager_1.Transaction_1");
-        }
-
-    }
-
+    
 }

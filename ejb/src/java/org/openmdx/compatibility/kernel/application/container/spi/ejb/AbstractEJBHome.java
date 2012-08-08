@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractEJBHome.java,v 1.2 2009/02/24 16:02:51 hburger Exp $
+ * Name:        $Id: AbstractEJBHome.java,v 1.3 2009/03/31 17:06:10 hburger Exp $
  * Description: Abstract Enterprise Java Bean Home
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 16:02:51 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -74,6 +74,7 @@ import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
 /**
  * Abstract Enterprise Java Bean Home
  */
+@SuppressWarnings("serial")
 public abstract class AbstractEJBHome
 extends AbstractRemoteObject
 implements HomeConfiguration, EJBHome 

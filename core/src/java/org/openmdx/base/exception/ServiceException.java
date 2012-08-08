@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ServiceException.java,v 1.18 2009/03/05 13:53:30 hburger Exp $
+ * Name:        $Id: ServiceException.java,v 1.19 2009/06/05 15:24:27 hburger Exp $
  * Description: ServiceException class
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 13:53:30 $
+ * Date:        $Date: 2009/06/05 15:24:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,27 +67,13 @@ public final class ServiceException
      * @param exception the Exception to be wrapped 
      */
     public ServiceException (
-        BasicException exception
+        Exception exception
     ){
         super.initCause(
-            exception == null ? BasicException.toExceptionStack(this) : exception
+            BasicException.toExceptionStack(exception == null ? this : exception)
         );
     }
-
-    /**
-     * Constructor  
-     *
-     * @param exception the Exception to be wrapped 
-     */
-    public ServiceException (
-        Exception exception,
-        Parameter... parameters
-    ){
-        super.initCause(
-            BasicException.toStackedException(exception, this, parameters)
-        );
-    }
-
+    
     /**
      * Creates a new <code>ServiceException</code>.
      *

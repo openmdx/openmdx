@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.10 2009/02/24 14:42:14 wfro Exp $
+= Name:        $Id: build.xml,v 1.12 2009/06/11 22:07:47 wfro Exp $
 = Description: openMDX/OpenEJB
-= Revision:    $Revision: 1.10 $
-= Date:        $Date: 2009/02/24 14:42:14 $
+= Revision:    $Revision: 1.12 $
+= Date:        $Date: 2009/06/11 22:07:47 $
 = Copyright:   (c) 2003-2007 OMEX AG
 =======================================================================
  *
@@ -65,17 +65,17 @@
 	<import file="../ant/etc/ant/build-library.xml"/>
 	<!-- OpenEJB -->    
 	<path id="apache.openejb.lib">
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-loader-3.1.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-tomcat-common-3.1.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-tomcat-catalina-3.1.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-core-3.1.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-server-3.1.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-ejbd-3.1.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-webservices-3.1.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/asm-finder-3.1.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-jee-3.1.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-http-3.1.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/xbean-naming-3.4.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-loader-3.1.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-tomcat-common-3.1.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-tomcat-catalina-3.1.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-core-3.1.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-server-3.1.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-ejbd-3.1.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-webservices-3.1.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/asm-finder-3.1.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-jee-3.1.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-http-3.1.1.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/xbean-naming-3.5.jar"/>
 	</path>		
 	<path id="project.lib.classpath">
 		<path refid="openmdx.core.bin"/>	
@@ -120,7 +120,7 @@
 	<!-- ******************************************************************* -->
 	<target name="java-archives" depends="deliverables-init,build">
 		<openmdx:archive
-			destfile="${deliver.dir}/lib/openejb-tomcat-catalina-3.1.jar"
+			destfile="${deliver.dir}/lib/openejb-tomcat-catalina-3.1.1.jar"
 			format="jar"
 			duplicate="preserve"
 		>
@@ -132,20 +132,7 @@
 			<openmdx:archivefileset dir="${build.dir}/bin">
 				<patternset refid="openejb-tomcat-catalina.jar.content"/>
 			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${build.dir}/module/openejb.war/lib/openejb-tomcat-catalina-3.1.jar"/>
-		</openmdx:archive>
-		<openmdx:archive
-			destfile="${deliver.dir}/lib/openejb-tomcat-webapp-3.1-sources.jar"
-			format="jar"
-			duplicate="preserve"
-		>
-			<openmdx:archivemanifest refid="project.manifest"/>
-			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="${project.specification.title} Library OpenEJB Tomcat WebApp Sources"/>
-				<attribute name="Implementation-Title" value="OpenEJB Tomcat Catalina for ${build.target.platform}"/>
-			</openmdx:archivemanifest>
-			<openmdx:archivefileset dir="src/data/openejb-tomcat-webapp-3.1-sources.jar"/>
-			<openmdx:archivefileset src="${build.dir}/module/openejb.war/lib/openejb-tomcat-webapp-3.1-sources.jar"/>
+			<openmdx:archivefileset src="${build.dir}/module/openejb.war/lib/openejb-tomcat-catalina-3.1.1.jar"/>
 		</openmdx:archive>
 		<openmdx:archive
 			destfile="${deliver.dir}/lib/catalina.jar"
@@ -191,12 +178,12 @@
 	  <!-- openEJB WAR -->
 	  <zip destfile="${deliver.dir}/deployment-unit/openmdx-openejb.war" duplicate="preserve">
 	  	<zipfileset dir="${build.dir}/module/openejb.war">
-	  		<exclude name="lib/openejb-tomcat-catalina-3.1.jar"/>
-	  		<exclude name="lib/openejb-tomcat-webapp-3.1-sources.jar"/>
+	  		<exclude name="lib/openejb-tomcat-catalina-3.1.1.jar"/>
+			<!-- Configure in tomcat/lib or tomcat-juli.jar -->
+	  		<exclude name="lib/slf4j*.jar"/>
 	  	</zipfileset>
 	  	<zipfileset dir="${deliver.dir}/lib" prefix="lib">
-	  		<include name="openejb-tomcat-catalina-3.1.jar"/>
-	  		<include name="openejb-tomcat-webapp-3.1-sources.jar"/>
+	  		<include name="openejb-tomcat-catalina-3.1.1.jar"/>
 	  		<include name="openmdx-openejb.jar"/>
 	  	</zipfileset>
 	  </zip>

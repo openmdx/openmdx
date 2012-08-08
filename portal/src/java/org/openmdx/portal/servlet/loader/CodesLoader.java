@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodesLoader.java,v 1.14 2009/03/08 18:03:20 wfro Exp $
+ * Name:        $Id: CodesLoader.java,v 1.20 2009/06/13 18:48:08 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:20 $
+ * Date:        $Date: 2009/06/13 18:48:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,21 +69,21 @@ import java.util.Map.Entry;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
 import javax.servlet.ServletContext;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.JmiHelper;
+import org.openmdx.application.dataprovider.importer.XmlImporter;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.naming.Path;
-import org.openmdx.compatibility.base.accessor.jmi.JmiHelper;
-import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
-import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
 public class CodesLoader
     extends Loader {
@@ -102,7 +103,6 @@ public class CodesLoader
   }
     
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     synchronized public void loadCodes(
         String[] locale
     ) throws ServiceException {
@@ -115,15 +115,15 @@ public class CodesLoader
             i.hasNext(); 
         ) {
             String dir = (String)i.next();        
-            Map mergedCodes = MapUtils.orderedMap(new HashMap());
+            Map<Path,MappedRecord> mergedCodes = new LinkedHashMap<Path,MappedRecord>();
             int fallbackLocaleIndex = 0;
             // Iterate all configured locales
             for(int j = 0; j < locale.length; j++) {
               fallbackLocaleIndex = 0;
-              Set codeResources = new TreeSet();
+              Set<String> codeResources = new TreeSet<String>();
               if(locale[j] != null) {
                   String codeResourcesPath = dir + locale[j];
-                  codeResources = new TreeSet(context.getResourcePaths(codeResourcesPath));
+                  codeResources = new TreeSet<String>(this.context.getResourcePaths(codeResourcesPath));
                   if(codeResources == null) {
                       for(int k = j-1; k >= 0; k--) {
                           if(locale[j].substring(0,2).equals(locale[k].substring(0,2))) {
@@ -136,7 +136,7 @@ public class CodesLoader
               }
               try {
                 for(Iterator k = codeResources.iterator(); k.hasNext(); ) {        
-                    Map codes = MapUtils.orderedMap(new HashMap());
+                    Map<Path,MappedRecord> codes = new LinkedHashMap<Path,MappedRecord>();
                     String path = (String)k.next();
                     if(!path.endsWith("/")) {
                         System.out.println("Loading " + path);
@@ -155,46 +155,60 @@ public class CodesLoader
                         }
                     }
                     // merge entries
-                    Set entrySet = j == 0 ? codes.entrySet() : mergedCodes.entrySet();
-                    for(Iterator l = entrySet.iterator(); l.hasNext(); ) {
-                        Entry e = (Entry)l.next();
+                    Set<Entry<Path,MappedRecord>> entrySet = j == 0 ? 
+                    	codes.entrySet() : 
+                    	mergedCodes.entrySet();
+                    for(Iterator<Entry<Path,MappedRecord>> l = entrySet.iterator(); l.hasNext(); ) {
+                        Entry<Path,MappedRecord> e = l.next();
                         // merge entry
                         if(
                             (j > 0) &&
                             (mergedCodes.get(e.getKey()) != null)
                         ) {                                                            
-                            DataproviderObject mergedCodeEntry = (DataproviderObject)mergedCodes.get(e.getKey());
-                                                
+                        	MappedRecord mergedCodeEntry = mergedCodes.get(e.getKey());
+                            ObjectHolder_2Facade mergedCodeEntryFacade;
+                            try {
+	                            mergedCodeEntryFacade = ObjectHolder_2Facade.newInstance(mergedCodeEntry);
+                            }
+                            catch (ResourceException e0) {
+                            	throw new ServiceException(e0);
+                            }
                             // do not merge if shortText for locale 0 is not set
-                            if(mergedCodeEntry.getValues("shortText") != null) {
-                                if(mergedCodeEntry.values("shortText").size() <= j) {
-                                    mergedCodeEntry.values("shortText").add(
-                                        mergedCodeEntry.values("shortText").get(fallbackLocaleIndex)
+                            if(mergedCodeEntryFacade.getAttributeValues("shortText") != null) {
+                                if(mergedCodeEntryFacade.attributeValues("shortText").size() <= j) {
+                                	mergedCodeEntryFacade.attributeValues("shortText").add(
+                                		mergedCodeEntryFacade.attributeValues("shortText").get(fallbackLocaleIndex)
                                     );
                                 }
                                 // assert that longText is set for locale i
-                                if(mergedCodeEntry.getValues("longText") == null) {
-                                    mergedCodeEntry.values("longText").add("N/A");
+                                if(mergedCodeEntryFacade.getAttributeValues("longText") == null) {
+                                	mergedCodeEntryFacade.attributeValues("longText").add("N/A");
                                 }
-                                if(mergedCodeEntry.values("longText").size() <= j) {
-                                    mergedCodeEntry.values("longText").add(
-                                        mergedCodeEntry.values("longText").get(fallbackLocaleIndex)
+                                if(mergedCodeEntryFacade.attributeValues("longText").size() <= j) {
+                                	mergedCodeEntryFacade.attributeValues("longText").add(
+                                		mergedCodeEntryFacade.attributeValues("longText").get(fallbackLocaleIndex)
                                     );
-                                }
-                                  
+                                }                                  
                                 // overwrite shortText and longText with uiElement values if available
-                                DataproviderObject codeEntry = (DataproviderObject)codes.get(e.getKey());
+                                MappedRecord codeEntry = codes.get(e.getKey());
                                 if(codeEntry != null) {
-                                    if(codeEntry.values("shortText").size() > 0) {
-                                        mergedCodeEntry.values("shortText").set(
+                                    ObjectHolder_2Facade codeEntryFacade;
+                                    try {
+	                                    codeEntryFacade = ObjectHolder_2Facade.newInstance(codeEntry);
+                                    }
+                                    catch (ResourceException e0) {
+                                    	throw new ServiceException(e0);
+                                    }
+                                    if(codeEntryFacade.attributeValues("shortText").size() > 0) {
+                                    	mergedCodeEntryFacade.attributeValues("shortText").set(
                                             j,
-                                            codeEntry.values("shortText").get(0)
+                                            codeEntryFacade.attributeValue("shortText")
                                         );
                                     }
-                                    if(codeEntry.values("longText").size() > 0) {
-                                        mergedCodeEntry.values("longText").set(
+                                    if(codeEntryFacade.attributeValues("longText").size() > 0) {
+                                    	mergedCodeEntryFacade.attributeValues("longText").set(
                                             j,
-                                            codeEntry.values("longText").get(0)
+                                            codeEntryFacade.attributeValue("longText")
                                         );
                                     }
                                  }
@@ -226,32 +240,33 @@ public class CodesLoader
                 this.getAdminPrincipal(dir),
                 null
             );
-            Set codeSegmentIdentities = new HashSet();
+            Set<Path> codeSegmentIdentities = new HashSet<Path>();
             // Load objects in multiple runs in order to resolve object dependencies.
             Map<Path,RefObject> loadedObjects = new HashMap<Path,RefObject>(); 
             for(int runs = 0; runs < 5; runs++) {
                 boolean hasNewObjects = false;
                 store.currentTransaction().begin();
                 for(
-                    Iterator j = mergedCodes.values().iterator(); 
+                    Iterator<MappedRecord> j = mergedCodes.values().iterator(); 
                     j.hasNext(); 
                 ) {
-                  DataproviderObject entry = (DataproviderObject)j.next();
+                  MappedRecord entry = j.next();
+                  Path entryPath = ObjectHolder_2Facade.getPath(entry);
                   codeSegmentIdentities.add(
-                      entry.path().getPrefix(5)
+                	  entryPath.getPrefix(5)
                   );
                   // create new entries, update existing
                   try {
                     RefObject_1_0 existing = null;
                     try {
                       existing = (RefObject_1_0)store.getObjectById(
-                          entry.path()
+                    	  entryPath
                       );
                     }
                     catch(Exception e) {}
                     if(existing != null) {
                         loadedObjects.put(
-                            entry.path(), 
+                        	entryPath, 
                             existing
                         );
                         JmiHelper.toRefObject(
@@ -264,7 +279,7 @@ public class CodesLoader
                         );
                     }
                     else {
-                        String qualifiedClassName = (String)entry.values(SystemAttributes.OBJECT_CLASS).get(0);
+                        String qualifiedClassName = ObjectHolder_2Facade.getObjectClass(entry);
                         String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
                         RefObject_1_0 newEntry = (RefObject_1_0)((org.openmdx.base.jmi1.Authority)store.getObjectById(
                             Authority.class,
@@ -279,26 +294,26 @@ public class CodesLoader
                             true, // replace values
                             true // remove trailing empty string
                         );
-                        Path parentIdentity = entry.path().getParent().getParent();
+                        Path parentIdentity = entryPath.getParent().getParent();
                         RefObject_1_0 parent = null;
                         try {
-                            parent = loadedObjects.containsKey(parentIdentity)
-                                ? (RefObject_1_0)loadedObjects.get(parentIdentity)
-                                : (RefObject_1_0)store.getObjectById(parentIdentity);
+                            parent = loadedObjects.containsKey(parentIdentity) ? 
+                            	(RefObject_1_0)loadedObjects.get(parentIdentity) : 
+                            	(RefObject_1_0)store.getObjectById(parentIdentity);
                         } 
                         catch(Exception e) {}
                         if(parent != null) {
                             RefContainer container = (RefContainer)parent.refGetValue(
-                                entry.path().get(entry.path().size() - 2)
+                            	entryPath.get(entryPath.size() - 2)
                             );
                             container.refAdd(
                                 QualifierType.REASSIGNABLE,
-                                entry.path().get(entry.path().size() - 1),
+                                entryPath.get(entryPath.size() - 1),
                                 newEntry
                             );
                         }
                         loadedObjects.put(
-                            entry.path(), 
+                        	entryPath, 
                             newEntry
                         );
                         hasNewObjects = true;

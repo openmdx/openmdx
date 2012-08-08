@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObject_1_0.java,v 1.5 2009/03/04 12:07:22 hburger Exp $
+ * Name:        $Id: DataObject_1_0.java,v 1.11 2009/05/26 09:29:22 wfro Exp $
  * Description: Data Object interface
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/04 12:07:22 $
+ * Date:        $Date: 2009/05/26 09:29:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,10 +56,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
+import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.Record;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 
 /**
  * The openMDX Service Data Object interface.
@@ -133,6 +138,28 @@ public interface DataObject_1_0
     extends PersistenceCapable, org.openmdx.base.persistence.spi.Cloneable<DataObject_1_0>
 {
 
+    /** 
+     * Return the openMDX identity associated with this instance <em>(i.e. not a copy 
+     * as prescribed by JDO)</em>.
+     * <P>
+     * Transient instances return null.
+     * 
+     * @return the object id
+     */
+	Path jdoGetObjectId();
+	
+    /** 
+     * Return a transient object id in case of transient object instances,
+     * and <code>null</code> for persistent instances <em>(i.e. not the transactional 
+     * object id as prescribed by JDO)</em>.
+     *
+     * @see #jdoGetObjectId()
+     * @see PersistenceManager#getObjectId(Object pc)
+     * @see PersistenceManager#getObjectById(Object oid, boolean validate)
+     * @return a transient object id
+     */
+    Path jdoGetTransactionalObjectId();
+    
     /**
      * Returns the object's model class.
      *
@@ -348,70 +375,41 @@ public interface DataObject_1_0
     // Operations
     //------------------------------------------------------------------------
 
-    /**
-     * Invokes an operation synchronously.
-     * <p>
-     * Only query operations can be invoked synchronously unless the unit of
-     * work is non-optimistic or committing. Such queries use the object states
-     * at the beginning of the unit of work!
+    /** 
+     * Executes an interaction represented by the InteractionSpec.
+     * This form of invocation takes an input Record and updates
+     * the output Record. 
+     *  
+     *  @param   ispec   InteractionSpec representing a target EIS 
+     *                   data/function module   
+     *  @param   input   Input Record
+     *  @param   output  Output Record
+     * 
+     *  @return  true if execution of the EIS function has been 
+     *           successful and output Record has been updated; false
+     *           otherwise
      *
-     * @param       operation
-     *              The operation name
-     * @param       arguments
-     *              The operation's arguments
-     *
-     * @return      the operation's return values
-     *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if a non-query operation is called in an inappropriate
-     *              state of the unit of work.
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if synchronous calls are not supported by the basic accessor
-     *              or if the requested operation is not supported by object
-     *              instance.
-     * @exception   ServiceException BAD_MEMBER_NAME
-     *              if the requested operation is not a feature of the object.
-     * @exception   ServiceException 
-     *              if a checked exception is thrown by the implementation or
-     *              the invocation fails for another reason.
+     *  @throws  ResourceException   Exception if execute operation
+     *                               fails. Examples of error cases
+     *                               are:
+     *         <UL>
+     *           <LI> Resource adapter internal, EIS-specific or 
+     *                communication error 
+     *           <LI> Invalid specification of an InteractionSpec, 
+     *                input or output record structure
+     *           <LI> Errors in use of input or output Record
+     *           <LI> Invalid connection associated with this 
+     *                Interaction
+     *         </UL>
+     *  @throws NotSupportedException Operation not supported 
+     *                             
      */
-    Structure_1_0 objInvokeOperation(
-        String operation,
-        Structure_1_0 arguments
-    ) throws ServiceException;
-
-    /**
-     * Invokes an operation asynchronously.
-     * <p>
-     * Such asynchronous operations will be invoked at the very end of an 
-     * optimistic unit of work, i.e. after all modifications at object and
-     * attribute level.
-     *
-     * @param       operation
-     *              The operation name
-     * @param       arguments
-     *              The operation's arguments
-     *
-     * @return      a structure with the result's values if the accessor is
-     *              going to populate it after the unit of work has committed
-     *              or null if the operation's return value(s) will never be
-     *              available to the accessor.
-     *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if no unit of work is in progress
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if synchronous calls are not supported by the basic
-     *              accessor.
-     * @exception   ServiceException BAD_MEMBER_NAME
-     *              if the requested operation is not a feature of the object.
-     * @exception   ServiceException 
-     *              if the invocation fails for another reason
-     */
-    Structure_1_0 objInvokeOperationInUnitOfWork(
-        String operation,
-        Structure_1_0 arguments
-    ) throws ServiceException;
-        
+    boolean execute(
+        InteractionSpec ispec, 
+        Record input, 
+        Record output
+    ) throws ResourceException;
+    
     //------------------------------------------------------------------------
     // Event Handling
     //------------------------------------------------------------------------
@@ -419,9 +417,6 @@ public interface DataObject_1_0
     /**
      * Add an event listener.
      * 
-     * @param feature
-     *        restrict the listener to this feature;
-     *        or null if the listener is interested in all features
      * @param listener
      *        the event listener to be added
      * <p>
@@ -440,7 +435,6 @@ public interface DataObject_1_0
      *              If the listener is null 
      */
     void objAddEventListener(
-        String feature,
         EventListener listener
     ) throws ServiceException;
 
@@ -450,9 +444,6 @@ public interface DataObject_1_0
      * It is implementation dependent whether feature name and listener
      * class are verified. 
      * 
-     * @param feature
-     *        the name of the feature that was listened on,
-     *        or null if the listener is interested in all features
      * @param listener
      *        the event listener to be removed
      * 
@@ -465,7 +456,6 @@ public interface DataObject_1_0
      *              If the listener is null 
      */
     void objRemoveEventListener(
-        String feature,
         EventListener listener
     ) throws ServiceException;
 
@@ -478,9 +468,6 @@ public interface DataObject_1_0
      * It is implementation dependent whether feature name and listener
      * type are verified. 
      * 
-     * @param feature
-     *        the name of the feature that was listened on,
-     *        or null for listeners interested in all features
      * @param listenerType
      *        the type of the event listeners to be returned
      * 
@@ -496,10 +483,8 @@ public interface DataObject_1_0
      *              if the listener type is not supported
      */
     <T extends EventListener> T[] objGetEventListeners(
-        String feature,
         Class<T> listenerType
     ) throws ServiceException;
-
 
     /**
      * Tests whether object is member of a container.
@@ -528,7 +513,7 @@ public interface DataObject_1_0
     ) throws ServiceException;
     
     /**
-     * Retrieve an aspect map
+     * Retrieve aspects for the specified aspect class.
      * 
      * @param aspectClass the aspect sub-class' MOF id
      * 
@@ -537,6 +522,17 @@ public interface DataObject_1_0
     Map<String,DataObject_1_0> getAspect(
         String aspectClass
     ) throws ServiceException;
+
+   /**
+    * Retrieves all aspects
+    * 
+    * @param aspectClass the aspect sub-class' MOF id
+    * 
+    * @return the requested aspect map
+    */
+    Map<String, DataObject_1_0> getAspects(
+    ) throws ServiceException;
+    
     
     public static final String SYSTEM_ATTRIBUTE_MODIFIER = "$";
     public static final String RECORD_NAME_REQUEST = SYSTEM_ATTRIBUTE_MODIFIER + SystemAttributes.OBJECT_CLASS;

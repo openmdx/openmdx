@@ -17,17 +17,22 @@
 		<config-property>
 			<config-property-name>UserName</config-property-name>
 			<config-property-type>java.lang.String</config-property-type>
-			<config-property-value>system</config-property-value>
+			<config-property-value>postgres</config-property-value>
 		</config-property>
 		<config-property>
 			<config-property-name>Password</config-property-name>
 			<config-property-type>java.lang.String</config-property-type>
-			<config-property-value>manager</config-property-value>
+			<config-property-value>manager99</config-property-value>
 		</config-property>
 		<config-property>
 			<config-property-name>ConnectionURL</config-property-name>
 			<config-property-type>java.lang.String</config-property-type>
-			<config-property-value>jdbc:postgresql://bsd0/openmdx_test</config-property-value>
+			<config-property-value>jdbc:postgresql://localhost/openmdx-test</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>Driver</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>org.postgresql.Driver</config-property-value>
 		</config-property>
 		<authentication-mechanism>
 			<authentication-mechanism-type>BasicPassword</authentication-mechanism-type>

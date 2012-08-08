@@ -3,8 +3,7 @@
 <openmdx-ejb-jar>
   	<enterprise-beans>
     	<session>
-      		<ejb-name>transaction-Persistent</ejb-name>
-			<jndi-name>org/openmdx/test-ejb-2_1/transaction/Persistent</jndi-name>
+      		<ejb-name>ejb21DataObjects</ejb-name>
 			<resource-ref>
 				<res-ref-name>jdbc/datasource[0]</res-ref-name>
 				<jndi-name>jdbc/dataproviders</jndi-name>

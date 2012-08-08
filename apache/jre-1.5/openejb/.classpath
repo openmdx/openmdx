@@ -10,13 +10,11 @@
 	<classpathentry exported="true" kind="lib" path="lib/openejb-javaagent.jar" sourcepath="src/openejb-javaagent.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/openejb-jee.jar" sourcepath="src/openejb-jee.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/openejb-loader.jar" sourcepath="src/openejb-loader.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/openejb-multicast.jar" sourcepath="src/openejb-multicast.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/openejb-server.jar" sourcepath="src/openejb-server.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/openejb-telnet.jar" sourcepath="src/openejb-telnet.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/openejb-webservices.jar" sourcepath="src/openejb-webservices.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/openejb-tomcat-common.jar" sourcepath="src/openejb-tomcat-common.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/openejb-tomcat-loader.jar" sourcepath="src/openejb-tomcat-loader.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/asm-finder.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xbean-naming.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/swizzle-stream.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wsdl4j.jar"/>
@@ -34,8 +32,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-dbcp-all.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-logging-api.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-pool.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cxf-bundle.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ejb31-api-experimental.jar"/>
@@ -45,7 +41,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/javaee-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/neethi.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/openejb-tomcat-catalina.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openejb-tomcat-catalina.jar" sourcepath="src/openejb-tomcat-catalina.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/openejb-tomcat-webapp-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/openejb-tomcat-webapp.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/openjpa.jar"/>
@@ -53,6 +49,15 @@
 	<classpathentry exported="true" kind="lib" path="lib/serp.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/stax-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wstx-asl.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk15.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openejb-api.jar" sourcepath="src/openejb-api.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/opensaml.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/quartz.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/wss4j.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xbean-asm-shaded.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xbean-finder-shaded.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/xmlsec.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.12.jar"/>
 	<classpathentry kind="output" path="bin"/>

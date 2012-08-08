@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Configuration.java,v 1.1 2009/01/05 13:44:55 wfro Exp $
+ * Name:        $Id: Configuration.java,v 1.5 2009/05/26 16:45:48 hburger Exp $
  * Description: Configuration
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:55 $
+ * Date:        $Date: 2009/05/26 16:45:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.openmdx.base.collection.OffsetArrayList;
+import org.openmdx.base.collection.CompactSparseList;
 import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -104,17 +104,18 @@ implements Cloneable, MultiLineStringRepresentation
         for(Map.Entry<String, ?> entry : source.entrySet()) {
             final String name = entry.getKey();
             SparseList<Object> values;
-            if (entry.getValue() instanceof Collection) {
-                values = new OffsetArrayList<Object>(
+            if (entry.getValue() instanceof Collection<?>) {
+                values = new CompactSparseList<Object>(
                         (Collection<?>)entry.getValue()
                 );
             } else if (entry.getValue() instanceof Object[]) {
-                values = new OffsetArrayList<Object>(
+                values = new CompactSparseList<Object>(
                         Arrays.asList((Object[])entry.getValue())
                 );
             } else {
-                values = new OffsetArrayList<Object>();
-                values.add(entry.getValue());
+                values = new CompactSparseList<Object>(
+                    entry.getValue()
+                );
             }
             this.entries.put(name,values);
         }
@@ -164,7 +165,7 @@ implements Cloneable, MultiLineStringRepresentation
     ){
         SparseList<T> values = (SparseList<T>)this.entries.get(entryName);
         if (values == null) {
-            values = new OffsetArrayList<T>();
+            values = new CompactSparseList<T>();
             this.entries.put(entryName, values);
         }
         return values;
@@ -175,9 +176,10 @@ implements Cloneable, MultiLineStringRepresentation
     // Flat list 
     //------------------------------------------------------------------------
 
-    protected void setValue(
+    public void setValue(
         String key,
-        Object value
+        Object value,
+        boolean override
     ) throws ServiceException {
         // Set the default values for name and index
         String name = key;

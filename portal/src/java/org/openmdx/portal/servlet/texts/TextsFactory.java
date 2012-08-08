@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextsFactory.java,v 1.5 2008/08/12 16:38:07 wfro Exp $
+ * Name:        $Id: TextsFactory.java,v 1.6 2009/05/26 12:41:15 wfro Exp $
  * Description: TextsFactory
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:07 $
+ * Date:        $Date: 2009/05/26 12:41:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,24 +56,22 @@
 package org.openmdx.portal.servlet.texts;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
 public class TextsFactory
   implements Serializable {
   
   //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-public TextsFactory(
+  public TextsFactory(
       String[] locales,
       List[] textsStreams
   ) {
-      this.texts = MapUtils.orderedMap(new HashMap<String,Texts_1_0>());
+      this.texts = new LinkedHashMap<String,Texts_1_0>();
       for(int i = 0; i < locales.length; i++) {
           if(locales[i] != null) {
 	          try {

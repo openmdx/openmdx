@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIModelMapper.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: XMIModelMapper.java,v 1.5 2009/06/03 00:03:34 wfro Exp $
  * Description: write model as org.omg.model1.xsd compliant XML file
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/03 00:03:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -122,7 +122,7 @@ public class XMIModelMapper {
     ) {
       java.lang.Object elementValue = i.next();
       if(elementValue instanceof Path) {
-        this.pw.println(spaces(48) + "<_item>" + ((Path)elementValue).toUri() + "</_item>");
+        this.pw.println(spaces(48) + "<_item>" + ((Path)elementValue).toXRI() + "</_item>");
       }
       else {
         this.pw.println(spaces(48) + "<_item>" + elementValue.toString() + "</_item>");
@@ -154,7 +154,7 @@ public class XMIModelMapper {
   ) {
     if(elementValue != null) {    
       if(elementValue instanceof Path) {
-        this.pw.println(spaces(pos) + "<" + elementName +  ">" + ((Path)elementValue).toUri() + "</" + elementName + ">");
+        this.pw.println(spaces(pos) + "<" + elementName +  ">" + ((Path)elementValue).toXRI() + "</" + elementName + ">");
       }
       else {
         this.pw.println(spaces(pos) + "<" + elementName +  ">" + elementValue.toString() + "</" + elementName + ">");
@@ -219,8 +219,6 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", packageDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)packageDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)packageDef.objGetValue("modifiedAt"));
     }
     writeElement("container", packageDef.objGetValue("container"));
     if(this.allFeatures) {

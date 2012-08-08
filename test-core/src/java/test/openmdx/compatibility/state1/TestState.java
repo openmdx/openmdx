@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestState.java,v 1.8 2009/03/05 17:51:36 hburger Exp $
+ * Name:        $Id: TestState.java,v 1.14 2009/05/27 23:14:40 wfro Exp $
  * Description: TestState 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 17:51:36 $
+ * Date:        $Date: 2009/05/27 23:14:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.jdo.JDOHelper;
@@ -69,7 +70,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openmdx.application.dataprovider.deployment.Deployment_1;
-import org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.naming.Path;
@@ -80,8 +80,8 @@ import org.openmdx.compatibility.state1.spi.StateCapables;
 import org.openmdx.compatibility.state1.view.DateStateViews;
 import org.w3c.spi.DatatypeFactories;
 
-import test.openmdx.compatibility.state1.cci2.SegmentContainsStateNoState;
-import test.openmdx.compatibility.state1.cci2.StateAHasStateD;
+import test.openmdx.compatibility.state1.cci2.SegmentContainsE;
+import test.openmdx.compatibility.state1.cci2.StateAContainsStateD;
 import test.openmdx.compatibility.state1.jmi1.E;
 import test.openmdx.compatibility.state1.jmi1.Segment;
 import test.openmdx.compatibility.state1.jmi1.State1Package;
@@ -105,20 +105,22 @@ public class TestState {
     protected static Provider provider;
         
     protected static final EntityManagerFactory managerFactory = new Deployment_1(
-        true, // IN_PROCESS
-        "file:../test-core/src/connector/openmdx-2/oracle-10g.rar", // CONNECTOR_URL
-        "file:../test-core/src/ear/test-state.ear", // APPLICATION_URL
+        "xri://@openmdx*(+leightweight)*ENTERPRISE_APPLICATION_CONTAINER",
+//      "xri://@openmdx*(+openejb)*ENTERPRISE_APPLICATION_CONTAINER",        
+//        new String[]{"file:../test-core/src/connector/openmdx-2/postgresql-7.rar"}, // CONNECTOR_URL
+        new String[]{"file:../test-core/src/connector/openmdx-2/oracle-10g.rar"}, // CONNECTOR_URL
+        new String[]{"file:../test-core/src/ear/test-state.ear"}, // APPLICATION_URL
         false, /// LOG_DEPLOYMENT_DETAIL
         "test/openmdx/state2/EntityProviderFactory", // ENTITY_MANAGER_FACTORY_JNDI_NAME
         "test/openmdx/state2/Gateway", // GATEWAY_JNDI_NAME
-        "test:openmdx:compatibility:state1" // MODEL
+        new String[]{"test:openmdx:compatibility:state1"} // MODEL
     );
     
     @BeforeClass
     public static void reset(
     ) throws ResourceException{
         PersistenceManager persistenceManager = managerFactory.getEntityManager(
-            AbstractPersistenceManagerFactory_1.toSubject("JUnit", null, null)
+            Collections.singletonList("JUnit")
         );
         Transaction transaction = persistenceManager.currentTransaction();
         Authority authority = (Authority) persistenceManager.getObjectById(
@@ -203,7 +205,7 @@ public class TestState {
         assertEquals(
             "resourceIdentifier" + suffix, 
             "xri://@openmdx*org.openmdx.compatibility.state1/provider/-/segment/-/state1Core/(@openmdx*test.openmdx.compatibility.state1/provider/Standard/segment/Compatibility/a/c0)", 
-            resourceIdentifier.toResourceIdentifier()
+            resourceIdentifier.toXRI()
         );
     }
     
@@ -251,7 +253,7 @@ public class TestState {
         StateA stateA0_0 = (StateA) JDOHelper.getPersistenceManager(segment).newInstance(StateA.class);
         E e0 = (E) JDOHelper.getPersistenceManager(segment).newInstance(E.class);
         e0.setStringValue("Object E");
-        e0.setStateA(stateA0_0);
+        e0.setAReference(stateA0_0);
         segment.addE("e0", e0);
         stateA0_0.setStringValue("State A");
         segment.addA(false, "a0", stateA0_0);
@@ -313,10 +315,11 @@ public class TestState {
         assertArrayEquals(new Object[]{"State A"}, stateA0_d.getStringList().toArray());   
         assertSame("getCore", stateA0_a, stateA0_a.getCore());
         
-        SegmentContainsStateNoState.E<E> e = segment.getE();
+        SegmentContainsE.E<E> e = segment.getE();
         assertEquals("E", 1, e.size());
         
-        StateAHasStateD.D<StateD> d = stateA0_a.getD();
+        @SuppressWarnings("unused")
+        StateAContainsStateD.D<StateD> d = stateA0_a.getD();
 //        d = DateStateViews.getNoView(d);
     }
 

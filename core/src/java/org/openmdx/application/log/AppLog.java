@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AppLog.java,v 1.20 2008/10/09 09:34:08 hburger Exp $
+ * Name:        $Id: AppLog.java,v 1.23 2009/04/01 13:33:33 hburger Exp $
  * Description: Logging
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/09 09:34:08 $
+ * Date:        $Date: 2009/04/01 13:33:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,11 +50,14 @@
  */
 package org.openmdx.application.log;
 
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+
+import org.openmdx.application.Version;
+import org.openmdx.kernel.log.ForeignLogRecord;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.log.SysLog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.MessageFormatter;
-import org.slf4j.spi.LocationAwareLogger;
 
 
 /**
@@ -70,81 +73,28 @@ public class AppLog {
      */
     private AppLog(
     ) {
-        // This class must NEVER be instantiated. Actually AppLog only extends
-        // the class Log to prevent problems with multiple class
-        // loaders. AppLog uses a Log instance singleton by delegation!
+        // Avoid instantiation
     }
-
-    /** Constants */
-    final public static String LOGNAME = "AppLog";
-    final private static String LOGSOURCE = "App";
-    
-    private static final Logger logger = LoggerFactory.getLogger(LOGNAME);
-    private static final boolean locationAware = logger instanceof LocationAwareLogger;
-    private static final LocationAwareLogger locationAwareLogger = (LocationAwareLogger) (locationAware ? logger : null);
-    private static Object logSource = LOGSOURCE;
-    private static final String THIS = AppLog.class.getName();
-
-    ///////////////////////////////////////////////////////////////////////////
-    //
-    // LOG configuration
-    //
-    ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Set a log source object. The logging framework uses the toString() method
-     * to determine the log source for each log event.
-     * The object may be set at any time.
-     *
-     * <p>
-     * Dynamic log source example:
-     * <code>
-     *
-     * class LogSource
-     * {
-     *   public String toString()
-     *   {
-     *      return "LogSource-" + System.currentTimeMillis();
-     *   }
-     * }
-     *
-     * LogSource logSource = new LogSource();
-     * SysLog.setLogSource(logSource)
-     *
-     * </code>
-     *
-     * <p>
-     * Static log source example:
-     * <code>
-     *
-     * SysLog.setLogSource("LogSource")
-     *
-     * </code>
-     *
-     * @param logSource a log source object
+     * To tell the foreign record about the loggger class
      */
-    public static void setLogSource(
-        Object logSource
-    ){
-        if(logSource != null) {
-            AppLog.logSource = logSource;
-        }
-    }
+    private static final String THIS = AppLog.class.getName();
 
     /**
      * Checks if trace logging is active
      *
      * <p>
-     * Applications can use this method before they call Log.trace(...) if
+     * Applications can use this method before they call SysLog.trace(...) if
      * the log string creation is very time consuming.
      *
      * <pre>
-     *      Log.trace("Customer created", "First=Mark, Last=Smith");
+     *      SysLog.trace("Customer created", "First=Mark, Last=Smith");
      *
-     *      if (Log.isTraceOn()) {
+     *      if (SysLog.isTraceOn()) {
      *          summary = expensive_creation();
      *          detail  = expensive_creation();
-     *          Log.trace(summary, detail);
+     *          SysLog.trace(summary, detail);
      *      }
      * </pre>
      *
@@ -152,35 +102,75 @@ public class AppLog {
      */
     public static boolean isTraceOn()
     {
-        return logger.isTraceEnabled();
+        return LoggerFactory.getLogger().isLoggable(Level.FINEST);
     }
-
-
-    ///////////////////////////////////////////////////////////////////////////
-    //
-    // LOG methods
-    //
-    ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Format the log message
+     * Log using the given pattern and arguments
+     * 
+     * @param level
+     * @param pattern 
+     * @param pattern
+     * @param logSource TODO
+     * @param arguments
      */
-    private static final String format(
-        String logString,
-        Object logObj
+    public static void log(
+        Level level,
+        String pattern, 
+        Object... arguments
     ){
-        return logObj == null || logObj instanceof Throwable ? MessageFormatter.arrayFormat(
-            SysLog.LOGSOURCE_SUMMARY_FORMAT, 
-            logSource, 
-            logString
-        ) : MessageFormatter.arrayFormat(
-            SysLog.LOGSOURCE_SUMMARY_DETAIL_FORMAT, 
-            logSource, 
-            logString,
-            logObj
-        );
+        Logger logger = LoggerFactory.getLogger();
+        if(logger.isLoggable(level)) {
+            LogRecord record = new ForeignLogRecord(THIS, level, pattern);
+            record.setParameters(arguments);
+            logger.log(record);
+        }
     }
 
+    /**
+     * Log an exception
+     * 
+     * @param level
+     * @param message
+     * @param throwable
+     */
+    public static void log(
+        Level level,
+        String message,
+        Throwable throwable
+    ){
+        Logger logger = LoggerFactory.getLogger();
+        if(logger.isLoggable(level)) {
+            LogRecord record = new ForeignLogRecord(THIS, level, message);
+            record.setThrown(throwable);
+            logger.log(record);
+        }
+        
+    }
+
+    /**
+     * Log an exception
+     * 
+     * @param level
+     * @param throwable
+     * @param pattern
+     * @param arguments
+     */
+    private static void log(
+        Level level,
+        Throwable throwable,
+        String pattern, 
+        Object... arguments
+    ){
+        Logger logger = LoggerFactory.getLogger();
+        if(logger.isLoggable(level)) {
+            LogRecord record = new ForeignLogRecord(THIS, level, pattern);
+            record.setParameters(arguments);
+            record.setThrown(throwable);
+            logger.log(record);
+        }
+    }
+    
     /**
      * Logs a text string at CRITICAL_ERROR_LEVEL.
      *
@@ -201,23 +191,30 @@ public class AppLog {
         String logString,
         Object logObj
     ){
-        if (logger.isErrorEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.ERROR_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.error(message);
-            } else {
-                logger.error(message, throwable);
-            }
-        }
+        log(Level.SEVERE, "{0}|{1}|{2}", "App", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at CRITICAL_ERROR_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #criticalError(String)
+     * @see #criticalError(String, Object, int)
+     */
+    public static void criticalError(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.SEVERE, logObj, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -231,20 +228,7 @@ public class AppLog {
      * @see #criticalError(String, Object, int)
      */
     public static void criticalError(String logString) {
-        if (logger.isErrorEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.ERROR_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.error(message);
-            }
-        }
+        log(Level.SEVERE, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -267,23 +251,30 @@ public class AppLog {
         String logString,
         Object logObj
     ){
-        if (logger.isErrorEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.ERROR_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.error(message);
-            } else {
-                logger.error(message, throwable);
-            }
-        }
+        log(Level.SEVERE, "{0}|{1}|{2}", "App", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at ERROR_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #error(String)
+     * @see #error(String, Object, int)
+     */
+    public static void error(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.SEVERE, logObj, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -299,20 +290,7 @@ public class AppLog {
     public static void error(
         String logString
     ){
-        if (logger.isErrorEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.ERROR_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.error(message);
-            }
-        }
+        log(Level.SEVERE, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -335,23 +313,30 @@ public class AppLog {
         String logString,
         Object logObj
     ){
-        if (logger.isWarnEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.WARN_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.warn(message);
-            } else {
-                logger.warn(message, throwable);
-            }
-        }
+        log(Level.WARNING, "{0}|{1}|{2}", "App", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at WARNING_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #warning(String)
+     * @see #warning(String, Object, int)
+     */
+    public static void warning(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.WARNING, logObj, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -367,20 +352,7 @@ public class AppLog {
     public static void warning(
         String logString
     ){
-        if (logger.isWarnEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.WARN_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.warn(message);
-            }
-        }
+        log(Level.WARNING, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -403,23 +375,30 @@ public class AppLog {
         String logString,
         Object logObj
     ){
-        if (logger.isInfoEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.INFO_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.info(message);
-            } else {
-                logger.info(message, throwable);
-            }
-        }
+        log(Level.INFO, "{0}|{1}|{2}", "App", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at INFO_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #info(String)
+     * @see #info(String, Object, int)
+     */
+    public static void info(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.INFO, logObj, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -435,20 +414,7 @@ public class AppLog {
     public static void info(
         String logString
     ){
-        if (logger.isInfoEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.INFO_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.info(message);
-            }
-        }
+        log(Level.INFO, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -471,23 +437,30 @@ public class AppLog {
         String logString,
         Object logObj
     ){
-        if (logger.isDebugEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.DEBUG_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.debug(message);
-            } else {
-                logger.debug(message, throwable);
-            }
-        }
+        log(Level.FINE, "{0}|{1}|{2}", "App", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at DETAIL_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #detail(String)
+     * @see #detail(String, Object, int)
+     */
+    public static void detail(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.FINE, logObj, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -503,20 +476,7 @@ public class AppLog {
     public static void detail(
         String logString
     ){
-        if (logger.isDebugEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.DEBUG_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.debug(message);
-            }
-        }
+        log(Level.FINE, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -539,23 +499,30 @@ public class AppLog {
         String logString,
         Object logObj
     ){
-        if (logger.isTraceEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.TRACE_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.trace(message);
-            } else {
-                logger.trace(message, throwable);
-            }
-        }
+        log(Level.FINEST, "{0}|{1}|{2}", "App", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at TRACE_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #trace(String)
+     * @see #trace(String, Object, int)
+     */
+    public static void trace(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.FINEST, logObj, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -571,20 +538,7 @@ public class AppLog {
     public static void trace(
         String logString
     ){
-        if (logger.isTraceEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.TRACE_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.trace(message);
-            }
-        }
+        log(Level.FINEST, "{0}|{1}", "App", logString);
     }
 
     /**
@@ -602,25 +556,7 @@ public class AppLog {
         String logString, 
         long elapsedTime
     ){
-        if (logger.isInfoEnabled()) {
-            String message = MessageFormatter.arrayFormat(
-                "{} Performance|{}|Elapsed time: {} ms", 
-                logSource, 
-                logString,
-                elapsedTime
-            );
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.INFO_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.info(message);
-            }
-        }
+        log(Level.INFO, "{0} Performance|{1}|Elapsed time: {2} ms", "App", logString, elapsedTime);
     }
 
     /**
@@ -629,32 +565,18 @@ public class AppLog {
      * meaning for the logging framework.
      *
      * @param group  a statistics group.
-     * @param record   a statistics record string
+     * @param record a statistics record string
      * @see #statistics(String, String, int)
      */
     public static void statistics(
-        String    group, 
-        String   record
+        String  group, 
+        String  record
     ) {
-        if (logger.isInfoEnabled()) {
-            String message = MessageFormatter.arrayFormat(
-                "{} Statistics|Group {}|{}", 
-                logSource, 
-                group,
-                record
-            );
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.INFO_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.info(message);
-            }
-        }
+        log(Level.INFO, "{0} Statistics|Group {1}|{2}", "App", group, record);
+    }
+
+    static {
+        SysLog.info("openMDX Application", Version.getImplementationVersion());
     }
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: IterationProcessor.java,v 1.3 2009/01/06 13:14:45 wfro Exp $
- * Description: spice: dataprovider object
- * Revision:    $Revision: 1.3 $
+ * Name:        $Id: IterationProcessor.java,v 1.6 2009/06/09 15:39:58 hburger Exp $
+ * Description: Iteration Processor
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 13:14:45 $
+ * Date:        $Date: 2009/06/09 15:39:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,11 @@
  */
 package org.openmdx.application.dataprovider.cci;
 
+import javax.resource.cci.MappedRecord;
+
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.AttributeSpecifier;
 
 
 /**
@@ -74,7 +77,7 @@ public interface IterationProcessor {
      * @exception   ServiceException
      *              if no valid request can be added
      *
-     * @see org.openmdx.application.dataprovider.cci.Directions
+     * @see org.openmdx.base.query.Directions
      */
     void addIterationRequest(
         Path referenceFilter,
@@ -105,7 +108,7 @@ public interface IterationProcessor {
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public DataproviderObject_1_0 addGetRequest(
+    public MappedRecord addGetRequest(
         Path path,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier

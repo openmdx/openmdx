@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1Object_1_0.java,v 1.2 2009/03/03 17:23:07 hburger Exp $
+ * Name:        $Id: Jmi1Object_1_0.java,v 1.3 2009/06/09 12:45:17 hburger Exp $
  * Description: RefObject_1_2 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 17:23:07 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,4 +64,17 @@ public interface Jmi1Object_1_0
         Object qualifier
     );
     
+    /**
+     * Adds the value to the feature with the specified qualifier.
+     *
+     * @param featureName feature to add value.
+     * @param qualifier qualifier of value to add.
+     * @param value value to add.
+     */
+    public void refAddValue(
+      String featureName,
+      Object qualifier,
+      Object value
+    );
+
 }

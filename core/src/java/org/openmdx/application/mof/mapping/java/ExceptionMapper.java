@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExceptionMapper.java,v 1.1 2009/01/13 02:10:34 wfro Exp $
+ * Name:        $Id: ExceptionMapper.java,v 1.2 2009/06/09 12:45:18 hburger Exp $
  * Description: Exception Template 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:34 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,7 @@ import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
 
 public class ExceptionMapper
     extends AbstractMapper {
@@ -69,7 +69,7 @@ public class ExceptionMapper
     public ExceptionMapper(
         ModelElement_1_0 exceptionDef,
         Writer writer,
-        Model_1_3 model,
+        Model_1_0 model,
         Format format, 
         String packageSuffix, MetaData_1_0 metaData
     ) throws ServiceException {

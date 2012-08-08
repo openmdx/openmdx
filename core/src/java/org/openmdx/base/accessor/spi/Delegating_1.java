@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Delegating_1.java,v 1.2 2009/01/10 02:09:13 wfro Exp $
+ * Name:        $Id: Delegating_1.java,v 1.4 2009/04/28 13:58:51 hburger Exp $
  * Description: Delegating_1 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/10 02:09:13 $
+ * Date:        $Date: 2009/04/28 13:58:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -73,11 +73,11 @@ public class Delegating_1 {
      * @throws NullPointerException if <code>left</code> is <code>null</code>.
      */
     public static boolean equal(
-        Delegating_1_0 left,
+        Delegating_1_0<?> left,
         Object right
     ) throws ServiceException {
-        if(right instanceof Delegating_1_0) {
-            Delegating_1_0 that = (Delegating_1_0) right;
+        if(right instanceof Delegating_1_0<?>) {
+            Delegating_1_0<?> that = (Delegating_1_0<?>) right;
             return left == that || ( // both same OR
                 left.getClass() == that.getClass() && // same class AND
                 equal (left.objGetDelegate(), that.objGetDelegate()) // equal delegates
@@ -110,7 +110,7 @@ public class Delegating_1 {
      * @return its hash code
      */
     public static int hashCode(
-        Delegating_1_0 delegating
+        Delegating_1_0<?> delegating
     ) throws ServiceException {
         Object delegate = delegating.objGetDelegate();
         return delegate == null ? 0 : delegate.hashCode();
@@ -125,7 +125,7 @@ public class Delegating_1 {
      * delegating object's class name.
      */
     public static String toString(
-        Delegating_1_0 delegating
+        Delegating_1_0<?> delegating
     ){
         try {
             return delegating.getClass().getName() + ": " + delegating.objGetDelegate();

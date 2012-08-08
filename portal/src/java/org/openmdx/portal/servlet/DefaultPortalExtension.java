@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultPortalExtension.java,v 1.68 2009/03/08 18:03:19 wfro Exp $
+ * Name:        $Id: DefaultPortalExtension.java,v 1.76 2009/06/09 12:50:34 hburger Exp $
  * Description: DefaultEvaluator
- * Revision:    $Revision: 1.68 $
+ * Revision:    $Revision: 1.76 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:19 $
+ * Date:        $Date: 2009/06/09 12:50:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,6 +80,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -87,6 +88,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
+import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefStruct;
@@ -96,19 +98,19 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.application.log.AppLog;
-import org.openmdx.application.mof.cci.AggregationKind;
-import org.openmdx.application.mof.cci.PrimitiveTypes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
@@ -128,9 +130,7 @@ import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.ui1.jmi1.FeatureDefinition;
 import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
-import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
-@SuppressWarnings("unchecked")
 public class DefaultPortalExtension
   implements PortalExtension_1_0, Serializable {
   
@@ -165,7 +165,7 @@ public class DefaultPortalExtension
       if(refObj == null) {
         return "#NULL";
       }
-      if(refObj.refIsNew() || !refObj.refIsPersistent()) {
+      if(JDOHelper.isNew(refObj) || !JDOHelper.isPersistent(refObj)) {
         return "Untitled";
       }
       Path p = refObj.refGetPath();
@@ -298,7 +298,7 @@ public class DefaultPortalExtension
         String qualifiedFeatureName
     ) {
         try {
-            Model_1_3 model = (Model_1_3)application.getModel();
+            Model_1_0 model = application.getModel();
             ModelElement_1_0 lookupType = null;
             // Get lookup type from model
             try {
@@ -327,9 +327,9 @@ public class DefaultPortalExtension
                     application.getPmData()
                 );
                 Path lookupObjectIdentity = new Path(lookupObject.refMofId());
-                Map filterByFeatures = new TreeMap();
-                Map filterByLabels = new TreeMap();
-                Map lookupReferenceNames = new TreeMap();
+                Map<Integer,String> filterByFeatures = new TreeMap<Integer,String>();
+                Map<Integer,String> filterByLabels = new TreeMap<Integer,String>();
+                Map<Integer,String> lookupReferenceNames = new TreeMap<Integer,String>();
                 ModelElement_1_0 lookupObjectClass = ((RefMetaObject_1)lookupObject.refMetaObject()).getElementDef();
                 Map lookupObjectFeatures = model.getStructuralFeatureDefs(lookupObjectClass, true, false, false);
                 ModelElement_1_0 extentCapableClass = model.getElement("org:openmdx:base:ExtentCapable");
@@ -346,7 +346,7 @@ public class DefaultPortalExtension
                     if(model.isReferenceType(feature)) {
                         ModelElement_1_0 referencedEnd = model.getElement(feature.objGetValue("referencedEnd"));
                         ModelElement_1_0 referencedType = model.getElement(feature.objGetValue("type"));
-                        List allReferencedTypes = new ArrayList();
+                        List<Object> allReferencedTypes = new ArrayList<Object>();
                         for(Iterator j = referencedType.objGetList("allSubtype").iterator(); j.hasNext(); ) {
                             allReferencedTypes.addAll(
                                 model.getElement(j.next()).objGetList("allSupertype")
@@ -474,15 +474,16 @@ public class DefaultPortalExtension
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getFindObjectsBaseFilter(org.openmdx.portal.servlet.ApplicationContext, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String)
      */
-    public List getFindObjectsBaseFilter(
+    public List<FilterProperty> getFindObjectsBaseFilter(
         ApplicationContext application,
         RefObject_1_0 context,
         String qualifiedFeatureName
     ) {
-        return new ArrayList();
+        return new ArrayList<FilterProperty>();
     }
     
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     private static boolean areEqual(
         Object v1,
         Object v2
@@ -511,13 +512,29 @@ public class DefaultPortalExtension
     }
   
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    static protected Map<String,Object> targetAsValueMap(
+    	Object target
+    ) {
+    	return (Map<String,Object>)target;
+    }
+    
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    static protected Collection<Object> valueAsCollection(
+    	Object value
+    ) {
+    	return (Collection<Object>)value;
+    }
+    
+    //-------------------------------------------------------------------------
     /**
      * Maps the request input to the specified object. The object must either
      * be instanceof RefObject_1_0 or Map.
      */
     public void updateObject(
         Object target,
-        Map parameterMap,
+        Map<String,Object[]> parameterMap,
         Map<String,Attribute> fieldMap,
         ApplicationContext application,
         PersistenceManager pm
@@ -525,18 +542,16 @@ public class DefaultPortalExtension
         AppLog.trace("fieldMap", fieldMap);
         AppLog.trace("parameterMap", parameterMap);
         Model_1_0 model = application.getModel();
-
         int count = 0;
         // Data bindings require multi-pass update of object
         while(count < 3) {
             // map object
-            Set modifiedFeatures = new HashSet();
+            Set<String> modifiedFeatures = new HashSet<String>();
             for(
               Iterator i = parameterMap.keySet().iterator(); 
               i.hasNext(); 
             ) {
-              Object key = i.next();
-        
+              Object key = i.next();        
               // field names are of the form 'feature[index][.false | .true]'
               // Suffix .true and .false for boolean fields only. 
               // If .false and .true fields are received ignore .false
@@ -544,8 +559,7 @@ public class DefaultPortalExtension
                 (key instanceof String) &&
                 (((String)key).indexOf("[") >= 0) &&
                 (!((String)key).endsWith(".false") || !parameterMap.keySet().contains(((String)key).substring(0, ((String)key).lastIndexOf(".false")) + ".true"))
-              ) {
-        
+              ) {        
                 // attribute names are of the form <name>[tabIndex]
                 // remove tabIndex to get full qualified feature name
                 String feature = ((String)key).substring(0, ((String)key).lastIndexOf("["));
@@ -564,39 +578,33 @@ public class DefaultPortalExtension
                         }
                     }
                     catch(Exception e0) {}                
-                }
-        
+                }        
                 Attribute attribute = (Attribute)fieldMap.get(feature);
-                if(attribute != null) {
-        
+                if(attribute != null) {        
                   // parse parameter values
                   List parameterValues = Arrays.asList((Object[])parameterMap.get(key));
-                  StringTokenizer tokenizer = parameterValues.size() == 0
-                    ? new StringTokenizer("", "\n")
-                    : new StringTokenizer((String)parameterValues.get(0), "\n\r");
-                  List newValues = new ArrayList();
+                  StringTokenizer tokenizer = parameterValues.size() == 0 ? 
+                	  new StringTokenizer("", "\n") : 
+                	  new StringTokenizer((String)parameterValues.get(0), "\n\r");
+                  List<String> newValues = new ArrayList<String>();
                   while(tokenizer.hasMoreTokens()) {
                     String token = tokenizer.nextToken();
                     if(!"#NULL".equals(token)) {
                       newValues.add(token);
                     }
-                  }
-        
+                  }        
                   // accept?
                   AttributeValue valueHolder = attribute.getValue();
                   boolean accept =
-                    (valueHolder != null) &&
-                    valueHolder.isChangeable() &&
-                    !modifiedFeatures.contains(feature);
+                      (valueHolder != null) &&
+                      valueHolder.isChangeable() &&
+                      !modifiedFeatures.contains(feature);
                   AppLog.trace("accept feature", feature + "=" + accept);
-                  AppLog.trace("new values", newValues);
-        
-                  if(accept) {
-        
+                  AppLog.trace("new values", newValues);        
+                  if(accept) {        
                     // text
                     if(valueHolder instanceof TextValue) {
-                      AppLog.trace("Text value " + attribute.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
-        
+                      AppLog.trace("Text value " + attribute.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));        
                       // single-valued
                       if(valueHolder.isSingleValued()) {
                         // cat all values into one string
@@ -623,32 +631,33 @@ public class DefaultPortalExtension
                           }
                         }
                         else {
-                            ((Map)target).put(
+                            targetAsValueMap(target).put(
                                 feature,
                                 mappedNewValue
                             );
                         }
-                      }
-        
+                      }        
                       // multi-valued
                       else {
-                        Collection values = null;
+                        Collection<Object> values = null;
                         if(target instanceof RefObject) {
-                            values = (Collection)valueHolder.getDataBinding().getValue(
-                                (RefObject)target,
-                                feature
+                            values = valueAsCollection(
+                            	valueHolder.getDataBinding().getValue(
+	                                (RefObject)target,
+	                                feature
+	                            )
                             );
                         }
                         else {
-                            values = (Collection)((Map)target).get(feature);
+                            values = valueAsCollection(targetAsValueMap(target).get(feature));
                             if(values == null) {
-                                ((Map)target).put(
+                                targetAsValueMap(target).put(
                                   feature,
-                                  values = new ArrayList()
+                                  values = new ArrayList<Object>()
                                 );
                             }
                         }
-                        List mappedNewValues = newValues;
+                        List<String> mappedNewValues = newValues;
                         boolean isModified = !DefaultPortalExtension.areEqual(
                             values,
                             mappedNewValues
@@ -682,9 +691,9 @@ public class DefaultPortalExtension
                               newValues.size() == 0 ? "" : ((String)newValues.get(0)).trim()
                           );
                           if(number == null) {
-                              number = valueHolder.isOptionalValued()
-                                  ? null
-                                  : new BigDecimal(0);
+                              number = valueHolder.isOptionalValued() ? 
+                            	  null : 
+                            	  new BigDecimal(0);
                           }
                           if(number == null) {
                               Object mappedNewValue = null;
@@ -707,7 +716,7 @@ public class DefaultPortalExtension
                                 }
                               }
                               else {
-                                  ((Map)target).put(
+                                  targetAsValueMap(target).put(
                                       feature,
                                       mappedNewValue
                                   );
@@ -734,7 +743,7 @@ public class DefaultPortalExtension
                                 }
                               }
                               else {
-                                  ((Map)target).put(
+                                  targetAsValueMap(target).put(
                                       feature,
                                       mappedNewValue
                                   );
@@ -761,7 +770,7 @@ public class DefaultPortalExtension
                                   }
                               }
                               else {
-                                  ((Map)target).put(
+                                  targetAsValueMap(target).put(
                                       feature,
                                       mappedNewValue
                                   );
@@ -788,7 +797,7 @@ public class DefaultPortalExtension
                                 }
                               }
                               else {
-                                  ((Map)target).put(
+                                  targetAsValueMap(target).put(
                                       feature,
                                       mappedNewValue
                                   );
@@ -815,7 +824,7 @@ public class DefaultPortalExtension
                                   }
                               }
                               else {
-                                  ((Map)target).put(
+                                  targetAsValueMap(target).put(
                                       feature,
                                       mappedNewValue
                                   );
@@ -846,23 +855,25 @@ public class DefaultPortalExtension
         
                       // multi-valued
                       else {
-                        Collection values = null;
+                        Collection<Object> values = null;
                         if(target instanceof RefObject) {
-                            values = (Collection)valueHolder.getDataBinding().getValue(
-                                (RefObject)target,
-                                feature
+                            values = valueAsCollection(
+                            	valueHolder.getDataBinding().getValue(
+	                                (RefObject)target,
+	                                feature
+	                            )
                             );
                         }
                         else {
-                            values = (Collection)((Map)target).get(feature);
+                            values = valueAsCollection(targetAsValueMap(target).get(feature));
                             if(values == null) {
-                                ((Map)target).put(
+                                targetAsValueMap(target).put(
                                   feature,
-                                  values = new ArrayList()
+                                  values = new ArrayList<Object>()
                                 );
                             }
                         }
-                        List mappedNewValues = new ArrayList();
+                        List<Object> mappedNewValues = new ArrayList<Object>();
                         for(Iterator j = newValues.iterator(); j.hasNext(); ) {
                           try {
                             String numberAsString = ((String)j.next()).trim();
@@ -972,7 +983,7 @@ public class DefaultPortalExtension
                               }
                             }
                             else {
-                                ((Map)target).put(
+                                targetAsValueMap(target).put(
                                     feature,
                                     mappedNewValue
                                 );
@@ -1015,7 +1026,7 @@ public class DefaultPortalExtension
                                   }
                                 }
                                 else {
-                                    ((Map)target).put(
+                                    targetAsValueMap(target).put(
                                         feature,
                                         mappedNewValueDate
                                     );
@@ -1041,7 +1052,7 @@ public class DefaultPortalExtension
                                   }
                                 }
                                 else {
-                                    ((Map)target).put(
+                                    targetAsValueMap(target).put(
                                         feature,
                                         mappedNewValue
                                     );
@@ -1080,23 +1091,25 @@ public class DefaultPortalExtension
         
                       // multi-valued
                       else {
-                        Collection values = null;
+                        Collection<Object> values = null;
                         if(target instanceof RefObject) {
-                            values = (Collection)valueHolder.getDataBinding().getValue(
-                                (RefObject)target,
-                                feature
+                            values = valueAsCollection(
+                            	valueHolder.getDataBinding().getValue(
+	                                (RefObject)target,
+	                                feature
+	                            )
                             );
                         }
                         else {
-                            values = (Collection)((Map)target).get(feature);
+                            values = valueAsCollection(targetAsValueMap(target).get(feature));
                             if(values == null) {
-                                ((Map)target).put(
+                                targetAsValueMap(target).put(
                                   feature,
-                                  values = new ArrayList()
+                                  values = new ArrayList<Object>()
                                 );
                             }
                         }
-                        List mappedNewValues = new ArrayList();
+                        List<Object> mappedNewValues = new ArrayList<Object>();
                         for(Iterator j = newValues.iterator(); j.hasNext(); ) {
                           try {
                             String newValue = (String)j.next();
@@ -1231,9 +1244,9 @@ public class DefaultPortalExtension
                               }
                               AppLog.trace("ObjRef xri", xri);
                               try {
-                                RefObject mappedNewValue = (xri == null) || "".equals(xri)
-                                    ? null
-                                    : (RefObject)pm.getObjectById(new Path(xri));
+                                RefObject mappedNewValue = (xri == null) || "".equals(xri) ? 
+                                	null : 
+                                	(RefObject)pm.getObjectById(new Path(xri));
                                 if(target instanceof RefObject) {
                                   boolean isModified = true;
                                   // force modify in case the referenced object does not exist
@@ -1258,7 +1271,7 @@ public class DefaultPortalExtension
                                   }
                                 }
                                 else {
-                                    ((Map)target).put(
+                                    targetAsValueMap(target).put(
                                         feature,
                                         mappedNewValue
                                     );
@@ -1301,9 +1314,9 @@ public class DefaultPortalExtension
                               System.err.println("WARNING: can not get CodeValueContainer with name " + feature + ". Add " + feature + " to the name list of a CodeValueContainer");
                               longTexts = new TreeMap();
                           }
-                          Short mappedNewValue = newValues.size() == 0
-                              ? new Short((short)0)
-                              : (Short)longTexts.get(newValues.get(0).toString());
+                          Short mappedNewValue = newValues.size() == 0 ? 
+                        	  new Short((short)0) : 
+                        	  (Short)longTexts.get(newValues.get(0).toString());
                           if(mappedNewValue != null) {
                               if(target instanceof RefObject) {
                                   boolean isModified = !DefaultPortalExtension.areEqual(
@@ -1324,11 +1337,14 @@ public class DefaultPortalExtension
                                   }
                               }
                               else {
-                                  ((Map)target).put(
+                                  targetAsValueMap(target).put(
                                       feature,
                                       mappedNewValue
                                   );
                               }
+                          }
+                          else {
+                        	  AppLog.warning("Unable to map code field", Arrays.asList(newValues.get(0).toString(), longTexts));
                           }
                         }
                         catch(JmiServiceException e) {
@@ -1349,23 +1365,25 @@ public class DefaultPortalExtension
         
                       // multi-valued
                       else {
-                        Collection values = null;
+                        Collection<Object> values = null;
                         if(target instanceof RefObject) {
-                            values = (Collection)valueHolder.getDataBinding().getValue(
-                                (RefObject)target,
-                                feature
+                            values = valueAsCollection(
+                            	valueHolder.getDataBinding().getValue(
+	                                (RefObject)target,
+	                                feature
+	                            )
                             );
                         }
                         else {
-                          values = (Collection)((Map)target).get(feature);
+                          values = valueAsCollection(targetAsValueMap(target).get(feature));
                           if(values == null) {
-                              ((Map)target).put(
+                              targetAsValueMap(target).put(
                                   feature,
-                                  values = new ArrayList()
+                                  values = new ArrayList<Object>()
                               );
                           }
                         }
-                        List mappedNewValues = new ArrayList();
+                        List<Object> mappedNewValues = new ArrayList<Object>();
                         for(Iterator j = newValues.iterator(); j.hasNext(); ) {
                           try {
                             String longText = j.next().toString();
@@ -1446,7 +1464,7 @@ public class DefaultPortalExtension
                           }
                         }
                         else {
-                            ((Map)target).put(
+                            targetAsValueMap(target).put(
                                 feature,
                                 mappedNewValue
                             );
@@ -1455,23 +1473,25 @@ public class DefaultPortalExtension
         
                       // multi-valued
                       else {
-                        Collection values = null;
+                        Collection<Object> values = null;
                         if(target instanceof RefObject) {
-                            values = (Collection)valueHolder.getDataBinding().getValue(
-                                (RefObject)target,
-                                feature
+                            values = valueAsCollection(
+                            	valueHolder.getDataBinding().getValue(
+	                                (RefObject)target,
+	                                feature
+	                            )
                             );
                         }
                         else {
-                          values = (Collection)((Map)target).get(feature);
+                          values = valueAsCollection(targetAsValueMap(target).get(feature));
                           if(values == null) {
-                              ((Map)target).put(
+                              targetAsValueMap(target).put(
                                   feature,
-                                  values = new ArrayList()
+                                  values = new ArrayList<Object>()
                               );
                           }
                         }
-                        List mappedNewValues = new ArrayList();
+                        List<Object> mappedNewValues = new ArrayList<Object>();
                         for(Iterator j = newValues.iterator(); j.hasNext(); ) {
                             Object mappedNewValue = j.next();
                             mappedNewValues.add(
@@ -1526,7 +1546,7 @@ public class DefaultPortalExtension
                                 );
                             }
                             else {
-                                ((Map)target).put(
+                                targetAsValueMap(target).put(
                                     feature,
                                     null
                                 );
@@ -1543,7 +1563,7 @@ public class DefaultPortalExtension
                                 );
                             }
                             else {
-                                ((Map)target).put(
+                                targetAsValueMap(target).put(
                                     feature + "Name",
                                     null
                                 );
@@ -1560,7 +1580,7 @@ public class DefaultPortalExtension
                                 );
                             }
                             else {
-                                ((Map)target).put(
+                                targetAsValueMap(target).put(
                                     feature + "MimeType",
                                     null
                                 );
@@ -1596,7 +1616,7 @@ public class DefaultPortalExtension
                                   );
                               }
                               else {
-                                  ((Map)target).put(
+                                  targetAsValueMap(target).put(
                                       feature + "MimeType",
                                       mimeType
                                   );
@@ -1617,7 +1637,7 @@ public class DefaultPortalExtension
                                   );
                               }
                               else {
-                                  ((Map)target).put(
+                                  targetAsValueMap(target).put(
                                       feature + "Name",
                                       name
                                   );
@@ -1667,7 +1687,7 @@ public class DefaultPortalExtension
                                       is.close();
                                       os.close();
                                       bytes = os.toByteArray();
-                                      ((Map)target).put(
+                                      targetAsValueMap(target).put(
                                           feature,
                                           bytes
                                       );
@@ -1710,7 +1730,7 @@ public class DefaultPortalExtension
                 ) {
                     Object value = target instanceof RefObject ?
                         attribute.getValue().getDataBinding().getValue((RefObject)target, attribute.getName()) :
-                        ((Map)target).get(attribute.getName());
+                        targetAsValueMap(target).get(attribute.getName());
                     if(
                         (value == null) || 
                         (value instanceof String && ((String)value).length() == 0) || 
@@ -1735,52 +1755,48 @@ public class DefaultPortalExtension
      * references are composite references of the class.
      */
     protected void createCompositionHierarchy(
-        ModelElement_1_0 ofType,
-        Map hierarchy
+    	ModelElement_1_0 ofType,
+    	Map<String,Set<String>> hierarchy
     ) throws ServiceException {
-
-        Model_1_0 model = ofType.getModel();
-        
-        // add ofType to hierarchy
-        String currentTypeName = (String)ofType.objGetValue("qualifiedName");
-        if(hierarchy.get(currentTypeName) == null) {
-          hierarchy.put(
-            currentTypeName,
-            new HashSet()
-          );
-        }
-    
-        // get all types which are involved in composition hierarchy
-        List typesToCheck = new ArrayList();
-        if(!ofType.objGetList("compositeReference").isEmpty()) {
-          typesToCheck.add(ofType);
-        }
-        else {
-          for(Iterator i = ofType.objGetList("allSubtype").iterator(); i.hasNext(); ) {
-            ModelElement_1_0 subtype = model.getElement(i.next());
-            if(
-              !ofType.objGetValue("qualifiedName").equals(subtype.objGetValue("qualifiedName")) &&
-              !subtype.objGetList("compositeReference").isEmpty()
-             ) {
-              typesToCheck.add(subtype);
-            }
-          }
-        }
-        
-        for(Iterator i = typesToCheck.iterator(); i.hasNext(); ) {
-          ModelElement_1_0 type = (ModelElement_1_0)i.next();
-          ModelElement_1_0 compositeReference = model.getElement(type.objGetValue("compositeReference"));
-          ModelElement_1_0 exposingType = model.getElement(compositeReference.objGetValue("container"));
-          this.createCompositionHierarchy(
-            exposingType,
-            hierarchy
-          );
-          ((Set)hierarchy.get(
-            exposingType.objGetValue("qualifiedName")
-          )).add(
-            compositeReference.objGetValue("name")
-          );
-        }
+    	Model_1_0 model = ofType.getModel();        
+    	// add ofType to hierarchy
+    	String currentTypeName = (String)ofType.objGetValue("qualifiedName");
+    	if(hierarchy.get(currentTypeName) == null) {
+    		hierarchy.put(
+    			currentTypeName,
+    			new HashSet<String>()
+    		);
+    	}    
+    	// get all types which are involved in composition hierarchy
+    	List<ModelElement_1_0> typesToCheck = new ArrayList<ModelElement_1_0>();
+    	if(!ofType.objGetList("compositeReference").isEmpty()) {
+    		typesToCheck.add(ofType);
+    	}
+    	else {
+    		for(Iterator i = ofType.objGetList("allSubtype").iterator(); i.hasNext(); ) {
+    			ModelElement_1_0 subtype = model.getElement(i.next());
+    			if(
+    				!ofType.objGetValue("qualifiedName").equals(subtype.objGetValue("qualifiedName")) &&
+    				!subtype.objGetList("compositeReference").isEmpty()
+    			) {
+    				typesToCheck.add(subtype);
+    			}
+    		}
+    	}        
+    	for(Iterator i = typesToCheck.iterator(); i.hasNext(); ) {
+    		ModelElement_1_0 type = (ModelElement_1_0)i.next();
+    		ModelElement_1_0 compositeReference = model.getElement(type.objGetValue("compositeReference"));
+    		ModelElement_1_0 exposingType = model.getElement(compositeReference.objGetValue("container"));
+    		this.createCompositionHierarchy(
+    			exposingType,
+    			hierarchy
+    		);
+    		hierarchy.get(
+    			exposingType.objGetValue("qualifiedName")
+    		).add(
+    			(String)compositeReference.objGetValue("name")
+    		);
+    	}
     }
 
     //-------------------------------------------------------------------------    
@@ -1788,78 +1804,72 @@ public class DefaultPortalExtension
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getLookupObject(org.openmdx.model1.accessor.basic.cci.ModelElement_1_0, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext, javax.jdo.PersistenceManager)
      */
     public RefObject_1_0 getLookupObject(
-        ModelElement_1_0 lookupType,
-        RefObject_1_0 startFrom,
-        ApplicationContext application,
-        PersistenceManager pm
+    	ModelElement_1_0 lookupType,
+    	RefObject_1_0 startFrom,
+    	ApplicationContext application,
+    	PersistenceManager pm
     ) throws ServiceException {
-
-        Model_1_0 model = application.getModel();
-        String qualifiedNameLookupType = (String)lookupType.objGetValue("qualifiedName");
-        Map compositionHierarchy = new HashMap();
-        this.createCompositionHierarchy(
-          lookupType,
-          compositionHierarchy
-        );
-        AppLog.trace("composition hierarchy", compositionHierarchy);
-        
-        RefObject_1_0 objectToShow = null;
-        
-        // get object to show. This is the first object which is member
-        // of the composition hierarchy of the referenced object.
-        RefObject_1_0 current = startFrom;
-        while(true) {
-          for(
-              Iterator i = compositionHierarchy.keySet().iterator(); 
-              i.hasNext(); 
-          ) {
-              if(
-                  model.isSubtypeOf(current.refClass().refMofId(), i.next()) &&
-                  !model.isSubtypeOf(current.refClass().refMofId(), qualifiedNameLookupType)
-              ) {
-                  objectToShow = current;
-                  break;
-              }
-          }
-          Path currentIdentity = current.refGetPath();
-          // In case current is corrupt for some reason
-          if(currentIdentity == null) {
-              break;
-          }
-          if(
-              (objectToShow != null) ||
-              (currentIdentity.size() < 7)
-          ) break;
-          // go to parent
-          currentIdentity = currentIdentity.getParent().getParent();
-          try {
-              current = (RefObject_1_0)pm.getObjectById(currentIdentity);
-          }
-          catch(Exception e) {
-              ServiceException e0 = new ServiceException(e);
-              AppLog.warning("Can not get object", Arrays.asList(currentIdentity, e.getMessage()));
-          }
-        }
-        
-        // If not found get root object which is in the composition hierarchy
-        if(objectToShow == null) {
-          RefObject[] rootObject = application.getRootObject();
-          for(int i = 0; i < rootObject.length; i++) {
-            for(Iterator j = compositionHierarchy.keySet().iterator(); j.hasNext(); ) {
-              if(model.isSubtypeOf(rootObject[i].refClass().refMofId(), j.next())) {
-                objectToShow = (RefObject_1_0)rootObject[i];
-                break;
-              }
-            }
-            if(objectToShow != null) break;
-          }            
-        }
-        
-        // take first root object if nothing found
-        if(objectToShow == null) {
-          objectToShow = (RefObject_1_0)application.getRootObject()[0];
-        }            
-        return objectToShow;
+    	Model_1_0 model = application.getModel();
+    	String qualifiedNameLookupType = (String)lookupType.objGetValue("qualifiedName");
+    	Map<String,Set<String>> compositionHierarchy = new HashMap<String,Set<String>>();
+    	this.createCompositionHierarchy(
+    		lookupType,
+    		compositionHierarchy
+    	);
+    	AppLog.trace("composition hierarchy", compositionHierarchy);        
+    	RefObject_1_0 objectToShow = null;        
+    	// get object to show. This is the first object which is member
+    	// of the composition hierarchy of the referenced object.
+    	RefObject_1_0 current = startFrom;
+    	while(true) {
+    		for(
+    			Iterator i = compositionHierarchy.keySet().iterator(); 
+    			i.hasNext(); 
+    		) {
+    			if(
+    				model.isSubtypeOf(current.refClass().refMofId(), i.next()) &&
+    				!model.isSubtypeOf(current.refClass().refMofId(), qualifiedNameLookupType)
+    			) {
+    				objectToShow = current;
+    				break;
+    			}
+    		}
+    		Path currentIdentity = current.refGetPath();
+    		// In case current is corrupt for some reason
+    		if(currentIdentity == null) {
+    			break;
+    		}
+    		if(
+    			(objectToShow != null) ||
+    			(currentIdentity.size() < 7)
+    		) break;
+    		// go to parent
+    		currentIdentity = currentIdentity.getParent().getParent();
+    		try {
+    			current = (RefObject_1_0)pm.getObjectById(currentIdentity);
+    		}
+    		catch(Exception e) {
+    			AppLog.warning("Can not get object", Arrays.asList((Object)currentIdentity, e.getMessage()));
+    		}
+    	}        
+    	// If not found get root object which is in the composition hierarchy
+    	if(objectToShow == null) {
+    		RefObject[] rootObject = application.getRootObject();
+    		for(int i = 0; i < rootObject.length; i++) {
+    			for(Iterator j = compositionHierarchy.keySet().iterator(); j.hasNext(); ) {
+    				if(model.isSubtypeOf(rootObject[i].refClass().refMofId(), j.next())) {
+    					objectToShow = (RefObject_1_0)rootObject[i];
+    					break;
+    				}
+    			}
+    			if(objectToShow != null) break;
+    		}            
+    	}        
+    	// take first root object if nothing found
+    	if(objectToShow == null) {
+    		objectToShow = (RefObject_1_0)application.getRootObject()[0];
+    	}            
+    	return objectToShow;
     }
       
     //-------------------------------------------------------------------------
@@ -1885,7 +1895,7 @@ public class DefaultPortalExtension
             null,
             lookupObject.refGetPath(),
             application,
-            MapUtils.orderedMap(new HashMap()),
+            new LinkedHashMap<Path,Action>(),
             qualifiedNameLookupType,
             null //compositionHierarchy,
         );
@@ -2083,8 +2093,8 @@ public class DefaultPortalExtension
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3690195425844146744L;
 
-    protected static final Set WELL_KNOWN_PROTOCOLS = 
-        new HashSet(Arrays.asList(new String[]{"http:/", "https:/", "Outlook:", "file:/"}));
+    protected static final Set<String> WELL_KNOWN_PROTOCOLS = 
+        new HashSet<String>(Arrays.asList("http:/", "https:/", "Outlook:", "file:/"));
       
     /**
      * A lazy initialized DatatypeFactory instance

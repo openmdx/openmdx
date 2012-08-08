@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: jdbcURLContextFactory.java,v 1.1 2009/01/12 12:49:24 wfro Exp $
+ * Name:        $Id: jdbcURLContextFactory.java,v 1.2 2009/03/31 17:06:10 hburger Exp $
  * Description: java URL Context Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:24 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,6 +54,8 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.Name;
@@ -65,10 +67,8 @@ import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.application.container.spi.sql.DatabaseConnectionRequestInfo;
 import org.openmdx.kernel.application.container.spi.sql.LightweightXADataSource;
 import org.openmdx.kernel.application.container.spi.sql.ManagedDatabaseConnectionFactory;
-import org.openmdx.kernel.naming.container.openmdx.openmdxURLContextFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.text.format.DatabaseDriverFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * java URL Context Factory
@@ -92,8 +92,9 @@ public class jdbcURLContextFactory implements ObjectFactory {
     ) throws ClassNotFoundException, SQLException {
         if(driverClass != null) Classes.getKernelClass(driverClass);
         Driver driver = DriverManager.getDriver(connectionURL);
-        logger.info(
-            "Registered driver for given URL {}", 
+        logger.log(
+        	Level.INFO,
+            "Registered driver for given URL {0}", 
             new DatabaseDriverFormatter(driver, connectionURL, null)
         );
     }
@@ -139,7 +140,7 @@ public class jdbcURLContextFactory implements ObjectFactory {
     /**
      * To log database driver information
      */
-    final static private Logger logger = LoggerFactory.getLogger(openmdxURLContextFactory.class);
+    final static private Logger logger = LoggerFactory.getLogger();
 
     /**
      * The URL scheme supported by this factory

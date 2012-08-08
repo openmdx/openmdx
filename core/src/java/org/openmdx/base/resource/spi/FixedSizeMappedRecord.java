@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FixedSizeMappedRecord.java,v 1.15 2009/01/12 16:41:58 wfro Exp $
+ * Name:        $Id: FixedSizeMappedRecord.java,v 1.17 2009/06/01 15:43:50 wfro Exp $
  * Description: JCA: Fixed-size MappedRecord implementation
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 16:41:58 $
+ * Date:        $Date: 2009/06/01 15:43:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -100,10 +100,18 @@ final class FixedSizeMappedRecord
     //------------------------------------------------------------------------
 
     /**
-     * 
+     * Constructor
+     */
+    protected FixedSizeMappedRecord(
+    ){      
+        // for de-serialization
+    }
+    
+    /**
+     * Serial Version UID
      */
     private static final long serialVersionUID = -2541643071249561421L;
-    
+
     
     //--------------------------------------------------------------------------
     // Implements Record
@@ -181,5 +189,5 @@ final class FixedSizeMappedRecord
     ){
         return IndentingFormatter.toString(this);
     }
-
+    
 }

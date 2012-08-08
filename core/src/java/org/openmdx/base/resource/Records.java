@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Records.java,v 1.9 2009/02/19 16:30:58 hburger Exp $
+ * Name:        $Id: Records.java,v 1.11 2009/06/03 15:42:38 hburger Exp $
  * Description: JCA: Utility methods for records
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/19 16:30:58 $
+ * Date:        $Date: 2009/06/03 15:42:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,13 +55,11 @@ import java.lang.reflect.Array;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
-import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
 import org.openmdx.base.resource.cci.ArrayBasedIndexedRecord;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
-import org.openmdx.base.resource.spi.OrderedRecordFactory;
-import org.openmdx.kernel.text.format.IndentingFormatter;
+import org.openmdx.base.resource.spi.StandardRecordFactory;
 
 
 /**
@@ -79,61 +77,10 @@ public class Records
 	    super();
 	}
 	
-	//------------------------------------------------------------------------
-	// Supports Record
-	//------------------------------------------------------------------------
-	
-	/**
-	 * Returns a multi-line string representation of this MappedRecord.
-	 * <p>
-	 * The string representation consists of the record name, follwed by the
-	 * optional short description enclosed in parenthesis (" (...)"), followed 
-	 * by a colon and the mappings enclosed in braces (": {...}"). Each
-	 * key-value mapping is rendered as the key followed by an equals sign
-	 * ("=") followed by the associated value written on a separate line and
-	 * indented while embedded lines are indented as well.
-	 *
-	 * @param   source
-	 *          the record to be visualized
-	 *
-	 * @return   a multi-line String representation of this Record.
-	 * 
-	 * @deprecated use org.openmdx.kernel.text.format.IntendingFormatter#toString(java.lang.Object)
-	 * @see org.openmdx.kernel.text.format.IndentingFormatter#toString(java.lang.Object)
-	 */
-	public static String toString(
-		MappedRecord source
-	){
-		return IndentingFormatter.toString(source);
-	}
-
 
 	//------------------------------------------------------------------------
 	// Supports IndexedRecord
 	//------------------------------------------------------------------------
-
-	/**
-	 * Returns a multi-line string representation of this IndexedRecord.
-	 * <p>
-	 * The string representation consists of the record name, follwed by the
-	 * optional short description enclosed in parenthesis (" (...)"), followed 
-	 * by a colon and the values enclosed in square brackets (": [...]"). Each
-	 * value is written on a separate line and indented while embedded lines
-	 * are indented as well.
-	 *
-	 * @param   source
-	 *          the record to be visualized
-	 *
-	 * @return   a multi-line String representation of this Record.
-	 * 
-	 * @deprecated use org.openmdx.kernel.text.format.IntendingFormatter#toString(java.lang.Object)
-	 * @see org.openmdx.kernel.text.format.IndentingFormatter#toString(java.lang.Object)
-	 */
-	public static String toString(
-		IndexedRecord source
-	){
-		return IndentingFormatter.toString(source);
-	}
 
 	/**
 	 * Return the record's values as single-dimensional or multi-dimensional
@@ -228,7 +175,7 @@ public class Records
      */
     public static ExtendedRecordFactory getRecordFactory(
     ){
-       return OrderedRecordFactory.getInstance();
+       return StandardRecordFactory.getInstance();
     }       
 
 }

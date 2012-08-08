@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestClock_1.java,v 1.16 2009/03/06 16:59:45 hburger Exp $
+ * Name:        $Id: TestClock_1.java,v 1.18 2009/04/07 09:42:15 hburger Exp $
  * Description: Class Loading Test
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/06 16:59:45 $
+ * Date:        $Date: 2009/04/07 09:42:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -130,13 +130,14 @@ public class TestClock_1 {
     @BeforeClass
     public static void deploy(){
         entityManagerFactory = new Deployment_1(
-            true, // IN_PROCESS_LIGHTWEIGHT_CONTAINER
-            null, // CONNECTOR_URL
-            "file:../test-core/src/ear/test-classloading.ear", // APPLICATION_URL
+            "xri://@openmdx*(+lightweight)*ENTERPRISE_APPLICATION_CONTAINER",
+//          "xri://@openmdx*(+openejb)*ENTERPRISE_APPLICATION_CONTAINER",
+            new String[]{}, // CONNECTOR_URL
+            new String[]{"file:../test-core/src/ear/test-classloading.ear"}, // APPLICATION_URL
             false, // LOG_DEPLOYMENT_DETAILS
             "test/openmdx/clock1/EntityProviderFactory", // ENTITY_MANAGER_FACTORY_JNDI_NAME
             null, // GATEWAY_JNDI_NAME
-            "org:openmdx:test:clock1" // MODEL
+           new String[]{"org:openmdx:test:clock1"} // MODEL
         );
     }
 

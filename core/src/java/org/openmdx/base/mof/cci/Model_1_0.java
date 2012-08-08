@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Model_1_0.java,v 1.2 2009/01/13 17:33:49 wfro Exp $
+ * Name:        $Id: Model_1_0.java,v 1.4 2009/06/09 12:45:17 hburger Exp $
  * Description: Model_1_0 interface
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:33:49 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,8 +59,8 @@ import org.openmdx.base.naming.Path;
 
 /**
  * Provides a simple interface to access org:omg:model1-compliant model 
- * elements. This interface is a very leightweight version of the MOF model 
- * interface and is used mainly for model-bootstraping.
+ * elements. This interface is a very lightweight version of the MOF model 
+ * interface and is used mainly for model-bootstrapping.
  */
 public interface Model_1_0 {
 
@@ -348,6 +348,144 @@ public interface Model_1_0 {
     boolean dereferenceType
   ) throws ServiceException;
 
+  /**
+   * Return the set of attributes and references of the specified class, 
+   * and if specified its subtypes.
+   *  
+   * @param classDef class to get feature of.  
+   * @param includeSubtypes if true, in addition returns the features
+   *         of the subtypes of class.
+   * @param includeDerived if false, only non-derived attributes are returned.
+   *         if true, derived and non-derived attributes are returned.
+   * @param attributesOnly 
+   *         if true return the same result as getAttributeDefs;
+   *         if false include references not stored as attributes
+   * @return Map map of features of class, its supertypes and subtypes. The
+   *          map contains an entry of the form (featureName, featureDef).
+   */
+  Map<String,ModelElement_1_0> getStructuralFeatureDefs(
+    ModelElement_1_0 classDef,
+    boolean includeSubtypes,
+    boolean includeDerived, 
+    boolean attributesOnly
+  ) throws ServiceException;
+
+  /**
+   * Verifies a single the value to be of the specified type. 
+   * The multiplicity is required to validate Stereotypes.STREAM types only.
+   * The values must be of well-known spice types which are:
+   * <ul>
+   *   <li>Structure_1_0</li>
+   *   <li>Object_1_0</li>
+   *   <li>Primitive types</li>
+   *   <li>DataproviderObject</li>
+   * </ul>
+   * The verification is done recursively. In case of a violation
+   * an exception is thrown containing the violation.
+   * 
+   * @param type if type == null then no verification is performed.
+   * 
+   * @param enforceRequired if true, all required feature of value 
+   *         are verified. Otherwise verifies only the available features.
+   * @param attributesOnly 
+   *         if true return the same result as 
+   *         verifyObject(Object,Object,String,boolean);
+   *         if false allow references not stored as attributes
+   * 
+   * @param removeDerived removes all derived features.
+   */
+  public void verifyObject(
+    Object value,
+    Object type,
+    String multiplicity,
+    boolean enforceRequired, 
+    boolean attributesOnly
+  ) throws ServiceException;
+  
+  /**
+   * Verifies an object
+   * 
+   * @param object to be verified
+   * @param deepVerify When <code>deepVerify</code> is <code>true</code>, 
+   * the refVerifyConstraints method carries out a shallowVerify on that
+   * object and a deep verify through its containment hierarchy.
+   * @param verifyDerived
+   * tells whether derived features should be verified as well
+   * 
+   * @return the null value if no constraint is violated; 
+   * otherwise, a list of <code>ServiceException</code> objects 
+   * (each representing a constraint violation) is returned.
+   */
+  Collection<ServiceException> verifyObject(
+      DataObject_1_0 object,
+      boolean deepVerify, 
+      boolean verifyDerived
+  );
+
+  /**
+   * Get the reference which references by composition the specified class.
+   * 
+   * @param classDef get the composite reference for this class.
+   * 
+   * @return the null value if class does not have a composite reference; 
+   * otherwise the composite reference. 
+   */
+  ModelElement_1_0 getCompositeReference(
+      ModelElement_1_0 classDef
+  ) throws ServiceException;
+
+  /**
+   * Verifies a single the value to be of the specified type. 
+   * The multiplicity is required to validate Stereotypes.STREAM types only.
+   * The values must be of well-known spice types which are:
+   * <ul>
+   *   <li>Structure_1_0</li>
+   *   <li>Object_1_0</li>
+   *   <li>DataproviderObject_1_0</li>
+   *   <li>Primitive types</li>
+   * </ul>
+   * The verification is done recursively. In case of a violation
+   * an exception is thrown containing the violation.
+   * 
+   * @param type if type == null then no verification is performed.
+   * 
+   * @param enforceRequired if true, all required feature of value 
+   *         are verified. Otherwise verifies only the available features.
+   * @param attributesOnly 
+   *         if true return the same result as 
+   *         verifyObject(Object,Object,String,boolean);
+   *         if false allow references not stored as attributes
+   * @param verifyDerived
+   *          tells whether derived features should be verified as well
+   * 
+   * @param removeDerived removes all derived features.
+   */
+  void verifyObject(
+    Object value,
+    Object type,
+    String multiplicity,
+    boolean enforceRequired, 
+    boolean attributesOnly,
+    boolean verifyDerived
+  ) throws ServiceException;
+
+  /**
+   * returns true, if the given type is instanceof ASSOCIATION
+   */
+  public boolean isAssociationType(
+    Object type
+  ) throws ServiceException;
+
+  /**
+   * Retrieve the least derived class
+   * @param qaualifiedClassName
+   * @return the least derived class' qualified name
+   * @throws ServiceException
+   */
+  String getLeastDerived(
+      String qaualifiedClassName
+  ) throws ServiceException;
+  
 }
 
 //--- End of File -----------------------------------------------------------

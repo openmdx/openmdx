@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestFilter.java,v 1.10 2009/02/04 11:06:38 hburger Exp $
+ * Name:        $Id: TestFilter.java,v 1.11 2009/05/18 13:06:57 hburger Exp $
  * Description: Test Filter
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/04 11:06:38 $
+ * Date:        $Date: 2009/05/18 13:06:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,8 +63,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.openmdx.application.dataprovider.cci.Directions;
 import org.openmdx.base.query.Condition;
+import org.openmdx.base.query.Directions;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsBetweenCondition;
 import org.openmdx.base.query.IsGreaterCondition;

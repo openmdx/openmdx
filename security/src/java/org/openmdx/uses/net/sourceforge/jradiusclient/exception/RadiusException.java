@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RadiusException.java,v 1.11 2009/03/05 16:29:53 hburger Exp $
+ * Name:        $Id: RadiusException.java,v 1.12 2009/06/05 16:23:42 hburger Exp $
  * Description: Radius Exception 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 16:29:53 $
+ * Date:        $Date: 2009/06/05 16:23:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -82,10 +82,7 @@ public class RadiusException
         Exception cause
     ) {
     	super.initCause(
-        	BasicException.toStackedException(
-	            cause,
-	            this
-	        )
+            BasicException.toExceptionStack(cause == null ? this : cause)
         );
     }
 

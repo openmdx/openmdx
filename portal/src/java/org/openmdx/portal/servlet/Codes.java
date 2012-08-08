@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Codes.java,v 1.15 2009/03/08 18:03:19 wfro Exp $
+ * Name:        $Id: Codes.java,v 1.16 2009/06/09 12:50:34 hburger Exp $
  * Description: Codes
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:19 $
+ * Date:        $Date: 2009/06/09 12:50:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import javax.jdo.JDOHelper;
 import javax.jmi.reflect.RefObject;
 
 import org.openmdx.application.log.AppLog;
@@ -96,7 +97,7 @@ implements Serializable {
     public void refresh(
     ) {
         this.valueContainerMap.clear();
-        this.codeSegment.refRefresh();        
+        JDOHelper.getPersistenceManager(this.codeSegment).refresh(this.codeSegment);        
         Collection valueContainers = (Collection)codeSegment.refGetValue("valueContainer");
         for(
                 Iterator i = valueContainers.iterator();

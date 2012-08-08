@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.1 2009/01/13 02:10:40 wfro Exp $
+ * Name:        $Id: Model_1.java,v 1.6 2009/06/01 15:41:12 wfro Exp $
  * Description: model1 application plugin
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:40 $
+ * Date:        $Date: 2009/06/01 15:41:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,20 +53,23 @@ package org.openmdx.application.mof.repository.layer.model;
 
 import java.util.List;
 
-import org.openmdx.application.cci.SystemAttributes;
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
+
 import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.layer.model.SystemAttributes_1;
 import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.application.mof.repository.utils.ModelUtils;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.layer.model.OptimisticLocking_1;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 
 @SuppressWarnings("unchecked")
 public class Model_1 
-  extends OptimisticLocking_1 {
+  extends SystemAttributes_1 {
 
   //---------------------------------------------------------------------------
   public void activate(
@@ -86,26 +89,31 @@ public class Model_1
   //---------------------------------------------------------------------------
   void completeObject(
     ServiceHeader header,
-    DataproviderObject object
+    MappedRecord object
   ) throws ServiceException {
-
+    ObjectHolder_2Facade facade;
+    try {
+        facade = ObjectHolder_2Facade.newInstance(object);
+    } 
+    catch (ResourceException e) {
+        throw new ServiceException(e);
+    }
     //SysLog.trace("> completeObject for " + object);
-    if(object.containsAttributeName(SystemAttributes.OBJECT_CLASS)) {
+    if(facade.getObjectClass() != null) {
       List supertype = ModelUtils.getallSupertype(
-        (String)object.values(SystemAttributes.OBJECT_CLASS).get(0)
+          facade.getObjectClass()
       );
       if(supertype != null) {
-        object.clearValues(SystemAttributes.OBJECT_INSTANCE_OF).addAll(
+        facade.clearAttributeValues(SystemAttributes.OBJECT_INSTANCE_OF).addAll(
           supertype
         );
       }
       else {
-        object.clearValues(SystemAttributes.OBJECT_INSTANCE_OF).addAll(
-          object.values(SystemAttributes.OBJECT_CLASS)
+        facade.clearAttributeValues(SystemAttributes.OBJECT_INSTANCE_OF).addAll(
+          facade.attributeValues(SystemAttributes.OBJECT_CLASS)
         );
       }
     }
-    //SysLog.trace("< completeObject");
   }
 
   //---------------------------------------------------------------------------

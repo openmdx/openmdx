@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: InstanceMapper.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: InstanceMapper.java,v 1.6 2009/06/09 12:45:18 hburger Exp $
  * Description: Instance Mapper 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,8 +60,6 @@ import java.util.Map;
 
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.mof.cci.PrimitiveTypes;
 import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.ExceptionDef;
@@ -73,9 +71,11 @@ import org.openmdx.application.mof.mapping.java.metadata.ClassMetaData;
 import org.openmdx.application.mof.mapping.java.metadata.FieldMetaData;
 import org.openmdx.application.mof.mapping.java.metadata.Visibility;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.PrimitiveTypes;
 
 /**
  * InstanceMapper
@@ -89,7 +89,7 @@ extends AbstractClassMapper {
         ModelElement_1_0 classDef,
         Writer writer,
         Writer writerJdoSlice,
-        Model_1_3 model,
+        Model_1_0 model,
         Format format, 
         String packageSuffix,
         MetaData_1_0 metaData
@@ -223,68 +223,12 @@ extends AbstractClassMapper {
     // -----------------------------------------------------------------------
     public void mapReferenceRemoveOptional(
         ReferenceDef referenceDef) throws ServiceException {
-        if(false) {
-            this.trace("Instance/ReferenceRemoveOptional");
-            this.pw.println("  /**");
-            this.pw
-            .println("   * Removes the value for the optional reference <code>"
-                + referenceDef.getName() + "</code>.");
-            this.pw.println("   * <p>");
-            this.pw.println(MapperUtils.wrapText(
-                "   * ",
-                "<em>Note: This is an extension to the JMI 1 standard.<br>" +
-                "To remain standard compliant you should substitute this method with <code>set" + 
-                referenceDef.getBeanGenericName() + "(null)</code>.</em>"
-            ));
-            if (referenceDef.getAnnotation() != null) {
-                this.pw.println("   * <p>");
-                this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
-            }
-            this.pw.println("   */");
-            this.pw.println("  public void " + this.getMethodName("remove" + referenceDef.getBeanGenericName()) + " (");
-            this.pw.println("  );");
-            this.pw.println();
-        }
     }
 
     // -----------------------------------------------------------------------
     public void mapReferenceRemoveWithQualifier(
         ReferenceDef referenceDef
     ) throws ServiceException {
-        if(false && getFormat() == Format.JMI1) {
-            this.trace("Instance/ReferenceRemoveWithQualifier");
-            this.pw.println("  /**");
-            this.pw.println(MapperUtils.wrapText(
-                "   * ",
-                "Removes the qualified (by means of the specified qualifier attribute value) " +
-                "element from the list of all the values for the reference <code>" +
-                referenceDef.getName() + 
-                "</code>."
-            ));
-            this.pw.println("   * <p>");
-            this.pw.println(MapperUtils.wrapText(
-                "   * ",
-                "<em>Note: This is an extension to the JMI 1 standard.<br>" +
-                "To remain standard compliant you should use " +
-                "<code>javax.jdo.Query.deletePersistentAll()</code>.</em>"
-            ));
-            if (referenceDef.getAnnotation() != null) {
-                this.pw.println("   * <p>");
-                this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
-            }
-            this.pw.println(MapperUtils
-                .wrapText(
-                    "   * ",
-                    "@param "
-                    + referenceDef.getQualifierName()
-                    + " The qualifier attribute value that qualifies the reference to get the element to be removed."));
-            this.pw.println("   */");
-            this.pw.println("  public void " + this.getMethodName("remove" + referenceDef.getBeanGenericName()) + " (");
-            this.pw.println("    "
-                + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " "
-                + referenceDef.getQualifierName() + "");
-            this.pw.println("  );");
-        }
     }
 
     // -----------------------------------------------------------------------
@@ -367,7 +311,7 @@ extends AbstractClassMapper {
                 ClassDef classDef = getClassDef(qualifiedTypeName);
                 ClassType classType = getClassType(classDef);
                 if(getFormat() == Format.JPA3) {
-                    mapDeclareReference("  ", qualifiedTypeName, referenceName);
+                    mapDeclareReference("  ", qualifiedTypeName, referenceName, referencedEnd);
                 }
                 if(referencedEnd) {
                     this.trace("Instance/ReferenceGetx_1NoQualifier");
@@ -621,6 +565,7 @@ extends AbstractClassMapper {
                 this.pw.println("  /**");
                 this.pw.println("   * Reference <code>" + referenceName + "</code> as <code>java.util.Map</code>");
                 this.pw.println("   */");
+                this.pw.println("  @SuppressWarnings(\"unused\")");                    
                 this.pw.println("  private transient java.util.Map<java.lang.String," + referenceType + "> " + referenceName + ';');
                 this.pw.println();
                 this.sliced.put(referenceName, referenceDef.getQualifiedTypeName());                
@@ -1165,7 +1110,7 @@ extends AbstractClassMapper {
                         this.pwSlice, 
                         "  ", 
                         qualifiedName, 
-                        e.getKey()
+                        e.getKey(), false
                     );
                 }
             }
@@ -2276,13 +2221,16 @@ extends AbstractClassMapper {
         PrintWriter pw,
         String indentation,
         String qualifiedTypeName, 
-        String referenceName
+        String referenceName, 
+        boolean unused
     ) throws ServiceException{
         this.trace(pw, "Instance/ReferenceDeclaration");
+        if(unused){
+            this.pw.println("  @SuppressWarnings(\"unused\")");
+        }
         pw.println("  /**");
         pw.println("   * Instance referenced by <code>" + referenceName + "</code>.");
         pw.println("   */");
-        pw.println("   @SuppressWarnings(\"unused\")");            
         pw.println("  private java.lang.String " + referenceName + ';');
         pw.println();
     }
@@ -2291,13 +2239,15 @@ extends AbstractClassMapper {
     protected void mapDeclareReference(
         String indentation,
         String qualifiedTypeName, 
-        String referenceName
+        String referenceName, 
+        boolean referencedEnd
     ) throws ServiceException{
         this.mapDeclareReference(
             this.pw,
             indentation, 
             qualifiedTypeName, 
-            referenceName
+            referenceName, 
+            !referencedEnd
         );
     }
     

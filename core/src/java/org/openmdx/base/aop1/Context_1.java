@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Context_1.java,v 1.6 2009/01/17 02:37:21 hburger Exp $
+ * Name:        $Id: Context_1.java,v 1.8 2009/05/16 22:17:47 wfro Exp $
  * Description: Embedded Context Object
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/17 02:37:21 $
+ * Date:        $Date: 2009/05/16 22:17:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,8 +52,8 @@ package org.openmdx.base.aop1;
 
 import javax.jdo.JDOUserException;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.EmbeddedObjectView_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
@@ -104,10 +104,10 @@ class Context_1 extends EmbeddedObjectView_1 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetPath()
      */
-    public Object jdoGetObjectId(
+    public Path jdoGetObjectId(
     ) {
         try {
-            Path objectPath = (Path)objGetDelegate().jdoGetObjectId();
+            Path objectPath = objGetDelegate().jdoGetObjectId();
             if(objectPath == null) return null;
             String[] components = objectPath.getSuffix(0);
             components[components.length-1] += ';' + this.suffix;

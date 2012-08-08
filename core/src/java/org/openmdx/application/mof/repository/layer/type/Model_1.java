@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.1 2009/01/13 02:10:44 wfro Exp $
+ * Name:        $Id: Model_1.java,v 1.2 2009/06/01 15:41:25 wfro Exp $
  * Description: model1 type plugin
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:44 $
+ * Date:        $Date: 2009/06/01 15:41:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -83,7 +83,7 @@ public class Model_1
   //---------------------------------------------------------------------------
   String getReferenceName(
     DataproviderRequest request
-  ) {
+  ) throws ServiceException {
     Path path = request.path();    
     return
       path.size() % 2 == 0 ?
@@ -94,7 +94,7 @@ public class Model_1
   //---------------------------------------------------------------------------
   void setObjectType (
     DataproviderRequest request
-  ) {
+  ) throws ServiceException {
 
     // path to authority is empty
     if(request.path().size() == 0) {

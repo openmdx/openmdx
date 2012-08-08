@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StructureMapper.java,v 1.1 2009/01/13 02:10:35 wfro Exp $
+ * Name:        $Id: StructureMapper.java,v 1.3 2009/06/09 12:45:18 hburger Exp $
  * Description: Structure Template 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:35 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,14 +57,14 @@ import java.util.List;
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
-import org.openmdx.application.mof.cci.PrimitiveTypes;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.cci.StructDef;
 import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.PrimitiveTypes;
 
 /**
  * StructureMapper
@@ -76,7 +76,7 @@ public class StructureMapper
     public StructureMapper(
         ModelElement_1_0 structDef,
         Writer writer,
-        Model_1_3 model,
+        Model_1_0 model,
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderContext.java,v 1.1 2009/01/05 13:44:50 wfro Exp $
+ * Name:        $Id: DataproviderContext.java,v 1.3 2009/06/03 16:50:39 hburger Exp $
  * Description: Dataprovider Context
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:50 $
+ * Date:        $Date: 2009/06/03 16:50:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,7 @@ import java.util.Set;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
-import org.openmdx.base.collection.OffsetArrayList;
+import org.openmdx.base.collection.CompactSparseList;
 import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
@@ -121,9 +121,9 @@ public abstract class DataproviderContext
     public final SparseList<Object> context(
         String name
     ){
-        OffsetArrayList values = (OffsetArrayList)this.contexts.get(name);
+        SparseList  values = (SparseList)this.contexts.get(name);
         if (values == null) {
-            values = new OffsetArrayList();
+            values = new CompactSparseList();
             this.contexts.put(name, values);
         }
         return values;
@@ -193,7 +193,8 @@ public abstract class DataproviderContext
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
-    public Object clone() throws CloneNotSupportedException {
+    public Object clone(
+    ) throws CloneNotSupportedException {
         return super.clone();
     }
 

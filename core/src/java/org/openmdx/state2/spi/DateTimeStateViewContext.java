@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DateTimeStateViewContext.java,v 1.2 2008/11/04 09:59:38 hburger Exp $
+ * Name:        $Id: DateTimeStateViewContext.java,v 1.3 2009/03/31 17:05:16 hburger Exp $
  * Description: Date State View
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/04 09:59:38 $
+ * Date:        $Date: 2009/03/31 17:05:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -166,6 +166,14 @@ public class DateTimeStateViewContext
         Date timePoint
     ) {
         return DateFormat.getInstance().format(timePoint);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.state2.spi.StateViewContext#now()
+     */
+    @Override
+    protected Date newValidAt() {
+        return new Date();
     }
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePaneControl.java,v 1.158 2009/03/08 18:03:24 wfro Exp $
+ * Name:        $Id: ReferencePaneControl.java,v 1.160 2009/05/16 23:02:58 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.158 $
+ * Revision:    $Revision: 1.160 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:24 $
+ * Date:        $Date: 2009/05/16 23:02:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,8 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.log.AppLog;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
@@ -805,7 +805,7 @@ public class ReferencePaneControl
                                     catch(Exception e0) {
                                         ServiceException e1 = new ServiceException(e0);
                                         SysLog.warning(
-                                            "Unable to retrieve (more info at detail level)", 
+                                            "Unable to retrieve object (more info at detail level)", 
                                             Arrays.asList(
                                                 objRow.refMofId(), 
                                                 valueHolder.getFieldDef().featureName, 

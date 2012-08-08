@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Order.java,v 1.2 2009/02/16 11:55:25 hburger Exp $
+ * Name:        $Id: Order.java,v 1.4 2009/05/25 10:13:10 hburger Exp $
  * Description: ValidTimes 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/16 11:55:25 $
+ * Date:        $Date: 2009/05/25 10:13:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,6 +57,7 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi.ImmutableDatatype;
 
 /**
  * Valid Times
@@ -115,7 +116,7 @@ public class Order {
         return d1 == null ? (
             d2 == null ? 0 : -1
         ) : (
-            d2 == null ? 1 : d1.compare(d2)
+            d2 == null ? 1 : compare(d1,d2)
         );
     }
 
@@ -136,10 +137,70 @@ public class Order {
         return d1 == null ? (
             d2 == null ? 0 : 1
         ) : (
-            d2 == null ? -1 : d1.compare(d2)
+            d2 == null ? -1 : compare(d1,d2)
         );
     }
 
+    /**
+     * Compare two XMLGregorianCalendar values where <code>null</code> is
+     * considered to be lesser than every other value for <code>from</code>
+     * and greater than every other value for <code>to</code>.
+     * 
+     * @param from
+     * @param to
+     * 
+     * @return a negative integer, zero, or a positive integer as <code>from</code> 
+     * is less than, equal to, or greater than <code>to</code>. 
+     */
+    public static int compareValidFromToValidTo(
+        XMLGregorianCalendar from,
+        XMLGregorianCalendar to
+    ){
+        return from == null || to == null ? -1 : compare(from,to);
+    }
+
+    /**
+     * Compare two (mutable or immutable) <code>XMLGregorianCalendar</code> values
+     * 
+     * @param d1
+     * @param d2
+     * 
+     * @return a negative integer, zero, or a positive integer as <code>from</code> 
+     * is less than, equal to, or greater than <code>to</code>. 
+     */
+    public static int compare(
+        XMLGregorianCalendar d1,
+        XMLGregorianCalendar d2
+    ){
+        boolean i1 = d1 instanceof ImmutableDatatype;
+        boolean i2 = d2 instanceof ImmutableDatatype;
+        return 
+            i1 == i2 ? d1.compare(d2) :
+            i1 ? ((XMLGregorianCalendar)d1.clone()).compare(d2) :
+            d1.compare((XMLGregorianCalendar) d2.clone());
+    }
+        
+    /**
+     * Compare two (mutable or immutable) <code>XMLGregorianCalendar</code> values
+     * 
+     * @param d1
+     * @param d2
+     * 
+     * @return true if the two values are either equal or both <code>null</code>
+     */
+    public static boolean equal(
+        XMLGregorianCalendar d1,
+        XMLGregorianCalendar d2
+    ){
+        boolean i1 = d1 instanceof ImmutableDatatype;
+        boolean i2 = d2 instanceof ImmutableDatatype;
+        return 
+            d1 == d2 ? true :
+            d1 == null || d2 == null ? false :
+            i1 == i2 ? d1.equals(d2) :
+            i1 ? d1.clone().equals(d2) :
+            d1.equals(d2.clone());
+    }
     
     //------------------------------------------------------------------------
     // Date-Time States
@@ -187,6 +248,24 @@ public class Order {
         );
     }
 
+    /**
+     * Compare two Date values where <code>null</code> is
+     * considered to be lesser than every other value for <code>from</code>
+     * and greater than every other value for <code>to</code>.
+     * 
+     * @param from
+     * @param to
+     * 
+     * @return a negative integer, zero, or a positive integer as <code>from</code> 
+     * is less than, equal to, or greater than <code>to</code>. 
+     */
+    public static int compareValidFromToValidTo(
+        Date from,
+        Date to
+    ){
+        return from == null || to == null ? -1 : from.compareTo(to);
+    }
+    
     
     //------------------------------------------------------------------------
     // Existence

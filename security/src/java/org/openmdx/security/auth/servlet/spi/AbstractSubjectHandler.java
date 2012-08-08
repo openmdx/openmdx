@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractSubjectHandler.java,v 1.13 2009/03/08 18:52:18 wfro Exp $
+ * Name:        $Id: AbstractSubjectHandler.java,v 1.14 2009/03/11 16:04:23 hburger Exp $
  * Description: Signed Token
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:18 $
+ * Date:        $Date: 2009/03/11 16:04:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,9 +66,9 @@ import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.security.authentication.spi.GenericPrincipals;
-import org.openmdx.kernel.security.pki.KeyProvider;
 import org.openmdx.kernel.security.token.TokenException;
 import org.openmdx.kernel.security.token.TokenFactory;
+import org.openmdx.resource.pki.cci.KeyProvider;
 import org.openmdx.security.auth.servlet.cci.HttpSubjectHandler;
 
 public abstract class AbstractSubjectHandler 
@@ -239,7 +239,7 @@ implements HttpSubjectHandler {
 					(PrivateKey) this.getKeyProvider().getKey()
 			);
 			if(this.isDebug()) {
-				this.log("$Id: AbstractSubjectHandler.java,v 1.13 2009/03/08 18:52:18 wfro Exp $");
+				this.log("$Id: AbstractSubjectHandler.java,v 1.14 2009/03/11 16:04:23 hburger Exp $");
 				this.log("token-timeout:" + this.tokenTimeout);
 				this.log("signature-algorithm:" + this.signatureAlgorithm);
 				this.log("cookie-name:" + this.cookieName);
@@ -255,7 +255,7 @@ implements HttpSubjectHandler {
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.ACTIVATION_FAILURE,
-					new BasicException.Parameter("info", "$Id: AbstractSubjectHandler.java,v 1.13 2009/03/08 18:52:18 wfro Exp $"),
+					new BasicException.Parameter("info", "$Id: AbstractSubjectHandler.java,v 1.14 2009/03/11 16:04:23 hburger Exp $"),
 					new BasicException.Parameter("name", this.getServletName()),
 					new BasicException.Parameter("token-timeout", this.tokenTimeout),
 					new BasicException.Parameter("signature-algorithm", this.signatureAlgorithm),

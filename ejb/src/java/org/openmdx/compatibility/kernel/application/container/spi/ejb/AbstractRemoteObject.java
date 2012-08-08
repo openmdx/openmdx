@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractRemoteObject.java,v 1.1 2009/01/12 12:49:24 wfro Exp $
+ * Name:        $Id: AbstractRemoteObject.java,v 1.2 2009/03/31 17:06:10 hburger Exp $
  * Description: Abstract Remote Object
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:24 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,6 +59,7 @@ import org.openmdx.kernel.application.container.lightweight.LightweightContainer
 /**
  * Abstract Remote Object
  */
+@SuppressWarnings("serial")
 public abstract class AbstractRemoteObject
     extends RemoteServer
 {

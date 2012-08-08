@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: BeforeImageCachingLayer_1.java,v 1.1 2009/01/05 13:44:51 wfro Exp $
+ * Name:        $Id: BeforeImageCachingLayer_1.java,v 1.3 2009/06/01 15:39:40 wfro Exp $
  * Description: BeforeImageCachingLayer_1
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:51 $
+ * Date:        $Date: 2009/06/01 15:39:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,16 +51,17 @@
  */
 package org.openmdx.application.dataprovider.spi;
 
+import javax.resource.cci.MappedRecord;
+
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
-import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.DataproviderRequestContexts;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 
 
 /**
@@ -93,24 +94,31 @@ public class BeforeImageCachingLayer_1
      * @throws ServiceException
      */
     @SuppressWarnings("unchecked")
-    protected DataproviderObject_1_0 getBeforeImage(
+    protected MappedRecord getBeforeImage(
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
         SparseList beforeImageContext = request.context(this.beforeImageContextName);
-        DataproviderObject_1_0 beforeImage = (DataproviderObject)beforeImageContext.get(0);
-        if(beforeImage == null) beforeImageContext.set(
-            0,
-            beforeImage = getDelegation().get(
-                header,
-                new DataproviderRequest(
-                    new DataproviderObject(request.path()),
-                    DataproviderOperations.OBJECT_RETRIEVAL,
-                    AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
-                    null
-                )
-            ).getObject()
-        );
+        MappedRecord beforeImage = (MappedRecord)beforeImageContext.get(0);
+        if(beforeImage == null) {
+            try {
+                beforeImageContext.set(
+                    0,
+                    beforeImage = this.getDelegation().get(
+                        header,
+                        new DataproviderRequest(
+                            ObjectHolder_2Facade.newInstance(request.path()).getDelegate(),
+                            DataproviderOperations.OBJECT_RETRIEVAL,
+                            AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
+                            null
+                        )
+                    ).getObject()
+                );
+            }
+            catch(Exception e) {
+                throw new ServiceException(e);
+            }
+        }
         return beforeImage;
     }
 

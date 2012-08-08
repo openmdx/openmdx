@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: VariableSizeMappedRecord.java,v 1.10 2008/06/28 00:21:57 hburger Exp $
+ * Name:        $Id: VariableSizeMappedRecord.java,v 1.15 2009/06/03 15:42:38 hburger Exp $
  * Description: JCA: variable-size MappedRecord implementation
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:57 $
+ * Date:        $Date: 2009/06/03 15:42:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,11 +52,9 @@
 package org.openmdx.base.resource.spi;
 
 import java.util.AbstractMap;
-import java.util.AbstractSet;
-import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import javax.resource.cci.MappedRecord;
@@ -66,7 +64,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
 
 /**
  * Java Connector Architecture:
- * An variable-size MappedRecord implementation.
+ * An variable-size MappedRecord implementation. Only keys of type string are supported.
  */
 @SuppressWarnings("unchecked")
 class VariableSizeMappedRecord 
@@ -75,7 +73,7 @@ class VariableSizeMappedRecord
 {
 
     /**
-     * Creates an IndexedRecord with the specified name and the given content.  
+     * Creates an <code>MappedRecord</code> with the specified name and the given content.  
      * <p>
      * This constructor does not declare any exceptions as it assumes that the
      * necessary checks are made by the record factory: The arguments keys
@@ -101,7 +99,7 @@ class VariableSizeMappedRecord
     }
 
     /**
-     * Creates an IndexedRecord with the specified name and the given content.  
+     * Creates an <code>MappedRecord</code> with the specified name and the given content.  
      * <p>
      * This constructor does not declare any exceptions as it assumes that the
      * necessary checks are made by the record factory: The arguments keys
@@ -122,7 +120,7 @@ class VariableSizeMappedRecord
     }
 
     /**
-     * Creates an IndexedRecord with the specified name and the given content.  
+     * Creates an <code>MappedRecord</code> with the specified name and the given content.  
      * <p>
      * This constructor does not declare any exceptions as it assumes that the
      * necessary checks are made by the record factory: The arguments keys
@@ -149,21 +147,34 @@ class VariableSizeMappedRecord
         putAll(initialContent);
     }
 
-
+    
     //------------------------------------------------------------------------
     // Implements Serializable
     //------------------------------------------------------------------------
 
     /**
-     *
+     * Constructor
+     */
+    protected VariableSizeMappedRecord(){
+        // for de-serialization
+    }
+    
+    /**
+     * Serial Version UID
      */
     static final long serialVersionUID = -511654274174846301L;
-    
+
+
+    private Object normalizeKey(
+        Object key
+    ) {
+        return ((String)key).intern();
+    }
     
     //--------------------------------------------------------------------------
     // Extends AbstractMap
     //--------------------------------------------------------------------------
-    
+
     /**
      * Associates the specified value with the specified key in this map. 
      * If the map previously contained a mapping for this key, the old value
@@ -193,14 +204,8 @@ class VariableSizeMappedRecord
         Object key,
         Object value
     ){
-        int index=this.keys.indexOf(key);
-        if(index==-1){
-            this.keys.add(key);
-            this.values.add(value);
-            return null;
-        }else{
-            return this.values.set(index,value);
-        }
+        key = this.normalizeKey(key);
+        return this.values.put(key, value);
     }
 
     /**
@@ -211,175 +216,72 @@ class VariableSizeMappedRecord
      */
     public Set entrySet(
     ){
-        return new EntrySet();
+        return this.values.entrySet();
     }
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#clear()
-	 */
-	public void clear() {
-		this.values.clear();
-		this.keys.clear();
-	}
-
-	/* (non-Javadoc)
-	 * @see java.util.Map#containsKey(java.lang.Object)
-	 */
-	public boolean containsKey(Object key) {
-		return this.keys.contains(key);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.util.Map#containsValue(java.lang.Object)
-	 */
-	public boolean containsValue(Object value) {
-		return this.values.contains(value);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.util.Map#get(java.lang.Object)
-	 */
-	public Object get(Object key) {
-		int index=this.keys.indexOf(key);
-		return index == -1 ? null : this.values.get(index);
-	}
-
-	/* (non-Javadoc)
-	 * @see java.util.Map#isEmpty()
-	 */
-	public boolean isEmpty() {
-		return this.keys.isEmpty();
-	}
-
-	/* (non-Javadoc)
-	 * @see java.util.Map#remove(java.lang.Object)
-	 */
-	public Object remove(Object key) {
-		int index=this.keys.indexOf(key);
-		if(index==-1){
-			return null;
-		}else{
-			this.keys.remove(index);
-			return this.values.remove(index);
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see java.util.Map#size()
-	 */
-	public int size() {
-		return this.keys.size();
-	}
-
-
-	//--------------------------------------------------------------------------
-	// Class EntrySet
-	//--------------------------------------------------------------------------
-
-    class EntrySet extends AbstractSet{
-    
-        public Iterator iterator(
-        ){
-            return new EntryIterator();
-        }
-
-        public int size(
-        ){
-            return keys.size();
-        } 
-    
+    /* (non-Javadoc)
+     * @see java.util.Map#clear()
+     */
+    public void clear(
+    ) {
+        this.values.clear();        
     }
 
-
-	//--------------------------------------------------------------------------
-	// Class EntryIterator
-	//--------------------------------------------------------------------------
-
-    final class EntryIterator implements Iterator{
-    
-        public boolean hasNext(
-        ){
-            return index < keys.size();
-        }
-        
-        public Object next(
-        ){
-            if(!hasNext())throw new NoSuchElementException();
-            return new MapEntry(last=index++);
-        }
-
-        public void remove(
-        ){
-            if(last==MISSING_NEXT_CALL)throw new IllegalStateException(
-                "next() has not been called yet"
-            );
-            if(last==DUPLICATE_REMOVE_CALL)throw new IllegalStateException(
-                "remove() has already been called after next()"
-            );
-            keys.remove(last);
-            values.remove(last);
-            index=last;
-            last=DUPLICATE_REMOVE_CALL;
-        }
-        
-        int index = 0;
-        int last = MISSING_NEXT_CALL;
-
-        private static final int MISSING_NEXT_CALL = -1;
-        private static final int DUPLICATE_REMOVE_CALL = -2;
-        
+    /* (non-Javadoc)
+     * @see java.util.Map#containsKey(java.lang.Object)
+     */
+    public boolean containsKey(
+        Object key
+    ) {
+        key = this.normalizeKey(key);
+        return this.values.containsKey(key);
     }
 
-
-	//--------------------------------------------------------------------------
-	// Class MapEntry
-	//--------------------------------------------------------------------------
-
-    private final class MapEntry implements Map.Entry {
-        
-        MapEntry(
-            int index
-        ){
-            this.index = index;
-        }
-            
-        public Object getKey(
-        ){
-            return keys.get(this.index);
-        }
-    
-        public Object getValue(
-        ){
-            return values.get(this.index);
-        } 
-    
-        public boolean equals(
-            Object other
-        ){
-            Map.Entry that;
-            return other instanceof Map.Entry &&
-                areEqual(this.getKey(),(that=(Map.Entry)other).getKey()) && 
-                areEqual(this.getValue(),that.getValue());
-        }
-    
-        public int hashCode(
-        ){
-            return VariableSizeMappedRecord.hashCode(getKey()) ^ 
-                VariableSizeMappedRecord.hashCode(getValue());
-        }
-    
-        public Object setValue(
-            Object value
-        ){
-            Object result = getValue();
-            values.set(this.index, value);
-            return result;
-        }
-        
-        private final int index;
-        
+    /* (non-Javadoc)
+     * @see java.util.Map#containsValue(java.lang.Object)
+     */
+    public boolean containsValue(
+        Object value
+    ) {
+        return this.containsValue(value);
     }
-             
+
+    /* (non-Javadoc)
+     * @see java.util.Map#get(java.lang.Object)
+     */
+    public Object get(
+        Object key
+    ) {
+        key = this.normalizeKey(key);        
+        return this.values.get(key);
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#isEmpty()
+     */
+    public boolean isEmpty(
+    ) {
+        return this.values.isEmpty();
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#remove(java.lang.Object)
+     */
+    public Object remove(
+        Object key
+    ) {
+        key = this.normalizeKey(key);
+        return this.values.remove(key);
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.Map#size()
+     */
+    public int size(
+    ) {
+        return this.values.size();
+    }
+
     //--------------------------------------------------------------------------
     // Implements Record
     //--------------------------------------------------------------------------
@@ -452,11 +354,11 @@ class VariableSizeMappedRecord
             Object key = e.getKey();
             Object value = e.getValue();
             if (value == null) {
-            if (!(that.get(key)==null && that.containsKey(key)))
-                return false;
+                if (!(that.get(key)==null && that.containsKey(key)))
+                    return false;
             } else {
-            if (!value.equals(that.get(key)))
-                return false;
+                if (!value.equals(that.get(key)))
+                    return false;
             }
         }
         return true;
@@ -572,11 +474,11 @@ class VariableSizeMappedRecord
         ).toString();
     }
 
-    
+
     //--------------------------------------------------------------------------
     // Instance members
     //--------------------------------------------------------------------------
-    
+
     /**
      * 
      */
@@ -590,14 +492,8 @@ class VariableSizeMappedRecord
     /**
      *
      */
-    final ArrayList keys = new ArrayList();
+    final Map values = new IdentityHashMap();
     
-    /**
-     * 
-     */
-    final ArrayList values = new ArrayList();
-
-
     //--------------------------------------------------------------------------
     // Class methods
     //--------------------------------------------------------------------------
@@ -633,5 +529,5 @@ class VariableSizeMappedRecord
     ){
         return object==null ? 0 : object.hashCode();
     }
-    
+
 }

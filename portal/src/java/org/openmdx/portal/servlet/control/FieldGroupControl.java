@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FieldGroupControl.java,v 1.44 2009/03/08 18:03:25 wfro Exp $
+ * Name:        $Id: FieldGroupControl.java,v 1.45 2009/06/03 15:33:43 wfro Exp $
  * Description: FieldGroupControl
- * Revision:    $Revision: 1.44 $
+ * Revision:    $Revision: 1.45 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:25 $
+ * Date:        $Date: 2009/06/03 15:33:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -258,7 +258,10 @@ public class FieldGroupControl
         Attribute[][] a = null;
         try {
             while(count < this.fields.size()) {
-                if(count == this.columnBreakAtElements.get(col)) {
+                if(
+                	(col < this.columnBreakAtElements.size()) && 
+                	(count == this.columnBreakAtElements.get(col))
+                ) {
                     columns.add(
                         attributes = new ArrayList<Attribute>()
                     );

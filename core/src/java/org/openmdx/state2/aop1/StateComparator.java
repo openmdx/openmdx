@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateComparator.java,v 1.2 2009/02/16 15:12:21 hburger Exp $
+ * Name:        $Id: StateComparator.java,v 1.3 2009/05/16 22:17:49 wfro Exp $
  * Description: StateComparator 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/16 15:12:21 $
+ * Date:        $Date: 2009/05/16 22:17:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,8 +56,8 @@ import java.util.Date;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.state2.spi.Order;
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LateBindingConnection_1.java,v 1.4 2009/01/15 15:10:18 hburger Exp $
+ * Name:        $Id: LateBindingConnection_1.java,v 1.5 2009/04/07 19:55:53 hburger Exp $
  * Description: Late Binding Connection
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/15 15:10:18 $
+ * Date:        $Date: 2009/04/07 19:55:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,13 +53,13 @@ package org.openmdx.application.dataprovider.transport.ejb.cci;
 
 import java.io.Serializable;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.jdo.PersistenceManager;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.resource.ResourceException;
-import javax.security.auth.Subject;
 
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
@@ -181,15 +181,15 @@ public class LateBindingConnection_1
     // Implements Dataprovider_1_0Connection
     //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.persistence.spi.EntityManagerFactory_2_0#createManager(javax.security.auth.Subject)
+    /**
+     * 
      */
     public PersistenceManager getEntityManager(
-        Subject subject
+        List<String> principalChain
     ) throws ResourceException {
         Object delegate = getDelegate();
         return delegate instanceof EntityManagerFactory ?
-            ((EntityManagerFactory)delegate).getEntityManager(subject) :
+            ((EntityManagerFactory)delegate).getEntityManager(principalChain) :
                 null;
     }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: NullMaskingMap.java,v 1.1 2008/11/25 17:47:50 hburger Exp $
+ * Name:        $Id: NullMaskingMap.java,v 1.2 2009/05/26 12:40:49 wfro Exp $
  * Description: Null Masking Map 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/25 17:47:50 $
+ * Date:        $Date: 2009/05/26 12:40:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,8 +57,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.openmdx.uses.org.apache.commons.collections.map.AbstractMapDecorator;
-
+/**
+ * NullMaskingMap
+ *
+ */
 @SuppressWarnings("unchecked") 
 public class NullMaskingMap extends AbstractMapDecorator {
 
@@ -112,9 +114,6 @@ public class NullMaskingMap extends AbstractMapDecorator {
         return new NullMaskingMap(delegate, nullValue);
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.uses.org.apache.commons.collections.map.AbstractMapDecorator#containsValue(java.lang.Object)
-     */
     @Override
     public boolean containsValue(Object value) {
         return super.containsValue(
@@ -122,9 +121,6 @@ public class NullMaskingMap extends AbstractMapDecorator {
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.uses.org.apache.commons.collections.map.AbstractMapDecorator#entrySet()
-     */
     @Override
     public Set entrySet() {
         if(this.entries == null) {
@@ -135,9 +131,6 @@ public class NullMaskingMap extends AbstractMapDecorator {
         return this.entries;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.uses.org.apache.commons.collections.map.AbstractMapDecorator#get(java.lang.Object)
-     */
     @Override
     public Object get(Object key) {
         return unmask(
@@ -145,9 +138,6 @@ public class NullMaskingMap extends AbstractMapDecorator {
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.uses.org.apache.commons.collections.map.AbstractMapDecorator#put(java.lang.Object, java.lang.Object)
-     */
     @Override
     public Object put(Object key, Object value) {
         return super.put(
@@ -156,9 +146,6 @@ public class NullMaskingMap extends AbstractMapDecorator {
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.uses.org.apache.commons.collections.map.AbstractMapDecorator#putAll(java.util.Map)
-     */
     @Override
     public void putAll(Map mapToCopy) {
         for (Map.Entry<?,?> e : (Set<Map.Entry<?,?>>) super.entrySet()) {
@@ -169,9 +156,6 @@ public class NullMaskingMap extends AbstractMapDecorator {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.uses.org.apache.commons.collections.map.AbstractMapDecorator#values()
-     */
     @Override
     public Collection values() {
         if(this.values == null) {

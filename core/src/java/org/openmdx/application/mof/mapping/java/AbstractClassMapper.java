@@ -1,15 +1,15 @@
 /*
  * ==================================================================== 
- * Project: openmdx, http://www.openmdx.org
- * Name: $Id: AbstractClassMapper.java,v 1.1 2009/01/13 02:10:36 wfro Exp $ 
- * Description: JMIClassLevelTemplate Revision: $Revision: 1.1 $ 
+ * Project: openMDX, http://www.openmdx.org
+ * Name: $Id: AbstractClassMapper.java,v 1.3 2009/06/09 12:45:18 hburger Exp $ 
+ * Description: JMIClassLevelTemplate Revision: $Revision: 1.3 $ 
  * Owner: OMEX AG, Switzerland, http://www.omex.ch 
- * Date: $Date: 2009/01/13 02:10:36 $
+ * Date: $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland All rights reserved.
+ * Copyright (c) 2005-2009, OMEX AG, Switzerland All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: *
@@ -38,7 +38,6 @@
  * This product includes or is based on software developed by other
  * organizations as listed in the NOTICE file.
  */
-
 package org.openmdx.application.mof.mapping.java;
 
 import java.io.Writer;
@@ -58,16 +57,16 @@ import org.openmdx.application.mof.mapping.java.metadata.FieldMetaData;
 import org.openmdx.application.mof.mapping.java.metadata.Visibility;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
 
-class AbstractClassMapper
+public class AbstractClassMapper
     extends AbstractMapper {
 
     //-----------------------------------------------------------------------
     protected AbstractClassMapper(
         ModelElement_1_0 classDef,        
         Writer writer, 
-        Model_1_3 model,
+        Model_1_0 model,
         Format format, 
         String packageSuffix, 
         MetaData_1_0 metaData

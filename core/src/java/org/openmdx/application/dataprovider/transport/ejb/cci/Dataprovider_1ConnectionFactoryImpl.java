@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1ConnectionFactoryImpl.java,v 1.1 2009/01/05 13:44:51 wfro Exp $
+ * Name:        $Id: Dataprovider_1ConnectionFactoryImpl.java,v 1.5 2009/05/26 13:43:51 wfro Exp $
  * Description: sDataprovider_1ConnectionFactoryImpl class
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:51 $
+ * Date:        $Date: 2009/05/26 13:43:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,7 +58,6 @@ import java.util.List;
 import javax.ejb.CreateException;
 import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 
 import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
 import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1_1Connection;
@@ -68,7 +67,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
 public class Dataprovider_1ConnectionFactoryImpl
-implements Dataprovider_1ConnectionFactory
+    implements Dataprovider_1ConnectionFactory
 {
 
     /**
@@ -191,15 +190,13 @@ implements Dataprovider_1ConnectionFactory
      *              The dataprovider EJB's home interface
      *
      * @return      a new dataprovider connection
+     * 
+     * @deprecated
      */
     public static Dataprovider_1_1Connection createRemoteConnection(
         Object ejbHome
     ) throws Exception {
-        return new Dataprovider_1RemoteConnection<Dataprovider_1_0Remote>(
-                ((Dataprovider_1Home)
-                        PortableRemoteObject.narrow(ejbHome, Dataprovider_1Home.class)
-                ).create()
-        );
+        throw new UnsupportedOperationException("Remote connections to dataproviders are not supported");
     }
 
     /**
@@ -216,9 +213,7 @@ implements Dataprovider_1ConnectionFactory
     public static Dataprovider_1_3Connection createLocalConnection(
         Object home
     ) throws ServiceException, CreateException {
-        Dataprovider_1_0Local dataprovider = home instanceof EntityManagerFactory_2LocalHome ?
-            ((EntityManagerFactory_2LocalHome)home).create() :
-                ((Dataprovider_1LocalHome)home).create();
+        Dataprovider_1_0Local dataprovider = ((Dataprovider_1LocalHome)home).create();
             return new Dataprovider_1LocalConnection(dataprovider);
     }
 
@@ -235,10 +230,9 @@ implements Dataprovider_1ConnectionFactory
     ) throws Exception {
         return home instanceof Dataprovider_1ConnectionFactory ?
             createStandardConnection(home) :
-                home instanceof Dataprovider_1LocalHome || 
-                home instanceof  EntityManagerFactory_2LocalHome?
-                    createLocalConnection(home) :
-                        createRemoteConnection(home);
+        home instanceof Dataprovider_1LocalHome ?
+            createLocalConnection(home) :
+            createRemoteConnection(home);
     }
 
 

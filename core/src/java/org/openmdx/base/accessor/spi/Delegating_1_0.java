@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Delegating_1_0.java,v 1.3 2009/01/10 02:09:13 wfro Exp $
+ * Name:        $Id: Delegating_1_0.java,v 1.4 2009/03/10 16:52:07 hburger Exp $
  * Description: Delegating 1.0
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/10 02:09:13 $
+ * Date:        $Date: 2009/03/10 16:52:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,14 +56,14 @@ import org.openmdx.base.exception.ServiceException;
 /**
  * Delegating 1.0
  */
-public interface Delegating_1_0 {
+public interface Delegating_1_0<T>{
     
     /**
      * Retrieve the delegate
      * 
      * @return the delegate
      */
-    Object objGetDelegate(
+    T objGetDelegate(
     ) throws ServiceException;
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AddressImpl.java,v 1.2 2009/02/18 13:00:20 hburger Exp $
+ * Name:        $Id: AddressImpl.java,v 1.3 2009/04/07 17:24:17 hburger Exp $
  * Description: Address  
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/18 13:00:20 $
+ * Date:        $Date: 2009/04/07 17:24:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,7 +63,7 @@ import org.openmdx.test.app1.jmi1.PostalAddress;
  * Address 
  */
 public class AddressImpl<S extends org.openmdx.test.app1.jmi1.Address,N extends org.openmdx.test.app1.cci2.Address> 
-    extends AbstractObject<S,N> 
+    extends AbstractObject<S,N,Void> 
 {
 
     /**

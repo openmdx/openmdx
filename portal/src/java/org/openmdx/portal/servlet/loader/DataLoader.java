@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DataLoader.java,v 1.14 2009/03/08 18:03:21 wfro Exp $
+ * Name:        $Id: DataLoader.java,v 1.19 2009/06/01 16:34:18 wfro Exp $
  * Description: DataLoader
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:21 $
+ * Date:        $Date: 2009/06/01 16:34:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,6 +58,7 @@ package org.openmdx.portal.servlet.loader;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,20 +67,19 @@ import java.util.TreeSet;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
+import javax.resource.cci.MappedRecord;
 import javax.servlet.ServletContext;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.JmiHelper;
+import org.openmdx.application.dataprovider.importer.XmlImporter;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.naming.Path;
-import org.openmdx.compatibility.base.accessor.jmi.JmiHelper;
-import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
-import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
 public class DataLoader
     extends Loader {
@@ -98,7 +98,6 @@ public class DataLoader
   }
     
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     synchronized public void loadData(
         String location
     ) throws ServiceException {
@@ -111,13 +110,13 @@ public class DataLoader
             i.hasNext(); 
         ) {
             String dir = (String)i.next();
-            Set resourcePaths = context.getResourcePaths(dir);
+            Set<String> resourcePaths = this.context.getResourcePaths(dir);
             if(resourcePaths == null) return;
-            resourcePaths = new TreeSet(resourcePaths);
+            resourcePaths = new TreeSet<String>(resourcePaths);
             try {
                 for(Iterator j = resourcePaths.iterator(); j.hasNext(); ) {        
                     String path = (String)j.next();
-                    Map data = MapUtils.orderedMap(new HashMap());
+                    Map<Path,MappedRecord> data = new LinkedHashMap<Path,MappedRecord>();
                     XmlImporter importer = new XmlImporter(
                         data,
                         false
@@ -147,20 +146,20 @@ public class DataLoader
                         store.currentTransaction().begin();
                         int kk = 0;
                         for(
-                            Iterator k = data.values().iterator(); 
+                            Iterator<MappedRecord> k = data.values().iterator(); 
                             k.hasNext();
                             kk++
                         ) {
                             if((kk > 0) && (kk % 100 == 0)) {
                                 System.out.println("Stored " + kk);
                             }
-                            DataproviderObject entry = (DataproviderObject)k.next();
+                            MappedRecord entry = k.next();
                             // create new entries, update existing
                             try {
                                 RefObject_1_0 existing = null;
                                 try {
                                     existing = (RefObject_1_0)store.getObjectById(
-                                        entry.path()
+                                        ObjectHolder_2Facade.getPath(entry)
                                     );
                                 }
                                 catch(Exception e) {}
@@ -184,7 +183,7 @@ public class DataLoader
                                     }
                                 }
                                 else {
-                                    String qualifiedClassName = (String)entry.values(SystemAttributes.OBJECT_CLASS).get(0);
+                                    String qualifiedClassName = ObjectHolder_2Facade.getObjectClass(entry);
                                     String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
                                     RefObject_1_0 newEntry = (RefObject_1_0)((org.openmdx.base.jmi1.Authority)store.getObjectById(
                                         Authority.class,
@@ -199,29 +198,30 @@ public class DataLoader
                                         true, // replace values
                                         true // remove trailing empty string
                                     );
-                                    Path parentIdentity = entry.path().getParent().getParent();
+                                    Path entryPath = ObjectHolder_2Facade.getPath(entry);
+                                    Path parentIdentity = entryPath.getParent().getParent();
                                     RefObject_1_0 parent = null;
                                     try {
-                                        parent = loadedObjects.containsKey(parentIdentity)
-                                            ? (RefObject_1_0)loadedObjects.get(parentIdentity)
-                                            : (RefObject_1_0)store.getObjectById(parentIdentity);
+                                        parent = loadedObjects.containsKey(parentIdentity) ? 
+                                        	(RefObject_1_0)loadedObjects.get(parentIdentity) : 
+                                        	(RefObject_1_0)store.getObjectById(parentIdentity);
                                     } 
                                     catch(Exception e) {}
                                     if(parent != null) {
                                         RefContainer container = (RefContainer)parent.refGetValue(
-                                            entry.path().get(entry.path().size() - 2)
+                                        	entryPath.get(entryPath.size() - 2)
                                         );
                                         container.refAdd(
                                             QualifierType.REASSIGNABLE,
-                                            entry.path().get(entry.path().size() - 1), 
+                                            entryPath.get(entryPath.size() - 1), 
                                             newEntry
                                         );
                                     }                                    
                                     if("bootstrap".equals(location)) {
-                                        System.out.println("Creating " + entry.path());
+                                        System.out.println("Creating " + entryPath);
                                     }
                                     loadedObjects.put(
-                                        entry.path(), 
+                                    	entryPath, 
                                         newEntry
                                     );                                    
                                     hasNewObjects = true;

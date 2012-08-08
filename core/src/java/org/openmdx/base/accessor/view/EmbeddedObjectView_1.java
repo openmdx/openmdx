@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EmbeddedObjectView_1.java,v 1.7 2009/02/10 16:36:37 hburger Exp $
+ * Name:        $Id: EmbeddedObjectView_1.java,v 1.12 2009/06/09 12:45:17 hburger Exp $
  * Description: Embedded Object
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/10 16:36:37 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,19 +63,20 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.listener.DeleteCallback;
 import javax.jdo.listener.LoadCallback;
 import javax.jdo.listener.StoreCallback;
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.Record;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.Structure_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.AbstractDataObject_1;
 import org.openmdx.base.accessor.spi.DelegatingObject_1;
-import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
-import org.openmdx.base.mof.cci.Model_1_6;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -84,7 +85,7 @@ import org.openmdx.kernel.exception.BasicException;
  */
 public abstract class EmbeddedObjectView_1 
     extends DelegatingObject_1 
-    implements ObjectView_1_0, Delegating_1_0, LoadCallback, StoreCallback, DeleteCallback, Serializable {
+    implements ObjectView_1_0, LoadCallback, StoreCallback, DeleteCallback, Serializable {
 
     /**
      * Constructor
@@ -103,12 +104,6 @@ public abstract class EmbeddedObjectView_1
         this.prefix = prefix;
         this.objectClass = objectClass;
     }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetPath()
-     */
-    public abstract Object jdoGetObjectId(
-    );
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objDefaultFetchGroup()
@@ -207,30 +202,19 @@ public abstract class EmbeddedObjectView_1
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objInvokeOperation(java.lang.String, org.openmdx.base.accessor.generic.cci.Structure_1_0)
+     * @see org.openmdx.base.accessor.spi.DelegatingObject_1#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
-    public Structure_1_0 objInvokeOperation(
-        String operation,
-        Structure_1_0 arguments
-    ) throws ServiceException {
-        return super.objInvokeOperation(
-            (this.prefix + operation),
-            arguments
+    @Override
+    public boolean execute(
+        InteractionSpec ispec, 
+        Record input, 
+        Record output
+    ) throws ResourceException {
+        throw new NotSupportedException(
+            "Method invocation is not supported for embedded objects"
         );
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objInvokeOperationInUnitOfWork(java.lang.String, org.openmdx.base.accessor.generic.cci.Structure_1_0)
-     */
-    public Structure_1_0 objInvokeOperationInUnitOfWork(
-        String operation,
-        Structure_1_0 arguments
-    ) throws ServiceException {
-        return super.objInvokeOperationInUnitOfWork(
-            (this.prefix + operation),
-            arguments
-        );
-    }
 
     //------------------------------------------------------------------------
     // Implements ObjectView_1_0
@@ -250,7 +234,7 @@ public abstract class EmbeddedObjectView_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.view.ObjectView_1_0#getModel()
      */
-    public Model_1_6 getModel() {
+    public Model_1_0 getModel() {
         DataObject_1_0 delegate;
         try {
             delegate = this.getDelegate();

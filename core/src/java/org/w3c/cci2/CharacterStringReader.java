@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CharacterStringReader.java,v 1.1 2009/01/12 12:54:16 wfro Exp $
+ * Name:        $Id: CharacterStringReader.java,v 1.2 2009/05/15 00:26:39 hburger Exp $
  * Description: Character String Reader 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:54:16 $
+ * Date:        $Date: 2009/05/15 00:26:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,11 +52,14 @@ package org.w3c.cci2;
 
 import java.io.CharArrayReader;
 
+import org.w3c.spi.Reusable;
+
 /**
  * Character String Reader
  */
 public class CharacterStringReader
     extends CharArrayReader
+    implements Reusable
 {
 
     /**
@@ -97,6 +100,13 @@ public class CharacterStringReader
     public void close() {
         this.string = null;
         super.close();
+    }
+
+    /* (non-Javadoc)
+     * @see org.w3c.spi.Reusable#reUse()
+     */
+    public void reUse() {
+        super.pos = 0;
     }
     
 }

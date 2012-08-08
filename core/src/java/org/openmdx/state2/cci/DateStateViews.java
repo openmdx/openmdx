@@ -1,8 +1,8 @@
 /*
  * ====================================================================
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/19 19:41:07 $
+ * Date:        $Date: 2009/05/29 17:04:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,9 +66,7 @@ import javax.resource.cci.InteractionSpec;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
-import org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_2;
 import org.openmdx.base.cci2.ExtentCapable;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -108,8 +106,8 @@ public class DateStateViews {
         RefBaseObject refBaseObject,
         DateStateContext viewContext
     ){
-        RefPackageFactory_1_0 refPackageFactory = (RefPackageFactory_1_0) refBaseObject.refOutermostPackage();
-        return refPackageFactory.getRefPackage((InteractionSpec) viewContext);
+        RefPackage_1_0 refPackageFactory = (RefPackage_1_0) refBaseObject.refOutermostPackage();
+        return refPackageFactory.refPackage((InteractionSpec) viewContext);
     }
     
     /**
@@ -388,7 +386,7 @@ public class DateStateViews {
             context,
             false
         );
-        if(target != null && !target.refIsDeleted()) {
+        if(target != null && !JDOHelper.isDeleted(target)) {
             if(override) {
                 target.refDelete();
             } else {
@@ -528,8 +526,8 @@ public class DateStateViews {
         SortedSet<DateState> set = new TreeSet<DateState>(StateComparator.getInstance());
         for(DateState state : dateStates) {
             if(
-                (validFrom == null || Order.compareValidTo(state.getStateValidTo(), validFrom) >= 0) &&
-                (validTo == null || Order.compareValidTo(state.getStateValidFrom(), validTo) <= 0)
+                Order.compareValidFromToValidTo(validFrom, state.getStateValidTo()) <= 0 &&
+                Order.compareValidFromToValidTo(state.getStateValidFrom(), validTo) <= 0
             ) {
                 set.add(state);
             }
@@ -660,8 +658,8 @@ public class DateStateViews {
     ){
         if(object instanceof RefObject) {
             RefPackage refPackage = ((RefObject)object).refOutermostPackage();
-            if(refPackage instanceof RefPackage_1_2) {
-                InteractionSpec interactionSpec = ((RefPackage_1_2)refPackage).refInteractionSpec();
+            if(refPackage instanceof RefPackage_1_0) {
+                InteractionSpec interactionSpec = ((RefPackage_1_0)refPackage).refInteractionSpec();
                 if(interactionSpec instanceof DateStateContext) {
                     return (DateStateContext)interactionSpec;
                 }

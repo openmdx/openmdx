@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FilterOperators.java,v 1.1 2009/01/06 10:21:19 wfro Exp $
+ * Name:        $Id: FilterOperators.java,v 1.2 2009/04/22 09:05:30 hburger Exp $
  * Description: Generated constants for FilterOperators
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2009/04/22 09:05:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -232,7 +232,7 @@ public class FilterOperators {
    * @param code a stringified code
    * @return a code
    */
-  static public int fromString(String code)
+  static public short fromString(String code)
   {  
     if (code.equalsIgnoreCase("SOUNDS_UNLIKE")) return SOUNDS_UNLIKE;
     if (code.equalsIgnoreCase("IS_UNLIKE")) return IS_UNLIKE;

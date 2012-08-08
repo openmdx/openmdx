@@ -599,7 +599,7 @@ CREATE TABLE [dbo].[state1_SLICED] (
 GO
 
 CREATE TABLE [dbo].[test_CB_SLICED] (
-	[object_rid] [bigint] NOT NULL ,
+	[object_rid] nvarchar(100) NOT NULL ,
 	[object_oid] nvarchar(200) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL,
 	[object_idx] [bigint] NOT NULL ,
 	[p$$object_parent__rid] nvarchar(100) NULL, 
@@ -612,12 +612,14 @@ CREATE TABLE [dbo].[test_CB_SLICED] (
 	[cb_type] [varchar] (10) NULL ,
 	[advice_text] [varchar] (200) NULL ,
 	[cancels_c_b] [varchar] (512) NULL ,
+	[p$$cancels_c_b__rid] nvarchar(100) NULL, 
+	[p$$cancels_c_b__oid] nvarchar(200) COLLATE SQL_Latin1_General_CP1_CS_AS NULL,
 	CONSTRAINT PK_test_CB_SLICED PRIMARY KEY (object_rid, object_oid, object_idx)
 ) ON [PRIMARY]
 GO
 
 CREATE TABLE [dbo].[test_SLB_SLICED] (
-	[object_rid] [bigint] NOT NULL ,
+	[object_rid] nvarchar(100) NOT NULL ,
 	[object_oid] nvarchar(200) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL,
 	[object_idx] [bigint] NOT NULL ,
 	[p$$object_parent__rid] nvarchar(100) NULL, 

@@ -315,8 +315,11 @@ img {
     padding-right: 0px;
 }
 #rootMenuAnchor {
-  padding:2px 1px 0px 1px;
+  padding:6px 1px 0px 1px;
   cursor:pointer;
+}
+#menuFlyIn li ul {
+  margin-top: 0px;
 }
 #menuRoot {
   display:block;

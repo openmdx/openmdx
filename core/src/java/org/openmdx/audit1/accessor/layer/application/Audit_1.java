@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Audit_1.java,v 1.37 2009/01/06 13:14:46 wfro Exp $
+ * Name:        $Id: Audit_1.java,v 1.42 2009/06/01 16:28:27 wfro Exp $
  * Description: accessor.Audit_1 plugin
- * Revision:    $Revision: 1.37 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 13:14:46 $
+ * Date:        $Date: 2009/06/01 16:28:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,35 +61,36 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
-import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.DataproviderRequestContexts;
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.application.dataprovider.cci.Directions;
 import org.openmdx.application.dataprovider.cci.RequestCollection;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1;
 import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.query.AttributeSpecifier;
+import org.openmdx.base.query.Directions;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.Quantors;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.base.text.format.DatatypeFormat;
-import org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc.Database_1;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -197,28 +198,37 @@ extends Database_1 {
      * Return the set of attributes which's values changed in o2 relative to o1.
      */
     private Set getChangedAttributes(
-        DataproviderObject_1_0 o1,
-        DataproviderObject_1_0 o2
+        MappedRecord o1,
+        MappedRecord o2
     ) throws ServiceException {
         if(o2 == null) {
             return new HashSet();
         }        
+        ObjectHolder_2Facade o1Facade;
+        ObjectHolder_2Facade o2Facade;
+        try {
+            o1Facade = ObjectHolder_2Facade.newInstance(o1);
+            o2Facade = ObjectHolder_2Facade.newInstance(o2);
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         // Touch all o1 attributes in o2
         for(
-                Iterator i = o1.attributeNames().iterator();
-                i.hasNext();
+            Iterator i = o1Facade.getValue().keySet().iterator();
+            i.hasNext();
         ) {
-            o2.values((String)i.next());
+            o2Facade.attributeValues((String)i.next());
         }        
         // Diff
         Set changedAttributes = new HashSet();
         for(
-                Iterator i = o2.attributeNames().iterator();
-                i.hasNext();
+            Iterator i = o2Facade.getValue().keySet().iterator();
+            i.hasNext();
         ) {
             String attributeName = (String)i.next();
-            SparseList v1 = o1.values(attributeName);
-            SparseList v2 = o2.values(attributeName);
+            SparseList v1 = o1Facade.attributeValues(attributeName);
+            SparseList v2 = o2Facade.attributeValues(attributeName);
             boolean isEqual =
                 (v1.firstIndex() == v2.firstIndex()) &&
                 (v1.lastIndex() == v2.lastIndex()) &&
@@ -264,8 +274,8 @@ extends Database_1 {
         boolean auditAuthority
     ) throws ServiceException {
         for(
-                Iterator i = this.auditMapping.entrySet().iterator();
-                i.hasNext();
+            Iterator i = this.auditMapping.entrySet().iterator();
+            i.hasNext();
         ) {
             Entry entry = (Entry)i.next();
             if(objectPath.startsWith((Path)entry.getKey())) {
@@ -301,39 +311,64 @@ extends Database_1 {
     /**
      * convert object to audit object (rewrite path according to mapping)
      */
-    private DataproviderObject objectToBeforeImage(
-        DataproviderObject_1_0 object,
+    private MappedRecord objectToBeforeImage(
+        MappedRecord object,
         String unitOfWorkId
     ) throws ServiceException {
         Path mappedPath = this.mapAuditPath(
-            object.path(),
+            ObjectHolder_2Facade.getPath(object),
             false
         );
         String lastComponent = mappedPath.getBase() + ":uow:" + unitOfWorkId;
         Path beforeImagePath = mappedPath.getParent().getChild(lastComponent);
-        DataproviderObject beforeImage = new DataproviderObject(object);
-        beforeImage.path().setTo(beforeImagePath);
-        if(useDatatypes()) this.convertXMLDatatypeValues(beforeImage);
+        MappedRecord beforeImage;
+        try {
+            beforeImage = ObjectHolder_2Facade.cloneObject(object);
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
+        try {
+            ObjectHolder_2Facade.newInstance(beforeImage).setPath(beforeImagePath);
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
+        if(this.useDatatypes()) this.convertXMLDatatypeValues(beforeImage);
         return beforeImage;
     }
 
     //------------------------------------------------------------------------
     private void addAsNamespace(
-        DataproviderObject target,
+        MappedRecord target,
         String namespaceId,
-        DataproviderObject source
-    ) {
+        MappedRecord source
+    ) throws ServiceException {
+        ObjectHolder_2Facade targetFacade = null;
+        ObjectHolder_2Facade sourceFacade = null;
+        try {
+            targetFacade = ObjectHolder_2Facade.newInstance(target);
+            sourceFacade = ObjectHolder_2Facade.newInstance(source);
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         if(source != null) {
             for(
-                    Iterator j = source.attributeNames().iterator();
-                    j.hasNext();
+                Iterator j = targetFacade.getValue().keySet().iterator();
+                j.hasNext();
             ) {
                 String attributeName = (String)j.next();
-                target.values(namespaceId + ":" + attributeName).addAll(
-                    SystemAttributes.OBJECT_CLASS.equals(attributeName) ? 
-                        source.values(attributeName).subList(0, 1) :
-                            source.values(attributeName)
-                );
+                if(SystemAttributes.OBJECT_CLASS.equals(attributeName)) {
+                    targetFacade.getValue().setRecordName(
+                        sourceFacade.getValue().getRecordName()
+                    );
+                }
+                else {
+                    targetFacade.attributeValues(namespaceId + ":" + attributeName).addAll(
+                        sourceFacade.attributeValues(attributeName)
+                    );
+                }
             }
         }
     }
@@ -345,21 +380,25 @@ extends Database_1 {
     private List beforeImagesToInvolved(
         ServiceHeader header,
         Path auditablePath,
-        List beforeImages
+        List<MappedRecord> beforeImages
     ) throws ServiceException {
-
         // get current auditable. The current is required as last/current 'BeforeImage'
-        DataproviderObject current = null;
+        MappedRecord current = null;
         try {
-            current = super.get(
-                header,
-                new DataproviderRequest(
-                    new DataproviderObject(auditablePath),
-                    DataproviderOperations.OBJECT_RETRIEVAL,
-                    AttributeSelectors.ALL_ATTRIBUTES,
-                    null
-                )
-            ).getObject();
+            try {
+                current = super.get(
+                    header,
+                    new DataproviderRequest(
+                        ObjectHolder_2Facade.newInstance(auditablePath).getDelegate(),
+                        DataproviderOperations.OBJECT_RETRIEVAL,
+                        AttributeSelectors.ALL_ATTRIBUTES,
+                        null
+                    )
+                ).getObject();
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
         }
         catch(ServiceException e) {
             // in case the object was removed the 'AfterImage' of the last
@@ -368,75 +407,90 @@ extends Database_1 {
                 throw e;
             }
         }
-
         // iterate the list to guarantee that all objects are present
         // and list size is known. This is required in case of 
         // batchSize of audit provider < number of involved objects and
         // TOTAL is unknown
         int ii = 0;
         for(
-                Iterator i = beforeImages.iterator(); 
-                i.hasNext(); 
-                ii++
+            Iterator i = beforeImages.iterator(); 
+            i.hasNext(); 
+            ii++
         ) {
             i.next();
         }
 
         // The involved objects are the difference objects of the beforeImages
-        List involvedObjects = new ArrayList();
-        List objects = new ArrayList(beforeImages);
+        List<MappedRecord> involvedObjects = new ArrayList<MappedRecord>();
+        List<MappedRecord> objects = new ArrayList<MappedRecord>(beforeImages);
         objects.add(current);
         for(
-                int i = 1; 
-                i < objects.size(); 
-                i++
+            int i = 1; 
+            i < objects.size(); 
+            i++
         ) {
-            DataproviderObject beforeImage = (DataproviderObject)objects.get(i-1);
-            beforeImage.clearValues(SystemAttributes.OBJECT_IDENTITY).add(auditablePath.toUri());
-            DataproviderObject afterImage = (DataproviderObject)objects.get(i);
-            if(afterImage != null) {
-                afterImage.clearValues(SystemAttributes.OBJECT_IDENTITY).add(auditablePath.toUri());
+            MappedRecord beforeImage = objects.get(i-1);
+            ObjectHolder_2Facade beforeImageFacade;
+            try {
+                beforeImageFacade = ObjectHolder_2Facade.newInstance(beforeImage);
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
             }
-
+            beforeImageFacade.clearAttributeValues(SystemAttributes.OBJECT_IDENTITY).add(auditablePath.toURI());
+            MappedRecord afterImage = objects.get(i);
+            if(afterImage != null) {
+                try {
+                    ObjectHolder_2Facade.newInstance(afterImage).clearAttributeValues(SystemAttributes.OBJECT_IDENTITY).add(
+                        auditablePath.toURI()
+                    );
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
+            }
             // path of involved = <auditablePath>/involved/<unitOfWorkId>
-            PathComponent base = new PathComponent(beforeImage.path().getBase());
+            PathComponent base = new PathComponent(beforeImageFacade.getPath().getBase());
             String unitOfWorkId = base.getLastField();
-            DataproviderObject involved = new DataproviderObject(
-                auditablePath.getDescendant(
-                    "view:Audit:involved", unitOfWorkId
-                )
-            );
-            involved.values(SystemAttributes.OBJECT_CLASS).add(
-                "org:openmdx:compatibility:audit1:Involved"
-            );
-
+            ObjectHolder_2Facade involvedFacade;
+            try {
+                involvedFacade = ObjectHolder_2Facade.newInstance(
+                    auditablePath.getDescendant(
+                        "view:Audit:involved", unitOfWorkId
+                    ),
+                    "org:openmdx:compatibility:audit1:Involved"
+                );
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
             // unitOfWorkId
-            involved.values("unitOfWorkId").add(
+            involvedFacade.attributeValues("unitOfWorkId").add(
                 unitOfWorkId
             );
-
             // taskId not supported currently
-            involved.values("taskId").add(
+            involvedFacade.attributeValues("taskId").add(
                 "N/A"
             );
-
             // modifiedFeature
-            involved.values("modifiedFeature").addAll(
+            involvedFacade.attributeValues("modifiedFeature").addAll(
                 this.getChangedAttributes(beforeImage, afterImage)
             );
 
             this.addAsNamespace(
-                involved,
+                involvedFacade.getDelegate(),
                 "view:BeforeImage",
                 beforeImage
             );
             this.addAsNamespace(
-                involved,
+                involvedFacade.getDelegate(),
                 "view:AfterImage",
                 afterImage
             );
 
-            involvedObjects.add(involved);
+            involvedObjects.add(
+                involvedFacade.getDelegate()
+            );
         }
         SysLog.trace("involved objects", involvedObjects);
         return involvedObjects;
@@ -463,7 +517,7 @@ extends Database_1 {
                     Quantors.THERE_EXISTS,
                     SystemAttributes.OBJECT_IDENTITY, 
                     FilterOperators.IS_LIKE,
-                    beforeImageCorePath.toUri() + ":uow:%"
+                    beforeImageCorePath.toURI() + ":uow:%"
                 )
             },
             AttributeSelectors.ALL_ATTRIBUTES,
@@ -483,20 +537,18 @@ extends Database_1 {
     }
 
     //------------------------------------------------------------------------
-    private DataproviderObject getUnitOfWork(
+    private MappedRecord getUnitOfWork(
         RequestCollection unitOfWorkChannel,
         Path unitOfWorkPath
     ) throws ServiceException {
         // get/create UnitOfWork
-        DataproviderObject unitOfWork = null;
+        MappedRecord unitOfWork = null;
         try {
             // try to get unit of work object
-            unitOfWork = new DataproviderObject(
-                unitOfWorkChannel.addGetRequest(
-                    unitOfWorkPath,
-                    AttributeSelectors.ALL_ATTRIBUTES,
-                    null
-                )
+            unitOfWork = unitOfWorkChannel.addGetRequest(
+                unitOfWorkPath,
+                AttributeSelectors.ALL_ATTRIBUTES,
+                null
             );
         }
         catch(ServiceException e) {
@@ -504,10 +556,15 @@ extends Database_1 {
                 throw e; 
             }
             // create if it does not exist
-            unitOfWork = new DataproviderObject(
-                unitOfWorkPath
-            );
-            unitOfWork.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:compatibility:audit1:UnitOfWork");
+            try {
+                unitOfWork = ObjectHolder_2Facade.newInstance(
+                    unitOfWorkPath,
+                    "org:openmdx:compatibility:audit1:UnitOfWork"
+                ).getDelegate();
+            } 
+            catch (ResourceException e0) {
+                throw new ServiceException(e0);
+            }
             unitOfWorkChannel.addCreateRequest(
                 unitOfWork
             );
@@ -527,12 +584,12 @@ extends Database_1 {
 
     //------------------------------------------------------------------------
     private void storeBeforeImage(
-        DataproviderObject _beforeImageAsObject,
+        MappedRecord _beforeImageAsObject,
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
         // get objectToBeReplaced with an explicit get if not defined
-        DataproviderObject beforeImageAsObject = _beforeImageAsObject == null ? 
+        MappedRecord beforeImageAsObject = _beforeImageAsObject == null ? 
             super.get(
                 header,
                 new DataproviderRequest(
@@ -543,78 +600,95 @@ extends Database_1 {
                 )
             ).getObject() : 
                 _beforeImageAsObject;
-
-            DataproviderObject beforeImage = this.objectToBeforeImage(
-                beforeImageAsObject,
-                this.unitOfWorkId
+        MappedRecord beforeImage = this.objectToBeforeImage(
+            beforeImageAsObject,
+            this.unitOfWorkId
+        );
+        // lazy-init beforeImageChannel and unitsOfWork
+        if(this.beforeImageChannel == null) {
+            SysLog.trace("starting new batch");
+            // create channel on-demand (will be reset in epilog.
+            // Channel is used to store before images. A batching 
+            // channel minimizes th roundtrips to the audit provider. 
+            this.beforeImageChannel = new RequestCollection(
+                header,
+                this.auditProviderBeforeImage
             );
+            this.beforeImageChannel.beginBatch();
 
-            // lazy-init beforeImageChannel and unitsOfWork
-            if(this.beforeImageChannel == null) {
-                SysLog.trace("starting new batch");
-                // create channel on-demand (will be reset in epilog.
-                // Channel is used to store before images. A batching 
-                // channel minimizes th roundtrips to the audit provider. 
-                this.beforeImageChannel = new RequestCollection(
-                    header,
-                    this.auditProviderBeforeImage
-                );
-                this.beforeImageChannel.beginBatch();
+            // pre-allocate units of work objects. They are modified during
+            // create, modify, remove, replace and set operations and stored
+            // stored in epilog(). This minimizes replace requests units of
+            // work objects.
+            this.unitsOfWork = new HashMap();
+        }
 
-                // pre-allocate units of work objects. They are modified during
-                // create, modify, remove, replace and set operations and stored
-                // stored in epilog(). This minimizes replace requests units of
-                // work objects.
-                this.unitsOfWork = new HashMap();
-            }
-
-            // lazy-creation of unit of work object
-            Path mappedPath = this.mapAuditPath(
-                request.path(),
-                true
-            );    
-            Path unitOfWorkPath = mappedPath.getPrefix(5).getDescendant(
-                "unitOfWork", this.unitOfWorkId
-            );
-            if(this.unitsOfWork.get(unitOfWorkPath) == null) {
+        // lazy-creation of unit of work object
+        Path mappedPath = this.mapAuditPath(
+            request.path(),
+            true
+        );    
+        Path unitOfWorkPath = mappedPath.getPrefix(5).getDescendant(
+            "unitOfWork", this.unitOfWorkId
+        );
+        if(this.unitsOfWork.get(unitOfWorkPath) == null) {
+            try {
                 this.unitsOfWork.put(
                     unitOfWorkPath,
-                    new DataproviderObject(
+                    ObjectHolder_2Facade.newInstance(
                         unitOfWorkPath
-                    )
+                    ).getDelegate()
                 );
-                SysLog.trace("unit of work added", unitOfWorkPath);
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
             }
+            SysLog.trace("unit of work added", unitOfWorkPath);
+        }
 
-            // create before image
-            this.beforeImageChannel.addCreateRequest(
-                beforeImage
-            );
+        // create before image
+        this.beforeImageChannel.addCreateRequest(
+            beforeImage
+        );
 
-            // update unit of work (will be stored in epilog)    
-            DataproviderObject unitOfWork = (DataproviderObject)this.unitsOfWork.get(
-                unitOfWorkPath
-            );
-            if(unitOfWork == null) {
-                SysLog.trace("unitOfWork is null for path", unitOfWorkPath);
-            }
-            Set involvedObjects = new HashSet(unitOfWork.values("involved"));
-            involvedObjects.add(
-                request.path().getDescendant(
-                    "view:Audit:involved", this.unitOfWorkId
-                )
-            );
-            unitOfWork.clearValues("involved").addAll(
-                involvedObjects
-            );
+        // update unit of work (will be stored in epilog)    
+        MappedRecord unitOfWork = this.unitsOfWork.get(
+            unitOfWorkPath
+        );
+        if(unitOfWork == null) {
+            SysLog.trace("unitOfWork is null for path", unitOfWorkPath);
+        }
+        ObjectHolder_2Facade unitOfWorkFacade;
+        try {
+            unitOfWorkFacade = ObjectHolder_2Facade.newInstance(unitOfWork);
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
+        Set involvedObjects = new HashSet(unitOfWorkFacade.attributeValues("involved"));
+        involvedObjects.add(
+            request.path().getDescendant(
+                "view:Audit:involved", this.unitOfWorkId
+            )
+        );
+        unitOfWorkFacade.clearAttributeValues("involved").addAll(
+            involvedObjects
+        );
     }
 
     //------------------------------------------------------------------------
     private void completeObject(
-        DataproviderObject object
-    ) {
+        MappedRecord object
+    ) throws ServiceException {
+        ObjectHolder_2Facade facade;
+        try {
+            facade = ObjectHolder_2Facade.newInstance(object);
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         // all objects managed by audit1 plugin provide the namespace 'Audit'
-        object.clearValues("view:Audit:" + SystemAttributes.OBJECT_CLASS).add(
+        facade.clearAttributeValues("view:Audit:" + SystemAttributes.OBJECT_CLASS).add(
             "org:openmdx:compatibility:audit1:Auditable"
         );
     }
@@ -622,7 +696,7 @@ extends Database_1 {
     //------------------------------------------------------------------------
     private DataproviderReply completeReply(
         DataproviderReply reply
-    ) {
+    ) throws ServiceException {
         for(int i = 0; i < reply.getObjects().length; i++) {
             this.completeObject(
                 reply.getObjects()[i]
@@ -645,19 +719,19 @@ extends Database_1 {
             header,
             requests
         );
-        String unitOfWorkId = requests.length == 0 
-        ? null 
-            : (String)requests[0].context(DataproviderRequestContexts.UNIT_OF_WORK_ID).get(0);
+        String unitOfWorkId = requests.length == 0 ? 
+            null : 
+            (String)requests[0].context(DataproviderRequestContexts.UNIT_OF_WORK_ID).get(0);
 
         SysLog.trace("unit of work (request)", unitOfWorkId);
         SysLog.trace("unit of work (current)", this.unitOfWorkId);
 
         // guarantee that this.unitOfWorkId has always a valid value
-        this.unitOfWorkId = unitOfWorkId != null
-        ? unitOfWorkId
-            : this.unitOfWorkId != null
-            ? this.unitOfWorkId
-                : super.uidAsString();    
+        this.unitOfWorkId = unitOfWorkId != null ? 
+            unitOfWorkId : 
+            this.unitOfWorkId != null ? 
+                this.unitOfWorkId :
+                super.uidAsString();    
     }
 
     //------------------------------------------------------------------------
@@ -673,30 +747,36 @@ extends Database_1 {
         );
         // update units of work and replace
         if(
-                (this.unitsOfWork != null) &&
-                (this.beforeImageChannel != null)
+            (this.unitsOfWork != null) &&
+            (this.beforeImageChannel != null)
         ) {
             RequestCollection unitOfWorkChannel = new RequestCollection(
                 header,
                 this.auditProviderUnitOfWork
             );
             for(
-                    Iterator i = this.unitsOfWork.keySet().iterator();
-                    i.hasNext();
+                Iterator i = this.unitsOfWork.keySet().iterator();
+                i.hasNext();
             ) {
                 Path unitOfWorkPath = (Path)i.next();
-                DataproviderObject sourceUnitOfWork = (DataproviderObject)this.unitsOfWork.get(unitOfWorkPath);
+                MappedRecord sourceUnitOfWork = this.unitsOfWork.get(unitOfWorkPath);
+                ObjectHolder_2Facade sourceUnitOfWorkFacade;
+                try {
+                    sourceUnitOfWorkFacade = ObjectHolder_2Facade.newInstance(sourceUnitOfWork);
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
                 if(
-                        (sourceUnitOfWork.getValues("involved") != null) && 
-                        (sourceUnitOfWork.values("involved").size() > 0)
+                    (sourceUnitOfWorkFacade.getAttributeValues("involved") != null) && 
+                    !sourceUnitOfWorkFacade.attributeValues("involved").isEmpty()
                 ) {
-                    DataproviderObject unitOfWorkToBeReplaced = this.getUnitOfWork(
+                    MappedRecord unitOfWorkToBeReplaced = this.getUnitOfWork(
                         unitOfWorkChannel,
                         unitOfWorkPath
                     );
-                    unitOfWorkToBeReplaced.addClones(
-                        (DataproviderObject_1_0)this.unitsOfWork.get(unitOfWorkPath),
-                        true
+                    ObjectHolder_2Facade.getValue(unitOfWorkToBeReplaced).putAll(
+                        ObjectHolder_2Facade.getValue(this.unitsOfWork.get(unitOfWorkPath))
                     );
                     unitOfWorkChannel.addReplaceRequest(
                         unitOfWorkToBeReplaced
@@ -736,15 +816,15 @@ extends Database_1 {
                 )
             );
             int pos = -1;
-            DataproviderObject involved = null;
+            MappedRecord involved = null;
             int ii = 0;
             for(                
-                    Iterator i = involvedObjects.iterator();
-                    i.hasNext();
-                    ii++
+                Iterator<MappedRecord> i = involvedObjects.iterator();
+                i.hasNext();
+                ii++
             ) {
-                involved = (DataproviderObject)i.next();
-                if(involved.path().equals(request.path())) {
+                involved = i.next();
+                if(ObjectHolder_2Facade.getPath(involved).equals(request.path())) {
                     pos = ii;
                     break;
                 }
@@ -826,32 +906,38 @@ extends Database_1 {
     }
 
     //------------------------------------------------------------------------
-    private DataproviderObject getBeforeImageView(
-        DataproviderObject object
+    private MappedRecord getBeforeImageView(
+        MappedRecord object
     ) throws ServiceException {
-        DataproviderObject beforeImage = new DataproviderObject(
-            object.path()
-        );
-        for(
-                Iterator i = object.attributeNames().iterator();
+        try {
+            ObjectHolder_2Facade facade = ObjectHolder_2Facade.newInstance(object);
+            ObjectHolder_2Facade beforeImageFacade = ObjectHolder_2Facade.newInstance(
+                ObjectHolder_2Facade.getPath(object)            
+            );
+            for(
+                Iterator i = facade.getValue().keySet().iterator();
                 i.hasNext();
-        ) {
-            String attributeName = (String)i.next();
-            if(attributeName.startsWith("view:BeforeImage:")) {
-                beforeImage.values(
-                    attributeName.substring("view:BeforeImage:".length())
-                ).addAll(
-                    object.values(attributeName)
-                );
+            ) {
+                String attributeName = (String)i.next();
+                if(attributeName.startsWith("view:BeforeImage:")) {
+                    beforeImageFacade.attributeValues(
+                        attributeName.substring("view:BeforeImage:".length())
+                    ).addAll(
+                        facade.attributeValues(attributeName)
+                    );
+                }
             }
+            return beforeImageFacade.getDelegate();
         }
-        return beforeImage;
+        catch(ResourceException e) {
+            throw new ServiceException(e);
+        }
     }
 
     //------------------------------------------------------------------------
     public DataproviderReply replace(
         ServiceHeader header,
-        DataproviderRequest	request
+        DataproviderRequest request
     ) throws ServiceException {
         DataproviderReply reply = super.replace(
             header,
@@ -868,7 +954,7 @@ extends Database_1 {
     //------------------------------------------------------------------------
     public DataproviderReply modify(
         ServiceHeader header,
-        DataproviderRequest	request
+        DataproviderRequest request
     ) throws ServiceException {
         this.storeBeforeImage(
             null, // datastore does not return a view:BeforeImage in case of modify
@@ -937,23 +1023,31 @@ extends Database_1 {
      * @throws ServiceException 
      */
     private void convertXMLDatatypeValues(
-        DataproviderObject_1_0 object
+        MappedRecord object
     ) throws ServiceException{
+        ObjectHolder_2Facade facade;
+        try {
+            facade = ObjectHolder_2Facade.newInstance(object);
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         for(
-                Iterator i = object.attributeNames().iterator();
-                i.hasNext();
+            Iterator i = facade.getValue().keySet().iterator();
+            i.hasNext();
         ) {
             for (
-                    ListIterator j = object.values((String) i.next()).populationIterator();
-                    j.hasNext();
+                ListIterator j = facade.attributeValues((String) i.next()).populationIterator();
+                j.hasNext();
             ) {
                 Object value = j.next();
                 if(
-                        value instanceof Duration || 
-                        value instanceof XMLGregorianCalendar
+                    value instanceof Duration || 
+                    value instanceof XMLGregorianCalendar
                 ) {
                     j.set(this.datatypeFormat.unmarshal(value));
-                } else {
+                } 
+                else {
                     break;
                 }
             }
@@ -975,7 +1069,7 @@ extends Database_1 {
     // from audit provider. The units of work are retrieved/created
     // in prolog(), then modified in replace, create, modify requests
     // and in epilog() stored to audit provider. 
-    private Map unitsOfWork = null;
+    private Map<Path,MappedRecord> unitsOfWork = null;
 
     // channel to audit provider used to store before images
     // Created during prolog() and committed in epilog()

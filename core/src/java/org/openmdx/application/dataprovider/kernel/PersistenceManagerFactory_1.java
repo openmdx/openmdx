@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceManagerFactory_1.java,v 1.4 2009/01/15 15:10:18 hburger Exp $
+ * Name:        $Id: PersistenceManagerFactory_1.java,v 1.6 2009/05/29 17:04:09 hburger Exp $
  * Description: PersistenceManagerFactory_1 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/15 15:10:18 $
+ * Date:        $Date: 2009/05/29 17:04:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,14 +51,12 @@
 
 package org.openmdx.application.dataprovider.kernel;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.jdo.JDOFatalUserException;
 import javax.jdo.PersistenceManager;
 import javax.resource.ResourceException;
-import javax.security.auth.Subject;
 
 import org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1;
 import org.openmdx.base.persistence.cci.EntityManagerFactory;
@@ -75,7 +73,7 @@ class PersistenceManagerFactory_1
      *
      * @param configuration
      */
-    PersistenceManagerFactory_1(
+    protected PersistenceManagerFactory_1(
         Map<String, Object> configuration
     ) {
         super(configuration);
@@ -86,23 +84,24 @@ class PersistenceManagerFactory_1
      */
     private static final long serialVersionUID = -1727834811596343077L;
 
-    /**
-     * Public credential used as persistence manager request marker!
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1#getConnectionFactory()
      */
-    private static final Set<?> PERSISTENCE_MANAGER_REQUEST = Collections.singleton(
-        ManagerFactoryConfigurationEntries.PERSISTENCE_MANAGER
-    );
-    
+    @Override
+    public EntityManagerFactory getConnectionFactory(
+    ) {
+        return (EntityManagerFactory) super.getConnectionFactory();
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.AbstractManagerFactory#newManager(javax.security.auth.Subject)
      */
     @Override
     protected PersistenceManager newManager(
-        Subject subject
+        List<String> principalChain
     ) { 
-        EntityManagerFactory managerFactory = (EntityManagerFactory) super.getConnectionFactory();
         try {
-            return managerFactory.getEntityManager(subject);
+            return getConnectionFactory().getEntityManager(principalChain);
         } catch (ResourceException exception) {
             throw new JDOFatalUserException(
                 "Persistence manager acquisition failure",
@@ -112,39 +111,18 @@ class PersistenceManagerFactory_1
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.persistence.spi.AbstractManagerFactory#newManager()
+     * @see org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1#newManager()
      */
     @Override
-    protected PersistenceManager newManager(
-    ) {
-        return newManager(
-            new Subject(
-                true, // readOnly, 
-                NO_PRINCIPALS,
-                PERSISTENCE_MANAGER_REQUEST,
-                NO_CREDENTIALS // private credentials           
-            )
-        );
+    protected PersistenceManager newManager() {
+        try {
+            return getConnectionFactory().getEntityManager();
+        } catch (ResourceException exception) {
+            throw new JDOFatalUserException(
+                "Persistence manager acquisition failure",
+                exception
+            );
+        }
     }
 
-    /**
-     * Create a read only subject based on the given credentials
-     * 
-     * @param username
-     * @param password
-     * 
-     * @return a new subject
-     */
-    @Override
-    protected Subject toSubject(
-        String username,
-        String password
-    ){
-        return toSubject(
-            username, 
-            password, 
-            PERSISTENCE_MANAGER_REQUEST
-        );
-    }
-    
 }

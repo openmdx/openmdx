@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CoreAImpl.java,v 1.2 2009/02/18 13:00:20 hburger Exp $
+ * Name:        $Id: CoreAImpl.java,v 1.4 2009/04/07 17:24:17 hburger Exp $
  * Description: CoraAImpl 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/18 13:00:20 $
+ * Date:        $Date: 2009/04/07 17:24:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,7 @@ import org.openmdx.base.aop2.AbstractObject;
  *
  */
 public class CoreAImpl
-    extends AbstractObject
+    extends AbstractObject<test.openmdx.state2.jmi1.CoreA,test.openmdx.state2.cci2.CoreA,Void>
     implements LoadCallback
 {
 

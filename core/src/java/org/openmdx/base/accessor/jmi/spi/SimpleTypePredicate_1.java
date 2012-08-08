@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SimpleTypePredicate_1.java,v 1.8 2009/01/13 02:10:32 wfro Exp $
+ * Name:        $Id: SimpleTypePredicate_1.java,v 1.9 2009/06/09 12:45:17 hburger Exp $
  * Description: Any Type Predicate implementation
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:32 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,7 +55,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
+import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.query.FilterOperators;
 import org.w3c.cci2.AnyTypePredicate;
@@ -76,7 +76,7 @@ class SimpleTypePredicate_1
      * @param quantor
      */
     SimpleTypePredicate_1 (
-        RefFilter_1_1 delegate,
+        RefFilter_1_0 delegate,
         ModelElement_1_0 featureDef,
         short quantor
     ){

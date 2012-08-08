@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectEventHandler.java,v 1.47 2009/03/09 16:02:34 wfro Exp $
+ * Name:        $Id: ShowObjectEventHandler.java,v 1.55 2009/06/09 12:50:34 hburger Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.47 $
+ * Revision:    $Revision: 1.55 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/09 16:02:34 $
+ * Date:        $Date: 2009/06/09 12:50:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,18 +55,18 @@
  */
 package org.openmdx.portal.servlet.eventhandler;
 
-import java.beans.XMLEncoder;
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
+import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefStruct;
@@ -81,7 +81,8 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.Base64;
-import org.openmdx.kernel.url.protocol.XriProtocols;
+import org.openmdx.base.text.conversion.JavaBeans;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.PaintScope;
@@ -95,7 +96,6 @@ import org.openmdx.portal.servlet.view.OperationTab;
 import org.openmdx.portal.servlet.view.ReferencePane;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.view.ViewMode;
-import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
 public class ShowObjectEventHandler {
 
@@ -485,7 +485,7 @@ public class ShowObjectEventHandler {
                             if ((application.getFilterCriteriaField() != null)
                                     && (paramValuesMap.keySet().contains(application.getFilterCriteriaField()))) {
                                 // Get submitted attribute filters
-                                Map attributeFiltersAsMap = MapUtils.orderedMap(new HashMap());
+                                Map<String,String> attributeFiltersAsMap = new LinkedHashMap<String,String>();
                                 if (paramValuesMap.get(application.getFilterCriteriaField()) != null) {
                                     StringTokenizer tokenizer = new StringTokenizer(
                                         (String) paramValuesMap.get(application.getFilterCriteriaField()), " ,;", false
@@ -504,14 +504,11 @@ public class ShowObjectEventHandler {
                                     ReferencePane pane = currentView.getReferencePane()[i];
                                     Grid currentGrid = pane.getGrid();
                                     if ((currentGrid != null) && (currentGrid.getCurrentFilter() != null)) {
-                                        ByteArrayOutputStream bs = new ByteArrayOutputStream();
-                                        XMLEncoder encoder = new XMLEncoder(bs);
-                                        encoder.writeObject(currentGrid.getCurrentFilter());
-                                        encoder.close();
                                         if(!attributeFiltersAsMap.keySet().contains(currentGrid.getGridControl().getObjectContainer().getReferenceName())) {
+                                            String filterAsXml = JavaBeans.toXML(currentGrid.getCurrentFilter());
                                             attributeFiltersAsMap.put(
                                                 currentGrid.getGridControl().getObjectContainer().getReferenceName(), 
-                                                Base64.encode(bs.toByteArray())
+                                                Base64.encode(filterAsXml.getBytes())
                                             );
                                         }
                                     }
@@ -564,10 +561,9 @@ public class ShowObjectEventHandler {
                                 // Test whether object is still accessible. If not
                                 // go back to previous view. Notify other views about object update
                                 try {
-                                    currentView.getRefObject().refRefresh();
-                                    EventHandlerHelper.notifyObjectModified(
-                                        showViewsCache
-                                    );     
+                                	RefObject_1_0 pcView = currentView.getRefObject(); 
+                                    JDOHelper.getPersistenceManager(pcView).refresh(pcView);
+                                    showViewsCache.evictViews();
                                     RefObject_1_0 newTarget = application.getPortalExtension().handleOperationResult(
                                         currentView.getRefObject(), 
                                         tab.getOperationTabControl().getOperationName(), 
@@ -623,12 +619,19 @@ public class ShowObjectEventHandler {
                                     }
                                 }
                                 catch (Exception e) {
+                                    ServiceException e0 = new ServiceException(e);
+                                    AppLog.info(e0.getMessage(), e0.getCause());
                                     nextView = currentView.getPreviousView(null);
                                 }
                             }
                             catch(Exception e) {
                                 ServiceException e0 = new ServiceException(e);
-                                AppLog.warning(e0.getMessage(), e0.getCause());
+                                if(e0.getExceptionCode() == BasicException.Code.CONCURRENT_ACCESS_FAILURE) {
+                                	AppLog.detail(e0.getMessage(), e0.getCause());
+                                }
+                                else {
+                                	AppLog.warning(e0.getMessage(), e0.getCause());
+                                }
                                 try {
                                     pm.currentTransaction().rollback();
                                 }
@@ -707,7 +710,7 @@ public class ShowObjectEventHandler {
                                                 null, 
                                                 application, 
                                                 currentView.getPersistenceManager(),
-                                                MapUtils.orderedMap(new HashMap()), 
+                                                new LinkedHashMap<Path,Action>(), 
                                                 currentView.getLookupType(),
                                                 currentView.getRestrictToElements(),
                                                 ViewMode.STANDARD
@@ -731,7 +734,7 @@ public class ShowObjectEventHandler {
                                                 null, 
                                                 application, 
                                                 currentView.getPersistenceManager(),
-                                                MapUtils.orderedMap(new HashMap()), 
+                                                new LinkedHashMap<Path,Action>(), 
                                                 currentView.getLookupType(),
                                                 currentView.getRestrictToElements(),
                                                 parent, 
@@ -754,7 +757,7 @@ public class ShowObjectEventHandler {
                                                 null, 
                                                 application, 
                                                 currentView.getPersistenceManager(),
-                                                MapUtils.orderedMap(new HashMap()), 
+                                                new LinkedHashMap<Path,Action>(), 
                                                 currentView.getLookupType(),
                                                 currentView.getRestrictToElements(),
                                                 parent, 

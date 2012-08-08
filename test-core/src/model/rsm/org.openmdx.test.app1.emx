@@ -2496,8 +2496,7 @@
         </ownedAttribute>
         <ownedOperation xmi:id="_3C7B8A60016D3DA8925102D6" name="formatNameAs" isQuery="true">
           <ownedComment xmi:id="_dUCcQNr6EdyqHpG4rXxY2g" annotatedElement="_3C7B8A60016D3DA8925102D6">
-            <body>@throws org::openmdx::test::app1::Person::CanNotFormatNameException&#xD;
- </body>
+            <body>@throws org::openmdx::test::app1::Person::CanNotFormatNameException</body>
           </ownedComment>
           <ownedParameter xmi:id="_qhGRQ97CEdmkJO73lqONhA" type="_3C7B8A60016D3DA89273031B" direction="return"/>
           <ownedParameter xmi:id="_3C7B8A60016D3DA894AE0394" name="&lt;&lt;0..1>> type" type="_3C7B8A60016D3DA894DD0283"/>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractObject.java,v 1.1 2009/02/04 11:13:51 hburger Exp $
+ * Name:        $Id: AbstractObject.java,v 1.7 2009/05/23 15:08:56 wfro Exp $
  * Description: Abstract Object
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/04 11:13:51 $
+ * Date:        $Date: 2009/05/23 15:08:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,9 @@
  */
 package org.openmdx.base.aop2;
 
+import java.util.Collections;
+
+import javax.jdo.JDOFatalInternalException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.listener.ClearCallback;
@@ -61,12 +64,14 @@ import javax.jmi.reflect.RefPackage;
 
 import org.openmdx.base.jmi1.BasePackage;
 import org.openmdx.base.jmi1.Void;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.spi.AspectObjectAcessor;
 import org.openmdx.jdo.listener.ConstructCallback;
 
 /**
  * Abstract Object
  */
-public abstract class AbstractObject<S extends RefObject, N> {
+public abstract class AbstractObject<S extends RefObject, N, C> {
 
     /**
      * Constructor 
@@ -74,7 +79,7 @@ public abstract class AbstractObject<S extends RefObject, N> {
      * @param same
      * @param next
      */
-    public AbstractObject(
+    protected AbstractObject(
         S same,
         N next
     ) {
@@ -92,6 +97,11 @@ public abstract class AbstractObject<S extends RefObject, N> {
      */
     private final N next;
 
+    
+    //------------------------------------------------------------------------
+    // Objects
+    //------------------------------------------------------------------------
+    
     /**
      * Retrieve same.
      *
@@ -110,12 +120,22 @@ public abstract class AbstractObject<S extends RefObject, N> {
         return this.next;
     }
 
+    
+    //------------------------------------------------------------------------
+    // Packages
+    //------------------------------------------------------------------------
+    
     @SuppressWarnings("unchecked")
     protected final <T extends RefPackage> T samePackage(
     ){
         return (T) this.same.refImmediatePackage();
     }
 
+    
+    //------------------------------------------------------------------------
+    // Managers
+    //------------------------------------------------------------------------
+    
     /**
      * Retrieve the same layer's persistence manager
      * 
@@ -133,6 +153,78 @@ public abstract class AbstractObject<S extends RefObject, N> {
     protected final PersistenceManager nextManager(){
         return JDOHelper.getPersistenceManager(this.next);
     }
+
+    
+    //------------------------------------------------------------------------
+    // Context Objects
+    //------------------------------------------------------------------------
+    
+    /**
+     * Retrieve the current object id
+     * 
+     * @return the current object id
+     */
+    private final Object contextId(){
+        return PersistenceHelper.getCurrentObjectId(sameObject());
+    }
+    
+    /**
+     * Acquire the <code>AspectObjectAcessor</code> instance
+     * 
+     * @return the <code>AspectObjectAcessor</code> instance
+     */
+    private AspectObjectAcessor aspectObjectAccessor(){
+        AspectObjectAcessor contexts = (AspectObjectAcessor) sameManager().getUserObject(AspectObjectAcessor.class);
+        if(contexts == null) throw new JDOFatalInternalException(
+            AspectObjectAcessor.class.getSimpleName() + " acquisition failure"
+        );
+        return contexts;
+    }
+    
+    /**
+     * Retrieve the context belonging to this aspect, creating a new one if necessary.
+     * 
+     * @return the context
+     */
+    @SuppressWarnings("unchecked")
+    protected C thisContext(
+    ){
+        AspectObjectAcessor contexts = aspectObjectAccessor();
+        Object id = contextId();
+        Class<?> aspect = getClass();
+        Object context = contexts.get(id, aspect);
+        if(context ==  null) contexts.put(
+            id,
+            aspect,
+            context = newContext()
+        );
+        return (C) context;
+    }
+    
+    /**
+     * Must be overridden by a sub-class in order to use an aspect specific context
+     * 
+     * @return a new context
+     */
+    protected C newContext(){
+        return null; 
+    }
+    
+    /**
+     * Removes the context if it is already set
+     */
+    protected void evictContext(
+    ){
+        aspectObjectAccessor().remove(
+            contextId(), // id
+            getClass() // aspect
+        );
+    }
+    
+    
+    //------------------------------------------------------------------------
+    // Void Factory
+    //------------------------------------------------------------------------
     
     /**
      * Void factory
@@ -143,49 +235,175 @@ public abstract class AbstractObject<S extends RefObject, N> {
         return ((BasePackage)this.same.refOutermostPackage().refPackage("org:openmdx:base")).createVoid();
     }
 
+    
+    //------------------------------------------------------------------------
+    // Callback Delegation
+    //------------------------------------------------------------------------
+    
     /**
-     * Delegate <code>ClearCallback</code> method to the next layer if appropriate.
+     * Delegate <code>ClearCallback</code> method to the mix-in super-classes 
+     * of the same layer and to the next layer.
      */
-    protected void jdoPreClear() {
+    protected void jdoPreClear(
+    ) {
+        //
+        // Mix-In Classes Of Same Layer
+        //
+        jdoPreClear(
+            (Class<? super N>[])null // any order
+        );
+        //
+        // Next Layer
+        //
         if(this.next instanceof ClearCallback) {
             ((ClearCallback)this.next).jdoPreClear();
         }
     }
 
     /**
-     * Delegate <code>StoreCallback</code> method to the next layer if appropriate.
+     * Delegate <code>StoreCallback</code> method to the mix-in super-classes 
+     * of the same layer and to the next layer.
      */
-    protected void jdoPreStore() {
-        if(this.next instanceof StoreCallback) {
-            ((StoreCallback)this.next).jdoPreStore();
+    protected void jdoPreStore(
+    ) {
+        //
+        // Mix-In Classes Of Same Layer
+        //
+        jdoPreStore(
+            (Class<? super N>[])null // any order
+        );
+    }
+
+    /**
+     * Delegate <code>LoadCallback</code> method to the mix-in super-classes 
+     * of the same layer and to the next layer.
+     */
+    protected void jdoPostLoad(
+    ) {
+        //
+        // Mix-In Classes Of Same Layer
+        //
+        jdoPostLoad(
+            (Class<? super N>[])null // any order
+        );
+    }
+
+    /**
+     * Delegate <code>DeleteCallback</code> method to the mix-in super-classes 
+     * of the same layer and to the next layer.
+     */
+    protected void jdoPreDelete(
+    ) {
+        //
+        // Mix-In Classes Of Same Layer
+        //
+        jdoPreDelete(
+            (Class<? super N>[])null // any order
+        );
+    }
+
+    /**
+     * Delegate <code>ConstructCallback</code> method to the mix-in super-classes 
+     * of the same layer and to the next layer.
+     */
+    protected void openmdxjdoPostConstruct(
+    ) {
+        //
+        // Mix-In Classes Of Same Layer
+        //
+        openmdxjdoPostConstruct(
+            (Class<? super N>[])null // any order
+        );
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Callback Delegation To Mix-In Classes Of The Same Layer
+    //------------------------------------------------------------------------
+    
+    /**
+     * Delegate <code>ClearCallback</code> method to the mix-in super-classes  
+     * of the same layer.
+     * 
+     * @param selection the selection and order of mix-in super-classes to dispatch to
+     */
+    protected void jdoPreClear(
+        Class<? super N>... selection
+    ) {
+        for(ClearCallback target : mixedInTargets(ClearCallback.class, selection)) {
+            target.jdoPreClear();
         }
     }
 
     /**
-     * Delegate <code>LoadCallback</code> method to the next layer if appropriate.
+     * Delegate <code>StoreCallback</code> method to the mix-in super-classes  
+     * of the same layer.
+     * 
+     * @param selection the selection and order of mix-in super-classes to dispatch to
      */
-    protected void jdoPostLoad() {
-        if(this.next instanceof LoadCallback) {
-            ((LoadCallback)this.next).jdoPostLoad();
+    protected void jdoPreStore(
+        Class<? super N>... selection
+    ) {
+        for(StoreCallback c : mixedInTargets(StoreCallback.class, selection)) {
+            c.jdoPreStore();
         }
     }
 
     /**
-     * Delegate <code>DeleteCallback</code> method to the next layer if appropriate.
+     * Delegate <code>LoadCallback</code> method to the mix-in super-classes  
+     * of the same layer.
+     * 
+     * @param selection the selection and order of mix-in super-classes to dispatch to
      */
-    protected void jdoPreDelete() {
-        if(this.next instanceof DeleteCallback) {
-            ((DeleteCallback)this.next).jdoPreDelete();
+    protected void jdoPostLoad(
+        Class<? super N>... selection
+    ) {
+        for(LoadCallback c : mixedInTargets(LoadCallback.class, selection)) {
+            c.jdoPostLoad();
         }
     }
 
     /**
-     * Delegate <code>ConstructCallback</code> method to the next layer if appropriate.
+     * Delegate <code>DeleteCallback</code> method to the mix-in super-classes  
+     * of the same layer.
+     * 
+     * @param selection the selection and order of mix-in super-classes to dispatch to
      */
-    protected void openmdxjdoPostConstruct() {
-        if(this.next instanceof ConstructCallback) {
-            ((ConstructCallback)this.next).openmdxjdoPostConstruct();
+    protected void jdoPreDelete(
+        Class<? super N>... selection
+    ) {
+        for(DeleteCallback c : mixedInTargets(DeleteCallback.class, selection)) {
+            c.jdoPreDelete();
         }
+    }
+
+    /**
+     * Delegate <code>ConstructCallback</code> method to the mix-in super-classes  
+     * of the same layer.
+     * 
+     * @param selection the selection and order of mix-in super-classes to dispatch to
+     */
+    protected void openmdxjdoPostConstruct(
+        Class<? super N>... selection
+    ) {
+        for(ConstructCallback c : mixedInTargets(ConstructCallback.class, selection)) {
+            c.openmdxjdoPostConstruct();
+        }
+    }
+
+    /**
+     * Provide the targets for mixed-in interfaces 
+     * 
+     * @param targetClass the target interface
+     * @param selection the selection and order of mix-in super-classes to dispatch to
+     * 
+     * @return the targets for mixed-in interfaces 
+     */
+    protected final <I> Iterable<I> mixedInTargets(
+        Class<I> targetClass,
+        Class<? super N>... selection
+    ){
+        return Collections.emptyList(); // TODO provide targets
     }
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceHelper.java,v 1.4 2009/02/10 16:51:12 hburger Exp $
+ * Name:        $Id: PersistenceHelper.java,v 1.6 2009/05/29 17:04:11 hburger Exp $
  * Description: PersistenceHelper 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/10 16:51:12 $
+ * Date:        $Date: 2009/05/29 17:04:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,12 @@
  */
 package org.openmdx.base.persistence.cci;
 
+import java.util.Collection;
+
+import javax.jdo.Extent;
 import javax.jdo.JDOHelper;
 
+import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -120,5 +124,39 @@ public class PersistenceHelper {
             JDOHelper.getTransactionalObjectId(pc);
     }
 
+    /**
+     * Retrieve a candidate collection
+     * 
+     * @param extent the extent
+     * @param pattern the object id pattern
+     * 
+     * @return the candidate collection
+     */
+    public static <T> Collection<T> getCandidates(
+        Extent<T> extent,
+        Object pattern
+    ){
+        return null; // TODO
+    }
+
+    /**
+     * A way to avoid fetching an object just to retrieve its object id
+     * 
+        Object pc a persistence capable object
+     * @param featureName
+     * 
+     * @return the value where each object is replaced by its id
+     */
+    public static Object getFeatureReplacingObjectById(
+        Object pc,
+        String featureName
+    ){  
+        PersistenceManager_1_0 pm = (PersistenceManager_1_0) JDOHelper.getPersistenceManager(pc);
+        return pm.getFeatureReplacingObjectById(
+            getCurrentObjectId(pc), 
+            featureName
+        );
+    }
+    
 }
 

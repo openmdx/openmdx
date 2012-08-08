@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderRequest.java,v 1.4 2009/01/06 13:14:45 wfro Exp $
+ * Name:        $Id: DataproviderRequest.java,v 1.7 2009/06/01 15:36:57 wfro Exp $
  * Description: Dataprovider Cursor
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 13:14:45 $
+ * Date:        $Date: 2009/06/01 15:36:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,9 +62,13 @@ import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.AttributeSpecifier;
+import org.openmdx.base.query.Directions;
 import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -82,19 +86,19 @@ implements MappedRecord
      */
     private static final long serialVersionUID = 3688790250033920310L;
 
-    final static private AttributeSpecifier[]   NO_ATTRIBUTE_SPECIFIERS = {};
-    final static private FilterProperty[]       NO_FILTER_PROPERTIES    = {};
+    final static private AttributeSpecifier[] NO_ATTRIBUTE_SPECIFIERS = {};
+    final static private FilterProperty[] NO_FILTER_PROPERTIES    = {};
 
     /**
      * Creates DataproviderRequest object with no filter properties set
      * and using default index values. 
      */
     public DataproviderRequest(
-        DataproviderObject object,
+        MappedRecord object,
         short operation,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
-    ){
+    ) throws ServiceException {
         this(
             object,
             operation,
@@ -132,7 +136,7 @@ implements MappedRecord
      * it would also ease the task of marshalling the object.
      */
     public DataproviderRequest(
-        DataproviderObject object,
+        MappedRecord object,
         short operation,
         FilterProperty[] filter,
         int position,
@@ -140,7 +144,7 @@ implements MappedRecord
         short direction,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
-    ){
+    ) throws ServiceException {
         this(
             null,
             object,
@@ -170,7 +174,7 @@ implements MappedRecord
      */
     public DataproviderRequest(
         DataproviderContext that,
-        DataproviderObject object,
+        MappedRecord object,
         short operation,
         FilterProperty[] filter,
         int position,
@@ -178,51 +182,52 @@ implements MappedRecord
         short direction,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
-    ){
+    ) throws ServiceException {
         super(that);
         try {
-            if(object.path() == null) throw new RuntimeServiceException(
-                BasicException.Code.DEFAULT_DOMAIN, 
-                BasicException.Code.ASSERTION_FAILURE,
-                "A request's path must not be null"
-            );
+            if(ObjectHolder_2Facade.getPath(object) == null) {
+                throw new RuntimeServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "A request's path must not be null"
+                );
+            }
             this.object = object;
             if(
-                    operation < DataproviderOperations.min() ||
-                    operation > DataproviderOperations.max()
-            ) throw new RuntimeServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "Illegal value for parameter 'operation'",
-                new BasicException.Parameter("operation", operation)
-            );        
-            this.attributeSpecifier =
-                attributeSpecifier == null
-                ? NO_ATTRIBUTE_SPECIFIERS
-                    : attributeSpecifier;
+                operation < DataproviderOperations.min() ||
+                operation > DataproviderOperations.max()
+            ) {
+                throw new RuntimeServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "Illegal value for parameter 'operation'",
+                    new BasicException.Parameter("operation", operation)
+                );
+            }
+            this.attributeSpecifier = attributeSpecifier == null ? 
+                NO_ATTRIBUTE_SPECIFIERS : 
+                attributeSpecifier;
             this.operation = operation;
-            this.filter = 
-                filter == null
-                ? NO_FILTER_PROPERTIES
-                    : filter;
+            this.filter = filter == null ? 
+                NO_FILTER_PROPERTIES : 
+                filter;
             this.position = position;
             this.size = size;
             this.direction = direction;
             this.attributeSelector = attributeSelector;
-
             // Check that no name is repeating in the array of AttributeSpecifier
             for(
-                    int i = 0;
-                    i < this.attributeSpecifier.length - 1;
-                    i++
+                int i = 0;
+                i < this.attributeSpecifier.length - 1;
+                i++
             ){
                 for(
-                        int j = i + 1;
-                        j < this.attributeSpecifier.length;
-                        j++
+                    int j = i + 1;
+                    j < this.attributeSpecifier.length;
+                    j++
                 ){
                     if(
-                            this.attributeSpecifier[i].name().equals(this.attributeSpecifier[j].name())
+                        this.attributeSpecifier[i].name().equals(this.attributeSpecifier[j].name())
                     ){
                         new RuntimeServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
@@ -238,15 +243,18 @@ implements MappedRecord
                     }
                 }
             }
-        } catch (RuntimeServiceException assertionFailure) {
+        }
+        catch (RuntimeServiceException assertionFailure) {
             SysLog.error(
                 assertionFailure.getMessage(), 
                 assertionFailure.getCause()
             );
             throw assertionFailure;
         }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-
 
     //------------------------------------------------------------------------
     // Members
@@ -258,8 +266,13 @@ implements MappedRecord
      * @return      an object of DataproviderObject class
      */
     public Path path(
-    ){
-        return this.object.path();
+    ) throws ServiceException {
+        try {
+            return ObjectHolder_2Facade.getPath(this.object);
+        }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
 
     /**
@@ -267,7 +280,7 @@ implements MappedRecord
      *
      * @return      an object of DataproviderObject class;
      */
-    public DataproviderObject object(
+    public MappedRecord object(
     ){
         return this.object;
     }
@@ -470,7 +483,7 @@ implements MappedRecord
     /**
      * Dataprovider object
      */
-    private final DataproviderObject object;
+    private final MappedRecord object;
 
     /**
      * Operation

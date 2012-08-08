@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestLoggerAdapter.java,v 1.5 2009/03/05 17:51:36 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TestLoggerAdapter.java,v 1.8 2009/05/27 23:38:41 hburger Exp $
  * Description: TestLoggerAdapter 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 17:51:36 $
+ * Date:        $Date: 2009/05/27 23:38:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,10 +50,7 @@
  */
 package org.openmdx.test.kernel.log;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
-import org.openmdx.application.log.AppLog;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -61,20 +58,20 @@ import org.openmdx.kernel.log.SysLog;
  */
 public class TestLoggerAdapter {
 
-    /**
-     * Test Logging via Jakarta Commons Logging
-     */
-    @Test
-    public void testFromJCL() {
-        Log log = LogFactory.getLog(TestLoggerAdapter.class);
-        Exception e = new Exception("This is a test exception");
-        log.trace("A trace message");
-        log.debug("A debug message");
-        log.info("An informational message");
-        log.warn("A warning", e);
-        log.error("An error", e);
-        log.fatal("A fatal exception", e);
-    }
+//    /**
+//     * Test Logging via Jakarta Commons Logging
+//     */
+//    @Test
+//    public void testFromJCL() {
+//        Log log = LogFactory.getLog(TestLoggerAdapter.class);
+//        Exception e = new Exception("This is a test exception");
+//        log.trace("A trace message");
+//        log.debug("A debug message");
+//        log.info("An informational message");
+//        log.warn("A warning", e);
+//        log.error("An error", e);
+//        log.fatal("A fatal exception", e);
+//    }
 
     /**
      * Test Logging via SysLog
@@ -90,18 +87,18 @@ public class TestLoggerAdapter {
         SysLog.criticalError("A fatal exception", e);
     }
     
-    /**
-     * Test Logging via AppLog
-     */
-    @Test
-    public void testAppLog() {
-        Exception e = new Exception("This is a test exception");
-        AppLog.trace("A trace message");
-        AppLog.detail("A debug message");
-        AppLog.info("An informational message");
-        AppLog.warning("A warning", e);
-        AppLog.error("An error", e);
-        AppLog.criticalError("A fatal exception", e);
-    }
+//    /**
+//     * Test Logging via AppLog
+//     */
+//    @Test
+//    public void testAppLog() {
+//        Exception e = new Exception("This is a test exception");
+//        AppLog.trace("A trace message");
+//        AppLog.detail("A debug message");
+//        AppLog.info("An informational message");
+//        AppLog.warning("A warning", e);
+//        AppLog.error("An error", e);
+//        AppLog.criticalError("A fatal exception", e);
+//    }
 
 }

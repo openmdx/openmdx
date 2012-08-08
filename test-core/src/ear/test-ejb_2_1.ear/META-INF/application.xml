@@ -2,11 +2,11 @@
 <!--
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: application.xml,v 1.4 2007/05/31 08:40:09 hburger Exp $
+ * Name:        $Id: application.xml,v 1.5 2009/03/09 18:15:47 hburger Exp $
  * Description: Enterprise Application 1.4 Descriptor
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/05/31 08:40:09 $
+ * Date:        $Date: 2009/03/09 18:15:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,22 +54,14 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/application_1_4.xsd"
   	version="1.4"
  >
-	<display-name>
-		openMDX/Core Test Lightweight Container EAR
-	</display-name>
+	<display-name>openMDX/Core Test EJB 2.1</display-name>
 	<module>
-		<ejb>
-			failing1.jar
-		</ejb>
+		<ejb>failing1.jar</ejb>
   	</module>
 	<module>
-		<ejb>
-			app1.jar
-		</ejb>
+		<ejb>app1.jar</ejb>
   	</module>
 	<module>
-		<ejb>
-			gateway1.jar
-		</ejb>
+		<ejb>gateway1.jar</ejb>
   	</module>
 </application>

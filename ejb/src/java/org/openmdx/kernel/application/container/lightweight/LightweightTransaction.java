@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightTransaction.java,v 1.3 2009/02/24 16:02:52 hburger Exp $
+ * Name:        $Id: LightweightTransaction.java,v 1.4 2009/03/31 17:06:10 hburger Exp $
  * Description: Lightweight Transaction
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 16:02:52 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,6 +55,8 @@ import java.io.StringWriter;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -70,8 +72,7 @@ import javax.transaction.xa.Xid;
 import org.openmdx.kernel.application.container.transaction.TransactionIdFactory;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 
 /**
  * JTA Transaction implementation.
@@ -98,9 +99,7 @@ final class LightweightTransaction implements Transaction {
     /**
      * The logger instance
      */
-    private final Logger logger = LoggerFactory.getLogger(
-        LightweightTransactionManager.class
-    );
+    private final Logger logger = LoggerFactory.getLogger();
     
     
     /**
@@ -409,8 +408,8 @@ final class LightweightTransaction implements Transaction {
         
         activeBranches.remove(xaRes);
         
-        this.logger.trace(
-            "Delist xaResource {} from transaction {} ({})",
+        this.logger.log(Level.FINEST,
+            "Delist xaResource {0} from transaction {1} ({2})",
             new Object[]{
                 xaRes,
                 getXAFlag(flag),
@@ -504,8 +503,9 @@ final class LightweightTransaction implements Transaction {
             suspendedResources.remove(xaRes);
         }
         
-        this.logger.trace(
-            "Enlist xaResource {} with transaction {} ({})",
+        this.logger.log(
+        	Level.FINEST,
+            "Enlist xaResource {0} with transaction {1} ({2})",
             new Object[]{
                 xaRes,
                 getXAFlag(flag),
@@ -786,7 +786,7 @@ final class LightweightTransaction implements Transaction {
     private Throwable log(
         Throwable exception
     ){
-        this.logger.warn(exception.getMessage(), exception);
+        this.logger.log(Level.WARNING,exception.getMessage(), exception);
         return exception;
     }
 

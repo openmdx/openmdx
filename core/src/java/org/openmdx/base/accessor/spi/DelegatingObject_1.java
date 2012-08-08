@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingObject_1.java,v 1.15 2009/02/03 11:12:24 hburger Exp $
+ * Name:        $Id: DelegatingObject_1.java,v 1.21 2009/05/26 09:29:22 wfro Exp $
  * Description: DelegatingObject_1 class
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/03 11:12:24 $
+ * Date:        $Date: 2009/05/26 09:29:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,12 +60,16 @@ import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
+import javax.resource.ResourceException;
+import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.Record;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.LargeObject_1_0;
-import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * A delegating object
@@ -385,6 +389,14 @@ public abstract class DelegatingObject_1
     }
 
     /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.Object_1_0#getAspect(java.lang.String)
+     */
+    public Map<String, DataObject_1_0> getAspects(
+    ) throws ServiceException {
+        return this.getDelegate().getAspects();
+    }
+
+    /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Object_1_0#objIsContained()
      */
     public boolean objIsContained(
@@ -434,7 +446,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetObjectId()
      */
-    public Object jdoGetObjectId(
+    public Path jdoGetObjectId(
     ) {
         return this.delegate.jdoGetObjectId();
     }
@@ -442,7 +454,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
-    public Object jdoGetTransactionalObjectId(
+    public Path jdoGetTransactionalObjectId(
     ) {
         return this.delegate.jdoGetTransactionalObjectId();
     }
@@ -452,7 +464,7 @@ public abstract class DelegatingObject_1
      */
     public Object jdoGetVersion(
     ) {
-        throw new UnsupportedOperationException("Operation not supported by DelegatingObject_1");
+        return this.delegate.jdoGetVersion();
     }
 
     /* (non-Javadoc)
@@ -744,100 +756,51 @@ public abstract class DelegatingObject_1
     // Operations
     //--------------------------------------------------------------------------
 
-    /**
-     * Invokes an operation asynchronously.
-     *
-     * @param       operation
-     *              The operation name
-     * @param       arguments
-     *              The operation's arguments object. 
-     *
-     * @return      a structure with the result's values if the accessor is
-     *        going to populate it after the unit of work has committed
-     *        or null if the operation's return value(s) will never be
-     *        available to the accessor.
-     *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if no unit of work is in progress
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if either asynchronous calls are not supported by the 
-     *        manager or the requested operation is not supportd by the
-     *        object.
-     * @exception   ServiceException 
-     *        if the invocation fails for another reason
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
-    public Structure_1_0 objInvokeOperationInUnitOfWork(
-        String operation,
-            Structure_1_0 arguments
-    ) throws ServiceException {
-        return getDelegate().objInvokeOperationInUnitOfWork(
-            operation,
-            arguments
-        );
-    }
-
-    /**
-     * Invokes an operation synchronously.
-     * <p>
-     * Only query operations can be invoked synchronously unless the unit of
-     * work is non-optimistic or committing.
-     *
-     * @param       operation
-     *              The operation name
-     * @param       arguments
-     *              The operation's arguments object. 
-     *
-     * @return      the operation's return object
-     *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if a non-query operation is called in an inappropriate
-     *        state of the unit of work.
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if either synchronous calls are not supported by the 
-     *        manager or the requested operation is not supportd by the
-     *        object.
-     * @exception   ServiceException 
-     *        if a checked exception is thrown by the implementation or
-     *        the invocation fails for another reason.
-     */
-    public Structure_1_0 objInvokeOperation(
-        String operation,
-            Structure_1_0 arguments
-    ) throws ServiceException {
-        return getDelegate().objInvokeOperation(
-            operation,
-            arguments
-        );
+    public boolean execute(
+        InteractionSpec ispec, 
+        Record input, 
+        Record output
+    ) throws ResourceException {
+        try {
+            return getDelegate().execute(ispec, input, output);
+        } catch (ServiceException exception) {
+            throw BasicException.initHolder(
+                new ResourceException(
+                    "Method invocation failure",
+                    BasicException.newEmbeddedExceptionStack(exception)
+                )
+            );
+        }
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objAddEventListener(java.lang.String, java.util.EventListener)
      */
     public void objAddEventListener(
-        String feature, 
         EventListener listener
     ) throws ServiceException {
-        getDelegate().objAddEventListener(feature, listener);     
+        getDelegate().objAddEventListener(listener);     
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objRemoveEventListener(java.lang.String, java.util.EventListener)
      */
     public void objRemoveEventListener(
-        String feature, 
         EventListener listener
     ) throws ServiceException {
-        getDelegate().objRemoveEventListener(feature, listener);      
+        getDelegate().objRemoveEventListener(listener);      
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetEventListeners(java.lang.String, java.lang.Class)
      */
     public <T extends EventListener> T[] objGetEventListeners(
-        String feature, 
         Class<T> listenerType
     ) throws ServiceException {
-        return getDelegate().objGetEventListeners(feature,listenerType);
+        return getDelegate().objGetEventListeners(listenerType);
     }
 
 }

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.206 2009/03/09 14:26:20 wfro Exp $
+= Name:        $Id: build.xml,v 1.211 2009/05/27 22:40:21 hburger Exp $
 = Description: openMDX/Core Build File
-= Revision:    $Revision: 1.206 $
-= Date:        $Date: 2009/03/09 14:26:20 $
+= Revision:    $Revision: 1.211 $
+= Date:        $Date: 2009/05/27 22:40:21 $
 = Copyright:   (c) 2003-2009 OMEX AG
 =======================================================================
 =
@@ -77,7 +77,6 @@
 		<include name="org/openmdx/base/stream/rmi/jrmp/*"/>
 		<include name="org/openmdx/base/stream/rmi/iiop/*"/>
 		<include name="org/openmdx/kernel/naming/spi/rmi/*"/>
-		<include name="org/openmdx/compatibility/application/dataprovider/transport/ejb/lightweight/*"/>
 	</patternset>
 	<patternset id="project.rmi.iiop.classes">
 		<include name="org/openmdx/base/stream/rmi/iiop/*"/>
@@ -98,13 +97,10 @@
 		<include name="com/sun/org/apache/xerces/internal/impl/msg/*"/>
 		<include name="com/sun/org/apache/xerces/internal/util/DatatypeMessageFormatter.*"/>
 	</patternset>
-	<patternset id="openmdx-base.openxri-syntax">
-		<include name="org/openxri/*"/>
-		<include name="com/ibm/icu/**"/>
-	</patternset>
 	<patternset id="openmdx-system.content">
 		<include name="org/openmdx/compatibility/kernel/url/protocol/**"/>
 		<include name="org/openmdx/kernel/url/protocol/**"/>
+		<include name="org/openmdx/kernel/logging/**"/>
 	</patternset>
 	<patternset id="tomcat-juli.content">
 		<include name="org/apache/juli/*"/>
@@ -113,7 +109,6 @@
 	<patternset id="openmdx-base.jre-1.5">
 		<patternset refid="slf4j-api.content"/>
 		<patternset refid="jdo-api.content"/>
-		<patternset refid="openmdx-base.openxri-syntax"/>
 		<include name="javax/jmi/**"/>
 		<include name="net/*/NetPackage*"/>
 		<include name="net/rfc/*/RfcPackage*"/>
@@ -123,18 +118,21 @@
 		<include name="org/oasisopen/**"/>
 		<include name="org/omg/**"/>
 		<include name="org/openmdx/*/OpenmdxPackage*"/>
-		<include name="org/openmdx/kernel/**"/>
-		<include name="org/openmdx/compatibility/kernel/**"/>
-		<include name="org/openmdx/base/**"/>
-		<include name="org/openmdx/compatibility/base/**"/>
-		<include name="org/openmdx/compatibility/*/CompatibilityPackage*"/>
 		<include name="org/openmdx/*1/**"/>
 		<include name="org/openmdx/*2/**"/>
-		<include name="org/openmdx/compatibility/*1/**"/>
 		<include name="org/openmdx/application/**"/>
 		<exclude name="org/openmdx/application/dataprovider/transport/ejb/**"/>
-		<include name="org/openmdx/oracle/base/**"/>
+		<include name="org/openmdx/base/**"/>
+		<include name="org/openmdx/compatibility/*1/**"/>
+		<include name="org/openmdx/compatibility/*/CompatibilityPackage*"/>
+		<include name="org/openmdx/compatibility/kernel/**"/>
+		<include name="org/openmdx/compatibility/base/**"/>
+		<exclude name="org/openmdx/compatibility/kernel/url/protocol/**"/>
+		<include name="org/openmdx/exception/**"/>
+		<include name="org/openmdx/kernel/**"/>
+		<exclude name="org/openmdx/kernel/url/protocol/**"/>
 		<include name="org/openmdx/jdo/**"/>
+		<include name="org/openmdx/oracle/base/**"/>
 		<include name="org/openmdx/uses/gnu/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/beanutils/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/collections/**"/>
@@ -165,7 +163,7 @@
 	<!-- ******************************************************************* -->
 	<target 
 		name="bootstrap" 
-		depends="build-init,generate-jaxp,generate-xri"
+		depends="build-init,generate-jaxp"
 		description="Generate version and jt dependend files" 
 	>
 		<antcall target="-preprocess-version-files-">
@@ -218,7 +216,6 @@
 			<exclude name="org/openmdx/base/transport/rest/**/*.java"/>
 			<exclude name="org/openmdx/base/aop2/*.java"/>
 			<patternset refid="build.exclude"/>
-			<patternset refid="openmdx-base.openxri-syntax"/>
 		</javac>
 		<available 
 			file="${openmdx.home}/ant/build.xml" 
@@ -277,19 +274,6 @@
 				<patternset refid="openmdx-base.jaxp-1.4"/>
 			</openmdx:archivefileset>
 		</openmdx:archive>
-	</target>
-	<target 
-		name="generate-xri" 
-		description="Include the required XRI classes"
-		depends="-platform-init"
-	>
-		<openmdx:unarchive dest="${build.dir}/bin">
-			<fileset dir="${openmdx.home}/java2/${build.java.platform}/extension/lib">
-				<!-- do not <include name="openxri-syntax.jar"/> as JRE 1.4 compliance is missing --> 
-				<include name="icu4j.jar"/>
-			</fileset>
-			<patternset refid="openmdx-base.openxri-syntax"/>
-		</openmdx:unarchive>
 	</target>
 
 	<target 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DateValue.java,v 1.48 2009/03/08 18:03:22 wfro Exp $
+ * Name:        $Id: DateValue.java,v 1.49 2009/05/14 12:28:35 wfro Exp $
  * Description: DateValue 
- * Revision:    $Revision: 1.48 $
+ * Revision:    $Revision: 1.49 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:22 $
+ * Date:        $Date: 2009/05/14 12:28:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -123,7 +123,7 @@ public class DateValue
     }
 
     //-------------------------------------------------------------------------
-    private static void assert4DigitYear(
+    public static void assert4DigitYear(
         SimpleDateFormat formatter
     ) {
         String pattern = formatter.toPattern();

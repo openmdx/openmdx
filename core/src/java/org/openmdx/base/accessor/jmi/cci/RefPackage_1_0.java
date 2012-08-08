@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1_0.java,v 1.18 2009/01/13 02:10:43 wfro Exp $
- * Description: RefPackage_1_0 interface
- * Revision:    $Revision: 1.18 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: RefPackage_1_0.java,v 1.30 2009/06/09 12:45:18 hburger Exp $
+ * Description: RefPackage 1.0 Interface
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:43 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,24 +51,28 @@
  */
 package org.openmdx.base.accessor.jmi.cci;
 
+import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
+import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.MappedRecord;
+import javax.resource.cci.Record;
 
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
+import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.transaction.UnitOfWork_1_0;
+import org.w3c.cci2.Container;
 
 /**
  * This interface extends the javax.jmi.reflect.RefPackage interface by
  * openMDX-specific helpers. This methods must not be used
  * by 100% JMI-compliant applications. 
  */
-public interface RefPackage_1_0 
-  extends RefPackage {
+public interface RefPackage_1_0 extends RefPackage {
 
   /**
    * Returns model defined for this package.
@@ -79,11 +83,11 @@ public interface RefPackage_1_0
   );
 
   /**
-   * Returns the object factory from which the package creates and retrieves objects.
+   * Returns the persistence manager from which the package creates and retrieves objects.
    * 
-   * @return ObjectFactory_1_0 object factory. 
+   * @return the package's delegate
    */
-  public PersistenceManager_1_0 refObjectFactory(
+  public PersistenceManager refDelegate(
   );
     
   /**
@@ -118,68 +122,6 @@ public interface RefPackage_1_0
   );
     
   /**
-   * Return the current unit of work. Equivalent to refOutermostPackage().refUnitOfWork().
-   */
-  public UnitOfWork_1_0 refUnitOfWork(
-  );
-    
-  /**
-   * Same as
-   * <pre>
-   * try {
-   *   this.refUnitOfWork.begin();
-   * }
-   * catch(ServiceException e) {
-   *   throw new JmiServiceException(e);
-   * }
-   * </pre>
-   * The added value of this method is to map a ServiceException to a JmiServiceException
-   * which simplifies exception handling.
-   */
-  public void refBegin();
-
-  /**
-   * Same as
-   * <pre>
-   * try {
-   *   this.refUnitOfWork.commit();
-   * }
-   * catch(ServiceException e) {
-   *   throw new JmiServiceException(e);
-   * }
-   * </pre>
-   * The added value of this method is to map a ServiceException to a JmiServiceException
-   * which simplifies exception handling.
-   */
-  public void refCommit();
-  
-  /**
-   * Same as
-   * <pre>
-   * try {
-   *   this.refUnitOfWork.rollback();
-   * }
-   * catch(ServiceException e) {
-   *   throw new JmiServiceException(e);
-   * }
-   * </pre>
-   * The added value of this method is to map a ServiceException to a JmiServiceException
-   * which simplifies exception handling.
-   */
-  public void refRollback();
-
-  /**
-   * Creates an instance of a struct data type defined by the metaobject
-   * 'structType' (or 'structName') whose attribute values are specified by arg 
-   * which must be instanceof Structure_1_0. The members of the arg correspond 
-   * 1-to-1 to the parameters for the specific create operation.
-   */
-  public RefStruct refCreateStruct(
-    String structName, 
-    Object arg
-  );
-
-  /**
    *  
    */
   public RefFilter_1_0 refCreateFilter(
@@ -189,20 +131,91 @@ public interface RefPackage_1_0
   );
 
   /**
-   * @return config option userContext
+   * Retrieves the JDO Persistence Manager delegating to this package.
+   * 
+   * @return the JDO Persistence Manager delegating to this package.
    */
-  Object refUserContext();
-    
-  /**
-   * Empty the cache
-   */
-  void clear();
+  PersistenceManager_1_0 refPersistenceManager(
+  );
 
-  /**
-   * Close
-   */
-  void close();
-        
+   /**
+    * Create a filter
+    * 
+    * @param filterClassName
+    * @param filterProperties
+    * @param attributeSpecifiers
+    * @param delegateFilter
+    * @param delegateQuantor
+    * @param delegateName
+    * 
+    * @return a filter
+    */
+   RefFilter_1_0 refCreateFilter(
+       String filterClassName,
+       FilterProperty[] filterProperties,
+       AttributeSpecifier[] attributeSpecifiers,
+       RefFilter_1_0 delegateFilter, 
+       Short delegateQuantor, 
+       String delegateName
+   );
+
+   /**
+    * Create a structure proxy based on the record name
+    * 
+    * @param structName
+    * @param delegate
+    * 
+    * @return the structure proxy based on the record name
+    */
+   public RefStruct refCreateStruct(
+       Record record
+   );
+
+   /**
+    * Create a structure proxy without accessing the delegate
+    * 
+    * @param structName
+    * @param delegate
+    * 
+    * @return the structure proxy without accessing the delegate
+    */
+   RefStruct refCreateStruct(
+       String structName,
+       MappedRecord delegate
+   );
+
+   /**
+    * Retrieve the RefPackage's view context
+    * 
+    * @return the RefPackage's view context in case of a view,
+    * <code>null</code> otherwise
+    */
+   InteractionSpec refInteractionSpec();
+
+   /**
+    * Retrieve a container specified by its resource identifier
+    * 
+    * @param resourceIdentifier
+    * @param containerClass
+    * 
+    * @return
+    */
+   RefContainer refContainer(
+       Path resourceIdentifier,
+       Class<Container<RefObject>> containerClass
+   );
+
+   /**
+    * Create a context specific RefPackage
+    * 
+    * @param viewContext
+    * 
+    * @return a context specific RefPackage
+    */
+   RefPackage_1_0 refPackage(
+       InteractionSpec viewContext
+   );
+
 }
 
 //--- End of File -----------------------------------------------------------

@@ -1,10 +1,10 @@
 /*
  * ==================================================================== 
  * Project: openmdx, http://www.openmdx.org
- * Name: $Id: ClassMapper.java,v 1.1 2009/01/13 02:10:37 wfro Exp $ 
- * Description: JMIClassLevelTemplate Revision: $Revision: 1.1 $ 
+ * Name: $Id: ClassMapper.java,v 1.3 2009/06/09 12:45:18 hburger Exp $ 
+ * Description: JMIClassLevelTemplate Revision: $Revision: 1.3 $ 
  * Owner: OMEX AG, Switzerland, http://www.omex.ch 
- * Date: $Date: 2009/01/13 02:10:37 $
+ * Date: $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -42,17 +42,14 @@
 package org.openmdx.application.mof.mapping.java;
 
 import java.io.Writer;
-import java.util.Iterator;
 import java.util.List;
 
-import org.omg.mof.spi.Identifier;
-import org.openmdx.application.mof.mapping.cci.AttributeDef;
 import org.openmdx.application.mof.mapping.cci.ClassDef;
 import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
 
 /**
  * ClassMapper
@@ -64,7 +61,7 @@ public class ClassMapper extends AbstractClassMapper {
     public ClassMapper(
         ModelElement_1_0 classDef,        
         Writer writer, 
-        Model_1_3 model,
+        Model_1_0 model,
         Format format, 
         String packageSuffix,
         MetaData_1_0 metaData
@@ -84,45 +81,6 @@ public class ClassMapper extends AbstractClassMapper {
         ClassDef superclassDef,
         List requiredAttributes
     ) throws ServiceException {
-        if(false) {
-            this.trace("ClassProxy/InstanceExtenderRequiredAttributes");
-            String superclassName = Identifier.CLASS_PROXY_NAME.toIdentifier(superclassDef.getName());
-            this.pw.println("  /**");
-            this.pw.println(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "Creates an instance of class <code>" + this.className + "</code> based on the superclass <code>" + superclassName + "</code> and all required attributes not included in this superclass."
-                )
-            );
-            this.pw.println(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "This is a factory operation used to create instance objects of class <code>" + this.className + "</code>."
-                )
-            );
-            for (Iterator i = requiredAttributes.iterator(); i.hasNext();) {
-                AttributeDef attribute = (AttributeDef)i.next();
-                if (attribute.getAnnotation() != null) {
-                    this.pw.println(
-                        MapperUtils.wrapText(
-                            "   * ",
-                            "@param " + this.getFeatureName(attribute) + " attribute.getAnnotation()"
-                        )
-                    );
-                }
-            }
-            this.pw.println("   */");
-            this.pw.println("  public " + this.className + " extend" + superclassName + "(");
-            this.pw.println("      " + this.getType(superclassDef.getQualifiedName()) + " _base");
-            for(Iterator i = requiredAttributes.iterator(); i.hasNext();) {
-                AttributeDef attribute = (AttributeDef)i.next();
-                this.mapParameter(
-                    "    , ",
-                    attribute, ""                
-                );
-            }
-            this.pw.println("  );");
-        }
     }
 
     //-----------------------------------------------------------------------
@@ -130,140 +88,18 @@ public class ClassMapper extends AbstractClassMapper {
         ClassDef superclassDef,
         List attributes
     ) throws ServiceException {
-        if(false) {
-            this.trace("ClassProxy/InstanceExtenderAllAttributes");
-            String superclassName = Identifier.CLASS_PROXY_NAME.toIdentifier(superclassDef.getName());
-            this.pw.println("  /**");
-            this.pw.println(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "Creates an instance of class <code>" + this.className + "</code> based on the superclass <code>" + superclassName + "</code> and all attributes not included in this superclass."
-                )
-            );
-            this.pw.println(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "This is a factory operation used to create instance objects of class <code>" + this.className + "</code>."
-                )
-           );
-            for (Iterator i = attributes.iterator(); i.hasNext();) {
-                AttributeDef attribute = (AttributeDef)i.next();
-                if (attribute.getAnnotation() != null) {
-                    this.pw.println(
-                        MapperUtils.wrapText(
-                            "   * ",
-                            "@param " + this.getFeatureName(attribute) + " attribute.getAnnotation()"
-                        )
-                    );
-                }
-            }
-            this.pw.println("   */");
-            this.pw.println("  public " + this.className + " extend" + superclassName + "(");
-            this.pw.println("      " + this.getType(superclassDef.getQualifiedName()) + " _base");
-            for (Iterator i = attributes.iterator(); i.hasNext();) {
-                AttributeDef attribute = (AttributeDef)i.next();
-                this.mapParameter(
-                    "    , ",
-                    attribute, ""
-                );
-            }
-            this.pw.println("  );");
-        }
     }
 
     //-----------------------------------------------------------------------
     public void mapInstanceCreatorRequiredAttributes(
         List requiredAttributes
     ) throws ServiceException {
-        if(false) {
-            this.trace("ClassProxy/InstanceCreatorRequiredAttributes");
-            this.pw.println("  /**");
-            this.pw.println(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "Creates an instance of class <code>" + this.className + "</code> based on all required attributes."
-                )
-            );
-            this.pw.println(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "This is a factory operation used to create instance objects of class <code>" + this.className + "</code>."
-                )
-            );
-            for (Iterator i = requiredAttributes.iterator(); i.hasNext();) {
-                AttributeDef attribute = (AttributeDef)i.next();
-                if (attribute.getAnnotation() != null) {
-                    this.pw.println(
-                        MapperUtils.wrapText(
-                            "   * ",
-                            "@param " + this.getFeatureName(attribute) + " attribute.getAnnotation()"
-                        )
-                    );
-                }
-            }
-            this.pw.println("   */");
-            this.pw.println("  public " + this.className + " create" + this.className + "(");
-            int ii = 0;
-            for (Iterator i = requiredAttributes.iterator(); i.hasNext(); ii++) {
-                AttributeDef attribute = (AttributeDef)i.next();
-                String separator = ii == 0
-                    ? "      "
-                    : "    , ";
-                this.mapParameter(
-                    separator,
-                    attribute, ""
-                );
-            }
-            this.pw.println("  );");
-        }
     }
 
     //-----------------------------------------------------------------------
     public void mapIntfInstanceCreatorAllAttributes(
         List attributes
     ) throws ServiceException {
-        if(false) {
-            this.trace("ClassProxy/InstanceCreatorAllAttributes");
-            this.pw.println("  /**");
-            this.pw.println(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "Creates an instance of class <code>" + this.className + "</code> based on all attributes."
-                )
-            );
-            this.pw.println(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "This is a factory operation used to create instance objects of class <code>" + this.className + "</code>."
-                )
-            );
-            for (Iterator i = attributes.iterator(); i.hasNext();) {
-                AttributeDef attribute = (AttributeDef)i.next();
-                if (attribute.getAnnotation() != null) {
-                    this.pw.println(
-                        MapperUtils.wrapText(
-                            "   * ",
-                            "@param " + this.getFeatureName(attribute) + " attribute.getAnnotation()"
-                        )
-                    );
-                }
-            }
-            this.pw.println("   */");
-            this.pw.println("  public " + this.className + " create" + this.className + "(");
-            int ii = 0;
-            for (Iterator i = attributes.iterator(); i.hasNext(); ii++) {
-                AttributeDef attribute = (AttributeDef)i.next();
-                String separator = ii == 0
-                    ? "      "
-                    : "    , ";
-                this.mapParameter(
-                    separator,
-                    attribute, ""
-                );
-            }
-            this.pw.println("  );");
-            this.pw.println();
-        }
     }
 
     //-----------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Grid.java,v 1.63 2009/03/08 18:03:23 wfro Exp $
+ * Name:        $Id: Grid.java,v 1.68 2009/06/01 16:34:18 wfro Exp $
  * Description: GridControl
- * Revision:    $Revision: 1.63 $
+ * Revision:    $Revision: 1.68 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:23 $
+ * Date:        $Date: 2009/06/01 16:34:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,11 +55,6 @@
  */
 package org.openmdx.portal.servlet.view;
 
-import java.beans.ExceptionListener;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -79,15 +74,15 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.Orders;
+import org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes;
 import org.openmdx.application.log.AppLog;
-import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.IsBetweenCondition;
 import org.openmdx.base.query.IsGreaterCondition;
@@ -95,13 +90,14 @@ import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.OrderSpecifier;
+import org.openmdx.base.query.Orders;
 import org.openmdx.base.query.PiggyBackCondition;
 import org.openmdx.base.query.Quantors;
 import org.openmdx.base.query.SoundsLikeCondition;
 import org.openmdx.base.text.conversion.Base64;
+import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc.Database_1_Attributes;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -172,24 +168,11 @@ public abstract class Grid
             Filter defaultFilter = null;
             if(application.getSettings().getProperty(defaultFilterPropertyName) != null) {
                 try {
-                    XMLDecoder decoder = 
-                        new XMLDecoder(
-                            new ByteArrayInputStream(
-                                Base64.decode(application.getSettings().getProperty(defaultFilterPropertyName))
-                            ),
-                            null,
-                            new ExceptionListener() {
-                                public void exceptionThrown(Exception e) {
-                                    if(
-                                        !(e instanceof ClassNotFoundException) || 
-                                        !"org.openmdx.uses.java.beans.XMLDecoder".equals(e.getMessage())
-                                    ) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }                                    
-                            }
-                        );
-                    defaultFilter = (Filter)decoder.readObject();
+                    defaultFilter = (Filter)JavaBeans.fromXML(
+                    	new String(
+                    		Base64.decode(application.getSettings().getProperty(defaultFilterPropertyName))
+                    	)
+                    );
                     defaultFilter.setName(Filters.DEFAULT_FILTER_NAME);
                     defaultFilter.setGroupName("0");
                     defaultFilter.setIconKey(WebKeys.ICON_FILTER_DEFAULT);
@@ -606,7 +589,7 @@ public abstract class Grid
   
   //-------------------------------------------------------------------------
   public void setCurrentFilterAsDefault(
-  ) {
+  ) throws ServiceException {
       if(this.currentFilter != null) {
           Filter defaultFilter = new Filter(
               Filters.DEFAULT_FILTER_NAME,
@@ -618,17 +601,14 @@ public abstract class Grid
               this.currentFilter.getOrderSpecifier(),
               new Object[]{this.getGridControl().getContainerId(), this.view.getApplicationContext().getCurrentUserRole(), this.view.getObjectReference().refMofId()} 
           );
-          ByteArrayOutputStream bs = new ByteArrayOutputStream();
-          XMLEncoder encoder = new XMLEncoder(bs);
-          encoder.writeObject(defaultFilter);
-          encoder.close();
+          String filterAsXml = JavaBeans.toXML(defaultFilter);
           Properties settings = this.view.getApplicationContext().getSettings();
           settings.setProperty(
               this.getGridControl().getPropertyName(
                   this.getGridControl().getContainerId(),
                   GridControl.PROPERTY_DEFAULT_FILTER
               ),
-              Base64.encode(bs.toByteArray())
+              Base64.encode(filterAsXml.getBytes())
           );
           this.setFilter(
               Filters.DEFAULT_FILTER_NAME,
@@ -846,86 +826,106 @@ public abstract class Grid
       return this.currentPageSize;
   }
   
-  //-------------------------------------------------------------------------
-  abstract protected List getFilteredObjects(
-      Filter filter
-  );
+    //-------------------------------------------------------------------------
+    abstract protected List getFilteredObjects(
+        Filter filter
+    );
 
     //-------------------------------------------------------------------------
     public void selectFilter(
-        String filterName,
-        String filterValues
+    	String filterName,
+    	String filterValues
     ) {
-        GridControl gridControl = this.getGridControl();  
-        try {
-          // reset column order indicators if new filter is set
-          this.columnSortOrders.clear();
-          this.columnSortOrders.putAll(
-              gridControl.getInitialColumnSortOrders()
-          );
-          
-          this.currentFilterValues = filterValues == null ? "" : filterValues;
-          
-          // can apply filter only to containers
-          Filter filter = this.getFilter(filterName);
-          if(filter == null) {
-              AppLog.info("filter " + filterName + " not found");
-          }
-          else {
-              this.currentFilter = filter;
-              for(
-                int i = 0; 
-                i < this.currentFilter.getCondition().length; 
-                i++
-              ) {
-                Condition condition = this.currentFilter.getCondition()[i];
-                for(
-                   int j = 0; 
-                   j < condition.getValue().length; 
-                   j++
-                ) {
-                  if("?".equals(condition.getValue()[j])) {
-                    // clone the filter and replace ? by filterValues
-                    this.currentFilter = new Filter(
-                        this.currentFilter.getName(),
-                        this.currentFilter.getLabel(),
-                        this.currentFilter.getGroupName(),
-                        this.currentFilter.getIconKey(),
-                        this.currentFilter.getOrder(),
-                        this.currentFilter.getCondition(),
-                        this.currentFilter.getOrderSpecifier(),
-                        new Object[]{this.getGridControl().getQualifiedReferenceName(), this.view.getApplicationContext().getCurrentUserRole(), this.view.getObjectReference().refMofId()} 
-                    );
-                    Condition newCondition = (Condition)condition.clone();
-                    List values = new ArrayList();
-                    StringTokenizer tokenizer = new StringTokenizer(filterValues, ",;");
-                    while(tokenizer.hasMoreTokens()) {
-                      values.add(tokenizer.nextToken());
-                    }
-                    if(values.size() == 0) {
-                      values.add("");
-                    }
-                    newCondition.setValue(
-                      values.toArray(new Object[values.size()])
-                    );
-                    this.currentFilter.setCondition(
-                      i,
-                      newCondition
-                    );
-                  }
-                }
-              }
-          }
-          AppLog.detail("selected filter ", this.currentFilter);
-          this.numberOfPages = Integer.MAX_VALUE;
-          this.setPage(
-              0, 
-              -1 // do not change page size
-          );
-        }
-        catch(CloneNotSupportedException e) {
-          throw new RuntimeServiceException(e);
-        }
+    	GridControl gridControl = this.getGridControl();  
+    	try {
+    		// reset column order indicators if new filter is set
+    		this.columnSortOrders.clear();
+    		this.columnSortOrders.putAll(
+    			gridControl.getInitialColumnSortOrders()
+    		);
+    		this.currentFilterValues = filterValues == null ? "" : filterValues;
+    		// can apply filter only to containers
+    		Filter filter = this.getFilter(filterName);
+    		if(filter == null) {
+    			AppLog.info("filter " + filterName + " not found");
+    		}
+    		else {
+    			this.currentFilter = filter;
+    			for(
+    				int i = 0; 
+    				i < this.currentFilter.getCondition().length; 
+    				i++
+    			) {
+    				Condition condition = this.currentFilter.getCondition()[i];
+    				for(
+    					int j = 0; 
+    					j < condition.getValue().length; 
+    					j++
+    				) {
+    					// Replace ? by filter value entered by user
+    					// Replace ${name} by attribute value
+    					if(
+    						"?".equals(condition.getValue()[j]) ||
+    						(condition.getValue()[j] instanceof String && ((String)condition.getValue()[j]).startsWith("${") && ((String)condition.getValue()[j]).endsWith("}")) 
+    					) {
+    						this.currentFilter = new Filter(
+    							this.currentFilter.getName(),
+    							this.currentFilter.getLabel(),
+    							this.currentFilter.getGroupName(),
+    							this.currentFilter.getIconKey(),
+    							this.currentFilter.getOrder(),
+    							this.currentFilter.getCondition(),
+    							this.currentFilter.getOrderSpecifier(),
+    							new Object[]{
+    								this.getGridControl().getQualifiedReferenceName(), 
+    								this.view.getApplicationContext().getCurrentUserRole(), 
+    								this.view.getObjectReference().refMofId()
+    							} 
+    						);
+    						Condition newCondition = (Condition)condition.clone();
+    						// ?
+    						if("?".equals(condition.getValue()[j])) {
+	    						List values = new ArrayList();
+	    						StringTokenizer tokenizer = new StringTokenizer(filterValues, ",;");
+	    						while(tokenizer.hasMoreTokens()) {
+	    							values.add(tokenizer.nextToken());
+	    						}
+	    						if(values.size() == 0) {
+	    							values.add("");
+	    						}
+	    						newCondition.setValue(
+	    							values.toArray(new Object[values.size()])
+	    						);
+    						}
+    						// ${name}
+    						else {
+    							String feature = ((String)condition.getValue()[j]);
+    							feature = feature.substring(2);
+    							feature = feature.substring(0, feature.length() - 1);
+    							newCondition.setValue(
+    								new Object[]{
+    									this.view.getObjectReference().getObject().refGetValue(feature)
+    								}
+    							);
+    						}
+    						this.currentFilter.setCondition(
+    							i,
+    							newCondition
+    						);
+    					}
+    				}
+    			}
+    		}
+    		AppLog.detail("selected filter ", this.currentFilter);
+    		this.numberOfPages = Integer.MAX_VALUE;
+    		this.setPage(
+    			0, 
+    			-1 // do not change page size
+    		);
+    	}
+    	catch(CloneNotSupportedException e) {
+    		throw new RuntimeServiceException(e);
+    	}
     }
 
   //-------------------------------------------------------------------------

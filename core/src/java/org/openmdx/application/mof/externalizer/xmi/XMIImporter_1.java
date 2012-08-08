@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIImporter_1.java,v 1.2 2009/03/04 18:44:38 wfro Exp $
+ * Name:        $Id: XMIImporter_1.java,v 1.7 2009/06/14 00:03:42 wfro Exp $
  * Description: XMI Model Importer
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/04 18:44:38 $
+ * Date:        $Date: 2009/06/14 00:03:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,17 +65,16 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
+
 import org.omg.mof.cci.DirectionKind;
 import org.omg.mof.cci.ScopeKind;
 import org.omg.mof.cci.VisibilityKind;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelExceptions;
-import org.openmdx.application.mof.cci.Stereotypes;
 import org.openmdx.application.mof.externalizer.spi.ModelImporter_1;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1AggregationKind;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Association;
@@ -94,7 +93,10 @@ import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Parameter;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1TaggedValue;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1VisibilityKind;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
+import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.BasicException.Code;
 import org.openmdx.kernel.log.SysLog;
@@ -314,27 +316,30 @@ implements UML1Consumer {
     ) throws ServiceException {
 
         SysLog.info("Processing package", umlPackage.getQualifiedName());
-
-        DataproviderObject modelPackage = new DataproviderObject(
-            toElementPath(
-                nameToPathComponent(umlPackage.getQualifiedName()),
-                umlPackage.getName()
-            )
-        );
-
-        modelPackage.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.PACKAGE);
-        modelPackage.values("isAbstract").add(new Boolean(false));
-        modelPackage.values("visibility").add(VisibilityKind.PUBLIC_VIS);
+        ObjectHolder_2Facade modelPackageFacade;
+        try {
+            modelPackageFacade = ObjectHolder_2Facade.newInstance(
+                toElementPath(
+                    nameToPathComponent(umlPackage.getQualifiedName()),
+                    umlPackage.getName()
+                ),
+                ModelAttributes.PACKAGE
+            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
+        modelPackageFacade.attributeValues("isAbstract").add(new Boolean(false));
+        modelPackageFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
 
         // annotation
         String annotation = this.getAnnotation(umlPackage);
-        if (annotation.length() != 0)
-        {
-            modelPackage.values("annotation").add(annotation);
+        if (annotation.length() != 0) {
+            modelPackageFacade.attributeValues("annotation").add(annotation);
         }
         this.createModelElement(
             null,
-            modelPackage
+            modelPackageFacade.getDelegate()
         );
     }
 
@@ -346,18 +351,15 @@ implements UML1Consumer {
         this.verifyAssociationName(umlAssociation.getName());
 
         // ModelAssociation object
-        DataproviderObject associationDef = new DataproviderObject(
+        ObjectHolder_2Facade associationDefFacade = ObjectHolder_2Facade.newInstance(
             toElementPath(
                 nameToPathComponent(getScope(umlAssociation.getQualifiedName())),
                 umlAssociation.getName()
-            )
+            ),
+            ModelAttributes.ASSOCIATION
         );
-
-        // object_class
-        associationDef.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.ASSOCIATION);
-
         // container
-        associationDef.values("container").add(
+        associationDefFacade.attributeValues("container").add(
             toElementPath(
                 nameToPathComponent(getScope(umlAssociation.getQualifiedName())),
                 getName(getScope(umlAssociation.getQualifiedName()))
@@ -368,30 +370,33 @@ implements UML1Consumer {
         String annotation = this.getAnnotation(umlAssociation);
         if (annotation.length() != 0)
         {
-            associationDef.values("annotation").add(annotation);
+            associationDefFacade.attributeValues("annotation").add(annotation);
         }
 
         // stereotype
-        associationDef.values("stereotype").addAll(umlAssociation.getStereotypes());
+        associationDefFacade.attributeValues("stereotype").addAll(umlAssociation.getStereotypes());
 
-        associationDef.values("isAbstract").add(new Boolean(false));
-        associationDef.values("visibility").add(VisibilityKind.PUBLIC_VIS);
-        associationDef.values("isDerived").add(
+        associationDefFacade.attributeValues("isAbstract").add(new Boolean(false));
+        associationDefFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
+        associationDefFacade.attributeValues("isDerived").add(
             new Boolean(umlAssociation.isDerived())
         );
-
-        createModelElement(null, associationDef);
-
-        DataproviderObject associationEnd1Def = this.processAssociationEnd(
-            (UML1AssociationEnd)umlAssociation.getConnection().get(0),
-            associationDef
+        this.createModelElement(
+            null, 
+            associationDefFacade.getDelegate()
         );
-
-        DataproviderObject associationEnd2Def = this.processAssociationEnd(
-            (UML1AssociationEnd)umlAssociation.getConnection().get(1),
-            associationDef
+        ObjectHolder_2Facade associationEnd1DefFacade = ObjectHolder_2Facade.newInstance(
+            this.processAssociationEnd(
+                (UML1AssociationEnd)umlAssociation.getConnection().get(0),
+                associationDefFacade.getDelegate()
+            )
         );
-
+        ObjectHolder_2Facade associationEnd2DefFacade = ObjectHolder_2Facade.newInstance(
+            this.processAssociationEnd(
+                (UML1AssociationEnd)umlAssociation.getConnection().get(1),
+                associationDefFacade.getDelegate()
+            )
+        );
         if(XMI_FORMAT_POSEIDON == this.xmiFormat) {
             /**
              * Poseidon XMI/UML format
@@ -403,30 +408,30 @@ implements UML1Consumer {
              */
 
             // swap 'aggregation' to comply with our MOF model
-            String temp = (String)associationEnd1Def.values("aggregation").get(0);
-            associationEnd1Def.values("aggregation").set(
+            String temp = (String)associationEnd1DefFacade.attributeValues("aggregation").get(0);
+            associationEnd1DefFacade.attributeValues("aggregation").set(
                 0,
-                associationEnd2Def.values("aggregation").get(0)
+                associationEnd2DefFacade.attributeValues("aggregation").get(0)
             );
-            associationEnd2Def.values("aggregation").set(0, temp);
+            associationEnd2DefFacade.attributeValues("aggregation").set(0, temp);
 
             // swap 'qualifierName' to comply with our MOF model
-            List tempQualifier = new ArrayList(associationEnd1Def.values("qualifierName"));
-            associationEnd1Def.values("qualifierName").clear();
-            associationEnd1Def.values("qualifierName").addAll(
-                associationEnd2Def.values("qualifierName")
+            List tempQualifier = new ArrayList(associationEnd1DefFacade.attributeValues("qualifierName"));
+            associationEnd1DefFacade.attributeValues("qualifierName").clear();
+            associationEnd1DefFacade.attributeValues("qualifierName").addAll(
+                associationEnd2DefFacade.attributeValues("qualifierName")
             );
-            associationEnd2Def.values("qualifierName").clear();
-            associationEnd2Def.values("qualifierName").addAll(tempQualifier);
+            associationEnd2DefFacade.attributeValues("qualifierName").clear();
+            associationEnd2DefFacade.attributeValues("qualifierName").addAll(tempQualifier);
 
             // swap 'qualifierType' to comply with our MOF model
-            tempQualifier = new ArrayList(associationEnd1Def.values("qualifierType"));
-            associationEnd1Def.values("qualifierType").clear();
-            associationEnd1Def.values("qualifierType").addAll(
-                associationEnd2Def.values("qualifierType")
+            tempQualifier = new ArrayList(associationEnd1DefFacade.attributeValues("qualifierType"));
+            associationEnd1DefFacade.attributeValues("qualifierType").clear();
+            associationEnd1DefFacade.attributeValues("qualifierType").addAll(
+                associationEnd2DefFacade.attributeValues("qualifierType")
             );
-            associationEnd2Def.values("qualifierType").clear();
-            associationEnd2Def.values("qualifierType").addAll(tempQualifier);
+            associationEnd2DefFacade.attributeValues("qualifierType").clear();
+            associationEnd2DefFacade.attributeValues("qualifierType").addAll(tempQualifier);
         }
         else if (XMI_FORMAT_MAGICDRAW == this.xmiFormat)
         {
@@ -438,45 +443,49 @@ implements UML1Consumer {
              */
 
             // swap 'aggregation' to comply with our MOF model
-            String temp = (String)associationEnd1Def.values("aggregation").get(0);
-            associationEnd1Def.values("aggregation").set(
+            String temp = (String)associationEnd1DefFacade.attributeValues("aggregation").get(0);
+            associationEnd1DefFacade.attributeValues("aggregation").set(
                 0,
-                associationEnd2Def.values("aggregation").get(0)
+                associationEnd2DefFacade.attributeValues("aggregation").get(0)
             );
-            associationEnd2Def.values("aggregation").set(0, temp);
+            associationEnd2DefFacade.attributeValues("aggregation").set(0, temp);
         }
 
         this.verifyAndCompleteAssociationEnds(
-            associationEnd1Def,
-            associationEnd2Def
+            associationEnd1DefFacade.getDelegate(),
+            associationEnd2DefFacade.getDelegate()
         );
         this.exportAssociationEndAsReference(
-            associationEnd1Def,
-            associationEnd2Def,
-            associationDef,
+            associationEnd1DefFacade.getDelegate(),
+            associationEnd2DefFacade.getDelegate(),
+            associationDefFacade.getDelegate(),
             null
         );
         this.exportAssociationEndAsReference(
-            associationEnd2Def,
-            associationEnd1Def,
-            associationDef,
+            associationEnd2DefFacade.getDelegate(),
+            associationEnd1DefFacade.getDelegate(),
+            associationDefFacade.getDelegate(),
             null
         );
-        this.createModelElement(null, associationEnd1Def);
-        this.createModelElement(null, associationEnd2Def);
+        this.createModelElement(
+            null, 
+            associationEnd1DefFacade.getDelegate()
+        );
+        this.createModelElement(
+            null, 
+            associationEnd2DefFacade.getDelegate()
+        );
     }
 
     //---------------------------------------------------------------------------
-    private DataproviderObject processAssociationEnd(
+    private MappedRecord processAssociationEnd(
         UML1AssociationEnd umlAssociationEnd,
-        DataproviderObject associationDef
+        MappedRecord associationDef
     ) throws Exception {
-
         this.verifyAssociationEndName(
             associationDef,
             umlAssociationEnd == null ? null : umlAssociationEnd.getName()
         );
-
         if(XMI_FORMAT_POSEIDON == this.xmiFormat) {
             // Note: 
             // In the Poseidon XMI/UML format qualifiers are entered by using 
@@ -491,8 +500,8 @@ implements UML1Consumer {
             // representation, therefore the internal qualifier representation has 
             // to be mapped
             for(
-                    Iterator it = this.toAssociationEndQualifiers(umlAssociationEnd.getName()).iterator();
-                    it.hasNext();
+                Iterator it = this.toAssociationEndQualifiers(umlAssociationEnd.getName()).iterator();
+                it.hasNext();
             ) {
                 Qualifier qualifier = (Qualifier)it.next();
                 UML1Attribute attribute = new UML1Attribute("", qualifier.getName());
@@ -503,26 +512,20 @@ implements UML1Consumer {
                 this.toAssociationEndName(umlAssociationEnd.getName())
             );
         }
-
-        DataproviderObject associationEndDef = new DataproviderObject(
-            new Path(associationDef.path().toString() + "::" + umlAssociationEnd.getName())
-        );
-
-        // name
-        associationEndDef.values("name").add(umlAssociationEnd.getName());
-
-        // annotation
-        String annotation = this.getAnnotation(umlAssociationEnd);
-        if (annotation.length() != 0)
-        {
-            associationEndDef.values("annotation").add(annotation);
-        }
-
-        // object_class
-        associationEndDef.values(SystemAttributes.OBJECT_CLASS).add(
+        ObjectHolder_2Facade associationEndDefFacade = ObjectHolder_2Facade.newInstance(
+            newFeaturePath(
+                ObjectHolder_2Facade.getPath(associationDef),
+                umlAssociationEnd.getName()
+            ),
             ModelAttributes.ASSOCIATION_END
         );
-
+        // name
+        associationEndDefFacade.attributeValues("name").add(umlAssociationEnd.getName());
+        // annotation
+        String annotation = this.getAnnotation(umlAssociationEnd);
+        if (annotation.length() != 0) {
+            associationEndDefFacade.attributeValues("annotation").add(annotation);
+        }
         // type
         if(umlAssociationEnd.getParticipant() == null) {
             throw new ServiceException(
@@ -532,49 +535,43 @@ implements UML1Consumer {
                 new BasicException.Parameter("association", umlAssociationEnd.getQualifiedName())
             );
         }
-        associationEndDef.values("type").add(
+        associationEndDefFacade.attributeValues("type").add(
             toElementPath(
                 nameToPathComponent(getScope(umlAssociationEnd.getParticipant())),
                 getName(umlAssociationEnd.getParticipant())
             )
         );
-
         // multiplicity
-        associationEndDef.values("multiplicity").add(
+        associationEndDefFacade.attributeValues("multiplicity").add(
             this.toMOFMultiplicity(umlAssociationEnd.getMultiplicityRange())
         );
-
         // container
-        associationEndDef.values("container").add(
-            associationDef.path()
+        associationEndDefFacade.attributeValues("container").add(
+            ObjectHolder_2Facade.getPath(associationDef)
         );
-
         // isChangeable
-        associationEndDef.values("isChangeable").add(
+        associationEndDefFacade.attributeValues("isChangeable").add(
             new Boolean(
                 this.toMOFChangeability(umlAssociationEnd.getChangeability())
             )
         );
-
         // aggregation
-        associationEndDef.values("aggregation").add(
+        associationEndDefFacade.attributeValues("aggregation").add(
             this.toMOFAggregation(umlAssociationEnd.getAggregation())
         );
-
         // isNavigable
-        associationEndDef.values("isNavigable").add(
+        associationEndDefFacade.attributeValues("isNavigable").add(
             new Boolean(umlAssociationEnd.isNavigable())
         );
-
         // qualifiers
         for (
-                Iterator it = umlAssociationEnd.getQualifier().iterator();
-                it.hasNext();
+            Iterator it = umlAssociationEnd.getQualifier().iterator();
+            it.hasNext();
         ) {
             UML1Attribute qualifier = (UML1Attribute)it.next();
-            associationEndDef.values("qualifierName").add(qualifier.getName());
+            associationEndDefFacade.attributeValues("qualifierName").add(qualifier.getName());
             try {
-                associationEndDef.values("qualifierType").add(
+                associationEndDefFacade.attributeValues("qualifierType").add(
                     toElementPath(
                         nameToPathComponent(getScope(qualifier.getType())),
                         getName(qualifier.getType())
@@ -593,25 +590,21 @@ implements UML1Consumer {
             }
         }
 
-        return associationEndDef;
+        return associationEndDefFacade.getDelegate();
     }
 
     //---------------------------------------------------------------------------
     public void processUMLClass(
         UML1Class umlClass
     ) throws Exception {
-
         // depending on stereotype, the given class must be treated differently
-        if (umlClass.getStereotypes().contains(Stereotypes.STRUCT))
-        {
+        if (umlClass.getStereotypes().contains(Stereotypes.STRUCT)) {
             this.processStructureType(umlClass);
         }
-        else if (umlClass.getStereotypes().contains(Stereotypes.ALIAS))
-        {
+        else if (umlClass.getStereotypes().contains(Stereotypes.ALIAS)) {
             this.processAliasType(umlClass);
         }
-        else
-        {
+        else {
             this.processClass(umlClass);
         }
     }
@@ -624,20 +617,15 @@ implements UML1Consumer {
         SysLog.info("Processing structure type", umlClass.getQualifiedName());
 
         // ModelClass object
-        DataproviderObject structureTypeDef = new DataproviderObject(
+        ObjectHolder_2Facade structureTypeDefFacade = ObjectHolder_2Facade.newInstance(
             toElementPath(
                 nameToPathComponent(getScope(umlClass.getQualifiedName())),
                 umlClass.getName()
-            )
-        );
-
-        // object_class
-        structureTypeDef.values(SystemAttributes.OBJECT_CLASS).add(
+            ),
             ModelAttributes.STRUCTURE_TYPE
         );
-
         // container
-        structureTypeDef.values("container").add(
+        structureTypeDefFacade.attributeValues("container").add(
             toElementPath(
                 nameToPathComponent(getScope(umlClass.getQualifiedName())),
                 getName(getScope(umlClass.getQualifiedName()))
@@ -652,16 +640,14 @@ implements UML1Consumer {
 
         // annotation
         String annotation = this.getAnnotation(umlClass);
-        if (annotation.length() != 0)
-        {
-            structureTypeDef.values("annotation").add(annotation);
+        if (annotation.length() != 0) {
+            structureTypeDefFacade.attributeValues("annotation").add(annotation);
         }
-
         // supertype
         SortedSet superTypePaths = new TreeSet();
         for (
-                Iterator it = umlClass.getSuperclasses().iterator();
-                it.hasNext();
+            Iterator it = umlClass.getSuperclasses().iterator();
+            it.hasNext();
         ) {
             String superclass = (String)it.next();
             superTypePaths.add(
@@ -673,37 +659,37 @@ implements UML1Consumer {
         }
         // add supertypes in sorted order
         for(
-                Iterator it = superTypePaths.iterator();
-                it.hasNext();
+            Iterator it = superTypePaths.iterator();
+            it.hasNext();
         ) {
-            structureTypeDef.values("supertype").add(it.next());
+            structureTypeDefFacade.attributeValues("supertype").add(it.next());
         }
 
         // isAbstract attribute
-        structureTypeDef.values("isAbstract").add(
+        structureTypeDefFacade.attributeValues("isAbstract").add(
             new Boolean(umlClass.isAbstract())
         );
 
         // visibility attribute
-        structureTypeDef.values("visibility").add(VisibilityKind.PUBLIC_VIS);
+        structureTypeDefFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
 
         // isSingleton attribute
-        structureTypeDef.values("isSingleton").add(
+        structureTypeDefFacade.attributeValues("isSingleton").add(
             new Boolean(false)
         );
 
         this.createModelElement(
             null,
-            structureTypeDef
+            structureTypeDefFacade.getDelegate()
         );
 
         for(
-                Iterator it = umlClass.getAttributes().iterator();
-                it.hasNext();
+            Iterator it = umlClass.getAttributes().iterator();
+            it.hasNext();
         ) {
             this.processStructureField(
                 (UML1Attribute)it.next(),
-                structureTypeDef
+                structureTypeDefFacade.getDelegate()
             );
         }
     }
@@ -711,31 +697,31 @@ implements UML1Consumer {
     //---------------------------------------------------------------------------
     private void processStructureField(
         UML1Attribute umlAttribute,
-        DataproviderObject aContainer
+        MappedRecord aContainer
     ) throws Exception {
 
         SysLog.info("Processing structure field", umlAttribute.getName());
 
-        DataproviderObject structureFieldDef = new DataproviderObject(
-            new Path(aContainer.path().toString() + "::" + umlAttribute.getName())
-        );
-
-        // object_class
-        structureFieldDef.values(SystemAttributes.OBJECT_CLASS).add(
+        ObjectHolder_2Facade structureFieldDefFacade = ObjectHolder_2Facade.newInstance(
+            newFeaturePath(
+                ObjectHolder_2Facade.getPath(aContainer),
+                umlAttribute.getName()
+            ),
             ModelAttributes.STRUCTURE_FIELD
         );
-
         // container
-        structureFieldDef.values("container").add(aContainer.path());
+        structureFieldDefFacade.attributeValues("container").add(
+            ObjectHolder_2Facade.getPath(aContainer)
+        );
 
         // maxLength attribute
-        structureFieldDef.values("maxLength").add(new Integer(this.getAttributeMaxLength(umlAttribute)));
+        structureFieldDefFacade.attributeValues("maxLength").add(new Integer(this.getAttributeMaxLength(umlAttribute)));
 
         // multiplicity attribute
         // openMDX uses attribute stereotype to indicate multiplicity
         // this allows to use multiplicities like set, list, ...
         // if no multiplicity has been modeled, the default multiplicity is taken
-        structureFieldDef.values("multiplicity").add(
+        structureFieldDefFacade.attributeValues("multiplicity").add(
             umlAttribute.getStereotypes().size() > 0
             ? umlAttribute.getStereotypes().iterator().next()
                 : umlAttribute.getMultiplicityRange() != null
@@ -745,16 +731,14 @@ implements UML1Consumer {
 
         // annotation
         String annotation = this.getAnnotation(umlAttribute);
-        if (annotation.length() != 0)
-        {
-            structureFieldDef.values("annotation").add(annotation);
+        if (annotation.length() != 0) {
+            structureFieldDefFacade.attributeValues("annotation").add(annotation);
         }
-
         if(umlAttribute.getType() == null) {
             this.error("Undefined type for field " + umlAttribute.getQualifiedName());
         }
         else {
-            structureFieldDef.values("type").add(
+            structureFieldDefFacade.attributeValues("type").add(
                 toElementPath(
                     nameToPathComponent(getScope(umlAttribute.getType())),
                     getName(umlAttribute.getType())
@@ -762,7 +746,7 @@ implements UML1Consumer {
             );
             this.createModelElement(
                 null,
-                structureFieldDef
+                structureFieldDefFacade.getDelegate()
             );
         }
     }
@@ -775,20 +759,15 @@ implements UML1Consumer {
         SysLog.info("Processing alias type", umlClass.getQualifiedName());
 
         // ModelClass object
-        DataproviderObject aliasTypeDef = new DataproviderObject(
+        ObjectHolder_2Facade aliasTypeDefFacade = ObjectHolder_2Facade.newInstance(
             toElementPath(
                 nameToPathComponent(getScope(umlClass.getQualifiedName())),
                 umlClass.getName()
-            )
-        );
-
-        // object_class
-        aliasTypeDef.values(SystemAttributes.OBJECT_CLASS).add(
+            ),
             ModelAttributes.ALIAS_TYPE
         );
-
         // container
-        aliasTypeDef.values("container").add(
+        aliasTypeDefFacade.attributeValues("container").add(
             toElementPath(
                 nameToPathComponent(getScope(umlClass.getQualifiedName())),
                 getName(getScope(umlClass.getQualifiedName()))
@@ -800,29 +779,35 @@ implements UML1Consumer {
         String annotation = this.getAnnotation(umlClass);
         if (annotation.length() != 0)
         {
-            aliasTypeDef.values("annotation").add(annotation);
+            aliasTypeDefFacade.attributeValues("annotation").add(annotation);
         }
 
         // isAbstract attribute
-        aliasTypeDef.values("isAbstract").add(
+        aliasTypeDefFacade.attributeValues("isAbstract").add(
             new Boolean(umlClass.isAbstract())
         );
 
         // visibility attribute
-        aliasTypeDef.values("visibility").add(VisibilityKind.PUBLIC_VIS);
+        aliasTypeDefFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
 
         // isSingleton attribute
-        aliasTypeDef.values("isSingleton").add(
+        aliasTypeDefFacade.attributeValues("isSingleton").add(
             new Boolean(false)
         );
 
         // type
         List attributes = umlClass.getAttributes();
-        this.verifyAliasAttributeNumber(aliasTypeDef, attributes.size());
+        this.verifyAliasAttributeNumber(
+            aliasTypeDefFacade.getDelegate(), 
+            attributes.size()
+        );
 
         UML1Attribute attribute = (UML1Attribute)umlClass.getAttributes().get(0);
-        this.verifyAliasAttributeName(aliasTypeDef, attribute.getName());
-        aliasTypeDef.values("type").add(
+        this.verifyAliasAttributeName(
+            aliasTypeDefFacade.getDelegate(), 
+            attribute.getName()
+        );
+        aliasTypeDefFacade.attributeValues("type").add(
             toElementPath(
                 nameToPathComponent(getScope(attribute.getName())),
                 getName(attribute.getName())
@@ -832,7 +817,7 @@ implements UML1Consumer {
         // create element
         this.createModelElement(
             null,
-            aliasTypeDef
+            aliasTypeDefFacade.getDelegate()
         );
     }
 
@@ -844,18 +829,16 @@ implements UML1Consumer {
         SysLog.info("Processing class", umlClass.getQualifiedName());
 
         // ModelClass object
-        DataproviderObject classDef = new DataproviderObject(
+        ObjectHolder_2Facade classDefFacade = ObjectHolder_2Facade.newInstance(
             toElementPath(
                 nameToPathComponent(getScope(umlClass.getQualifiedName())),
                 umlClass.getName()
-            )
+            ),
+            ModelAttributes.CLASS
         );
 
-        // object_class
-        classDef.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.CLASS);
-
         // container
-        classDef.values("container").add(
+        classDefFacade.attributeValues("container").add(
             toElementPath(
                 nameToPathComponent(getScope(umlClass.getQualifiedName())),
                 getName(getScope(umlClass.getQualifiedName()))
@@ -863,22 +846,21 @@ implements UML1Consumer {
         );
 
         // stereotype
-        classDef.values("stereotype").addAll(
+        classDefFacade.attributeValues("stereotype").addAll(
             umlClass.getStereotypes()
         );
 
         // annotation
         String annotation = this.getAnnotation(umlClass);
-        if (annotation.length() != 0)
-        {
-            classDef.values("annotation").add(annotation);
+        if (annotation.length() != 0) {
+            classDefFacade.attributeValues("annotation").add(annotation);
         }
 
         // supertype
         SortedSet superTypePaths = new TreeSet();
         for (
-                Iterator it = umlClass.getSuperclasses().iterator();
-                it.hasNext();
+            Iterator it = umlClass.getSuperclasses().iterator();
+            it.hasNext();
         ) {
             String superclass = (String)it.next();
             superTypePaths.add(
@@ -890,42 +872,48 @@ implements UML1Consumer {
         }
         // add supertypes in sorted order
         for(
-                Iterator it = superTypePaths.iterator();
-                it.hasNext();
+            Iterator it = superTypePaths.iterator();
+            it.hasNext();
         ) {
-            classDef.values("supertype").add(it.next());
+            classDefFacade.attributeValues("supertype").add(it.next());
         }
 
         // isAbstract attribute
-        classDef.values("isAbstract").add(
+        classDefFacade.attributeValues("isAbstract").add(
             new Boolean(umlClass.isAbstract())
         );
 
         // visibility attribute
-        classDef.values("visibility").add(VisibilityKind.PUBLIC_VIS);
+        classDefFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
 
         // isSingleton attribute
-        classDef.values("isSingleton").add(
+        classDefFacade.attributeValues("isSingleton").add(
             new Boolean(false)
         );
 
-        SysLog.info("Class", classDef.path());
-        createModelElement(null, classDef);
+        SysLog.info("Class", classDefFacade.getPath());
+        this.createModelElement(
+            null, 
+            classDefFacade.getDelegate()
+        );
 
         // process attributes of this class
         for (
-                Iterator it = umlClass.getAttributes().iterator();
-                it.hasNext();
+            Iterator it = umlClass.getAttributes().iterator();
+            it.hasNext();
         ) {
             this.processAttribute((UML1Attribute)it.next());
         }
 
         // process operations of this class
         for (
-                Iterator it = umlClass.getOperations().iterator();
-                it.hasNext();
+            Iterator it = umlClass.getOperations().iterator();
+            it.hasNext();
         ) {
-            this.processOperation((UML1Operation)it.next(), classDef);
+            this.processOperation(
+                (UML1Operation)it.next(), 
+                classDefFacade.getDelegate()
+            );
         }
     }
 
@@ -940,22 +928,24 @@ implements UML1Consumer {
             getName(getScope(umlAttribute.getQualifiedName()))
         );
 
-        DataproviderObject attributeDef = new DataproviderObject(
-            new Path(containerPath.toString() + "::" + umlAttribute.getName())
+        ObjectHolder_2Facade attributeDefFacade = ObjectHolder_2Facade.newInstance(
+            newFeaturePath(
+                containerPath,
+                umlAttribute.getName()
+            ),
+            ModelAttributes.ATTRIBUTE
         );
 
-        attributeDef.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.ATTRIBUTE);
-
-        attributeDef.values("container").add(containerPath);
-        attributeDef.values("visibility").add(this.toMOFVisibility(umlAttribute.getVisiblity()));
-        attributeDef.values("uniqueValues").add(new Boolean(DEFAULT_ATTRIBUTE_IS_UNIQUE));
-        attributeDef.values("isLanguageNeutral").add(new Boolean(DEFAULT_ATTRIBUTE_IS_LANGUAGE_NEUTRAL));
-        attributeDef.values("maxLength").add(new Integer(this.getAttributeMaxLength(umlAttribute)));
+        attributeDefFacade.attributeValues("container").add(containerPath);
+        attributeDefFacade.attributeValues("visibility").add(this.toMOFVisibility(umlAttribute.getVisiblity()));
+        attributeDefFacade.attributeValues("uniqueValues").add(new Boolean(DEFAULT_ATTRIBUTE_IS_UNIQUE));
+        attributeDefFacade.attributeValues("isLanguageNeutral").add(new Boolean(DEFAULT_ATTRIBUTE_IS_LANGUAGE_NEUTRAL));
+        attributeDefFacade.attributeValues("maxLength").add(new Integer(this.getAttributeMaxLength(umlAttribute)));
 
         boolean isDerived = this.isAttributeDerived(umlAttribute);
         boolean isChangeable = this.toMOFChangeability(umlAttribute.getChangeability());
         if(isDerived && isChangeable) {
-            this.warning("Attribute <" + attributeDef.path().toString() + "> is derived AND changeable. Derived attributes MUST NOT be changeable. Continuing with isChangeable=false!");
+            this.warning("Attribute <" + attributeDefFacade.getPath().toString() + "> is derived AND changeable. Derived attributes MUST NOT be changeable. Continuing with isChangeable=false!");
             isChangeable = false;
         }
 
@@ -963,7 +953,7 @@ implements UML1Consumer {
             this.error("Undefined type for attribute " + umlAttribute.getQualifiedName());
         }
         else {
-            attributeDef.values("type").add(
+            attributeDefFacade.attributeValues("type").add(
                 toElementPath(
                     nameToPathComponent(getScope(umlAttribute.getType())),
                     getName(umlAttribute.getType())
@@ -973,67 +963,61 @@ implements UML1Consumer {
 
         // openMDX uses attribute stereotype to indicate multiplicity
         // this allows to use multiplicities like set, list, ...
-        attributeDef.values("multiplicity").add(
+        attributeDefFacade.attributeValues("multiplicity").add(
             umlAttribute.getStereotypes().size() > 0
             ? umlAttribute.getStereotypes().iterator().next()
                 : umlAttribute.getMultiplicityRange() != null
                 ? this.toMOFMultiplicity(umlAttribute.getMultiplicityRange())
                     : DEFAULT_ATTRIBUTE_MULTIPLICITY
         );
-        attributeDef.values("scope").add(ScopeKind.INSTANCE_LEVEL);
-        attributeDef.values("isDerived").add(new Boolean(isDerived));
-        attributeDef.values("isChangeable").add(new Boolean(isChangeable));
+        attributeDefFacade.attributeValues("scope").add(ScopeKind.INSTANCE_LEVEL);
+        attributeDefFacade.attributeValues("isDerived").add(new Boolean(isDerived));
+        attributeDefFacade.attributeValues("isChangeable").add(new Boolean(isChangeable));
 
         // annotation
         String annotation = this.getAnnotation(umlAttribute);
         if (annotation.length() != 0)
         {
-            attributeDef.values("annotation").add(annotation);
+            attributeDefFacade.attributeValues("annotation").add(annotation);
         }
 
-        SysLog.info("Attribute", attributeDef.path());
-        createModelElement(null, attributeDef);
+        SysLog.info("Attribute", attributeDefFacade.getPath());
+        this.createModelElement(
+            null, 
+            attributeDefFacade.getDelegate()
+        );
     }
 
     //---------------------------------------------------------------------------
     private void processOperation(
         UML1Operation umlOperation,
-        DataproviderObject aContainer
+        MappedRecord aContainer
     ) throws Exception {
         SysLog.info("Processing operation", umlOperation.getName());
-
         String operationName = umlOperation.getName();
-
-//      Path containerPath = toElementPath(
-//      nameToPathComponent(getScope(getScope(umlOperation.getQualifiedName()))),
-//      getName(getScope(umlOperation.getQualifiedName()))
-//      ); 
-//      DataproviderObject operationDef = new DataproviderObject(
-//      new Path(containerPath.toString() + "::" + umlOperation.getName())
-//      );
-        DataproviderObject operationDef = new DataproviderObject(
-            new Path(aContainer.path().toString() + "::" + umlOperation.getName())
-        );
-
-        // object_class
-        operationDef.values(SystemAttributes.OBJECT_CLASS).add(
+        ObjectHolder_2Facade operationDefFacade = ObjectHolder_2Facade.newInstance(
+            newFeaturePath(
+                ObjectHolder_2Facade.getPath(aContainer),
+                umlOperation.getName()
+            ),
             ModelAttributes.OPERATION
         );
-
         // container
-        operationDef.values("container").add(aContainer.path());
+        operationDefFacade.attributeValues("container").add(
+            ObjectHolder_2Facade.getPath(aContainer)
+        );
 
         // stereotype
         boolean isException = false;
         if(umlOperation.getStereotypes().size() > 0) {
-            operationDef.values("stereotype").addAll(umlOperation.getStereotypes());
+            operationDefFacade.attributeValues("stereotype").addAll(umlOperation.getStereotypes());
 
             // well-known stereotype <<exception>>
-            if(operationDef.values("stereotype").contains(Stereotypes.EXCEPTION)) {
-                operationDef.clearValues(SystemAttributes.OBJECT_CLASS).add(
+            if(operationDefFacade.attributeValues("stereotype").contains(Stereotypes.EXCEPTION)) {
+                operationDefFacade.getValue().setRecordName(
                     ModelAttributes.EXCEPTION
                 );
-                operationDef.clearValues("stereotype");
+                operationDefFacade.clearAttributeValues("stereotype");
                 isException = true;
             }
         }
@@ -1042,28 +1026,27 @@ implements UML1Consumer {
         String annotation = this.getAnnotation(umlOperation);
         if (annotation.length() != 0)
         {
-            operationDef.values("annotation").add(annotation);
+            operationDefFacade.attributeValues("annotation").add(annotation);
         }
 
         // visibility
-        operationDef.values("visibility").add(VisibilityKind.PUBLIC_VIS);
+        operationDefFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
 
         // scope
-        operationDef.values("scope").add(ScopeKind.INSTANCE_LEVEL);
+        operationDefFacade.attributeValues("scope").add(ScopeKind.INSTANCE_LEVEL);
 
         // isQuery
-        operationDef.values("isQuery").add(
+        operationDefFacade.attributeValues("isQuery").add(
             new Boolean(umlOperation.isQuery())
         );
 
         // parameters
         List parameters = umlOperation.getParametersWithoutReturnParameter();
 
-        if(parameters.size() > 0)
-        {
+        if(parameters.size() > 0) {
 
             /**
-             * In SPICE all operations have excatly one parameter with name 'in'. The importer
+             * In openMDX all operations have exactly one parameter with name 'in'. The importer
              * supports two forms how parameters may be specified:
              * 1) p0:t0, p1:t1, ..., pn:tn. In this case a class with stereotype <parameter> is created
              *    and p0, ..., pn are added as class attributes. Finally, a parameter with name 'in'
@@ -1079,19 +1062,17 @@ implements UML1Consumer {
                 operationName.substring(0,1).toUpperCase() +
                 operationName.substring(1);
 
-            DataproviderObject parameterType = new DataproviderObject(
+            ObjectHolder_2Facade parameterTypeFacade = ObjectHolder_2Facade.newInstance(
                 new Path(
-                    aContainer.path().toString() + capOperationName + "Params"
-                )
-            );
-            parameterType.values(SystemAttributes.OBJECT_CLASS).add(
+                    ObjectHolder_2Facade.getPath(aContainer).toString() + capOperationName + "Params"
+                ),
                 ModelAttributes.STRUCTURE_TYPE
             );
-            parameterType.values("visibility").add(VisibilityKind.PUBLIC_VIS);
-            parameterType.values("isAbstract").add(new Boolean(false));
-            parameterType.values("isSingleton").add(new Boolean(false));
-            parameterType.values("container").addAll(
-                aContainer.values("container")
+            parameterTypeFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
+            parameterTypeFacade.attributeValues("isAbstract").add(new Boolean(false));
+            parameterTypeFacade.attributeValues("isSingleton").add(new Boolean(false));
+            parameterTypeFacade.attributeValues("container").addAll(
+                ObjectHolder_2Facade.newInstance(aContainer).attributeValues("container")
             );
 
             /**
@@ -1100,24 +1081,20 @@ implements UML1Consumer {
              */
             boolean createParameterType = true;
             boolean parametersCreated = false;
-
             for(
-                    Iterator it = parameters.iterator();
-                    it.hasNext();
+                Iterator it = parameters.iterator();
+                it.hasNext();
             ) {
                 UML1Parameter aParameter = (UML1Parameter)it.next();
-
-                DataproviderObject parameterDef = this.processParameter(
+                MappedRecord parameterDef = this.processParameter(
                     aParameter,
-                    parameterType
+                    parameterTypeFacade.getDelegate()
                 );
-
                 /**
                  * Case 2: Parameter with name 'in'. Create object as PARAMETER.
                  */
-                String fullQualifiedParameterName = parameterDef.path().getBase();
+                String fullQualifiedParameterName = ObjectHolder_2Facade.getPath(parameterDef).getBase();
                 if("in".equals(fullQualifiedParameterName.substring(fullQualifiedParameterName.lastIndexOf(':') + 1))) {
-
                     // 'in' is the only allowed parameter
                     if(parametersCreated) {
                         SysLog.error("Parameter format must be [p0:T0...pn:Tn | in:T], where T must be a class with stereotype " + Stereotypes.STRUCT);
@@ -1125,20 +1102,18 @@ implements UML1Consumer {
                             ModelExceptions.MODEL_DOMAIN,
                             ModelExceptions.INVALID_PARAMETER_DECLARATION,
                             "Parameter format must be [p0:T0...pn:Tn | in:T], where T must be a class with stereotype " + Stereotypes.STRUCT,
-                            new BasicException.Parameter("operation", operationDef.path().toString())
+                            new BasicException.Parameter("operation", operationDefFacade.getPath())
                         );
                     }
-                    parameterType = new DataproviderObject(
-                        (Path)parameterDef.values("type").get(0)
+                    parameterTypeFacade = ObjectHolder_2Facade.newInstance(
+                        (Path)ObjectHolder_2Facade.newInstance(parameterDef).attributeValue("type")
                     );
                     createParameterType = false;
                 }
-
                 /**
                  * Case 1: Parameter is attribute of parameter type. Create object as ATTRIBUTE.
                  */
                 else {
-
                     // 'in' is the only allowed parameter
                     if(!createParameterType) {
                         SysLog.error("Parameter format must be [p0:T0, ... ,pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE);
@@ -1146,7 +1121,7 @@ implements UML1Consumer {
                             ModelExceptions.MODEL_DOMAIN,
                             ModelExceptions.INVALID_PARAMETER_DECLARATION,
                             "Parameter format must be [p0:T0, ... ,pn:Tn | in:T], where T must be a class with stereotype " + ModelAttributes.STRUCTURE_TYPE,
-                            new BasicException.Parameter("operation", operationDef.path().toString())
+                            new BasicException.Parameter("operation", operationDefFacade.getPath())
                         );
                     }
                     this.createModelElement(
@@ -1157,64 +1132,60 @@ implements UML1Consumer {
                 }
 
             }
-
             /**
              * Case 1: parameter type must be created
              */
             if(createParameterType) {
                 this.createModelElement(
                     null,
-                    parameterType
+                    parameterTypeFacade.getDelegate()
                 );
             }
-
             // in-parameter
-            DataproviderObject inParameterDef = new DataproviderObject(
-                new Path(
-                    operationDef.path().toString() + "::in"
-                )
-            );
-            inParameterDef.values(SystemAttributes.OBJECT_CLASS).add(
+            ObjectHolder_2Facade inParameterDefFacade = ObjectHolder_2Facade.newInstance(
+                newFeaturePath(
+                    operationDefFacade.getPath(),
+                    "in"
+                ),
                 ModelAttributes.PARAMETER
             );
-            inParameterDef.values("container").add(
-                operationDef.path()
+            inParameterDefFacade.attributeValues("container").add(
+                operationDefFacade.getPath()
             );
-            inParameterDef.values("direction").add(
+            inParameterDefFacade.attributeValues("direction").add(
                 DirectionKind.IN_DIR
             );
-            inParameterDef.values("multiplicity").add(
+            inParameterDefFacade.attributeValues("multiplicity").add(
                 "1..1"
             );
-            inParameterDef.values("type").add(
-                parameterType.path()
+            inParameterDefFacade.attributeValues("type").add(
+                parameterTypeFacade.getPath()
             );
             this.createModelElement(
                 null,
-                inParameterDef
+                inParameterDefFacade.getDelegate()
             );
         }
 
         // void in-parameter
         else {
-            DataproviderObject inParameterDef = new DataproviderObject(
-                new Path(
-                    operationDef.path().toString() + "::in"
-                )
-            );
-            inParameterDef.values(SystemAttributes.OBJECT_CLASS).add(
+            ObjectHolder_2Facade inParameterDefFacade = ObjectHolder_2Facade.newInstance(
+                newFeaturePath(
+                    operationDefFacade.getPath(),
+                    "in"
+                ),
                 ModelAttributes.PARAMETER
             );
-            inParameterDef.values("container").add(
-                operationDef.path()
+            inParameterDefFacade.attributeValues("container").add(
+                operationDefFacade.getPath()
             );
-            inParameterDef.values("direction").add(
+            inParameterDefFacade.attributeValues("direction").add(
                 DirectionKind.IN_DIR
             );
-            inParameterDef.values("multiplicity").add(
+            inParameterDefFacade.attributeValues("multiplicity").add(
                 "1..1"
             );
-            inParameterDef.values("type").add(
+            inParameterDefFacade.attributeValues("type").add(
                 toElementPath(
                     nameToPathComponent("org::openmdx::base"),
                     "Void"
@@ -1222,29 +1193,27 @@ implements UML1Consumer {
             );
             this.createModelElement(
                 null,
-                inParameterDef
+                inParameterDefFacade.getDelegate()
             );
         }
-
         // Note:
         // return parameter is ignored for exceptions (operations with stereotype
         // exception)
         if(!isException) {
-            DataproviderObject resultDef = new DataproviderObject(
-                new Path(
-                    operationDef.path().toString() + "::result"
-                )
-            );
-            resultDef.values(SystemAttributes.OBJECT_CLASS).add(
+            ObjectHolder_2Facade resultDefFacade = ObjectHolder_2Facade.newInstance(
+                newFeaturePath(
+                    operationDefFacade.getPath(),
+                    "result"
+                ),
                 ModelAttributes.PARAMETER
             );
-            resultDef.values("container").add(
-                operationDef.path()
+            resultDefFacade.attributeValues("container").add(
+                operationDefFacade.getPath()
             );
-            resultDef.values("direction").add(
+            resultDefFacade.attributeValues("direction").add(
                 DirectionKind.RETURN_DIR
             );
-            resultDef.values("multiplicity").add(
+            resultDefFacade.attributeValues("multiplicity").add(
                 "1..1"
             );
 
@@ -1252,7 +1221,7 @@ implements UML1Consumer {
                 this.error("Undefined return type for operation " + umlOperation.getQualifiedName());
             }
             else {
-                resultDef.values("type").add(
+                resultDefFacade.attributeValues("type").add(
                     toElementPath(
                         nameToPathComponent(getScope(umlOperation.getReturnParameter().getType())),
                         getName(umlOperation.getReturnParameter().getType())
@@ -1260,7 +1229,7 @@ implements UML1Consumer {
                 );
                 this.createModelElement(
                     null,
-                    resultDef
+                    resultDefFacade.getDelegate()                   
                 );
             }
         }
@@ -1283,9 +1252,9 @@ implements UML1Consumer {
                         this.errors.println("Found invalid exception declaration <" + qualifiedExceptionName + "> for the operation " + umlOperation.getQualifiedName() + "; this exception is ignored unless a valid qualified exception name is specified.");
                     }
                     else {
-                        operationDef.values("exception").add(
-                            new Path(
-                                toElementPath(nameToPathComponent(scope), name).toString() + "::" +
+                        operationDefFacade.attributeValues("exception").add(
+                            newFeaturePath(
+                                toElementPath(nameToPathComponent(scope), name),
                                 getName(qualifiedExceptionName)
                             )
                         );
@@ -1295,53 +1264,50 @@ implements UML1Consumer {
         }
         this.createModelElement(
             null,
-            operationDef
+            operationDefFacade.getDelegate()
         );
     }
 
     //---------------------------------------------------------------------------
-    private DataproviderObject processParameter(
+    private MappedRecord processParameter(
         UML1Parameter umlParameter,
-        DataproviderObject parameterType
+        MappedRecord parameterType
     ) throws Exception {
         SysLog.info("Processing parameter", umlParameter.getName());
 
-        DataproviderObject parameterDef = new DataproviderObject(
-            new Path(
-                parameterType.path().toString() + "::" + umlParameter.getName()
-            )
-        );
-
-        // object_class
-        parameterDef.values(SystemAttributes.OBJECT_CLASS).add(
+        ObjectHolder_2Facade parameterDefFacade = ObjectHolder_2Facade.newInstance(
+            newFeaturePath(
+                ObjectHolder_2Facade.getPath(parameterType),
+                umlParameter.getName()
+            ),
             ModelAttributes.STRUCTURE_FIELD
         );
 
         // container
-        parameterDef.values("container").add(
-            parameterType.path()
+        parameterDefFacade.attributeValues("container").add(
+            ObjectHolder_2Facade.getPath(parameterType)
         );
 
-        parameterDef.values("maxLength").add(new Integer(DEFAULT_PARAMETER_MAX_LENGTH));
+        parameterDefFacade.attributeValues("maxLength").add(new Integer(DEFAULT_PARAMETER_MAX_LENGTH));
 
         if(umlParameter.getType() == null) {
             this.error("Undefined type for parameter " + umlParameter.getQualifiedName());
         }
         else {
-            parameterDef.values("type").add(
+            parameterDefFacade.attributeValues("type").add(
                 toElementPath(
                     nameToPathComponent(getScope(umlParameter.getType())),
                     getName(umlParameter.getType())
                 )
             );
-            parameterDef.values("multiplicity").add(
+            parameterDefFacade.attributeValues("multiplicity").add(
                 umlParameter.getStereotypes().size() > 0 ?
                     umlParameter.getStereotypes().iterator().next() :
                         DEFAULT_PARAMETER_MULTIPLICITY
             );
         }
 
-        return parameterDef;
+        return parameterDefFacade.getDelegate();
 
     }
 
@@ -1352,18 +1318,16 @@ implements UML1Consumer {
         SysLog.info("Processing primitive type", umlDataType.getQualifiedName());
 
         // ModelPrimitiveType object
-        DataproviderObject primitiveTypeDef = new DataproviderObject(
+        ObjectHolder_2Facade primitiveTypeDefFacade = ObjectHolder_2Facade.newInstance(
             toElementPath(
                 nameToPathComponent(getScope(umlDataType.getQualifiedName())),
                 umlDataType.getName()
-            )
+            ),
+            ModelAttributes.PRIMITIVE_TYPE
         );
 
-        // object_class
-        primitiveTypeDef.values(SystemAttributes.OBJECT_CLASS).add(ModelAttributes.PRIMITIVE_TYPE);
-
         // container
-        primitiveTypeDef.values("container").add(
+        primitiveTypeDefFacade.attributeValues("container").add(
             toElementPath(
                 nameToPathComponent(getScope(umlDataType.getQualifiedName())),
                 getName(getScope(umlDataType.getQualifiedName()))
@@ -1378,26 +1342,28 @@ implements UML1Consumer {
 
         // annotation
         String annotation = this.getAnnotation(umlDataType);
-        if (annotation.length() != 0)
-        {
-            primitiveTypeDef.values("annotation").add(annotation);
+        if (annotation.length() != 0) {
+            primitiveTypeDefFacade.attributeValues("annotation").add(annotation);
         }
 
         // isAbstract attribute
-        primitiveTypeDef.values("isAbstract").add(
+        primitiveTypeDefFacade.attributeValues("isAbstract").add(
             new Boolean(umlDataType.isAbstract())
         );
 
         // isSingleton attribute
-        primitiveTypeDef.values("isSingleton").add(
+        primitiveTypeDefFacade.attributeValues("isSingleton").add(
             new Boolean(false)
         );
 
         // visibility attribute
-        primitiveTypeDef.values("visibility").add(VisibilityKind.PUBLIC_VIS);
+        primitiveTypeDefFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
 
-        SysLog.info("Primitive type", primitiveTypeDef.path());
-        createModelElement(null, primitiveTypeDef);
+        SysLog.info("Primitive type", primitiveTypeDefFacade.getPath());
+        createModelElement(
+            null, 
+            primitiveTypeDefFacade.getDelegate()
+        );
     }
 
     //---------------------------------------------------------------------------

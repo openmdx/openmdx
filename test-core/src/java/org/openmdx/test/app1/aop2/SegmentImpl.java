@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SegmentImpl.java,v 1.2 2009/02/18 13:00:20 hburger Exp $
+ * Name:        $Id: SegmentImpl.java,v 1.4 2009/05/15 00:36:30 hburger Exp $
  * Description: SegmentImpl 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/18 13:00:20 $
+ * Date:        $Date: 2009/05/15 00:36:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,12 +53,11 @@ package org.openmdx.test.app1.aop2;
 import org.openmdx.base.aop2.AbstractObject;
 import org.openmdx.test.app1.cci2.SegmentReferencesForgeignPerson;
 import org.openmdx.test.app1.jmi1.Person;
-import org.openmdx.test.app1.jmi1.Segment;
 
 /**
  * SegmentImpl
  */
-public class SegmentImpl extends AbstractObject<org.openmdx.test.app1.jmi1.Segment,org.openmdx.test.app1.cci2.Segment> {
+public class SegmentImpl extends AbstractObject<org.openmdx.test.app1.jmi1.Segment,org.openmdx.test.app1.cci2.Segment,Void> {
 
     /**
      * Constructor 
@@ -82,10 +81,10 @@ public class SegmentImpl extends AbstractObject<org.openmdx.test.app1.jmi1.Segme
      * @see org.openmdx.test.app1.cci2.Segment#getForeignPerson()
      */
     public <T extends org.openmdx.test.app1.cci2.Person> SegmentReferencesForgeignPerson.ForeignPerson<T> getForeignPerson() {
-        Segment same = sameObject();
-        return (SegmentReferencesForgeignPerson.ForeignPerson<T>) (this.foreignPerson == null ?
-            this.foreignPerson = new SegmentReferencesForeignPersonImpl(same) :
-            this.foreignPerson);
+        if(this.foreignPerson == null) {
+            this.foreignPerson = new SegmentReferencesForeignPersonImpl(sameObject());   
+        }
+        return (SegmentReferencesForgeignPerson.ForeignPerson<T>) this.foreignPerson;
     }
 
 }

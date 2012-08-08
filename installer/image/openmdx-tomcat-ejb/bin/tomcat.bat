@@ -20,7 +20,6 @@ set JAVA_HOME=%JAVA_HOME:/=\%
 set JAVA_OPTS=%JAVA_OPTS% -Xmx800M 
 set JAVA_OPTS=%JAVA_OPTS% -XX:MaxPermSize=128m
 set JAVA_OPTS=%JAVA_OPTS% -Djava.protocol.handler.pkgs=org.openmdx.kernel.url.protocol
-set JAVA_OPTS=%JAVA_OPTS% -Dorg.openmdx.log.config.filename="%CATALINA_HOME%\server.log.properties"
 set JAVA_OPTS=%JAVA_OPTS% -Dorg.opencrx.maildir="%CATALINA_HOME%\maildir"
 cd %CATALINA_HOME%
 rmdir /s /q temp

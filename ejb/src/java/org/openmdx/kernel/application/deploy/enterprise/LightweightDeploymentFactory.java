@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightDeploymentFactory.java,v 1.1 2009/01/15 15:11:42 hburger Exp $
+ * Name:        $Id: LightweightDeploymentFactory.java,v 1.2 2009/04/21 16:18:25 hburger Exp $
  * Description: Lightweight Deployment Manager
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/15 15:11:42 $
+ * Date:        $Date: 2009/04/21 16:18:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -85,7 +85,10 @@ public class LightweightDeploymentFactory implements DeploymentFactory {
 		LightweightContainer.Mode.values().length                                                          
 	];                                                             
 
-	private static final String URI_PREFIX = "xri://@openmdx*(+lightweight)*";	
+	private static final String[] URI_PREFIX = {
+		"xri://ejb.openmdx.org*", // preferred
+		"xri://@openmdx*(+lightweight)*" // deprecated	
+	};
 	
 	public DeploymentManager getDisconnectedDeploymentManager(
 		String uri
@@ -104,13 +107,16 @@ public class LightweightDeploymentFactory implements DeploymentFactory {
 	static LightweightContainer.Mode getMode(
 		String uri
 	){
-		if(uri != null && uri.toLowerCase().startsWith(URI_PREFIX)) {
-			String mode = uri.substring(URI_PREFIX.length());
-			for(LightweightContainer.Mode candidate : Mode.values()) {
-				if(candidate.name().equalsIgnoreCase(mode)) {
-					return candidate;
+		if(uri != null) try {
+			for (String uriPrefix : URI_PREFIX) {
+				if(uri.toLowerCase().startsWith(uriPrefix)) {
+					return Mode.valueOf(
+						uri.substring(uriPrefix.length()).toUpperCase()
+					);
 				}
 			}
+		} catch (Exception exception) {
+			// Tell the caller that we are not going to handle the uri
 		}
 		return null;
 	}

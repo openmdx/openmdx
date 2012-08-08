@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ResourceURLConnection.java,v 1.3 2008/06/28 00:21:33 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ResourceURLConnection.java,v 1.5 2009/03/16 16:47:13 hburger Exp $
  * Description: Resource URL Connection
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:33 $
+ * Date:        $Date: 2009/03/16 16:47:13 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,12 +45,11 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.kernel.url.protocol.xri;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -91,17 +89,7 @@ public class ResourceURLConnection
         if(!path.startsWith(PREFIX)) throw new MalformedURLException(
             "Only the XRI authority '" + XriAuthorities.RESOURCE_AUTHORITY + "' can be handled: " + url
         );
-        String name = path.substring(PREFIX.length());
-        //
-        // first try TCL and then SCL
-        //
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        URL target = contextClassLoader == null ? null : contextClassLoader.getResource(name);
-        if (target == null) target = ClassLoader.getSystemClassLoader().getResource(name);
-        if (target == null) throw new FileNotFoundException(
-            "Could not locate resource: " + name
-         );
-        return target;
+        return getResourceUrl(path.substring(PREFIX.length()));
    }
    
    /**

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SysLog.java,v 1.16 2009/03/05 13:53:30 hburger Exp $
+ * Name:        $Id: SysLog.java,v 1.19 2009/04/01 13:33:33 hburger Exp $
  * Description: Former Log API
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 13:53:30 $
+ * Date:        $Date: 2009/04/01 13:33:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,10 +50,11 @@
  */
 package org.openmdx.kernel.log;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.MessageFormatter;
-import org.slf4j.spi.LocationAwareLogger;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+
+import org.openmdx.kernel.Version;
 
 /**
  * <code>SysLog</code> wraps the Log class to do application-general
@@ -67,68 +68,13 @@ public class SysLog {
      */
 	private SysLog(
 	) {
-	    // This class must NEVER be instantiated. Actually SysLog only extends
-	    // the class Log to prevent problems with multiple class
-	    // loaders. SysLog uses a Log instance singleton by delegation!
+	    // Avoid instantiation
 	}
-	
-    /** Constants */
-	final public static String LOGSOURCE_SUMMARY_DETAIL_FORMAT = "{}|{}|{}";
-    final public static String LOGSOURCE_SUMMARY_FORMAT = "{}|{}";
-    final public static String LOGNAME = "SysLog";
-    final private static String LOGSOURCE = "Sys";
-	
-    private static final Logger logger = LoggerFactory.getLogger(LOGNAME);
-    private static final boolean locationAware = logger instanceof LocationAwareLogger;
-    private static final LocationAwareLogger locationAwareLogger = (LocationAwareLogger) (locationAware ? logger : null);
-    private static Object logSource = LOGSOURCE;
+
+    /**
+     * To tell the foreign record about the loggger class
+     */
     private static final String THIS = SysLog.class.getName();
-
-	///////////////////////////////////////////////////////////////////////////
-    //
-    // LOG configuration
-    //
-    ///////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Set a log source object. The logging framework uses the toString() method
-	 * to determine the log source for each log event.
-	 * The object may be set at any time.
-	 *
-	 * <p>
-	 * Dynamic log source example:
-	 * <code>
-	 *
-	 * class LogSource
-	 * {
-	 *   public String toString()
-	 *   {
-	 * 		return "LogSource-" + System.currentTimeMillis();
-	 * 	 }
-	 * }
-	 *
-	 * LogSource logSource = new LogSource();
-	 * SysLog.setLogSource(logSource)
-	 *
-	 * </code>
-	 *
-	 * <p>
-	 * Static log source example:
-	 * <code>
-	 *
-	 * SysLog.setLogSource("LogSource")
-	 *
-	 * </code>
-	 *
-	 * @param logSource a log source object
-	 */
-	public static void setLogSource(
-	    Object logSource
-	){
-	    if(logSource != null) {
-    	    SysLog.logSource = logSource;
-	    }
-	}
 
 	/**
      * Checks if trace logging is active
@@ -151,35 +97,75 @@ public class SysLog {
      */
     public static boolean isTraceOn()
     {
-        return logger.isTraceEnabled();
+        return LoggerFactory.getLogger().isLoggable(Level.FINEST);
     }
-
-
-    ///////////////////////////////////////////////////////////////////////////
-    //
-    // LOG methods
-    //
-    ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Format the log message
+     * Log using the given pattern and arguments
+     * 
+     * @param level
+     * @param pattern 
+     * @param pattern
+     * @param logSource TODO
+     * @param arguments
      */
-    private static final String format(
-        String logString,
-        Object logObj
+    public static void log(
+        Level level,
+        String pattern, 
+        Object... arguments
     ){
-        return logObj == null || logObj instanceof Throwable ? MessageFormatter.arrayFormat(
-            LOGSOURCE_SUMMARY_FORMAT, 
-            logSource, 
-            logString
-        ) : MessageFormatter.arrayFormat(
-            LOGSOURCE_SUMMARY_DETAIL_FORMAT, 
-            logSource, 
-            logString,
-            logObj
-        );
+        Logger logger = LoggerFactory.getLogger();
+        if(logger.isLoggable(level)) {
+            LogRecord record = new ForeignLogRecord(THIS, level, pattern);
+            record.setParameters(arguments);
+            logger.log(record);
+        }
     }
 
+    /**
+     * Log an exception
+     * 
+     * @param level
+     * @param message
+     * @param throwable
+     */
+    public static void log(
+        Level level,
+        String message,
+        Throwable throwable
+    ){
+        Logger logger = LoggerFactory.getLogger();
+        if(logger.isLoggable(level)) {
+            LogRecord record = new ForeignLogRecord(THIS, level, message);
+            record.setThrown(throwable);
+            logger.log(record);
+        }
+        
+    }
+    
+    /**
+     * Log an exception
+     * 
+     * @param level
+     * @param throwable
+     * @param pattern
+     * @param arguments
+     */
+    private static void log(
+        Level level,
+        Throwable throwable,
+        String pattern, 
+        Object... arguments
+    ){
+        Logger logger = LoggerFactory.getLogger();
+        if(logger.isLoggable(level)) {
+            LogRecord record = new ForeignLogRecord(THIS, level, pattern);
+            record.setParameters(arguments);
+            record.setThrown(throwable);
+            logger.log(record);
+        }
+    }
+    
     /**
      * Logs a text string at CRITICAL_ERROR_LEVEL.
      *
@@ -200,23 +186,30 @@ public class SysLog {
 		String logString,
 		Object logObj
     ){
-        if (logger.isErrorEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.ERROR_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.error(message);
-            } else {
-                logger.error(message, throwable);
-            }
-        }
+        log(Level.SEVERE, "{0}|{1}|{2}", "Sys", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at CRITICAL_ERROR_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #criticalError(String)
+     * @see #criticalError(String, Object, int)
+     */
+    public static void criticalError(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.SEVERE, logObj, "{0}|{1}", "Sys", logString);
     }
 
     /**
@@ -230,20 +223,7 @@ public class SysLog {
      * @see #criticalError(String, Object, int)
      */
     public static void criticalError(String logString) {
-        if (logger.isErrorEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.ERROR_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.error(message);
-            }
-        }
+        log(Level.SEVERE, "{0}|{1}", "Sys", logString);
     }
 
 	/**
@@ -266,23 +246,30 @@ public class SysLog {
 		String logString,
 		Object logObj
 	){
-        if (logger.isErrorEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.ERROR_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.error(message);
-            } else {
-                logger.error(message, throwable);
-            }
-        }
+        log(Level.SEVERE, "{0}|{1}|{2}", "Sys", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at ERROR_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #error(String)
+     * @see #error(String, Object, int)
+     */
+    public static void error(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.SEVERE, logObj, "{0}|{1}", "Sys", logString);
     }
 
 	/**
@@ -298,20 +285,7 @@ public class SysLog {
     public static void error(
         String logString
     ){
-        if (logger.isErrorEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.ERROR_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.error(message);
-            }
-        }
+        log(Level.SEVERE, "{0}|{1}", "Sys", logString);
     }
 
     /**
@@ -334,23 +308,30 @@ public class SysLog {
 		String logString,
 		Object logObj
     ){
-        if (logger.isWarnEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.WARN_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.warn(message);
-            } else {
-                logger.warn(message, throwable);
-            }
-        }
+        log(Level.WARNING, "{0}|{1}|{2}", "Sys", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at WARNING_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #warning(String)
+     * @see #warning(String, Object, int)
+     */
+    public static void warning(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.WARNING, logObj, "{0}|{1}", "Sys", logString);
     }
 
     /**
@@ -366,20 +347,7 @@ public class SysLog {
     public static void warning(
         String logString
     ){
-        if (logger.isWarnEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.WARN_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.warn(message);
-            }
-        }
+        log(Level.WARNING, "{0}|{1}", "Sys", logString);
     }
 
     /**
@@ -402,23 +370,30 @@ public class SysLog {
 		String logString,
 		Object logObj
     ){
-        if (logger.isInfoEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.INFO_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.info(message);
-            } else {
-                logger.info(message, throwable);
-            }
-        }
+        log(Level.INFO, "{0}|{1}|{2}", "Sys", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at INFO_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #info(String)
+     * @see #info(String, Object, int)
+     */
+    public static void info(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.INFO, logObj, "{0}|{1}", "Sys", logString);
     }
 
     /**
@@ -434,20 +409,7 @@ public class SysLog {
     public static void info(
         String logString
     ){
-        if (logger.isInfoEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.INFO_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.info(message);
-            }
-        }
+        log(Level.INFO, "{0}|{1}", "Sys", logString);
 	}
 
     /**
@@ -470,23 +432,30 @@ public class SysLog {
 		String logString,
 		Object logObj
     ){
-        if (logger.isDebugEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.DEBUG_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.debug(message);
-            } else {
-                logger.debug(message, throwable);
-            }
-        }
+        log(Level.FINE, "{0}|{1}|{2}", "Sys", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at DETAIL_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #detail(String)
+     * @see #detail(String, Object, int)
+     */
+    public static void detail(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.FINE, logObj, "{0}|{1}", "Sys", logString);
     }
 
     /**
@@ -502,20 +471,7 @@ public class SysLog {
     public static void detail(
         String logString
     ){
-        if (logger.isDebugEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.DEBUG_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.debug(message);
-            }
-        }
+        log(Level.FINE, "{0}|{1}", "Sys", logString);
     }
 
     /**
@@ -538,23 +494,30 @@ public class SysLog {
 		String logString,
 		Object logObj
 	){
-        if (logger.isTraceEnabled()) {
-            String message = format(logString, logObj);
-            Throwable throwable = (Throwable) (logObj instanceof Throwable ? logObj : null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.TRACE_INT, 
-                    message, 
-                    throwable
-                 );
-            } else if(throwable == null) {
-                logger.trace(message);
-            } else {
-                logger.trace(message, throwable);
-            }
-        }
+        log(Level.FINEST, "{0}|{1}|{2}", "Sys", logString, logObj);
+    }
+
+    /**
+     * Logs a text string at TRACE_LEVEL.
+     *
+     * @param logString
+     *         a concise summary message. The message must be single line and
+     *         must therefore not contain any '\r' or '\n' characters. The '\r'
+     *         and '\n' characters are removed silently from the message.
+     * @param logObj
+     *         a log object providing detail information. The log object is
+     *         stringified using its <code>toString</code> method before getting
+     *         logged. The log object may be a null object. If the log object
+     *         is a <code>Throwable</code> it's message and stack trace is
+     *         logged.
+     * @see #trace(String)
+     * @see #trace(String, Object, int)
+     */
+    public static void trace(
+        String logString,
+        Throwable logObj
+    ){
+        log(Level.FINEST, logObj, "{0}|{1}", "Sys", logString);
     }
 
     /**
@@ -570,20 +533,7 @@ public class SysLog {
     public static void trace(
         String logString
     ){
-        if (logger.isTraceEnabled()) {
-            String message = format(logString, null);
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.TRACE_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.trace(message);
-            }
-        }
+        log(Level.FINEST, "{0}|{1}", "Sys", logString);
     }
 
     /**
@@ -601,25 +551,7 @@ public class SysLog {
         String logString, 
         long elapsedTime
     ){
-        if (logger.isInfoEnabled()) {
-            String message = MessageFormatter.arrayFormat(
-                "{} Performance|{}|Elapsed time: {} ms", 
-                logSource, 
-                logString,
-                elapsedTime
-            );
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.INFO_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.info(message);
-            }
-        }
+        log(Level.INFO, "{0} Performance|{1}|Elapsed time: {2} ms", "Sys", logString, elapsedTime);
     }
 
     /**
@@ -635,25 +567,11 @@ public class SysLog {
         String 	group, 
         String 	record
     ) {
-        if (logger.isInfoEnabled()) {
-            String message = MessageFormatter.arrayFormat(
-                "{} Statistics|Group {}|{}", 
-                logSource, 
-                group,
-                record
-            );
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    THIS, 
-                    LocationAwareLogger.INFO_INT, 
-                    message, 
-                    null // throwable
-                 );
-            } else {
-                logger.info(message);
-            }
-        }
+        log(Level.INFO, "{0} Statistics|Group {1}|{2}", "Sys", group, record);
    	}
+
+    static {
+        SysLog.info("openMDX Kernel", Version.getImplementationVersion());
+    }
 
 }

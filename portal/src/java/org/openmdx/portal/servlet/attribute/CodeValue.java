@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeValue.java,v 1.38 2008/11/12 10:36:53 wfro Exp $
+ * Name:        $Id: CodeValue.java,v 1.39 2009/04/30 11:48:40 wfro Exp $
  * Description: CodeValue
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 10:36:53 $
+ * Date:        $Date: 2009/04/30 11:48:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -315,7 +315,10 @@ public class CodeValue
                 ? feature + "[" + Integer.toString(tabIndex) + "]"
                 : id;            
             p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
-            Map longTextsT = this.getLongText(false, false);
+            Map longTextsT = this.getLongText(
+            	false, 
+            	false
+            );
             StringBuilder longTextsAsJsArray = new StringBuilder();
             for(String option: (Set<String>)longTextsT.keySet()) {
             	(longTextsAsJsArray.length() > 0 ?

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Container.java,v 1.2 2009/02/19 16:30:57 hburger Exp $
+ * Name:        $Id: Container.java,v 1.3 2009/06/03 17:36:00 hburger Exp $
  * Description: Container interface
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/19 16:30:57 $
+ * Date:        $Date: 2009/06/03 17:36:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -148,6 +148,30 @@ public interface Container<E>
      */
     List<E> toList(
         Object criteria
+    );
+
+    /**
+     * Load the collection into the cache
+     * <p>
+     * Retrieve field values of instances from the store.  This tells
+     * the <code>PersistenceManager</code> that the application intends to use 
+     * the instances, and their field values should be retrieved.  The fields
+     * in the current fetch group must be retrieved, and the implementation
+     * might retrieve more fields than the current fetch group.
+     * <P>
+     * If the useFetchPlan parameter is false, this method behaves exactly
+     * as the corresponding method without the useFetchPlan parameter. 
+     * If the useFetchPlan parameter is true, and the fetch plan has not been
+     * modified from its default setting, all fields in the current fetch plan
+     * are fetched, and other fields might be fetched lazily by the
+     * implementation. If the useFetchPlan parameter is true, and the fetch
+     * plan has been changed from its default setting, then the fields
+     * specified by the fetch plan are loaded, along with related instances
+     * specified by the fetch plan.
+     * @param useFetchPlan whether to use the current fetch plan to determine
+     * which fields to load and which instances to retrieve.     */
+    void retrieveAll(
+        boolean useFetchPlan
     );
 
 }

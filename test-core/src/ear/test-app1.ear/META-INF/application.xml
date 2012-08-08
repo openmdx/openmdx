@@ -4,13 +4,9 @@
 		openMDX/Core Test Lightweight Container EAR
 	</display-name>
 	<module>
-		<ejb>
-			data-object-provider.jar
-		</ejb>
+		<ejb>data-object-provider.jar/</ejb>
   	</module>
 	<module>
-		<ejb>
-			entity-provider.jar
-		</ejb>
+		<ejb>entity-provider.jar/</ejb>
   	</module>
 </application>

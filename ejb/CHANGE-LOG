@@ -4,7 +4,7 @@
                     =====================================
 
 ==============================================================================
-Version 2.2.1+                                                      2008-11-27
+Version 2.4.1+                                                      2009-04-21
 ==============================================================================
 
 1.    NEW FEATURES
@@ -13,13 +13,28 @@ Version 2.2.1+                                                      2008-11-27
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
-      none
+
+      CR20018669
+      Deployment URIs
+       
+      Deprecate
+      1. xri://@openmdx*(+lightweight)*...
+      2. xri://@openmdx*(+openejb)*...
+      in favour of
+      1. xri://ejb.openmdx.org*...
+      2. xri://openejb.apache.org*...
                   
 2.1.  FIXED BUGS
       none
 
 2.2.  DEPRECATED FEATURES
-      none
+     
+      CR20018669
+      Deployment URIs
+       
+      Deprecate
+      1. xri://@openmdx*(+lightweight)*...
+      2. xri://@openmdx*(+openejb)*...
             
 2.3   REMOVED FEATURES
       none

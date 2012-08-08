@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefContainer.java,v 1.4 2008/12/15 03:15:30 hburger Exp $
+ * Name:        $Id: RefContainer.java,v 1.5 2009/05/07 14:54:36 hburger Exp $
  * Description: RefContainer 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/15 03:15:30 $
+ * Date:        $Date: 2009/05/07 14:54:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -75,7 +75,7 @@ public interface RefContainer extends RefBaseObject {
      * Retrieves an object from the container
      * 
      * @param arguments there is always an even number of arguments:
-     * ((REASSIGNABLE|PERSISTENT) identifier)+
+     * (({@link #REASSIGNABLE}|{@link #PERSISTENT}) identifier)+
      * 
      * @return the object
      */
@@ -87,7 +87,7 @@ public interface RefContainer extends RefBaseObject {
      * Removes an object from the container
      * 
      * @param arguments there is always an even number of arguments:
-     * ((REASSIGNABLE|PERSISTENT) identifier)+
+     * (({@link #REASSIGNABLE}|{@link #PERSISTENT}) identifier)+
      */
     void refRemove(
         Object... arguments 

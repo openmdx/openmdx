@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AlternativeDatatypeFactory.java,v 1.6 2009/02/24 15:48:55 hburger Exp $
+ * Name:        $Id: AlternativeDatatypeFactory.java,v 1.7 2009/05/25 14:24:33 hburger Exp $
  * Description: Immutable Datatype Factory
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 15:48:55 $
+ * Date:        $Date: 2009/05/25 14:24:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -282,7 +282,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
         if(datatype == null) {
             return null;
         } else if(datatype instanceof ImmutableDatatype) {
-            return ((ImmutableDatatype)datatype).toBasicFormat();
+            return ((ImmutableDatatype<?>)datatype).toBasicFormat();
         } else if (datatype instanceof Date) {
             return ImmutableDateTime.basicFormat.format((Date)datatype);
         } else if (datatype instanceof Duration) {
@@ -331,8 +331,8 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
     public String toExtendedFormat(Object datatype) {
         if(datatype == null) {
             return null;
-        } else if(datatype instanceof ImmutableDatatype) {
-            return ((ImmutableDatatype)datatype).toXMLFormat();
+        } else if(datatype instanceof ImmutableDatatype<?>) {
+            return ((ImmutableDatatype<?>)datatype).toXMLFormat();
         } else if (datatype instanceof Date) {
             return ImmutableDateTime.extendedFormat.format((Date)datatype);
         } else if (datatype instanceof Duration) {

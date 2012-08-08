@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: XRI_1Marshaller.java,v 1.1 2009/01/06 13:14:44 wfro Exp $
+ * Name:        $Id: XRI_1Marshaller.java,v 1.3 2009/05/29 17:04:11 hburger Exp $
  * Description: Path/XRI Marshaller 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 13:14:44 $
+ * Date:        $Date: 2009/05/29 17:04:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -130,6 +130,7 @@ implements Marshaller
         }
     }
 
+    @SuppressWarnings("deprecation")
     static void encode(
         Object charSequence,
         StringBuilder xri,
@@ -395,7 +396,7 @@ implements Marshaller
                         target.append(character);
                 }
             }
-            return new Path(target.toString()).toString();
+            return new Path(target.toString()).toComponent();
         } else if (authority && "*".equals(source)) {
             return ":*";
         } else if (terminal && ":***".equals(source)) {

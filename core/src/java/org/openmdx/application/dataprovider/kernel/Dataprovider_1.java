@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1.java,v 1.4 2009/02/10 16:08:52 hburger Exp $
+ * Name:        $Id: Dataprovider_1.java,v 1.8 2009/06/01 15:37:28 wfro Exp $
  * Description: The dataprovider kernel
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/10 16:08:52 $
+ * Date:        $Date: 2009/06/01 15:37:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,38 +52,35 @@ package org.openmdx.application.dataprovider.kernel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openmdx.application.cci.ConfigurationProvider_1_0;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.DataproviderLayers;
-import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
-import org.openmdx.application.dataprovider.spi.LayerStatistics_1_0;
 import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Model_1_6;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 
 /**
  * This class is the dataprovider builder.
- */
+ */ 
 public class Dataprovider_1 
-    extends EntityManagerFactory_2
+    extends AbstractProvider_1
     implements Dataprovider_1_1Connection
 {
 
@@ -95,15 +92,12 @@ public class Dataprovider_1
      * @param       configurationProvider
      *              The configurationProvider provides the configurations for
      *              the kernel and the individual layers.
-     * @param       self 
-     *              A self reference
      * @exception   ServiceException
      *              If the instantiation of the dataprovider fails
      */
     public Dataprovider_1(
         Configuration dataproviderConfiguration,
-        ConfigurationProvider_1_0 configurationProvider, 
-        Dataprovider_1_0 self
+        ConfigurationProvider_1_0 configurationProvider
     ) throws ServiceException {
         super(configurationProvider);
 
@@ -115,34 +109,13 @@ public class Dataprovider_1
         );
 
         try {
-            this.logger.trace (
-                "Creating kernel for namespace \"{}\"",
-                namespace,
-                kernelConfiguration
-            );
-
-            // Prepare layer statistics objects
-            LayerStatistics_1_0[] layerStatistics = namespaceStatistics.get(namespace);
-            if(layerStatistics == null) synchronized(namespaceStatistics){
-                layerStatistics = namespaceStatistics.get(namespace);
-                if(layerStatistics == null) {
-                    layerStatistics = new LayerStatistics_1_0[LAYERS];
-                    for(
-                            short layer = DataproviderLayers.PERSISTENCE;
-                            layer <= DataproviderLayers.INTERCEPTION;
-                            layer++
-                    ) layerStatistics[layer] = new LayerStatistics_1();
-                    namespaceStatistics.put(namespace, layerStatistics);
+            this.logger.log(
+                Level.FINEST,
+                "Creating kernel for namespace \"{0}\": {1}",
+                new Object[]{
+                    namespace,
+                    kernelConfiguration
                 }
-            }
-
-            // Get dataprovider configuration
-
-            // LAYER_STATISTICS
-            dataproviderConfiguration.values(
-                SharedConfigurationEntries.LAYER_STATISTICS
-            ).addAll(
-                Arrays.asList(layerStatistics)
             );
 
             // NAMESPACE_ID
@@ -189,24 +162,18 @@ public class Dataprovider_1
             ).addAll(
                 kernelConfiguration.values(SharedConfigurationEntries.PACKAGE_IMPL)
             );
-            this.model = Model_1Factory.getModel();
-            dataproviderConfiguration.values(SharedConfigurationEntries.MODEL).set(0, this.model);
             List<String> modelPackages = new ArrayList<String>();
             for(Object modelPackage : dataproviderConfiguration.values(SharedConfigurationEntries.MODEL_PACKAGE).population()) {
                 modelPackages.add((String) modelPackage);
             }
-            this.model.addModels(modelPackages);
+            if(!modelPackages.isEmpty()) {
+                Model_1Factory.getModel().addModels(modelPackages);
+            }
 
             // DATAPROVIDER_CONNECTION
             dataproviderConfiguration.values(
                 SharedConfigurationEntries.DATAPROVIDER_CONNECTION
             ); // Like that even an initially empty entry is sharable
-
-            if(self != null) dataproviderConfiguration.values(
-                SharedConfigurationEntries.THIS_DATAPROVIDER
-            ).add(
-                self
-            );
 
             // Load, configure and activate plug-ins
             Configuration[] layerConfigurations = new Configuration[LAYERS];
@@ -271,10 +238,10 @@ public class Dataprovider_1
                     new BasicException.Parameter("step",step)
                 ).log();
             }
-            logger.debug(
-                "Kernel for namespace \"{}\" created: {}",
-                namespace,
-                kernelConfiguration
+            this.logger.log(
+                Level.FINER,
+                "Kernel for namespace \"{0}\" created: {}",
+                new Object[]{namespace,kernelConfiguration}
             );
 
             this.delegation = layers[DataproviderLayers.INTERCEPTION];
@@ -308,13 +275,8 @@ public class Dataprovider_1
     /**
      * The logger instance
      */
-    private final Logger logger = LoggerFactory.getLogger(Dataprovider_1.class);
+    private final Logger logger = LoggerFactory.getLogger();
 
-    /**
-     * The model repository
-     */
-    private Model_1_6 model;
-    
     
     //------------------------------------------------------------------------
     // Class Members
@@ -341,12 +303,6 @@ public class Dataprovider_1
     final private static short ACTIVATE_PLUGIN    = 2;
 
     /**
-     * Contains one layer statistic array per namespace.
-     */
-    final static Map<String,LayerStatistics_1_0[]> namespaceStatistics = 
-        new HashMap<String,LayerStatistics_1_0[]>();
-
-    /**
      * The toPath method accepts any input class
      */
     protected final static Path toPath(
@@ -360,14 +316,6 @@ public class Dataprovider_1
                         new Path(path.toString());
     }
 
-    /**
-     * Retrieve the model repository
-     * 
-     * @return the model repository
-     */
-    protected Model_1_6 getModel(){
-        return this.model;
-    }
     
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0
@@ -385,10 +333,10 @@ public class Dataprovider_1
         ServiceHeader header,
         UnitOfWorkRequest... workingUnits
     ){
-        this.logger.trace(
-            "{} requested by {}",
-            Arrays.asList(workingUnits),
-            header.getPrincipalChain()
+        this.logger.log(
+            Level.FINEST,
+            "{0} requested by {1}",
+            new Object[]{Arrays.asList(workingUnits),header.getPrincipalChain()}
         );
         return delegation.process(header, workingUnits);
     }

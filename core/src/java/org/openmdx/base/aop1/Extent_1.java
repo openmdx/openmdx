@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Extent_1.java,v 1.4 2009/02/10 22:31:08 hburger Exp $
+ * Name:        $Id: Extent_1.java,v 1.10 2009/06/09 12:45:19 hburger Exp $
  * Description: State Object Container
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/10 22:31:08 $
+ * Date:        $Date: 2009/06/09 12:45:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,20 +56,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Model_1_6;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.Quantors;
-import org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes;
 import org.openmdx.compatibility.state1.aop1.StateContainer_1;
 import org.openmdx.compatibility.state1.aop1.StatedObjectContainer_1;
 
@@ -77,7 +76,7 @@ import org.openmdx.compatibility.state1.aop1.StatedObjectContainer_1;
  * State Object Container
  */
 public class Extent_1 
-    implements Serializable, Container_1_0, Delegating_1_0 
+    implements Serializable, Container_1_0, Delegating_1_0<Container_1_0> 
 {
 
     /**
@@ -107,7 +106,7 @@ public class Extent_1
      */
     private static final long serialVersionUID = 5143844081800565000L;
 
-    protected Model_1_6 getModel(){
+    protected Model_1_0 getModel(){
         return this.parent.getModel();
     }
     
@@ -116,6 +115,13 @@ public class Extent_1
      */
     public Object getContainerId() {
         return objGetDelegate().getContainerId();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
+     */
+    public void retrieveAll(boolean useFetchPlan) {
+        throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
 
     /* (non-Javadoc)
@@ -182,8 +188,8 @@ public class Extent_1
             DataObject_1_0 object = (DataObject_1_0) value;
             try {
                 if(getModel().isInstanceof(object, "org:openmdx:base:ExtentCapable")){
-                    Path candidate = (Path) object.jdoGetObjectId();
-                    Path parent = (Path) this.parent.jdoGetObjectId();
+                    Path candidate = object.jdoGetObjectId();
+                    Path parent = this.parent.jdoGetObjectId();
                     return 
                         candidate != null &&
                         parent != null &&

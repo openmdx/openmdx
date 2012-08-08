@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightClassLoader.java,v 1.2 2009/01/21 10:54:18 wfro Exp $
+ * Name:        $Id: LightweightClassLoader.java,v 1.3 2009/03/31 17:06:10 hburger Exp $
  * Description: Lightweight Class Loader
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/21 10:54:18 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -68,16 +69,17 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.openmdx.kernel.application.configuration.Report;
-import org.openmdx.kernel.application.configuration.ReportLogger;
 import org.openmdx.kernel.environment.SystemProperties;
+import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.url.protocol.xri.ZipURLConnection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Lightweight Class Loader
@@ -197,7 +199,7 @@ public class LightweightClassLoader extends URLClassLoader
     	Set<URL> currentUrls = new HashSet<URL>(Arrays.asList(getURLs()));
     	List<URL> newUrls = new ArrayList<URL>(Arrays.asList(urls));
     	boolean added = false;
-    	Logger logger = new ReportLogger(report);
+    	LogSink logger = new ReportSink(report);
     	while(!newUrls.isEmpty()) {
     	    URL newURL = newUrls.remove(0);
     	    try {
@@ -241,9 +243,8 @@ public class LightweightClassLoader extends URLClassLoader
         try {
             return new URL("file","","");
         } catch (MalformedURLException exception) {
-            LoggerFactory.getLogger(
-                LightweightClassLoader.class
-            ).error(
+            LoggerFactory.getLogger().log(
+            	Level.SEVERE,
                 "NO_RESOURCE place holder URL \"file:\" can't created, no resource tracking will take place",
                 exception
             );
@@ -367,6 +368,24 @@ public class LightweightClassLoader extends URLClassLoader
         URL url, 
         Logger logger
     ) throws IOException {
+    	return getManifestClassPath(url, new LoggerSink(logger));
+    }
+    
+    /**
+     * The Manifest is optional as well as its Class-Path attribute.
+     * Return an empty array if either is missing.
+     * 
+     * @param url
+     * @param logger
+     *  
+     * @return the manifest class path; never <code>null</code>.
+     * 
+     * @throws IOException
+     */
+    private static URL[] getManifestClassPath(
+        URL url, 
+        LogSink logger
+    ) throws IOException {
         Manifest manifest = getManifest(url);
         String archiveString = url.toExternalForm();
         List<URL> classPath = new ArrayList<URL>();
@@ -382,14 +401,17 @@ public class LightweightClassLoader extends URLClassLoader
                 ); 
             }
         }
-        logger.info(
-            "{} has {} Manifest leading to the following Class-Path: {}",
-            new Object[]{
+        LogRecord logRecord = new LogRecord(
+        	Level.INFO,
+        	manifest == null ? "{0} has no Manifest leading to the following Class-Path: {1}" : "{0} has a Manifest leading to the following Class-Path: {1}"
+        );
+        logRecord.setParameters(
+        	new Object[]{
                 archiveString,
-                manifest == null ? "no" : "a",
                 classPath
             }
         );
+        logger.log(logRecord);
         return classPath.toArray(new URL[classPath.size()]);
     }
     
@@ -398,7 +420,7 @@ public class LightweightClassLoader extends URLClassLoader
      * Return the original URL of either is missing
      * 
      * @param url
-     * @param logger 
+     * @param logSink 
      * 
      * @return the manifest class path; never <code>null</code>.
      * 
@@ -406,7 +428,7 @@ public class LightweightClassLoader extends URLClassLoader
      */
     static protected URL getImplementationURL(
         URL url, 
-        Logger logger
+        LogSink logSink
     ) throws IOException {
       	Manifest manifest = getManifest(url);
       	String archiveString = url.toExternalForm();
@@ -423,18 +445,24 @@ public class LightweightClassLoader extends URLClassLoader
       		}
       	}
       	if(implementationURL == null) {
-      	    logger.info(
-      	        "{} has no Implementation-URL Manifest entry: {}",
-      	        archiveString, 
-        		url
+      		LogRecord logRecord = new LogRecord(
+      			Level.INFO, 
+      			"{0} has no Implementation-URL Manifest entry: {1}"
+      		);
+      		logRecord.setParameters(
+      			new Object[]{archiveString,url}
         	);
+      		logSink.log(logRecord);
         	return url;
       	} else {
-            logger.info(
-                "{} has an Implementation-URL Manifest entry leading to the following location: ",
-                archiveString, 
-        		implementationURL
+      		LogRecord logRecord = new LogRecord(
+      			Level.INFO, 
+      			"{0} has an Implementation-URL Manifest entry leading to the following location: {1}"
+      		);
+      		logRecord.setParameters(
+      			new Object[]{archiveString,implementationURL}
         	);
+      		logSink.log(logRecord);
         	return implementationURL;
       	}
     }
@@ -465,5 +493,110 @@ public class LightweightClassLoader extends URLClassLoader
         instance.addURLs(urls, report);
         return instance;
     }
+
     
+    //------------------------------------------------------------------------
+    // Interface Logger
+    //------------------------------------------------------------------------
+
+    /**
+     * Log Sink
+     */
+    public interface LogSink {
+    	
+    	void log (LogRecord logRecord);
+    	
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Class ReportSink
+    //------------------------------------------------------------------------
+
+    /**
+     * Report Sink
+     */
+    static class ReportSink implements LogSink {
+        
+        /**
+         * Constructor 
+         *
+         * @param sink
+         */
+        ReportSink(Report sink) {
+            this.sink = sink;
+        }
+
+        /**
+         * 
+         */
+        private final Report sink;
+
+        /**
+         * 
+         */
+		public void log(LogRecord logRecord) {
+			int level = logRecord.getLevel().intValue();
+			Object[] parameters = logRecord.getParameters();
+			Throwable thrown = logRecord.getThrown();
+			try {
+			String message = logRecord.getMessage();
+			if(parameters != null && parameters.length != 0) try {
+				message = MessageFormat.format(message, parameters);
+			} catch (IllegalArgumentException exception) {
+				// Use the pattern as message
+			}
+			if(level >= Level.SEVERE.intValue()) {
+				if(thrown == null) {
+					this.sink.addError(message);
+				} else {
+					this.sink.addError(message, thrown);
+				}
+			} else if (level >= Level.WARNING.intValue()) {
+				if(thrown == null) {
+					this.sink.addWarning(message);
+				} else {
+					this.sink.addWarning(message, thrown);
+				}
+			} else {
+				this.sink.addInfo(message);
+			}
+			} catch (RuntimeException e) {
+				throw e;
+			}
+		} 
+
+    }
+
+    //------------------------------------------------------------------------
+    // Class LoggerSink
+    //------------------------------------------------------------------------
+
+    /**
+     * Report Logger
+     */
+    static class LoggerSink implements LogSink {
+        
+        /**
+         * Constructor 
+         *
+         * @param sink
+         */
+    	LoggerSink(Logger sink) {
+            this.sink = sink;
+        }
+
+        /**
+         * 
+         */
+        private final Logger sink;
+
+        /**
+         * 
+         */
+		public void log(LogRecord logRecord) {
+			this.sink.log(logRecord);
+		}
+    }
+
 }

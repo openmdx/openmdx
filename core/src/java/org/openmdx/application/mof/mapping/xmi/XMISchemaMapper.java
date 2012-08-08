@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMISchemaMapper.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: XMISchemaMapper.java,v 1.3 2009/05/16 22:17:50 wfro Exp $
  * Description: write XML schema (XSD)
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/05/16 22:17:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,12 +56,12 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.openmdx.application.mof.cci.Multiplicities;
-import org.openmdx.application.mof.cci.PrimitiveTypes;
-import org.openmdx.application.mof.cci.Stereotypes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.PrimitiveTypes;
+import org.openmdx.base.mof.cci.Stereotypes;
 
 @SuppressWarnings("unchecked")
 public class XMISchemaMapper {

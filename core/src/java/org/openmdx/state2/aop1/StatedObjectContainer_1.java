@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StatedObjectContainer_1.java,v 1.10 2009/02/12 18:34:42 hburger Exp $
+ * Name:        $Id: StatedObjectContainer_1.java,v 1.14 2009/06/02 23:18:31 hburger Exp $
  * Description: State Object Container
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/12 18:34:42 $
+ * Date:        $Date: 2009/06/02 23:18:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,6 +56,7 @@ import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -63,10 +64,11 @@ import java.util.Set;
 
 import javax.jdo.JDOHelper;
 import javax.resource.cci.InteractionSpec;
+import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.collection.FilterableMap;
@@ -83,7 +85,7 @@ import org.openmdx.state2.cci.ViewKind;
  * State Object Container
  */
 public class StatedObjectContainer_1 
-    implements Serializable, Container_1_0, Delegating_1_0 
+    implements Serializable, Container_1_0, Delegating_1_0<FilterableMap<String,DataObject_1_0>> 
 {
 
     /**
@@ -170,15 +172,15 @@ public class StatedObjectContainer_1
 
     private transient Set<String> keys = null;
     
-    public final FilterableMap<String,DataObject_1_0> objGetDelegate(){
-        return this.selection;
-    }
-    
     /**
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = 1312568818384216689L;
 
+    public final FilterableMap<String,DataObject_1_0> objGetDelegate(){
+        return this.selection;
+    }
+    
     /**
      * Derive the filter from the state context
      * 
@@ -193,93 +195,98 @@ public class StatedObjectContainer_1
     ){
         if(interactionSpec instanceof DateStateContext) {
             DateStateContext stateContext = (DateStateContext) interactionSpec;
+        	List<FilterProperty> filter = new ArrayList<FilterProperty>();
+        	filter.add(
+	            new FilterProperty(
+	                Quantors.THERE_EXISTS,
+	                SystemAttributes.OBJECT_INSTANCE_OF,
+	                FilterOperators.IS_IN,
+	                instanceOf
+	            )
+	        );
             switch(stateContext.getViewKind()) {
                 case TIME_RANGE_VIEW:
-                    return new FilterProperty[]{
-                        new FilterProperty(
-                            Quantors.THERE_EXISTS,
-                            SystemAttributes.OBJECT_INSTANCE_OF,
-                            FilterOperators.IS_IN,
-                            instanceOf
-                        ),
-                        new FilterProperty(
-                            Quantors.FOR_ALL,
-                            "stateValidFrom",
-                            FilterOperators.IS_LESS_OR_EQUAL,
-                            stateContext.getValidTo()
-                        ),
-                        new FilterProperty(
-                            Quantors.FOR_ALL,
-                            "stateValidTo",
-                            FilterOperators.IS_GREATER_OR_EQUAL,
-                            stateContext.getValidFrom()
-                        ),
+                	XMLGregorianCalendar validTo = stateContext.getValidTo();
+                	if(validTo != null) {
+                		filter.add(
+                            new FilterProperty(
+                                Quantors.FOR_ALL,
+                                "stateValidFrom",
+                                FilterOperators.IS_LESS_OR_EQUAL,
+                                validTo
+                            )
+                		);
+                	}
+                	XMLGregorianCalendar validFrom = stateContext.getValidFrom();
+                	if(validFrom != null) {
+                		filter.add(
+                            new FilterProperty(
+                                Quantors.FOR_ALL,
+                                "stateValidTo",
+                                FilterOperators.IS_GREATER_OR_EQUAL,
+                                validFrom
+                            )
+                		);
+                	}
+            		filter.add(
                         new FilterProperty(
                             Quantors.FOR_ALL,
                             SystemAttributes.REMOVED_AT,
                             FilterOperators.IS_IN
                         )
-                    };
+                    );
+            		break;
                 case TIME_POINT_VIEW:
-                    return stateContext.getExistsAt() == null ? new FilterProperty[]{
-                        new FilterProperty(
-                            Quantors.THERE_EXISTS,
-                            SystemAttributes.OBJECT_INSTANCE_OF,
-                            FilterOperators.IS_IN,
-                            instanceOf
-                        ),
+                	XMLGregorianCalendar validAt = stateContext.getValidAt();
+            		filter.add(
                         new FilterProperty(
                             Quantors.FOR_ALL,
                             "stateValidFrom",
                             FilterOperators.IS_LESS_OR_EQUAL,
-                            stateContext.getValidAt()
-                        ),
+                            validAt
+                        )
+                    );
+            		filter.add(
                         new FilterProperty(
                             Quantors.FOR_ALL,
                             "stateValidTo",
                             FilterOperators.IS_GREATER_OR_EQUAL,
-                            stateContext.getValidAt()
-                        ),
-                        new FilterProperty(
-                            Quantors.FOR_ALL,
-                            SystemAttributes.REMOVED_AT,
-                            FilterOperators.IS_IN
+                            validAt
                         )
-                    } : new FilterProperty[]{
-                        new FilterProperty(
-                            Quantors.THERE_EXISTS,
-                            SystemAttributes.OBJECT_INSTANCE_OF,
-                            FilterOperators.IS_IN,
-                            instanceOf
-                        ),
-                        new FilterProperty(
-                            Quantors.FOR_ALL,
-                            "stateValidFrom",
-                            FilterOperators.IS_LESS_OR_EQUAL,
-                            stateContext.getValidAt()
-                        ),
-                        new FilterProperty(
-                            Quantors.FOR_ALL,
-                            "stateValidTo",
-                            FilterOperators.IS_GREATER_OR_EQUAL,
-                            stateContext.getValidAt()
-                        ),
-                        new FilterProperty(
-                            Quantors.FOR_ALL,
-                            SystemAttributes.CREATED_AT,
-                            FilterOperators.IS_LESS_OR_EQUAL,
-                            stateContext.getExistsAt()
-                        ),
-                        new FilterProperty(
-                            Quantors.FOR_ALL,
-                            SystemAttributes.REMOVED_AT,
-                            FilterOperators.IS_GREATER_OR_EQUAL,
-                            stateContext.getExistsAt()
-                        )
-                    };
+                    );
+                	Date existsAt = stateContext.getExistsAt();
+                	if(existsAt == null) {
+                		filter.add(
+                            new FilterProperty(
+                                Quantors.FOR_ALL,
+                                SystemAttributes.REMOVED_AT,
+                                FilterOperators.IS_IN
+                            )
+						);
+                	} else {
+                		filter.add(
+                            new FilterProperty(
+                                Quantors.FOR_ALL,
+                                SystemAttributes.CREATED_AT,
+                                FilterOperators.IS_LESS_OR_EQUAL,
+                                existsAt
+                            )
+                		);
+                		filter.add(
+                            new FilterProperty(
+                                Quantors.FOR_ALL,
+                                SystemAttributes.REMOVED_AT,
+                                FilterOperators.IS_GREATER_OR_EQUAL,
+                                existsAt
+                            )
+            			);
+                	}
+                	break;
             }
+            return filter.toArray(new FilterProperty[filter.size()]);
+        } else {
+	        return null;
         }
-        return null;
     }
         
     /* (non-Javadoc)
@@ -450,6 +457,18 @@ public class StatedObjectContainer_1
     }
 
 
+    //-------------------------------------------------------------------------
+    // Implements Container_1_0
+    //-------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
+     */
+    public void retrieveAll(boolean useFetchPlan) {
+        this.selection.retrieveAll(useFetchPlan);
+    }
+
+    
     //-------------------------------------------------------------------------
     // Extends Object
     //-------------------------------------------------------------------------

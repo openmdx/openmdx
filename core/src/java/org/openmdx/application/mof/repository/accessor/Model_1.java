@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.4 2009/03/01 12:29:57 wfro Exp $
+ * Name:        $Id: Model_1.java,v 1.14 2009/06/09 12:45:18 hburger Exp $
  * Description: MOF repository accessor
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/01 12:29:57 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,41 +69,39 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
+
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Names;
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
-import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.application.dataprovider.cci.Directions;
 import org.openmdx.application.dataprovider.cci.RequestCollection;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.importer.XmlImporter;
 import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.dataprovider.spi.Layer_1_0;
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelConstraints;
 import org.openmdx.application.mof.cci.ModelExceptions;
-import org.openmdx.application.mof.cci.Multiplicities;
-import org.openmdx.application.mof.cci.PrimitiveTypes;
-import org.openmdx.application.mof.cci.Stereotypes;
 import org.openmdx.application.mof.mapping.xmi.XMINames;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
-import org.openmdx.base.collection.CompactSparseList;
-import org.openmdx.base.collection.OffsetArrayList;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.ModelElement_1_1;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Model_1_6;
+import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.PrimitiveTypes;
+import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.Directions;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
@@ -116,16 +114,16 @@ import org.w3c.cci2.SparseArray;
  * functions and provides a cache for fast model element access.
  */
 //---------------------------------------------------------------------------
-public class Model_1 implements Model_1_6 {
+public class Model_1 implements Model_1_0 {
 
     //-------------------------------------------------------------------------
-    public static Model_1_6 getInstance(
+    public static Model_1_0 getInstance(
     ) throws ServiceException {
         return new Model_1();
     }
     
     //-------------------------------------------------------------------------
-    public static Model_1_6 getInstance(
+    public static Model_1_0 getInstance(
         Dataprovider_1_0 repository,
         boolean force
     ) throws ServiceException {
@@ -214,7 +212,7 @@ public class Model_1 implements Model_1_6 {
                 persistenceConfiguration.values("storageFolder").add(storageFolder);
             }
             Layer_1_0 persistencePlugin = (Layer_1_0)Classes.getApplicationClass(
-                org.openmdx.compatibility.base.dataprovider.layer.persistence.none.InMemory_1.class.getName()
+                org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
             ).newInstance();
             persistencePlugin.activate((short)0, persistenceConfiguration, null);
             Layer_1_0 modelPlugin = (Layer_1_0)Classes.getApplicationClass(
@@ -230,7 +228,7 @@ public class Model_1 implements Model_1_6 {
             ).newInstance();
             typePlugin.activate((short)3, configuration, applicationPlugin);
             Layer_1_0 interceptionPlugin = (Layer_1_0)Classes.getApplicationClass(
-                org.openmdx.compatibility.base.dataprovider.layer.interception.Standard_1.class.getName()
+                org.openmdx.application.dataprovider.layer.interception.Standard_1.class.getName()
             ).newInstance();
             Configuration interceptionConfiguration = new Configuration(configuration);
             interceptionConfiguration.values("propagateSet").add(Boolean.TRUE);
@@ -385,14 +383,16 @@ public class Model_1 implements Model_1_6 {
                     if(this.cache.get(qualifiedModelName) == null) {
                         if(!importing) {
                             // beginImport
-                            DataproviderObject params = new DataproviderObject(
-                                PROVIDER_ROOT_PATH.getDescendant(
-                                    "segment", "-", "beginImport"
-                                )
-                            );
-                            params.values(SystemAttributes.OBJECT_CLASS).add(
-                                "org:openmdx:base:Void"
-                            );
+                            MappedRecord params;
+                            try {
+                                params = ObjectHolder_2Facade.newInstance(
+                                    PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport"),
+                                    "org:openmdx:base:Void"
+                                ).getDelegate();
+                            } 
+                            catch (ResourceException e) {
+                                throw new ServiceException(e);
+                            }
                             this.channel.addOperationRequest(params);
                             importing = true;
                         }        
@@ -419,14 +419,16 @@ public class Model_1 implements Model_1_6 {
             if(isDirty) {
                 if(importing) {
                     // endImport
-                    DataproviderObject params = new DataproviderObject(
-                        PROVIDER_ROOT_PATH.getDescendant(
-                            "segment", "-", "endImport"
-                        )
-                    );
-                    params.values(SystemAttributes.OBJECT_CLASS).add(
-                        "org:openmdx:base:Void"
-                    );
+                    MappedRecord params;
+                    try {
+                        params = ObjectHolder_2Facade.newInstance(
+                            PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport"),
+                            "org:openmdx:base:Void"
+                        ).getDelegate();
+                    } 
+                    catch (ResourceException e) {
+                        throw new ServiceException(e);
+                    }
                     this.channel.addOperationRequest(params);
                 }    
                 // retrieve imported and merged models and update cache    
@@ -476,7 +478,7 @@ public class Model_1 implements Model_1_6 {
             /**
              * Add only associations used in references to the list of AssociationDefs
              */
-            if(elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
+            if(elementDef.objGetClass().equals(ModelAttributes.REFERENCE)) {
                 Path referencedEndPath = (Path)elementDef.objGetValue("referencedEnd");
                 Path exposedEndPath = (Path)elementDef.objGetValue("exposedEnd");
                 String referenceName = (String)elementDef.objGetValue("name");
@@ -596,7 +598,7 @@ public class Model_1 implements Model_1_6 {
                 ) {
                     AssociationDef assocationDef = j.next();
                     // model name (segment name) must match the path authority
-                    if(((Path)assocationDef.getReference().jdoGetObjectId()).get(4).equals(objectPath.get(0))) {
+                    if(assocationDef.getReference().jdoGetObjectId().get(4).equals(objectPath.get(0))) {
                         matching++;
                         index = jj; 
                     }
@@ -607,7 +609,7 @@ public class Model_1 implements Model_1_6 {
                         Iterator<AssociationDef> j = next.iterator();
                         j.hasNext();
                     ) {
-                        Path referencePath = (Path)j.next().getReference().jdoGetObjectId(); 
+                        Path referencePath = j.next().getReference().jdoGetObjectId(); 
                         if(referencePath.get(4).equals(objectPath.get(0))) {
                             matches.add(referencePath.get(6));
                         }
@@ -648,10 +650,10 @@ public class Model_1 implements Model_1_6 {
         boolean verifyDerived
     ) throws ServiceException {
         int size;
-        if(values instanceof Collection){
+        if(values instanceof Collection<?>){
             size = ((Collection<?>)values).size();
         } 
-        else if (values instanceof Map){
+        else if (values instanceof Map<?,?>){
             size = ((Map<?,?>)values).size();
         } 
         else throw new ServiceException(
@@ -698,12 +700,11 @@ public class Model_1 implements Model_1_6 {
             );      
         }
         // Verify collection and multiplicity type.
-        // SparseArray is valid for openMDX compatibility
+        // MULTI_VALUE is valid for openMDX compatibility
         if(
-            (Multiplicities.SET.equals(multiplicity) && !(values instanceof Set || values instanceof OffsetArrayList || values instanceof CompactSparseList)) ||
-            (Multiplicities.LIST.equals(multiplicity) && !(values instanceof List)) ||
-            (Multiplicities.SPARSEARRAY.equals(multiplicity) && !(values instanceof SortedMap || values instanceof SparseArray || values instanceof OffsetArrayList || values instanceof CompactSparseList)) ||
-            (Multiplicities.MULTI_VALUE.equals(multiplicity) && !(values instanceof List))
+            (Multiplicities.SET.equals(multiplicity) && !(values instanceof Set<?> || values instanceof SparseList<?>)) ||
+            ((Multiplicities.LIST.equals(multiplicity) || Multiplicities.MULTI_VALUE.equals(multiplicity)) && !(values instanceof List<?>)) ||
+            (Multiplicities.SPARSEARRAY.equals(multiplicity) && !(values instanceof SortedMap<?,?> || values instanceof SparseArray<?> || values instanceof SparseList<?>)) 
         ) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -721,7 +722,7 @@ public class Model_1 implements Model_1_6 {
         );
         int index = 0;
         for(
-            Iterator<?> i = (values instanceof Collection ? (Collection<?>)values : ((Map<?,?>)values).values()).iterator();
+            Iterator<?> i = (values instanceof Collection<?> ? (Collection<?>)values : ((Map<?,?>)values).values()).iterator();
             i.hasNext();
             index++
         ) {
@@ -889,20 +890,18 @@ public class Model_1 implements Model_1_6 {
         // StructureType
         else if(this.isStructureType(type)) {
             Set<String> fieldNames;
-            if(value instanceof Structure_1_0) {
-                fieldNames = new TreeSet<String>(((Structure_1_0)value).objFieldNames());
-                // remove empty fields
-                for(Iterator<String> i = fieldNames.iterator(); i.hasNext(); ) {
-                    if(((Structure_1_0)value).objGetValue(i.next()) == null) {
-                        i.remove();
-                    } 
+            if(value instanceof MappedRecord) {
+                ObjectHolder_2Facade valueFacade;
+                try {
+                    valueFacade = ObjectHolder_2Facade.newInstance((MappedRecord)value);
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
                 }
-            }
-            else if(value instanceof DataproviderObject_1_0) {
-                fieldNames = new TreeSet<String>(((DataproviderObject)value).attributeNames());
+                fieldNames = new TreeSet<String>(valueFacade.getValue().keySet());
                 // remove empty fields
                 for(Iterator<String> i = fieldNames.iterator(); i.hasNext(); ) {
-                    if(((DataproviderObject_1_0)value).getValues(i.next()) == null) {
+                    if(valueFacade.getAttributeValues(i.next()) == null) {
                         i.remove();
                     } 
                 }
@@ -938,7 +937,7 @@ public class Model_1 implements Model_1_6 {
                 i.hasNext(); 
             ) {
                 String fieldName = i.next();
-                // object_class for openMDX/2 compability
+                // object_class for openMDX/2 compatibility
                 if(
                     !fieldName.equals(SystemAttributes.OBJECT_CLASS) &&
                     !fieldName.equals(SystemAttributes.OBJECT_INSTANCE_OF)
@@ -956,9 +955,15 @@ public class Model_1 implements Model_1_6 {
                         );
                     }
                     else {
-                        Object fieldValue = value instanceof Structure_1_0 ? 
-                            ((Structure_1_0)value).objGetValue(fieldName) : 
-                            ((DataproviderObject_1_0)value).getValues(fieldName);
+                        Object fieldValue;
+                        try {
+                            fieldValue = value instanceof Structure_1_0 ? 
+                                ((Structure_1_0)value).objGetValue(fieldName) : 
+                                ObjectHolder_2Facade.newInstance((MappedRecord)value).getAttributeValues(fieldName);
+                        } 
+                        catch (ResourceException e) {
+                            throw new ServiceException(e);
+                        }
                         if(enforceRequired && (fieldValue == null)) {
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
@@ -990,7 +995,6 @@ public class Model_1 implements Model_1_6 {
         // Class
         else if(this.isClassType(type)) {
             Set<String> attributeNames = null;
-
             // validateObject does not support deep verify. Referenced objects
             // are not validated.
             if(value instanceof Path) {
@@ -999,9 +1003,16 @@ public class Model_1 implements Model_1_6 {
             else if(value instanceof DataObject_1_0) {
                 attributeNames = new TreeSet<String>(((DataObject_1_0)value).objDefaultFetchGroup());
             }
-            else if(value instanceof DataproviderObject_1_0) {
-                attributeNames = new TreeSet<String>(((DataproviderObject_1_0)value).attributeNames());
-            } 
+            else if(value instanceof MappedRecord) {
+                ObjectHolder_2Facade valueFacade;
+                try {
+                    valueFacade = ObjectHolder_2Facade.newInstance((MappedRecord)value);
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
+                attributeNames = new TreeSet<String>(valueFacade.getValue().keySet());
+            }
             else {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
@@ -1011,7 +1022,7 @@ public class Model_1 implements Model_1_6 {
                     new BasicException.Parameter("value class", value.getClass().getName()),
                     new BasicException.Parameter("context", validationContext)
                 );        
-            }       
+            }
             Map<String,ModelElement_1_0> structuralFeatureDefs = this.getStructuralFeatureDefs(
                 typeDef, 
                 false, // includeSubtypes
@@ -1089,7 +1100,7 @@ public class Model_1 implements Model_1_6 {
                             if(
                                 enforceRequired && 
                                 Multiplicities.SINGLE_VALUE.equals(featureMultiplicity) &&
-                                attributeValue == null
+                                (attributeValue == null)
                             ) {
                                 throw new ServiceException(
                                     BasicException.Code.DEFAULT_DOMAIN,
@@ -1103,8 +1114,14 @@ public class Model_1 implements Model_1_6 {
                             }
                         }
                     } 
-                    else if (value instanceof DataproviderObject_1_0) {
-                        SparseList<?> genericValue = ((DataproviderObject_1_0)value).getValues(attributeName);
+                    else if (value instanceof MappedRecord) {
+                        SparseList<?> genericValue;
+                        try {
+                            genericValue = ObjectHolder_2Facade.newInstance((MappedRecord)value).getAttributeValues(attributeName);
+                        } 
+                        catch (ResourceException e) {
+                            throw new ServiceException(e);
+                        }
                         attributeValue = genericValue; 
                         if(
                             enforceRequired && 
@@ -1189,16 +1206,17 @@ public class Model_1 implements Model_1_6 {
         // get exclusive access to repository. synchronize
         // with possibly concurrent loaders
         synchronized(this.repository) {
-            List<DataproviderObject_1_0> models = this.channel.addFindRequest(
+            List<MappedRecord> modelPackages = this.channel.addFindRequest(
                 PROVIDER_ROOT_PATH.getChild("segment"),
                 null
             );
             for(
-                Iterator<DataproviderObject_1_0> i = models.iterator();
+                Iterator<MappedRecord> i = modelPackages.iterator();
                 i.hasNext();
             ) {
-                List<DataproviderObject_1_0> elementDefs = this.channel.addFindRequest(
-                    (i.next()).path().getChild("element"),
+                MappedRecord modelPackage = i.next(); 
+                List<MappedRecord> elementDefs = this.channel.addFindRequest(
+                    ObjectHolder_2Facade.getPath(modelPackage).getChild("element"),
                     null,
                     AttributeSelectors.ALL_ATTRIBUTES,
                     null, 
@@ -1207,12 +1225,12 @@ public class Model_1 implements Model_1_6 {
                     Directions.ASCENDING
                 );
                 for(
-                    Iterator<DataproviderObject_1_0> j = elementDefs.iterator();
+                    Iterator<MappedRecord> j = elementDefs.iterator();
                     j.hasNext();
                 ) {
-                    DataproviderObject elementDef = (DataproviderObject)j.next();
+                    MappedRecord elementDef = j.next();
                     cache.put(
-                        elementDef.path().getBase(),
+                        ObjectHolder_2Facade.getPath(elementDef).getBase(),
                         new ModelElement_1(elementDef, this)
                     ); 
                 }
@@ -1232,10 +1250,10 @@ public class Model_1 implements Model_1_6 {
             // feature = content + content of all supertypes. Attn: StructurType is a Classifier so 
             // if must be in this order!
             List<Object> content = null;
-            if(element.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.STRUCTURE_TYPE)) {
+            if(element.objGetClass().equals(ModelAttributes.STRUCTURE_TYPE)) {
                 content = element.objGetList("content");
             }
-            else if(element.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
+            else if(element.objGetClass().equals(ModelAttributes.CLASS)) {
                 content = element.objGetList("feature");
             }
             if(content != null) {        
@@ -1262,25 +1280,19 @@ public class Model_1 implements Model_1_6 {
                     ModelElement_1_0 contentElement = cache.get(
                         contentElementPath.getBase()
                     );
-                    if(contentElement.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ATTRIBUTE)) {
+                    if(contentElement.objGetClass().equals(ModelAttributes.ATTRIBUTE)) {
                         attributes.put(
                             (String)contentElement.objGetValue("name"),
                             contentElement
                         );
                     }
-                    else if(contentElement.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.STRUCTURE_FIELD)) {
-                        fields.put(
-                            (String)contentElement.objGetValue("name"),
-                            contentElement
-                        );
-                    }
-                    else if(contentElement.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.OPERATION)) {
+                    else if(contentElement.objGetClass().equals(ModelAttributes.OPERATION)) {
                         operations.put(
                             (String)contentElement.objGetValue("name"),
                             contentElement
                         );
                     }
-                    else if(contentElement.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.REFERENCE)) {
+                    else if(contentElement.objGetClass().equals(ModelAttributes.REFERENCE)) {
                         references.put(
                             (String)contentElement.objGetValue("name"),
                             contentElement
@@ -1316,6 +1328,12 @@ public class Model_1 implements Model_1_6 {
                             );
                         }
                     }
+                    else if(contentElement.objGetClass().equals(ModelAttributes.STRUCTURE_FIELD)) {
+                        fields.put(
+                            (String)contentElement.objGetValue("name"),
+                            contentElement
+                        );
+                    }
                 }
                 element.objSetValue("attribute", attributes);
                 element.objSetValue("reference", references);
@@ -1329,7 +1347,7 @@ public class Model_1 implements Model_1_6 {
             i.hasNext();
         ) {
             ModelElement_1_0 classDef = i.next();      
-            if(classDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
+            if(classDef.objGetClass().equals(ModelAttributes.CLASS)) {
                 Map<String,ModelElement_1_0> allFeature = new HashMap<String,ModelElement_1_0>();
                 for(
                     Iterator<?> j = classDef.objGetList("allSupertype").iterator();
@@ -1352,7 +1370,7 @@ public class Model_1 implements Model_1_6 {
             i.hasNext();
         ) {
             ModelElement_1_0 classDef = i.next();      
-            if(classDef.objGetList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
+            if(classDef.objGetClass().equals(ModelAttributes.CLASS)) {
                 Map<String,ModelElement_1_0> allFeatureWithSubtype = new HashMap<String,ModelElement_1_0>((Map)classDef.objGetValue("allFeature"));
                 for(
                     Iterator<?> j = classDef.objGetList("allSubtype").iterator();
@@ -1395,10 +1413,7 @@ public class Model_1 implements Model_1_6 {
         else if(element instanceof Path) {
             e = elements.get(((Path)element).getBase());
         }
-        else if(element instanceof DataproviderObject_1_0) {
-            e = elements.get(((DataproviderObject_1_0)element).path().getBase());
-        }
-        else if(element instanceof List) {
+        else if(element instanceof List<?>) {
             String qualifiedElementName = "";
             int ii = 0;
             for(Iterator<?> i = ((List<?>)element).iterator(); i.hasNext(); ii++) {
@@ -1406,8 +1421,11 @@ public class Model_1 implements Model_1_6 {
             }
             e = elements.get(qualifiedElementName);
         }
+        else if(element instanceof String) {
+            e = elements.get(element);            
+        }
         else {
-            e = elements.get(element); 
+            throw new UnsupportedOperationException("Unsupported element type. Element is " + element);
         }
         return e;
     }  
@@ -1723,6 +1741,14 @@ public class Model_1 implements Model_1_6 {
     ) throws ServiceException {
         ModelElement_1_0 type = (ModelElement_1_0)elementDef.objGetValue("dereferencedType");
         if(type == null) {
+            if(elementDef.objGetValue("type") == null) {
+                throw new ServiceException(
+                    ModelExceptions.MODEL_DOMAIN,
+                    ModelExceptions.REFERENCED_ELEMENT_TYPE_NOT_FOUND_IN_REPOSITORY,
+                    "Element has undefined type",
+                    new BasicException.Parameter("element", elementDef)
+                );
+            }
             type = this.getDereferencedType(
                 elementDef.objGetValue("type")
             );
@@ -1835,7 +1861,7 @@ public class Model_1 implements Model_1_6 {
      * otherwise, a list of <code>ServiceException</code> objects 
      * (each representing a constraint violation) is returned.
      */
-    public Collection<?> verifyObject(
+    public Collection<ServiceException> verifyObject(
         DataObject_1_0 object,
         boolean deepVerify, 
         boolean verifyDerived
@@ -2055,8 +2081,8 @@ public class Model_1 implements Model_1_6 {
         Object type
     ) throws ServiceException {
         String typeName = (String)this.getElement(type).objGetValue("qualifiedName");
-        String objectClass = object instanceof DataproviderObject_1_0 ?
-            (String)((DataproviderObject_1_0)object).values(SystemAttributes.OBJECT_CLASS).get(0) :
+        String objectClass = object instanceof MappedRecord ?
+            ObjectHolder_2Facade.getObjectClass((MappedRecord)object) :
             object instanceof DataObject_1_0 ?
                 ((DataObject_1_0)object).objGetClass() :
                 null;
@@ -2121,7 +2147,7 @@ public class Model_1 implements Model_1_6 {
             this.getDereferencedType(type) : 
             this.getElement(type);
         return toJavaPackageName( 
-            ((Path)element.jdoGetObjectId()).get(4),
+            element.jdoGetObjectId().get(4),
             packageSuffix
         );
     }
@@ -2204,10 +2230,9 @@ public class Model_1 implements Model_1_6 {
     public boolean isAssociationType(
         Object type
     ) throws ServiceException {
-        ModelElement_1_1 typeDef = (ModelElement_1_1) this.getDereferencedType(type);
+        ModelElement_1_0 typeDef = this.getDereferencedType(type);
         return typeDef.isAssociationType();
     }
-
 
     //------------------------------------------------------------------------
     // Implements Model_1_6

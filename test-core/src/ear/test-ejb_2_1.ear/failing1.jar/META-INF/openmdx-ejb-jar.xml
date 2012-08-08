@@ -3,8 +3,7 @@
 <openmdx-ejb-jar>
   	<enterprise-beans>
     	<session>
-      		<ejb-name>transaction-RollbackOnly</ejb-name>
-			<jndi-name>org/openmdx/test-ejb-2_1/transaction/RollbackOnly</jndi-name>
+      		<ejb-name>ejb21RollbackOnly</ejb-name>
 	      	<pool>
 	        	<initial-capacity>1</initial-capacity>
 	        	<maximum-capacity>10</maximum-capacity>

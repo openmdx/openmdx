@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateContainer_1.java,v 1.6 2009/01/17 02:37:21 hburger Exp $
+ * Name:        $Id: StateContainer_1.java,v 1.11 2009/06/02 23:18:31 hburger Exp $
  * Description: State Object Container
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/17 02:37:21 $
+ * Date:        $Date: 2009/06/02 23:18:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,11 +59,12 @@ import java.util.Set;
 
 import javax.jdo.JDOHelper;
 
-import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
+import org.openmdx.base.aop1.State_1_Attributes;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -71,14 +72,13 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.Quantors;
-import org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * State Object Container
  */
 public class StateContainer_1 
-    implements Serializable, Container_1_0, Delegating_1_0 
+    implements Serializable, Container_1_0, Delegating_1_0<FilterableMap<String,DataObject_1_0>> 
 {
 
     /**
@@ -197,7 +197,7 @@ public class StateContainer_1
      * @see org.openmdx.base.accessor.generic.cci.Container_1_0#getObjectId()
      */
     public Object getContainerId() {
-        Path parent = (Path) this.parent.jdoGetObjectId();
+        Path parent = this.parent.jdoGetObjectId();
         return parent.getChild(feature);
     }
     
@@ -327,7 +327,24 @@ public class StateContainer_1
         return this.amendet.values();
     }
 
+    //------------------------------------------------------------------------
+    // Implements Container_1_0
+    //------------------------------------------------------------------------
     
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
+     */
+    public void retrieveAll(boolean useFetchPlan) {
+        if(this.amendet instanceof Container_1_0) {
+            ((Container_1_0)this.amendet).retrieveAll(useFetchPlan);
+        } else if (this.original instanceof Container_1_0) {
+            ((Container_1_0)this.original).retrieveAll(useFetchPlan);
+        } else  throw new UnsupportedOperationException(
+            "Operation not supported by StateContainer_1"
+        );
+    }
+
+ 
     //------------------------------------------------------------------------
     // Filter Mapping
     //------------------------------------------------------------------------

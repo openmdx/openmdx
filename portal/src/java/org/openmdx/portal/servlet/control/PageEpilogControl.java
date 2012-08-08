@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PageEpilogControl.java,v 1.71 2009/02/05 16:45:55 wfro Exp $
+ * Name:        $Id: PageEpilogControl.java,v 1.72 2009/04/23 09:59:10 wfro Exp $
  * Description: PageEpilogControl 
- * Revision:    $Revision: 1.71 $
+ * Revision:    $Revision: 1.72 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/05 16:45:55 $
+ * Date:        $Date: 2009/04/23 09:59:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -658,6 +658,9 @@ public class PageEpilogControl
             String actionName = (String)macro[1];
             if(actionType.intValue() == Action.MACRO_TYPE_JAVASCRIPT) {
                 actionName = actionName.replaceAll(View.REQUEST_ID_TEMPLATE, view.getRequestId());
+                if(view instanceof ShowObjectView) {
+                	actionName = actionName.replaceAll(View.CURRENT_OBJECT_XRI_TEMPLATE, ((ShowObjectView)view).getRefObject().refMofId());
+                }
                 p.write("  ", actionName);
             }
             view.setMacro(null);

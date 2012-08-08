@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1Class_1_0.java,v 1.1 2009/01/27 00:10:57 wfro Exp $
+ * Name:        $Id: Jmi1Class_1_0.java,v 1.3 2009/06/09 12:45:17 hburger Exp $
  * Description: Jmi1Class 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/27 00:10:57 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,8 +55,8 @@ package org.openmdx.base.accessor.jmi.spi;
 import java.util.Set;
 
 import javax.jdo.JDOFatalUserException;
+import javax.jmi.reflect.RefClass;
 
-import org.openmdx.base.accessor.jmi.cci.RefClass_1_0;
 import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectInvocationHandler.StandardMarshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
@@ -64,7 +64,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
  * Jmi1Class
  *
  */
-public interface Jmi1Class_1_0 extends RefClass_1_0 {
+public interface Jmi1Class_1_0 extends RefClass {
         
     /**
      * Returns the set of features which are recognized as having no implementations. 
@@ -88,7 +88,7 @@ public interface Jmi1Class_1_0 extends RefClass_1_0 {
      * 
      * @return <code>true</code> if its RefPackage delegates to an ObjectFactory_1_0
      */
-    boolean hasLegacyDelegate();
+    boolean isTerminal();
 
     /**
      * Retrieve the feature mapper which maps the class features 

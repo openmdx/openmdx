@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Path.java,v 1.7 2009/03/06 10:38:06 hburger Exp $
+ * Name:        $Id: Path.java,v 1.15 2009/06/04 13:53:30 hburger Exp $
  * Description: Profile Path 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/06 10:38:06 $
+ * Date:        $Date: 2009/06/04 13:53:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,6 @@ package org.openmdx.base.naming;
 
 import java.io.Serializable;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -63,10 +62,10 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.uri.scheme.OpenMDXSchemes;
 import org.openmdx.kernel.url.protocol.XRI_1Protocols;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
-import org.openxri.XRI;
+import org.openmdx.kernel.url.protocol.XriAuthorities;
 
 /**
- * The Path class reperesents a data provider path.
+ * The Path class represents a data provider path.
  * 
  * The components of a name are numbered. The indexes of a
  * name with N components range from 0 up to, but not
@@ -83,9 +82,8 @@ import org.openxri.XRI;
  * concurrent multithreaded access if that access is not
  * read-only.
  */
-@SuppressWarnings("unchecked")
 public final class Path
-    implements Comparable, Cloneable, Serializable, Iterable<String>  
+    implements Comparable<Path>, Cloneable, Serializable, Iterable<String>  
 {
 
     /**
@@ -95,7 +93,7 @@ public final class Path
 s    */
     public Path(
     ){        
-        // Required for Externalizable.
+        // Required for Externalizable and XMLEncoder
     }
 
     /**
@@ -114,14 +112,22 @@ s    */
         String[] components
     ){
         this.setComponents(components);
+        this.xri = null;
     }
 
+    /**
+     * Constructor 
+     *
+     * @param components
+     * @param size
+     */
     private Path(
         String components,
         int size
     ) {
         this.components = components;
         this.size = size;
+        this.xri = null;
     }
 
     /**
@@ -137,13 +143,11 @@ s    */
     ){
         this (
             charSequence, 
-            charSequence.startsWith(OpenMDXSchemes.URI_PREFIX) ? 
-                UriMarshaller.getInstance() : 
-                    charSequence.startsWith(XRI_1Protocols.OPENMDX_PREFIX) ?
-                        XRI_1Marshaller.getInstance() :
-                            charSequence.startsWith(XRI_2Protocols.OPENMDX_PREFIX) ?
-                                XRI_2Marshaller.getInstance() :
-                                    PathMarshaller.getInstance()
+            charSequence.startsWith(XRI_2Protocols.OPENMDX_PREFIX) ? XRI_2Marshaller.getInstance() :
+            charSequence.startsWith(XriAuthorities.OPENMDX_AUTHORITY) ? IRI_2Marshaller.getInstance() :     
+            charSequence.startsWith(XRI_1Protocols.OPENMDX_PREFIX) ? XRI_1Marshaller.getInstance() :
+            charSequence.startsWith(OpenMDXSchemes.LEGACY_PREFIX) ? URI_1.getInstance() : 
+            LegacyMarshaller.getInstance()
         );
     }
 
@@ -160,10 +164,11 @@ s    */
     ){
         this (
             iri.toString(), 
-            IriMarshaller.getInstance()
+            IRI_2Marshaller.getInstance()
         );
     }
 
+    //-------------------------------------------------------------------------
     private void setComponents(
         String[] components
     ) {
@@ -174,6 +179,20 @@ s    */
             tmp.append(components[i]).append(COMPONENT_SEPARATOR);
         }
         this.components = tmp.toString();
+    }
+
+    //-------------------------------------------------------------------------
+    public String[] getComponents(
+    ) {
+        if(this.components.length() == 0) {
+            return EMPTY_COMPONENTS;
+        }
+        else {
+            return this.components.substring(
+                0, 
+                this.components.length()-1
+            ).split(COMPONENT_SEPARATOR_STRING);
+        }
     }
 
     /**
@@ -196,8 +215,8 @@ s    */
             this.setComponents(
                 (String[])marshaller.unmarshal(charSequence)
             );
-        } 
-        catch (ServiceException exception){
+            this.xri = marshaller == XRI_2Marshaller.getInstance() ? charSequence : null;
+        }  catch (ServiceException exception){
             throw new RuntimeServiceException(exception);
         }
     }
@@ -212,6 +231,7 @@ s    */
     ){
         this.components = that.components;
         this.size = that.size;
+        this.xri = that.xri;
     }
 
     //--------------------------------------------------------------------------
@@ -229,14 +249,14 @@ s    */
     ){
         int size = components.length;
         for (
-                int index = 0;
-                index < size;
-                index++
+            int index = 0;
+            index < size;
+            index++
         ) {
             String component = components[index];
             if(
-                    (component == null) || 
-                    (component.length() == 0)
+                (component == null) || 
+                (component.length() == 0)
             ) {
                 throw new RuntimeServiceException(
                     BasicException.Code.DEFAULT_DOMAIN, 
@@ -263,6 +283,8 @@ s    */
                 BasicException.Code.ILLEGAL_STATE,
                 "This path is in read only state"
             );
+        } else {
+            this.xri = null;
         }
     }
 
@@ -303,6 +325,39 @@ s    */
         );
     }
 
+    /**
+     * The component representation of a cross-reference path
+     * 
+     * @return the legacy path representation
+     */
+    String toComponent(){
+        try {
+            return LegacyMarshaller.getInstance().marshal(getComponents()).toString();
+        } catch (ServiceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
+    }
+    
+    /**
+     * Returns a child path
+     *
+     * @param       component 
+     *              the component to be added
+     *
+     * @return      a new and longer path
+     *
+     * @exception   RuntimeServiceException
+     *              if the component is null or empty
+     */
+    public Path getChild(
+        Path crossReference
+    ) {
+        return new Path(
+            this.components + crossReference.toComponent() + COMPONENT_SEPARATOR,
+            this.size + 1
+        );
+    }
+    
     /**
      * Returns a child path
      *
@@ -348,6 +403,21 @@ s    */
     // Operations not modifying the path
     //--------------------------------------------------------------------------
 
+    /**
+     * Tests, whether the path contains a wildcard
+     * 
+     * @return <code>true</code> if the path contains any of the following XRI cross references<ul>
+     * <li>$.
+     * <li>$..
+     * <li>$...
+     * </ul>
+     */
+    public boolean containsWildcard(){
+        return 
+            toXRI().indexOf("($.") >= 0 || 
+            toXRI().indexOf("($\\.")  >= 0; // TODO to be removed together with the toResourcePattern() method
+    }
+    
     /**
      * Returns the base of the path. The base is the last component of a path.
      *
@@ -398,19 +468,6 @@ s    */
         return new PathComponent(this.get(position)); 
     }
 
-    public String[] getComponents(
-    ) {
-        if(this.components.length() == 0) {
-            return EMPTY_COMPONENTS;
-        }
-        else {
-            return this.components.substring(
-                0, 
-                this.components.length()-1
-            ).split(COMPONENT_SEPARATOR_STRING);
-        }
-    }
-
     /**
      * Generates the URI representation of this path. An empty
      * path is represented by "spice:/". The string representation
@@ -418,16 +475,44 @@ s    */
      * new equivalent path.
      *
      * @return   A non-null string representation of this path.
+     * 
+     * @deprecated use toURI()
+     * 
+     * @see #toURI()
      */
     public String toUri()
     {
         try {
-            return UriMarshaller.getInstance().marshal(this.getComponents()).toString();
+            return URI_1.getInstance().marshal(this.getComponents()).toString();
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         }
     }
 
+    /**
+     * Generates a relative URI representation of this path which may safely be appended to another hierarchical URI.
+     * An empty path is represented by <code>"@openmdx"</code>. 
+     * <p> 
+     * The string representation thus generated can be passed to the 
+     * Path constructor to create a new equivalent path.
+     *
+     * @return   A non-null string representation of this path.
+     */
+    public String toURI()
+    {
+    	URI iri = toIRI();
+        String uri = iri.toASCIIString();
+        if(uri.startsWith(XRI_2Protocols.SCHEME_PREFIX)) {
+            return uri.substring(XRI_2Protocols.SCHEME_PREFIX.length());
+        } else throw new RuntimeServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.ASSERTION_FAILURE,
+            "The IRI should start with the XRI scheme specification",
+            new BasicException.Parameter("iri", iri)
+        );
+    }
+
+    
     /**
      * Generates the XRI 1 representation of this path.
      * <p> 
@@ -435,6 +520,9 @@ s    */
      * Path constructor to create a new equivalent path.
      *
      * @return   A non-null string representation of this path.
+     * 
+     * @deprecated use toXRI()
+     * @see toXRI()
      */
     public String toXri()
     {
@@ -451,14 +539,28 @@ s    */
      * The string can be passed to the Path constructor to create a new equivalent path.
      *
      * @return   An XRI 2 String representation of this path.
+     * @deprecated Use {@link #toXRI()} instead
      */
     public String toResourceIdentifier(
     ){
-        try {
+        return toXRI();
+    }
+
+    /**
+     * Generates the XRI 2 String representation of this path.
+     * <p> 
+     * The string can be passed to the Path constructor to create a new equivalent path.
+     *
+     * @return   An XRI 2 String representation of this path.
+     */
+    public String toXRI(
+    ){
+        if(this.xri == null) try {
             return XRI_2Marshaller.getInstance().marshal(this.getComponents()).toString();
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         }
+        return this.xri;
     }
 
     /**
@@ -469,56 +571,56 @@ s    */
      * after replacing all escaped dots by plain dots.
      *
      * @return an escaped XRI 2 String representation of this path.
+     * 
+     * @deprecated will be removed as soon as the identity.isLike() pattern is no longer necessary
      */
     public String toResourcePattern(
     ){
-        return toXri().replace(".", "\\.");
+        return toXri().replace(".", "\\."); 
     }
     
     /**
-     * Generates the XRI 2 representation of this path.
-     * <p> 
-     * The string representation of the generated XRI can be passed to the 
-     * Path constructor to create a new equivalent path.
-     *
-     * @return   An XRI 2 representation of this path.
-     */
-    public XRI toXRI(
-    ){
-        return new XRI(toResourceIdentifier());
-    }
-
-    /**
      * Generates the XRI 2 based IRI representation of this path.
-     *
+     * <ol>
+     * <li>Percent-encode all percent "%" characters as "%25" across the entire XRI reference.
+     * <li>Percent-encode all number sign "#" characters that appear within a cross-reference as "%23".
+     * <li>Percent-encode all question mark "?" characters that appear within a cross-reference as "%3F".
+     * <li>Percent-encode all slash "/" characters that appear within a cross-reference as "%2F".
+     * </ol>
      * @return   An XRI 2 based IRI representation of this path.
      */
     public URI toIRI(
     ){
-        try {
-            return new URI(toXRI().toIRINormalForm());
-        } catch (URISyntaxException exception) {
-            throw new RuntimeServiceException(exception);
+        String xri = toXRI();
+        StringBuilder iri = new StringBuilder(xri.length());
+        int xRef = 0;
+        for(
+            int i = 0, limit = xri.length();
+            i < limit;
+            i++
+        ){
+            char c = xri.charAt(i);
+            if(c == '%') {
+                iri.append("%25");
+            } else if (c == '(') {
+                xRef++;
+                iri.append(c);
+            } else if (c == ')') {
+                xRef--;
+                iri.append(c);
+            } else if (xRef == 0) {
+                iri.append(c);
+            } else if (c == '#') {
+                iri.append("%23");
+            } else if (c == '?') {
+                iri.append("%3F");
+            } else if (c == '/') {
+                iri.append("%2F");
+            } else {
+                iri.append(c);
+            }
         }
-    }
-
-    /**
-     * Generates an URI refercence for this Path and the given fragment
-     * identifier
-     *
-     * @param   fragmentIdentifier
-     *          The fragment identifier
-     *
-     * @return  A non-null URI reference with the given fragment identifier
-     *          or the the paths' URI if the fragemtn identifier is null.
-     *          
-     */
-    public String getUriReference(
-        String fragmentIdentifier
-    ){
-        return fragmentIdentifier == null ?
-            toUri() :
-                toUri() + '#' + fragmentIdentifier;
+        return URI.create(iri.toString());
     }
 
 
@@ -541,9 +643,8 @@ s    */
      *              if obj is not an instance of Path
      */
     public int compareTo(
-        Object obj
+        Path that
     ) {
-        Path that = (Path) obj;
         return this.components.compareTo(that.components);
     }
 
@@ -836,6 +937,7 @@ s    */
     public Path add(
         String component
     ){
+        this.checkState();
         this.components += component + COMPONENT_SEPARATOR;
         this.size++;
         return this;
@@ -858,6 +960,23 @@ s    */
         return this.add(component.toString());
     }
 
+    /**
+     * Adds a single component to the end of this path.
+     * 
+     * @param       crossReference
+     *              the component to add
+     * 
+     * @return      the updated path (not a new one)
+     *
+     * @exception   RuntimeServiceException
+     *              if the component is null or empty
+     */
+    public Path add(
+        Path crossReference
+    ){
+        return this.add(crossReference.toComponent());
+    }
+    
     /**
      * Adds a single component at a specified position within
      * this path. Components of this path at or after the
@@ -915,6 +1034,37 @@ s    */
             component.toString()
         );
     }       
+    
+    /**
+     * Adds a single component at a specified position within
+     * this path. Components of this path at or after the
+     * index of the new component are shifted up by one (away
+     * from index 0) to accommodate the new component.
+     * 
+     * @param       crossReference
+     *              the component to add
+     * @param       position
+     *              the index at which to add the new component.
+     *              Must be in the range [0,size()].
+     * 
+     * @return      the updated path (not a new one)
+     * 
+     * @exception   ArrayIndexOutOfBoundsException
+     *              if position is outside the specified range
+     * @exception   RuntimeServiceException
+     *              if the component is null or empty
+     */
+    public Path add(
+        int position,
+        Path crossReference
+    ){
+        return this.add(
+            position, 
+            crossReference.toComponent()
+        );
+    }       
+
+    
 
     /**
      * Removes a component from this path. The component of
@@ -1017,8 +1167,8 @@ s    */
         Path pattern
     ){
         if(pattern.isCrossReferencePattern()) {
-            return Wildcards.isLike(
-                this.toXRI(), 
+            return XRI_2Marshaller.isLike(
+                this.toXRI(),
                 pattern.toXRI()
             );
         } 
@@ -1127,22 +1277,13 @@ s    */
     //--------------------------------------------------------------------------
 
     /**
-     * Generates the string representation of this path. An empty
-     * path is represented by an empty string. The string representation
-     * thus generated can be passed to the Path constructor to create a
-     * new equivalent path.
+     * Provides the XRI representation of a path
      *
-     * @return   A non-null string representation of this path.
+     * @return   the XRI 2 representation of a path
      */
-    public String toString()
-    {
-        try {
-            return String.valueOf(
-                PathMarshaller.getInstance().marshal(this.getComponents())
-            );
-        } catch (ServiceException exception) {
-            throw new RuntimeServiceException(exception);
-        }
+    public String toString(
+    ){
+        return LEGACY_STRING_REPRESENTATION ? toComponent() : toXRI(); 
     }
 
     /**
@@ -1175,6 +1316,7 @@ s    */
         return this.components.hashCode();
     }
 
+    
     //--------------------------------------------------------------------------
     // Static methods
     //--------------------------------------------------------------------------
@@ -1188,13 +1330,12 @@ s    */
      *              If any of the values is not an instance of Path
      */
     public static Path[] toPathArray(
-        List source
+        List<Path> source
     ){
-        return source == null ?
-            null:
-                (Path[])source.toArray(new Path[source.size()]);
+        return source == null ? null: source.toArray(new Path[source.size()]);
     }
 
+    
     //--------------------------------------------------------------------------
     // Variables
     //--------------------------------------------------------------------------
@@ -1204,12 +1345,14 @@ s    */
      */
     private transient String components;
     private transient int size;
-    private static char COMPONENT_SEPARATOR = '\u0001';
+    private transient String xri;
+    private static char COMPONENT_SEPARATOR = '\u0009';
     private static String PLACEHOLDER_COMPONENT = COMPONENT_SEPARATOR + ":";
     private static String MATCHES_ALL_PATTERN = "%" + COMPONENT_SEPARATOR;
     private static String WILDCARD_COMPONENT_TERMINATOR = "*" + COMPONENT_SEPARATOR;
     private static final String COMPONENT_SEPARATOR_STRING = Character.toString(COMPONENT_SEPARATOR);
     private static final String[] EMPTY_COMPONENTS = {};
+    private static final boolean LEGACY_STRING_REPRESENTATION = true;
 
     /**
      * Defines, whether the path can be modified or not
@@ -1224,13 +1367,6 @@ s    */
      * Serial Version UID
      */
     static final long serialVersionUID = 8827631310993135122L;
-
-    /**
-     * A path's URI scheme
-     * 
-     * @deprecated use org.openmdx.kernel.uri.scheme.OpenMDXSchemes.URI_SCHEME
-     */
-    public final static String URI_SCHEME = OpenMDXSchemes.URI_SCHEME;
 
     /**
      * An error message in case the number of a component is outside the

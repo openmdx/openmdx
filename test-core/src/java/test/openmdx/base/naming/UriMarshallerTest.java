@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UriMarshallerTest.java,v 1.1 2009/03/06 10:38:42 hburger Exp $
+ * Name:        $Id: UriMarshallerTest.java,v 1.3 2009/05/27 23:39:40 hburger Exp $
  * Description: TestUriMarshaller
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/06 10:38:42 $
+ * Date:        $Date: 2009/05/27 23:39:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -111,7 +111,7 @@ public class UriMarshallerTest extends TestCase {
             new String[]{"A"},
             new String[]{"A","B:B0/B1","C"},
             new String[]{"A","B/B0::B1","C"},
-            new String[]{"Fran\u00e7ois"}, // "François"
+            new String[]{"Fran\u00e7ois"},
             new String[]{"A","provider","P","segment","S","object","RR_1:0:"},
             new String[]{"A","provider","P","segment","S","object",":012345"}
         };
@@ -139,6 +139,7 @@ public class UriMarshallerTest extends TestCase {
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
      */
+    @SuppressWarnings("deprecation")
     public void testEncode(
     ) throws ServiceException {
         for (

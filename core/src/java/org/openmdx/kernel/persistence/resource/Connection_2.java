@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection_2.java,v 1.6 2008/09/18 15:17:03 hburger Exp $
+ * Name:        $Id: Connection_2.java,v 1.9 2009/04/28 17:13:43 hburger Exp $
  * Description: PersistenceManager_2_0 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/18 15:17:03 $
+ * Date:        $Date: 2009/04/28 17:13:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,10 +50,12 @@
  */
 package org.openmdx.kernel.persistence.resource;
 
+import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
 import org.openmdx.kernel.callback.CloseCallback;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Accessor
@@ -64,6 +66,7 @@ public abstract class Connection_2 implements PersistenceManager {
      * Constructor 
      */
     protected Connection_2() {
+        this.persistenceManagerFactory = null;
     }
 
     /**
@@ -92,9 +95,24 @@ public abstract class Connection_2 implements PersistenceManager {
     ) {
         if(this.persistenceManagerFactory == null) {
             this.persistenceManagerFactory = persistenceManagerFactory;
-        } else if (persistenceManagerFactory != persistenceManagerFactory) throw new IllegalStateException(
-            "The persistence manager's factory is already set"
-        );
+        } 
+//        else if(this.persistenceManagerFactory != persistenceManagerFactory) throw BasicException.initHolder(
+//            new JDOUserException(
+//                "The persistence manager's factory is already set",
+//                BasicException.newEmbeddedExceptionStack(
+//                    BasicException.Code.DEFAULT_DOMAIN,
+//                    BasicException.Code.ILLEGAL_STATE,
+//                    new BasicException.Parameter(
+//                        "old", 
+//                        System.identityHashCode(this.persistenceManagerFactory)
+//                    ),
+//                    new BasicException.Parameter(
+//                        "new", 
+//                        System.identityHashCode(persistenceManagerFactory)
+//                    )
+//                )
+//            )
+//        );
     }
 
     /* (non-Javadoc)
@@ -103,8 +121,15 @@ public abstract class Connection_2 implements PersistenceManager {
     public PersistenceManagerFactory getPersistenceManagerFactory() {
         if(this.persistenceManagerFactory != null) {
             return this.persistenceManagerFactory;
-        } else throw new IllegalStateException(
-            "The persistence manager's factory is not yet set"
+        } else throw BasicException.initHolder(
+            new JDOUserException(
+                "The persistence manager is closed",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ILLEGAL_STATE,
+                    new BasicException.Parameter("persistenceManagerFactory")
+                )
+            )
         );
     }
 
@@ -118,11 +143,13 @@ public abstract class Connection_2 implements PersistenceManager {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#close()
      */
-    public void close() {        
-        if(persistenceManagerFactory instanceof CloseCallback) {
-            ((CloseCallback)this.persistenceManagerFactory).postClose(this);
+    public void close(
+    ) {  
+        if(this.persistenceManagerFactory instanceof CloseCallback) {
+            CloseCallback persistenceManagerFactory = (CloseCallback) this.persistenceManagerFactory;
+            this.persistenceManagerFactory = null;
+            persistenceManagerFactory.postClose(this);
         }
-        this.persistenceManagerFactory = null;
     }
 
     /* (non-Javadoc)
@@ -133,7 +160,5 @@ public abstract class Connection_2 implements PersistenceManager {
     ) throws Throwable {
         close();
     }
-    
-    
     
 }

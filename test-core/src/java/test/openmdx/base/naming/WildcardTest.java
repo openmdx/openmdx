@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: WildcardTest.java,v 1.1 2009/03/06 10:38:42 hburger Exp $
+ * Name:        $Id: WildcardTest.java,v 1.3 2009/05/27 23:39:40 hburger Exp $
  * Description: class TestPath 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/06 10:38:42 $
+ * Date:        $Date: 2009/05/27 23:39:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +57,6 @@ import junit.framework.TestSuite;
 
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
-import org.openxri.XRI;
 
 public class WildcardTest extends TestCase {
 
@@ -157,8 +156,8 @@ public class WildcardTest extends TestCase {
             i < xris.length;
             i++
         ){
-            XRI xri = paths[i].toXRI();
-            assertEquals("path>xri[" + i + "]", xris[i], xri.toString());
+            String xri = paths[i].toXRI();
+            assertEquals("path>xri[" + i + "]", xris[i], xri);
         }
     }
 
@@ -236,4 +235,17 @@ public class WildcardTest extends TestCase {
         }
     }
 
+    @SuppressWarnings("deprecation")
+    public void testAuthority(){
+        Path authorityPath = new Path(new String[]{AUTHORITY.toString()});
+        Path[] authorityPattern = {
+            new Path(new String[]{":*"}),
+            new Path("::*"),
+            new Path("xri://@openmdx*($..)")
+        };
+        for(Path pattern : authorityPattern) {
+            assertTrue(authorityPath.toXri() + " matches " + pattern.toXri(), authorityPath.isLike(pattern));
+        }
+    }
+    
 }

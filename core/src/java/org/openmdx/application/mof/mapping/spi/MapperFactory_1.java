@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapperFactory_1.java,v 1.1 2009/01/13 02:10:40 wfro Exp $
+ * Name:        $Id: MapperFactory_1.java,v 1.2 2009/04/03 13:14:00 hburger Exp $
  * Description: MapperFactory_1
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:40 $
+ * Date:        $Date: 2009/04/03 13:14:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -120,9 +120,7 @@ public class MapperFactory_1 {
                     format
                 ).getConstructor(
                     NO_ARGUMENTS
-                ).newInstance(
-                    (Object[])null
-                );
+                ).newInstance();
             }
         } catch(ClassNotFoundException e) {
             throw new ServiceException(e);

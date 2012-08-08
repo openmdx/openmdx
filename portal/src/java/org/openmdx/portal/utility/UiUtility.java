@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiUtility.java,v 1.9 2009/03/08 18:03:26 wfro Exp $
+ * Name:        $Id: UiUtility.java,v 1.16 2009/06/13 18:48:08 wfro Exp $
  * Description: UiUtility
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2009/03/08 18:03:26 $
+ * Date:        $Date: 2009/06/13 18:48:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -55,7 +55,6 @@
  *
  */
 package org.openmdx.portal.utility;
-import java.beans.ExceptionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -66,24 +65,21 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
-import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.application.shell.Application;
-import org.openmdx.application.shell.ApplicationController;
-import org.openmdx.application.shell.CmdLineOption;
+import org.openmdx.application.dataprovider.importer.XmlImporter;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.portal.text.conversion.XMLWriter;
-import org.openmdx.uses.org.apache.commons.collections.map.ListOrderedMap;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -99,21 +95,8 @@ import org.xml.sax.SAXException;
  * @author wfro
  */
 @SuppressWarnings("unchecked")
-public class UiUtility
-  extends Application
-  implements ExceptionListener {
+public class UiUtility {
     
-  //-------------------------------------------------------------------------    
-  public UiUtility(
-  ) {
-    super(
-      APP_NAME, 
-      VERSION, 
-      HELP_TEXT, 
-      UiUtility.createCmdLineOptions()
-    );        
-  }
-        
   //-------------------------------------------------------------------------    
   public void exceptionThrown(
          Exception exception
@@ -124,35 +107,6 @@ public class UiUtility
   //-------------------------------------------------------------------------  
   protected void init(
   ) throws Exception {
-      // locales. get locale and assert en_US to be the first in the list
-      this.locales = new ArrayList();
-      if(this.getCmdLineArgs().hasArg("locale")) {
-        this.locales.addAll(this.getCmdLineArgs().getValues("locale"));   
-      }
-      if((this.locales.size() == 0) || !"en_US".equals(this.locales.get(0))) {
-          this.locales.add(0, "en_US");
-      }
-      // sourceDir
-      this.sourceDir = null;
-      if(this.getCmdLineArgs().hasArg("sourceDir")) {
-          this.sourceDir = new File(this.getCmdLineArgs().getFirstValue("sourceDir"));
-      }
-      else {
-          this.sourceDir = new File(".");
-      }  
-      // targetDir
-      this.targetDir = null;
-      if(this.getCmdLineArgs().hasArg("targetDir")) {
-          this.targetDir = new File(this.getCmdLineArgs().getFirstValue("targetDir"));
-      }
-      else {
-          this.targetDir = new File(".");
-      }
-      // format
-      this.format = "table";
-      if(this.getCmdLineArgs().hasArg("format")) {
-          this.format = this.getCmdLineArgs().getFirstValue("format");
-      }
   }
 
   //-------------------------------------------------------------------------    
@@ -263,15 +217,16 @@ public class UiUtility
   private void writeAsSchema(
       Writer w,
       Writer fw,
-      Map elementDefinitions,
+      Map<Path,MappedRecord> elementDefinitions,
       int localeIndex
   ) throws ServiceException, IOException {
       String providerName ="CRX";
       String segmentName = "Standard";
-      if(elementDefinitions.size() > 0) {
-          DataproviderObject_1_0 obj = (DataproviderObject_1_0)elementDefinitions.values().iterator().next();
-          providerName = obj.path().get(2);
-          segmentName = obj.path().get(4);
+      if(!elementDefinitions.isEmpty()) {
+          MappedRecord obj = elementDefinitions.values().iterator().next();
+          Path objPath = ObjectHolder_2Facade.getPath(obj);
+          providerName = objPath.get(2);
+          segmentName = objPath.get(4);
       }
       String s = null;
       s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
@@ -289,11 +244,18 @@ public class UiUtility
           "                <elementDefinition>\n";
       w.write(s, 0, s.length());
       for(
-          Iterator i = elementDefinitions.values().iterator(); 
+          Iterator<MappedRecord> i = elementDefinitions.values().iterator(); 
           i.hasNext(); 
       ) {
-          DataproviderObject_1_0 element = (DataproviderObject_1_0)i.next();
-          String elementDefinitionType = (String)element.values(SystemAttributes.OBJECT_CLASS).get(0);
+          MappedRecord element = i.next();
+          ObjectHolder_2Facade elementFacade;
+          try {
+	          elementFacade = ObjectHolder_2Facade.newInstance(element);
+          }
+          catch (ResourceException e) {
+        	  throw new ServiceException(e);
+          }
+          String elementDefinitionType = elementFacade.getObjectClass();
           if(
               "org:openmdx:ui1:ElementDefinition".equals(elementDefinitionType) ||
               "org:openmdx:ui1:AlternateElementDefinition".equals(elementDefinitionType) ||
@@ -303,31 +265,31 @@ public class UiUtility
               // write only if either label or toolTip for specified locale exists
               if(
                   allLocales || 
-                  ((element.values("label").get(localeIndex) != null) && !"".equals(element.values("label").get(localeIndex))) ||
-                  ((element.values("shortLabel").get(localeIndex) != null) && !"".equals(element.values("shortLabel").get(localeIndex))) ||
-                  ((element.values("toolTip").get(localeIndex) != null) && !"".equals(element.values("toolTip").get(localeIndex)))
+                  ((elementFacade.attributeValues("label").get(localeIndex) != null) && !"".equals(elementFacade.attributeValues("label").get(localeIndex))) ||
+                  ((elementFacade.attributeValues("shortLabel").get(localeIndex) != null) && !"".equals(elementFacade.attributeValues("shortLabel").get(localeIndex))) ||
+                  ((elementFacade.attributeValues("toolTip").get(localeIndex) != null) && !"".equals(elementFacade.attributeValues("toolTip").get(localeIndex)))
               ) {
                   boolean isNested = false;
                   if("org:openmdx:ui1:AlternateElementDefinition".equals(elementDefinitionType)) {
-                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + element.path().getParent().getParent().getBase() + "\" _operation=\"null\">\n" +
+                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + elementFacade.getPath().getParent().getParent().getBase() + "\" _operation=\"null\">\n" +
                           "                    <_object/>\n" +
                           "                    <_content>\n" +
                           "                      <alternateElementDefinition>\n" +
-                          "                        <org.openmdx.ui1.AlternateElementDefinition id=\"" + element.path().getBase() + "\" _operation=\"create\">\n" +
+                          "                        <org.openmdx.ui1.AlternateElementDefinition id=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
                           "                          <_object>\n";
                       isNested = true;
                   }
                   else if("org:openmdx:ui1:AdditionalElementDefinition".equals(elementDefinitionType)) {
-                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + element.path().getParent().getParent().getBase() + "\" _operation=\"null\">\n" +
+                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + elementFacade.getPath().getParent().getParent().getBase() + "\" _operation=\"null\">\n" +
                           "                    <_object/>\n" +
                           "                    <_content>\n" +
                           "                      <additionalElementDefinition>\n" +
-                          "                        <org.openmdx.ui1.AdditionalElementDefinition id=\"" + element.path().getBase() + "\" _operation=\"create\">\n" +
+                          "                        <org.openmdx.ui1.AdditionalElementDefinition id=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
                           "                          <_object>\n";
                       isNested = true;
                   }
                   else {
-                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + element.path().getBase() + "\" _operation=\"create\">\n" +
+                      s = "                  <org.openmdx.ui1.ElementDefinition name=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
                           "                    <_object>\n";
                       isNested = false;
                   }
@@ -342,8 +304,8 @@ public class UiUtility
                       j < endIndex + 1;
                       j++
                   ) {
-                      String label = element.values("label").size() > j
-                          ? (String)element.values("label").get(j)
+                      String label = elementFacade.attributeValues("label").size() > j
+                          ? (String)elementFacade.attributeValues("label").get(j)
                           : "";
                       if(!"".equals(label)) {
                           String indent = isNested ? "      " : "";        
@@ -375,8 +337,8 @@ public class UiUtility
                       j < endIndex + 1;
                       j++
                   ) {
-                      String shortLabel = element.values("shortLabel").size() > j
-                          ? (String)element.values("shortLabel").get(j)
+                      String shortLabel = elementFacade.attributeValues("shortLabel").size() > j
+                          ? (String)elementFacade.attributeValues("shortLabel").get(j)
                           : "";
                       if(!"".equals(shortLabel)) {
                           String indent = isNested ? "      " : "";
@@ -408,8 +370,8 @@ public class UiUtility
                       j < endIndex + 1;
                       j++
                   ) {
-                      String toolTip = element.values("toolTip").size() > j
-                          ? (String)element.values("toolTip").get(j)
+                      String toolTip = elementFacade.attributeValues("toolTip").size() > j
+                          ? (String)elementFacade.attributeValues("toolTip").get(j)
                           : "";
                       if(!"".equals(toolTip)) {
                           String indent = isNested ? "      " : "";
@@ -481,10 +443,10 @@ public class UiUtility
    */
   private void readAsSchema(
       File file,
-      Map mergedElementDefinitions,
+      Map<Path,MappedRecord> mergedElementDefinitions,
       int localeIndex
   ) throws ServiceException {
-      Map elementDefinitions = ListOrderedMap.decorate(new HashMap());
+      Map<Path,MappedRecord> elementDefinitions = new LinkedHashMap<Path,MappedRecord>();
       if(file.exists()) {
           XmlImporter importer = new XmlImporter(
             elementDefinitions,
@@ -507,38 +469,40 @@ public class UiUtility
       }
       
       // merge entries
-      Set keySet = localeIndex <= 0 ? elementDefinitions.keySet() : mergedElementDefinitions.keySet();
+      Set<Path> keySet = localeIndex <= 0 ? elementDefinitions.keySet() : mergedElementDefinitions.keySet();
       try {
           for(Iterator j = keySet.iterator(); j.hasNext(); ) {
             Path key = (Path)j.next();
             // merge entry
             if(mergedElementDefinitions.get(key) != null) {
-              DataproviderObject mergedElementDefinition = (DataproviderObject)mergedElementDefinitions.get(key);
-              String mergedElementDefinitionType = (String)mergedElementDefinition.values(SystemAttributes.OBJECT_CLASS).get(0);
+              MappedRecord mergedElementDefinition = mergedElementDefinitions.get(key);
+              String mergedElementDefinitionType = ObjectHolder_2Facade.getObjectClass(mergedElementDefinition);
               if(
                 "org:openmdx:ui1:ElementDefinition".equals(mergedElementDefinitionType) ||
                 "org:openmdx:ui1:AlternateElementDefinition".equals(mergedElementDefinitionType) ||
                 "org:openmdx:ui1:AdditionalElementDefinition".equals(mergedElementDefinitionType)
               ) {
-                  DataproviderObject elementDefinition = (DataproviderObject)elementDefinitions.get(key);
-                  if(mergedElementDefinition.getValues("label") != null) {
-                    mergedElementDefinition.values("label").add(
-                      (elementDefinition != null) && (elementDefinition.values("label").size() > 0)
-                        ? elementDefinition.values("label").get(0)
+                  MappedRecord elementDefinition = elementDefinitions.get(key);
+                  ObjectHolder_2Facade elementDefinitionFacade = ObjectHolder_2Facade.newInstance(elementDefinition);
+                  ObjectHolder_2Facade mergedElementDefinitionFacade = ObjectHolder_2Facade.newInstance(mergedElementDefinition);
+                  if(elementDefinitionFacade.getAttributeValues("label") != null) {
+                	  mergedElementDefinitionFacade.attributeValues("label").add(
+                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValues("label").size() > 0)
+                        ? elementDefinitionFacade.attributeValue("label")
                         : "" // empty string as default
                     );
                   }
-                  if(mergedElementDefinition.getValues("shortLabel") != null) {
-                    mergedElementDefinition.values("shortLabel").add(
-                      (elementDefinition != null) && (elementDefinition.values("shortLabel").size() > 0)
-                        ? elementDefinition.values("shortLabel").get(0)
+                  if(mergedElementDefinitionFacade.getAttributeValues("shortLabel") != null) {
+                	  mergedElementDefinitionFacade.attributeValues("shortLabel").add(
+                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValues("shortLabel").size() > 0)
+                        ? elementDefinitionFacade.attributeValue("shortLabel")
                         : "" // empty string as default
                     );
                   }
-                  if(mergedElementDefinition.getValues("toolTip") != null) {
-                    mergedElementDefinition.values("toolTip").add(
-                      (elementDefinition != null) && (elementDefinition.values("toolTip").size() > 0)
-                        ? elementDefinition.values("toolTip").get(0)
+                  if(mergedElementDefinitionFacade.getAttributeValues("toolTip") != null) {
+                	  mergedElementDefinitionFacade.attributeValues("toolTip").add(
+                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValues("toolTip").size() > 0)
+                        ? elementDefinitionFacade.attributeValue("toolTip")
                         : ""  // empty string as default
                     );
                   }
@@ -567,7 +531,7 @@ public class UiUtility
   private void readAsTable(
       File file,
       File templateFile,
-      Map elementDefinitions
+      Map<Path,MappedRecord> elementDefinitions
   ) throws ServiceException {          
       XmlImporter importer = new XmlImporter(
           elementDefinitions,
@@ -590,15 +554,22 @@ public class UiUtility
       try {
           System.out.println("loading " + file.getAbsolutePath());
           org.w3c.dom.Document mergedElementDefinitions = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
-          for(Iterator i = elementDefinitions.values().iterator(); i.hasNext(); ) {
-              DataproviderObject elementDefinition = (DataproviderObject)i.next();
-              String elementDefinitionType = (String)elementDefinition.values(SystemAttributes.OBJECT_CLASS).get(0);
+          for(Iterator<MappedRecord> i = elementDefinitions.values().iterator(); i.hasNext(); ) {
+              MappedRecord elementDefinition = i.next();
+              ObjectHolder_2Facade elementDefinitionFacade;
+              try {
+	              elementDefinitionFacade = ObjectHolder_2Facade.newInstance(elementDefinition);
+              }
+              catch (ResourceException e) {
+            	  throw new ServiceException(e);
+              }
+              String elementDefinitionType = elementDefinitionFacade.getObjectClass();
               Map mergedElementDefinition = null;
               if("org:openmdx:ui1:ElementDefinition".equals(elementDefinitionType)) {
                   mergedElementDefinition = 
                       this.lookupElementDefinition(
                           mergedElementDefinitions, 
-                          elementDefinition.path().getBase()
+                          elementDefinitionFacade.getPath().getBase()
                       );
               }
               else if("org:openmdx:ui1:AlternateElementDefinition".equals(elementDefinitionType)) {
@@ -606,8 +577,8 @@ public class UiUtility
                       this.lookupElementDefinitionByType(
                           "AlternateElementDefinition",
                           mergedElementDefinitions, 
-                          elementDefinition.path().getParent().getParent().getBase(), 
-                          elementDefinition.path().getBase()
+                          elementDefinitionFacade.getPath().getParent().getParent().getBase(), 
+                          elementDefinitionFacade.getPath().getBase()
                       );
               }
               else if("org:openmdx:ui1:AdditionalElementDefinition".equals(elementDefinitionType)) {
@@ -615,8 +586,8 @@ public class UiUtility
                       this.lookupElementDefinitionByType(
                           "AdditionalElementDefinition",
                           mergedElementDefinitions, 
-                          elementDefinition.path().getParent().getParent().getBase(), 
-                          elementDefinition.path().getBase()
+                          elementDefinitionFacade.getPath().getParent().getParent().getBase(), 
+                          elementDefinitionFacade.getPath().getBase()
                       );
               }
               for(int j = 1; j < locales.size(); j++) { // skip en_US
@@ -628,9 +599,9 @@ public class UiUtility
                       shortLabel = (String)mergedElementDefinition.get(locales.get(j) + "_ShortLabel");
                       toolTip = (String)mergedElementDefinition.get(locales.get(j) + "_ToolTip");
                   }
-                  elementDefinition.values("label").add(label == null ? "" : label);
-                  elementDefinition.values("shortLabel").add(shortLabel == null ? "" : shortLabel);
-                  elementDefinition.values("toolTip").add(toolTip == null ? "" : toolTip);
+                  elementDefinitionFacade.attributeValues("label").add(label == null ? "" : label);
+                  elementDefinitionFacade.attributeValues("shortLabel").add(shortLabel == null ? "" : shortLabel);
+                  elementDefinitionFacade.attributeValues("toolTip").add(toolTip == null ? "" : toolTip);
               }
           }
       }
@@ -649,7 +620,7 @@ public class UiUtility
   private void writeAsTable(
       Writer w,
       Writer fw,
-      Map elementDefinitions
+      Map<Path,MappedRecord> elementDefinitions
   ) throws ServiceException, IOException {
       String s = null;   
       s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -657,29 +628,36 @@ public class UiUtility
       s = "<ElementDefinitions>\n";
       w.write(s, 0, s.length());
       for(
-          Iterator j = elementDefinitions.values().iterator(); 
+          Iterator<MappedRecord> j = elementDefinitions.values().iterator(); 
           j.hasNext(); 
       ) {
-          DataproviderObject_1_0 entry = (DataproviderObject_1_0)j.next();
-          String elementDefinitionType = (String)entry.values(SystemAttributes.OBJECT_CLASS).get(0);
+          MappedRecord entry = j.next();
+          ObjectHolder_2Facade entryFacade;
+          try {
+	          entryFacade = ObjectHolder_2Facade.newInstance(entry);
+          }
+          catch (ResourceException e) {
+        	  throw new ServiceException(e);
+          }
+          String elementDefinitionType = entryFacade.getObjectClass();
           if("org:openmdx:ui1:ElementDefinition".equals(elementDefinitionType)) {
-              s = "  <ElementDefinition name=\"" + entry.path().getBase() + "\">\n";
+              s = "  <ElementDefinition name=\"" + entryFacade.getPath().getBase() + "\">\n";
           }
           else if("org:openmdx:ui1:AlternateElementDefinition".equals(elementDefinitionType)) {
-              s = "  <AlternateElementDefinition name=\"" + entry.path().getParent().getParent().getBase() + "\" id=\"" + entry.path().getBase() + "\">\n";                      
+              s = "  <AlternateElementDefinition name=\"" + entryFacade.getPath().getParent().getParent().getBase() + "\" id=\"" + entryFacade.getPath().getBase() + "\">\n";                      
           }
           else {
-              s = "  <AdditionalElementDefinition name=\"" + entry.path().getParent().getParent().getBase() + "\" id=\"" + entry.path().getBase() + "\">\n";                      
+              s = "  <AdditionalElementDefinition name=\"" + entryFacade.getPath().getParent().getParent().getBase() + "\" id=\"" + entryFacade.getPath().getBase() + "\">\n";                      
           }
           w.write(s, 0, s.length());
           // label
-          if(entry.getValues("label") != null) {
+          if(entryFacade.getAttributeValues("label") != null) {
               s = "    <Text type=\"Label\">\n";
               w.write(s, 0, s.length());
               for(int k = 0; k < locales.size(); k++) {
                   s = "      <" + locales.get(k) + ">";
                   w.write(s, 0, s.length());
-                  s = (String)entry.values("label").get(k);
+                  s = (String)entryFacade.attributeValues("label").get(k);
                   if(s == null) s = "";
                   fw.write(s, 0, s.length());
                   s = "</" + locales.get(k) + ">\n";
@@ -689,13 +667,13 @@ public class UiUtility
               w.write(s, 0, s.length());
           }
           // shortLabel
-          if(entry.getValues("shortLabel") != null) {
+          if(entryFacade.getAttributeValues("shortLabel") != null) {
               s = "    <Text type=\"ShortLabel\">\n";
               w.write(s, 0, s.length());
               for(int k = 0; k < locales.size(); k++) {
                   s = "      <" + locales.get(k) + ">";
                   w.write(s, 0, s.length());
-                  s = (String)entry.values("shortLabel").get(k);
+                  s = (String)entryFacade.attributeValues("shortLabel").get(k);
                   if(s == null) s = "";
                   fw.write(s, 0, s.length());
                   s = "</" + locales.get(k) + ">\n";
@@ -705,13 +683,13 @@ public class UiUtility
               w.write(s, 0, s.length());
           }
           // toolTip
-          if(entry.getValues("toolTip") != null) {
+          if(entryFacade.getAttributeValues("toolTip") != null) {
               s = "    <Text type=\"ToolTip\">\n";
               w.write(s, 0, s.length());
               for(int k = 0; k < locales.size(); k++) {
                   s = "      <" + locales.get(k) + ">";
                   w.write(s, 0, s.length());
-                  s = (String)entry.values("toolTip").get(k);
+                  s = (String)entryFacade.attributeValues("toolTip").get(k);
                   if(s == null) s = "";
                   fw.write(s, 0, s.length());
                   s = "</" + locales.get(k) + ">\n";
@@ -752,7 +730,7 @@ public class UiUtility
       
       // en_US files are leading. process all files
       for(int u = 0; u < en_US_files.length; u++) {
-          Map elementDefinitions = ListOrderedMap.decorate(new HashMap());          
+          Map elementDefinitions = new LinkedHashMap();          
           File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + en_US_files[u].getName());
           if("table".equals(this.format)) {
               this.readAsTable(
@@ -831,7 +809,7 @@ public class UiUtility
       for(int u = 0; u < en_US_files.length; u++) {
 
           // get all locale specific files for en_US_files[k]
-          Map mergedElementDefinitions = ListOrderedMap.decorate(new HashMap());
+          Map mergedElementDefinitions = new LinkedHashMap();
           for(int i = 0; i < locales.size(); i++) {
               File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + locales.get(i) + File.separatorChar + en_US_files[u].getName());
               this.readAsSchema(
@@ -893,118 +871,72 @@ public class UiUtility
   
   //-------------------------------------------------------------------------    
   protected void run(
-  ) throws Exception {
+	  String[] args
+  ) throws ServiceException {
+      this.locales = new ArrayList();
+      this.sourceDir = new File(".");
+      this.targetDir = new File(".");
+      this.format = "table";
       String command = "merge";
-      if (this.getCmdLineArgs().hasArg("merge")) {
-          command = "merge";
-      }
-      if (this.getCmdLineArgs().hasArg("split")) {
-          command = "split";
-      }
+	  for(int i = 0; i < args.length; i++) {
+	      // locales. get locale and assert en_US to be the first in the list
+	      if("--locale".equals(args[i])) {
+	    	  int j = i + 1;
+	    	  while(j < args.length && !args[j].startsWith("--")) {
+	    		  this.locales.add(args[j]);
+	    		  j++;
+	    	  }
+	      }
+	      // sourceDir
+	      else if("--sourceDir".equals(args[i]) && (i + 1 < args.length)) {
+	          this.sourceDir = new File(args[i+1]);
+	      }
+	      // targetDir
+	      else if("--targetDir".equals(args[i]) && (i + 1 < args.length)) {
+	          this.targetDir = new File(args[i+1]);
+	      }
+	      else if("--format".equals(args[i]) && (i + 1 < args.length)) {
+	          this.format = args[i+1];	    	  
+	      }
+	      else if("--split".equals(args[i])) {
+	    	  command = "split";
+	      }
+	      else if("--merge".equals(args[i])) {
+	    	  command = "merge";
+	      }
+	  }
+      if(this.locales.isEmpty() || !"en_US".equals(this.locales.get(0))) {
+          this.locales.add(0, "en_US");
+      }	  
+	  
       if("merge".equals(command)){
-          this.merge(this.locales, this.sourceDir, this.targetDir, this.format);
+          this.merge(
+        	  this.locales, 
+        	  this.sourceDir, 
+        	  this.targetDir, 
+        	  this.format
+          );
       }
       else if("split".equals(command)){
-          this.split(this.locales, this.sourceDir, this.targetDir, this.format);
+          this.split(
+        	  this.locales, 
+        	  this.sourceDir, 
+        	  this.targetDir, 
+        	  this.format
+          );
       }
-  }
-
-  //-------------------------------------------------------------------------    
-  protected void release(
-  ) throws Exception {
-    System.out.println("shutdown");
   }
 
   //-------------------------------------------------------------------------    
   public static void main(
     String[] args
-  ) {
-    ApplicationController controller = new ApplicationController(args);
-    controller.initLogging(LOG_CONFIG_NAME, LOG_SOURCE);
-    controller.registerApplication(new UiUtility());
-    controller.run();
-  }
-  
-  //-------------------------------------------------------------------------        
-  private static List createCmdLineOptions(
-  ) {
-    ArrayList options = new ArrayList();
-    
-    // merge command
-    options.add(
-      new CmdLineOption(
-        "merge",
-        "Merge locale separated files to one merged file"
-      )
-    );
-
-    // split command
-    options.add(
-      new CmdLineOption(
-        "split",
-        "Split merged file to locale separated files"
-      )
-    );
-    
-    
-    // dir (split directory)
-    options.add(
-      new CmdLineOption(
-        "sourceDir",
-        "directory containing the source files",
-        1,
-        1
-      )
-    );    
-    options.add(
-      new CmdLineOption(
-        "targetDir",
-        "directory containing the target files",
-        1,
-        1
-      )
-    );    
-    // locale
-    options.add(
-      new CmdLineOption(
-        "locale",
-        "list of locales to process",
-        0,
-        Integer.MAX_VALUE
-      )
-    );    
-    // format
-    options.add(
-      new CmdLineOption(
-        "format",
-        "ui source format for split; ui target format for merge [table|schema]",
-        0,
-        Integer.MAX_VALUE
-      )
-    );    
-    return options;
+  ) throws ServiceException {
+    new UiUtility().run(args);
   }
   
   //-------------------------------------------------------------------------
   // Variables    
   //-------------------------------------------------------------------------    
-
-  // The version gets set by CVS
-  private static final String VERSION = "$Revision: 1.9 $";
-  
-  // The application name
-  private static final String APP_NAME = "UiMapper";
-  
-  // The logging configuration name
-  private static final String LOG_CONFIG_NAME = "UiMapper";
-  
-  // The logging log source name
-  private static final String LOG_SOURCE = UiUtility.APP_NAME;
-  
-  // Application help
-  private static final String HELP_TEXT = "UiMapper splits and merges ui definitions";
-  
-  // command line options
   private List locales = null;
   private File sourceDir = null;
   private File targetDir = null;

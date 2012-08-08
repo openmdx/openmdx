@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OpenMDXSchemes.java,v 1.3 2007/10/10 16:06:08 hburger Exp $
+ * Name:        $Id: OpenMDXSchemes.java,v 1.4 2009/05/27 22:43:50 hburger Exp $
  * Description: XRI Protocol Constants
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:08 $
+ * Date:        $Date: 2009/05/27 22:43:50 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -62,13 +61,13 @@ public class OpenMDXSchemes {
     }
 
     /**
-     * openMDX' URI Scheme
+     * Legacy URI Scheme
      */
-    public final static String URI_SCHEME = "spice";
+    public final static String LEGACY_SCHEME = "spice";
 
     /**
-     * openMDX' URI Scheme Prefix
+     * Legacy' URI Scheme Prefix
      */
-    public final static String URI_PREFIX = URI_SCHEME + ":/";
+    public final static String LEGACY_PREFIX = LEGACY_SCHEME + ":/";
 
 }

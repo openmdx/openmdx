@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsEventHandler.java,v 1.24 2009/03/08 18:03:21 wfro Exp $
+ * Name:        $Id: FindObjectsEventHandler.java,v 1.26 2009/05/16 23:02:56 wfro Exp $
  * Description: FindObjectsEventHandler 
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:21 $
+ * Date:        $Date: 2009/05/16 23:02:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,17 +67,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.application.dataprovider.cci.Orders;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Orders;
 import org.openmdx.base.query.Quantors;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -167,7 +167,7 @@ public class FindObjectsEventHandler {
                                 filterByFeature,
                                 filterOperator,
                                 filterFeatureIsNumeric ? Integer.valueOf(filterValue) :
-                                filterOperator == FilterOperators.IS_LIKE ? "(?i)%" + filterValue + "%": filterValue
+                                filterOperator == FilterOperators.IS_LIKE ? "(?i).*" + filterValue + ".*": filterValue
                             )
                         );
                     }

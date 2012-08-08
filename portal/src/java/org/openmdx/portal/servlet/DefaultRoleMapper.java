@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultRoleMapper.java,v 1.19 2009/03/08 18:03:19 wfro Exp $
+ * Name:        $Id: DefaultRoleMapper.java,v 1.20 2009/04/07 19:29:13 hburger Exp $
  * Description: DefaultRoleMapper 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:19 $
+ * Date:        $Date: 2009/04/07 19:29:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -208,14 +208,14 @@ public class DefaultRoleMapper
                                     }
                                     // Ignore errors while inspecting groups
                                     catch(Exception e) {
-                                        boolean error = true;
+//                                      boolean error = true;
                                     }
                                     leastRecentLoginAt = Math.max(lastLoginAt, leastRecentLoginAt);
                                 }
                             }
                             // Ignore errors while inspecting user roles (e.g. subject can not be found)
                             catch(Exception e) {
-                                boolean error = true;
+//                              boolean error = true;
                             }
                         }
                     }

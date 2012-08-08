@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI2Parser.java,v 1.3 2009/03/04 18:44:38 wfro Exp $
+ * Name:        $Id: XMI2Parser.java,v 1.4 2009/03/10 18:14:01 wfro Exp $
  * Description: XMI2 Parser
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/04 18:44:38 $
+ * Date:        $Date: 2009/03/10 18:14:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -361,7 +361,7 @@ public class XMI2Parser
         }
         // returnResult
         else if("returnResult".equals(qName)) {
-            if(this.elementStack.size() > 0) {
+            if(!this.elementStack.isEmpty()) {
                 UML1ModelElement operationDef = (UML1ModelElement)this.elementStack.peek();
                 if(operationDef instanceof UML1Operation) {
                     UML1Parameter parameterDef =
@@ -384,7 +384,7 @@ public class XMI2Parser
         }
         // ownedParameter
         else if("ownedParameter".equals(qName)) {
-            if(this.elementStack.size() > 0) {
+            if(!this.elementStack.isEmpty()) {
                 UML1ModelElement operationDef = (UML1ModelElement)this.elementStack.peek();
                 if(operationDef instanceof UML1Operation) {
                     String name = atts.getValue("name");
@@ -423,7 +423,7 @@ public class XMI2Parser
         // ownedComment
         else if("ownedComment".equals(qName)) {
             String body = atts.getValue("body");
-            if(elementStack.size() > 0) {
+            if(!this.elementStack.isEmpty()) {
                 UML1ModelElement element = (UML1ModelElement)elementStack.peek();
                 if(body != null) {
                     element.getComment().add(
@@ -435,7 +435,7 @@ public class XMI2Parser
         // generalization
         else if("generalization".equals(qName)) {
             String supertype = resolver.lookupXMIId(atts.getValue("general"));
-            if(this.elementStack.size() > 0) {
+            if(!this.elementStack.isEmpty()) {
                 UML1ModelElement element = (UML1ModelElement)elementStack.peek();
                 if((supertype != null) && (element instanceof UML1Class)) {
                     ((UML1Class)element).getSuperclasses().add(supertype);
@@ -457,7 +457,7 @@ public class XMI2Parser
                     id = id.substring(0, id.indexOf("?"));
                 }
                 String supertype = resolver.lookupXMIId(id);
-                if(this.elementStack.size() > 0) {
+                if(!this.elementStack.isEmpty()) {
                     UML1ModelElement element = (UML1ModelElement)elementStack.peek();
                     if((supertype != null) && (element instanceof UML1Class)) {
                         ((UML1Class)element).getSuperclasses().add(supertype);
@@ -481,7 +481,7 @@ public class XMI2Parser
         }
         // details
         else if("details".equals(qName)) {
-            if(this.elementStack.size() > 0) {
+            if(!this.elementStack.isEmpty()) {
                 UML1ModelElement element = (UML1ModelElement)elementStack.peek();
                 // Stereotype
                 if(element instanceof UML1Stereotype) {
@@ -491,7 +491,7 @@ public class XMI2Parser
         }
         // lowerValue
         else if("lowerValue".equals(qName)) {
-            if(this.elementStack.size() > 0) {
+            if(!this.elementStack.isEmpty()) {
                 UML1ModelElement element = (UML1ModelElement)elementStack.peek();
                 if(element instanceof UML1StructuralFeature) {
                     UML1StructuralFeature feature = (UML1StructuralFeature)element;
@@ -517,7 +517,7 @@ public class XMI2Parser
         }
         // upperValue
         else if("upperValue".equals(qName)) {
-            if(this.elementStack.size() > 0) {
+            if(!this.elementStack.isEmpty()) {
                 UML1ModelElement element = (UML1ModelElement)elementStack.peek();
                 if(element instanceof UML1StructuralFeature) {
                     UML1StructuralFeature feature = (UML1StructuralFeature)element;
@@ -543,7 +543,7 @@ public class XMI2Parser
         }
         // qualifier
         else if("qualifier".equals(qName)) {
-            if(this.elementStack.size() > 0) {
+            if(!this.elementStack.isEmpty()) {
                 UML1ModelElement element = (UML1ModelElement)elementStack.peek();
                 if(element instanceof UML1AssociationEnd) {
                     UML1AssociationEnd associationEndDef = (UML1AssociationEnd)element;
@@ -639,7 +639,7 @@ public class XMI2Parser
                 if(id.indexOf("?") >= 0) {
                     id = id.substring(0, id.indexOf("?"));
                 }
-                if(this.elementStack.size() > 0) {
+                if(!this.elementStack.isEmpty()) {
                     UML1ModelElement element = (UML1ModelElement)this.elementStack.peek();
                     if(element instanceof UML1StructuralFeature) {
                         ((UML1StructuralFeature)element).setType(
@@ -677,9 +677,9 @@ public class XMI2Parser
         try {
             // ownedAttribute
             if("ownedAttribute".equals(qName)) {
-                if(this.elementStack.size() > 0) {
+                if(!this.elementStack.isEmpty()) {
                     Object attributeDef = this.elementStack.pop();
-                    if(this.elementStack.size() > 0) {
+                    if(!this.elementStack.isEmpty()) {
                         UML1ModelElement classDef = (UML1ModelElement)this.elementStack.peek();
                         if((classDef instanceof UML1Class) && (attributeDef instanceof UML1Attribute)) {
                             ((UML1Class)classDef).getFeature().add(attributeDef);
@@ -689,7 +689,7 @@ public class XMI2Parser
             }
             // ownedMember
             else if("packagedElement".equals(qName) || "ownedMember".equals(qName)) {
-                if(this.elementStack.size() > 0) {
+                if(!this.elementStack.isEmpty()) {
                     UML1ModelElement element = (UML1ModelElement)this.elementStack.pop();
                     if(element instanceof UML1Package) {
                         this.importer.processUMLPackage((UML1Package)element);
@@ -714,10 +714,10 @@ public class XMI2Parser
             }
             // ownedOperation
             else if("ownedOperation".equals(qName)) {
-                if(this.elementStack.size() > 0) {
+                if(!this.elementStack.isEmpty()) {
                     UML1ModelElement operationDef = (UML1ModelElement)this.elementStack.pop();
                     if(operationDef instanceof UML1Operation) {
-                        if(this.elementStack.size() > 0) {
+                        if(!this.elementStack.isEmpty()) {
                             UML1ModelElement classDef = (UML1ModelElement)this.elementStack.peek();
                             if(classDef instanceof UML1Class) {
                                 ((UML1Class)classDef).getFeature().add(
@@ -730,25 +730,34 @@ public class XMI2Parser
             }
             // returnResult
             else if("returnResult".equals(qName)) {
-                if(this.elementStack.size() > 0) {
+                if(!this.elementStack.isEmpty()) {
                     this.elementStack.pop();
                 }
             }
             // ownedParameter
             else if("ownedParameter".equals(qName)) {
-                if(this.elementStack.size() > 0) {
+                if(!this.elementStack.isEmpty()) {
                     this.elementStack.pop();
+                }
+            }
+            // body
+            else if("body".equals(qName)) {
+                if(!this.elementStack.isEmpty()) {
+                    UML1ModelElement element = (UML1ModelElement)this.elementStack.peek();
+                    if(this.value.length() > 0) {
+                    	element.getComment().add(this.value.toString());
+                    }
                 }
             }
             // qualifier
             else if("qualifier".equals(qName)) {
-                if(this.elementStack.size() > 0) {
+                if(!this.elementStack.isEmpty()) {
                     this.elementStack.pop();
                 }
             }
             // eAnnotations
             else if("eAnnotations".equals(qName)) {
-                if(this.elementStack.size() > 0) {
+                if(!this.elementStack.isEmpty()) {
                     UML1ModelElement element = (UML1ModelElement)this.elementStack.peek();
                     // apply stereotype to element
                     if(element instanceof UML1Stereotype) {
@@ -763,7 +772,7 @@ public class XMI2Parser
             }
             // ownedEnd
             else if("ownedEnd".equals(qName)) {
-                if(this.elementStack.size() > 0) {
+                if(!this.elementStack.isEmpty()) {
                     this.elementStack.pop();
                 }
             }
@@ -779,7 +788,10 @@ public class XMI2Parser
         int start,
         int length
     ) {
-        //
+        this.value.setLength(0);
+        for(int i = 0; i < length; i++) {
+        	this.value.append(ch[start + i]);        	
+        }
     }
 
     //---------------------------------------------------------------------------
@@ -832,20 +844,16 @@ public class XMI2Parser
     private UML1VisibilityKind toUMLVisibilityKind(
         String visibility
     ) {
-        if ("private".equals(visibility))
-        {
+        if ("private".equals(visibility)) {
           return UML1VisibilityKind.PRIVATE;
         }
-        else if ("protected".equals(visibility))
-        {
+        else if ("protected".equals(visibility)) {
           return UML1VisibilityKind.PROTECTED;
         }
-        else if ("package".equals(visibility))
-        {
+        else if ("package".equals(visibility)) {
           return UML1VisibilityKind.PACKAGE;
         }
-        else
-        {
+        else {
           return UML1VisibilityKind.PUBLIC;
         }
     }
@@ -866,6 +874,7 @@ public class XMI2Parser
     }
 
     //-------------------------------------------------------------------------
+    private final StringBuffer value = new StringBuffer();
     private String modelUri = null;
     private Locator locator = null;
     private Stack scope = null;

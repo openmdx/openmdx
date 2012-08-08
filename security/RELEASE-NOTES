@@ -1,7 +1,7 @@
 Distribution Name: openMDX/Security
-Release Date: 2009-03-09
-Specification Version: 2.4
-Implementation Version: 2.4.0
+Release Date: 2009-06-14
+Specification Version: 2.5
+Implementation Version: 2.5.0
 
 ---------------------------------------------------------------------
 Notes:
@@ -49,7 +49,7 @@ Notes:
 ---------------------------------------------------------------------
 
 0.    SUMMARY
-      * New PIN / Next Tokencode
+      * Refactoring
       
 1.    NEW FEATURES
       none
@@ -58,10 +58,10 @@ Notes:
      
 2.0.  CHANGED FEATURES
       
-      CR20013400
-      New PIN / Next Tokencode
+      20018630
+      openMDX/Test Security
       
-      Expect CredentialExceptions other than CredentialExpiredException.
+      The openMDX/Security tests have been moved to their own sub-project
       
 2.1.  FIXED BUGS
       none

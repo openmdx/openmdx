@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FixedSizeIndexedRecord.java,v 1.12 2008/02/28 13:59:08 hburger Exp $
+ * Name:        $Id: FixedSizeIndexedRecord.java,v 1.15 2009/05/20 15:13:42 hburger Exp $
  * Description: JCA: IndexedRecord backed-up by a primitive type array
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/28 13:59:08 $
+ * Date:        $Date: 2009/05/20 15:13:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,15 +60,10 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  * A fixed-size IndexedRecord implementation backed-up by an array.
  */
 @SuppressWarnings("unchecked")
-public class FixedSizeIndexedRecord 
+final class FixedSizeIndexedRecord 
 	extends ArraysExtension.AsList
 	implements ArrayBasedIndexedRecord, MultiLineStringRepresentation
 {
-
-	/**
-     * 
-     */
-    private static final long serialVersionUID = 3978138833738936625L;
 
     /**
 	 * Creates an IndexedRecord with the specified name and the given content.  
@@ -85,7 +80,7 @@ public class FixedSizeIndexedRecord
 	 * @param     values
 	 *            The values of the indexed record.
 	 */
-	public FixedSizeIndexedRecord(
+	FixedSizeIndexedRecord(
 		String recordName,
 		String recordShortDescription,
 		Object values
@@ -114,20 +109,20 @@ public class FixedSizeIndexedRecord
 	// Implements Serializable
 	//------------------------------------------------------------------------
 
+    /**
+     * Constructor
+     */
+    protected FixedSizeIndexedRecord(
+    ){      
+        // for de-serialization
+    }
+    
 	/**
 	 * Serial Version UID
 	 */
-	// static final long serialVersionUID = 3275321657666356693L;
+    private static final long serialVersionUID = 3978138833738936625L;
 
-	/**
-	 * Deserialization
-	 */
-	protected FixedSizeIndexedRecord(
-	){		
-	    super();
-	}
-	
-	
+    
 	//------------------------------------------------------------------------
 	// Implements Record
 	//------------------------------------------------------------------------

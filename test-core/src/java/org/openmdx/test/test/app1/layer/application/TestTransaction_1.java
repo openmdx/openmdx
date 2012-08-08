@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestTransaction_1.java,v 1.8 2009/02/04 11:06:38 hburger Exp $
+ * Name:        $Id: TestTransaction_1.java,v 1.9 2009/05/27 23:14:18 wfro Exp $
  * Description: TestTransaction_1
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/04 11:06:38 $
+ * Date:        $Date: 2009/05/27 23:14:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,11 +62,11 @@ import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.layer.application.ProvidingUid_1;
 import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.compatibility.base.dataprovider.layer.application.ProvidingUid_1;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.test.kernel.application.container.ejb.cci.Runnable_1LocalHome;
 

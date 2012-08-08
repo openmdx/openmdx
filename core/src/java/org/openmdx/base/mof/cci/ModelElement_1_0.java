@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ModelElement_1_0.java,v 1.2 2009/01/13 17:33:49 wfro Exp $
+ * Name:        $Id: ModelElement_1_0.java,v 1.5 2009/06/09 12:45:17 hburger Exp $
  * Description: ModelElement_1_0 interface
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:33:49 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,7 +57,7 @@ import org.openmdx.base.exception.ServiceException;
 
 public interface ModelElement_1_0 extends DataObject_1_0 {
 
-    public Model_1_4 getModel();
+    public Model_1_0 getModel();
   
     public boolean isAliasType();
   
@@ -77,6 +77,40 @@ public interface ModelElement_1_0 extends DataObject_1_0 {
     
     public boolean isPackageType();
     
+    public boolean isAssociationType();
+    
+    public boolean isElementType();
+    
+    public boolean isNamespaceType();
+    
+    public boolean isGeneralizableElementType();
+    
+    public boolean isTypedElementType();
+    
+    public boolean isDataType();
+    
+    public boolean isExceptionType();
+    
+    public boolean isAssociationEndType();
+    
+    public boolean isImportType();
+    
+    public boolean isConstraintType();
+    
+    public boolean isConstantType();
+    
+    public boolean isStructuralFeatureType();
+    
+    public boolean isParameterType();
+    
+    public boolean isCollectionType();
+
+    public boolean isClassifierType();
+    
+    public boolean isEnumerationType();
+
+    public boolean isBehaviouralFeatureType();
+
     public boolean isReferenceStoredAsAttribute(
         Map<String,ModelElement_1_0> elements
     ) throws ServiceException;

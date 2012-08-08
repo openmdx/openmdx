@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.11 2009/01/06 10:21:19 wfro Exp $
+ * Name:        $Id: Filter.java,v 1.13 2009/05/16 22:17:51 wfro Exp $
  * Description: Filter
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2009/05/16 22:17:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,6 @@ import java.util.List;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.base.resource.Records;
 import org.w3c.cci2.AnyTypePredicate;
 
@@ -122,19 +121,23 @@ public class Filter
          AttributeSpecifier[] attributeSpecifiers
     ) {
         this.conditions = new ArrayList<Condition>();
-        for(FilterProperty p: filterProperties) {
-            this.conditions.add(
-                new AnyTypeCondition(p)
-            );
+        if(filterProperties != null) {
+            for(FilterProperty p: filterProperties) {
+                this.conditions.add(
+                    new AnyTypeCondition(p)
+                );
+            }
         }
         this.orderSpecifiers = new ArrayList<OrderSpecifier>();
-        for(AttributeSpecifier a: attributeSpecifiers) {
-            this.orderSpecifiers.add(
-                new OrderSpecifier(
-                    a.name(),
-                    a.order()
-                )
-            );
+        if(attributeSpecifiers != null) {
+            for(AttributeSpecifier a: attributeSpecifiers) {
+                this.orderSpecifiers.add(
+                    new OrderSpecifier(
+                        a.name(),
+                        a.order()
+                    )
+                );
+            }
         }
     }
     

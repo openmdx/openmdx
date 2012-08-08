@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ResourceIdentifierTypePredicate_1.java,v 1.7 2009/02/18 12:54:32 hburger Exp $
+ * Name:        $Id: ResourceIdentifierTypePredicate_1.java,v 1.8 2009/06/09 12:45:17 hburger Exp $
  * Description: Resource Identifier Type Predicate implementation
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/18 12:54:32 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
+import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.query.FilterOperators;
 import org.w3c.cci2.MatchableTypePredicate;
@@ -75,7 +75,7 @@ class ResourceIdentifierTypePredicate_1<V extends Comparable<?>>
      * @param quantor
      */
     ResourceIdentifierTypePredicate_1 (
-        RefFilter_1_1 delegate,
+        RefFilter_1_0 delegate,
         ModelElement_1_0 featureDef,
         short quantor
     ){

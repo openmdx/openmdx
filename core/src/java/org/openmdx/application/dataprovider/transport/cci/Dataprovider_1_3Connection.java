@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1_3Connection.java,v 1.2 2009/01/11 21:28:59 wfro Exp $
+ * Name:        $Id: Dataprovider_1_3Connection.java,v 1.4 2009/06/08 17:12:25 hburger Exp $
  * Description: Dataprovider_1_3Connection 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/11 21:28:59 $
+ * Date:        $Date: 2009/06/08 17:12:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,13 +50,13 @@
  */
 package org.openmdx.application.dataprovider.transport.cci;
 
-import org.openmdx.application.dataprovider.cci.OptimisticTransaction_2_0;
+import org.openmdx.base.resource.spi.TransactionManager;
 
 /**
  * Dataprovider_1_3Connection
  */
 public interface Dataprovider_1_3Connection
-    extends Dataprovider_1_2Connection, OptimisticTransaction_2_0
+    extends Dataprovider_1_2Connection, TransactionManager
 {
     // The methods are declared in the extended interfaces
 }

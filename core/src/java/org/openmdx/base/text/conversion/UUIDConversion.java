@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UUIDConversion.java,v 1.4 2008/01/08 16:16:31 hburger Exp $
+ * Name:        $Id: UUIDConversion.java,v 1.7 2009/05/27 22:48:21 hburger Exp $
  * Description: UUID conversion
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2009/05/27 22:48:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,21 +50,13 @@
  */
 package org.openmdx.base.text.conversion;
 
-import org.openxri.XRI;
-
-
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.UUID;
+
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
-
-
-
-
-
-
-import java.util.UUID;
 
 
 
@@ -100,21 +92,22 @@ public class UUIDConversion {
         String uuid
     ){
         if(uuid == null) {
-                return null;
+            return null;
         } else switch(uuid.length()){
-            case UUID_FORMAT: return UUID.fromString(uuid);
-            case URN_FORMAT: return fromString(uuid.substring(9));
-            case UID_FORMAT: return fromBinary(
+            case LEGACY_FORMAT: return fromBinary(
                 Base64.decode(
-                        uuid.replace(
-                                SOLIDUS_REPLACEMENT,
-                                '/'
-                        ).replace(
-                                PLUS_REPLACEMENT,
-                                '+'
-                        ) + "=="
+                    uuid.replace(
+                        '-',
+                        '/'
+                    ).replace(
+                        '.',
+                        '+'
+                    ) + "=="
                 )
             );
+            case UID_FORMAT: return UUIDConversion.fromUID(uuid);
+            case UUID_FORMAT: return UUID.fromString(uuid);
+            case URN_FORMAT: return UUID.fromString(uuid.substring(9));
             default: throw new IllegalArgumentException(
                 "Invalid UUID string: " + uuid
             );
@@ -177,18 +170,25 @@ public class UUIDConversion {
      * 
      * @return the corresponding UUID XRI
      */
-    public static XRI toXRI (
+    public static String toXRI (
         UUID uuid
     ){
-        return new XRI("xri://$t*uuid*" + uuid);
+        return "xri://$t*uuid*" + uuid;
     }
 
     /**
-     * Returns a base 64 based UID, where<ul>
-     * <li>all '/' have been replaced by '-'
-     * <li>all '+' have been repalced by '.'
-     * <li>the two trailing '=' have been removed
+     * Returns a base 36 encoded URI.
+     * <p>
+     * Note:<br>
+     * The encoding is as following:<ul>
+     * <li>Digit 0 contains sum of<ul>
+     * <li>6 times (bits 1 to 63 divided by 36^12 plus 3 if bit 0 is set) 
+     * <li>bits 65 to 127 divided by 36^12 plus 3 if bit 64 is set
      * </ul>
+     * <li>Digits 1 to 12 contain bits 1 to 63 modulo 36^12
+     * <li>Digits 13 to 24 contain bits 65 to 127 modulo 36^12
+     * </ul>
+     * 
      * @param uuid the UUID to be converted
      * 
      * @return the corresponding UID
@@ -196,22 +196,11 @@ public class UUIDConversion {
     public static String toUID (
        UUID uuid
     ){
-        return uuid == null?
-            null :
-            Base64.encode(
-                toBinary(uuid)
-            ).substring(
-                0,
-                22
-            ).replace(
-                '/',
-                SOLIDUS_REPLACEMENT
-            ).replace(
-                '+',
-                PLUS_REPLACEMENT
-            );
+        return uuid == null ? null : toUID(
+            uuid.getMostSignificantBits(),
+            uuid.getLeastSignificantBits()
+        );
     }
-
 
     /**
      * Returns a UUID Oid according to ISO/IEC 9834-8 | ITU-T Rec. X.667
@@ -322,28 +311,118 @@ public class UUIDConversion {
     }
 
     /**
-     * The UUID format's length
+     * Decodes a base 36 encoded UID
+     * <p>
+     * Note:<br>
+     * The encoding is as following:<ul>
+     * <li>Digit 0 contains sum of<ul>
+     * <li>6 times (bits 1 to 63 divided by 36^12 plus 3 if bit 0 is set) 
+     * <li>bits 65 to 127 divided by 36^12 plus 3 if bit 64 is set
+     * </ul>
+     * <li>Digits 1 to 12 contain bits 1 to 63 modulo 36^12
+     * <li>Digits 13 to 24 contain bits 65 to 127 modulo 36^12
+     * </ul>
+     * 
+     * @param uid the base 36 encoded UID
+     * 
+     * @return the corresponding UUID
      */
-    private static final int UUID_FORMAT = 36;
+    private static UUID fromUID(
+        String uid
+    ){
+        long split = digit(uid.charAt(0));
+        long mostSignificantBits = split / 6;
+        boolean mostSignificantIsNegative = mostSignificantBits >= 3;
+        if(mostSignificantIsNegative) mostSignificantBits -= 3;
+        long leastSignificantBits = split % 6;
+        boolean leastSignificantIsNegative = leastSignificantBits >= 3;
+        if(leastSignificantIsNegative)leastSignificantBits -= 3;
+        for(int i = 1; i < 13; i++){
+            mostSignificantBits *= 36;
+            mostSignificantBits += digit(uid.charAt(i));
+        }
+        if(mostSignificantIsNegative) mostSignificantBits |= 0x8000000000000000l;
+        for(int i = 13; i < 25; i++){
+            leastSignificantBits *= 36;
+            leastSignificantBits += digit(uid.charAt(i));
+        }
+        if(leastSignificantIsNegative) leastSignificantBits |= 0x8000000000000000l;
+        return new UUID(mostSignificantBits, leastSignificantBits);
+    }
+
+    /**
+     * Uppercase radix 36 character for digit
+     * 
+     * @param digit the digit to be converted
+     * 
+     * @return its character representation
+     */
+    private static char forDigit(
+        long digit
+    ){
+        return (char) (digit + (digit < 10 ? '0' : 'A' - 10)); 
+    }
+    
+    /**
+     * Uppercase radix 16 digit for character 
+     * 
+     * @param character the digits character representation
+     * 
+     * @return the digit 
+     */
+    private static long digit (
+        char character
+    ){
+        return character - (character < 'A' ? '0' : 'A' - 10);
+    }
+    
+    /**
+     * 
+     * @param mostSignificantBits
+     * @param leastSignificantBits
+     * @return
+     */
+    private static String toUID(
+        long mostSignificantBits,
+        long leastSignificantBits
+    ){
+        StringBuilder uid = new StringBuilder(UID_FORMAT);
+        long leastSignificantSignum = leastSignificantBits < 0 ? 3 : 0;
+        leastSignificantBits &= 0x7FFFFFFFFFFFFFFFl;
+        long mostSignificantSignum = mostSignificantBits < 0 ? 3 : 0;
+        mostSignificantBits &= 0x7FFFFFFFFFFFFFFFl;
+        for(int i = 0; i < 12; i++) {
+            uid.insert(0, forDigit(leastSignificantBits % 36));
+            leastSignificantBits /= 36;
+        }
+        for(int i = 0; i < 12; i++) {
+            uid.insert(0, forDigit(mostSignificantBits % 36));
+            mostSignificantBits /= 36;
+        }
+        leastSignificantBits += leastSignificantSignum;
+        mostSignificantBits += mostSignificantSignum;
+        uid.insert(0, forDigit(6 * mostSignificantBits + leastSignificantBits));
+        return uid.toString();
+    }
+    
+    /**
+     * The legacy UID format's length
+     */
+    private static final int LEGACY_FORMAT = 22;
 
     /**
      * The UID format's length
      */
-    private static final int UID_FORMAT = 22;
+    private static final int UID_FORMAT = 25;
 
+    /**
+     * The UUID format's length
+     */
+    private static final int UUID_FORMAT = 36;
+    
     /**
      * The URN format's length
      */
     private static final int URN_FORMAT = 45;
-
-    /**
-     * To replace '/' in UIDs
-     */
-    private static final char SOLIDUS_REPLACEMENT = '-';
-
-    /**
-     * To replace '+' in UIDs
-     */
-    private static final char PLUS_REPLACEMENT = '.';
 
 }

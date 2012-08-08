@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Implementation-URL: ../../../../build/${build.target.platform}/bin/
+Class-Path: openmdx-base.jar openmdx-test-core.resource.jar openmdx-test-core.openmdx-xmi.jar

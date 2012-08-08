@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateCapables.java,v 1.6 2009/01/17 02:37:25 hburger Exp $
+ * Name:        $Id: StateCapables.java,v 1.7 2009/05/27 22:45:07 hburger Exp $
  * Description: StateCapables 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/17 02:37:25 $
+ * Date:        $Date: 2009/05/27 22:45:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -94,8 +94,6 @@ public class StateCapables {
     private  static final Path CORE_OBJECT = CORE_CONTAINER.getChild(":*");
 
     public static final Path TRANSIENT_OBJECT = TRANSIENT_CONTAINER.getChild(":*");
-    
-    private static boolean XRI2 = false;
     
     public static String getResourceIdentifier(
         RefBaseObject refContainer,
@@ -195,10 +193,7 @@ public class StateCapables {
     public static String toString(
         Path id
     ){
-        return 
-            id == null ? null :
-            XRI2 ? id.toResourceIdentifier() : 
-            id.toXri();
+        return id == null ? null : id.toXRI();
     }
     
     public static boolean isCoreObject(

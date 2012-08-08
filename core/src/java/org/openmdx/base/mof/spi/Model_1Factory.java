@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Model_1Factory.java,v 1.5 2009/03/03 17:23:08 hburger Exp $
+ * Name:        $Id: Model_1Factory.java,v 1.10 2009/06/09 12:45:19 hburger Exp $
  * Description: Model_1Factory
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 17:23:08 $
+ * Date:        $Date: 2009/06/09 12:45:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,34 +57,48 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
 
-import org.openmdx.base.mof.cci.Model_1_6;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
-import org.slf4j.LoggerFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 
+/**
+ * Model_1Factory
+ */
 public class Model_1Factory {
 
-    public static synchronized Model_1_6 getModel(
+    public static synchronized Model_1_0 getModel(
     ) {
         if(model == null) try {
             Class<?> modelClass = Classes.getApplicationClass("org.openmdx.application.mof.repository.accessor.Model_1");
             Method getInstanceMethod = modelClass.getMethod("getInstance");
-            model = (Model_1_6)getInstanceMethod.invoke(null);
-            Enumeration<URL> resources = Classes.getResources("META-INF/openmdxmof.properties");
+            model = (Model_1_0) getInstanceMethod.invoke(null);
             List<String> modelPackages = new ArrayList<String>();
-            while(resources.hasMoreElements()) {
+            for(
+            	Enumeration<URL> resources = Classes.getResources("META-INF/openmdxmof.properties");
+            	resources.hasMoreElements();
+            ) {
                 URL resource = resources.nextElement();
                 BufferedReader in = new BufferedReader(new InputStreamReader(resource.openStream()));
-                while(in.ready()) {
-                    modelPackages.add(in.readLine());
+                String line;
+                while((line = in.readLine()) != null) {
+                	line = line.trim();
+                	if(
+                	    line.length() > 0 && 
+                	    !line.startsWith("#") && 
+                	    !line.startsWith("!") &&
+                	    !modelPackages.contains(line) 
+                	) {
+	                    modelPackages.add(line);
+                	}
                 }
                 in.close();
             }
             model.addModels(modelPackages);
         } catch(Exception e) {
-            LoggerFactory.getLogger(
-                Model_1Factory.class
-            ).warn(
+            LoggerFactory.getLogger().log(
+                Level.SEVERE,
                 "Model acquisition failure",
                 e
             );
@@ -92,7 +106,7 @@ public class Model_1Factory {
         return model;
     }
     
-    private static Model_1_6 model;
+    private static Model_1_0 model;
     
 }
 

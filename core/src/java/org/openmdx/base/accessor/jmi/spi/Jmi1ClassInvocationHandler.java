@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ClassInvocationHandler.java,v 1.15 2009/02/03 11:12:24 hburger Exp $
+ * Name:        $Id: Jmi1ClassInvocationHandler.java,v 1.16 2009/06/09 12:45:17 hburger Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/03 11:12:24 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,6 @@ import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefClass;
 import javax.jmi.reflect.RefFeatured;
 
-import org.openmdx.base.accessor.jmi.cci.RefClass_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 
 /**
@@ -177,7 +176,7 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
             if("refCreateInstance".equals(methodName) && args.length == 1) {
                 return this.delegation.refCreateInstance(
                     (List<?>)args[0], // arguments
-                    (RefClass_1_0)proxy
+                    (RefClass)proxy
                 );
             } else try {
                 return method.invoke(
@@ -197,7 +196,7 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
             //
             return this.delegation.refCreateInstance(
                 null, // arguments
-                (RefClass_1_0)proxy
+                (RefClass)proxy
             );            
         } else if(
             args == null || 
@@ -209,7 +208,7 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
             //
             return this.delegation.refCreateInstance(
                 Arrays.asList(args), 
-                (RefClass_1_0)proxy
+                (RefClass)proxy
             );            
         }        
         throw new UnsupportedOperationException(method.getName());

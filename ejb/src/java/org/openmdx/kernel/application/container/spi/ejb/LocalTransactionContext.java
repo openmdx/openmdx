@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LocalTransactionContext.java,v 1.1 2009/01/12 12:49:22 wfro Exp $
+ * Name:        $Id: LocalTransactionContext.java,v 1.2 2009/03/31 17:06:10 hburger Exp $
  * Description: LocalTransactionContext
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:22 $
+ * Date:        $Date: 2009/03/31 17:06:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,6 +51,8 @@
 package org.openmdx.kernel.application.container.spi.ejb;
 
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.EJBException;
 import javax.ejb.TransactionRequiredLocalException;
@@ -64,8 +66,7 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionRequiredException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openmdx.kernel.log.LoggerFactory;
 
 /**
  * LocalTransactionContext
@@ -110,13 +111,13 @@ class LocalTransactionContext
     EJBException end(
          Throwable cause
     ){
-        Logger logger = LoggerFactory.getLogger(LocalTransactionContext.class);
+        Logger logger = LoggerFactory.getLogger();
         try {
             super.endFail();
         } catch (Exception exception) {
-            logger.error("Transaction Management Failure", exception);
+            logger.log(Level.SEVERE,"Transaction Management Failure", exception);
         }
-        logger.error("Caught non-application exception", cause);
+        logger.log(Level.SEVERE,"Caught non-application exception", cause);
         return new TransactionRolledbackLocalException(
              "Caught non-application exception",
              cause instanceof Exception ? (Exception)cause : new UndeclaredThrowableException(cause)

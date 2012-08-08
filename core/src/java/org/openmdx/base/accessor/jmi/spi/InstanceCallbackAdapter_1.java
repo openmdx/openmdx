@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InstanceCallbackAdapter_1.java,v 1.3 2009/01/04 21:17:19 wfro Exp $
+ * Name:        $Id: InstanceCallbackAdapter_1.java,v 1.4 2009/05/23 10:14:15 wfro Exp $
  * Description: Instance Callback Adapter
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/04 21:17:19 $
+ * Date:        $Date: 2009/05/23 10:14:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -131,4 +131,9 @@ class InstanceCallbackAdapter_1 implements InstanceCallbackListener {
         // There is no CreateCallback
     }
 
+    Object getInstance(
+    ) {
+        return this.instance;
+    }
+    
 }

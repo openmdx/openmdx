@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiLoader.java,v 1.33 2009/03/08 18:03:21 wfro Exp $
+ * Name:        $Id: UiLoader.java,v 1.52 2009/06/13 18:48:08 wfro Exp $
  * Description: UiLoader
- * Revision:    $Revision: 1.33 $
+ * Revision:    $Revision: 1.52 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:21 $
+ * Date:        $Date: 2009/06/13 18:48:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,28 +70,31 @@ import java.util.Map.Entry;
 
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
+import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
 import javax.servlet.ServletContext;
 
 import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.accessor.Connection_1;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.application.dataprovider.cci.RequestCollection;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.importer.XmlImporter;
+import org.openmdx.application.dataprovider.spi.Dataprovider_2Connection;
 import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.application.log.AppLog;
+import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
-import org.openmdx.base.accessor.view.Manager_1;
+import org.openmdx.base.accessor.rest.DataObjectManagerFactory_1;
+import org.openmdx.base.accessor.view.ViewManager_1;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
-import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
+import org.openmdx.base.rest.spi.ConnectionAdapter;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
-import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
 public class UiLoader
     extends Loader {
@@ -99,14 +103,13 @@ public class UiLoader
     public UiLoader(
         ServletContext context,
         RoleMapper_1_0 roleMapper,
-        Model_1_3 model,
+        Model_1_0 model,
         Path providerPath
     ) throws ServiceException {
         super(
             context,
             roleMapper
         );
-        this.model = model;
         this.providerPath = providerPath;
         this.uiRepository = UiLoader.createUiRepository(model);      
     }
@@ -158,30 +161,29 @@ public class UiLoader
      * Constructs an in-memory ui repository
      */
     protected static Layer_1 createUiRepository(
-        Model_1_3 model
+        Model_1_0 model
     ) throws ServiceException {
         try {
             Configuration configuration = new Configuration();
             configuration.values("namespaceId").add("ui");
-            configuration.values(SharedConfigurationEntries.MODEL).add(model);
             Layer_1_0 persistencePlugin = (Layer_1_0)Classes.getApplicationClass(
-                "org.openmdx.compatibility.base.dataprovider.layer.persistence.none.InMemory_1"
+                org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
             ).newInstance();
             persistencePlugin.activate((short)0, configuration, null);
             Layer_1_0 modelPlugin = (Layer_1_0)Classes.getApplicationClass(
-                "org.openmdx.compatibility.base.dataprovider.layer.model.Standard_1"
+                org.openmdx.application.dataprovider.layer.model.Standard_1.class.getName()
             ).newInstance();
             modelPlugin.activate((short)1, configuration, persistencePlugin);
             Layer_1_0 applicationPlugin = (Layer_1_0)Classes.getApplicationClass(
-                "org.openmdx.ui1.layer.application.Ui_1"
+                org.openmdx.ui1.layer.application.Ui_1.class.getName()
             ).newInstance();
             applicationPlugin.activate((short)2, configuration, modelPlugin);
             Layer_1_0 typePlugin = (Layer_1_0)Classes.getApplicationClass(
-                "org.openmdx.compatibility.base.dataprovider.layer.type.Strict_1"
+                org.openmdx.application.dataprovider.layer.type.Strict_1.class.getName()
             ).newInstance();
             typePlugin.activate((short)3, configuration, applicationPlugin);
             Layer_1_0 interceptionPlugin = (Layer_1_0)Classes.getApplicationClass(
-                "org.openmdx.compatibility.base.dataprovider.layer.interception.Standard_1"
+                org.openmdx.application.dataprovider.layer.interception.Standard_1.class.getName()
             ).newInstance();
             Configuration interceptionConfiguration = new Configuration(configuration);
             interceptionConfiguration.values("propagateSet").add(Boolean.TRUE);
@@ -211,17 +213,18 @@ public class UiLoader
     public PersistenceManager getRepository(
     ) throws ServiceException {
         if(this.pm == null) {
-            Connection_1 connection = new Connection_1(
-                new RequestCollection(
-                    new ServiceHeader(),
-                    this.uiRepository
-                ),
-                false, // transactionPolicyIsNew
-                false // containerManagedUnitOfWork
-            );
-            Manager_1 manager = new Manager_1(connection);
+        	DataObjectManagerFactory_1 pmf = new DataObjectManagerFactory_1(
+        		new ArrayList<String>(),
+        		ConnectionAdapter.newInstance(
+        			new Dataprovider_2Connection(this.uiRepository)
+        		),
+        		null
+        	);
+        	DataObjectManager_1_0 connection = pmf.getPersistenceManager();
+            ViewManager_1 manager = new ViewManager_1(connection);
             RefRootPackage_1 rootPkg = new RefRootPackage_1(
-                manager
+                manager,
+                true
             );
             this.pm = rootPkg.refPersistenceManager();
         }
@@ -258,7 +261,7 @@ public class UiLoader
               (this.uiCRC.get(dir) == null) || 
               (((Long)this.uiCRC.get(dir)).longValue() != crc)
             ) {
-              Map mergedUiElements = MapUtils.orderedMap(new HashMap());
+              Map<Path,MappedRecord> mergedUiElements = new LinkedHashMap<Path,MappedRecord>();
               int fallbackLocaleIndex = 0;
               for(int j = 0; j < locale.length; j++) {
                 fallbackLocaleIndex = 0;
@@ -296,7 +299,7 @@ public class UiLoader
                       Iterator k = uiResources.iterator(); 
                       k.hasNext(); 
                   ) {        
-                      Map uiElements = MapUtils.orderedMap(new HashMap());
+                      Map<Path,MappedRecord> uiElements = new LinkedHashMap<Path,MappedRecord>();
                       String path = (String)k.next();
                       if(!path.endsWith("/")) {
                           AppLog.detail("Loading", path);
@@ -317,67 +320,79 @@ public class UiLoader
                       // Merge entries
                       Set entrySet = j == 0 ? uiElements.entrySet() : mergedUiElements.entrySet();
                       for(Iterator l = entrySet.iterator(); l.hasNext(); ) {
-                          Entry e = (Entry)l.next();
+                          Entry<Path,MappedRecord> e = (Entry)l.next();
                           // merge entry
                           if(
                               (j > 0) &&
                               (mergedUiElements.get(e.getKey()) != null)
                           ) {                      
-                              DataproviderObject mergedUiElement = (DataproviderObject)mergedUiElements.get(e.getKey());
-                              
+                              MappedRecord mergedUiElement = mergedUiElements.get(e.getKey());   
+                              ObjectHolder_2Facade mergedUiElementFacade;
+                              try {
+	                              mergedUiElementFacade = ObjectHolder_2Facade.newInstance(mergedUiElement);
+                              }
+                              catch(ResourceException e0) {
+                            	  throw new ServiceException(e0);
+                              }
                               // do not merge if label for locale 0 is not set
-                              if(mergedUiElement.getValues("label") != null) {
-                                  if(mergedUiElement.values("label").size() <= j) {
-                                      mergedUiElement.values("label").add(
-                                          mergedUiElement.values("label").get(fallbackLocaleIndex)
+                              if(mergedUiElementFacade.getAttributeValues("label") != null) {
+                                  if(mergedUiElementFacade.attributeValues("label").size() <= j) {
+                                	  mergedUiElementFacade.attributeValues("label").add(
+                                		  mergedUiElementFacade.attributeValues("label").get(fallbackLocaleIndex)
                                       );
                                   }
                                   // assert that shortLabel is set for locale i. 
-                                  if(mergedUiElement.getValues("shortLabel") == null) {
-                                      mergedUiElement.values("shortLabel").add("");                                     
+                                  if(mergedUiElementFacade.getAttributeValues("shortLabel") == null) {
+                                	  mergedUiElementFacade.attributeValues("shortLabel").add("");                                     
                                   }
-                                  if(mergedUiElement.values("shortLabel").size() <= j) {
-                                      mergedUiElement.values("shortLabel").add(
-                                          mergedUiElement.values("shortLabel").get(fallbackLocaleIndex)
+                                  if(mergedUiElementFacade.attributeValues("shortLabel").size() <= j) {
+                                	  mergedUiElementFacade.attributeValues("shortLabel").add(
+                                		  mergedUiElementFacade.attributeValues("shortLabel").get(fallbackLocaleIndex)
                                       );
                                   }
                                   // assert that toolTip is set for locale i
-                                  if(mergedUiElement.getValues("toolTip") == null) {
-                                      mergedUiElement.values("toolTip").add("");
+                                  if(mergedUiElementFacade.getAttributeValues("toolTip") == null) {
+                                	  mergedUiElementFacade.attributeValues("toolTip").add("");
                                   }
-                                  if(mergedUiElement.values("toolTip").size() <= j) {
-                                      mergedUiElement.values("toolTip").add(
-                                          mergedUiElement.values("toolTip").get(fallbackLocaleIndex)
+                                  if(mergedUiElementFacade.attributeValues("toolTip").size() <= j) {
+                                	  mergedUiElementFacade.attributeValues("toolTip").add(
+                                		  mergedUiElementFacade.attributeValues("toolTip").get(fallbackLocaleIndex)
                                       );
-                                  }
-                                  
+                                  }                                 
                                   // overwrite label, shortLabel and toolTip with uiElement values if available
-                                  DataproviderObject uiElement = (DataproviderObject)uiElements.get(e.getKey());
+                                  MappedRecord uiElement = uiElements.get(e.getKey());
+                                  ObjectHolder_2Facade uiElementFacade;
+                                  try {
+	                                  uiElementFacade = ObjectHolder_2Facade.newInstance(uiElement);
+                                  }
+                                  catch (ResourceException e0) {
+                                	  throw new ServiceException(e0);
+                                  }
                                   if(uiElement != null) {
-                                      if(!uiElement.values("label").isEmpty()) {
-                                          mergedUiElement.values("label").set(
+                                      if(!uiElementFacade.attributeValues("label").isEmpty()) {
+                                          mergedUiElementFacade.attributeValues("label").set(
                                               j,
-                                              uiElement.values("label").get(0)
+                                              uiElementFacade.attributeValue("label")
                                           );
                                       }
-                                      if(!uiElement.values("shortLabel").isEmpty()) {
-                                          mergedUiElement.values("shortLabel").set(
+                                      if(!uiElementFacade.attributeValues("shortLabel").isEmpty()) {
+                                          mergedUiElementFacade.attributeValues("shortLabel").set(
                                               j,
-                                              uiElement.values("shortLabel").get(0)
+                                              uiElementFacade.attributeValue("shortLabel")
                                           );
                                       }
                                       // Take label of same locale as shortLabel fallback 
                                       // Do not take shortLabel of fallback locale 
                                       else {
-                                          mergedUiElement.values("shortLabel").set(
+                                          mergedUiElementFacade.attributeValues("shortLabel").set(
                                               j,
-                                              mergedUiElement.values("label").get(j)
+                                              mergedUiElementFacade.attributeValues("label").get(j)
                                           );                                      
                                       }
-                                      if(!uiElement.values("toolTip").isEmpty()) {
-                                          mergedUiElement.values("toolTip").set(
+                                      if(!uiElementFacade.attributeValues("toolTip").isEmpty()) {
+                                          mergedUiElementFacade.attributeValues("toolTip").set(
                                               j,
-                                              uiElement.values("toolTip").get(0)
+                                              uiElementFacade.attributeValue("toolTip")
                                           );
                                       }
                                   }
@@ -404,53 +419,40 @@ public class UiLoader
               }          
               // Store ui elements. First remove existing elements
               try {
-                  PersistenceManager pm = this.getRepository();
-                  org.openmdx.ui1.jmi1.Ui1Package uiPkg = UiLoader.getUiPackage(pm);
-                  
                   String[] segmentName = this.getSegmentName(dir);
-                  // Remove existing ui config
-                  try {
-                      pm.currentTransaction().begin();
-                      org.openmdx.base.jmi1.Provider provider = (org.openmdx.base.jmi1.Provider)pm.getObjectById(
-                          this.providerPath
-                      );
-                      provider.getSegment(segmentName[segmentName.length-1]).refDelete();
-                      pm.currentTransaction().commit();
-                  }
-                  catch(Exception e) {
-                      try {
-                          pm.currentTransaction().rollback();
-                      } 
-                      catch(Exception e0) {}
-                  }    
-                  // Re-create segment
-                  try {
-                    pm.currentTransaction().begin();
-                    org.openmdx.base.jmi1.Provider provider = (org.openmdx.base.jmi1.Provider)pm.getObjectById(
-                        this.providerPath
-                    );
-                    provider.addSegment(
-                        false,
-                        segmentName[segmentName.length-1],
-                        uiPkg.getSegment().createSegment()
-                    );                    
-                    pm.currentTransaction().commit();
-                  }
-                  catch(Exception e) {
-                      try {
-                          pm.currentTransaction().rollback();
-                      } 
-                      catch(Exception e0) {}
-                  }    
-                  // Store ui elements
-                  System.out.println("Storing " + mergedUiElements.size() + " ui elements");
                   RequestCollection store = new RequestCollection(
                       new ServiceHeader(),
                       this.uiRepository
                   );
+                  // Assert existence of provider
+                  try {
+                	  MappedRecord uiProvider = ObjectHolder_2Facade.newInstance(
+                		  this.providerPath,
+                		  "org:openmdx:base:Provider"
+                	  ).getDelegate();
+                	  store.addCreateRequest(uiProvider);
+                  }
+                  catch(Exception e) {}
+                  // Remove existing ui config
+                  Path uiSegmentPath = this.providerPath.getDescendant("segment", segmentName[segmentName.length-1]);
+                  try {
+                	  store.addRemoveRequest(uiSegmentPath);
+                  }
+                  catch(Exception e) {}
+                  // Re-create segment
+                  try {
+                	  MappedRecord uiSegment = ObjectHolder_2Facade.newInstance(
+                		  uiSegmentPath,
+                		  "org:openmdx:ui1:Segment"
+                	  ).getDelegate();
+                	  store.addCreateRequest(uiSegment);
+                  }
+                  catch(Exception e) {}
+                  // Store ui elements
+                  System.out.println("Storing " + mergedUiElements.size() + " ui elements");
                   store.beginBatch();
-                  for(Iterator j = mergedUiElements.values().iterator(); j.hasNext(); ) {
-                      DataproviderObject uiElement = (DataproviderObject)j.next();
+                  for(Iterator<MappedRecord> j = mergedUiElements.values().iterator(); j.hasNext(); ) {
+                      MappedRecord uiElement = j.next();
                       store.addCreateRequest(
                           uiElement
                       );
@@ -476,7 +478,6 @@ public class UiLoader
     //-------------------------------------------------------------------------
     private Map uiCRC = new HashMap();
     private final Layer_1 uiRepository;
-    private final Model_1_3 model;
     private transient PersistenceManager pm = null;
     private final Path providerPath;
   

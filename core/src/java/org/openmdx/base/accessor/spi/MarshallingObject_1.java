@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMEX, http://www.openmdx.org/
- * Name:        $Id: MarshallingObject_1.java,v 1.7 2009/02/02 15:49:32 hburger Exp $
+ * Name:        $Id: MarshallingObject_1.java,v 1.13 2009/06/02 23:18:31 hburger Exp $
  * Description: MarshallingObject_1 class
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/02 15:49:32 $
+ * Date:        $Date: 2009/06/02 23:18:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,9 +58,8 @@ import java.util.SortedMap;
 import javax.jdo.JDOUserException;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
-import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.Structure_1_0;
+import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.collection.MarshallingFilterableMap;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
@@ -366,83 +365,6 @@ public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
     } 
 
 
-    //--------------------------------------------------------------------------
-    // Operations
-    //--------------------------------------------------------------------------
-
-    /**
-     * Invokes an operation asynchronously.
-     *
-     * @param       operation
-     *              The operation name
-     * @param       arguments
-     *              The operation's arguments object. 
-     *
-     * @return      a structure with the result's values if the accessor is
-     *              going to populate it after the unit of work has committed
-     *              or null if the operation's return value(s) will never be
-     *              available to the accessor.
-     *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if no unit of work is in progress
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if either asynchronous calls are not supported by the 
-     *              manager or the requested operation is not supportd by the
-     *              object.
-     * @exception   ServiceException 
-     *              if the invocation fails for another reason
-     */
-    public Structure_1_0 objInvokeOperationInUnitOfWork(
-        String operation,
-        Structure_1_0 arguments
-    ) throws ServiceException {
-        M marshaller = getMarshaller();
-        return (Structure_1_0)marshaller.marshal(
-            getDelegate().objInvokeOperationInUnitOfWork(
-                operation,
-                (Structure_1_0)marshaller.unmarshal(arguments)
-            )
-        );
-    }
-
-    /**
-     * Invokes an operation synchronously.
-     * <p>
-     * Only query operations can be invoked synchronously unless the unit of
-     * work is non-optimistic or committing.
-     *
-     * @param       operation
-     *              The operation name
-     * @param       arguments
-     *              The operation's arguments object. 
-     *
-     * @return      the operation's return object
-     *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if a non-query operation is called in an inappropriate
-     *        state of the unit of work.
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if either synchronous calls are not supported by the 
-     *        manager or the requested operation is not supportd by the
-     *        object.
-     * @exception   ServiceException 
-     *        if a checked exception is thrown by the implementation or
-     *        the invocation fails for another reason.
-     */
-    public Structure_1_0 objInvokeOperation(
-        String operation,
-        Structure_1_0 arguments
-    ) throws ServiceException {
-        Marshaller marshaller = getMarshaller();
-        return (Structure_1_0)marshaller.marshal(
-            getDelegate().objInvokeOperation(
-                operation,
-                (Structure_1_0)marshaller.unmarshal(arguments)
-            )
-        );
-    }
-
-
     //------------------------------------------------------------------------
     // Event Handling
     //------------------------------------------------------------------------
@@ -450,41 +372,30 @@ public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
     /**
      * Add an event listener.
      * 
-     * @param feature
-     *        restrict the listener to this feature;
-     *        or null if the listener is interested in all features
      * @param listener
      *        the event listener to be added
      */
     public void objAddEventListener(
-        String feature,
         EventListener listener
     ) throws ServiceException{
-        super.objAddEventListener(feature, listener); //... Event marshalling to be added
+        super.objAddEventListener(listener);
     }
 
     /**
      * Remove an event listener.
      * 
-     * @param feature
-     *        the name of the feature that was listened on,
-     *        or null if the listener is interested in all features
      * @param listener
      *        the event listener to be removed
      */
     public void objRemoveEventListener(
-        String feature,
         EventListener listener
     ) throws ServiceException{
-        super.objRemoveEventListener(feature, listener);
+        super.objRemoveEventListener(listener);
     }
 
     /**
      * Add an event listener.
      * 
-     * @param feature
-     *        the name of the feature that was listened on,
-     *        or null if the listener is interested in all features
      * @param listenerType
      *        the type of the event listeners to be returned
      * 
@@ -492,13 +403,11 @@ public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
      *         listeners
      */
     public <T extends EventListener> T[] objGetEventListeners(
-        String feature,
         Class<T> listenerType
     ) throws ServiceException{
-        return super.objGetEventListeners(feature, listenerType);
+        return super.objGetEventListeners(listenerType);
     }
 
-    
     //------------------------------------------------------------------------
     // Class MarshallingContainer
     //------------------------------------------------------------------------
@@ -565,7 +474,7 @@ public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
                         "A transient parent must belong to the same manager as its future child"
                     );
                 }
-                PersistenceManager_1_0 factory = (PersistenceManager_1_0)actualMarshaller;
+                DataObjectManager_1_0 factory = (DataObjectManager_1_0)actualMarshaller;
                 container = (MarshallingContainer)((DataObject_1_0)factory.getObjectById(
                     id.getParent()
                 )).objGetContainer(
@@ -590,6 +499,13 @@ public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
         public Container_1_0 superSet(
         ) {
             return ((Container_1_0)this.getDelegate()).superSet();
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
+         */
+        public void retrieveAll(boolean useFetchPlan) {
+            ((Container_1_0)this.getDelegate()).retrieveAll(useFetchPlan);
         }
 
         /* (non-Javadoc)

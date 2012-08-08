@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Classes.java,v 1.19 2009/03/03 17:23:08 hburger Exp $
+ * Name:        $Id: Classes.java,v 1.23 2009/05/15 00:26:36 hburger Exp $
  * Description: Application Framework: Classes 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 17:23:08 $
+ * Date:        $Date: 2009/05/15 00:26:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,7 @@
  */
 package org.openmdx.compatibility.kernel.application.cci;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -59,7 +60,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -99,18 +99,20 @@ public class Classes
     
     /**
      * Retrieve information about the the class loaders failing to provide the given class
-     *  
-     * @param className
-     * @param classLoader
      * 
+     * @param type The entity type
+     * @param name The entity name
+     * @param classLoader
+     *  
      * @return <code>BasicException.Parameter</code>s
      */
     private static final BasicException.Parameter[] getInfo(
-        String className,
+        String type,
+        String name, 
         ClassLoader classLoader
     ){
         List<BasicException.Parameter> info = new ArrayList<BasicException.Parameter>();
-        info.add(new BasicException.Parameter("class", className));
+        info.add(new BasicException.Parameter(type, name));
         try {
             int i = 0;
             for(
@@ -171,7 +173,8 @@ public class Classes
         		BasicException.Code.DEFAULT_DOMAIN,
         		BasicException.Code.INITIALIZATION_FAILURE,
         		getInfo(
-        		    name,
+        		    "class",
+        		    name, 
         		    classLoader
         		)
     		);
@@ -184,8 +187,8 @@ public class Classes
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NO_RESOURCE,
                         getInfo(
-                            name,
-                            classLoader
+                            "class",
+                            name, classLoader
                         )
                     )
                 )
@@ -317,7 +320,64 @@ public class Classes
         URL resource = getClassLoader().getResource(name);
         return resource == null ? getKernelResource(name) : resource;
     }
+    
+    /**
+     * Load an application resource
+     *
+     * @param     name
+     *            fully qualified name of the desired resource
+     *
+     * @return    a URL for reading the resource,
+     *            or <code>null</code> if the resource could not be found or
+     *            the caller doesn't have adequate privileges to get the
+     *            resource.
+     * @throws IOException 
+     */
+    public static URL getRequiredResource(
+        String name
+    ) throws IOException{
+        URL resource = getApplicationResource(name);
+        if(resource == null) {
+    	    throw Throwables.initCause(
+    	    	new FileNotFoundException("Could not locate resource " + name),
+    	    	null,
+        		BasicException.Code.DEFAULT_DOMAIN,
+        		BasicException.Code.INITIALIZATION_FAILURE,
+        		getInfo(
+        		    "resource",
+        		    name, 
+        		    getClassLoader()
+        		)
+    		);
+        }
+        return resource == null ? getKernelResource(name) : resource;
+    }
 
+    
+
+    /**
+     * Load a package local resource
+     *
+     * @param     sibling
+     *            a class in the same package
+     * @param     simpleName
+     *            the unqualified resource name
+     *
+     * @return    a URL for reading the resource,
+     *            or <code>null</code> if the resource could not be found or
+     *            the caller doesn't have adequate privileges to get the
+     *            resource.
+     */
+    public static URL getPackageResource(
+    	Class<?> sibling,
+        String simpleName
+    ){
+    	String qualifiedClassName = sibling.getName();
+    	return getApplicationResource(
+    		qualifiedClassName.substring(0, qualifiedClassName.length() - sibling.getSimpleName().length()).replace('.', '/') + simpleName
+    	);
+    }
+    
     /**
      * Finds all the resources with the given name. A resource is some data
      * (images, audio, text, etc) that can be accessed by class code in a way
@@ -365,46 +425,17 @@ public class Classes
      *      if the invocation handler, <code>invocationHandler</code>, is
      *      <code>null</code>
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T newProxyInstance(
+    public static Object newProxyInstance(
         InvocationHandler invocationHandler,
         Class<?>... interfaces
     ){
-        return (T) Proxy.newProxyInstance(
+        return Proxy.newProxyInstance(
             getClassLoader(),
             interfaces,
             invocationHandler
         );
     }
     
-    /**
-     * Create a new proxy instance
-     * 
-     * @param invocationHandler
-     * @param interfaces
-     * 
-     * @return a newly created proxy instance
-     * 
-     * @throws  IllegalArgumentException if any of the restrictions on the
-     *      parameters that may be passed to <code>getProxyClass</code>
-     *      are violated
-     * @throws  NullPointerException if the <code>interfaces</code> array
-     *      argument or any of its elements are <code>null</code>, or
-     *      if the invocation handler, <code>invocationHandler</code>, is
-     *      <code>null</code>
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T newProxyInstance(
-        InvocationHandler invocationHandler,
-        Collection<Class<?>> interfaces
-    ){
-        return (T) Proxy.newProxyInstance(
-            getClassLoader(),
-            interfaces.toArray(new Class<?>[interfaces.size()]),
-            invocationHandler
-        );
-    }
-
     /**
      * Combine the interfaces
      * 

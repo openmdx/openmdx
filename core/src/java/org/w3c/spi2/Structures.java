@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Structures.java,v 1.22 2009/03/03 17:23:08 hburger Exp $
+ * Name:        $Id: Structures.java,v 1.24 2009/04/28 13:58:51 hburger Exp $
  * Description: Structures 
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 17:23:08 $
+ * Date:        $Date: 2009/04/28 13:58:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,6 +81,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
+import javax.resource.cci.Record;
 
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
@@ -257,6 +258,21 @@ public class Structures {
             );
         }
     }
+
+    /**
+     * Retrieve the record type
+     * 
+     * @param record
+     * 
+     * @return the record name components
+     */
+    private static List<String> refTypeName(
+        Record record
+    ){
+        String name = record.getRecordName();
+        return Arrays.asList(name.split(name.indexOf("::") > 0 ? "::" : ":"));
+    }
+    
     
     /**
      * Create a structure from a JCA record 
@@ -277,9 +293,7 @@ public class Structures {
     ){
         return create(
             persistenceManager,
-            record.getRecordName().indexOf("::") > 0
-                ? Arrays.asList(record.getRecordName().split("::"))
-                : Arrays.asList(record.getRecordName().split(":")),
+            refTypeName(record),
             record
         );
     }
@@ -492,9 +506,7 @@ public class Structures {
                     return this.hashCode;
                 }
             } else if (PersistenceAware.class == declaringClass) {
-                if("openmdxjdoSetPersistenceManager".equals(methodName)) {
-                    return null;
-                } else if ("openmdxjdoValues".equals(methodName)) {
+                if ("openmdxjdoValues".equals(methodName)) {
                     Object[] values = new Object[this.metaData.names.length];
                     for(Enum<?> member : this.metaData.names) {
                         values[member.ordinal()] = get(member);
@@ -581,7 +593,7 @@ public class Structures {
                             System.arraycopy(source, 0, target, 0, slot);
                         } 
                         Collection<?> c;
-                        if(value instanceof Collection) {
+                        if(value instanceof Collection<?>) {
                             c = (Collection<?>) value;
                         } else if (value.getClass().isArray()) {
                             c = ArraysExtension.asList(value);
@@ -606,9 +618,9 @@ public class Structures {
                             System.arraycopy(source, 0, target, 0, slot);
                         }
                         SparseArray<?> a;
-                        if (value instanceof SparseArray) {
+                        if (value instanceof SparseArray<?>) {
                             a = (SparseArray<?>) value;
-                        } else if (value instanceof Map) {
+                        } else if (value instanceof Map<?,?>) {
                             a = toSparseArray((Map<?,?>)value);
                         } else throw new IllegalArgumentException(
                             "Mmember '" + this.metaData.names[slot] + 
@@ -1228,7 +1240,7 @@ public class Structures {
                                     if(e != null && e.length == 1) {
                                         if(e[0] instanceof Class<?>) {
                                             this.elementTypes[slot] = (Class<?>) e[0];
-                                        } else if (e[0] instanceof TypeVariable){
+                                        } else if (e[0] instanceof TypeVariable<?>){
                                             TypeVariable<?> t = (TypeVariable<?>)e[0];
                                             this.elementTypes[slot] = (Class<?>)t.getBounds()[0];
                                         } else if (e[0] instanceof GenericArrayType){
@@ -1314,7 +1326,7 @@ public class Structures {
                 if(value == null) {
                     // leave null in values[slot]
                 } else if(List.class == memberType || Set.class == memberType) {
-                    if(value instanceof Collection) {
+                    if(value instanceof Collection<?>) {
                         values[slot] = toValue(
                             persistenceManager,
                             this.elementTypes[slot],
@@ -1332,7 +1344,7 @@ public class Structures {
                         value.getClass().getName()
                     );
                 } else if (SparseArray.class == memberType) {
-                    if(value instanceof Map) {
+                    if(value instanceof Map<?,?>) {
                         values[slot] = toValue(
                             persistenceManager,
                             this.elementTypes[slot],
@@ -1361,7 +1373,7 @@ public class Structures {
         ) {
             if (value == null) {
                 return null;
-            } else if (value instanceof Map) {
+            } else if (value instanceof Map<?,?>) {
                 return create(
                     persistenceManager,
                     type,

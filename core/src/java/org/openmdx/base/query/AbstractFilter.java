@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractFilter.java,v 1.8 2009/03/06 10:40:44 hburger Exp $
+ * Name:        $Id: AbstractFilter.java,v 1.10 2009/05/29 17:04:09 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/06 10:40:44 $
+ * Date:        $Date: 2009/05/29 17:04:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -286,7 +286,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
                                 setIndex < setSize;
                                 setIndex++
                         ) {
-                            boolean equal =  raw instanceof Comparable || raw instanceof Number ? 
+                            boolean equal =  raw instanceof Comparable<?> || raw instanceof Number ? 
                                 comparator.compare(raw,property.getValue(setIndex)) == 0 :
                                     raw.equals(property.getValue(setIndex)); 
                             if(equal) {
@@ -309,7 +309,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
                                 setIndex < setSize;
                                 setIndex++
                         ) {
-                            boolean equal = raw instanceof Comparable || raw instanceof Number ? 
+                            boolean equal = raw instanceof Comparable <?>|| raw instanceof Number ? 
                                 comparator.compare(raw,property.getValue(setIndex)) == 0 :
                                     raw.equals(property.getValue(setIndex));
                             if(equal) {
@@ -761,6 +761,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
             return input.isLike(this.pathPattern);
         }
 
+        @SuppressWarnings("deprecation")
         public String pattern() {
             return this.pathPattern.toUri();
         }

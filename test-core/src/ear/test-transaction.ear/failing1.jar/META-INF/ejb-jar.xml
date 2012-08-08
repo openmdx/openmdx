@@ -4,7 +4,7 @@
 	<display-name>openMDX/Test RollbackOnly</display-name>
 	<enterprise-beans>
 	    <session>
-			<ejb-name>transaction-RollbackOnly</ejb-name>
+			<ejb-name>ejb20RollbackOnly</ejb-name>
 			<local-home>org.openmdx.test.kernel.application.container.ejb.cci.Runnable_1LocalHome</local-home>
 			<local>org.openmdx.test.kernel.application.container.ejb.cci.Runnable_1_0Local</local>
 			<ejb-class>org.openmdx.test.kernel.application.container.ejb.spi.Failing_1Bean</ejb-class>
@@ -15,7 +15,7 @@
   <assembly-descriptor>
     <container-transaction>
       <method>
-        <ejb-name>transaction-RollbackOnly</ejb-name>
+        <ejb-name>ejb20RollbackOnly</ejb-name>
         <method-name>*</method-name>
       </method>
       <trans-attribute>Mandatory</trans-attribute>

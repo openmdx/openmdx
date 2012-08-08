@@ -1,23 +1,278 @@
-﻿
+
                     =====================================
                              CHANGE LOG openMDX
                     =====================================
 
 ==============================================================================
-Version 2.4.0+                                                      2009-03-09
+Version 2.5.0                                                       2009-06-14
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20018712
+      containsWildcard
+      
+      The method conainsWildcard() tests, whether the path contains a wildcard.
+      It returns true if the path contains any of the following XRI cross references
+      * $.
+      * $..
+      * $... 
+      
+      CR20018662
+      SessionBean configuration. In addition to the deployment 
+      descriptor env entries, session beans can be configured with the 
+      META-INF/<namespace-id>.properties file. The properties override the
+      properties defined as env entries.  
+
+      CR20018666 
+      Callbacks must be invoked for all dirty objects 
+      
+      Callbacks must be invoked for all dirty objects whether they are created 
+      or fetched by the accessor or a plug-in.
+      
+      CR20018579
+      LateBindingDataSource
+      
+      CR20018656
+      BasicException
+      
+      Configure
+      * exception mappers with openmdxExceptionMapper.properties files in the
+        META-INF directory
+      * exception domains with resource bundles in the 
+        org.openmdx.exception.domain directory 
+      
+      CR20018649
+      StandardFileHandler extends FileHandler
+      
+      The StandardFileHandler is able to stream throwables directly to the 
+      underlying stream when using an AbstractFormatter sub-class telling that
+      throwables remain to be processed. 
+      
+      The corresponding Java Logging compliant classes are:
+      * org.openmdx.kernel.log.StandardFileHandler
+      * org.openmdx.kernel.log.BasicFormatter
+       
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20018660
+      Transport API Unification. Migration to JCA-APIs using REST-based interactions. 
+
+      CR20018701
+      refMofId
+      
+      Current behaviour:
+      * The refMofId is derived from the identity in case of ExtentCapable 
+         classes unless the identity attribute is not yet loaded or null.
+      * The refMofId is the objects XRI in all other cases.
+      
+      In future
+      * shall the refMofId be the objects XRI in all cases
+      * shall the identity attribute be used explicitely if its value is required.
+      
+      CR20018696 
+      XRI support
+      
+      Get rid of openxri classes.
+      Implement the required XRI 2 support natively.
+
+      CR20018696 
+      XRI 2 Marshaller
+      
+      Do not replace '=' signs by ':'. 
+      
+      Sub-segments with '=' signs will be transformed into case exact string 
+      cross references. 
+      
+      CR20018674
+      UID
+      
+      Use uppercase only
+      
+      A UID consists now of 25 digits based on base 36 encoding, while legacy
+      UIDs consist of 22 digits based on base 64 encoding.
+      
+      The new encoding is as following:
+      * Digit 0 contains sum of
+            6 times (bits 1 to 63 divided by 36^12 plus 3 if bit 0 is set)
+            bits 65 to 127 divided by 36^12 plus 3 if bit 64 is set
+      * Digits 1 to 12 contain bits 1 to 63 modulo 36^12
+      * Digits 13 to 24 contain bits 65 to 127 modulo 36^12
+
+      Legacy UIDs may still be decoded but no longer encoded.
+                  
+      CR20018665
+      Struct Marshalling
+      
+      Structures should have their proper persistence manager 
+       
+      CR20018660
+      Authorization
+      
+      Provide the principal chain (a List<String>) instead of the principal set
+      (a Set<? extends Principal>) as user object.
+      
+      CR20018579
+      DbConnectionManager_1_0 & LateBindingDataSource
+      
+      DbConnectionManager_1_0 and its implementations replaced by LateBindingDataSource 
+      
+      CR20018657
+      JPA3 warnings
+      
+      Correct the usage of
+      * unchecked
+      * cast
+      * unused  
+      
+      CR20018653
+      SLF4J 1.5.6
+      
+      * Support both singleton lookup mechanisms
+      * Add "1.5.6" to its API compliance list  
+      
+2.1.  FIXED BUGS
+      
+      SF329844
+      So I did a post with the following settings:  
+      POST http://localhost:8080/opencrx-rest-CRX/org.opencrx.kernel.account1/provider/CRX/segment/Standard/account/7wmWgCjdEd6ri3Nu6Dapag/member 
+      <?xml version="1.0"?> 
+      <org.opencrx.kernel.account1.Member> 
+        <name>MyName</name> 
+        <account>xri://@openmdx*org.opencrx.kernel.account1/provider/CRX/segment/Standard/account/NI7XwEIBEd29BeMf4vj8cA</account> 
+      </org.opencrx.kernel.account1.Member> 
+      NI7XwEIBEd29BeMf4vj8cA should become a member of 7wmWgCjdEd6ri3Nu6Dapag. 
+      Anyway, I get a server error, without using the account argument all is fine.
+      
+      CR20018668
+      Large Object Update
+      
+      Large object updates are no longer ignored.  
+
+2.2.  DEPRECATED FEATURES
+      
+      CR20018651
+      Container.remove()
+      
+      This method should be deprecated for the following reasons:
+      * container.remove(qualifier) does not what one expcects: It just returns 
+        false because the container contains persistence capable objects and 
+        not qualifiers
+      * container.remove(object) should only be used to remove a transient 
+        object from its container
+       
+      CR20018652
+      RefObject_1_0.refAddValue(containerId, qualifier, object) 
+      
+      This method belongs no longer to the supported API
+
+2.3.  REMOVED FEATURES
+      
+      CR20018718 	
+      Replicating refMethods
+      
+      Get rid of refMethods replicating PersistenceManager functionality.
+       
+      CR20018712
+      getUriReference
+      
+      The Path's getUriReference() method has been removed
+      
+      CR20018660
+      Rest Connector
+      
+      The deprecated IndexedRecordFormatter and its format method have been removed.
+      
+      CR20018579
+      DbConnectionManager_1_0 
+      
+      Get rid of DbConnectionManager_1_0 and its implementations.
+      
+      We can get rid of these implementations as xri://@openmdx*org.openmdx.deployment1 
+      based clients are no longer supported. 
+      
+      CR20018656
+      BasicException
+      
+      Got rid of ShortEnumeration and IntegerEnumeration 
+      
+      CR20018654
+      SLF4J
+      
+      Dependency on SLF4J removed from openMDX.
+      openMDX uses the plain Java Logging API.
+      
+      
+==============================================================================
+Version 2.4.1                                                       2009-04-02
 ==============================================================================
 
 1.    NEW FEATURES
       
-      none
+      CR20018634
+      ResourceURLConnection's FileNotFound exception
+      
+      Include class loader information in case of URL class loaders. 
        
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
      
-      none
+      CR20018633
+      printStackTrace
+      
+      Only a BasicException's or BasicException.Wrapper's printStackTrace() 
+      method did include the exception stack elements' attributes.
+
+      A standard Throwable's printStackTrace() method should include this 
+      information as well.  
       
 2.1.  FIXED BUGS
+
+      CR20018642
+      Correct Include/Exclude Collections
+      
+      A persistent container's include/exclude collections are erroneous in a 
+      multithreaded environment. 
+      
+      CR20018632
+      XMIExternalizer
+      
+      The XMIExternalizer swallows fatal exception causes.
+      
+      The corresponding exception stack should be sent to both
+      * System.err
+      * the log
+      
+      CR20018628
+      DataproviderObject class
+      
+      Object class and instance-of specifications are ignored unless the object 
+      is populated with the attributes of another dataprovider object. 
+       
+      CR20018627
+      BinaryLargeObject's OutputStream accessor
+      
+      The content can not be retrieved more than once 
+       
+      CR20018626	
+      Wildcard Propagation
+      
+      LIKE "<prefix>." must be handled handled correctly.
+      
+      CR20018625
+      ProviderCollection.clear()
+      
+      The ProviderCollection.clear() method is likely to fail with an element 
+      not found exception unless its exact size is known.
+      
+      CR20018624
+      PersistenceManager Method Delegation
+      
+      Some PersistenceManager methods are not delegated from the Object View to its
+      Data Object instance.
 
       CR20018622	
       Rollback of persistent-new instances 

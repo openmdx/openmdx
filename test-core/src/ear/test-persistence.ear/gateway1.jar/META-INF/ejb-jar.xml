@@ -5,39 +5,34 @@
     <!-- deployment settings for gateway_NoOrNew -->
     <session>
       <ejb-name>gateway1-NoOrNew</ejb-name>
-		<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
-		<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
-		<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-		<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-        <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Dataprovider_1Bean</ejb-class>
+		<home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+		<remote>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+		<local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+		<local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+        <ejb-class>org.openmdx.application.dataprovider.transport.ejb.transaction.Dataprovider_1Bean</ejb-class>
       <session-type>Stateless</session-type>
       <transaction-type>Bean</transaction-type>
       <!-- local ejb reference to gateway gateway_Mandatory -->
       <ejb-local-ref>
         <ejb-ref-name>ejb/server</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
-        <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+        <local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+        <local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
         <ejb-link>gateway1-Mandatory</ejb-link>
       </ejb-local-ref>
     </session>
     <!-- deployment settings for gateway_Mandatory-->
     <session>
       <ejb-name>gateway1-Mandatory</ejb-name>
-			<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
-			<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
-			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-			<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
+			<home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+			<remote>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+			<local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			<local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			<ejb-class>org.openmdx.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
       <session-type>Stateless</session-type>
       <transaction-type>Container</transaction-type>
       <env-entry>
         <env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
-        <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>xri:@openmdx:org.openmdx.test/provider/Generic</env-entry-value>
-      </env-entry>
-      <env-entry>
-        <env-entry-name>KERNEL/exposedPath[1]</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
         <env-entry-value>xri:@openmdx:org.openmdx.test/provider/Sliced</env-entry-value>
       </env-entry>
@@ -49,12 +44,12 @@
       <env-entry>
         <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+        <env-entry-value>org.openmdx.application.dataprovider.spi.DelegatingLayer_0</env-entry-value>
       </env-entry>
       <env-entry>
         <env-entry-name>KERNEL/TYPE</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+        <env-entry-value>org.openmdx.application.dataprovider.spi.DelegatingLayer_0</env-entry-value>
       </env-entry>
       <env-entry>
         <env-entry-name>KERNEL/APPLICATION</env-entry-name>
@@ -64,7 +59,7 @@
       <env-entry>
         <env-entry-name>KERNEL/MODEL</env-entry-name>
         <env-entry-type>java.lang.String</env-entry-type>
-        <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+        <env-entry-value>org.openmdx.application.dataprovider.spi.DelegatingLayer_0</env-entry-value>
       </env-entry>
       <env-entry>
         <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
@@ -79,15 +74,8 @@
       <ejb-local-ref>
         <ejb-ref-name>ejb/dataprovider[0]</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
-        <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-        <ejb-link>generic</ejb-link>
-      </ejb-local-ref>
-      <ejb-local-ref>
-        <ejb-ref-name>ejb/dataprovider[1]</ejb-ref-name>
-        <ejb-ref-type>Session</ejb-ref-type>
-        <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+        <local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+        <local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
         <ejb-link>sliced</ejb-link>
       </ejb-local-ref>
     </session>

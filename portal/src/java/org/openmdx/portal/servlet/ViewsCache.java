@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ViewsCache.java,v 1.4 2008/09/10 09:31:01 wfro Exp $
+ * Name:        $Id: ViewsCache.java,v 1.8 2009/06/02 16:26:39 wfro Exp $
  * Description: ViewsCache 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/10 09:31:01 $
+ * Date:        $Date: 2009/06/02 16:26:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,12 +56,13 @@
 package org.openmdx.portal.servlet;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpSession;
 
 import org.openmdx.portal.servlet.view.ObjectView;
-import org.openmdx.uses.org.apache.commons.collections.map.LRUMap;
 
 /**
  * Holds the cached views stored per session. transient prevents serializing
@@ -73,10 +74,12 @@ public class ViewsCache {
     public ViewsCache(
         Number viewsCacheSize
     ) {
-        this.views = new LRUMap(
+        this.views = new LinkedHashMap(
             viewsCacheSize == null ? 
                 DEFAULT_VIEWS_CACHE_SIZE : 
-                viewsCacheSize.intValue()
+                viewsCacheSize.intValue(),
+            0.75f,
+            true
         );
     }
 
@@ -100,16 +103,36 @@ public class ViewsCache {
         }
     }
 
+    //-------------------------------------------------------------------------
+    public void evictViews(
+    ) {
+    	synchronized(this.views) {
+    		try {
+	            for(Iterator<Entry<String,ObjectView>> i = this.views.entrySet().iterator(); i.hasNext(); ) {
+	            	Entry<String,ObjectView> entry = i.next();
+	                ObjectView view = entry.getValue();
+	                view.getPersistenceManager().evictAll();
+	            }
+    		}
+    		catch(Exception e) {} // ignore
+    	}
+    }
+        
     //-----------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public void removeDirtyViews(
     ) {
         synchronized(this.views) {
-            for(Iterator i = this.views.values().iterator(); i.hasNext(); ) {
-                ObjectView view = (ObjectView)i.next();
-                if(view.getObjectReference().getObject() == null) {
-                    i.remove();
-                }
-            }
+        	try {
+	            for(Iterator<Entry<String,ObjectView>> i = this.views.entrySet().iterator(); i.hasNext(); ) {
+	            	Entry<String,ObjectView> entry = i.next();
+	                ObjectView view = entry.getValue();
+	                if(view.getObjectReference().getObject() == null) {
+	                    i.remove();
+	                }
+	            }
+        	}
+        	catch(Exception e) {} // ignore
         }
     }
 

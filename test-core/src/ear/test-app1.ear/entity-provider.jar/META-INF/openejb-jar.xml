@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openejb-jar xmlns="http://www.openejb.org/xml/ns/openejb-jar-2.2">
+	<enterprise-beans>
+		<session>
+			<ejb-name>EntityManagerFactory</ejb-name>
+			<local-jndi-name>test/openmdx/test/app1/EntityProviderFactory</local-jndi-name>
+		</session>
+	</enterprise-beans>
+</openejb-jar>

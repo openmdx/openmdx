@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateState_1.java,v 1.9 2009/03/04 12:07:22 hburger Exp $
+ * Name:        $Id: DateState_1.java,v 1.11 2009/05/16 22:17:49 wfro Exp $
  * Description: Date State
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/04 12:07:22 $
+ * Date:        $Date: 2009/05/16 22:17:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,14 +63,14 @@ import java.util.TreeSet;
 import javax.jdo.JDOHelper;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.mof.cci.Multiplicities;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.aop1.Removable_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.state2.cci.DateStateContext;
@@ -152,12 +152,8 @@ public class DateState_1
         if(isValidTimeFeature(feature)){
             DateStateContext context = (DateStateContext) self.getInteractionSpec();
             if(context.getViewKind() == ViewKind.TIME_RANGE_VIEW) {
-                if("stateValidFrom".equals(feature)) {
-                    return context.getValidFrom();
-                }
-                if("stateValidTo".equals(feature)) {
-                    return context.getValidTo();
-                }
+                if("stateValidFrom".equals(feature)) return  context.getValidFrom();
+                if("stateValidTo".equals(feature)) return  context.getValidTo();
             }
         }
         return super.objGetValue(feature);
@@ -276,22 +272,22 @@ public class DateState_1
             // 
             switch(context.getViewKind()) {
                 case TIME_POINT_VIEW:
+                    XMLGregorianCalendar validAt = context.getValidAt();
                     return Order.compareValidFrom(
-                       (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"),
-                        context.getValidAt()
-                    ) <= 0 && 
-                    Order.compareValidTo(
-                        context.getValidAt(),
+                        (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"),
+                        validAt
+                    ) <= 0 && Order.compareValidTo(
+                        validAt,
                         (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
                     ) <= 0;
                 case TIME_RANGE_VIEW:
-                    return Order.compareValidFrom(
+                    return Order.compareValidFromToValidTo(
                         context.getValidFrom(), 
                         (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
-                    ) <= 0 && Order.compareValidTo(
-                        context.getValidTo(),
-                        (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom") 
-                    ) >= 0;
+                    ) <= 0 && Order.compareValidFromToValidTo(
+                        (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"),
+                        context.getValidTo()
+                    ) <= 0;
             }
         }
         return false;

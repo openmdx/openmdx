@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestUUID.java,v 1.1 2009/03/06 14:46:46 hburger Exp $
+ * Name:        $Id: TestUUID.java,v 1.2 2009/05/04 13:50:53 hburger Exp $
  * Description: TestUUID 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/06 14:46:46 $
+ * Date:        $Date: 2009/05/04 13:50:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -124,7 +124,7 @@ public class TestUUID {
         for(int i = 0; i < 8; i++){
             UUID uuid = generator.next();
             assertEquals("Leach-Salz variant", uuid.variant(), 2);
-            assertEquals("base64", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
+            assertEquals("Base36", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
             assertEquals("urn", uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)));
             if(OUT_LIMIT > i) log("testUUIDs", uuid);
         }
@@ -148,7 +148,7 @@ public class TestUUID {
         UUID uuid = UUIDs.NIL;
         assertEquals("NIL value", new UUID(0L, 0L), uuid);
         assertEquals("NIL String", "00000000-0000-0000-0000-000000000000", uuid.toString());
-        assertEquals("toBase64", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
+        assertEquals("toBase36", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
         assertEquals("toURN", uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)));
         if(OUT_LIMIT > 0) log("testNIL", uuid);
     }
@@ -163,7 +163,7 @@ public class TestUUID {
             UUID uuid = UUID.randomUUID();
             assertEquals("Leach-Salz variant", uuid.variant(), 2);
             assertEquals("Randomly generated", uuid.version(), 4);
-            assertEquals("toBase64", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
+            assertEquals("toBase36", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
             assertEquals("toURN", uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)));
             if(OUT_LIMIT > i) log("testJavaRandomUUID", uuid);
         }
@@ -180,7 +180,7 @@ public class TestUUID {
             assertEquals("Leach-Salz variant", uuid.variant(), 2);
             assertEquals("Randomly generated", uuid.version(),4);
             assertEquals("UUID String", UUIDGEN_RANDOM_UUID[i], uuid.toString());
-            assertEquals("toBase64", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
+            assertEquals("toBase36", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
             assertEquals("toURN", uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)));
             if(OUT_LIMIT > i) log("testUuidgenRandomUUID", uuid);
         }
@@ -198,7 +198,7 @@ public class TestUUID {
             assertEquals("Leach-Salz variant", uuid.variant(), 2);
             assertEquals("Time-based version", uuid.version(), 1);
             assertEquals("UUID String" + i, UUIDGEN_SEQUENTIAL_UUID[i], uuid.toString());
-            assertEquals("toBase64", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
+            assertEquals("toBase36", uuid, UUIDConversion.fromString(UUIDConversion.toUID(uuid)));
             assertEquals("toURN", uuid, UUIDConversion.fromString(UUIDConversion.toURN(uuid)));
             if(OUT_LIMIT > i) log("testUuidgenSequentialUUID", uuid);
             if(last != null){

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReference.java,v 1.32 2009/01/13 23:48:40 wfro Exp $
+ * Name:        $Id: ObjectReference.java,v 1.35 2009/06/09 12:50:34 hburger Exp $
  * Description: ObjectReference 
- * Revision:    $Revision: 1.32 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 23:48:40 $
+ * Date:        $Date: 2009/06/09 12:50:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,6 +58,8 @@ package org.openmdx.portal.servlet;
 import java.io.Serializable;
 import java.util.regex.Pattern;
 
+import javax.jdo.JDOHelper;
+
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
@@ -96,7 +98,7 @@ public class ObjectReference
     ) {
         if(this.object != null) {
 	        try {
-	            this.object.refRefresh();
+	        	JDOHelper.getPersistenceManager(this.object).refresh(this.object);
 	        } 
 	        catch(Exception e) {
 	            this.object = null;
@@ -116,10 +118,10 @@ public class ObjectReference
   ) {
       if(this.exception != null) {
           if(this.exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
-              return TITLE_PREFIX_NOT_ACCESSIBLE + " (" + this.exception.getCause().getParameter("path") + ")";
+              return TITLE_PREFIX_NOT_ACCESSIBLE + " (" + this.exception.getCause().getParameter("object.mof.id") + ")";
           }
           else if(this.exception.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE) {
-              return TITLE_PREFIX_NO_PERMISSION + " (" + this.exception.getCause().getParameter("path") + ")";              
+              return TITLE_PREFIX_NO_PERMISSION + " (" + this.exception.getCause().getParameter("object.mof.id") + ")";              
           }
           else {
               return this.exception.getMessage();

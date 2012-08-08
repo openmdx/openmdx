@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractURLConnection.java,v 1.4 2008/03/13 17:16:15 hburger Exp $
+ * Name:        $Id: AbstractURLConnection.java,v 1.5 2009/03/16 16:47:13 hburger Exp $
  * Description: Delegating URL connection
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/13 17:16:15 $
+ * Date:        $Date: 2009/03/16 16:47:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,11 +53,13 @@
  */
 package org.openmdx.kernel.url.protocol;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.security.Permission;
 import java.util.List;
@@ -448,6 +450,52 @@ public abstract class AbstractURLConnection
      */
     public void setUseCaches(boolean usecaches) {
         this.delegate.setUseCaches(usecaches);
+    }
+
+    /**
+     * Retrieve the resource URL
+     * 
+     * @param name
+     * 
+     * @return the resource URL
+     */
+    protected static URL getResourceUrl(
+    	String name
+    ) throws FileNotFoundException {     
+    	ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    	if(classLoader != null) {
+    		URL resource = classLoader.getResource(name);
+        	if(resource != null) return resource;
+    	}
+    	classLoader = AbstractURLConnection.class.getClassLoader();
+        URL resource = classLoader.getResource(name);
+    	if(resource != null) return resource;
+		resource = ClassLoader.getSystemResource(name);
+    	if(resource != null) return resource;
+    	StringBuilder message = new StringBuilder(
+    		"Resource not found: "
+    	).append(
+    		name
+    	);
+        try {
+            int i = 0;
+            for(
+                ClassLoader current = classLoader;
+                current != null;
+                current = current.getParent(), i++
+            ){
+            	message.append("\n\t   classLoader[").append(i).append("]\t").append(current.getClass().getName());
+                if(current instanceof URLClassLoader) {
+                    int j = 0;
+                    for(URL url : ((URLClassLoader)current).getURLs()) {
+                    	message.append("\n\t\turl[").append(i).append(',').append(j++).append("]\t").append(url);
+                    }
+                }
+            }
+        } catch (RuntimeException ignore) {
+            // just end info generation
+        }
+        throw new FileNotFoundException(message.toString());
     }
 
 }

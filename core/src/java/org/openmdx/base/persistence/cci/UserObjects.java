@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UserObjects.java,v 1.1 2008/11/07 17:45:59 hburger Exp $
+ * Name:        $Id: UserObjects.java,v 1.4 2009/04/08 14:51:59 hburger Exp $
  * Description: UserObjects 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/07 17:45:59 $
+ * Date:        $Date: 2009/04/08 14:51:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,14 +51,28 @@
 
 package org.openmdx.base.persistence.cci;
 
+import java.security.Principal;
+import java.util.List;
+
+import javax.jdo.PersistenceManager;
+
 /**
  * User Objects
  */
 public class UserObjects {
 
     /**
-     * Key for a user object of type is Set<? extends Principal>
+     * Retrieve the principal chain
+     * 
+     * @param persistenceManager
+     * 
+     * @return the principal chain
      */
-    public static final String PRINCIPALS = "org.openmdx.security.principals";
+    @SuppressWarnings("unchecked")
+    public static List<String> getPrincipalChain(
+        PersistenceManager persistenceManager
+    ){
+        return (List<String>) persistenceManager.getUserObject(Principal[].class);
+    }
         
 }

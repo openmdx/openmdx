@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     opencrx, http://www.opencrx.org/
- * Name:        $Id: HtmlEncoder.java,v 1.15 2008/12/12 14:00:19 wfro Exp $
+ * Name:        $Id: HtmlEncoder.java,v 1.17 2009/05/01 08:40:34 wfro Exp $
  * Description: HttpEncoder class
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/12/12 14:00:19 $
+ * Date:        $Date: 2009/05/01 08:40:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -142,13 +142,14 @@ public class HtmlEncoder {
     };
     private static final String KNOWN_TAGS[] = {
         "&nbsp;", "&quot;", "&amp;", "&lt;", "&gt;",
-        "<b>", "</b>", "<i>", "</i>", "<big>", "</big>",
+        "<b>", "</b>", "<i>", "</i>", "<u>", "</u>", "<big>", "</big>",
         "<em>", "</em>", "<small>", "</small>", "<strong>", "</strong>",
         "<sub>", "</sub>", "<sup>", "</sup>", "<u>", "</u>", "<h1>",
         "<pre>", "</pre>", "</h1>", "<h2>", "</h2>", "<h3>", "</h3>", "<h4>",
         "</h4>", "<h5>", "</h5>", "<h6>", "</h6>", "<center>", "<br>", "<br />",
         "<ul>", "</ul>", "<ol>", "</ol>", "<li>", "</li>",
         "<font", "</font>",
+        "<del>", "</del>",
         "<tbody>", "</tbody>",
         "<caption>", "</caption>",
         "<table", "</table>",

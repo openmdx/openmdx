@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReferenceValue.java,v 1.62 2009/02/27 17:15:40 wfro Exp $
+ * Name:        $Id: ObjectReferenceValue.java,v 1.63 2009/04/23 13:33:37 wfro Exp $
  * Description: ObjectReferenceValue 
- * Revision:    $Revision: 1.62 $
+ * Revision:    $Revision: 1.63 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/27 17:15:40 $
+ * Date:        $Date: 2009/04/23 13:33:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -258,10 +258,12 @@ implements Serializable {
         }
         else {
             Action action = ((ObjectReference)v).getSelectObjectAction();
-            String title = action.getTitle();
-            return action.getEvent() == Action.EVENT_NONE
-            ? title
-                : "<a href=\"\" onmouseover=\"javascript:this.href=" + p.getEvalHRef(action) + ";onmouseover=function(){};\">" + this.application.getHtmlEncoder().encode(title, false) + "</a>";
+            String encodedTitle = (action.getTitle().startsWith("<") ? 
+            	action.getTitle() : 
+            	this.application.getHtmlEncoder().encode(action.getTitle(), false));
+            return action.getEvent() == Action.EVENT_NONE ? 
+            	encodedTitle : 
+            	"<a href=\"\" onmouseover=\"javascript:this.href=" + p.getEvalHRef(action) + ";onmouseover=function(){};\">" + encodedTitle + "</a>";
         }
     }
 

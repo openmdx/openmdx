@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EmbeddedContainer_1.java,v 1.2 2009/01/10 12:12:18 wfro Exp $
+ * Name:        $Id: EmbeddedContainer_1.java,v 1.3 2009/06/02 19:54:54 hburger Exp $
  * Description: Embedded Container
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/10 12:12:18 $
+ * Date:        $Date: 2009/06/02 19:54:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -187,6 +187,13 @@ public class EmbeddedContainer_1
      * @see org.openmdx.base.accessor.generic.cci.Container_1_0#superSet()
      */
     public Container_1_0 superSet() {
+        throw new UnsupportedOperationException("Operation not supported by EmbeddedContainer_1");
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
+     */
+    public void retrieveAll(boolean useFetchPlan) {
         throw new UnsupportedOperationException("Operation not supported by EmbeddedContainer_1");
     }
 

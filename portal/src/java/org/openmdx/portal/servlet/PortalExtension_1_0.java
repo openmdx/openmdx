@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalExtension_1_0.java,v 1.26 2009/02/27 15:52:52 wfro Exp $
+ * Name:        $Id: PortalExtension_1_0.java,v 1.28 2009/05/01 23:40:44 wfro Exp $
  * Description: Evaluator_1_0
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/27 15:52:52 $
+ * Date:        $Date: 2009/05/01 23:40:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,7 @@ import javax.jmi.reflect.RefStruct;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.GridControl;
@@ -189,7 +190,7 @@ public interface PortalExtension_1_0 {
      * be returned by the find objects reply a filter of the form active=true can
      * be returned.
      */
-    public List getFindObjectsBaseFilter(
+    public List<FilterProperty> getFindObjectsBaseFilter(
         ApplicationContext application,
         RefObject_1_0 context,
         String qualifiedFeatureName
@@ -208,7 +209,7 @@ public interface PortalExtension_1_0 {
      */
     public void updateObject(
         Object target,
-        Map parameterMap,
+        Map<String,Object[]> parameterMap,
         Map<String,Attribute> fieldMap,
         ApplicationContext application,
         PersistenceManager pm

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.11 2009/02/16 11:55:24 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.13 2009/06/09 12:45:17 hburger Exp $
  * Description: Object 1 Plug-In
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/16 11:55:24 $
+ * Date:        $Date: 2009/06/09 12:45:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,21 +50,23 @@
  */
 package org.openmdx.base.accessor.view;
 
-import javax.jdo.InstanceCallbacks;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+import javax.jdo.listener.ClearCallback;
+import javax.jdo.listener.DeleteCallback;
+import javax.jdo.listener.StoreCallback;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.spi.DelegatingObject_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Model_1_6;
+import org.openmdx.base.mof.cci.Model_1_0;
 
 /**
  * Object 1 Plug-In
  */
 public class PlugIn_1
     extends DelegatingObject_1 
-    implements InstanceCallbacks 
+    implements ClearCallback, DeleteCallback, StoreCallback
 {
 
     /**
@@ -121,7 +123,7 @@ public class PlugIn_1
      * 
      * @return the model repository
      */
-    protected Model_1_6 getModel(){
+    protected Model_1_0 getModel(){
         return this.self.getModel();
     }
     
@@ -178,16 +180,6 @@ public class PlugIn_1
         PlugIn_1 next = getNext();
         if(next != null) {
             next.jdoPreDelete();
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see javax.jdo.listener.LoadCallback#jdoPostLoad()
-     */
-    public void jdoPostLoad() {
-        PlugIn_1 next = getNext();
-        if(next != null) {
-            next.jdoPostLoad();
         }
     }
 

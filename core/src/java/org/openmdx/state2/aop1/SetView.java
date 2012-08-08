@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SetView.java,v 1.4 2009/03/04 12:07:22 hburger Exp $
+ * Name:        $Id: SetView.java,v 1.5 2009/04/28 13:58:52 hburger Exp $
  * Description: Set View
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/04 12:07:22 $
+ * Date:        $Date: 2009/04/28 13:58:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -147,7 +147,7 @@ final class SetView<O,E> extends CollectionView<O,Set<E>,E> implements Set<E> {
      */
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof Set) {
+        if(obj instanceof Set<?>) {
             Set<?> that = (Set<?>) obj;
             if(this.size() == that.size()) {
                 for(Object member : this) {

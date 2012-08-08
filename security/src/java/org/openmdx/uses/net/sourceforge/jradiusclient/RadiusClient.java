@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusClient.java,v 1.17 2007/08/24 16:30:04 hburger Exp $
+ * Name:        $Id: RadiusClient.java,v 1.18 2009/03/31 17:30:55 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/24 16:30:04 $
+ * Date:        $Date: 2009/03/31 17:30:55 $
  * ====================================================================
  *
  * Copyright (C) 2004-2007  OMEX AG
@@ -108,7 +108,7 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
  * for laying the groundwork for the development of this class.
  *
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class RadiusClient
     extends AbstractRadiusClient
@@ -750,7 +750,7 @@ public class RadiusClient
                 for (int i = 0; i<responseAuthenticator.length;i++){
                     if (responseAuthenticator[i] != myResponseAuthenticator[i]){
                         logWarning(
-                        	"Response Authenticator Mismatch (Identifier={})\n{}\n{}",
+                        	"Response Authenticator Mismatch (Identifier={0})\n{1}\n{2}",
                         	identifierByte,
                         	new ByteArrayFormatter(
                                 myResponseAuthenticator, 0, myResponseAuthenticator.length,
@@ -884,12 +884,12 @@ public class RadiusClient
                 packet_out.setPort(port[p]);
             	if(i == 0) {
             		logDebug(
-            			"Send\n{}",
+            			"Send\n{0}",
             			new DatagramPacketFormatter(packet_out)
             		);
             	} else {
             		logDebug(
-            			"Retry {}\n{}",
+            			"Retry {0}\n{1}",
             			i,
             			new DatagramPacketFormatter(packet_out)
             		);
@@ -897,7 +897,7 @@ public class RadiusClient
                 this.socket.send(packet_out);
                 this.socket.receive(packet_in);
                 logDebug(
-                    "Receive",
+                    "Receive\n{0}",
                     new DatagramPacketFormatter(packet_in)
                 );
                 return this.checkRadiusPacket(packet_in, identifier, requestAuthenticator, provider);

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1_0Local.java,v 1.1 2009/01/05 13:44:51 wfro Exp $
+ * Name:        $Id: Dataprovider_1_0Local.java,v 1.4 2009/06/08 17:12:04 hburger Exp $
  * Description: Enterprise JavaBean stateless session example
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:51 $
+ * Date:        $Date: 2009/06/08 17:12:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,15 +51,15 @@
  */
 package org.openmdx.application.dataprovider.transport.ejb.cci;
 
-import javax.ejb.EJBLocalObject;
-
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
+import org.openmdx.application.rest.ejb.Connection_2_0Local;
+import org.openmdx.base.resource.spi.TransactionManager;
 
 /**
  * 
  */
 public interface Dataprovider_1_0Local
-    extends Dataprovider_1_0, EJBLocalObject 
+    extends Dataprovider_1_0, Connection_2_0Local, TransactionManager
 {
     //
 }

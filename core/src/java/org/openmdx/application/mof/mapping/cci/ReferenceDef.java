@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReferenceDef.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: ReferenceDef.java,v 1.4 2009/06/09 12:45:18 hburger Exp $
  * Description: VelocityReferenceDef class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/09 12:45:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,11 +54,10 @@ package org.openmdx.application.mof.mapping.cci;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Model_1_3;
 
 @SuppressWarnings("unchecked")
 public class ReferenceDef 
@@ -109,15 +108,15 @@ public class ReferenceDef
           (String)model.getElementType(referenceDef).objGetValue("qualifiedName"),
           (String)referenceDef.objGetValue("multiplicity"),
           getQualifierName(referenceDef, model, "referencedEnd"),
-          getQualifierTypeName(referenceDef, (Model_1_3) model, "referencedEnd"),
+          getQualifierTypeName(referenceDef, model, "referencedEnd"),
           (Boolean)referenceDef.objGetValue("isChangeable"),
           model.referenceIsDerived(referenceDef),
           true,
           getExposedEndName(referenceDef, model),
-          getExposedEndQualifiedTypeName(referenceDef, (Model_1_3) model),
+          getExposedEndQualifiedTypeName(referenceDef, model),
           getQualifierName(referenceDef, model, "exposedEnd"),
-          getQualifierTypeName(referenceDef, (Model_1_3) model, "exposedEnd"),
-          getReferencedEndQualifiedTypeName(referenceDef, (Model_1_3)model),
+          getQualifierTypeName(referenceDef,  model, "exposedEnd"),
+          getReferencedEndQualifiedTypeName(referenceDef, model),
           (String) associationDef.objGetValue("name"),
           (String) associationDef.objGetValue("qualifiedName"),
           isComposition(referenceDef, model),
@@ -228,7 +227,7 @@ public class ReferenceDef
   //-------------------------------------------------------------------------
   private static String getQualifierTypeName(
     ModelElement_1_0 referenceDef,
-    Model_1_3 model, 
+    Model_1_0 model, 
     String end
   ) throws ServiceException {
     ModelElement_1_0 referencedEnd = model.getElement(
@@ -245,7 +244,7 @@ public class ReferenceDef
   //-------------------------------------------------------------------------
   private static String getExposedEndQualifiedTypeName(
     ModelElement_1_0 referenceDef,
-    Model_1_3 model 
+    Model_1_0 model 
   ) throws ServiceException {
     ModelElement_1_0 exposedEnd = model.getElement(
       referenceDef.objGetValue("exposedEnd")
@@ -258,7 +257,7 @@ public class ReferenceDef
   //-------------------------------------------------------------------------
   private static String getReferencedEndQualifiedTypeName(
     ModelElement_1_0 referenceDef,
-    Model_1_3 model 
+    Model_1_0 model 
   ) throws ServiceException {
     ModelElement_1_0 referencedEnd = model.getElement(
       referenceDef.objGetValue("referencedEnd")

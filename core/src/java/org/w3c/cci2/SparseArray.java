@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SparseArray.java,v 1.2 2008/02/18 13:34:11 hburger Exp $
+ * Name:        $Id: SparseArray.java,v 1.3 2009/04/22 09:03:30 hburger Exp $
  * Description: SparseArray 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 13:34:11 $
+ * Date:        $Date: 2009/04/22 09:03:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,7 +66,7 @@ public interface SparseArray<E> extends SortedMap<Integer, E>, Iterable<E> {
      * <li>its size() is the sparse array's <code>lastKey() + 1</code>
      * <li>the sparse array's un-populated positions are represented as <code>null</null> values
      * <li><code>get(int)</code> and set(int,E) operations are allowed for any index >= 0
-     * <li><cttode>add(E)</code> is allowed
+     * <li><code>add(E)</code> is allowed
      * </ul>
      *  
      * @return a <code>List</code> representing this <code>SparseArray</code>

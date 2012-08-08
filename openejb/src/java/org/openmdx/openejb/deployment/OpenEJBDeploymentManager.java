@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/OpenEJB, http://www.openmdx.org/
- * Name:        $Id: OpenEJBDeploymentManager.java,v 1.11 2009/01/23 00:28:54 wfro Exp $
+ * Name:        $Id: OpenEJBDeploymentManager.java,v 1.12 2009/03/31 18:07:45 wfro Exp $
  * Description: OpenEJBDeploymentManager
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/23 00:28:54 $
+ * Date:        $Date: 2009/03/31 18:07:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,6 +81,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.deploy.model.DeployableObject;
 import javax.enterprise.deploy.shared.ActionType;
@@ -106,13 +108,10 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.application.configuration.Report;
 import org.openmdx.kernel.url.URLInputStream;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.xml.ValidatingDocumentBuilder;
-import org.openmdx.openejb.logging.Slf4jLogStreamFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.openmdx.openejb.logging.JdkLogStreamFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -185,28 +184,28 @@ public class OpenEJBDeploymentManager implements DeploymentManager {
     ) throws IOException, SAXException, ParserConfigurationException {
         // Read and parse rar.xml (mandatory)
         URL raXmlUrl = getNestedArchiveUrl(moduleURL, RA_XML);
-        logger.trace("Accessing file '{}|{}", RA_XML, raXmlUrl);
+        logger.log(Level.FINEST, "Accessing file '{0}|{1}", new Object[]{RA_XML, raXmlUrl});
         Document rarXmlDocument = this.documentBuilder.parse(raXmlUrl);
         ConnectorDeploymentDescriptor connectorDD = new ConnectorDeploymentDescriptor(moduleID, raXmlUrl);
         connectorDD.parseXml(rarXmlDocument.getDocumentElement());
         // Parse OPENEJB_CONNECTOR_XML
         URL openEjbXmlUrl = getNestedArchiveUrl(moduleURL, OPENEJB_CONNECTOR_XML);
-        logger.trace("Accessing file '{}|{}", OPENMDX_CONNECTOR_XML, openEjbXmlUrl);
+        logger.log(Level.FINEST, "Accessing file '{0}|{1}", new Object[]{OPENMDX_CONNECTOR_XML, openEjbXmlUrl});
         try {
             Document openMdxXmlDocument = this.documentBuilder.parse(openEjbXmlUrl);
             connectorDD.parseOpenMdxXml(openMdxXmlDocument.getDocumentElement());
         }
         catch (FileNotFoundException e0) {
-            logger.debug("Optional file '{}' does not exist for module|{}", OPENEJB_CONNECTOR_XML, moduleURL.toExternalForm());
+            logger.log(Level.FINEST, "Optional file '{0}' does not exist for module|{1}", new Object[]{OPENEJB_CONNECTOR_XML, moduleURL.toExternalForm()});
             // Fallback to OPENMDX_CONNECTOR_XML
             URL openMdxXmlUrl = getNestedArchiveUrl(moduleURL, OPENMDX_CONNECTOR_XML);
-            logger.trace("Accessing file '{}|{}", OPENMDX_CONNECTOR_XML, openMdxXmlUrl);
+            logger.log(Level.FINEST, "Accessing file '{0}|{1}", new Object[]{OPENMDX_CONNECTOR_XML, openMdxXmlUrl});
             try {
                 Document openMdxXmlDocument = this.documentBuilder.parse(openMdxXmlUrl);
                 connectorDD.parseOpenMdxXml(openMdxXmlDocument.getDocumentElement());
             }
             catch (FileNotFoundException e1) {
-                logger.debug("Optional file '{}' does not exist for module|{}", OPENMDX_CONNECTOR_XML, moduleURL.toExternalForm());
+                logger.log(Level.FINEST, "Optional file '{0}' does not exist for module|{1}", new Object[]{OPENMDX_CONNECTOR_XML, moduleURL.toExternalForm()});
             }
         }
         return connectorDD;
@@ -509,7 +508,7 @@ public class OpenEJBDeploymentManager implements DeploymentManager {
         Type target = null;
         SortedMap<Integer,URL> applications = new TreeMap<Integer,URL>();
         SortedMap<Integer,URL> resourceAdapters = new TreeMap<Integer,URL>();
-        logger.info("Processing modules {}", Arrays.asList(moduleIDList));
+        logger.log(Level.FINE, "Processing modules {0}", Arrays.asList(moduleIDList));
         for(int i = 0; i < moduleIDList.length; i++) {
             if( moduleIDList[i] instanceof Unit) {
                 Unit targetModuleID = (Unit)moduleIDList[i];
@@ -550,11 +549,11 @@ public class OpenEJBDeploymentManager implements DeploymentManager {
         switch(target.getMode()) {
             case ENTERPRISE_APPLICATION_CONTAINER: try {
                 
-                logger.info("Starting OpenEJB in mode {}", target.getMode());
+                logger.log(Level.FINE, "Starting OpenEJB in mode {0}", target.getMode());
                 List<TargetModuleID> completed = new ArrayList<TargetModuleID>();
                 Map<String,String> deployments = new HashMap<String,String>();
                 for(Map.Entry<Integer,URL> resourceAdapter: resourceAdapters.entrySet()){
-                    logger.info("Processing {}", resourceAdapter.getValue());
+                    logger.log(Level.FINE, "Processing {0}", resourceAdapter.getValue());
                     // TODO Do it this way because OpenEJB 3.1 can not deploy RARs. Maybe
                     // in a future version this step can be simplified, i.e. ra.xml does
                     // not have to be parsed here
@@ -571,27 +570,27 @@ public class OpenEJBDeploymentManager implements DeploymentManager {
                             "UserName=" + connectorDD.getResourceAdapter().getConfigProperties().get("UserName") + "&" +
                             "Password=" + connectorDD.getResourceAdapter().getConfigProperties().get("Password") + "&" +
                             "JtaManaged=true";
-                        logger.info("Adding resource id={}, url={}", moduleId, moduleUrl);
+                        logger.log(Level.FINE, "Adding resource id={0}, url={1}", new Object[]{moduleId, moduleUrl});
                         completed.add(moduleIDList[resourceAdapter.getKey()]);                    
                         deployments.put(moduleId, moduleUrl);
                     }
                     catch(Exception e) {
-                        logger.warn(
-                            "Deployment of resource adapter {} failed: {}",
-                            resourceAdapter.getValue(),
-                            e
+                        logger.log(
+                        	Level.WARNING,
+                            "Deployment of resource adapter {0} failed: {1}",
+                            new Object[]{resourceAdapter.getValue(), e}
                         );                        
                     }
                 }
                 for(Map.Entry<Integer,URL> application : applications.entrySet()){
-                    logger.info("Processing {}", application.getValue());
+                    logger.log(Level.FINE, "Processing {0}", application.getValue());
                     // For each RAR create a property of the form
                     // properties.setProperty("helloworld.ear", "new://Deployments?jar=/home/openejb/helloworld/src/ear/helloworld.ear");
                     String moduleId = new File(application.getValue().getFile()).getName();
                     String moduleUrl =
                         "new://Deployments?" +
                         "jar=" + (application.getValue().getProtocol().equals("file") ? URLEncoder.encode(new File(application.getValue().getFile()).getAbsolutePath(), "UTF-8") : application.getValue().toString());
-                    logger.info("Adding module id={}, url={}", moduleId, moduleUrl);
+                    logger.log(Level.FINE, "Adding module id={0}, url={1}", new Object[]{moduleId, moduleUrl});
                     completed.add(moduleIDList[application.getKey()]);                    
                     deployments.put(moduleId, moduleUrl);
                 }
@@ -602,7 +601,7 @@ public class OpenEJBDeploymentManager implements DeploymentManager {
                 );
                 System.getProperties().setProperty(
                     "openejb.log.factory", 
-                    Slf4jLogStreamFactory.class.getName()
+                    JdkLogStreamFactory.class.getName()
                 );
                 Properties properties = new Properties();
                 properties.putAll(deployments);
@@ -929,7 +928,7 @@ public class OpenEJBDeploymentManager implements DeploymentManager {
 
     private final ValidatingDocumentBuilder documentBuilder;
     private Locale locale;
-    private static Logger logger = LoggerFactory.getLogger(OpenEJBDeploymentFactory.class);
+    private static Logger logger = Logger.getLogger(OpenEJBDeploymentFactory.class.getName());
 
     final OpenEJBDeploymentFactory.Mode mode;
     private final Target[] targets; 

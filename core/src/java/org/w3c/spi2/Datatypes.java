@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Datatypes.java,v 1.1 2009/01/17 10:16:21 wfro Exp $
+ * Name:        $Id: Datatypes.java,v 1.2 2009/03/20 15:05:46 hburger Exp $
  * Description: Date 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/17 10:16:21 $
+ * Date:        $Date: 2009/03/20 15:05:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -151,7 +151,7 @@ public class Datatypes {
      * Create a structure proxy
      * 
      * @param structureInterface the structure's interface
-     * @param members the structure's members
+     * @param values the structure's members
      * 
      * @return
      */

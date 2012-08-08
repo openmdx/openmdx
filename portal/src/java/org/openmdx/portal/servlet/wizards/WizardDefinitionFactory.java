@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardDefinitionFactory.java,v 1.23 2009/03/08 18:03:24 wfro Exp $
+ * Name:        $Id: WizardDefinitionFactory.java,v 1.24 2009/06/05 11:49:57 wfro Exp $
  * Description: WizardDefinitionFactory 
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:24 $
+ * Date:        $Date: 2009/06/05 11:49:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -137,49 +137,51 @@ implements Serializable {
         }
 
         int ii = 0;
-        for(
-            Iterator i = wizardDefinitions.iterator();
-            i.hasNext();
-            ii++
-        ) {
-            WizardDefinition wizardDefinition = (WizardDefinition)i.next();
-            try {
-                for(
-                    Iterator j = wizardDefinition.getForClass().iterator(); 
-                    j.hasNext(); 
-                ) {
-                    String wizardClass = (String)j.next();
-                    /**
-                     * A wizard definition matches if:
-                     * <ul>
-                     *   <li>orderKey == null and order is numeric
-                     *   <li>orderKey != null and is equal to order
-                     * </ul>  
-                     */                  
-                    List order = wizardDefinition.getOrder();
-                    if(
-                        model.isSubtypeOf(forClass, wizardClass) &&
-                        ((orderPattern == null) && !customizedDefinitions.contains(wizardDefinition.getName()) || 
-                                ((orderPattern != null) && (order != null) && order.contains(orderPattern)))
-                    ) {
-                        matchingWizardDefinitions.put(
-                            order + ":" + ii,
-                            wizardDefinition
-                        );
-                    }
-                    // Wizard is customized if multiple orders are customized and order is not numeric, i.e. a qualified element name
-                    boolean isCustomized = 
-                        (order != null) && 
-                        (order.size() >= 1) && 
-                        !Character.isDigit(((String)order.get(0)).charAt(0));
-                    if(isCustomized) {
-                        customizedDefinitions.add(
-                            wizardDefinition.getName()
-                        );
-                    }
-                }
-            }
-            catch(ServiceException e) {}
+        if(wizardDefinitions != null) {
+	        for(
+	            Iterator i = wizardDefinitions.iterator();
+	            i.hasNext();
+	            ii++
+	        ) {
+	            WizardDefinition wizardDefinition = (WizardDefinition)i.next();
+	            try {
+	                for(
+	                    Iterator j = wizardDefinition.getForClass().iterator(); 
+	                    j.hasNext(); 
+	                ) {
+	                    String wizardClass = (String)j.next();
+	                    /**
+	                     * A wizard definition matches if:
+	                     * <ul>
+	                     *   <li>orderKey == null and order is numeric
+	                     *   <li>orderKey != null and is equal to order
+	                     * </ul>  
+	                     */                  
+	                    List order = wizardDefinition.getOrder();
+	                    if(
+	                        model.isSubtypeOf(forClass, wizardClass) &&
+	                        ((orderPattern == null) && !customizedDefinitions.contains(wizardDefinition.getName()) || 
+	                                ((orderPattern != null) && (order != null) && order.contains(orderPattern)))
+	                    ) {
+	                        matchingWizardDefinitions.put(
+	                            order + ":" + ii,
+	                            wizardDefinition
+	                        );
+	                    }
+	                    // Wizard is customized if multiple orders are customized and order is not numeric, i.e. a qualified element name
+	                    boolean isCustomized = 
+	                        (order != null) && 
+	                        (order.size() >= 1) && 
+	                        !Character.isDigit(((String)order.get(0)).charAt(0));
+	                    if(isCustomized) {
+	                        customizedDefinitions.add(
+	                            wizardDefinition.getName()
+	                        );
+	                    }
+	                }
+	            }
+	            catch(ServiceException e) {}
+	        }
         }
         return (WizardDefinition[])matchingWizardDefinitions.values().toArray(new WizardDefinition[matchingWizardDefinitions.size()]);
     }

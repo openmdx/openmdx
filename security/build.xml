@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.54 2009/03/09 14:25:47 wfro Exp $
+= Name:        $Id: build.xml,v 1.55 2009/03/31 17:33:09 wfro Exp $
 = Description: openMDX/Security Ant Build File
-= Revision:    $Revision: 1.54 $
-= Date:        $Date: 2009/03/09 14:25:47 $
+= Revision:    $Revision: 1.55 $
+= Date:        $Date: 2009/03/31 17:33:09 $
 = Copyright:   (c) 2003-2005 OMEX AG
 =======================================================================
  *
@@ -108,9 +108,11 @@
 			<property name="build.target.platform" value="${build.java.platform}"/>
 		</ant>
 -->		
+<!--
 		<antcall target="-preprocess-jt-files-">
 			<param name="preprocess-jt.target" value="java"/>
 		</antcall>
+-->		
 		<antcall target="-preprocess-model-files-"/>
 	</target>
 

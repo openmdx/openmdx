@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Uml1ModelMapper.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: Uml1ModelMapper.java,v 1.5 2009/06/04 14:46:12 hburger Exp $
  * Description: write XML schema (XSD)
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2009/06/04 14:46:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,13 +59,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.omg.mof.cci.VisibilityKind;
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.application.mof.cci.ModelAttributes;
-import org.openmdx.application.mof.cci.Multiplicities;
-import org.openmdx.application.mof.cci.Stereotypes;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -357,7 +356,7 @@ public class Uml1ModelMapper {
         pw.write(indent, 0, nTabs); pw.write("\t\t\tvisibility = 'public' isSpecification = 'false' ownerScope = 'instance'\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\tchangeability = 'changeable'>\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\t<UML:StructuralFeature.type>\n");
-        if (((ModelElement_1_0)associationEnd1QualifierTypes.get(index)).objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE))
+        if (((ModelElement_1_0)associationEnd1QualifierTypes.get(index)).objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE))
         {
           // type is DataType
           pw.write(indent, 0, nTabs); pw.write("\t\t\t\t<UML:DataType xmi.idref = '"); pw.write(this.getDataTypeId(qualifierTypeName)); pw.write("'/>\n");
@@ -430,7 +429,7 @@ public class Uml1ModelMapper {
         pw.write(indent, 0, nTabs); pw.write("\t\t\tvisibility = 'public' isSpecification = 'false' ownerScope = 'instance'\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\tchangeability = 'changeable'>\n");
         pw.write(indent, 0, nTabs); pw.write("\t\t\t<UML:StructuralFeature.type>\n");
-        if (((ModelElement_1_0)associationEnd2QualifierTypes.get(index)).objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE))
+        if (((ModelElement_1_0)associationEnd2QualifierTypes.get(index)).objGetClass().equals(ModelAttributes.PRIMITIVE_TYPE))
         {
           // type is DataType
           pw.write(indent, 0, nTabs); pw.write("\t\t\t\t<UML:DataType xmi.idref = '"); pw.write(this.getDataTypeId(qualifierTypeName)); pw.write("'/>\n");

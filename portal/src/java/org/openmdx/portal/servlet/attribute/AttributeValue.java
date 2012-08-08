@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValue.java,v 1.73 2009/03/08 18:03:22 wfro Exp $
+ * Name:        $Id: AttributeValue.java,v 1.77 2009/06/09 12:50:34 hburger Exp $
  * Description: AttributeValue
- * Revision:    $Revision: 1.73 $
+ * Revision:    $Revision: 1.77 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:22 $
+ * Date:        $Date: 2009/06/09 12:50:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,11 +64,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.jdo.JDOHelper;
+
 import org.openmdx.application.log.AppLog;
-import org.openmdx.application.mof.cci.Multiplicities;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
@@ -237,7 +239,7 @@ implements Serializable {
                 );
                 Object defaultValue = this.getDefaultValue();
                 if(
-                    !refObj.refIsPersistent() &&
+                    !JDOHelper.isPersistent(refObj) &&
                     (defaultValue != null) && 
                     ((value == null) || 
                         ((value instanceof Number) && ((Number)value).intValue() == 0) ||
@@ -258,15 +260,15 @@ implements Serializable {
                     return e.getCause();
                 }
                 else {
-                    AppLog.info("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
-                    AppLog.info(e.getMessage(), e.getCause());
+                    AppLog.detail("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
+                    AppLog.detail(e.getMessage(), e.getCause());
                     return null;
                 }
             }
             catch(Exception e) {
-                AppLog.info("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
+                AppLog.detail("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
                 ServiceException e0 = new ServiceException(e);
-                AppLog.info(e0.getMessage(), e0.getCause());
+                AppLog.detail(e0.getMessage(), e0.getCause());
                 return null;
             }
         }

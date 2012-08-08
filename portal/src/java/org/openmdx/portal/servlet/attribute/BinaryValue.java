@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BinaryValue.java,v 1.41 2009/03/08 18:03:22 wfro Exp $
+ * Name:        $Id: BinaryValue.java,v 1.43 2009/05/16 23:02:57 wfro Exp $
  * Description: BinaryValue
- * Revision:    $Revision: 1.41 $
+ * Revision:    $Revision: 1.43 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:22 $
+ * Date:        $Date: 2009/05/16 23:02:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,11 +72,11 @@ import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 
 import org.openmdx.application.log.AppLog;
-import org.openmdx.application.mof.cci.Multiplicities;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -437,7 +437,6 @@ public class BinaryValue
     }
     
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public void paint(
         Attribute attribute,
         HtmlPage p,

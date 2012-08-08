@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightConnectionManager.java,v 1.1 2009/01/12 12:49:23 wfro Exp $
+ * Name:        $Id: LightweightConnectionManager.java,v 1.3 2009/05/15 00:38:58 hburger Exp $
  * Description: LightweightConnectionManager
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:23 $
+ * Date:        $Date: 2009/05/15 00:38:58 $
  * ====================================================================
  *
  * This software is published under the BSD licenseas listed below.
@@ -70,6 +70,7 @@ import javax.transaction.TransactionManager;
 
 import org.openmdx.kernel.application.container.spi.resource.Validatable;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.kernel.resource.spi.AbstractConnectionManager;
 import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
 import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
 import org.openmdx.uses.org.apache.commons.pool.impl.GenericObjectPool;
@@ -256,10 +257,11 @@ public class LightweightConnectionManager
     protected Set<ManagedConnection> getManagedConnections(        
     ) throws ResourceException {
         Transaction transaction = getTransaction();
-        if(transaction == null) throw new LocalTransactionException(
-            "No active transaction, managed connection can't be allocated"
-        );
-        synchronized(transactionalConnections){
+        if(transaction == null) {
+        	throw new LocalTransactionException(
+	            "No active transaction, managed connection can't be allocated"
+	        );
+        } else synchronized(transactionalConnections){
             ManagedConnectionSet managedConnectionSet = transactionalConnections.get(
                 transaction
             );

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GridEventHandler.java,v 1.48 2009/01/06 14:12:01 wfro Exp $
+ * Name:        $Id: GridEventHandler.java,v 1.49 2009/05/16 23:02:56 wfro Exp $
  * Description: GridEventHandler 
- * Revision:    $Revision: 1.48 $
+ * Revision:    $Revision: 1.49 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 14:12:01 $
+ * Date:        $Date: 2009/05/16 23:02:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,10 +69,10 @@ import javax.jmi.reflect.RefObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.openmdx.application.dataprovider.cci.Orders;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.Orders;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;

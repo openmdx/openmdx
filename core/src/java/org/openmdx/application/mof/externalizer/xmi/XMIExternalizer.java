@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIExternalizer.java,v 1.1 2009/01/13 02:10:42 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: XMIExternalizer.java,v 1.3 2009/06/09 15:39:59 hburger Exp $
  * Description: RoseExporterMain command-line tool
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:42 $
+ * Date:        $Date: 2009/06/09 15:39:59 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.mof.externalizer.xmi;
 
@@ -65,18 +64,20 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.uses.gnu.getopt.Getopt;
 import org.openmdx.uses.gnu.getopt.LongOpt;
 
-//---------------------------------------------------------------------------  
-@SuppressWarnings("unchecked")
+/**
+ * XMI Externalizer
+ */
 public class XMIExternalizer {
 
-    //-------------------------------------------------------------------------  
-    static class Runner {
-
-        //-----------------------------------------------------------------------  
-        public void run(
-            String args[]
-        ) throws ServiceException, Exception {
-
+    /**
+     * Main
+     * 
+     * @param args
+     */
+    public static void main(
+        String[] args
+    ) {
+        try {
             Getopt g = new Getopt(
                 XMIExternalizer.class.getName(),
                 args,
@@ -92,14 +93,14 @@ public class XMIExternalizer {
                 }
             );
 
-            List modelNames = new ArrayList();
-            List formats = new ArrayList();
+            List<String> modelNames = new ArrayList<String>();
+            List<String> formats = new ArrayList<String>();
             String url = null;
             String openmdxjdo = null;
             String stXMIDialect = "poseidon";
             String outFileName = "./out.jar";
-            List pathMapSymbols = new ArrayList();
-            List pathMapPaths = new ArrayList();
+            List<String> pathMapSymbols = new ArrayList<String>();
+            List<String> pathMapPaths = new ArrayList<String>();
 
             int c;
             while ((c = g.getopt()) != -1) {
@@ -168,7 +169,7 @@ public class XMIExternalizer {
             }
 
             // pathMap
-            Map pathMap = new HashMap();
+            Map<String,String> pathMap = new HashMap<String,String>();
             for(int i = 0; i < pathMapSymbols.size(); i++) {
                 pathMap.put(
                     pathMapSymbols.get(i),
@@ -192,37 +193,18 @@ public class XMIExternalizer {
             );
             fos.write(
                 modelExternalizer.externalizePackageAsJar(
-                    (String)modelNames.get(0),
+                    modelNames.get(0),
                     formats
                 )
             );  
             fos.close();
-        }
-    }
-
-    //---------------------------------------------------------------------------  
-    public static void main(
-        String[] args
-    ) {
-        try {
-            new Runner().run(args);
-        }
-        catch(ServiceException e) {
-            System.err.println(e.toString());
+        } catch(ServiceException e) {
+        	e.log().printStackTrace();
             System.exit(-1);
-        }
-        catch(Exception e) {
-            System.err.println(
-                new ServiceException(e).toString()
-            );
+        } catch(Exception e) {
+        	new ServiceException(e).log().printStackTrace();
             System.exit(-1);
         }
     }
-
-    //---------------------------------------------------------------------------
-    // Variables  
-    //---------------------------------------------------------------------------  
 
 }
-
-//--- End of File -----------------------------------------------------------

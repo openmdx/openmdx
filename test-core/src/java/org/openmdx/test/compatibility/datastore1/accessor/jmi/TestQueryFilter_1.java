@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestQueryFilter_1.java,v 1.4 2009/03/05 17:51:36 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TestQueryFilter_1.java,v 1.8 2009/05/18 13:06:57 hburger Exp $
  * Description: Context Query Test
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 17:51:36 $
+ * Date:        $Date: 2009/05/18 13:06:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,26 +50,27 @@
  */
 package org.openmdx.test.compatibility.datastore1.accessor.jmi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefPackage;
 
-import junit.framework.TestCase;
-
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.accessor.Connection_1;
-import org.openmdx.application.dataprovider.cci.RequestCollection;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
-import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1_1Connection;
-import org.openmdx.application.log.AppLog;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.openmdx.application.dataprovider.deployment.Deployment_1;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
-import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
-import org.openmdx.base.accessor.view.Manager_1;
+import org.openmdx.base.jmi1.BasePackage;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.FilterOperators;
@@ -77,60 +78,45 @@ import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.Quantors;
 import org.openmdx.compatibility.datastore1.jmi1.Datastore1Package;
 import org.openmdx.compatibility.datastore1.jmi1.QueryFilter;
-import org.openmdx.kernel.application.deploy.cci.DeploymentProperties;
-import org.openmdx.kernel.application.deploy.spi.Deployment;
-import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.test.clock1.cci2.SegmentQuery;
 import org.openmdx.test.clock1.jmi1.Clock1Package;
-
-import org.openmdx.base.jmi1.BasePackage;
 
 /**
  * Context Query Test
  */
-public class TestQueryFilter_1 extends TestCase {
+public class TestQueryFilter_1 {
 
-    /**
-     * Constructor
-     * 
-     * @param name
-     */
-    public TestQueryFilter_1(
-        String name
-    ){
-        super(name);
-    }
+    static final String[] expectedAttributes = new String[]{
+        "dateParam",
+        "decimalParam",
+        "clause",
+        "booleanParam",
+        "integerParam",
+        "dateTimeParam",
+        "stringParam"
+    };
 
-    /**
-     * 
-     */
-    protected synchronized void setUp(
+    static final List<?>[] expectedValues = {
+        Collections.EMPTY_LIST,
+        Collections.EMPTY_LIST,
+        Collections.singletonList("SELECT something FROM somewhere WHERE b0 = ? AND i0 = ? AND i1 = ? AND i2 = ?"),
+        Collections.singletonList(Boolean.TRUE),
+        Arrays.asList(new Integer[]{new Integer(1), new Integer(2), new Integer(3)}),
+        Collections.EMPTY_LIST,
+        Collections.EMPTY_LIST
+    };
+
+    protected static Deployment_1 deployment;
+    
+    @Before
+    public void setUp(
     ) throws Exception {
-        String message = ">>>> **** Start Test: " + this.getName();
-        Path segmentPath = new Path(PROVIDER_PATH).add("segment").add(this.getName());
-        System.out.println(message);
-        AppLog.info(message, segmentPath);
-// TODO  this.dataproviderConnection = (
-//                "Remote".equals(getName()) ? TestQueryFilter_1.remoteConnectionfactory : TestQueryFilter_1.inProcessConnectionfactory
-//        ).createConnection();
-        RefPackage rootPkg = null; // TODO new RefRootPackage_1(
-//            new Manager_1(
-//                new Connection_1(
-//                    new Provider_1(
-//                        new RequestCollection(
-//                            new ServiceHeader(),
-//                            dataproviderConnection
-//                        ),
-//                        false
-//                    ),
-//                    false
-//                )
-//            ),
-//            null, // impls
-//            null, // context
-//            "cci",
-//            false
-//        );
+        PersistenceManager entityManager = deployment.getEntityManager();
+        this.provider = entityManager.getObjectById(
+            Provider.class,
+            PROVIDER_PATH
+        );
+        RefPackage rootPkg = this.provider.refOutermostPackage();
         this.clock1 = (Clock1Package)rootPkg.refPackage(
             "org:openmdx:test:clock1"
         );
@@ -145,21 +131,7 @@ public class TestQueryFilter_1 extends TestCase {
         );
     }
 
-    /**
-     * 
-     */
-    protected void tearDown(
-    ) {
-        String message = "<<<< **** End Test: " + this.getName();
-        System.out.println(message);
-        AppLog.info(message);
-        this.dataproviderConnection.close();
-    }
-
-    /**
-     * 
-     * @throws Exception
-     */
+    @Test
     public void testQueryFilter(
     ) throws Exception {
         SegmentQuery query = this.clock1.createSegmentQuery();
@@ -175,10 +147,10 @@ public class TestQueryFilter_1 extends TestCase {
         );
         query.thereExistsContext().equalTo(context);
         assertTrue("Query instance of RefFilter_1_0", query instanceof RefFilter_1_0);
-        Collection filterProperties = ((RefFilter_1_0)query).refGetFilterProperties();
+        Collection<?> filterProperties = ((RefFilter_1_0)query).refGetFilterProperties();
         System.out.println(filterProperties);
         assertEquals("Filter property count", 9, filterProperties.size());
-        Iterator i = filterProperties.iterator();
+        Iterator<?> i = filterProperties.iterator();
         assertEquals(
             "Instance of",
             new FilterProperty(
@@ -235,95 +207,25 @@ public class TestQueryFilter_1 extends TestCase {
     /**
      * 
      */
-    private Dataprovider_1_1Connection dataproviderConnection;
-
-    /**
-     * 
-     */
     static private final String PROVIDER_PATH = "xri:@openmdx:org.openmdx.test.clock1/provider/Java";
 
-    /**
-     * 
-     */
-    static private final String APPLICATION_URL = "file:src/ear/test-classloading.ear";
+    @BeforeClass
+    public static void deploy(){
+        deployment = new Deployment_1(
+            "xri://@openmdx*(+lightweight)*ENTERPRISE_APPLICATION_CONTAINER",
+//          "xri://@openmdx*(+openejb)*ENTERPRISE_APPLICATION_CONTAINER",
+            new String[]{}, // connectorURI 
+            new String[]{"file:src/ear/test-classloading.ear"}, // applicationURI 
+            true, // logDeploymentDetails
+            "test/openmdx/clock1/EntityProviderFactory", // entityManagerFactoryURI 
+            null, // gatewayURI
+            new String[]{"org:openmdx:test:clock1"} // model
+        );
+    }
 
-    /**
-     * 
-     */
-    static private final String JNDI_NAME = "org/openmdx/test/supports/clock";
-
-    /**
-     * Define whether deployment details should logged to the console
-     */
-    final private static boolean LOG_DEPLOYMENT_DETAIL = false;
-
-//    private final static Deployment modelDeployment = new Model_1Deployment(
-//        new String[]{
-//            "org:openmdx:base",
-//            "org:w3c",
-//            "org:oasis-open",
-//            "org:openmdx:compatibility:view1",
-//            "org:openmdx:test:clock1"
-//        }
-//    );
-
-//    /**
-//     * 
-//     */
-//    protected final static Dataprovider_1ConnectionFactory inProcessConnectionfactory = new Dataprovider_1Deployment(
-//        new InProcessDeployment(
-//            null,
-//            APPLICATION_URL,
-//            LOG_DEPLOYMENT_DETAIL ? System.out : null,
-//                System.err
-//        ),
-//        modelDeployment,
-//        JNDI_NAME
-//    );
-//
-//
-//    /**
-//     * 
-//     */
-//    protected final static Dataprovider_1ConnectionFactory remoteConnectionfactory = new Dataprovider_1Deployment(
-//        new RemoteDeployment(
-//            ArraysExtension.asMap(
-//                new String[]{
-//                    DeploymentProperties.APPLICATION_URLS,
-//                    "build.java.platform",
-//                    "build.target.platform"
-//                },
-//                new String[]{
-//                    APPLICATION_URL,
-//                    System.getProperty("build.java.platform"),
-//                    System.getProperty("build.target.platform")
-//                }
-//            ),
-//            LOG_DEPLOYMENT_DETAIL ? System.out : null,
-//                System.err
-//        ),
-//        modelDeployment,
-//        JNDI_NAME
-//    );
-
-    static final String[] expectedAttributes = new String[]{
-        "dateParam",
-        "decimalParam",
-        "clause",
-        "booleanParam",
-        "integerParam",
-        "dateTimeParam",
-        "stringParam"
-    };
-
-    static final List[] expectedValues = new List[]{
-        Collections.EMPTY_LIST,
-        Collections.EMPTY_LIST,
-        Collections.singletonList("SELECT something FROM somewhere WHERE b0 = ? AND i0 = ? AND i1 = ? AND i2 = ?"),
-        Collections.singletonList(Boolean.TRUE),
-        Arrays.asList(new Integer[]{new Integer(1), new Integer(2), new Integer(3)}),
-        Collections.EMPTY_LIST,
-        Collections.EMPTY_LIST
-    };
-
+    @AfterClass
+    public static void close(
+    ) throws IOException{
+        deployment.close();
+    }
 }

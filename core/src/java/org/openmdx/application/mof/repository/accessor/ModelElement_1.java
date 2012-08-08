@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelElement_1.java,v 1.4 2009/03/01 12:29:56 wfro Exp $
+ * Name:        $Id: ModelElement_1.java,v 1.13 2009/06/14 00:03:42 wfro Exp $
  * Description: ModelElement_1 class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/01 12:29:56 $
+ * Date:        $Date: 2009/06/14 00:03:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,51 +57,59 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
+import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.MappedRecord;
+import javax.resource.cci.Record;
 
-import org.openmdx.application.cci.SystemAttributes;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
-import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.LargeObject_1_0;
-import org.openmdx.base.accessor.cci.Structure_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.ModelElement_1_1;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 
 //---------------------------------------------------------------------------
-public class ModelElement_1
-    extends DataproviderObject
-    implements ModelElement_1_1 
+public class ModelElement_1 implements ModelElement_1_0
 {
 
     private static final long serialVersionUID = 3257002159609753654L;
 
     //-------------------------------------------------------------------------
     public ModelElement_1(
-        DataproviderObject element,
+        MappedRecord data,
         Model_1 model
-    ) {
-        super(element);
-        this.model = model;
+    ) throws ServiceException {
+        try {
+            this.data = ObjectHolder_2Facade.newInstance(data);
+            this.model = model;
+        }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
-  
+
     //-------------------------------------------------------------------------
     public ModelElement_1(
         ModelElement_1_0 element
-    ) {
-        super(
-            element instanceof ModelElement_1 ? 
-                (ModelElement_1)element :
-                element instanceof DataproviderObject ?
-                     new DataproviderObject((DataproviderObject)element) :
-                     null
-        );
+    ) throws ServiceException {
+        try {
+            this.data = ObjectHolder_2Facade.newInstance(
+                ObjectHolder_2Facade.cloneObject(((ModelElement_1)element).data.getDelegate())
+            );
+        } 
+        catch (ResourceException e) {
+            throw new ServiceException(e);
+        }
         this.model = (Model_1)element.getModel();
     }
 
@@ -115,7 +123,7 @@ public class ModelElement_1
     public boolean isAliasType(
     ) {
         if(this.isAliasType == null) {
-            this.isAliasType = this.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ALIAS_TYPE);
+            this.isAliasType = this.data.getObjectClass().equals(ModelAttributes.ALIAS_TYPE);
         }
         return this.isAliasType;
     }
@@ -124,7 +132,7 @@ public class ModelElement_1
     public boolean isPrimitiveType(
     ) {
         if(this.isPrimitiveType == null) {
-            this.isPrimitiveType = this.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE);
+            this.isPrimitiveType = this.data.getObjectClass().equals(ModelAttributes.PRIMITIVE_TYPE);
         }
         return this.isPrimitiveType;
     }
@@ -133,7 +141,7 @@ public class ModelElement_1
     public boolean isStructureType(
     ) {
         if(this.isStructureType == null) {
-            this.isStructureType = this.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_TYPE);
+            this.isStructureType = this.data.getObjectClass().equals(ModelAttributes.STRUCTURE_TYPE);
         }
         return this.isStructureType;            
     }
@@ -142,7 +150,7 @@ public class ModelElement_1
     public boolean isStructureFieldType(
     ) {
         if(this.isStructureFieldType == null) {
-            this.isStructureFieldType = this.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_FIELD);
+            this.isStructureFieldType = this.data.getObjectClass().equals(ModelAttributes.STRUCTURE_FIELD);
         }
         return this.isStructureFieldType;
     }
@@ -151,7 +159,7 @@ public class ModelElement_1
     public boolean isClassType(
     ) {
         if(this.isClassType == null) {
-            this.isClassType = this.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.CLASS);
+            this.isClassType = this.data.getObjectClass().equals(ModelAttributes.CLASS);
         }
         return this.isClassType;
     }
@@ -160,7 +168,7 @@ public class ModelElement_1
     public boolean isReferenceType(
     ) {
         if(this.isReferenceType == null) {
-            this.isReferenceType = this.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE);
+            this.isReferenceType = this.data.getObjectClass().equals(ModelAttributes.REFERENCE);
         }
         return this.isReferenceType;
     }
@@ -169,7 +177,7 @@ public class ModelElement_1
     public boolean isAttributeType(
     ) {
         if(this.isAttributeType == null) {
-            this.isAttributeType = this.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE);            
+            this.isAttributeType = this.data.getObjectClass().equals(ModelAttributes.ATTRIBUTE);            
         }
         return this.isAttributeType;
     }
@@ -178,7 +186,7 @@ public class ModelElement_1
     public boolean isOperationType(
     ) {
         if(this.isOperationType == null) {
-            this.isOperationType = this.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION);
+            this.isOperationType = this.data.getObjectClass().equals(ModelAttributes.OPERATION);
         }
         return this.isOperationType;
     }
@@ -187,9 +195,198 @@ public class ModelElement_1
     public boolean isPackageType(
     ) {
         if(this.isPackageType == null) {
-            this.isPackageType = this.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PACKAGE);
+            this.isPackageType = this.data.getObjectClass().equals(ModelAttributes.PACKAGE);
         }
         return this.isPackageType;
+    }
+    
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isAssociationEndType()
+     */
+    public boolean isAssociationEndType(
+    ) {
+        if(this.isAssociationEndType == null) {
+            this.isAssociationEndType = this.data.getObjectClass().equals(ModelAttributes.ASSOCIATION_END);
+        }
+        return this.isAssociationEndType;
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isCollectionType()
+     */
+    public boolean isCollectionType(
+    ) {
+        if(this.isCollectionType == null) {
+            this.isCollectionType = this.data.getObjectClass().equals(ModelAttributes.COLLECTION_TYPE);
+        }
+        return this.isCollectionType;
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isConstantType()
+     */
+    public boolean isConstantType(
+    ) {
+        if(this.isConstantType == null) {
+            this.isConstantType = this.data.getObjectClass().equals(ModelAttributes.CONSTANT);
+        }
+        return this.isConstantType;
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isConstraintType()
+     */
+    public boolean isConstraintType(
+    ) {
+        if(this.isConstraintType == null) {
+            this.isConstraintType = this.data.getObjectClass().equals(ModelAttributes.CONSTRAINT);
+        }
+        return this.isConstraintType;
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isEnumerationType()
+     */
+    public boolean isEnumerationType(
+    ) {
+        if(this.isEnumerationType == null) {
+            this.isEnumerationType = this.data.getObjectClass().equals(ModelAttributes.ENUMERATION_TYPE);
+        }
+        return this.isEnumerationType;
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isDataType()
+     */
+    public boolean isDataType(
+    ) {
+        return
+            this.isPrimitiveType() ||
+            this.isEnumerationType() ||
+            this.isStructureType() ||
+            this.isCollectionType();
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isElementType()
+     */
+    public boolean isElementType(
+    ) {
+        return true;
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isExceptionType()
+     */
+    public boolean isExceptionType(
+    ) {
+        if(this.isExceptionType == null) {
+            this.isExceptionType = this.data.getObjectClass().equals(ModelAttributes.EXCEPTION);
+        }
+        return this.isExceptionType;
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isGeneralizableElementType()
+     */
+    public boolean isGeneralizableElementType(
+    ) {
+        return
+            this.isPackageType() ||
+            this.isClassifierType();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isGeneralizableElementType()
+     */
+    public boolean isClassifierType(
+    ) {
+        return
+            this.isAssociationType() ||
+            this.isClassType() ||
+            this.isDataType();            
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isGeneralizableElementType()
+     */
+    public boolean isBehaviouralFeatureType(
+    ) {
+        return
+            this.isOperationType() ||
+            this.isExceptionType();
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isImportType()
+     */
+    public boolean isImportType(
+    ) {
+        if(this.isImportType == null) {
+            this.isImportType = this.data.getObjectClass().equals(ModelAttributes.IMPORT);
+        }
+        return this.isImportType;
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isNamespaceType()
+     */
+    public boolean isNamespaceType(
+    ) {
+        return
+            this.isGeneralizableElementType() ||
+            this.isBehaviouralFeatureType();
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isParameterType()
+     */
+    public boolean isParameterType(
+    ) {
+        if(this.isParameterType == null) {
+            this.isParameterType = this.data.getObjectClass().equals(ModelAttributes.PARAMETER);
+        }
+        return this.isParameterType;
+    }
+    
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isStructuralFeatureType()
+     */
+    public boolean isStructuralFeatureType(
+    ) {
+        return
+            this.isAttributeType() ||
+            this.isReferenceType();
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.ModelElement_1_0#isTypedElementType()
+     */
+    public boolean isTypedElementType(
+    ) {
+        return
+            this.isCollectionType() ||
+            this.isAliasType() ||
+            this.isStructuralFeatureType() ||
+            this.isAssociationEndType() ||
+            this.isConstantType() ||
+            this.isStructureFieldType() ||
+            this.isParameterType();
     }
     
     //-------------------------------------------------------------------------
@@ -221,7 +418,12 @@ public class ModelElement_1
     public Object objGetValue(
         String featureName
     ) {
-        return super.values(featureName).get(0);
+        try {
+            return this.data.attributeValue(featureName);
+        }
+        catch(Exception e) {
+            throw new JDOUserException("Unable to get value", e);
+        }
     }
         
     /* (non-Javadoc)
@@ -230,14 +432,29 @@ public class ModelElement_1
     public List<Object> objGetList(
         String featureName
     ) {
-        return super.values(featureName);
+        try {
+            return this.data.attributeValues(featureName);
+        }
+        catch(Exception e) {
+            throw new JDOUserException("Unable to get value", e);
+        }
     }
         
     public void objSetValue(
         String featureName,
         Object value
     ) {
-        super.clearValues(featureName).add(value);
+        if(SystemAttributes.OBJECT_CLASS.equals(featureName)) {
+            this.data.getValue().setRecordName((String)value);
+        }
+        else {
+            try {
+                this.data.clearAttributeValues(featureName).add(value);
+            }
+            catch(Exception e) {
+                throw new JDOUserException("Unable to set value", e);
+            }
+        }
     }
     
     //------------------------------------------------------------------------
@@ -259,7 +476,6 @@ public class ModelElement_1
     ){
     }
 
-    
     //------------------------------------------------------------------------
     // Implements ModelElement_1_1    
     //------------------------------------------------------------------------
@@ -268,29 +484,37 @@ public class ModelElement_1
      * @see org.openmdx.model1.accessor.basic.cci.ModelElement_1_1#isAssociation()
      */
     public boolean isAssociationType() {
-        if(this.associationType == null) {
-            this.associationType = this.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ASSOCIATION);
+        if(this.isAssociationType == null) {
+            this.isAssociationType = this.data.getObjectClass().equals(ModelAttributes.ASSOCIATION);
         }
-        return this.associationType;
+        return this.isAssociationType;
     }
 
     //-------------------------------------------------------------------------
     public Path jdoGetObjectId(
     ) {
-        return super.path();
+        return this.data.getPath();
     }
     
     //-------------------------------------------------------------------------
     public boolean isSet(
         String feature
     ) {
-        return super.attributeNames().contains(feature);
+        return this.data.getValue().keySet().contains(feature);
     }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#getAspect(java.lang.String)
      */
     public Map<String, DataObject_1_0> getAspect(String aspectClass)
+        throws ServiceException {
+        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#getAspect(java.lang.String)
+     */
+    public Map<String, DataObject_1_0> getAspects()
         throws ServiceException {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
@@ -306,7 +530,7 @@ public class ModelElement_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objAddEventListener(java.lang.String, java.util.EventListener)
      */
-    public void objAddEventListener(String feature, EventListener listener)
+    public void objAddEventListener(EventListener listener)
         throws ServiceException {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
@@ -324,7 +548,7 @@ public class ModelElement_1
      */
     public String objGetClass()
         throws ServiceException {
-        return (String)this.objGetValue(SystemAttributes.OBJECT_CLASS);
+        return this.data.getObjectClass();
     }
 
     /* (non-Javadoc)
@@ -339,7 +563,6 @@ public class ModelElement_1
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objGetEventListeners(java.lang.String, java.lang.Class)
      */
     public <T extends EventListener> T[] objGetEventListeners(
-        String feature,
         Class<T> listenerType)
         throws ServiceException {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
@@ -369,24 +592,16 @@ public class ModelElement_1
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
 
+    
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objInvokeOperation(java.lang.String, org.openmdx.base.accessor.cci.Structure_1_0)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
-    public Structure_1_0 objInvokeOperation(
-        String operation,
-        Structure_1_0 arguments)
-        throws ServiceException {
-        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objInvokeOperationInUnitOfWork(java.lang.String, org.openmdx.base.accessor.cci.Structure_1_0)
-     */
-    public Structure_1_0 objInvokeOperationInUnitOfWork(
-        String operation,
-        Structure_1_0 arguments)
-        throws ServiceException {
-        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
+    public boolean execute(
+        InteractionSpec ispec, 
+        Record input, 
+        Record output
+    ) throws ResourceException {
+        throw new NotSupportedException("Operation not supported by ModelElement_1");
     }
 
     /* (non-Javadoc)
@@ -416,7 +631,7 @@ public class ModelElement_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objRemoveEventListener(java.lang.String, java.util.EventListener)
      */
-    public void objRemoveEventListener(String feature, EventListener listener)
+    public void objRemoveEventListener(EventListener listener)
         throws ServiceException {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
@@ -461,7 +676,7 @@ public class ModelElement_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
-    public Object jdoGetTransactionalObjectId() {
+    public Path jdoGetTransactionalObjectId() {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
 
@@ -599,10 +814,17 @@ public class ModelElement_1
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
 
+    @Override
+    public String toString(
+    ) {
+        return this.data == null ? null : this.data.getPath() + " is " + this.data.getObjectClass() + " having attributes " + this.data.getValue().keySet().toString();
+    }
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
     private final Model_1 model;
+    private final ObjectHolder_2Facade data;
     private Boolean isAliasType = null;
     private Boolean isPrimitiveType = null;
     private Boolean isStructureType = null;
@@ -613,8 +835,15 @@ public class ModelElement_1
     private Boolean isOperationType = null;
     private Boolean isPackageType = null;
     private Boolean isReferenceStoredAsAttribute = null;
-    private Boolean associationType = null;
-
+    private Boolean isAssociationType = null;
+    private Boolean isAssociationEndType = null;
+    private Boolean isCollectionType = null;
+    private Boolean isConstantType = null;
+    private Boolean isConstraintType = null;
+    private Boolean isExceptionType = null;
+    private Boolean isEnumerationType = null;
+    private Boolean isImportType = null;
+    private Boolean isParameterType = null;
 }
 
 //--- End of File -----------------------------------------------------------

@@ -1,2 +1,0 @@
-Manifest-Version: 1.0
-Implementation-URL: ../../../../../../${build.java.platform}/core/lib/openmdx-base.jar

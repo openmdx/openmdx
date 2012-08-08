@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.46 2009/01/12 17:58:13 wfro Exp $
+= Name:        $Id: build.xml,v 1.50 2009/03/16 17:53:13 hburger Exp $
 = Description: openmdx project raw
-= Revision:    $Revision: 1.46 $
-= Date:        $Date: 2009/01/12 17:58:13 $
+= Revision:    $Revision: 1.50 $
+= Date:        $Date: 2009/03/16 17:53:13 $
 = Copyright:   (c) 2003-2004 OMEX AG
 =======================================================================
  *
@@ -60,7 +60,7 @@
 	<description>Builds the openMDX/Test.Core component</description>
 	<property name="project.specification.title" value="openMDX/Test.Core"/>
 
-	<property name="model.transformation.class.path" value="openmdx.bootstrap.bin"/>
+	<property name="model.transformation.class.path" value="project.lib.classpath"/>
 
 	<!-- Slash separated platform list, the last entry being the default -->
 	<property name="project.platform.list" value="jre-1.5"/>
@@ -86,27 +86,25 @@
 	<patternset id="project.junit.test.case">
 		<include name="org/openmdx/test/**/Test*.java"/>
 		<patternset refid="build.exclude"/>
-		<exclude name="org/openmdx/test/compatibility/audit1/plugin/jmi/TestAudit_1Plugin.java"/>
-		<exclude name="org/openmdx/test/compatibility/base/dataprovider/layer/model/TestRoleApplication_1.java"/>
-		<exclude name="org/openmdx/test/compatibility/base/dataprovider/layer/model/TestRolePersistenceJdbc_1.java"/>
-		<exclude name="org/openmdx/test/compatibility/base/dataprovider/layer/model/TestRolePersistenceNone_1.java"/>
-		<exclude name="org/openmdx/test/compatibility/base/dataprovider/exporter/**/TestReplicator.java"/>
-		<exclude name="org/openmdx/test/compatibility/base/dataprovider/exporter/**/TestSetup.java"/>
-		<exclude name="org/openmdx/test/compatibility/base/dataprovider/exporter/**/TestHelper.java"/>
+		<exclude name="org/openmdx/test/compatibility/audit1/**/Test*.java"/>
 		<exclude name="org/openmdx/test/test/app1/layer/**/Test*.java"/>
-		<exclude name="org/openmdx/test/test/app1/plugin/**/Test*.java"/>
 	</patternset>
 
 	<!-- ******************************************************************* -->
 	<!-- * generate -->
 	<!-- ******************************************************************* -->
 	<target name="generate" description="Generate version, jt and model dependend files" depends="build-init">
-		<ant dir="${openmdx.home}/core" inheritAll="false" target="build">
+		<ant dir="${openmdx.home}/core" inheritAll="false" target="deliverables">
 			<property name="build.target.platform" value="${build.java.platform}"/>
 		</ant> 
-		<antcall target="-preprocess-jt-files-">
-			<param name="preprocess-jt.target" value="java"/>
-		</antcall>
+		<ant dir="${openmdx.home}/ejb" inheritAll="false" target="deliverables">
+			<property name="build.target.platform" value="${build.java.platform}"/>
+		</ant> 
+		<!-- There are no JT files at the moment
+			<antcall target="-preprocess-jt-files-">
+				<param name="preprocess-jt.target" value="java"/>
+			</antcall>
+		-->
 		<antcall target="-preprocess-model-files-"/>
 	</target>
 

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.5-properties.xml,v 1.1 2007/12/05 17:28:03 hburger Exp $
+= Name:        $Id: jre-1.5-properties.xml,v 1.2 2009/03/11 16:44:26 hburger Exp $
 = Description: openMDX/Security jre-1.5 Platform Properties
-= Revision:    $Revision: 1.1 $
-= Date:        $Date: 2007/12/05 17:28:03 $
+= Revision:    $Revision: 1.2 $
+= Date:        $Date: 2009/03/11 16:44:26 $
 = Copyright:   (c) 2003-2004 OMEX AG
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2007, OMEX AG, Switzerland
+= Copyright (c) 2007-2009, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -44,6 +44,4 @@
 = POSSIBILITY OF SUCH DAMAGE.
 = 
 -->
-<project name="openmdx-security-jre-1.5-properties">
-	<property name="project.build.exclude.1" value="org/openmdx/uses/javax/security/auth/login/*"/>
-</project>
+<project name="openmdx-security-jre-1.5-properties"/>
