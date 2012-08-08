@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardControl.java,v 1.22 2007/12/03 10:54:32 wfro Exp $
+ * Name:        $Id: WizardControl.java,v 1.23 2008/05/01 21:43:55 wfro Exp $
  * Description: WizardControl
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/03 10:54:32 $
+ * Date:        $Date: 2008/05/01 21:43:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -116,6 +116,7 @@ public class WizardControl
     }
     
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,

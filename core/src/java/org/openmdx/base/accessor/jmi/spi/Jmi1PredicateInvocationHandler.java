@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1PredicateInvocationHandler.java,v 1.6 2008/02/22 18:14:33 hburger Exp $
+ * Name:        $Id: Jmi1PredicateInvocationHandler.java,v 1.7 2008/05/06 14:53:47 wfro Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/22 18:14:33 $
+ * Date:        $Date: 2008/05/06 14:53:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,7 +63,7 @@ import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.base.query.Quantors;
-import org.openmdx.model1.mapping.java.Identifier;
+import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 
 /**
  * Jmi1ObjectInvocationHandler
@@ -107,7 +107,7 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
         Short delegateQuantor,
         String delegateName
     ) {
-        this.delegation = new RefPredicate_1Proxy(
+        this.delegate = new RefPredicate_1Proxy(
             refPackage,
             filterType,
             filterProperties,
@@ -135,7 +135,7 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
         ) {
             try {
                 return method.invoke(
-                    this.delegation, 
+                    this.delegate, 
                     args
                 );
             }
@@ -145,50 +145,59 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
         }
         // orderBy
         else if(method.getName().startsWith("orderBy")) {
-            String featureName = method.getName().substring(7);
-            featureName = Identifier.ATTRIBUTE_NAME.toIdentifier(featureName);
-            return this.delegation.refGetOrder(
+            ModelElement_1_0 feature = this.delegate.getFeatureMapper().getFeature(
+                method.getName().substring(7),
+                FeatureMapper.MethodSignature.PREDICATE                                
+            );
+            String featureName = (String)feature.values("name").get(0);
+            return this.delegate.refGetOrder(
                 featureName
             );
         }
         // thereExists
         else if(method.getName().startsWith("thereExists")) {
-            String featureName = method.getName().substring(11);
-            featureName = Identifier.ATTRIBUTE_NAME.toIdentifier(featureName);
+            ModelElement_1_0 feature = this.delegate.getFeatureMapper().getFeature(
+                method.getName().substring(11),
+                FeatureMapper.MethodSignature.PREDICATE                                
+            );
+            String featureName = (String)feature.values("name").get(0);
             return "thereExistsContext".equals(method.getName())
-                ? this.delegation.refGetPredicate(
+                ? this.delegate.refGetPredicate(
                     Quantors.THERE_EXISTS,
                     "org:openmdx:base:ContextCapable:context"
                   )
-                : this.delegation.refGetPredicate(
+                : this.delegate.refGetPredicate(
                     Quantors.THERE_EXISTS,
                     featureName
                   );
         }
         // forAll
         else if(method.getName().startsWith("forAll")) {
-            String featureName = method.getName().substring(6);
-            featureName = Identifier.ATTRIBUTE_NAME.toIdentifier(featureName);
+            ModelElement_1_0 feature = this.delegate.getFeatureMapper().getFeature(
+                method.getName().substring(6),
+                FeatureMapper.MethodSignature.PREDICATE                
+            );
+            String featureName = (String)feature.values("name").get(0);
             return "thereExistsContext".equals(method.getName())
-                ? this.delegation.refGetPredicate(
+                ? this.delegate.refGetPredicate(
                     Quantors.FOR_ALL,
                     "org:openmdx:base:ContextCapable:context"
                   )
-                : this.delegation.refGetPredicate(
+                : this.delegate.refGetPredicate(
                     Quantors.FOR_ALL,
                     featureName
                   );
         }
         // equalTo
         else if("equalTo".equals(method.getName())) {
-            this.delegation.equalTo(
+            this.delegate.equalTo(
                 args[0]
             );
             return null;
         }        
         // notEqualTo
         else if("notEqualTo".equals(method.getName())) {
-            this.delegation.notEqualTo(
+            this.delegate.notEqualTo(
                 args[0]
             );
             return null;
@@ -196,17 +205,17 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
         // elementOf
         else if("elementOf".equals(method.getName())) {
             if(args[0] == null) {
-                this.delegation.elementOf(
+                this.delegate.elementOf(
                     Collections.EMPTY_SET
                 );
                 return null;
             } else if (args[0] instanceof Collection){
-                this.delegation.elementOf(
+                this.delegate.elementOf(
                     (Collection<?>)args[0]
                 );
                 return null;
             } else if (args[0].getClass().isArray()) {
-                this.delegation.elementOf(
+                this.delegate.elementOf(
                     (Object[])args[0]
                 );
                 return null;
@@ -217,17 +226,17 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
         // notAnElementOf
         else if("notAnElementOf".equals(method.getName())) {
             if(args[0] == null) {
-                this.delegation.elementOf(
+                this.delegate.elementOf(
                     Collections.EMPTY_SET
                 );
                 return null;
             } else if (args[0] instanceof Collection){
-                this.delegation.notAnElementOf(
+                this.delegate.notAnElementOf(
                     (Collection<?>)args[0]
                 );
                 return null;
             } else if (args[0].getClass().isArray()) {
-                this.delegation.notAnElementOf(
+                this.delegate.notAnElementOf(
                     (Object[])args[0]
                 );
                 return null;
@@ -237,12 +246,17 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
         }        
         // Object
         else if("toString".equals(method.getName())) {
-            return this.delegation.toString();
+            return this.delegate.toString();
         }
         // Predicate
         else if((args == null) || (args.length == 0)) {
-            return this.delegation.refGetPredicate(
-                method.getName()
+            ModelElement_1_0 feature = this.delegate.getFeatureMapper().getFeature(
+                method.getName(),
+                FeatureMapper.MethodSignature.PREDICATE                
+            );
+            String featureName = (String)feature.values("name").get(0);            
+            return this.delegate.refGetPredicate(
+                featureName
             );
         }
         throw new UnsupportedOperationException(method.getName());
@@ -251,6 +265,6 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    protected final RefPredicate_1 delegation;
+    protected final RefPredicate_1 delegate;
     
 }

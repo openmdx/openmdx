@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ModelAwareFilter.java,v 1.3 2007/12/02 01:47:21 hburger Exp $
+ * Name:        $Id: ModelAwareFilter.java,v 1.4 2008/03/21 20:14:51 hburger Exp $
  * Description: Model Aware Filter
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/02 01:47:21 $
+ * Date:        $Date: 2008/03/21 20:14:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,6 +63,7 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 /**
  * Model Aware Filter
  */
+@SuppressWarnings("unchecked")
 public abstract class ModelAwareFilter 
     extends AbstractFilter
     implements ModelHolder_1_0

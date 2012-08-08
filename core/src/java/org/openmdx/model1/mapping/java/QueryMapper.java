@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: QueryMapper.java,v 1.8 2008/02/15 17:24:07 hburger Exp $
+ * Name:        $Id: QueryMapper.java,v 1.9 2008/03/21 18:40:19 hburger Exp $
  * Description: JMI Query Mapper
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/15 17:24:07 $
+ * Date:        $Date: 2008/03/21 18:40:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,6 +67,7 @@ import org.openmdx.model1.mapping.StructuralFeatureDef;
 /**
  * JMI Query Mapper
  */
+@SuppressWarnings("unchecked")
 public class QueryMapper
     extends AbstractMapper {
 

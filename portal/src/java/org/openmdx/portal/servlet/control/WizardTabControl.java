@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardTabControl.java,v 1.3 2007/12/13 01:24:01 wfro Exp $
+ * Name:        $Id: WizardTabControl.java,v 1.5 2008/06/20 23:42:05 wfro Exp $
  * Description: WizardTabControl
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:24:01 $
+ * Date:        $Date: 2008/06/20 23:42:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -118,6 +118,7 @@ public class WizardTabControl
     }
 
     //-----------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p, 
         String frame, 
@@ -133,10 +134,10 @@ public class WizardTabControl
             }
             catch(UnsupportedEncodingException e) {}
             if(this.wizardDefinition.getOpenParameter().length() > 0) {
-                p.write("    <li><a href=\"#\"", p.getOnClick("javascript:window.open('.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');"), " id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");                    
+                p.write("    <li><a href=\"#\"", p.getOnClick("javascript:window.open('.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');"), " id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");                    
             }
             else {
-                p.write("    <li><a href=\".", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");
+                p.write("    <li><a href=\".", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");
             }            
         }
     }

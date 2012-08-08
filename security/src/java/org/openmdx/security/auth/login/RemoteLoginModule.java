@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     OMEX/Security, http://www.omex.ch/
- * Name:        $Id: RemoteLoginModule.java,v 1.12 2007/05/09 22:34:29 wfro Exp $
+ * Name:        $Id: RemoteLoginModule.java,v 1.14 2008/04/04 17:55:32 hburger Exp $
  * Description: Remote Login Module
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/05/09 22:34:29 $
+ * Date:        $Date: 2008/04/04 17:55:32 $
  * ====================================================================
  *
  * Copyright (c) 2004-2006, OMEX AG, Switzerland
@@ -28,8 +28,8 @@
 package org.openmdx.security.auth.login;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,13 +91,13 @@ public class RemoteLoginModule implements LoginModule {
   	 * if so, what principals did we add to the subject
   	 * (so we can remove the principals we added if the login is aborted)
   	 */
-  	private Set principalsForSubject; 
+  	private Set<java.security.Principal> principalsForSubject; 
 
     /** 
      * if so, what credentials did we add to the subject
      * (so we can remove the credentials we added if the login is aborted)
      */
-    private Set credentialsForSubject; 
+    private Set<Object> credentialsForSubject; 
 
     /**
      * The realm's object id is passed as an option
@@ -193,8 +193,8 @@ public class RemoteLoginModule implements LoginModule {
   	public void initialize(
       	Subject         subject,
       	CallbackHandler callbackHandler,
-      	Map             sharedState,
-      	Map             options
+      	Map<String,?>   sharedState,
+      	Map<String,?>   options
   	){
       	//
       	// only called (once!) after the constructor and before login
@@ -219,8 +219,8 @@ public class RemoteLoginModule implements LoginModule {
         if(this.passwordPrompt == null) this.passwordPrompt = "${challenge}";
         this.realmInformation = options.get(TextOutputCallback.class.getName() + ".realm").toString();
         if(this.realmInformation == null) this.realmInformation = "Realm ${realm}";
-    	this.principalsForSubject = new HashSet();
-        this.credentialsForSubject = new HashSet();
+    	this.principalsForSubject = new HashSet<java.security.Principal>();
+        this.credentialsForSubject = new HashSet<Object>();
         this.subjectModified = false;
    	}
 
@@ -286,7 +286,7 @@ public class RemoteLoginModule implements LoginModule {
                 PrincipalQuery principalQuery = realm1Package.createPrincipalQuery();
                 principalQuery.name().equalTo(name);
                 principalQuery.disabled().isFalse();
-                List principals = realm.getPrincipal(principalQuery);
+                List<?> principals = realm.getPrincipal(principalQuery);
                 switch (principals.size()) {
                     case 0: throw new FailedLoginException(
                         "Found no enabled principal named " + name
@@ -298,20 +298,21 @@ public class RemoteLoginModule implements LoginModule {
                     );
                 }
                 principal = (Principal) principals.get(0);
-                authenticationCredentials = (Credential[]) principal.getAuthCredential().toArray(
+                Collection<?> authCredentials = principal.getAuthCredential();
+                authenticationCredentials = authCredentials.toArray(
                     new Credential[]{}
                 );
                 passwordCallbacks = new PasswordCallback[authenticationCredentials.length];
                 validationResult = new ValidationResult[authenticationCredentials.length];
                 unitOfWork.begin();
-//              persistenceManager.makeTransactional(principal);
                 for(
                     int i = 0;
                     i < authenticationCredentials.length;
                     i++
-                ) validationResult[i] = authenticationCredentials[i].request(
-                    authenticationContext
-                );
+                ) {
+                    org.openmdx.security.realm1.cci.CredentialRequestParams params =  realm1Package.createCredentialRequestParams(authenticationContext);               
+                    validationResult[i] = authenticationCredentials[i].request(params);
+                }
                 unitOfWork.commit();
                 for(
                     int i = 0;
@@ -360,11 +361,12 @@ public class RemoteLoginModule implements LoginModule {
                     i++
                 ) {
                     char[] password = passwordCallbacks[i].getPassword();
-                    validationResult[i] = authenticationCredentials[i].validate(
-                        authenticationContext,
-                        validationResult[i].getState(),
+                    org.openmdx.security.realm1.cci.CredentialValidateParams params = realm1Package.createCredentialValidateParams(
+                        authenticationContext, 
+                        validationResult[i].getState(), 
                         UnicodeTransformation.toByteArray(password, 0, password.length)
                     );
+                    validationResult[i] = authenticationCredentials[i].validate(params);
                 }
                 preparing = false;
                 unitOfWork.commit();
@@ -385,27 +387,14 @@ public class RemoteLoginModule implements LoginModule {
                 "Login for principal '" + principal.getName() + "' failed: " +
                 principal.refMofId()
             );
-            List principals = new ArrayList();
+            List<Principal> principals = new ArrayList<Principal>();
             principals.add(principal);
-            for(
-                int i = 0;
-                i < principals.size();
-                i++
-            ){
-                Principal p = (Principal) principals.get(i);
-                for(
-                   Iterator j = p.getIsMemberOf().iterator();
-                   j.hasNext();
-                ) {
-                    Group g = (Group) j.next();
-                    if(!principals.contains(g)) principals.add(g);
+            for(Principal p : principals) {
+                for(Object g : p.getIsMemberOf()) { 
+                    if(!principals.contains(g)) principals.add((Group)g);
                 }
             }
-            for(
-                Iterator i = principals.iterator();
-                i.hasNext();
-            ){
-                Principal p = (Principal) i.next();
+            for(Principal p : principals) {
                 this.principalsForSubject.add(
                     new GenericPrincipal (
                         p == principal ? 
@@ -495,12 +484,13 @@ public class RemoteLoginModule implements LoginModule {
      * 
      * @return <code>true</code> if the <code>PasswordCallback</code>'s echo should be switched on
      */
-    private boolean isPasswordEchoOn(
+    @SuppressWarnings("unchecked")
+	private boolean isPasswordEchoOn(
         Short code
     ){
         return 
             this.echoOn instanceof Boolean ? ((Boolean)this.echoOn).booleanValue() :
-            this.echoOn instanceof Set ? ((Set)this.echoOn).contains(code) :
+            this.echoOn instanceof Set ? ((Set<?>)this.echoOn).contains(code) :
             false;
     }
 

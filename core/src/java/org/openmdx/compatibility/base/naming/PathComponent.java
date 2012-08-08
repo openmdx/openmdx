@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PathComponent.java,v 1.16 2006/10/11 22:27:11 hburger Exp $
+ * Name:        $Id: PathComponent.java,v 1.17 2008/03/21 18:48:01 hburger Exp $
  * Description: A Path COmponent 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/11 22:27:11 $
+ * Date:        $Date: 2008/03/21 18:48:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,8 +60,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * The PathComponent class reperesents a path component.
  * 
@@ -80,6 +78,7 @@ import org.openmdx.kernel.text.StringBuilders;
  * concurrent multithreaded access if that access is not
  * read-only.
  */
+@SuppressWarnings("unchecked")
 public final class PathComponent
     implements Comparable, Cloneable, Serializable
 {
@@ -748,15 +747,15 @@ public final class PathComponent
      */
     public String toString(
     ){
-        CharSequence target = StringBuilders.newStringBuilder();
+        StringBuilder target = new StringBuilder();
         for (
             int index = 0;
             index < this.fields.length;
             index++
         ){
             (index > 0 ?
-                StringBuilders.asStringBuilder(target).append(FIELD_DELIMITER) :
-                StringBuilders.asStringBuilder(target)
+                target.append(FIELD_DELIMITER) :
+                target
             ).append(
                 this.fields[index]
             );

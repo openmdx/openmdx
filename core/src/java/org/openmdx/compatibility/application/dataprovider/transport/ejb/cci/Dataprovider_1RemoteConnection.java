@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1RemoteConnection.java,v 1.2 2008/02/29 18:10:22 hburger Exp $
+ * Name:        $Id: Dataprovider_1RemoteConnection.java,v 1.3 2008/06/24 16:17:21 hburger Exp $
  * Description: Dataprovider_1_0RemoteConnection class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:10:22 $
+ * Date:        $Date: 2008/06/24 16:17:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -152,7 +152,7 @@ public class Dataprovider_1RemoteConnection<D extends Dataprovider_1_0Remote>
             UnitOfWorkRequest[] requests = RMIMapper.marshal(workingUnits);
             UnitOfWorkReply[] replies = null;
             try {
-                SysLog.detail("Processing units of work", new Integer(requests.length));
+                SysLog.detail("Processing units of work", Integer.valueOf(requests.length));
                 replies = getDelegate().process(header,requests);
             } catch (RemoteException exception){
                 this.ejbObject = null;
@@ -167,7 +167,7 @@ public class Dataprovider_1RemoteConnection<D extends Dataprovider_1_0Remote>
 	                throw exception;
                 }
             }
-            SysLog.detail("Processed units of work", new Integer(replies.length));
+            SysLog.detail("Processed units of work", Integer.valueOf(replies.length));
             return RMIMapper.unmarshal(replies);
         } catch (Exception exception) {
             throw new RuntimeServiceException(exception).log();

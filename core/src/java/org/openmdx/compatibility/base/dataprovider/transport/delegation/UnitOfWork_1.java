@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1.java,v 1.15 2008/02/18 13:34:06 hburger Exp $
+ * Name:        $Id: UnitOfWork_1.java,v 1.20 2008/06/03 16:30:59 hburger Exp $
  * Description: Unit Of Work Implementation
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 13:34:06 $
+ * Date:        $Date: 2008/06/03 16:30:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,10 +64,11 @@ import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
+import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.transaction.Synchronization_1_0;
 import org.openmdx.base.transaction.TransactionManager_1;
-import org.openmdx.base.transaction.UnitOfWork_1_0;
+import org.openmdx.base.transaction.UnitOfWork_1_2;
 import org.openmdx.compatibility.base.collection.FilteringList;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.query.Selector;
@@ -78,7 +79,7 @@ import org.openmdx.kernel.log.SysLog;
  * SPICE Object Layer: Unit Of Work implementation.
  */
 class UnitOfWork_1 
-    implements Serializable, UnitOfWork_1_0
+    implements Serializable, UnitOfWork_1_2
 {
 
 
@@ -134,7 +135,7 @@ class UnitOfWork_1
     //------------------------------------------------------------------------
 
     void add(
-        Object member
+        Object_1 member
     ) throws ServiceException {
         if(!isActive())throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
@@ -146,7 +147,7 @@ class UnitOfWork_1
     }
     
     void remove(
-        Object member
+        Object_1 member
     ) throws ServiceException {
         this.members.remove(member);
     }
@@ -157,7 +158,7 @@ class UnitOfWork_1
         return this.members.contains(candidate);
     }
     
-    List include (
+    List<?> include (
         Path referenceFilter,
         Selector attributeFilter
     ){
@@ -167,7 +168,7 @@ class UnitOfWork_1
         );
     }
 
-    List exclude (
+    List<?> exclude (
         Path referenceFilter,
         Selector attributeFilter
     ){
@@ -191,12 +192,12 @@ class UnitOfWork_1
     /**
      * The members of this unit of work
      */
-    protected final List members = new ArrayList();
+    protected final List<Object_1> members = new ArrayList<Object_1>();
 
     /**
      * The filtered containers created by this unit of work.
      */
-    private final Collection containers = new ArrayList();
+    private final Collection<Evictable> containers = new ArrayList<Evictable>();
                          
     /**
      *
@@ -231,8 +232,31 @@ class UnitOfWork_1
     /**
      * 
      */
+    private boolean rollbackOnly = false;
+    
+    /**
+     * 
+     */
     private final int PREPARE_CYCLE_LIMIT = 8;
     
+    
+    //------------------------------------------------------------------------
+    // Implements UnitOfWork_1_2       
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.transaction.UnitOfWork_1_2#getRollbckOnly()
+     */
+    public boolean getRollbackOnly() {
+        return this.active && this.rollbackOnly;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.transaction.UnitOfWork_1_2#setRollbackOnly()
+     */
+    public void setRollbackOnly() {
+        this.rollbackOnly = true;
+    }
     
     //------------------------------------------------------------------------
     // Implements UnitOfWork_1_0
@@ -274,6 +298,7 @@ class UnitOfWork_1
             throw new ServiceException(exception);
         }
         reset();
+        this.active = true;
     }
     
     /** 
@@ -295,20 +320,33 @@ class UnitOfWork_1
             null,
             "No unit of work is active"
         );
-        if(isTransactional() && this.transaction != null) {
-            TransactionManager_1.execute(
-                isOptimistic() ? 
-                    this.transaction : 
-                    new TransactionTerminator(this.transaction),
-                this
-            );
-        } else  {
-            boolean committed = false;
+        if(this.rollbackOnly) {
             try {
-                beforeCompletion();
-                committed = true;
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ROLLBACK,
+                    null,
+                    "The unit of work has been marked for rollback only"
+                );
             } finally {
-                afterCompletion(committed);
+                afterCompletion(false);
+            }
+        } else {
+            if(isTransactional() && this.transaction != null) {
+                TransactionManager_1.execute(
+                    isOptimistic() ? 
+                        this.transaction : 
+                        new TransactionTerminator(this.transaction),
+                    this
+                );
+            } else  {
+                boolean committed = false;
+                try {
+                    beforeCompletion();
+                    committed = true;
+                } finally {
+                    afterCompletion(committed);
+                }
             }
         }
     } 
@@ -360,8 +398,8 @@ class UnitOfWork_1
     synchronized private void reset(
     ) throws ServiceException {
         SysLog.detail("Unit Of Work","reset");
+        this.rollbackOnly = false;
         this.members.clear();
-        this.active = true;
         this.synchronization.afterBegin();
     }
 
@@ -415,6 +453,7 @@ class UnitOfWork_1
      */
     public void afterBegin(
     ) throws ServiceException {
+        this.active = true;
         if(isContainerManaged()) reset();
     }
 
@@ -437,10 +476,12 @@ class UnitOfWork_1
                 i < this.members.size();
                 i++
             ){
-                Object_1 object = (Object_1)this.members.get(i);
-                if(!object.isPrepared()) {
+                Object_1 object = this.members.get(i);
+                if(!object.isPrepared()) try {
                     preparing = true;
                     object.prepare();
+                } catch (JmiServiceException exception) {
+                    throw new ServiceException(exception);
                 }
             }
         }
@@ -455,9 +496,9 @@ class UnitOfWork_1
         try {
             this.synchronization.beforeCompletion();
             for(
-                Iterator i=this.members.iterator();
+                Iterator<Object_1> i=this.members.iterator();
                 i.hasNext();
-            ) ((Object_1)i.next()).flush(false);
+            ) i.next().flush(false);
             this.synchronization.afterCompletion(true);
         } catch (ServiceException exception) {
             this.synchronization.afterCompletion(false);
@@ -480,13 +521,14 @@ class UnitOfWork_1
             "Unit Of Work",
             committed ? 
                 "committed" : 
-                this.transactional ? "rolled back" : "aborted"
+                this.transactional || this.containerManaged ? "rolled back" : "aborted"
         );
         this.active = false;
         notifyAll();
         while(!this.members.isEmpty()){
-            ((Object_1)this.members.remove(0)).afterCompletion(committed);
+            this.members.remove(0).afterCompletion(committed);
         }
+        if(isContainerManaged()) reset();
     }
 
     /**
@@ -499,6 +541,7 @@ class UnitOfWork_1
         Path candidate
     ){
         return 
+            candidate != null &&
             candidate.getParent().equals(referenceFilter) &&
             candidate.getBase().indexOf(';') == -1; 
     }
@@ -509,19 +552,15 @@ class UnitOfWork_1
     //------------------------------------------------------------------------
 
     /**
-     * 
-     * @author hburger
-     *
-     * To change the template for this generated type comment go to
-     * Window>Preferences>Java>Code Generation>Code and Comments
+     * Include
      */
     class Include extends FilteringList implements Selector {
         
         /**
+         * Constructor
          * 
          * @param referenceFilter
-         * @param newFilter
-         * @param deletedFilter
+         * @param attributeFilter
          */
         Include(
             Path referenceFilter,
@@ -568,15 +607,15 @@ class UnitOfWork_1
     //------------------------------------------------------------------------
 
     /**
-     * 
+     * Exclude
      */
     class Exclude extends FilteringList implements Selector {
         
         /**
+         * Constructor
          * 
          * @param referenceFilter
-         * @param newFilter
-         * @param deletedFilter
+         * @param attributeFilter
          */
         Exclude(
             Path referenceFilter,

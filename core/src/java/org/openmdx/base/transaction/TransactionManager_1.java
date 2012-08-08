@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TransactionManager_1.java,v 1.8 2007/10/10 16:05:54 hburger Exp $
- * Description: 
- * Revision:    $Revision: 1.8 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TransactionManager_1.java,v 1.11 2008/06/28 00:21:53 hburger Exp $
+ * Description: Transaction Manager
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:54 $
+ * Date:        $Date: 2008/06/28 00:21:53 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.transaction;
 
@@ -62,21 +61,20 @@ import javax.transaction.UserTransaction;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * @author hburger
- *
  * The transaction manager unifies the exception handling.
  */
 public class TransactionManager_1 {
 
 	/**
-	 * Avoid instantiation
+	 * Constructor
 	 */
 	private TransactionManager_1(
 	){
-	    super();
+	    //  Avoid instantiation
 	}
 
 	/**
@@ -369,12 +367,17 @@ public class TransactionManager_1 {
 		}
 	}
 	
-	private static class Phase {
-		
+	static class Phase {
+
+	    /**
+	     * The logger instance
+	     */
+	    private static Logger logger = LoggerFactory.getLogger(TransactionManager_1.class);
+	    	    
 		void setPhase(
 			String to
 		){
-			SysLog.trace("phase",to);
+			logger.trace("Setting to phase \"{}\"",to);
 			this.phase[0] = new BasicException.Parameter("phase",to);
 		}
 

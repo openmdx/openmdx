@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Marshaller.java,v 1.6 2008/02/18 13:34:10 hburger Exp $
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: Marshaller.java,v 1.8 2008/06/17 10:32:09 hburger Exp $
  * Description: Dataprovider Adapter: Marshaller
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 13:34:10 $
+ * Date:        $Date: 2008/06/17 10:32:09 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.transport.adapter;
 
@@ -72,6 +71,7 @@ import org.openmdx.compatibility.base.naming.Path;
  * DataproviderObject to MappedRecord marshaller.
  */
 //---------------------------------------------------------------------------
+@SuppressWarnings("unchecked")
 class Marshaller {
 
     private Marshaller(
@@ -118,7 +118,10 @@ class Marshaller {
             String name = (String)entry.getKey();
             if(name.startsWith(SystemAttributes.OBJECT_LOCK_PREFIX)) {
                 if(name.endsWith(SystemAttributes.OBJECT_DIGEST)){
-                    result.setDigest((byte[])source);
+                    Object digest = source instanceof SparseList ? 
+                        ((SparseList)source).get(0) :
+                        source;
+                    result.setDigest((byte[])digest);
                 }
             } else {
                 SparseList target = result.values(name);

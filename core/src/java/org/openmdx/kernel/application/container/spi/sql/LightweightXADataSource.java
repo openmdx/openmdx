@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightXADataSource.java,v 1.2 2006/08/09 14:37:29 hburger Exp $
+ * Name:        $Id: LightweightXADataSource.java,v 1.3 2008/03/21 18:38:41 hburger Exp $
  * Description: Lightweight XADataSource
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/09 14:37:29 $
+ * Date:        $Date: 2008/03/21 18:38:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,6 +65,7 @@ import javax.sql.XADataSource;
 /**
  * Lightweight XADataSource
  */
+@SuppressWarnings("unchecked")
 public class LightweightXADataSource
     implements XADataSource 
 {

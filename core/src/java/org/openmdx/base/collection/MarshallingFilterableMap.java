@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingFilterableMap.java,v 1.11 2008/02/18 14:11:33 hburger Exp $
- * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.11 $
+ * Name:        $Id: MarshallingFilterableMap.java,v 1.15 2008/04/21 17:03:59 hburger Exp $
+ * Description: Marshalling Filterable Map
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/04/21 17:03:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,7 +69,7 @@ public class MarshallingFilterableMap<K,V,M extends FilterableMap<K,?>>
      * @param map
      */
     public MarshallingFilterableMap(
-        org.openmdx.base.object.spi.Marshaller marshaller, 
+        org.openmdx.base.persistence.spi.Marshaller marshaller, 
         M container
     ) {
         super(marshaller, container);
@@ -117,7 +117,7 @@ public class MarshallingFilterableMap<K,V,M extends FilterableMap<K,?>>
             getDelegate().values(super.marshaller.unmarshal(criteria))
         );
     }
-
+    
     
     //------------------------------------------------------------------------
     // Implements FetchSize

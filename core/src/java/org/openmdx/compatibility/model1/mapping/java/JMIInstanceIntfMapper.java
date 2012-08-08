@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JMIInstanceIntfMapper.java,v 1.9 2008/02/18 09:18:20 hburger Exp $
+ * Name:        $Id: JMIInstanceIntfMapper.java,v 1.11 2008/04/03 00:41:22 wfro Exp $
  * Description: JMIInstanceTemplate 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 09:18:20 $
+ * Date:        $Date: 2008/04/03 00:41:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,11 +53,13 @@
 package org.openmdx.compatibility.model1.mapping.java;
 
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.PrimitiveTypes;
 import org.openmdx.model1.mapping.AttributeDef;
 import org.openmdx.model1.mapping.ClassDef;
@@ -74,7 +76,7 @@ public class JMIInstanceIntfMapper
     public JMIInstanceIntfMapper(
         ModelElement_1_0 classDef,
         Writer writer,
-        Model_1_0 model,
+        Model_1_3 model,
         String format, 
         String packageSuffix
     ) throws ServiceException {
@@ -91,7 +93,7 @@ public class JMIInstanceIntfMapper
      * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
      */
     protected String mapperId() {
-        return "$Id: JMIInstanceIntfMapper.java,v 1.9 2008/02/18 09:18:20 hburger Exp $";
+        return "$Id: JMIInstanceIntfMapper.java,v 1.11 2008/04/03 00:41:22 wfro Exp $";
     }
 
     // -----------------------------------------------------------------------
@@ -464,25 +466,49 @@ public class JMIInstanceIntfMapper
             this.pw.println(MapperUtils.wrapText("   * ", operationDef.getAnnotation()));
             this.pw.println("  */");
         }
+        // Compatibility: get type of parameter with name "in"
+        String qualifiedInParameterTypeName = null;
+        for(StructuralFeatureDef parameter: operationDef.getParameters()) {
+            if("in".equals(parameter.getName())) {
+                qualifiedInParameterTypeName = parameter.getQualifiedTypeName();
+                break;
+            }
+        }
         this.pw.println("  public " + this.getType(operationDef.getQualifiedReturnTypeName()) + " " + this.getMethodName(operationDef.getName()) + "(");
-        this.pw.println("      " + this.getType(operationDef.getQualifiedInParameterTypeName()) + " params");
+        this.pw.println("      " + this.getType(qualifiedInParameterTypeName) + " params");
         this.pw.print("  ) throws javax.jmi.reflect.RefException");
         for (Iterator<ExceptionDef> i = operationDef.getExceptions().iterator(); i.hasNext();) {
             ExceptionDef exceptionDef = i.next();
             this.pw.print(", ");
             this.pw.print(this.getNamespace(MapperUtils
-                .getNameComponents(MapperUtils.getPackageName(exceptionDef
-                    .getQualifiedName(), 2)))
+                .getNameComponents(MapperUtils.getPackageName(exceptionDef.getQualifiedName(), 2)))
                 + "." + exceptionDef.getName());
         }
         this.pw.println("  ;");
         this.pw.println("");
+        // fields of in-parameter
+        ModelElement_1_0 inParamType = this.model.getElement(qualifiedInParameterTypeName);
+        List<StructuralFeatureDef> fields = new ArrayList<StructuralFeatureDef>();
+        for(
+          Iterator it = inParamType.values("content").iterator();
+          it.hasNext();
+        ) {
+          ModelElement_1_0 inParam = this.model.getElement(it.next());
+          fields.add(
+            new AttributeDef(
+              inParam, 
+              this.model, 
+              true
+            )
+          );
+        }        
+        // Generate specific signature if operation is not a single-parameter 
+        // operation or the single parameter is not a struct.
         this.pw.println("  /**");
         if (operationDef.getAnnotation() != null) {
             this.pw.println(MapperUtils.wrapText("   * ", operationDef.getAnnotation()));
         }
-        for (Iterator<StructuralFeatureDef> i = operationDef.getParameters().iterator(); i.hasNext();) {
-            StructuralFeatureDef param = i.next();
+        for(StructuralFeatureDef param: fields) {
             if (param.getAnnotation() != null) {
                 this.pw.println("   * @param " + param.getName() + " " + param.getAnnotation() + "");
             }
@@ -492,8 +518,7 @@ public class JMIInstanceIntfMapper
             + this.getType(operationDef.getQualifiedReturnTypeName()) + " "
             + this.getMethodName(operationDef.getName()) + "(");
         int ii = 0;
-        for (Iterator<StructuralFeatureDef> i = operationDef.getParameters().iterator(); i.hasNext(); ii++) {
-            StructuralFeatureDef param = i.next();
+        for (StructuralFeatureDef param: fields) {
             String separator = ii == 0
                 ? "      "
                 : "    , ";
@@ -501,6 +526,7 @@ public class JMIInstanceIntfMapper
                 separator,
                 param
             );
+            ii++;
         }
         this.pw.print("  ) throws javax.jmi.reflect.RefException");
         for (Iterator<ExceptionDef> i = operationDef.getExceptions().iterator(); i.hasNext();) {

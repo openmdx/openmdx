@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -27,10 +28,11 @@ import java.util.Comparator;
  * @see #getBooleanComparator(boolean)
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:13 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:28 $
  * 
  * @author Rodney Waldhoff
  */
+@SuppressWarnings("unchecked")
 public final class BooleanComparator implements Comparator, Serializable {
 
     /** Serialization version. */
@@ -143,7 +145,7 @@ public final class BooleanComparator implements Comparator, Serializable {
     
     /**
      * Compares two non-<code>null</code> <code>Boolean</code> objects
-     * according to the value of {@link #trueFirst}.
+     * according to the value of {@link #sortsTrueFirst()}.
      * 
      * @param b1  the first boolean to compare
      * @param b2  the second boolean to compare
@@ -176,7 +178,7 @@ public final class BooleanComparator implements Comparator, Serializable {
      * <p>
      * This implementation returns <code>true</code>
      * iff <code><i>that</i></code> is a {@link BooleanComparator} 
-     * whose {@link #trueFirst} value is equal to mine.
+     * whose value of {@link #sortsTrueFirst()} is equal to mine.
      * 
      * @param object  the object to compare to
      * @return true if equal

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RequestedObject.java,v 1.6 2005/02/21 13:10:34 hburger Exp $
+ * Name:        $Id: RequestedObject.java,v 1.7 2008/03/21 18:45:25 hburger Exp $
  * Description: spice: dataprovider object proxy
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:10:34 $
+ * Date:        $Date: 2008/03/21 18:45:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * This eimplementation delegates to the AbstractReply's first object. 
  */
+@SuppressWarnings("unchecked")
 public class RequestedObject
     implements DataproviderReplyListener, Serializable, DataproviderObject_1_0
 {

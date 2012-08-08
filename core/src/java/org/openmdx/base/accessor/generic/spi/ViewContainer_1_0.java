@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewContainer_1_0.java,v 1.2 2007/11/19 17:20:21 hburger Exp $
+ * Name:        $Id: ViewContainer_1_0.java,v 1.3 2008/03/19 17:11:53 hburger Exp $
  * Description: View Container Interface
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/19 17:20:21 $
+ * Date:        $Date: 2008/03/19 17:11:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,6 +52,7 @@ package org.openmdx.base.accessor.generic.spi;
 
 import java.util.Collection;
 
+import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.exception.ServiceException;
 
 /**
@@ -70,7 +71,7 @@ public interface ViewContainer_1_0 {
      * 
      * @throws ServiceException 
      */
-    Collection allStates(
+    Collection<Object_1_0> allStates(
         String qualifier,
         Boolean invalidated, 
         Boolean deleted

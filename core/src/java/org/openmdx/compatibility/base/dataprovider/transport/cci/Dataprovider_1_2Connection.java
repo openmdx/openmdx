@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1_2Connection.java,v 1.3 2008/02/29 18:06:33 hburger Exp $
- * Description: Dataprovider Connection Interface 1.2
- * Revision:    $Revision: 1.3 $
+ * Name:        $Id: Dataprovider_1_2Connection.java,v 1.7 2008/06/30 15:41:09 hburger Exp $
+ * Description: Dataprovider_1_3Connection 
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:06:33 $
+ * Date:        $Date: 2008/06/30 15:41:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,14 +50,13 @@
  */
 package org.openmdx.compatibility.base.dataprovider.transport.cci;
 
-import org.openmdx.base.object.spi.PersistenceManagerFactory_2_0;
-import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.PersistenceManagerFactory_1_0;
+import org.openmdx.base.persistence.spi.ManagerFactory_2_0;
 
 /**
- * Dataprovider Connection Interface 1.2
+ * Dataprovider_1_3Connection
  */
 public interface Dataprovider_1_2Connection
-    extends Dataprovider_1_1Connection, PersistenceManagerFactory_1_0, PersistenceManagerFactory_2_0
+    extends Dataprovider_1_1Connection, ManagerFactory_2_0
 {
-    // 
+    // The methods are declared in the extended interfaces
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1HttpConnectionFactory.java,v 1.6 2007/10/10 16:06:01 hburger Exp $
+ * Name:        $Id: Dataprovider_1HttpConnectionFactory.java,v 1.7 2008/03/19 17:07:35 hburger Exp $
  * Description: Lightweight Container's Dataprovider Connection Factory 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:01 $
+ * Date:        $Date: 2008/03/19 17:07:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,11 +70,10 @@ import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_
 import org.openmdx.kernel.application.container.spi.http.DataproviderConnectionFactory;
 import org.openmdx.kernel.exception.BasicException;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * The Lightweight Container's Dataprovider Connection Factory
  */
+@SuppressWarnings("unchecked")
 public class Dataprovider_1HttpConnectionFactory
         implements DataproviderConnectionFactory, Dataprovider_1ConnectionFactory
 {
@@ -161,13 +160,13 @@ public class Dataprovider_1HttpConnectionFactory
             }
         }
         if(!cookies.isEmpty()) {
-            CharSequence cookieValue = StringBuilders.newStringBuilder("$Version=1");
+            StringBuilder cookieValue = new StringBuilder("$Version=1");
             for(
                 Iterator i = cookies.entrySet().iterator();
                 i.hasNext();
             ){
                 Map.Entry e = (Entry) i.next();
-                StringBuilders.asStringBuilder(cookieValue).append(
+                cookieValue.append(
                     ';'
                 ).append(
                     e.getKey()

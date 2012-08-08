@@ -2,17 +2,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: show-Default.jsp,v 1.39 2007/11/23 00:39:16 wfro Exp $
+ * Name:        $Id: show-Default.jsp,v 1.44 2008/06/01 16:40:52 wfro Exp $
  * Description: Default.jsp
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/23 00:39:16 $
+ * Date:        $Date: 2008/06/01 16:40:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -62,9 +62,11 @@ org.openmdx.portal.servlet.view.*,
 org.openmdx.portal.servlet.texts.*
 " %>
 <%
-	ApplicationContext app = (ApplicationContext)session.getValue("ObjectInspectorServlet.ApplicationContext");
+	ApplicationContext app = (ApplicationContext)session.getValue(WebKeys.APPLICATION_KEY);
+	ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_SHOW);
+	ShowObjectView view = (ShowObjectView)viewsCache.getView(request.getParameter(Action.PARAMETER_REQUEST_ID));
+	PaintScope paintScope = PaintScope.valueOf(request.getParameter(Action.PARAMETER_SCOPE));
 	Texts_1_0 texts = app.getTexts();
-	ShowObjectView view = (ShowObjectView)session.getValue(WebKeys.CURRENT_VIEW_KEY);
 	ShowInspectorControl inspectorControl = view.getShowInspectorControl();
 	String guiMode = app.getCurrentGuiMode();
 	HtmlPage p = HtmlPageFactory.openPage(
@@ -73,129 +75,134 @@ org.openmdx.portal.servlet.texts.*
 		out
 	);
 
-  // Set header
-  response.setHeader(
-	"Cache-Control",
-	"max-age=" + Integer.MAX_VALUE
-  );
-  response.setHeader(
-	"Pragma",
-	""
-  );
-
-  // Prolog
-  Control prolog = view.createControl(
-    "PROLOG",
-    PagePrologControl.class
-  );
-
-  // Epilog
-  Control epilog = view.createControl(
-    "EPILOG",
-    PageEpilogControl.class
-  );
-
-  	// Operation parameters
-  	PanelControl operationParams = (PanelControl)view.createControl(
-    	"PARAMS",
-    	PanelControl.class
-  	);
-  	operationParams.setLayout(PanelControl.LAYOUT_NONE);
-  	operationParams.addControl(inspectorControl.getOperationPaneControl(), OperationPaneControl.FRAME_PARAMETERS);
-  	operationParams.addControl(inspectorControl.getReportControl(), OperationPaneControl.FRAME_PARAMETERS);
-
-	// Dialogs
-	PanelControl dialogs = (PanelControl)view.createControl(
-		"dialogs",
-		PanelControl.class
-	);
-	dialogs.addControl(operationParams);
-
-	// North
-	Control north = view.createControl(null, SessionInfoControl.class);
-
-  	// West
-  	MenuControl menuRoot = (MenuControl)view.createControl(
-    	"menuRoot",
-    	MenuControl.class
-  	);
-  	menuRoot.addControl(
-  		view.createControl("rootmenu", RootMenuControl.class)
-  	);
-  	menuRoot.setMenuClass("navv");
-  	menuRoot.setLayout(MenuControl.LAYOUT_VERTICAL);
-  	PanelControl west = (PanelControl)view.createControl(
-    	"layoutWest",
-    	PanelControl.class
-  	);
-  	west.setLayout(PanelControl.LAYOUT_VERTICAL);
-  	west.setTableStyle("cellspacing=\"0\" cellpadding=\"0\"");
-  	west.addControl(
-    	new Control[]{
-			view.createControl("userwest", ScriptControl.class),
-      		menuRoot,
-      		view.createControl("nav-calendar", CalendarControl.class)
-    	}
-  	);
-
-  	// Title
-  	ObjectTitleControl title = (ObjectTitleControl)view.createControl(
-    	"TITLE",
-    	ObjectTitleControl.class
-  	);
-	title.setShowPerformance(false);
-  	// Menu
-  	MenuControl menu = (MenuControl)view.createControl(
-    	"opMenu",
-    	MenuControl.class
-  	);
-  	menu.setLayout(MenuControl.LAYOUT_HORIZONTAL);
-  	menu.setMenuClass("nav");
-	menu.setHasPrintOption(true);
-  	menu.addControl(inspectorControl.getOperationPaneControl());
-  	menu.addControl(inspectorControl.getWizardControl());
-  	menu.addControl(inspectorControl.getReportControl());
-
-  	// Operation results
-  	PanelControl operationResults = (PanelControl)view.createControl(
-    	"PARAMS",
-    	PanelControl.class
-  	);
-  	operationResults.setLayout(PanelControl.LAYOUT_NONE);
-  	operationResults.addControl(inspectorControl.getOperationPaneControl(), OperationPaneControl.FRAME_RESULTS);
-
-	// Errors
-	Control errors =	view.createControl(null, ShowErrorsControl.class);
-
-  // Attributes
-  Control attributes = inspectorControl.getAttributePaneControl();
-
-  // References
-  PanelControl references = (PanelControl)view.createControl(
-    "REFERENCES",
-    PanelControl.class
-  );
-  references.setLayout(PanelControl.LAYOUT_NONE);
-  ReferencePaneControl[] referencePaneControls = inspectorControl.getReferencePaneControl();
-  for(int i = 0; i < referencePaneControls.length; i++) {
-    referencePaneControls[i].setIsMultiDeleteEnabled(true);
-  }
-	references.addControl(
-		referencePaneControls,
-		ReferencePaneControl.FRAME_VIEW
-	);
-
-	// Center
-	PanelControl center = (PanelControl)view.createControl(
-  		"CENTER",
-  		PanelControl.class
-  	);
-  	center.setLayout(PanelControl.LAYOUT_VERTICAL);
-  	center.setTableStyle("class=\"wide\"");
-	center.addControl(title);
-	center.addControl(menu);
-
-	boolean noLayoutManager =
+	// PaintScope.FULL
+	if(paintScope == PaintScope.FULL) {
+		// Set header
+		response.setHeader(
+			"Cache-Control",
+			"max-age=" + Integer.MAX_VALUE
+		);
+		response.setHeader(
+			"Pragma",
+			""
+		);
+	
+		// Prolog
+		Control prolog = view.createControl(
+			"PROLOG",
+			PagePrologControl.class
+		);
+	
+		// Epilog
+		Control epilog = view.createControl(
+			"EPILOG",
+			PageEpilogControl.class
+		);
+	
+		// Operation parameters
+		PanelControl operationParams = (PanelControl)view.createControl(
+			"PARAMS",
+			PanelControl.class
+		);
+		operationParams.setLayout(PanelControl.LAYOUT_NONE);
+		operationParams.addControl(inspectorControl.getOperationPaneControl(), OperationPaneControl.FRAME_PARAMETERS);
+		operationParams.addControl(inspectorControl.getReportControl(), OperationPaneControl.FRAME_PARAMETERS);
+	
+		// Dialogs
+		PanelControl dialogs = (PanelControl)view.createControl(
+			"dialogs",
+			PanelControl.class
+		);
+		dialogs.addControl(operationParams);
+	
+		// North
+		Control north = view.createControl(
+			"north", 
+			SessionInfoControl.class
+		);
+	
+		// West
+		MenuControl menuRoot = (MenuControl)view.createControl(
+			"menuRoot",
+			MenuControl.class
+		);
+		menuRoot.addControl(
+			view.createControl("rootmenu", RootMenuControl.class)
+		);
+		menuRoot.setMenuClass("navv");
+		menuRoot.setLayout(MenuControl.LAYOUT_VERTICAL);
+		PanelControl west = (PanelControl)view.createControl(
+			"layoutWest",
+			PanelControl.class
+		);
+		west.setLayout(PanelControl.LAYOUT_VERTICAL);
+		west.setTableStyle("cellspacing=\"0\" cellpadding=\"0\"");
+		west.addControl(
+			new Control[]{
+				view.createControl("userwest", ScriptControl.class),
+				menuRoot,
+				view.createControl("nav-calendar", CalendarControl.class)
+			}
+		);
+	
+		// Title
+		ObjectTitleControl title = (ObjectTitleControl)view.createControl(
+			"TITLE",
+			ObjectTitleControl.class
+		);
+		title.setShowPerformance(false);
+		// Menu
+		MenuControl menu = (MenuControl)view.createControl(
+			"opMenu",
+			MenuControl.class
+		);
+		menu.setLayout(MenuControl.LAYOUT_HORIZONTAL);
+		menu.setMenuClass("nav");
+		menu.setHasPrintOption(true);
+		menu.addControl(inspectorControl.getOperationPaneControl());
+		menu.addControl(inspectorControl.getWizardControl());
+		menu.addControl(inspectorControl.getReportControl());
+	
+		// Operation results
+		PanelControl operationResults = (PanelControl)view.createControl(
+			"PARAMS",
+			PanelControl.class
+		);
+		operationResults.setLayout(PanelControl.LAYOUT_NONE);
+		operationResults.addControl(inspectorControl.getOperationPaneControl(), OperationPaneControl.FRAME_RESULTS);
+	
+		// Errors
+		Control errors =	view.createControl(null, ShowErrorsControl.class);
+	
+		// Attributes
+		Control attributes = inspectorControl.getAttributePaneControl();
+	
+		// References
+		PanelControl references = (PanelControl)view.createControl(
+			"REFERENCES",
+			PanelControl.class
+		);
+		references.setLayout(PanelControl.LAYOUT_NONE);
+		ReferencePaneControl[] referencePaneControls = inspectorControl.getReferencePaneControl();
+		for(int i = 0; i < referencePaneControls.length; i++) {
+			referencePaneControls[i].setIsMultiDeleteEnabled(true);
+		}
+		references.addControl(
+			referencePaneControls,
+			ReferencePaneControl.FRAME_VIEW
+		);
+	
+		// Center
+		PanelControl center = (PanelControl)view.createControl(
+			"CENTER",
+			PanelControl.class
+		);
+		center.setLayout(PanelControl.LAYOUT_VERTICAL);
+		center.setTableStyle("class=\"wide\"");
+		center.addControl(title);
+		center.addControl(menu);
+	
+		boolean noLayoutManager =
 		guiMode.equals(WebKeys.SETTING_GUI_MODE_BASIC);
 
 %>
@@ -324,7 +331,15 @@ org.openmdx.portal.servlet.texts.*
 			errors.paint(p, false);
 			center.paint(p, false);
 			operationResults.paint(p, false);
+			p.flush();
+%>
+			<div id="aPanel">
+<%
 			attributes.paint(p, false);
+			p.flush();
+%>
+			</div>
+<%
 			references.paint(p, false);
 			p.flush();
 %>
@@ -353,3 +368,20 @@ org.openmdx.portal.servlet.texts.*
 %>
 </body>
 </html>
+<%
+	}
+	// PaintScope.ATTRIBUTE_PANE
+	else if(paintScope == PaintScope.ATTRIBUTE_PANE) {
+		view.getAttributePane().getAttributePaneControl().paint(
+			p, 
+			false
+		);
+		p.flush();
+		p.close(false);
+%>
+	<script language="javascript" type="text/javascript">
+		//alert('postLoad show');
+	</script>
+<%
+	}
+%>

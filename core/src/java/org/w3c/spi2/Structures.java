@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Structures.java,v 1.8 2008/02/28 16:20:02 hburger Exp $
- * Description: Arrays Extension 
- * Revision:    $Revision: 1.8 $
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: Structures.java,v 1.18 2008/07/04 14:09:29 wfro Exp $
+ * Description: Structures 
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/28 16:20:02 $
+ * Date:        $Date: 2008/07/04 14:09:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -81,9 +82,6 @@ import javax.jdo.spi.PersistenceCapable;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
-import org.oasisopen.spi2.DataObjectIdBuilder;
-import org.oasisopen.spi2.ObjectId;
-import org.oasisopen.spi2.ObjectIdBuilder;
 import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.resource.spi.OrderedRecordFactory;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
@@ -191,7 +189,7 @@ public class Structures {
      */
     public static <S> S create(
         Class<S> structureClass,
-        List<Structures.Member<?>> members
+        List<? extends Structures.Member<?>> members
     ) {
         MetaData metaData = MetaData.getInstance(structureClass);
         return create(
@@ -279,7 +277,9 @@ public class Structures {
     ){
         return create(
             persistenceManager,
-            Arrays.asList(record.getRecordName().split("::")),
+            record.getRecordName().indexOf("::") > 0
+                ? Arrays.asList(record.getRecordName().split("::"))
+                : Arrays.asList(record.getRecordName().split(":")),
             record
         );
     }
@@ -288,15 +288,19 @@ public class Structures {
      * Return a mapped record view of the given structure
      * 
      * @param structure
+     * @param mapNullValues if true, fields with value==null are added
+     *        to the mapped record. They are not added if mapNullValues 
+     *        is false.
      * 
      * @return a mapped record view of the given structure
      * 
      * @exception ClassCastException unless isStructureInstance(structure) evaluates to <code>true</code>
      */
     public static MappedRecord toRecord(
-        Object structure
+        Object structure,
+        boolean mapNullValues
     ){
-        return ((PersistenceAware)structure).openmdxjdoRecord();
+        return ((PersistenceAware)structure).openmdxjdoRecord(mapNullValues);
     }
     
     /**
@@ -407,6 +411,23 @@ public class Structures {
         private transient String string = null;
         
         private transient MappedRecord record = null;
+        
+        /**
+         * Maps primitive types to their respective object class
+         */
+        private final static Map<Class<?>,Class<?>> PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING = 
+            new HashMap<Class<?>,Class<?>>();
+        
+        static {
+            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Boolean.TYPE, Boolean.class);
+            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Character.TYPE, Character.class);
+            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Byte.TYPE, Byte.class);
+            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Short.TYPE, Short.class);
+            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Integer.TYPE, Integer.class);
+            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Long.TYPE, Long.class);
+            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Float.TYPE, Float.class);
+            PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.put(Double.TYPE, Double.class);
+        }
 
         /**
          * Collection modification exception
@@ -457,13 +478,12 @@ public class Structures {
                     } else if (!getClass().isInstance(args[0])) {
                         return false;
                     } else {
-                        ProxyHandler that = (ProxyHandler) Proxy
-                            .getInvocationHandler(args[0]);
+                        ProxyHandler that = (ProxyHandler) Proxy.getInvocationHandler(args[0]);
                         return Arrays.deepEquals(this.values, that.values);
                     }
                 } else if ("toString".equals(methodName)) {
                     if (this.string == null) {
-                        this.string = toRecord().toString();
+                        this.string = toRecord(true).toString();
                     }
                     return this.string;
                 } else if ("hashCode".equals(methodName)) {
@@ -482,7 +502,7 @@ public class Structures {
                     }
                     return values;
                 } else if ("openmdxjdoRecord".equals(methodName)) {
-                    return toRecord();
+                    return toRecord((Boolean)args[0]);
                 }
             } else {
                 Enum<?> member = this.metaData.accessors.get(method);
@@ -615,7 +635,7 @@ public class Structures {
                                 is, vs
                             };
                         }
-                    } else if(memberType.isInstance(value)) {
+                    } else if(toObjectClass(memberType).isInstance(value)) {
                         target[slot] = value;
                     } else throw new IllegalArgumentException(
                         "Value of class '" + value.getClass().getName() + 
@@ -665,56 +685,72 @@ public class Structures {
             );
         }
 
-        MappedRecord toRecord() {
+        MappedRecord toRecord(
+            boolean mapNullValues
+        ) {
             if(this.record == null) try {
-                Object[] values = new Object[this.metaData.names.length];
+                List<Object> values = new ArrayList<Object>();
+                List<String> keys = new ArrayList<String>();
                 for(Enum<?> field : this.metaData.names) {
                     int slot = field.ordinal();
                     Object v = this.values[slot];
+                    Object value = null;
                     Class<?> t = this.metaData.memberTypes[slot];
                     if (Iterable.class.isAssignableFrom(t)) {
                         Object[] i = (Object[]) v;
                         if (SparseArray.class == t) {
                             if(v == null) {
-                                values[slot] = OrderedRecordFactory.getInstance().asMappedRecord(
+                                value = OrderedRecordFactory.getInstance().asMappedRecord(
                                     MetaData.toType(t),
                                     null, // recordShortDescription 
                                     NO_INDICES,
                                     EMPTY_COLLECTION
                                 );
                             } else {
-                                values[slot] = OrderedRecordFactory.getInstance().asMappedRecord(
+                                value = OrderedRecordFactory.getInstance().asMappedRecord(
                                     MetaData.toType(t),
                                     null, // recordShortDescription 
                                     i[0], // keys
-                                    toRecordValues((Object[])i[1]) // values
+                                    toRecordValues(
+                                        (Object[])i[1], 
+                                        mapNullValues
+                                    ) // values
                                 );
                             }
                         } else {
                             if(v == null) {
-                                values[slot] = OrderedRecordFactory.getInstance().asIndexedRecord(
+                                value = OrderedRecordFactory.getInstance().asIndexedRecord(
                                     MetaData.toType(t),
                                     null, // recordShortDescription 
                                     EMPTY_COLLECTION
                                 );
                             } else {
-                                values[slot] = OrderedRecordFactory.getInstance().asIndexedRecord(
+                                value = OrderedRecordFactory.getInstance().asIndexedRecord(
                                     MetaData.toType(t),
                                     null, // recordShortDescription 
-                                    toRecordValues(i)
+                                    toRecordValues(
+                                        i, 
+                                        mapNullValues
+                                    )
                                 );
                             }
                         }
                     } else {
-                        values[slot] = v;
+                        value = v instanceof PersistenceAware
+                            ? Structures.toRecord(v, mapNullValues)
+                            : v;
                     }
-                    this.record = OrderedRecordFactory.getInstance().asMappedRecord(
-                        this.metaData.type, 
-                        null, // recordShortDescription, 
-                        this.metaData.keys, 
-                        values
-                    );
+                    if(mapNullValues || (value != null)) {
+                        keys.add(this.metaData.keys[slot]);
+                        values.add(value);                        
+                    }
                 }
+                this.record = OrderedRecordFactory.getInstance().asMappedRecord(
+                    this.metaData.type, 
+                    null, // recordShortDescription, 
+                    keys.toArray(new String[keys.size()]),
+                    values.toArray(new Object[values.size()])
+                );
             } catch (ResourceException exception) {
                 throw new RuntimeException(
                     "Can not represent the structure '" + this.metaData.type + "' as mapped record",
@@ -725,7 +761,8 @@ public class Structures {
         }
         
         private Object[] toRecordValues(
-            Object[] structureValues
+            Object[] structureValues,
+            boolean mapNullValues
         ){
             Object[] recordValues = new Object[structureValues.length];
             int slot = 0;
@@ -737,12 +774,25 @@ public class Structures {
                         "Transient object's can't be used as value of a structure member"
                     );
                 } else if (v instanceof PersistenceAware){
-                    recordValues[slot++] = Structures.toRecord(v);
+                    recordValues[slot++] = Structures.toRecord(v, mapNullValues);
                 } else {
                     recordValues[slot++] = v;
                 }
             }
             return recordValues;
+        }
+
+        /**
+         * Convert primitive type to object class
+         * 
+         * @param memberClass either a primitive type or an object class
+         * 
+         * @return an object class
+         */
+        private static final Class<?> toObjectClass (Class<?> memberClass){
+            return memberClass.isPrimitive() ?
+                PRIMITIVE_TYPE_TO_OBJECT_CLASS_MAPPING.get(memberClass) :
+                memberClass;
         }
         
         /**
@@ -770,7 +820,7 @@ public class Structures {
             /**
              * The members
              */
-            private final Object[] values;
+            final Object[] values;
         
             /*
              * (non-Javadoc)
@@ -906,13 +956,13 @@ public class Structures {
                 this.end = end;
             }
         
-            private final int[] indices;
+            final int[] indices;
         
-            private final Object[] values;
+            final Object[] values;
         
-            private final int begin;
+            final int begin;
         
-            private final int end;
+            final int end;
         
             private transient Set<Map.Entry<Integer, Object>> entries;
         
@@ -1031,7 +1081,7 @@ public class Structures {
         
                     return new Iterator<Map.Entry<Integer, Object>>() {
         
-                        private int i = UnmodifiableSortedMap.this.begin;
+                        int i = UnmodifiableSortedMap.this.begin;
         
                         public boolean hasNext() {
                             return i < UnmodifiableSortedMap.this.end;
@@ -1215,7 +1265,7 @@ public class Structures {
         
         final String[] keys;
 
-        private final Map<Method, Enum<?>> accessors;
+        final Map<Method, Enum<?>> accessors;
 
         final Class<?>[] memberTypes;
 
@@ -1248,7 +1298,7 @@ public class Structures {
             return values;
         }
 
-        Object[] toValues(List<Structures.Member<?>> members) {
+        Object[] toValues(List<? extends Structures.Member<?>> members) {
             Object[] values = new Object[this.names.length];
             for (Structures.Member<?> member : members) {
                 values[member.getName().ordinal()] = member.getValue();
@@ -1327,27 +1377,7 @@ public class Structures {
                     "A persistence manager is required to create values of type " + type.getName() +
                     ": " + oid
                 );
-                ObjectIdBuilder objectIdBuilder = (ObjectIdBuilder) persistenceManager.getUserObject(
-                    ObjectIdBuilder.class.getName()
-                );
-                if(objectIdBuilder == null) objectIdBuilder = DataObjectIdBuilder.getInstance();
-                ObjectId objectId = objectIdBuilder.toObjectId(oid); 
-                List<String> targetClass = objectId.getTargetClass();
-                if(targetClass == null) throw new NullPointerException(
-                    "The object id's target class can't be determined by the current object id builder: " + oid
-                );
-                try {
-                    return persistenceManager.getObjectById(
-                        Classes.getApplicationClass(cciClassName(targetClass)),
-                        oid
-                    );
-                } catch (ClassNotFoundException exception) {
-                    throw newIllegalArgumentException(
-                        "persistence capable class",
-                        targetClass,
-                        exception
-                    );
-                }
+                return persistenceManager.getObjectById(type, value);
             } else {
                 return value;
             }
@@ -1508,9 +1538,13 @@ public class Structures {
         /**
          * Retrieve the structure's JCA record representation
          * 
+         * @param mapNullValues if true, fields with value==null are added
+         *        to the mapped record. They are not added if mapNullValues 
+         *        is false.
          * @return JCA record representation of the structure
          */
         MappedRecord openmdxjdoRecord(
+            boolean mapNullValues
         );
         
     }

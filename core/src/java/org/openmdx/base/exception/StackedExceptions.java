@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StackedExceptions.java,v 1.6 2007/10/10 16:05:53 hburger Exp $
+ * Name:        $Id: StackedExceptions.java,v 1.7 2008/03/21 18:30:08 hburger Exp $
  * Description: SPICE Exceptions: Stacked Exceptions Helper 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:53 $
+ * Date:        $Date: 2008/03/21 18:30:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,6 +62,7 @@ import org.openmdx.kernel.exception.BasicException;
  * @deprecated 
  * @see org.openmdx.kernel.exception.BasicException
  */
+@SuppressWarnings("unchecked")
 public final class StackedExceptions {
 
     /**

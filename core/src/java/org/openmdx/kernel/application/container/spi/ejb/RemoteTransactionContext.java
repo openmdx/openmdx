@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RemoteTransactionContext.java,v 1.1 2008/01/25 00:58:53 hburger Exp $
+ * Name:        $Id: RemoteTransactionContext.java,v 1.2 2008/03/27 19:16:28 hburger Exp $
  * Description: RemoteTransactionContext
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:53 $
+ * Date:        $Date: 2008/03/27 19:16:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,6 +61,7 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionRolledbackException;
 
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
 
@@ -96,14 +97,12 @@ public class RemoteTransactionContext
     /**
      * Abort an EJB business method invocation
      * 
-     * @param cause thethrowable causing the abort
+     * @param cause a BasicException representing the throwable causing the abort
      * 
      * @return the exception to be thrown
-     * 
-     * @throws RemoteException
      */
     public RemoteException end(
-         Throwable cause
+         BasicException cause
     ){
         try {
             super.endFail();

@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -38,12 +39,13 @@ import org.openmdx.uses.org.apache.commons.collections.OrderedIterator;
  * is here.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.4 $ $Date: 2005/04/07 14:15:24 $
+ * @version $Revision: 1.7 $ $Date: 2008/06/28 00:21:22 $
  *
  * @author Rich Dougherty
  * @author Phil Steitz
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractLinkedList implements List {
 
     /*
@@ -168,7 +170,8 @@ public abstract class AbstractLinkedList implements List {
         return toArray(new Object[size]);
     }
 
-    public Object[] toArray(Object[] array) {
+    public Object[] toArray(Object[] _array) {
+        Object[] array = _array;
         // Extend the array if needed
         if (array.length < size) {
             Class componentType = array.getClass().getComponentType();
@@ -819,9 +822,16 @@ public abstract class AbstractLinkedList implements List {
 
         public void remove() {
             checkModCount();
-            parent.removeNode(getLastNodeReturned());
+            if (current == next) {
+                // remove() following previous()
+                next = next.next;
+                parent.removeNode(getLastNodeReturned());
+            } else {
+                // remove() following next()
+                parent.removeNode(getLastNodeReturned());
+                nextIndex--;
+            }
             current = null;
-            nextIndex--;
             expectedModCount++;
         }
 

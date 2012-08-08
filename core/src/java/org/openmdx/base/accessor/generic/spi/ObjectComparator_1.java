@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ObjectComparator_1.java,v 1.7 2008/02/18 13:34:06 hburger Exp $
+ * Name:        $Id: ObjectComparator_1.java,v 1.9 2008/06/28 00:21:44 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 13:34:06 $
+ * Date:        $Date: 2008/06/28 00:21:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.collection.SparseArray;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.compatibility.base.dataprovider.cci.Directions;
 import org.openmdx.compatibility.base.dataprovider.cci.Orders;
 
 /**
@@ -71,6 +72,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.Orders;
  * To change the template for this generated type comment go to
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
+@SuppressWarnings("unchecked")
 public final class ObjectComparator_1 implements Serializable, Comparator {
 
     /**
@@ -154,7 +156,7 @@ public final class ObjectComparator_1 implements Serializable, Comparator {
                     if(vx == null) return -1;
                     if(vy == null) return +1;
                     int c = ((Comparable)vx).compareTo(vy);
-                    if (c != 0) return s.order() == Orders.ASCENDING ? c : -c;
+                    if (c != 0) return s.order() == Directions.ASCENDING ? c : -c;
                 }
             }
             return 0;

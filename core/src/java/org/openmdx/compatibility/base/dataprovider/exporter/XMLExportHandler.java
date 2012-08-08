@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMLExportHandler.java,v 1.13 2007/10/10 16:05:59 hburger Exp $
+ * Name:        $Id: XMLExportHandler.java,v 1.15 2008/05/12 10:45:51 wfro Exp $
  * Description: Export handler for synchronizer producing XML output
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:59 $
+ * Date:        $Date: 2008/05/12 10:45:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,16 +64,13 @@ import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.code.Multiplicities;
 
 /**
  * Class to export the callback data as an XML file.
- * 
- * @author anyff
- *
  */
+@SuppressWarnings("unchecked")
 public class XMLExportHandler implements TraversalHandler {
 
     /**
@@ -137,12 +134,12 @@ public class XMLExportHandler implements TraversalHandler {
     }
 
     public boolean startObject(
+        Path parentPath,
         String qualifiedName,
         String qualifierName,
         String id,
         short operation
     ) throws ServiceException {
-        
         XmlContentHandler.Attributes atts = new XmlContentHandler.Attributes();
         atts.addCDATA(qualifierName, id);
 
@@ -187,6 +184,7 @@ public class XMLExportHandler implements TraversalHandler {
     
     //-----------------------------------------------------------------------
     public boolean featureComplete(
+        Path reference,
         DataproviderObject_1_0 object
     ) throws ServiceException {
         Map tags = this.getAttributeTags(object);        
@@ -372,11 +370,11 @@ public class XMLExportHandler implements TraversalHandler {
     public void startTraversal(
         List startPaths
     ) throws ServiceException {
-        CharSequence sb = StringBuilders.newStringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (Iterator i = startPaths.iterator(); i.hasNext();) {
-            StringBuilders.asStringBuilder(sb).append(((Path) i.next()).toString());
+            sb.append(((Path) i.next()).toString());
             if (i.hasNext()) {
-                StringBuilders.asStringBuilder(sb).append(";");
+                sb.append(";");
             }
         }
 

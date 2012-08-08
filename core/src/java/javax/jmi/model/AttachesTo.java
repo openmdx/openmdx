@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings("unchecked")
 public interface AttachesTo extends RefAssociation {
     public boolean exists(ModelElement modelElement, Tag tag);
     public java.util.Collection getModelElement(Tag tag);

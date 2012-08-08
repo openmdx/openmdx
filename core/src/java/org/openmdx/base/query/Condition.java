@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Condition.java,v 1.4 2005/04/06 15:28:18 wfro Exp $
- * Description: 
- * Revision:    $Revision: 1.4 $
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: Condition.java,v 1.5 2008/04/25 23:34:29 wfro Exp $
+ * Description: Condition
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/06 15:28:18 $
+ * Date:        $Date: 2008/04/25 23:34:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,116 +61,131 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.compatibility.base.query.Quantors;
 
 public abstract class Condition
-  implements Serializable, Cloneable {
+    implements Serializable, Cloneable {
 
-  protected Condition(
-      Object[] values
-  ) {
-    this((short)-1, null, false, values);
-  }
-  
-  protected Condition(
-      short quantor,
-      String feature,
-      boolean fulfils,
-      Object[] values
-  ) {
-    this.quantor = quantor;
-    this.feature = feature;
-    this.fulfils = fulfils;
-    this.values = values;
-  }
-  
-  public Object clone(
-  ) throws CloneNotSupportedException {
-    return super.clone();
-  }
-  
-  public short getQuantor() {
-    return this.quantor;
-  }
-  
-  public void setQuantor(
-      short quantor
-  ) {
-    this.quantor = quantor;
-  }
-  
-  public String getFeature() {
-    return this.feature;
-  }
-  
-  public void setFeature(
-      String feature
-  ) {
-    this.feature = feature;
-  }
-  
-  public boolean isFulfil() {
-    return this.fulfils;
-  }
-  
-  public void setFulfil(
-      boolean fulfil
-  ) {
-    this.fulfils = fulfil;
-  }
-  
-  public Object[] getValue(
-  ) {
-    return this.values;
-  }
-  
-  public Object getValue(
-    int index
-  ) {
-    return this.values[index];
-  }
-  
-  public void setValue(
-    int index,
-    Object value
-  ) {
-    this.values[index] = value;
-  }
-  
-  public void setValue(
-    Object[] values
-  ) {
-    this.values = values;
-  }
-  
-  public abstract String getName();
-
-  public String toString (
-  ) {
-    try {
-      return Records.getRecordFactory().asMappedRecord(
-          getClass().getName(), 
-          Quantors.toString(quantor) + ' ' + feature + ' ' + getName() + ' ' + Arrays.asList(values),
-          new String[]{
-              "quantor",
-              "feature",
-              "operator",
-              "values"
-          }, 
-          new Object[]{
-              Quantors.toString(quantor),
-              feature, 
-              getName(), 
-              Arrays.asList(values)
-          }
-      ).toString();
-    } catch (ResourceException exception) {
-      throw new RuntimeServiceException(exception);
+    //-----------------------------------------------------------------------    
+    protected Condition(
+        Object[] values
+    ) {
+        this((short)-1, null, false, values);
     }
-  }
   
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private short quantor;
-  private String feature;
-  private boolean fulfils;
-  protected Object[] values;
+    //-----------------------------------------------------------------------    
+    protected Condition(
+        short quantor,
+        String feature,
+        boolean fulfils,
+        Object[] values
+    ) {
+        this.quantor = quantor;
+        this.feature = feature;
+        this.fulfils = fulfils;
+        this.values = values;
+    }
+
+    //-----------------------------------------------------------------------    
+    public Object clone(
+    ) throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+    //-----------------------------------------------------------------------    
+    public short getQuantor() {
+        return this.quantor;
+    }
+  
+    //-----------------------------------------------------------------------    
+    public void setQuantor(
+        short quantor
+    ) {
+        this.quantor = quantor;
+    }
+
+    //-----------------------------------------------------------------------    
+    public String getFeature() {
+        return this.feature;
+    }
+
+    //-----------------------------------------------------------------------    
+    public void setFeature(
+        String feature
+    ) {
+        this.feature = feature;
+    }
+
+    //-----------------------------------------------------------------------    
+    public boolean isFulfil() {
+        return this.fulfils;
+    }
+
+    //-----------------------------------------------------------------------    
+    public void setFulfil(
+        boolean fulfil
+    ) {
+        this.fulfils = fulfil;
+    }
+
+    //-----------------------------------------------------------------------    
+    public Object[] getValue(
+    ) {
+        return this.values;
+    }
+
+    //-----------------------------------------------------------------------    
+    public Object getValue(
+        int index
+    ) {
+        return this.values[index];
+    }
+
+    //-----------------------------------------------------------------------    
+    public void setValue(
+        int index,
+        Object value
+    ) {
+        this.values[index] = value;
+    }
+
+    //-----------------------------------------------------------------------    
+    public void setValue(
+        Object[] values
+    ) {
+        this.values = values;
+    }
+
+    //-----------------------------------------------------------------------    
+    public abstract String getName();
+
+    //-----------------------------------------------------------------------    
+    public String toString (
+    ) {
+        try {
+            return Records.getRecordFactory().asMappedRecord(
+                getClass().getName(), 
+                Quantors.toString(quantor) + ' ' + feature + ' ' + getName() + ' ' + Arrays.asList(values),
+                new String[]{
+                    "quantor",
+                    "feature",
+                    "operator",
+                    "values"
+                }, 
+                new Object[]{
+                    Quantors.toString(quantor),
+                    feature, 
+                    getName(), 
+                    Arrays.asList(values)
+                }
+            ).toString();
+        } catch (ResourceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
+    }
+  
+    //-------------------------------------------------------------------------
+    // Variables
+    //-------------------------------------------------------------------------
+    private short quantor;
+    private String feature;
+    private boolean fulfils;
+    protected Object[] values;
 }

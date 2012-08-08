@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CharacterLargeObjects.java,v 1.2 2007/12/17 16:54:04 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: CharacterLargeObjects.java,v 1.5 2008/04/21 16:52:08 hburger Exp $
  * Description: Object Relational Mapping 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/17 16:54:04 $
+ * Date:        $Date: 2008/04/21 16:52:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2007, OMEX AG, Switzerland
+ * Copyright (c) 2006-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,12 +51,14 @@
 package org.w3c.cci2;
 
 import java.io.CharArrayReader;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -96,6 +98,10 @@ public class CharacterLargeObjects {
             this.value = value;
         }
 
+        /**
+         * 
+         */
+        private final char[] value;
         
         /* (non-Javadoc)
          * @see org.w3c.cci2.LargeObject#getLength()
@@ -105,7 +111,6 @@ public class CharacterLargeObjects {
             return Long.valueOf(this.value.length);
         }
 
-
         /* (non-Javadoc)
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
          */
@@ -114,10 +119,19 @@ public class CharacterLargeObjects {
             return new CharArrayReader(this.value);
         }
 
-        /**
-         * 
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
          */
-        private final char[] value;
+        public void getContent(
+            Writer writer, 
+            long position
+        ) throws IOException {
+            int length = (int) (this.value.length - position);
+            if(length < 0) throw new EOFException(
+                "Position " + position + " is larger than the objects length " + this.value.length
+            );
+            writer.write(this.value, (int) position, length);
+        }
 
     }
     
@@ -141,13 +155,28 @@ public class CharacterLargeObjects {
             this.url = url;
         }
 
+        /**
+         * 
+         */
+        private final URL url;
+
+        /**
+         * 
+         */
+        private transient URLConnection connection;
+        
+        /**
+         * 
+         */
+        private transient Long length;
+        
         /* (non-Javadoc)
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
          */
         public Reader getContent() throws IOException {
-            URLConnection connection = this.url.openConnection();
+            URLConnection connection = getConnection();
             String encoding = connection.getContentEncoding();
-            InputStream stream = this.url.openStream();
+            InputStream stream = connection.getInputStream();
             return encoding == null ? new InputStreamReader(
                 stream
             ) : new InputStreamReader(
@@ -161,14 +190,36 @@ public class CharacterLargeObjects {
          */
         public Long getLength(
         ){
-            return null;
+            return this.length;
         }
 
         /**
+         * Opens the URL connection
          * 
+         * @return the URL connection
+         * 
+         * @throws IOException
          */
-        private final URL url;
+        protected URLConnection getConnection() throws IOException{
+            return this.connection == null ?
+                this.connection = url.openConnection() :
+                this.connection;
+        }
 
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
+         */
+        public void getContent(
+            Writer writer, 
+            long position
+        ) throws IOException {
+            this.length = position + streamCopy(
+                getContent(),
+                position,
+                writer
+            );
+        }
+        
     }
 
     public static CharacterLargeObject valueOf(
@@ -191,6 +242,16 @@ public class CharacterLargeObjects {
             this.file = file;
         }
 
+        /**
+         * 
+         */
+        private final File file;
+        
+        /**
+         * 
+         */
+        private transient Long length = null;
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
          */
@@ -207,13 +268,22 @@ public class CharacterLargeObjects {
          */
         public Long getLength(
         ){
-            return null;
+            return this.length;
         }
 
-        /**
-         * 
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
          */
-        private final File file;
+        public void getContent(
+            Writer writer, 
+            long position
+        ) throws IOException {
+            this.length = position + streamCopy(
+                getContent(),
+                position,
+                writer
+            );
+        }
 
     }
 
@@ -237,6 +307,11 @@ public class CharacterLargeObjects {
             this.delegate = delegate;
         }
 
+        /**
+         * 
+         */
+        private final ReadableLargeObject delegate;
+        
         /* (non-Javadoc)
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
          */
@@ -258,12 +333,24 @@ public class CharacterLargeObjects {
             } catch (ServiceException exception) {
                 throw new ExtendedIOException(exception);
             }
-        }        
-        
-        /**
-         * 
+        }
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
          */
-        private final ReadableLargeObject delegate;
+        public void getContent(
+            Writer writer, 
+            long position
+        ) throws IOException {
+            try {
+                this.delegate.getCharacterStream(
+                    writer,
+                    position
+                );
+            } catch (ServiceException exception) {
+                throw new ExtendedIOException(exception);
+            }
+        }        
         
     }
     
@@ -279,5 +366,40 @@ public class CharacterLargeObjects {
     ){
         return length < 0 ? null : Long.valueOf(length);
     }
+
+    /**
+     * Copy a reader's content to a writer
+     * @param source
+     * @param position
+     * @param target
+     * 
+     * @return the number of character's written to the writer
+     * 
+     * @throws IOException
+     */
+    public static long streamCopy(
+        Reader source,
+        long position,
+        Writer target
+    ) throws IOException {
+        char[] buffer = new char[CAPACITY];
+        if(position != 0l) {
+            source.skip(position);
+        }
+        long count = 0l;
+        for(
+            int i = source.read(buffer);
+            i >= 0;
+        ){
+            count += i;
+            target.write(buffer, 0, i);
+        }
+        return count;
+    }
+
+    /**
+     * Default capacity for stream copy
+     */
+    private final static int CAPACITY = 10000;
 
 }

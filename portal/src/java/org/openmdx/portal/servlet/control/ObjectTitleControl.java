@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectTitleControl.java,v 1.27 2007/12/13 01:24:01 wfro Exp $
+ * Name:        $Id: ObjectTitleControl.java,v 1.28 2008/05/01 21:43:55 wfro Exp $
  * Description: ObjectTitleControl
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:24:01 $
+ * Date:        $Date: 2008/05/01 21:43:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -94,6 +94,7 @@ public class ObjectTitleControl
     }
     
     //---------------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,

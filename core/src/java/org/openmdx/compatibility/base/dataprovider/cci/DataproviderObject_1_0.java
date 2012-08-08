@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderObject_1_0.java,v 1.3 2004/04/02 16:59:01 wfro Exp $
+ * Name:        $Id: DataproviderObject_1_0.java,v 1.4 2008/03/21 18:45:24 hburger Exp $
  * Description: spice: dataprovider object interface
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:01 $
+ * Date:        $Date: 2008/03/21 18:45:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,7 @@ import org.openmdx.compatibility.base.naming.Path;
 /**
  * Dataprovider objects implement this interface
  */
+@SuppressWarnings("unchecked")
 public interface DataproviderObject_1_0 {
 
     /**

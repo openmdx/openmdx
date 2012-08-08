@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1_1.java,v 1.1 2005/09/28 06:08:13 hburger Exp $
+ * Name:        $Id: Model_1_1.java,v 1.2 2008/03/21 18:40:07 hburger Exp $
  * Description: Model_1_1 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/09/28 06:08:13 $
+ * Date:        $Date: 2008/03/21 18:40:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import org.openmdx.base.exception.ServiceException;
 /**
  * Model_1_1
  */
+@SuppressWarnings("unchecked")
 public interface Model_1_1
     extends Model_1_0
 {

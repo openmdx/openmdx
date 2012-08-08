@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MappedRecordFormatter.java,v 1.7 2006/05/31 15:02:56 hburger Exp $
+ * Name:        $Id: MappedRecordFormatter.java,v 1.8 2008/03/21 18:32:18 hburger Exp $
  * Description: Mapped Record Formatter
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/05/31 15:02:56 $
+ * Date:        $Date: 2008/03/21 18:32:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -93,6 +93,7 @@ public class MappedRecordFormatter {
      * @param recordShortDescription
      * @param source
      */
+    @SuppressWarnings("unchecked")
     public MappedRecordFormatter(
         String recordName,
         String recordShortDescription,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: EmbeddedObject_1.java,v 1.5 2004/12/22 17:19:31 hburger Exp $
+ * Name:        $Id: EmbeddedObject_1.java,v 1.7 2008/04/21 16:53:41 hburger Exp $
  * Description: Embedded View Object
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/12/22 17:19:31 $
+ * Date:        $Date: 2008/04/21 16:53:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,7 +64,6 @@ import org.openmdx.base.accessor.generic.spi.AbstractObject_1;
 import org.openmdx.base.accessor.generic.spi.DelegatingObject_1;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.Container;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
@@ -72,6 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Embedded View Object
  */
+@SuppressWarnings("unchecked")
 abstract class EmbeddedObject_1 
     extends DelegatingObject_1 
     implements Serializable
@@ -130,7 +130,7 @@ abstract class EmbeddedObject_1
     }
 
     public Object_1_0 objCopy(
-        Container there, 
+        FilterableMap there, 
         String criteria
     ) throws ServiceException {
         throw new ServiceException(

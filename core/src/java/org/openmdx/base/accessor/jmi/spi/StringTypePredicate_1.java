@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StringTypePredicate_1.java,v 1.1 2008/01/08 16:16:31 hburger Exp $
+ * Name:        $Id: StringTypePredicate_1.java,v 1.2 2008/03/19 17:22:02 hburger Exp $
  * Description: String Type Predicate implementation
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2008/03/19 17:22:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -495,6 +495,7 @@ class StringTypePredicate_1
      * 
      * @return the modified operands
      */
+    @SuppressWarnings("unchecked")
     static Collection sqlWildcard (
         Collection source,
         boolean prefix

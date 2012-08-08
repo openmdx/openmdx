@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: OverriddenTldConfig.java,v 1.1 2008/01/13 21:38:20 hburger Exp $
+ * Name:        $Id: OverriddenTldConfig.java,v 1.2 2008/03/13 14:06:00 hburger Exp $
  * Description: Extended Context
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/13 21:38:20 $
+ * Date:        $Date: 2008/03/13 14:06:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -121,6 +121,7 @@ import org.xml.sax.InputSource;
  * We could just extend the original class if it wasn't final and override the 
  * method getJarPaths() if it was protected instead of private.
  */
+@SuppressWarnings("unchecked")
 public final class OverriddenTldConfig  {
 
 	// Names of JARs that are known not to contain any TLDs
@@ -316,6 +317,7 @@ public final class OverriddenTldConfig  {
 		File tldCache=null;
 
 		if (context instanceof StandardContext) {
+			@SuppressWarnings("unused")
 			File workDir= (File)
 			((StandardContext)context).getServletContext().getAttribute(Globals.WORK_DIR_ATTR);
 			//tldCache=new File( workDir, "tldCache.ser");

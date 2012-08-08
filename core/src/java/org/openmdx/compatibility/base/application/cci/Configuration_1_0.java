@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Configuration_1_0.java,v 1.1 2004/07/15 15:56:35 hburger Exp $
+ * Name:        $Id: Configuration_1_0.java,v 1.2 2008/03/21 18:45:20 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/07/15 15:56:35 $
+ * Date:        $Date: 2008/03/21 18:45:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,6 +62,7 @@ import org.openmdx.compatibility.base.application.configuration.Configuration;
  *
  * @obsolete	replaced by ConfigurationProvider_1_0
  */
+@SuppressWarnings("unchecked")
 public interface Configuration_1_0 { 
 
 	/**

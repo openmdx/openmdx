@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractPlugin_1.java,v 1.4 2008/02/29 18:05:19 hburger Exp $
+ * Name:        $Id: AbstractPlugin_1.java,v 1.9 2008/06/28 00:21:27 hburger Exp $
  * Description: AbstractPlugin_1
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:05:19 $
+ * Date:        $Date: 2008/06/28 00:21:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -73,6 +73,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
+import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.layer.application.CommonConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
@@ -97,7 +98,8 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_3;
  */
 @SuppressWarnings("unchecked")
 abstract public class AbstractPlugin_1
-  extends StreamOperationAwareLayer_1 {
+  extends StreamOperationAwareLayer_1 
+{
   
     //---------------------------------------------------------------------------
     /**
@@ -221,7 +223,7 @@ abstract public class AbstractPlugin_1
         }
         this.objectIsNew.put(
             identity,
-            new Boolean(object == null)
+            Boolean.valueOf(object == null)
         );
         return object;    
     }
@@ -253,17 +255,17 @@ abstract public class AbstractPlugin_1
         //
         // Default  Qualifier Type
         //
-        this.defaultQualifierType = configuration.isOn(CommonConfigurationEntries.SEQUENCE_SUPPORTED) 
+        this.defaultQualifierType = configuration.isOn(SharedConfigurationEntries.SEQUENCE_SUPPORTED) 
             ? "SEQUENCE" 
-            : configuration.isOn(CommonConfigurationEntries.COMPRESS_UID) 
+            : configuration.isOn(SharedConfigurationEntries.COMPRESS_UID) 
                 ? "UID" 
                 : "UUID";
         //
         // batchSize
         //
-        if(configuration.values(CommonConfigurationEntries.BATCH_SIZE).size() > 0) {
+        if(configuration.values(SharedConfigurationEntries.BATCH_SIZE).size() > 0) {
             this.batchSize = ((Number)configuration.values(
-                CommonConfigurationEntries.BATCH_SIZE).get(0)
+                SharedConfigurationEntries.BATCH_SIZE).get(0)
             ).intValue();
         }
         //
@@ -277,13 +279,13 @@ abstract public class AbstractPlugin_1
         //
         // packageImpl
         //
-        if(configuration.values(CommonConfigurationEntries.MODEL_PACKAGE).size() > 0) {
+        if(configuration.values(SharedConfigurationEntries.MODEL_PACKAGE).size() > 0) {
             this.packageImpls = new HashMap();
             for(
-                ListIterator i = configuration.values(CommonConfigurationEntries.MODEL_PACKAGE).listIterator();
+                ListIterator i = configuration.values(SharedConfigurationEntries.MODEL_PACKAGE).listIterator();
                 i.hasNext();
             ) {
-                String packageImpl = (String)configuration.values(CommonConfigurationEntries.PACKAGE_IMPL).get(
+                String packageImpl = (String)configuration.values(SharedConfigurationEntries.PACKAGE_IMPL).get(
                     i.nextIndex()
                 );
                 this.packageImpls.put(
@@ -296,10 +298,10 @@ abstract public class AbstractPlugin_1
         // Switch configuration
         //
         SparseList dataproviderSource = configuration.values(
-            CommonConfigurationEntries.DATAPROVIDER_CONNECTION
+            SharedConfigurationEntries.DATAPROVIDER_CONNECTION
         );
         SparseList delegationPathSource = configuration.values(
-            CommonConfigurationEntries.DELEGATION_PATH
+            SharedConfigurationEntries.DELEGATION_PATH
         );
         if(delegationPathSource.isEmpty()){
             if(dataproviderSource.isEmpty()) {
@@ -308,8 +310,8 @@ abstract public class AbstractPlugin_1
             else {
                 SysLog.info(
                     "The org:openmdx:compatibility:runtime1 model allowing to explore other dataproviders is deprecated",
-                    "Specifying some " + CommonConfigurationEntries.DATAPROVIDER_CONNECTION +
-                    " entries without their corresponding " + CommonConfigurationEntries.DELEGATION_PATH +
+                    "Specifying some " + SharedConfigurationEntries.DATAPROVIDER_CONNECTION +
+                    " entries without their corresponding " + SharedConfigurationEntries.DELEGATION_PATH +
                     " is deprecated"
                 );
                 List dataproviderTarget = dataproviderSource.population(); 
@@ -336,7 +338,7 @@ abstract public class AbstractPlugin_1
                         BasicException.Code.INVALID_CONFIGURATION,
                         new BasicException.Parameter[]{
                             new BasicException.Parameter(
-                                CommonConfigurationEntries.DELEGATION_PATH,
+                                SharedConfigurationEntries.DELEGATION_PATH,
                                 delegationPathSource
                             ),
                             new BasicException.Parameter(
@@ -344,7 +346,7 @@ abstract public class AbstractPlugin_1
                                 i
                             ),
                             new BasicException.Parameter(
-                                CommonConfigurationEntries.DATAPROVIDER_CONNECTION,
+                                SharedConfigurationEntries.DATAPROVIDER_CONNECTION,
                                 dataproviderSource
                             )
                         },
@@ -370,7 +372,7 @@ abstract public class AbstractPlugin_1
         //
         // get model
         //
-        List models = configuration.values(CommonConfigurationEntries.MODEL);
+        List models = configuration.values(SharedConfigurationEntries.MODEL);
         if (models.isEmpty()) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -414,23 +416,29 @@ abstract public class AbstractPlugin_1
             requests
         );
         this.header = header;
-        this.delegation = new RequestCollection(
-            header,
-            this.router == null
-                ? this.getDelegation()
-                : this.router
-        );
-        Provider_1_0 provider = new Provider_1(
-            this.delegation,
-            false // transactionPolicyIsNew
-        );
-        Connection_1_5 interaction = new Connection_1(
-            provider,
-            true, // containerManagedUnitOfWork
-            this.defaultQualifierType
-        ); 
-        interaction.setModel(this.model);
-        this.manager = new Manager_1(interaction);
+        Dataprovider_1_0 delegation = this.router == null ? 
+            this.getDelegation() : 
+            this.router;
+        if(delegation == null) {
+            this.delegation = null;
+            this.manager = null;
+        } else {
+            this.delegation = new RequestCollection(
+                header,
+                delegation
+            );
+            Provider_1_0 provider = new Provider_1(
+                this.delegation,
+                false // transactionPolicyIsNew
+            );
+            Connection_1_5 interaction = new Connection_1(
+                provider,
+                true, // containerManagedUnitOfWork
+                this.defaultQualifierType
+            ); 
+            interaction.setModel(this.model);
+            this.manager = new Manager_1(interaction);
+        }
         this.objectFactory = this.getObjectFactory();
         this.objectFactory.getUnitOfWork().afterBegin();
         this.objectCache.clear();
@@ -526,22 +534,30 @@ abstract public class AbstractPlugin_1
     public ObjectFactory_1_0 getManager(
         ServiceHeader header
     ) throws ServiceException {
-        Provider_1_0 provider = new Provider_1(
-            new RequestCollection(
-                header,
-                this.router
-            ),
-            false
-        );
         return new Manager_1(
             new Connection_1(
-                provider,
+                getProvider(header),
                 true,
                 this.defaultQualifierType
             )
         );
     }
 
+    /**
+     * Create a new provider with specified ServiceHeader
+     */
+    public Provider_1_0 getProvider(
+        ServiceHeader header
+    ) throws ServiceException {
+        return new Provider_1(
+            new RequestCollection(
+                header,
+                this.router
+            ),
+            false
+        );
+    }
+    
     //---------------------------------------------------------------------------
     public ServiceHeader getServiceHeader(
     ) {

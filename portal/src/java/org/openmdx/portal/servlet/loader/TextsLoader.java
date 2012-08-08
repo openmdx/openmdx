@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextsLoader.java,v 1.6 2007/01/21 20:46:42 wfro Exp $
+ * Name:        $Id: TextsLoader.java,v 1.7 2008/04/04 17:01:12 hburger Exp $
  * Description: TextsLoader
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:46:42 $
+ * Date:        $Date: 2008/04/04 17:01:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,6 +58,7 @@
  */
 package org.openmdx.portal.servlet.loader;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -90,7 +91,7 @@ public class TextsLoader
   ) throws ServiceException {
     System.out.println("Loading texts");
     // 2-dim list: first index=locale, second index = input stream
-    List textsInputStreams = new ArrayList();
+    List<List<InputStream>> textsInputStreams = new ArrayList<List<InputStream>>();
     int fallbackLocaleIndex = 0;
     for(int i = 0; i < locale.length; i++) {
         Set localeTextsPaths = new HashSet();
@@ -108,7 +109,7 @@ public class TextsLoader
                 localeTextsPaths = context.getResourcePaths("/WEB-INF/config/texts/" + locale[fallbackLocaleIndex]);
             }
         }
-        List localeTextsInputStreams = new ArrayList();
+        List<InputStream> localeTextsInputStreams = new ArrayList<InputStream>();
         textsInputStreams.add(localeTextsInputStreams);
         for(Iterator j = localeTextsPaths.iterator(); j.hasNext(); ) {
             String path = (String)j.next();

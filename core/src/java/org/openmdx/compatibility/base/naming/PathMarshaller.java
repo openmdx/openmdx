@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PathMarshaller.java,v 1.8 2007/10/10 16:06:03 hburger Exp $
+ * Name:        $Id: PathMarshaller.java,v 1.9 2008/03/21 18:48:02 hburger Exp $
  * Description: Property 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:03 $
+ * Date:        $Date: 2008/03/21 18:48:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,12 +56,12 @@ import java.util.ArrayList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 
 
 /**
  * Converts Path into a human readable form.
  */
+@SuppressWarnings("unchecked")
 public final class PathMarshaller
     implements Marshaller
 {
@@ -106,14 +106,14 @@ public final class PathMarshaller
         Object[] source = (Object[])charSequences;
         if (source == null) return null;
         if (source.length==0) return "";
-        CharSequence target = StringBuilders.newStringBuilder();
+        StringBuilder target = new StringBuilder();
         appendMarshalled(target,source[0]);
     for(
       int i=1;
       i<source.length;
       i++
     )appendMarshalled(
-                StringBuilders.asStringBuilder(target).append(COMPONENT_SEPARATOR),
+                target.append(COMPONENT_SEPARATOR),
                 source[i]
         );
         return target;
@@ -128,11 +128,11 @@ public final class PathMarshaller
      *            The component to be appended.
    */
     private void appendMarshalled (
-        CharSequence buffer,
+        StringBuilder buffer,
         Object charSequence
     ) throws ServiceException {
         int cursor = buffer.length();
-        StringBuilders.asStringBuilder(buffer).append(charSequence);
+        buffer.append(charSequence);
         if(cursor == buffer.length())throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
@@ -147,9 +147,7 @@ public final class PathMarshaller
             if (
                 character == COMPONENT_SEPARATOR || 
                 character == FIELD_SEPARATOR
-            ) StringBuilders.asStringBuilder(
-                buffer
-            ).insert(
+            ) buffer.insert(
                 index,
                 character
             );
@@ -214,7 +212,7 @@ public final class PathMarshaller
         ArrayList target,
         String source
     ){
-        CharSequence buffer = StringBuilders.newStringBuilder();
+        StringBuilder buffer = new StringBuilder();
         int end;
         for (
             int start = 0;
@@ -227,7 +225,7 @@ public final class PathMarshaller
         ! (source.charAt(end) == COMPONENT_SEPARATOR) &&
         ! (source.charAt(end) == FIELD_SEPARATOR)
       ) end++;
-      StringBuilders.asStringBuilder(buffer).append(source.substring(start,++end));
+      buffer.append(source.substring(start,++end));
     }
         target.add(buffer.toString());
     }

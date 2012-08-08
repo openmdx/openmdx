@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ManagedKeyStoreConnection.java,v 1.2 2007/10/10 16:05:53 hburger Exp $
+ * Name:        $Id: ManagedKeyStoreConnection.java,v 1.3 2008/06/28 00:21:36 hburger Exp $
  * Description: Managed Connection 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:53 $
+ * Date:        $Date: 2008/06/28 00:21:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -270,7 +270,7 @@ class ManagedKeyStoreConnection
      * 
      * @return the alias
      */
-    private String getAlias(){
+    String getAlias(){
         return this.credential.getUserName();
     }
     

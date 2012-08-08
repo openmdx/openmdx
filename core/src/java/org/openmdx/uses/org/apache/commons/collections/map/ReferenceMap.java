@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -29,7 +30,7 @@ import java.io.Serializable;
  * If non-hard references are used, then the garbage collector can remove
  * mappings if a key or value becomes unreachable, or if the JVM's memory is
  * running low. For information on how the different reference types behave,
- * see {@link Reference}.
+ * see {@link java.lang.ref.Reference Reference}.
  * <p>
  * Different types of references can be specified for keys and values.
  * The keys can be configured to be weak but the values hard,
@@ -43,7 +44,7 @@ import java.io.Serializable;
  * {@link org.openmdx.uses.org.apache.commons.collections.map.ReferenceIdentityMap ReferenceIdentityMap}.
  * It differs in that keys and values in this class are compared using <code>equals()</code>.
  * <p>
- * This {@link Map} implementation does <i>not</i> allow null elements.
+ * This {@link java.util.Map Map} implementation does <i>not</i> allow null elements.
  * Attempting to add a null key or value to the map will raise a <code>NullPointerException</code>.
  * <p>
  * This implementation is not synchronized.
@@ -54,6 +55,12 @@ import java.io.Serializable;
  * All the available iterators can be reset back to the start by casting to
  * <code>ResettableIterator</code> and calling <code>reset()</code>.
  * <p>
+ * <strong>Note that ReferenceMap is not synchronized and is not thread-safe.</strong>
+ * If you wish to use this map from multiple threads concurrently, you must use
+ * appropriate synchronization. The simplest approach is to wrap this map
+ * using {@link java.util.Collections#synchronizedMap}. This class may throw 
+ * exceptions when accessed by concurrent threads without synchronization.
+ * <p>
  * NOTE: As from Commons Collections 3.1 this map extends <code>AbstractReferenceMap</code>
  * (previously it extended AbstractMap). As a result, the implementation is now
  * extensible and provides a <code>MapIterator</code>.
@@ -61,7 +68,7 @@ import java.io.Serializable;
  * @see java.lang.ref.Reference
  * 
  * @since Commons Collections 3.0 (previously in main package v2.1)
- * @version $Revision: 1.3 $ $Date: 2004/10/24 12:17:17 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:16 $
  * 
  * @author Paul Jack
  * @author Stephen Colebourne

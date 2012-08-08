@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ServiceLocator_1_0.java,v 1.4 2007/12/13 18:19:20 hburger Exp $
+ * Name:        $Id: ServiceLocator_1_0.java,v 1.5 2008/03/21 18:45:20 hburger Exp $
  * Description: The ServiceLocator interface
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:19:20 $
+ * Date:        $Date: 2008/03/21 18:45:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,6 +61,7 @@ import org.openmdx.base.exception.ServiceException;
  * @deprecated in favour of {@link javax.naming.InitialContext
  * Standard JNDI access}
  */
+@SuppressWarnings("unchecked")
 public interface ServiceLocator_1_0 {
 
 	/**

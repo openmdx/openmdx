@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SessionEventHandler.java,v 1.9 2007/11/23 00:21:04 wfro Exp $
- * Description: ShowObjectView 
- * Revision:    $Revision: 1.9 $
+ * Name:        $Id: SessionEventHandler.java,v 1.13 2008/05/31 23:40:08 wfro Exp $
+ * Description: SessionEventHandler 
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/23 00:21:04 $
+ * Date:        $Date: 2008/05/31 23:40:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -81,7 +81,7 @@ import org.openmdx.portal.servlet.view.ShowObjectView;
 public class SessionEventHandler {
 
     //-----------------------------------------------------------------------
-    public static void handleEvent(
+    public static HandleEventResult handleEvent(
         int event,
         ObjectView view,
         HttpServletRequest request,
@@ -104,7 +104,7 @@ public class SessionEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
         
@@ -116,7 +116,7 @@ public class SessionEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                     
@@ -141,7 +141,10 @@ public class SessionEventHandler {
                     AppLog.detail("logoff");
                     break;                    
             }
-        }        
+        }
+        return new HandleEventResult(
+            HandleEventResult.StatusCode.DONE
+        );
     }
 
     //-------------------------------------------------------------------------

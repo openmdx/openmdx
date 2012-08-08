@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtendedJDBCRealm.java,v 1.2 2008/01/28 23:45:38 wfro Exp $
+ * Name:        $Id: ExtendedJDBCRealm.java,v 1.3 2008/03/13 14:05:47 hburger Exp $
  * Description: Extended Context Bindings
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/28 23:45:38 $
+ * Date:        $Date: 2008/03/13 14:05:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -175,7 +175,8 @@ public class ExtendedJDBCRealm extends JDBCRealm {
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    private static Log log = LogFactory.getLog(RealmBase.class);
+    private final Log log = LogFactory.getLog(RealmBase.class);
+    
     /**
      * The format for the digest (hex, base64)
      */

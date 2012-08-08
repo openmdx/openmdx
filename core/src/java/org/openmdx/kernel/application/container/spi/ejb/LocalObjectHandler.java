@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LocalObjectHandler.java,v 1.1 2008/01/25 00:58:53 hburger Exp $
+ * Name:        $Id: LocalObjectHandler.java,v 1.3 2008/03/28 03:20:52 hburger Exp $
  * Description: Local Object Invocation Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:53 $
+ * Date:        $Date: 2008/03/28 03:20:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -84,32 +84,19 @@ class LocalObjectHandler<H extends EJBLocalHome>
        Method method, 
        Object[] args
     ) throws Throwable{
-        if(GET_EJB_LOCAL_HOME.equals(method)) {
-            return this.homeHandler.getLocalHome();
-        } else if (IS_IDENTICAL.equals(method)) {
-            return this.homeHandler.getLocalHome().equals(((EJBLocalObject)args[0]).getEJBLocalHome());
-        } else {
-            return super.invoke(proxy, method, args);
+        if(EJBLocalObject.class == method.getDeclaringClass()) {
+            String methodName = method.getName().intern();
+            if("getEJBLocalHome" == methodName) {
+                return this.homeHandler.getLocalHome();
+            } else if ("isIdentical" == methodName) {
+                return this.homeHandler.getLocalHome().equals(((EJBLocalObject)args[0]).getEJBLocalHome());
+            } else {
+                throw new UnsupportedOperationException(methodName);
+            }
         }
+        return super.invoke(proxy, method, args);
     }
 
-    /**
-     * EJBLocalHome getEJBLocalHome() 
-     */
-    protected final static Method GET_EJB_LOCAL_HOME = getMethod(
-        EJBLocalObject.class, 
-        "getEJBLocalHome"
-    );
-
-    /**
-     * boolean isIdentical(EJBLocalObject obj)
-     */
-    private final static Method IS_IDENTICAL = getMethod(
-        EJBLocalObject.class, 
-        "isIdentical", 
-        EJBLocalObject.class
-    );
-    
     /**
      * Action factory
      * 
@@ -198,6 +185,7 @@ class LocalObjectHandler<H extends EJBLocalHome>
                     throw transactionContext.end(exception);
                 } catch (InvocationTargetException exception) {
                     Throwable throwable = exception.getCause();
+                    transactionContext.end();
                     if(throwable instanceof Exception) {
                         throw (Exception)throwable;
                     } else {

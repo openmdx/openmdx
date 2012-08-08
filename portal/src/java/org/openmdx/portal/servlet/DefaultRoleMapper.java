@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultRoleMapper.java,v 1.10 2007/07/04 09:37:02 wfro Exp $
+ * Name:        $Id: DefaultRoleMapper.java,v 1.15 2008/07/04 13:26:06 wfro Exp $
  * Description: DefaultRoleMapper 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/07/04 09:37:02 $
+ * Date:        $Date: 2008/07/04 13:26:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,40 +62,36 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.jmi.reflect.RefObject;
+import javax.jdo.PersistenceManager;
 
+import org.oasisopen.cci2.QualifierType;
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.jmi.cci.RefContainer_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
 
 public class DefaultRoleMapper
     implements Serializable, RoleMapper_1_0 {
     
     //-------------------------------------------------------------------------
-    protected List getIsMemberOfGroup(
-        RefObject loginPrincipal,
-        String segmentName
+    protected List<org.openmdx.security.realm1.jmi1.Group> getGroupMembership(
+        org.openmdx.security.realm1.jmi1.Principal loginPrincipal,
+        String segmentName,
+        PersistenceManager pm
     ) {
         try {
             String loginPrincipalName = new Path(loginPrincipal.refMofId()).getBase();            
-            RefPackage_1_0 rootPkg = (RefPackage_1_0)loginPrincipal.refOutermostPackage();
-            Path loginPrincipalIdentity = new Path(loginPrincipal.refMofId());
+            Path loginPrincipalIdentity = loginPrincipal.refGetPath();
             AppLog.detail("Group membership for segment", segmentName);
             AppLog.detail("Group membership for principal", loginPrincipalIdentity);
-            RefObject principal = rootPkg.refObject(
-                loginPrincipalIdentity.getPrefix(loginPrincipalIdentity.size()-3).getDescendant(
-                    new String[]{segmentName, "principal", loginPrincipalName}
-                ).toXri()
-            );
-            return (List)principal.refGetValue("isMemberOf");
+            org.openmdx.security.realm1.jmi1.Principal principal = 
+                (org.openmdx.security.realm1.jmi1.Principal)pm.getObjectById(
+                    loginPrincipalIdentity.getPrefix(loginPrincipalIdentity.size()-3).getDescendant(
+                        new String[]{segmentName, "principal", loginPrincipalName}
+                    )
+                );
+            return principal.getIsMemberOf();
         }
         catch(Exception e) {
             AppLog.detail("Can not retrieve group membership", e);
@@ -105,19 +101,22 @@ public class DefaultRoleMapper
     }
     
     //-------------------------------------------------------------------------
-    public RefObject checkPrincipal(
-        RefObject realm,
-        String principalName
+    public org.openmdx.security.realm1.cci2.Principal checkPrincipal(
+        org.openmdx.security.realm1.cci2.Realm realm,
+        String principalName,
+        PersistenceManager pm
     ) {
         try {
-            RefContainer_1_0 allPrincipals = (RefContainer_1_0)realm.refGetValue("principal");
-            RefObject loginPrincipal = (RefObject)allPrincipals.get(principalName);
+            org.openmdx.security.realm1.cci2.Principal loginPrincipal = realm.getPrincipal().get(QualifierType.REASSIGNABLE, principalName);
             if(loginPrincipal == null) {
                 AppLog.info("principal not found in realm", "realm=" + realm + ", principal=" + principalName);
                 return null;
             }
-            Boolean disabled = (Boolean)loginPrincipal.refGetValue("disabled");
-            return (disabled == null) || !disabled.booleanValue()
+            boolean disabled = false;
+            try {
+                disabled = loginPrincipal.isDisabled();
+            } catch(NullPointerException e) {}
+            return !disabled
                 ? loginPrincipal
                 : null;
         }
@@ -130,102 +129,93 @@ public class DefaultRoleMapper
     //-------------------------------------------------------------------------
     /**
      * Return set of roles for specified principal in given realm.
-     * This role mapper is based on the openMDX/security model. 
+     * This role mapper is based on the openMDX/Security model. 
      */
-    public List getUserInRoles(
-        RefObject loginRealm,
-        String principalName
+    public List<String> getUserInRoles(
+        org.openmdx.security.realm1.cci2.Realm loginRealm_,
+        String principalName,
+        PersistenceManager pm
     ) {
-        // Get principals owned by subject
-        RefContainer_1_0 allPrincipals = (RefContainer_1_0)loginRealm.refGetValue("principal");
-        RefObject primaryLoginPrincipal = (RefObject)allPrincipals.get(principalName);
-        RefObject subject = (RefObject)primaryLoginPrincipal.refGetValue("subject");
-        List allLoginPrincipals = allPrincipals.subSet(
-            new FilterProperty[]{
-                new FilterProperty(
-                    Quantors.THERE_EXISTS,
-                    "subject",
-                    FilterOperators.IS_IN,
-                    new Path[]{
-                        new Path(subject.refMofId())
-                    }
-                )
-            }
-        ).toList(null);
-        
-        // Reverse sort user roles by their last login date
-        List userRoles = new ArrayList();
-        RefObject realmSegment = 
-            ((RefPackage_1_0)loginRealm.refOutermostPackage()).refObject(
-                new Path(loginRealm.refMofId()).getParent().getParent().toXri()
-            );
-        // Iterate all realms
-        long leastRecentLoginAt = 0L;
-        for(
-            Iterator i = ((Collection)realmSegment.refGetValue("realm")).iterator();
-            i.hasNext();
-        ) {
-            RefObject realm = (RefObject)i.next();
-            AppLog.detail("Checking realm", realm);
-            // Skip login realm
-            if(!realm.refMofId().equals(loginRealm.refMofId())) {
-                for(
-                    Iterator j = allLoginPrincipals.iterator();
-                    j.hasNext();
-                ) {
-                    RefObject loginPrincipal = (RefObject)j.next();
-                    String principalId = new Path(loginPrincipal.refMofId()).getBase();
-                    AppLog.detail("Checking principal", principalId);
-                    RefObject principal = null;
-                    String realmName = (String)realm.refGetValue("name");
-                    // Do not include root realm in roles except if principal is root
-                    if((principal = this.checkPrincipal(realm, principalId)) != null) {
-                        try {
-                            List groups = this.getIsMemberOfGroup(
-                                loginPrincipal,
-                                realmName
-                            );
-                            AppLog.detail("Principal groups", groups);
-                            if(groups != null) {
-                                long lastLoginAt = 0L;
-                                try {
-                                    lastLoginAt = ((Date)principal.refGetValue("lastLoginAt")).getTime();
-                                } catch(Exception e) {}
-                                String roleId = principalId + "@" + realmName;
-                                AppLog.detail("Checking role", roleId);
-                                if(
-                                    !userRoles.contains(roleId) &&
-                                    (!ROOT_REALM_NAME.equals(realmName) || ROOT_PRINCIPAL_NAME.equals(principalId))                                    
-                                ) {
-                                    AppLog.detail("Adding role", roleId);
-                                    userRoles.add(
-                                        lastLoginAt > leastRecentLoginAt ? 0 : userRoles.size(),
-                                        roleId
-                                    );
-                                }
-                                for(
-                                    Iterator k = groups.iterator();
-                                    k.hasNext();
-                                ) {
-                                    RefObject userGroup = (RefObject)k.next();
-                                    AppLog.detail("Checking group", userGroup);
-                                    String userGroupIdentity = new Path(userGroup.refMofId()).getBase();
-                                    if(USER_GROUP_ADMINISTRATORS.equals(userGroupIdentity)) {
-                                        roleId = ADMIN_PRINCIPAL_PREFIX + realmName + "@" + realmName;
-                                        if(!userRoles.contains(roleId)) {
-                                            AppLog.detail("Adding role", roleId);
-                                            userRoles.add(
-                                                lastLoginAt > leastRecentLoginAt ? 1 : userRoles.size(),
-                                                roleId
-                                            );
+        List<String> userRoles = new ArrayList<String>();
+        if(loginRealm_ instanceof org.openmdx.security.realm1.jmi1.Realm) {
+            org.openmdx.security.realm1.jmi1.Realm loginRealm = (org.openmdx.security.realm1.jmi1.Realm)loginRealm_;
+            org.openmdx.security.realm1.jmi1.Realm1Package realmPkg = (org.openmdx.security.realm1.jmi1.Realm1Package)loginRealm.refImmediatePackage();
+            // Get principals owned by subject
+            org.openmdx.security.realm1.jmi1.Principal primaryLoginPrincipal = loginRealm.getPrincipal(principalName);
+            org.openmdx.security.realm1.jmi1.Subject subject = primaryLoginPrincipal.getSubject();
+            org.openmdx.security.realm1.cci2.PrincipalQuery principalQuery = realmPkg.createPrincipalQuery();
+            principalQuery.thereExistsSubject().equalTo(subject);
+            List<org.openmdx.security.realm1.jmi1.Principal> allLoginPrincipals = loginRealm.getPrincipal(principalQuery);        
+            // Reverse sort user roles by their last login date
+            org.openmdx.security.realm1.jmi1.Segment realmSegment = 
+                (org.openmdx.security.realm1.jmi1.Segment)pm.getObjectById(loginRealm.refGetPath().getParent().getParent());
+            // Iterate all realms
+            long leastRecentLoginAt = 0L;
+            Collection<org.openmdx.security.realm1.jmi1.Realm> realms = realmSegment.getRealm();
+            for(org.openmdx.security.realm1.jmi1.Realm realm: realms) {
+                AppLog.detail("Checking realm", realm);
+                // Skip login realm
+                if(!realm.refGetPath().equals(loginRealm.refGetPath())) {
+                    for(org.openmdx.security.realm1.jmi1.Principal loginPrincipal: allLoginPrincipals) {
+                        String principalId = loginPrincipal.refGetPath().getBase();
+                        AppLog.detail("Checking principal", principalId);
+                        org.openmdx.security.realm1.jmi1.Principal principal = 
+                            (org.openmdx.security.realm1.jmi1.Principal)this.checkPrincipal(realm, principalId, pm);
+                        String realmName = realm.getName();
+                        // Do not include root realm in roles except if principal is root
+                        if(principal != null) {
+                            try {
+                                List<org.openmdx.security.realm1.jmi1.Group> groups = this.getGroupMembership(
+                                    principal,
+                                    realmName,
+                                    pm
+                                );
+                                AppLog.detail("Principal groups", groups);
+                                if(groups != null) {
+                                    long lastLoginAt = 0L;
+                                    try {
+                                        lastLoginAt = ((Date)principal.refGetValue("lastLoginAt")).getTime();
+                                    } catch(Exception e) {}
+                                    String roleId = principalId + "@" + realmName;
+                                    AppLog.detail("Checking role", roleId);
+                                    if(
+                                        !userRoles.contains(roleId) &&
+                                        (!ROOT_REALM_NAME.equals(realmName) || ROOT_PRINCIPAL_NAME.equals(principalId))                                    
+                                    ) {
+                                        AppLog.detail("Adding role", roleId);
+                                        userRoles.add(
+                                            lastLoginAt > leastRecentLoginAt ? 0 : userRoles.size(),
+                                            roleId
+                                        );
+                                    }
+                                    try {
+                                        for(org.openmdx.security.realm1.jmi1.Group userGroup: groups) {
+                                            AppLog.detail("Checking group", userGroup);
+                                            String userGroupIdentity = userGroup.refGetPath().getBase();
+                                            if(USER_GROUP_ADMINISTRATORS.equals(userGroupIdentity)) {
+                                                roleId = ADMIN_PRINCIPAL_PREFIX + realmName + "@" + realmName;
+                                                if(!userRoles.contains(roleId)) {
+                                                    AppLog.detail("Adding role", roleId);
+                                                    userRoles.add(
+                                                        lastLoginAt > leastRecentLoginAt ? 1 : userRoles.size(),
+                                                        roleId
+                                                    );
+                                                }
+                                            }
                                         }
                                     }
+                                    // Ignore errors while inspecting groups
+                                    catch(Exception e) {
+                                        boolean error = true;
+                                    }
+                                    leastRecentLoginAt = Math.max(lastLoginAt, leastRecentLoginAt);
                                 }
-                                leastRecentLoginAt = Math.max(lastLoginAt, leastRecentLoginAt);
+                            }
+                            // Ignore errors while inspecting user roles (e.g. subject can not be found)
+                            catch(Exception e) {
+                                boolean error = true;
                             }
                         }
-                        // Don't care if subject can not be found. Do not add it to userRoles
-                        catch(Exception e) {}
                     }
                 }
             }

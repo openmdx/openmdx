@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StreamMarshaller.java,v 1.19 2005/10/12 16:59:46 hburger Exp $
+ * Name:        $Id: StreamMarshaller.java,v 1.20 2008/03/19 17:09:22 hburger Exp $
  * Description: RMIMapper class
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/10/12 16:59:46 $
+ * Date:        $Date: 2008/03/19 17:09:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -90,6 +90,7 @@ import org.openmdx.kernel.security.ExecutionContext;
 /**
  * Marshalls remote streams and service exceptions
  */
+@SuppressWarnings("unchecked")
 public class StreamMarshaller
     implements DataproviderObjectInterceptor
 {

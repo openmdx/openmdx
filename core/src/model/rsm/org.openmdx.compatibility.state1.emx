@@ -625,11 +625,6 @@
       <eAnnotations xmi:id="_MiPm_N65EdmrtKJSXC0_FQ" source="keywords">
         <details xmi:id="_MiPm_d65EdmrtKJSXC0_FQ" key="root"/>
       </eAnnotations>
-      <ownedComment xmi:id="_MiJgYd65EdmrtKJSXC0_FQ" body="&lt;h6>State Pattern&lt;/h6>&#xA;&#xA;&lt;ul>&#xA;&lt;li>Der Zugriff auf ein Objekt geschieht ueber die normalen Referenzen und Qualifier.  Zur Auswahl des Objekt-States wird implizit der Request-Context (requestedAt, requestedFor) verwendet. Ist kein Request-Context gesetzt wird requestedAt=requestedFrom=currentDateTime gesetzt.&lt;/li>&#xA;&#xA;&lt;li>Der Zugriff auf einzelne Objekt-States geschieht ueber Reference 'historyState' und 'validState'. Der Qualifier ist von der Form &amp;lt;requestedFor&amp;gt;[:&amp;lt;requestedAt&amp;gt;]. Dies gilt fuer find(), get(), create(), remove() und update() Operationen.&lt;/li>&#xA;&#xA;&lt;li>'requestedFor' definiert den Zeitpunkt des gewuenschten States. 'requestedAt' definiert den Abfragezeitpunkt.&lt;/li>&#xA;&#xA;&lt;li>Die Implementation erfolgt durch einen generischen MODEL-Layer erfolgen, der den Qualifier ergaenzt um object_validFrom und object_createdAt und update()-Operationen ersetzt durch create()-Operationen.&lt;/li>&#xA;&lt;/ul>&#xA;&#xA;" annotatedElement="_3C7B8A60016D3C9913B00156">
-        <eAnnotations xmi:id="_MiJgYt65EdmrtKJSXC0_FQ" source="appliedStereotypes">
-          <contents xmi:type="Default_0:Default__Documentation" xmi:id="_MiJgY965EdmrtKJSXC0_FQ"/>
-        </eAnnotations>
-      </ownedComment>
       <ownedRule xmi:id="_MiVtld65EdmrtKJSXC0_FQ" constrainedElement="_3C7B8A60016D3CCFA4CE01E7">
         <specification xmi:type="uml:OpaqueExpression" xmi:id="_MiVtlt65EdmrtKJSXC0_FQ" body="isFrozen"/>
       </ownedRule>
@@ -663,7 +658,7 @@
       </ownedAttribute>
     </ownedMember>
     <ownedMember xmi:type="uml:Association" xmi:id="_3C7B8A60016D3CCFA4CD004B" name="BasicObjectHasValidState" isDerived="true" memberEnd="_3C7B8A60016D3CCFA4CE01E7 _3C7B8A60016D3CCFA4CE01F1">
-      <ownedComment xmi:id="_MiPm_965EdmrtKJSXC0_FQ" body="Find mit dem Referenzfilter &quot;&lt;objectPath>/validState&quot; gibt die Stati des Objekts nach object_validFrom sortiert zurueck. Sie koennen beispielsweise mit &quot;THERE_EXISTS object_validFrom | object_validFrom IS_GREATER_OR_EQUAL [&lt;begin>] AND FOR_ALL object_validTo | object_validTo IS_LESS_OR_EQUAL [&lt;end>]&quot; eingeschraenkt werden. Der Kontext requestedFor wird hierbei ignoriert.&#xA;" annotatedElement="_3C7B8A60016D3CCFA4CD004B">
+      <ownedComment xmi:id="_MiPm_965EdmrtKJSXC0_FQ" body="Find with reference filter &quot;&lt;objectPath>/validState&quot; returns the object states sorted by validFrom. Additional filters can be set with &quot;THERE_EXISTS validFrom | validFrom IS_GREATER_OR_EQUAL [&lt;begin>] AND FOR_ALL validTo | validTo IS_LESS_OR_EQUAL [&lt;end>]&quot;. The context requestedFor is ignored.&#xA;" annotatedElement="_3C7B8A60016D3CCFA4CD004B">
         <eAnnotations xmi:id="_MiVtkN65EdmrtKJSXC0_FQ" source="appliedStereotypes">
           <contents xmi:type="Default_0:Default__Documentation" xmi:id="_MiVtkd65EdmrtKJSXC0_FQ"/>
         </eAnnotations>
@@ -674,7 +669,7 @@
       </ownedEnd>
     </ownedMember>
     <ownedMember xmi:type="uml:Association" xmi:id="_3C7B8A60016D3C9914C80361" name="BasicObjectHasHistoryState" isDerived="true" memberEnd="_3C7B8A60016D3C9914CA0314 _3C7B8A60016D3C9914CA0316">
-      <ownedComment xmi:id="_MiVtnN65EdmrtKJSXC0_FQ" body="Find mit dem Referenzfilter &quot;&lt;objectPath>/historyState&quot; gibt die Stati des Objekts nach object_modifiedAt sortiert zurueck. Sie koennen beispielsweise mit &quot;THERE_EXISTS object_modifiedAt | object_modifiedAt IS_BETWEEN [&lt;begin>, &lt;end>]&quot; eingeschraenkt werden. Der Kontext requestedAt wird hierbei ignoriert.&#xA;" annotatedElement="_3C7B8A60016D3C9914C80361">
+      <ownedComment xmi:id="_MiVtnN65EdmrtKJSXC0_FQ" body="Find with reference filter &quot;&lt;objectPath>/historyState&quot; returns the object states sorted by modifiedAt. Additional filters can be set with &quot;THERE_EXISTS modifiedAt | modifiedAt IS_BETWEEN [&lt;begin>, &lt;end>]&quot;. The context requestedAt is ignored.&#xA;" annotatedElement="_3C7B8A60016D3C9914C80361">
         <eAnnotations xmi:id="_MiVtnd65EdmrtKJSXC0_FQ" source="appliedStereotypes">
           <contents xmi:type="Default_0:Default__Documentation" xmi:id="_MiVtnt65EdmrtKJSXC0_FQ"/>
         </eAnnotations>
@@ -685,7 +680,7 @@
       </ownedEnd>
     </ownedMember>
     <ownedMember xmi:type="uml:Association" xmi:id="_3C7B8A60016D3D608DC20187" name="BasicObjectHasState" isDerived="true" memberEnd="_3C7B8A60016D3D608DC603E6 _3C7B8A60016D3D608DC70012">
-      <ownedComment xmi:id="_MiVtqd65EdmrtKJSXC0_FQ" body="Find mit dem Referenzfilter &quot;&lt;objectPath>/state&quot; gibt die Stati des Objekts nach object_modifiedAt, object_validFrom sortiert zurueck. Weitere Einschränkungen sind sowohl mit object_validFrom, object_validTo als auch mit object_modifiedAt, object_invalidatedAt möglich.&#xA;Beide Kontext requestedFor, requestedAt werden ignoriert.&#xA;Der Qualifier &quot;stateQualifier&quot; erlaubt den direkten Zugriff auf einen beliebigen State. Er setzt sich folgendermassen zusammen: &quot;&lt;requestedAt-Date>:&lt;requestedFor-Date>&quot;.  &#xA;&#xA;" annotatedElement="_3C7B8A60016D3D608DC20187">
+      <ownedComment xmi:id="_MiVtqd65EdmrtKJSXC0_FQ" body="Find with reference filter &quot;&lt;objectPath>/state&quot; returns the object states sorted by modifiedAt, validFrom. Additional filters can be set for validFrom, validTo, modifiedAt and invalidatedAt.&#xA;The contexts requestedFor, requestedAt are ignored.&#xA;The qualifier &quot;stateQualifier&quot; allows direct access to a specific state. The qualifier is composed as follows: &quot;&lt;requestedAt-Date>:&lt;requestedFor-Date>&quot;.  &#xA;&#xA;" annotatedElement="_3C7B8A60016D3D608DC20187">
         <eAnnotations xmi:id="_Mib0MN65EdmrtKJSXC0_FQ" source="appliedStereotypes">
           <contents xmi:type="Default_0:Default__Documentation" xmi:id="_Mib0Md65EdmrtKJSXC0_FQ"/>
         </eAnnotations>

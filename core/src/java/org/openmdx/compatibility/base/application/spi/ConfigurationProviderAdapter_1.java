@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ConfigurationProviderAdapter_1.java,v 1.2 2006/08/11 09:24:09 hburger Exp $
+ * Name:        $Id: ConfigurationProviderAdapter_1.java,v 1.3 2008/03/21 18:45:21 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:09 $
+ * Date:        $Date: 2008/03/21 18:45:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +57,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.application.cci.ConfigurationProvider_1_0;
 import org.openmdx.compatibility.base.application.cci.Configuration_1_0;
 import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * To access the components or subcomponents configuration
@@ -91,7 +90,8 @@ public class ConfigurationProviderAdapter_1 implements ConfigurationProvider_1_0
 	 *				if the actual configuration does not match the 
 	 *				specification
 	 */
-	public Configuration getConfiguration(
+	@SuppressWarnings("unchecked")
+    public Configuration getConfiguration(
 		String[] section,
 		Map specification
 	) throws ServiceException {
@@ -99,14 +99,14 @@ public class ConfigurationProviderAdapter_1 implements ConfigurationProvider_1_0
 			null,
 			specification
 		);
-		CharSequence target = StringBuilders.newStringBuilder();
+		StringBuilder target = new StringBuilder();
 		for (
 			int index = 0;
 			index < section.length;
 			index++
 		){
-			if(index > 0) StringBuilders.asStringBuilder(target).append('/');
-            StringBuilders.asStringBuilder(target).append(section[index]);
+			if(index > 0) target.append('/');
+            target.append(section[index]);
 		}
 		return this.configurationProvider.getConfiguration(
 			target.toString(),

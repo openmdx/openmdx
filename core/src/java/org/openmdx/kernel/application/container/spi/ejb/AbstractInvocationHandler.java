@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractInvocationHandler.java,v 1.1 2008/01/25 00:58:53 hburger Exp $
+ * Name:        $Id: AbstractInvocationHandler.java,v 1.3 2008/04/07 18:32:04 hburger Exp $
  * Description: Abstract Invocation Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:53 $
+ * Date:        $Date: 2008/04/07 18:32:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -90,15 +90,19 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
     protected static String[] getActualTypes(
         Object[] arguments
     ){
-        String[] classNames = new String[arguments.length];
-        for(
-           int i = 0;
-           i < arguments.length;
-           i++
-        ){
-            classNames[i] = arguments[i] == null ? null : arguments[i].getClass().getName();
+        if(arguments == null) {
+            return null;
+        } else {
+            String[] classNames = new String[arguments.length];
+            for(
+               int i = 0;
+               i < arguments.length;
+               i++
+            ){
+                classNames[i] = arguments[i] == null ? null : arguments[i].getClass().getName();
+            }
+            return classNames;
         }
-        return classNames;
     }
 
     
@@ -126,9 +130,10 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
     /**
      * Class array to String array
      * 
-     * @param classes
+     * @param classNames
      * 
      * @return the arguments' class names
+     * 
      * @throws ClassNotFoundException  
      */
     protected static Class<?>[] getFormalClasses(

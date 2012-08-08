@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapperFactory_1.java,v 1.17 2007/07/30 16:14:50 wfro Exp $
+ * Name:        $Id: MapperFactory_1.java,v 1.18 2008/03/21 18:40:16 hburger Exp $
  * Description: PackageExternalizerFactory_1
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/07/30 16:14:50 $
+ * Date:        $Date: 2008/03/21 18:40:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.compatibility.kernel.application.cci.Classes;
 /**
  * MapperFactory_1
  */
+@SuppressWarnings("unchecked")
 public class MapperFactory_1 {
 
     /**
@@ -74,6 +75,7 @@ public class MapperFactory_1 {
      * 
      * @throws ServiceException
      */
+    @SuppressWarnings("deprecation")
     public static Mapper_1_0 create(
         String format
     ) throws ServiceException {

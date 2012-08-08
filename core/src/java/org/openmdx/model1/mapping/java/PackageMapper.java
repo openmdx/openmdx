@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PackageMapper.java,v 1.14 2007/12/11 17:12:27 wfro Exp $
+ * Name:        $Id: PackageMapper.java,v 1.17 2008/06/28 00:21:26 hburger Exp $
  * Description: JMI Package Template 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/11 17:12:27 $
+ * Date:        $Date: 2008/06/28 00:21:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,17 +57,18 @@ import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.model1.accessor.basic.cci.Model_1_3;
+import org.openmdx.model1.mapping.AbstractNames;
 import org.openmdx.model1.mapping.ClassDef;
 import org.openmdx.model1.mapping.ClassifierDef;
 import org.openmdx.model1.mapping.MapperUtils;
 import org.openmdx.model1.mapping.MetaData_1_0;
-import org.openmdx.model1.mapping.Names;
 import org.openmdx.model1.mapping.StructDef;
 import org.openmdx.model1.mapping.StructuralFeatureDef;
 
 /**
  * JMI Package template
  */
+@SuppressWarnings("unchecked")
 public class PackageMapper
     extends AbstractMapper {
 
@@ -122,13 +123,14 @@ public class PackageMapper
     }
   
     //-----------------------------------------------------------------------
+    @SuppressWarnings("static-access")
     public void mapBegin(
         String qualifiedPackageName
     ) throws ServiceException {
         this.trace("Package/Begin");
         this.fileHeader();
         List nameComponents = MapperUtils.getNameComponents(MapperUtils.getPackageName(qualifiedPackageName));
-        StringBuffer buffer = Names.openmdx2PackageName(
+        StringBuffer buffer = AbstractNames.openmdx2PackageName(
             new StringBuffer(),
             MapperUtils.getElementName(qualifiedPackageName)
         );
@@ -188,8 +190,14 @@ public class PackageMapper
         StructDef structDef
     ) throws ServiceException {
         this.trace("Package/StructCreator");
-        this.pw
-            .println("  public " + this.getType(structDef.getQualifiedName()) + " create" + MapperUtils.getElementName(structDef.getQualifiedName()) + "(");
+        String methodName = Identifier.OPERATION_NAME.toIdentifier(
+            structDef.getName(), 
+            null, // removablePrefix
+            "create", // prependablePrefix
+            null, // removableSuffix
+            null // appendableSuffix
+        );
+        this.pw.println("  public " + this.getType(structDef.getQualifiedName()) + " " + methodName + "(");
         int ii = 0;
         for (Iterator i = structDef.getFields().iterator(); i.hasNext(); ii++) {
             StructuralFeatureDef fieldDef = (StructuralFeatureDef) i.next();

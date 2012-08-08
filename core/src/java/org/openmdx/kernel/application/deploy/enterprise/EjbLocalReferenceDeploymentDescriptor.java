@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: EjbLocalReferenceDeploymentDescriptor.java,v 1.15 2008/01/08 17:36:29 hburger Exp $
+ * Name:        $Id: EjbLocalReferenceDeploymentDescriptor.java,v 1.16 2008/03/21 18:38:43 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 17:36:29 $
+ * Date:        $Date: 2008/03/21 18:38:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,8 +62,9 @@ import org.openmdx.kernel.naming.Contexts;
 import org.openmdx.kernel.naming.container.openmdx.openmdxURLContextFactory;
 import org.w3c.dom.Element;
 
+@SuppressWarnings("unchecked")
 public class EjbLocalReferenceDeploymentDescriptor
-extends EjbReferenceDeploymentDescriptor
+    extends EjbReferenceDeploymentDescriptor
 {
     public EjbLocalReferenceDeploymentDescriptor(
         ModuleDeploymentDescriptor module

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InMemory_1.java,v 1.22 2006/07/13 23:57:29 hburger Exp $
+ * Name:        $Id: InMemory_1.java,v 1.24 2008/06/28 00:21:34 hburger Exp $
  * Description: InMemory_1 class
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/07/13 23:57:29 $
+ * Date:        $Date: 2008/06/28 00:21:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -92,6 +92,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.Orders;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractIterator;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractPersistence_1;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.Sequences;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
@@ -102,6 +103,7 @@ import org.openmdx.kernel.log.SysLog;
 /**
  * An in-memory data store
  */
+@SuppressWarnings("unchecked")
 public class InMemory_1
   extends AbstractPersistence_1 {
 
@@ -499,8 +501,8 @@ public class InMemory_1
       configuration, 
       delegation
     );
-    if(!configuration.values(LayerConfigurationEntries.BATCH_SIZE).isEmpty()) {
-      this.batchSize = ((Number)configuration.values(LayerConfigurationEntries.BATCH_SIZE).get(0)).intValue();
+    if(!configuration.values(SharedConfigurationEntries.BATCH_SIZE).isEmpty()) {
+      this.batchSize = ((Number)configuration.values(SharedConfigurationEntries.BATCH_SIZE).get(0)).intValue();
     }
     String namespaceId = configuration.getFirstValue(
         SharedConfigurationEntries.NAMESPACE_ID
@@ -889,7 +891,7 @@ public class InMemory_1
           request.attributeFilter(),
           request.attributeSpecifier()
         ) :
-        (InMemoryIterator)InMemoryIterator.deserialize(
+        (InMemoryIterator)AbstractIterator.deserialize(
           (byte[])request.context(DataproviderReplyContexts.ITERATOR).get(0)
         );
         
@@ -978,9 +980,9 @@ public class InMemory_1
                   int diff = 0;
                   for (int i=0; i<sorters.length && diff == 0 && !added; i++) {
                     diff = this.compare((CompressedObject)sortedObjects.get(pos), object, sorters[i].name(), sorters[i].position());
-                    if ((diff > 0 && sorters[i].order() == Orders.ASCENDING)
+                    if ((diff > 0 && sorters[i].order() == Directions.ASCENDING)
                         ||
-                        (diff < 0 && sorters[i].order() == Orders.DESCENDING)
+                        (diff < 0 && sorters[i].order() == Directions.DESCENDING)
                     ) {
                         sortedObjects.add(pos, object); // shifts existing objects
                         added = true;
@@ -1021,7 +1023,7 @@ public class InMemory_1
         if(request.operation() == DataproviderOperations.ITERATION_START){
           reply.context(DataproviderReplyContexts.ITERATOR).set(
             0,
-            InMemoryIterator.serialize(specification)
+            AbstractIterator.serialize(specification)
           );
           reply.context(DataproviderReplyContexts.ATTRIBUTE_SELECTOR).set(
             0,

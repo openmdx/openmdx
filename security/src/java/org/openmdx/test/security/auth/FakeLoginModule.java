@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FakeLoginModule.java,v 1.4 2005/07/09 19:53:32 hburger Exp $
+ * Name:        $Id: FakeLoginModule.java,v 1.5 2008/04/04 17:55:31 hburger Exp $
  * Description: FakeLoginModule
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/07/09 19:53:32 $
+ * Date:        $Date: 2008/04/04 17:55:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,7 @@
 package org.openmdx.test.security.auth;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -82,9 +83,9 @@ public class FakeLoginModule implements LoginModule {
     
     protected Subject subject;
     protected CallbackHandler callbackHandler;
-    protected Map sharedState; 
-    protected Map options;
-    private Set principals;
+    protected Map<String,?> sharedState; 
+    protected Map<String,?> options;
+    private Set<Principal> principals;
 
     /**
      * A generic principal
@@ -234,14 +235,14 @@ public class FakeLoginModule implements LoginModule {
     public void initialize(
         Subject subject, 
         CallbackHandler callbackHandler,
-        Map sharedState, 
-        Map options
+        Map<String,?> sharedState, 
+        Map<String,?> options
     ) {
         this.subject = subject;
         this.callbackHandler = callbackHandler;
         this.sharedState = sharedState;
         this.options = options;
-        this.principals = new HashSet();
+        this.principals = new HashSet<Principal>();
     }
 
 }

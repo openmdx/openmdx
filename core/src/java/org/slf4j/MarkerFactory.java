@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarkerFactory.java,v 1.6 2007/12/19 15:48:12 hburger Exp $
+ * Name:        $Id: MarkerFactory.java,v 1.8 2008/03/13 17:16:15 hburger Exp $
  * Description: Lenient Marker Factory
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/19 15:48:12 $
+ * Date:        $Date: 2008/03/13 17:16:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -47,8 +47,7 @@
  * 
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
- * 
- * ------------------
+ * ______________________________________________________________________
  * 
  * The original file was provided by SLF4J (http://www.slf4j.org)
  * under the following terms:
@@ -77,8 +76,8 @@
  */
 package org.slf4j;
 
-import org.slf4j.helpers.Util;
-import org.slf4j.lenient.DynamicMarkerBinder;
+import org.slf4j.helpers.BasicMarkerFactory;
+import org.slf4j.helpers.LenientBinder;
 import org.slf4j.spi.MarkerFactoryBinder;
 
 /**
@@ -96,31 +95,17 @@ import org.slf4j.spi.MarkerFactoryBinder;
  */
 public class MarkerFactory {
 
-    static IMarkerFactory markerFactory;
-
     /**
-     * The binder shall be loaded dynamically
+     * Constructor 
      */
-    private static final String STATIC_BINDER = "org.slf4j.impl.StaticMarkerBinder";
-
     private MarkerFactory() {
         // Avoid instantiation
     }
 
-    static {
-        MarkerFactoryBinder binder = getBinder();
-        try {
-            markerFactory = binder.getMarkerFactory();
-        } catch (Exception exception) {
-            //
-            // we should never get here
-            //
-            Util.reportFailure(
-                "Failed to instantiate instance of class [" + binder.getMarkerFactoryClassStr() + "]", 
-                exception
-            );
-        }
-    }
+    /**
+     * The marker factory singleton
+     */
+    private static final IMarkerFactory markerFactory = new LenientFactory().narrow();
 
     /**
      * Return a Marker instance as specified by the name parameter using the
@@ -131,7 +116,7 @@ public class MarkerFactory {
      * @return marker
      */
     public static Marker getMarker(String name) {
-        return markerFactory.getMarker(name);
+        return MarkerFactory.markerFactory.getMarker(name);
     }
 
     /**
@@ -143,38 +128,72 @@ public class MarkerFactory {
      * @return the IMarkerFactory instance in use
      */
     public static IMarkerFactory getIMarkerFactory() {
-        return markerFactory;
+        return MarkerFactory.markerFactory;
     }
 
+    
+    //------------------------------------------------------------------------
+    // Class LenientFactory
+    //------------------------------------------------------------------------
+    
     /**
-     * Retrieve the static binder if already available to this class loader,
-     * or the dynamic binder otherwise.
-     * 
-     * @return the appropriate binder
+     * Lenient Marker Factory
+     * <p>
+     * This implementation uses<ul>
+     * <li>a StaticMarkerBinder if available in the current classloader
+     * <li>a BasicMarkerFactory otherwise
+     * </ul>
      */
-    private static MarkerFactoryBinder getBinder(
-    ){
-        try {
-            return (MarkerFactoryBinder) Class.forName(
-                STATIC_BINDER,
-                true,
-                MarkerFactory.class.getClassLoader()
-            ).getField(
-                "SINGLETON"
-            ).get(
-                null // static
-            );
-        } catch (Exception exception) {
-            try {
-                return DynamicMarkerBinder.SINGLETON;
-            } catch(NoClassDefFoundError error) {
-                Util.reportFailure(
-                    "Failed to load class \"org.slf4j.lenient.DynamicMarkerBinder\".",
-                    error
-                );
-                throw error;
-            }
-        }
-    }
+    static class LenientFactory
+        extends LenientBinder<IMarkerFactory,MarkerFactoryBinder>
+        implements IMarkerFactory
+    {
 
+        
+        /**
+         * Constructor 
+         */
+        LenientFactory() {
+            super("org.slf4j.impl.StaticMarkerBinder");
+        }
+
+        /* (non-Javadoc)
+         * @see org.slf4j.helpers.LenientBinder#getFallbackDelegate()
+         */
+        protected IMarkerFactory getFallbackDelegate() {
+            return new BasicMarkerFactory();
+        }
+
+        /* (non-Javadoc)
+         * @see org.slf4j.helpers.LenientBinder#getStandardDelegate(java.lang.Object)
+         */
+        protected IMarkerFactory getStandardDelegate(
+            MarkerFactoryBinder binderInstance
+        ) {
+            return binderInstance.getMarkerFactory();
+        }
+        
+        /* (non-Javadoc)
+         * @see org.slf4j.IMarkerFactory#detachMarker(java.lang.String)
+         */
+        public boolean detachMarker(String name) {
+            return getDelegate().detachMarker(name);
+        }
+
+        /* (non-Javadoc)
+         * @see org.slf4j.IMarkerFactory#exists(java.lang.String)
+         */
+        public boolean exists(String name) {
+            return getDelegate().exists(name);
+        }
+
+        /* (non-Javadoc)
+         * @see org.slf4j.IMarkerFactory#getMarker(java.lang.String)
+         */
+        public Marker getMarker(String name) {
+            return getDelegate().getMarker(name);
+        }
+
+    }
+        
 }

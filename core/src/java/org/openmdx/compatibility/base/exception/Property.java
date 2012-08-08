@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Property.java,v 1.6 2005/02/21 13:10:12 hburger Exp $
+ * Name:        $Id: Property.java,v 1.7 2008/03/21 20:15:15 hburger Exp $
  * Description: Property 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:10:12 $
+ * Date:        $Date: 2008/03/21 20:15:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -97,6 +97,7 @@ public final class Property
      *
      * @deprecated use BasicException.Parameter#Parameter(String,Object)
      */
+    @SuppressWarnings("unchecked")
     public Property(
         Map.Entry mapEntry      
     ) {

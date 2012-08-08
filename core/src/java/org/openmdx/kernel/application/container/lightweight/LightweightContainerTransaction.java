@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightContainerTransaction.java,v 1.3 2005/04/05 12:02:48 hburger Exp $
+ * Name:        $Id: LightweightContainerTransaction.java,v 1.4 2008/03/21 18:38:38 hburger Exp $
  * Description: LightweightContainerTransaction
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/05 12:02:48 $
+ * Date:        $Date: 2008/03/21 18:38:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.kernel.collection.EnumMapping;
 /**
  * LightweightContainerTransaction
  */
+@SuppressWarnings("unchecked")
 public class LightweightContainerTransaction 
     implements ContainerTransaction 
 {

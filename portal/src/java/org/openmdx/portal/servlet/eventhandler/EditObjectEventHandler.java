@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectEventHandler.java,v 1.11 2008/01/27 00:37:49 wfro Exp $
- * Description: ShowObjectView 
- * Revision:    $Revision: 1.11 $
+ * Name:        $Id: EditObjectEventHandler.java,v 1.24 2008/06/18 22:52:51 wfro Exp $
+ * Description: EditObjectEventHandler 
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/27 00:37:49 $
+ * Date:        $Date: 2008/06/18 22:52:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,52 +58,59 @@
  */
 package org.openmdx.portal.servlet.eventhandler;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.jdo.PersistenceManager;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ObjectReference;
+import org.openmdx.portal.servlet.PaintScope;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.ObjectCreationResult;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
+import org.openmdx.portal.servlet.view.ViewMode;
 
 public class EditObjectEventHandler {
 
     //-------------------------------------------------------------------------
-    public static ObjectView handleEvent(
+    @SuppressWarnings("unchecked")
+    public static HandleEventResult handleEvent(
         int event,
         EditObjectView currentView,
+        HttpServletRequest request,
+        HttpServletResponse response,        
         String parameter,
         HttpSession session,
         Map parameterMap,
-        ViewsCache currentEditViews,
-        ViewsCache currentShowViews      
+        ViewsCache editViewsCache,
+        ViewsCache showViewsCache      
     ) {
-
         ObjectView nextView = currentView;
+        PaintScope nextPaintMode = PaintScope.FULL;
         ApplicationContext application = currentView.getApplicationContext();
         switch(event) {
 
             case Action.EVENT_SAVE: {
-                RefPackage_1_0 pkg = (RefPackage_1_0)currentView.getRefObject().refOutermostPackage();
                 Map attributeMap = new HashMap();    
+                PersistenceManager pm = currentView.getPersistenceManager();
                 try {  
+                    pm.currentTransaction().begin();
                     currentView.storeObject(
                         parameterMap,
                         attributeMap
                     );
-                    nextView = currentView.getPreviousView();
+                    pm.currentTransaction().commit();
+                    nextView = currentView.getPreviousView(showViewsCache);
                     if(!currentView.isEditMode() && (nextView instanceof ShowObjectView)) {
                         // Refresh derived attributes of newly created objects
                         currentView.getRefObject().refRefresh();
@@ -125,111 +132,63 @@ public class EditObjectEventHandler {
                         );
                     }
                     EventHandlerHelper.notifyObjectModified(
-                        currentShowViews,
+                        showViewsCache,
                         currentView.getRefObject()
                     );
                     // Object is saved. EditObjectView is not required any more. Remove 
                     // it from the set of open EditObjectViews.
-                    currentEditViews.removeView(
+                    editViewsCache.removeView(
                         currentView.getRequestId()
                     );
-                    // If view is modal set 'window.close();' macro
-                    if(currentView.isModal()) {
-                        nextView.setMacro(
-                            new Object[]{
-                                new Integer(Action.MACRO_TYPE_JAVASCRIPT),
-                                "window.location.href='close-window.html';",
-                                Collections.EMPTY_LIST
-                            }
-                        );
+                    // Paint attributes if view is embedded
+                    if(currentView.getMode() == ViewMode.EMBEDDED) {
+                        nextView.refresh(true);
+                        nextPaintMode = PaintScope.ATTRIBUTE_PANE;
                     }
                 }
                 // In case of an exception stay with edit object view and
                 // let the user fix the input data
-                catch(JmiServiceException e) {
-                    AppLog.warning(e.getMessage(), e.getCause(), 1);
+                catch(Exception e) {
+                    ServiceException e0 = new ServiceException(e);
+                    AppLog.warning(e.getMessage(), e.getCause());
                     try {
-                        pkg.refRollback();
-                    } 
-                    catch(Exception e0) {}
+                        pm.currentTransaction().rollback();
+                    } catch(Exception e1) {}
                     try {
                         // create a new empty instance ...
-                        RefObject_1_0 workObject = (RefObject_1_0)pkg.refClass(currentView.getRefObject().refClass().refMofId()).refCreateInstance(null);
+                        RefObject_1_0 workObject = (RefObject_1_0)currentView.getRefObject().refClass().refCreateInstance(null);
+                        workObject.refInitialize(false, false);
                         // ... and initialize with received attribute values
                         application.getPortalExtension().updateObject(
                             workObject,
                             parameterMap,
                             attributeMap,
                             application,
-                            pkg
+                            currentView.getPersistenceManager()
                         );
                         nextView = new EditObjectView(
                             currentView.getId(),
                             currentView.getContainerElementId(),
                             workObject,
-                            currentView.getEditObjectRefMofId(),
+                            currentView.getEditObjectIdentity(),
                             application,
+                            pm,
                             currentView.getHistoryActions(),
                             currentView.getLookupType(),
                             currentView.getRestrictToElements(),
                             currentView.getParentObject(),
                             currentView.getForReference(),
-                            currentView.isModal(),
+                            currentView.getMode(),
                             currentView.getControlFactory()
                         );                
                         // Current view is dirty. Remove it and replace it by newly created. 
-                        currentEditViews.removeView(
+                        editViewsCache.removeView(
                             currentView.getRequestId()
                         );
                     }
-                    // Can not stay in edit object view. Return to returnToView
-                    // as fallback
-                    catch(Exception e0) {
-                        nextView =  currentView.getPreviousView();
-                    }
-                    currentView.handleCanNotCommitException(e.getExceptionStack());
-                }
-                catch(Exception e) {
-                    ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause(), 1);
-                    try {
-                        pkg.refRollback();
-                    } 
-                    catch(Exception e1) {}
-                    try {
-                        // create a new empty instance ...
-                        RefObject_1_0 workObject = (RefObject_1_0)pkg.refClass(currentView.getRefObject().refClass().refMofId()).refCreateInstance(null);
-                        // ... and initialize with received attribute values
-                        application.getPortalExtension().updateObject(
-                            workObject,
-                            parameterMap,
-                            attributeMap,
-                            application,
-                            pkg
-                        );
-                        nextView = new EditObjectView(
-                            currentView.getId(),
-                            currentView.getContainerElementId(),
-                            workObject,
-                            currentView.getEditObjectRefMofId(),
-                            application,
-                            currentView.getHistoryActions(),
-                            currentView.getLookupType(),
-                            currentView.getRestrictToElements(),
-                            currentView.getParentObject(),
-                            currentView.getForReference(),
-                            currentView.isModal(),
-                            currentView.getControlFactory()
-                        );
-                        // Current view is dirty. Remove it and replace it by newly created. 
-                        currentEditViews.removeView(
-                            currentView.getRequestId()
-                        );
-                    }
-                    // Can not stay in edit object view. Return to returnToView
-                    // as fallback
+                    // Can not stay in edit object view. Return to returnToView as fallback
                     catch(Exception e1) {
-                        nextView = currentView.getPreviousView();
+                        nextView = currentView.getPreviousView(null);
                     }
                     currentView.handleCanNotCommitException(e0.getExceptionStack());
                 }
@@ -237,20 +196,14 @@ public class EditObjectEventHandler {
             }
 
             case Action.EVENT_CANCEL:
-                currentEditViews.removeView(
+                editViewsCache.removeView(
                     currentView.getRequestId()
                 );
-                nextView = currentView.getPreviousView();
-                // If view is modal set 'window.close();' macro
-                if(currentView.isModal()) {
-                    nextView.setMacro(
-                        new Object[]{
-                            new Integer(Action.MACRO_TYPE_JAVASCRIPT),
-                            "window.location.href='close-window.html';",
-                            Collections.EMPTY_LIST
-                        }
-                    );
-                }
+                nextView = currentView.getPreviousView(showViewsCache);
+                // If the view is embedded paint attribute pane
+                if(currentView.getMode() == ViewMode.EMBEDDED) {
+                    nextPaintMode = PaintScope.ATTRIBUTE_PANE;
+                }                
                 break;
 
         }
@@ -259,7 +212,10 @@ public class EditObjectEventHandler {
                 currentView.getForReference()
             );
         }
-        return nextView;
+        return new HandleEventResult(
+            nextView,
+            nextPaintMode
+        );
     }
     
     //-------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SQLWildcards.java,v 1.3 2007/03/12 14:04:57 hburger Exp $
+ * Name:        $Id: SQLWildcards.java,v 1.4 2008/03/21 18:32:18 hburger Exp $
  * Description: SQL Wildcards 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/12 14:04:57 $
+ * Date:        $Date: 2008/03/21 18:32:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,11 +56,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * SQL Wildcards
  */
+@SuppressWarnings("unchecked")
 public class SQLWildcards {
 
     /**
@@ -98,7 +97,7 @@ public class SQLWildcards {
     public String fromJDO(
         String jdoExpression
     ){
-        CharSequence sqlExpression = StringBuilders.newStringBuilder();
+        StringBuilder sqlExpression = new StringBuilder();
         for(
             int i = 0, iLimit = jdoExpression.length();
             i < iLimit;
@@ -110,39 +109,29 @@ public class SQLWildcards {
                     int j = i + 1;
                     if(j < iLimit && jdoExpression.charAt(j) == '*') {
                         i = j;
-                        StringBuilders.asStringBuilder(
-                            sqlExpression
-                        ).append(
+                        sqlExpression.append(
                             '%'
                         );                        
                     } else {
-                        StringBuilders.asStringBuilder(
-                            sqlExpression
-                        ).append(
+                        sqlExpression.append(
                             '_'
                         );
                     }
                     break;
                 case '%': case '_':
-                    StringBuilders.asStringBuilder(
-                        sqlExpression
-                    ).append(
+                    sqlExpression.append(
                         this.escape
                     ).append(
                         c
                     );
                     break;
                 case '\\':
-                    if(i++ < iLimit) StringBuilders.asStringBuilder(
-                        sqlExpression
-                    ).append(
+                    if(i++ < iLimit) sqlExpression.append(
                         jdoExpression.charAt(i)
                     );
                     break;
                 default:
-                    StringBuilders.asStringBuilder(
-                        sqlExpression
-                    ).append(
+                    sqlExpression.append(
                         c
                     );
             }
@@ -199,7 +188,7 @@ public class SQLWildcards {
     public String toJDO(
         String sqlExpression
     ){
-        CharSequence jdoExpression = StringBuilders.newStringBuilder();
+        StringBuilder jdoExpression = new StringBuilder();
         for(
             int i = 0, iLimit = sqlExpression.length();
             i < iLimit;
@@ -207,39 +196,29 @@ public class SQLWildcards {
         ){
             char c = sqlExpression.charAt(i);
             if(c == this.escape) {
-                if(i++ < iLimit) StringBuilders.asStringBuilder(
-                    jdoExpression
-                ).append(
+                if(i++ < iLimit) jdoExpression.append(
                     sqlExpression.charAt(i)
                 );
             } else switch(c){
                 case '%':
-                    StringBuilders.asStringBuilder(
-                        jdoExpression
-                    ).append(
+                    jdoExpression.append(
                         ".*"
                     );
                     break;
                 case '_':
-                    StringBuilders.asStringBuilder(
-                        jdoExpression
-                    ).append(
+                    jdoExpression.append(
                         '.'
                     );
                     break;
                 case '.': case '*':
-                    StringBuilders.asStringBuilder(
-                        jdoExpression
-                    ).append(
+                    jdoExpression.append(
                         '\\'
                     ).append(
                         c
                     );
                     break;
                 default:
-                    StringBuilders.asStringBuilder(
-                        jdoExpression
-                    ).append(
+                    jdoExpression.append(
                         c
                     );
             }

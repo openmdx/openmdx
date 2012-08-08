@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: EntityMapper.java,v 1.3 2007/10/10 16:06:08 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: EntityMapper.java,v 1.4 2008/03/13 17:16:15 hburger Exp $
  * Description: EntityMapper
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:08 $
+ * Date:        $Date: 2008/03/13 17:16:15 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license  as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.xml;
 
@@ -73,12 +72,12 @@ public class EntityMapper implements EntityResolver {
     /**
      * Public id mappings
      */
-    private static final Map publicIdMappings = new Hashtable();
+    private static final Map<String,String> publicIdMappings = new Hashtable<String,String>();
     
     /**
      * System id mappings
      */
-    private static final Map systemIdMappings = new Hashtable();
+    private static final Map<String,String> systemIdMappings = new Hashtable<String,String>();
 
     protected EntityMapper() {
         // Avoid instantiation
@@ -135,11 +134,11 @@ public class EntityMapper implements EntityResolver {
           String systemId
     ) throws SAXException, IOException {
         if(publicId != null){
-            String url = (String) publicIdMappings.get(publicId);
+            String url = publicIdMappings.get(publicId);
             if(url != null) return new InputSource(new URL(url).openStream());
         }
         if(systemId != null){
-            String url = (String) systemIdMappings.get(systemId);
+            String url = systemIdMappings.get(systemId);
             if(url != null) return new InputSource(new URL(url).openStream());
         }
         return null;

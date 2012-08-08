@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OptionalFeaturePredicate.java,v 1.1 2006/10/19 17:07:11 hburger Exp $
+ * Name:        $Id: OptionalFeaturePredicate.java,v 1.2 2008/05/06 09:30:13 hburger Exp $
  * Description: Optional Predicate
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/19 17:07:11 $
+ * Date:        $Date: 2008/05/06 09:30:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,4 +67,13 @@ public interface OptionalFeaturePredicate {
      */
     void isNonNull();
     
+    /**
+     * This method is deprecated to avoid its erroneous use..
+     * 
+     * @deprecated to avoid erroneous use 
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    boolean equals(Object obj);
+
 }

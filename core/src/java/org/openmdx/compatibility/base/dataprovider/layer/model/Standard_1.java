@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.43 2007/10/19 00:03:21 wfro Exp $
+ * Name:        $Id: Standard_1.java,v 1.48 2008/06/28 00:21:28 hburger Exp $
  * Description: Model layer Standard_1 plugin
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.48 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/19 00:03:21 $
+ * Date:        $Date: 2008/06/28 00:21:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -77,6 +77,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequestContexts;
 import org.openmdx.compatibility.base.dataprovider.cci.Directions;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
+import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.compatibility.base.dataprovider.spi.SystemOperations;
@@ -107,6 +108,7 @@ import org.openmdx.model1.code.PrimitiveTypes;
  * <li> conversion of strings to Path, where needed. </li>
  * </ul>
  */
+@SuppressWarnings("unchecked")
 public class Standard_1 extends OptimisticLocking_1 {
 
     /* (non-Javadoc)
@@ -127,14 +129,14 @@ public class Standard_1 extends OptimisticLocking_1 {
         //
         // Model
         //
-        List models = configuration.values(LayerConfigurationEntries.MODEL);
+        List models = configuration.values(SharedConfigurationEntries.MODEL);
         if (models.isEmpty()) {
             throw new ServiceException(
                 StackedException.DEFAULT_DOMAIN,
                 StackedException.INVALID_CONFIGURATION,
                 null,
                 "A model must be configured with option '" + 
-                LayerConfigurationEntries.MODEL + 
+                SharedConfigurationEntries.MODEL + 
                 "'"
             );
         } else {
@@ -144,7 +146,7 @@ public class Standard_1 extends OptimisticLocking_1 {
         // XML Datatype Usage
         //
         this.datatypeFormat = configuration.isOn(
-            LayerConfigurationEntries.XML_DATATYPES
+            SharedConfigurationEntries.XML_DATATYPES
         ) ? DatatypeFormat.newInstance(true) : null;
         //
         // Notify preDelete
@@ -484,7 +486,6 @@ public class Standard_1 extends OptimisticLocking_1 {
         DataproviderObject object
     ) throws ServiceException {
 
-        String attributeName = null;
         Object value = null;
     
         // Tells if the object contains any paths in attributes, in which case 
@@ -497,10 +498,9 @@ public class Standard_1 extends OptimisticLocking_1 {
         // iterate through the attributes values until a path is found
         // then check for the right type
     
-        for (Iterator a = object.attributeNames().iterator(); a.hasNext();) {
+        for(String attributeName: object.attributeNames()) {
           doConvert = false;
           doConvertSet = false;
-          attributeName = (String)a.next();
           for (ListIterator v =
             object.getValues(attributeName).populationIterator();
             v.hasNext() && !(doConvertSet && !doConvert);
@@ -517,8 +517,7 @@ public class Standard_1 extends OptimisticLocking_1 {
                 v.set(((Path)value).toUri());
               }
     
-            }
-    
+            }    
           }
         }
         return containsPath;
@@ -643,11 +642,16 @@ public class Standard_1 extends OptimisticLocking_1 {
     }
 
     // --------------------------------------------------------------------------
-    /** 
+
+    /**
      * Set the derived attribute 'identity' in case the class supports this feature,
      * e.g. ch:omex:generic:BasicObject
+     * 
+     * @param request
+     * @param object
      */
     protected void setIdentity(
+        DataproviderRequest request, 
         DataproviderObject object
     ) throws ServiceException {
       if(object.getValues(SystemAttributes.OBJECT_CLASS) != null) {
@@ -861,12 +865,9 @@ public class Standard_1 extends OptimisticLocking_1 {
     private void convertXMLDatatypeValues(
         DataproviderObject_1_0 object
     ) throws ServiceException{
-        for(
-            Iterator i = object.attributeNames().iterator();
-            i.hasNext();
-        ) {
-            for (
-                ListIterator j = object.values((String) i.next()).populationIterator();
+        for(String attributeName: (Set<String>)object.attributeNames()) {
+            for(
+                ListIterator j = object.values(attributeName).populationIterator();
                 j.hasNext();
             ) {
                 Object value = j.next();
@@ -899,7 +900,7 @@ public class Standard_1 extends OptimisticLocking_1 {
           this.convertPaths(object);                
         }
         this.setInstanceOf(object);
-        this.setIdentity(object);
+        this.setIdentity(request, object);
         this.adjustEmptyFeatureSet(
             object, 
             request.attributeSelector() == AttributeSelectors.ALL_ATTRIBUTES

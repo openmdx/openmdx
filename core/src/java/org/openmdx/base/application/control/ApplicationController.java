@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ApplicationController.java,v 1.14 2007/10/10 16:05:52 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ApplicationController.java,v 1.15 2008/03/21 18:27:19 hburger Exp $
  * Description: Base Application
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:52 $
+ * Date:        $Date: 2008/03/21 18:27:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,8 +46,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.application.control;
 
@@ -58,14 +58,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.openmdx.compatibility.base.application.control.LogConfiguration_1_0;
+import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.LogLevel;
 import org.openmdx.kernel.log.SysLog;
 
 
 /**
  * ApplicationController
  */
+@SuppressWarnings("unchecked")
 public class ApplicationController
     implements CmdLineListener, ExceptionListener
 {
@@ -263,8 +265,8 @@ public class ApplicationController
      */
     public void initLogging(String configName, String logSource)
     {
-        SysLog.setConfigName(configName);
-        SysLog.setLogSource(logSource);
+        getLogConfiguration().setConfigName(configName);
+        getLogConfiguration().setLogSource(logSource);
 
 //      AppLog.setConfigName(configName);
 //      AppLog.setLogSource(logSource);
@@ -597,23 +599,17 @@ public class ApplicationController
                 if (ii<(this.rawArgs.length-1)) {
                     String level = this.rawArgs[ii+1];
                     if (level.equals("critical")) {
-                        SysLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_CRITICAL_ERROR);
-//                      AppLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_CRITICAL_ERROR);
+                        getLogConfiguration().setLogLevelCriticalError();
                     }else if (level.equals("error")) {
-                        SysLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_ERROR);
-//                      AppLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_ERROR);
+                        getLogConfiguration().setLogLevelError();
                     }else if (level.equals("warning")) {
-                        SysLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_WARNING);
-//                      AppLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_WARNING);
+                        getLogConfiguration().setLogLevelWarning();
                     }else if (level.equals("info")) {
-                        SysLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_INFO);
-//                      AppLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_INFO);
+                        getLogConfiguration().setLogLevelInfo();
                     }else if (level.equals("detail")) {
-                        SysLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_DETAIL);
-//                      AppLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_DETAIL);
+                        getLogConfiguration().setLogLevelDetail();
                     }else if (level.equals("trace")) {
-                        SysLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_TRACE);
-//                      AppLog.getLogConfig().setLogLevel(LogLevel.LOG_LEVEL_TRACE);
+                        getLogConfiguration().setLogLevelTrace();
                     }else{
                         throw new Exception(
                                     "The log-level '" + level + "' is not supported."
@@ -622,20 +618,36 @@ public class ApplicationController
 
                 }
             }else if (this.rawArgs[ii].equals("--log-performance")) {
-                SysLog.getLogConfig().enablePerformanceLog(true);
-//              AppLog.getLogConfig().enablePerformanceLog(true);
+                getLogConfiguration().enablePerformanceLog();
             }else if (this.rawArgs[ii].equals("--log-statistics")) {
-                SysLog.getLogConfig().enableStatisticsLog(true);
-//              AppLog.getLogConfig().enableStatisticsLog(true);
+                getLogConfiguration().enableStatisticsLog();
             }else if (this.rawArgs[ii].equals("--dump-log-properties")) {
-                System.out.println(SysLog.getLogConfig().dumpLogProperties());
-//              System.out.println(AppLog.getLogConfig().dumpLogProperties());
+                System.out.println(getLogConfiguration());
                 exit(Application.EXIT_CODE_OK);
             }
         }
     }
 
-
+    /**
+     * Retrieve the log configuration proxy from an optional library
+     * 
+     * @return the log configuration proxy
+     */
+    private LogConfiguration_1_0 getLogConfiguration(){
+        if(this.logConfiguration == null) try {
+            this.logConfiguration = (LogConfiguration_1_0) Classes.getApplicationClass(
+                "org.openmdx.compatibility.base.log.LogConfiguration_1"
+            ).newInstance();
+        } catch (Exception exception) {
+            SysLog.error(
+                "Log configuration proxy unavailable, slf4j-openmdx1.jar is probalbly missing",
+                exception
+            );
+            exit(Application.EXIT_CODE_OK);
+        }
+        return this.logConfiguration;
+    }
+    
     /**
      * Requests the system command line option specification.
      *
@@ -821,4 +833,9 @@ public class ApplicationController
     /** Command line raw args */
     private final String[] rawArgs;
 
+    /**
+     * org.openmdx.compatibility.kernel.log.SysLog configuration proxy
+     */
+    LogConfiguration_1_0 logConfiguration = null;
+    
 }

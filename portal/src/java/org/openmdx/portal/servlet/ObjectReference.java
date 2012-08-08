@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReference.java,v 1.19 2007/12/13 01:04:33 wfro Exp $
+ * Name:        $Id: ObjectReference.java,v 1.24 2008/06/14 00:00:14 wfro Exp $
  * Description: ObjectReference 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:04:33 $
+ * Date:        $Date: 2008/06/14 00:00:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,6 +69,7 @@ import org.openmdx.base.text.pattern.StringExpression;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.portal.servlet.view.ViewMode;
 import org.openmdx.ui1.layer.application.Ui_1;
 
 public class ObjectReference
@@ -150,7 +151,7 @@ public class ObjectReference
 	      }
 	      catch(Exception e) {
 	          this.exception = BasicException.toStackedException(e);
-	          AppLog.detail(e.getMessage(), e.getCause(), 1);
+	          AppLog.detail(e.getMessage(), e.getCause());
 	          return this.getTitle();
 	      }
 	    return title;
@@ -186,7 +187,7 @@ public class ObjectReference
         );
     }
     catch(ServiceException e) {
-        AppLog.warning(e.getMessage(), e.getCause(), 1);
+        AppLog.warning(e.getMessage(), e.getCause());
         return WebKeys.ICON_MISSING;
     }
   }
@@ -207,7 +208,7 @@ public class ObjectReference
           );              
       }
       catch(ServiceException e) {
-          AppLog.warning(e.getMessage(), e.getCause(), 1);
+          AppLog.warning(e.getMessage(), e.getCause());
           return null;
       }
   }
@@ -228,7 +229,7 @@ public class ObjectReference
           );              
       }
       catch(ServiceException e) {
-          AppLog.warning(e.getMessage(), e.getCause(), 1);
+          AppLog.warning(e.getMessage(), e.getCause());
           return null;
       }
   }
@@ -243,7 +244,7 @@ public class ObjectReference
                   this.inspector = this.application.getInspector(forClass);
               }
               catch(ServiceException e) {
-                  AppLog.warning(e.getMessage(), e.getCause(), 1);              
+                  AppLog.warning(e.getMessage(), e.getCause());              
               }
     	      if(this.inspector == null) {
     	          AppLog.warning("can not get inspector for object " + (this.object == null ? null : this.object.refMofId()));      
@@ -257,7 +258,10 @@ public class ObjectReference
   public Action getSelectObjectAction(
   ) {  
       String title = this.getTitle();
-      if(this.object == null) {
+      Path retrievalPath = this.object == null
+          ? null
+          : this.application.getObjectRetrievalIdentity(this.object);
+      if(retrievalPath == null) {
           return new Action(
               Action.EVENT_NONE,
               null,
@@ -271,7 +275,7 @@ public class ObjectReference
           new Action.Parameter[]{
               new Action.Parameter(
                   Action.PARAMETER_OBJECTXRI, 
-                  this.application.getObjectRetrievalXri(this.object)
+                  retrievalPath.toXri()
               ),
           },
           title.trim().length() > 0
@@ -329,19 +333,35 @@ public class ObjectReference
     }
 
     //-------------------------------------------------------------------------
+    public Action getObjectGetAttributesAction(
+    ) {
+        return new Action(
+            Action.EVENT_OBJECT_GET_ATTRIBUTES, 
+            new Action.Parameter[]{ 
+               new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refMofId())
+            }, 
+            this.application.getTexts().getShowDetailsTitle(), 
+            true
+        );
+    }
+          
+    //-------------------------------------------------------------------------
     public Action getEditObjectAction(
     ) {
-        return this.getEditObjectAction(false);
+        return this.getEditObjectAction(
+            ViewMode.STANDARD
+        );
     }
     
     //-------------------------------------------------------------------------
     public Action getEditObjectAction(
-        boolean modalEditView
+        ViewMode mode
     ) {
         return new Action(
-            modalEditView ? Action.EVENT_EDIT_MODAL : Action.EVENT_EDIT,  
+            Action.EVENT_EDIT,  
             new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object == null ? "" : this.object.refMofId())
+                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object == null ? "" : this.object.refMofId()),
+                new Action.Parameter(Action.PARAMETER_MODE, mode.toString())
             },
             this.application.getTexts().getEditTitle(),
             this.application.getTexts().getEditTitle(),
@@ -381,52 +401,40 @@ public class ObjectReference
         return this.getSelectParentAction(null);
     }
   
-  //-------------------------------------------------------------------------
-  public Action getSelectParentAction(
-      String parentTitle
-  ) {
-    if(
-      (this.object == null) ||
-      (this.object.refMofId() == null)
-    ) {
-      return new Action(
-          Action.EVENT_NONE,
-          null,
-          this.application.getTexts().getNavigateToParentText(),
-          WebKeys.ICON_UP,
-          false
-      );
-    }
-    else {
-        Path identity = new Path(this.object.refMofId());
-        return new Action(
-            Action.EVENT_SELECT_OBJECT,
-            new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_OBJECTXRI, (identity.size() >= 7 ? identity.getParent().getParent() : identity).toXri()),
-                new Action.Parameter(Action.PARAMETER_REFERENCE_NAME, identity.getParent().getBase())
-            },
-            parentTitle != null
-                ? parentTitle
-                : this.application.getTexts().getNavigateToParentText(),
-            WebKeys.ICON_UP,
-            identity.size() >= 7
-        );
-    }
-  }
-
     //-------------------------------------------------------------------------
-    public Action getGetAttributesAction(
+    public Action getSelectParentAction(
+        String parentTitle
     ) {
-        return new Action(
-            Action.EVENT_GET_OBJECT_ATTRIBUTES, 
-            new Action.Parameter[]{ 
-               new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refMofId())
-            }, 
-            this.application.getTexts().getShowDetailsTitle(), 
-            true
-        );
+        if(
+            (this.object == null) ||
+            (this.object.refGetPath() == null) ||
+            (this.object.refGetPath().size() < 7)
+        ) {
+            return new Action(
+                Action.EVENT_NONE,
+                null,
+                this.application.getTexts().getNavigateToParentText(),
+                WebKeys.ICON_UP,
+                false
+            );
+        }
+        else {
+            Path identity = this.object.refGetPath();
+            return new Action(
+                Action.EVENT_SELECT_OBJECT,
+                new Action.Parameter[]{
+                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, identity.getParent().getParent().toXri()),
+                    new Action.Parameter(Action.PARAMETER_REFERENCE_NAME, identity.getParent().getBase())
+                },
+                parentTitle != null
+                    ? parentTitle
+                    : this.application.getTexts().getNavigateToParentText(),
+                WebKeys.ICON_UP,
+                true
+            );
+        }
     }
-      
+
     //-------------------------------------------------------------------------
     public boolean isInstanceof(
         String typeName

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractNames.java,v 1.2 2008/02/15 17:24:06 hburger Exp $
+ * Name:        $Id: AbstractNames.java,v 1.4 2008/06/28 00:21:26 hburger Exp $
  * Description: Abstract Names 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/15 17:24:06 $
+ * Date:        $Date: 2008/06/28 00:21:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,7 +57,7 @@ import org.openmdx.model1.mapping.java.Identifier;
 /**
  * Names
  */
-abstract class AbstractNames {
+public abstract class AbstractNames {
 
     /**
      * Avoid instantiation 
@@ -82,8 +82,8 @@ abstract class AbstractNames {
             featureName,
             flag ? "is" : null, // removablePrefix
             forQuery ? (flag ? "is" : "get") : "set", // prependablePrefix
-            null
-, null // appendableSuffix
+            null, // removableSuffix
+            null // appendableSuffix
         );
     }
 
@@ -99,13 +99,13 @@ abstract class AbstractNames {
     ){
 
         return target.append(
-                Identifier.CLASS_PROXY_NAME.toIdentifier(
-                        source,
-                        null, // removablePrefix, 
-                        null, // prependablePrefix, 
-                        null
-, "package" //appendableSuffix
-                )
+            Identifier.CLASS_PROXY_NAME.toIdentifier(
+                source,
+                null, // removablePrefix, 
+                null, // prependablePrefix, 
+                null, // removableSuffix
+                "package" //appendableSuffix
+            )
         );
     }
 
@@ -121,13 +121,13 @@ abstract class AbstractNames {
     ){
 
         return target.append(
-                Identifier.PACKAGE_NAME.toIdentifier(
-                        source,
-                        null, // removablePrefix, 
-                        null, // prependablePrefix, 
-                        null
-, null //appendableSuffix
-                )
+            Identifier.PACKAGE_NAME.toIdentifier(
+                source,
+                null, // removablePrefix, 
+                null, // prependablePrefix, 
+                null, // removableSuffix
+                null //appendableSuffix
+            )
         );
     }
 

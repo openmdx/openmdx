@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportTabControl.java,v 1.2 2007/08/10 12:41:52 wfro Exp $
+ * Name:        $Id: ReportTabControl.java,v 1.3 2008/05/01 21:43:57 wfro Exp $
  * Description: WizardTabControl
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/10 12:41:52 $
+ * Date:        $Date: 2008/05/01 21:43:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -158,6 +158,7 @@ public class ReportTabControl
     }
     
     //-----------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p, 
         String frame, 

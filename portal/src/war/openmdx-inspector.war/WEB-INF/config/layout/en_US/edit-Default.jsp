@@ -2,17 +2,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: edit-Default.jsp,v 1.30 2007/11/23 00:39:16 wfro Exp $
+ * Name:        $Id: edit-Default.jsp,v 1.37 2008/06/01 16:40:52 wfro Exp $
  * Description: edit-Default.jsp
- * Revision:    $Revision: 1.30 $
+ * Revision:    $Revision: 1.37 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/23 00:39:16 $
+ * Date:        $Date: 2008/06/01 16:40:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -64,30 +64,35 @@ org.openmdx.portal.servlet.control.*,
 org.openmdx.compatibility.base.naming.*,
 org.openmdx.portal.servlet.texts.*
 " %><%
-  ApplicationContext app = (ApplicationContext)session.getValue("ObjectInspectorServlet.ApplicationContext");
-  Texts_1_0 texts = app.getTexts();
-  EditObjectView view = (EditObjectView)session.getValue(WebKeys.CURRENT_VIEW_KEY);
-  EditInspectorControl inspectorControl = view.getEditInspectorControl();
-  HtmlPage p = HtmlPageFactory.openPage(
-    view,
-    request,
-    out
-  );
+	ApplicationContext app = (ApplicationContext)session.getValue(WebKeys.APPLICATION_KEY);
+	ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_EDIT);
+	EditObjectView view = (EditObjectView)viewsCache.getView(request.getParameter(Action.PARAMETER_REQUEST_ID));
+	PaintScope paintScope = PaintScope.valueOf(request.getParameter(Action.PARAMETER_SCOPE));
+	Texts_1_0 texts = app.getTexts();
+	EditInspectorControl inspectorControl = view.getEditInspectorControl();
+	HtmlPage p = HtmlPageFactory.openPage(
+		view,
+		request,
+		out
+	);
 
-  // Prolog
-  Control prolog = view.createControl(
-    "prolog",
-    PagePrologControl.class
-  );
+	// Prolog
+	Control prolog = view.createControl(
+		"prolog",
+		PagePrologControl.class
+	);
 
-  // Epilog
-  Control epilog = view.createControl(
-    "epilog",
-    PageEpilogControl.class
-  );
+	// Epilog
+	Control epilog = view.createControl(
+		"epilog",
+		PageEpilogControl.class
+	);
 
 	// Session info
-	Control north = view.createControl(null, SessionInfoControl.class);
+	Control north = view.createControl(
+		"north",
+		SessionInfoControl.class
+	);
 
 	// Errors
 	Control errors = view.createControl(
@@ -104,14 +109,15 @@ org.openmdx.portal.servlet.texts.*
 	// Attributes
 	Control attributes = inspectorControl.getAttributePaneControl();
 
-	// Edit
-	ContainerControl edit = (ContainerControl)view.createControl(
-		"editObject",
-		EditObjectControl.class
-	);
-	edit.addControl(errors);
-	edit.addControl(title);
-	edit.addControl(attributes);
+	// STANDARD
+	if(view.getMode() == ViewMode.STANDARD) {
+		EditObjectControl edit = (EditObjectControl)view.createControl(
+			"editObject",
+			EditObjectControl.class
+		);
+		edit.addControl(errors);
+		edit.addControl(title);
+		edit.addControl(attributes);
 %>
 <!--[if IE]><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><![endif]-->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -161,7 +167,6 @@ org.openmdx.portal.servlet.texts.*
 %>&nbsp;
 </div>
 <%
-	p.setProperty(HtmlPage.PROPERTY_FORM_ID, "editObject");
 	edit.paint(p, true);
 	epilog.paint(p, true);
 	p.close(false);
@@ -170,3 +175,25 @@ org.openmdx.portal.servlet.texts.*
 <%@ include file="../../../../edit-footer.html" %>
 </body>
 </html>
+<%
+	}
+	// EMBEDDED
+	else if(view.getMode() == ViewMode.EMBEDDED) {
+		EditObjectControl edit = (EditObjectControl)view.createControl(
+			"editObject",
+			EditObjectControl.class
+		);
+		if(!app.getErrorMessages().isEmpty()) {
+			edit.addControl(errors);
+		}
+		edit.addControl(attributes);
+		edit.paint(p, true);
+		p.flush();
+		p.close(false);
+%>
+		<script language="javascript" type="text/javascript">
+			//alert('postLoad edit');
+		</script>
+<%
+	}
+%>

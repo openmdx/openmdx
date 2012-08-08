@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SystemAttributes_1.java,v 1.6 2006/07/24 09:03:38 hburger Exp $
+ * Name:        $Id: SystemAttributes_1.java,v 1.7 2008/03/21 18:46:24 hburger Exp $
  * Description: Handle the BasicObjects' Attributes
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/07/24 09:03:38 $
+ * Date:        $Date: 2008/03/21 18:46:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,6 +68,7 @@ import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 /**
  * Handle the BasicObjects' Attributes.
  */
+@SuppressWarnings("unchecked")
 public class SystemAttributes_1
     extends BeforeImageCachingLayer_1 
 {

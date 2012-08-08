@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractConfiguration.java,v 1.11 2008/02/18 13:34:10 hburger Exp $
+ * Name:        $Id: AbstractConfiguration.java,v 1.12 2008/03/21 18:28:05 hburger Exp $
  * Description: AbstractConfiguration
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 13:34:10 $
+ * Date:        $Date: 2008/03/21 18:28:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,7 +66,6 @@ import org.openmdx.compatibility.base.collection.TreeSparseArray;
 import org.openmdx.kernel.application.configuration.Configuration;
 import org.openmdx.kernel.application.configuration.Report;
 import org.openmdx.kernel.environment.cci.VersionNumber;
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * A configuration holds multiple configuration entries, is versioned and has
@@ -79,6 +78,7 @@ import org.openmdx.kernel.text.StringBuilders;
  * This class is not threadsafe. Thread safety must be guaranteed by the
  * callers.
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractConfiguration
     implements Configuration
 {
@@ -605,7 +605,7 @@ public abstract class AbstractConfiguration
     public String toString()
     {
         final String  EOL = "\n";
-        CharSequence buf = StringBuilders.newStringBuilder(
+        StringBuilder buf = new StringBuilder(
         ).append(
             "CfgName: "
         ).append(
@@ -624,14 +624,12 @@ public abstract class AbstractConfiguration
 
         Iterator iter = getEntryNames().iterator();
         while(iter.hasNext()) {
-            StringBuilders.asStringBuilder(buf).append(EOL);
+            buf.append(EOL);
             String name = (String)iter.next();
 
             SparseArray sa = (SparseArray)this.configValues.get(name);
             if ((sa == null) || sa.isEmpty()) {
-                StringBuilders.asStringBuilder(
-                    buf
-                ).append(
+                buf.append(
                     name
                 ).append(
                     "="
@@ -640,9 +638,7 @@ public abstract class AbstractConfiguration
             }
 
             if (sa.size() == 1) {
-                StringBuilders.asStringBuilder(
-                    buf
-                ).append(
+                buf.append(
                     name
                 ).append(
                     "="
@@ -651,9 +647,7 @@ public abstract class AbstractConfiguration
                 );
             }else{
                 for(int ii=0; ii<sa.size(); ii++) {
-                    StringBuilders.asStringBuilder(
-                        buf
-                    ).append(
+                    buf.append(
                         name
                     ).append(
                         "["
@@ -664,7 +658,7 @@ public abstract class AbstractConfiguration
                     ).append(
                         sa.get(ii)
                     );
-                    if (ii<(sa.size()-1)) StringBuilders.asStringBuilder(buf).append(EOL);
+                    if (ii<(sa.size()-1)) buf.append(EOL);
                 }
             }
         }

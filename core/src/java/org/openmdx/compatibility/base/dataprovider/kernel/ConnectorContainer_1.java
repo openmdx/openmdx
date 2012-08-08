@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ConnectorContainer_1.java,v 1.18 2007/12/13 18:19:20 hburger Exp $
+ * Name:        $Id: ConnectorContainer_1.java,v 1.19 2008/03/25 23:20:22 hburger Exp $
  * Description: ConnectorContainer_1 class
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:19:20 $
+ * Date:        $Date: 2008/03/25 23:20:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -82,6 +82,7 @@ import org.openmdx.kernel.log.SysLog;
  * org.openmdx.kernel.application.container.lightweight.LightweightContainer 
  * LightweightContainer} in case of {@link javax.sql.DataSource DataSources}
  */
+@SuppressWarnings("unchecked")
 public class ConnectorContainer_1 {
 
   //-------------------------------------------------------------------------

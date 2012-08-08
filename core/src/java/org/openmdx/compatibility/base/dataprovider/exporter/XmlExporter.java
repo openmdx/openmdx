@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XmlExporter.java,v 1.16 2007/12/02 09:59:35 hburger Exp $
+ * Name:        $Id: XmlExporter.java,v 1.18 2008/05/12 10:45:51 wfro Exp $
  * Description: XML Exporter
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/02 09:59:35 $
+ * Date:        $Date: 2008/05/12 10:45:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,17 +54,21 @@ package org.openmdx.compatibility.base.dataprovider.exporter;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.query.Filter;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.exception.StackedException;
+import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
 
 //---------------------------------------------------------------------------
+@SuppressWarnings("unchecked")
 public class XmlExporter {
 
     //-----------------------------------------------------------------------
@@ -168,9 +172,9 @@ public class XmlExporter {
      * After setting the desired behaviour, call export() to execute the export 
      */
     public void export(
-        List startPoints,
-        List referenceFilter,
-        Map attributeFilter,
+        List<Path> startPoints,
+        Set<String> referenceFilter,
+        Map<String,Filter> attributeFilter,
         String schemaString
     ) throws ServiceException {        
         this.startPoints = startPoints;
@@ -253,7 +257,6 @@ public class XmlExporter {
    ) {
       ProviderTraverser traverser = 
             new ProviderTraverser(
-                this.header, 
                 this.reader, 
                 this.model, 
                 this.startPoints, 
@@ -337,11 +340,11 @@ public class XmlExporter {
     protected String schemaString = null;    
 
     /** start points for the export */
-    protected List startPoints = null;
+    protected List<Path> startPoints = null;
     
     // objects are retrieved matching the specified filter
-    protected List referenceFilter = null;
-    protected Map attributeFilter = null;
+    protected Set<String> referenceFilter = null;
+    protected Map<String,Filter> attributeFilter = null;
     
     protected final ServiceHeader header;
     protected final RequestCollection reader;

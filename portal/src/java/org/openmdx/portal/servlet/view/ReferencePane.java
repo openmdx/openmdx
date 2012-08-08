@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePane.java,v 1.6 2007/04/23 09:02:25 wfro Exp $
+ * Name:        $Id: ReferencePane.java,v 1.7 2008/04/04 11:53:14 hburger Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/04/23 09:02:25 $
+ * Date:        $Date: 2008/04/04 11:53:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -188,7 +188,7 @@ public class ReferencePane
         Action[] actions = this.getReferencePaneControl().getSelectReferenceAction();
         Action[] actionsWithXri = new Action[actions.length];
         for(int i = 0; i < actions.length; i++) {
-            List parameters = new ArrayList(
+            List<Action.Parameter> parameters = new ArrayList<Action.Parameter>(
                 Arrays.asList(actions[i].getParameters())
             );
             parameters.add(

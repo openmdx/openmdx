@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderObject.java,v 1.29 2008/02/29 17:58:29 hburger Exp $
+ * Name:        $Id: DataproviderObject.java,v 1.32 2008/06/27 16:59:28 hburger Exp $
  * Description: spice: dataprovider object
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 17:58:29 $
+ * Date:        $Date: 2008/06/27 16:59:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -92,12 +92,12 @@ public class DataproviderObject
     implements DataproviderObject_1_0, Serializable, Cloneable, Externalizable {
 
     //-----------------------------------------------------------------------    
-    private final int getAttributeIndex(
+    final int getAttributeIndex(
         String attributeName,
         boolean forceCreation
     ) throws ServiceException {
         String internalName = attributeName.intern();
-        for(int i = 0; i < attributeNames.length; i++) {
+        for(int i = 0; i < this.attributeNames.length; i++) {
             if(this.attributeNames[i] == internalName) return i;
         }
         if(!forceCreation) return -1;
@@ -110,7 +110,7 @@ public class DataproviderObject
     }
     
     //-----------------------------------------------------------------------
-    private SparseList getAttributeValue(
+    SparseList getAttributeValue(
         int attributeIndex
     ) throws ServiceException {
         return this.attributeValues == null || attributeIndex >= this.attributeValues.length
@@ -119,7 +119,7 @@ public class DataproviderObject
     }
     
     //-----------------------------------------------------------------------
-    private void setAttributeValue(
+    void setAttributeValue(
         int attributeIndex,
         SparseList value
     ) throws ServiceException {
@@ -281,13 +281,15 @@ public class DataproviderObject
         try {
             int attributeIndex = this.getAttributeIndex(attributeName, false);
             if(attributeIndex == -1) {
-                attributeIndex = this.getAttributeIndex(attributeName, true);
-                this.setAttributeValue(
-                    attributeIndex, 
-                    COMPACT 
-                        ? (SparseList)new CompactSparseList(1) 
-                        : (SparseList)new OffsetArrayList(1)
-                );
+                synchronized(this.attributeNames) {
+                    attributeIndex = this.getAttributeIndex(attributeName, true);
+                    this.setAttributeValue(
+                        attributeIndex, 
+                        COMPACT 
+                            ? (SparseList)new CompactSparseList(1) 
+                            : (SparseList)new OffsetArrayList(1)
+                    );
+                }
             }
             return this.getAttributeValue(attributeIndex);
         }
@@ -301,7 +303,7 @@ public class DataproviderObject
      * Returns a modifiable value-less attribute object.
      * This method never returns null.
      */
-    final public SparseList clearValues(
+    final public SparseList<Object> clearValues(
         String attributeName
     ) {
         SparseList values = this.values(attributeName);
@@ -326,7 +328,7 @@ public class DataproviderObject
     /**
      * Get a set view of the dataprovider object's attribute names
      */
-    final public Set attributeNames(
+    final public Set<String> attributeNames(
     ) {
         return new AttributeNames();
     }
@@ -413,7 +415,7 @@ public class DataproviderObject
                             BasicException.Code.TRANSFORMATION_FAILURE,
                             new BasicException.Parameter[]{
                                 new BasicException.Parameter("path", this.path),
-                                new BasicException.Parameter("attribute", attributeNames[i]),
+                                new BasicException.Parameter("attribute", this.attributeNames[i]),
                                 new BasicException.Parameter("values", this.getAttributeValue(i))
                             },
                             "DataproviderObject serialization failed"
@@ -783,7 +785,7 @@ public class DataproviderObject
         private int pos = 0;
     }
     
-    private class AttributeNames extends AbstractSet {
+    class AttributeNames extends AbstractSet<String> {
 
         public Iterator iterator(
         ) {
@@ -796,10 +798,9 @@ public class DataproviderObject
         }
 
         public boolean add(
-            Object o
+            String name
         ) {
             try {
-                String name = (String)o;
                 if(DataproviderObject.this.getAttributeIndex(name, false) == -1) {
                     DataproviderObject.this.getAttributeIndex(name, true);
                     return true;
@@ -868,7 +869,7 @@ public class DataproviderObject
     
     private transient Path path;
     private transient byte[] digest;
-    private transient String[] attributeNames;
+    transient String[] attributeNames;
     private transient SparseList[] attributeValues;
 
 }

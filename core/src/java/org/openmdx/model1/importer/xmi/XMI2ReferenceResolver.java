@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI2ReferenceResolver.java,v 1.13 2007/10/10 16:06:11 hburger Exp $
+ * Name:        $Id: XMI2ReferenceResolver.java,v 1.14 2008/03/21 18:40:13 hburger Exp $
  * Description: XMI2 Reference Resolver
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:11 $
+ * Date:        $Date: 2008/03/21 18:40:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,8 +70,7 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import org.openmdx.kernel.text.StringBuilders;
-
+@SuppressWarnings("unchecked")
 public class XMI2ReferenceResolver
     implements ContentHandler, XMIReferenceResolver {
 
@@ -172,10 +171,10 @@ public class XMI2ReferenceResolver
                 "uml:PrimitiveType".equals(atts.getValue("xmi:type"))
             ) {
                 if (atts.getValue("xmi:id") != null) {
-                    CharSequence sb = StringBuilders.newStringBuilder();
+                    StringBuilder sb = new StringBuilder();
                     for(int i = 0; i < scope.size(); i++) {
-                        if(i > 0) StringBuilders.asStringBuilder(sb).append("::");
-                        StringBuilders.asStringBuilder(sb).append(scope.get(i));
+                        if(i > 0) sb.append("::");
+                        sb.append(scope.get(i));
                     }
                     xmiReferences.put(
                         atts.getValue("xmi:id"),

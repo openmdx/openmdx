@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Servlet.java,v 1.11 2007/10/10 16:05:55 hburger Exp $
+ * Name:        $Id: Dataprovider_1Servlet.java,v 1.12 2008/03/21 18:43:56 hburger Exp $
  * Description: Dataprovider Servlet
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:55 $
+ * Date:        $Date: 2008/03/21 18:43:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,7 +74,6 @@ import org.openmdx.compatibility.base.dataprovider.spi.ExecutionContextModifier_
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * Dataprovider_1 Servlet
@@ -116,7 +115,7 @@ public class Dataprovider_1Servlet extends HttpServlet {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
                 new BasicException.Parameter[]{
-                    new BasicException.Parameter("info", "$Id: Dataprovider_1Servlet.java,v 1.11 2007/10/10 16:05:55 hburger Exp $"),
+                    new BasicException.Parameter("info", "$Id: Dataprovider_1Servlet.java,v 1.12 2008/03/21 18:43:56 hburger Exp $"),
                     new BasicException.Parameter("dataprovider", "java:comp/env/ejb/dataprovider")
                 },
                 null
@@ -140,27 +139,21 @@ public class Dataprovider_1Servlet extends HttpServlet {
         try {
             super.init(configuration);
         } catch (ServletException exception) {
-            CharSequence message = StringBuilders.newStringBuilder("Servlet ");
+            StringBuilder message = new StringBuilder("Servlet ");
             if(exception instanceof UnavailableException){
-                StringBuilders.asStringBuilder(
-                    message
-                ).append(
+                message.append(
                     ((UnavailableException)exception).isPermanent() ? "permanently" : "temporarely"
                 ).append(
                     " unavailable"
                 );
             } else {
-                StringBuilders.asStringBuilder(
-                    message
-                ).append(
+                message.append(
                     "initialization failed"
                 );
             }
             if(exception instanceof BasicException.Wrapper) {
                 log(
-                    StringBuilders.asStringBuilder(
-                        message
-                    ).append(
+                    message.append(
                         ": "
                     ).append(
                         exception
@@ -194,7 +187,7 @@ public class Dataprovider_1Servlet extends HttpServlet {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
                 new BasicException.Parameter[]{
-                     new BasicException.Parameter("id", "$Id: Dataprovider_1Servlet.java,v 1.11 2007/10/10 16:05:55 hburger Exp $"),
+                     new BasicException.Parameter("id", "$Id: Dataprovider_1Servlet.java,v 1.12 2008/03/21 18:43:56 hburger Exp $"),
                      new BasicException.Parameter("security", security)
                 },
                 null

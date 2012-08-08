@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -33,7 +34,7 @@ import org.openmdx.uses.org.apache.commons.collections.list.UnmodifiableList;
  * Provides utility methods and decorators for {@link List} instances.
  *
  * @since Commons Collections 1.0
- * @version $Revision: 1.3 $ $Date: 2007/10/10 16:06:13 $
+ * @version $Revision: 1.5 $ $Date: 2008/04/25 14:32:26 $
  * 
  * @author Federico Barbieri
  * @author Peter Donald
@@ -42,6 +43,7 @@ import org.openmdx.uses.org.apache.commons.collections.list.UnmodifiableList;
  * @author Neil O'Toole
  * @author Matthew Hawthorne
  */
+@SuppressWarnings("unchecked")
 public class ListUtils {
 
     /**
@@ -55,7 +57,6 @@ public class ListUtils {
      * <code>ListUtils</code> should not normally be instantiated.
      */
     public ListUtils() {
-        super();
     }
 
     //-----------------------------------------------------------------------
@@ -218,6 +219,61 @@ public class ListUtils {
         }
         return hashCode;
     }   
+
+    //-----------------------------------------------------------------------
+    /**
+     * Returns a List containing all the elements in <code>collection</code>
+     * that are also in <code>retain</code>. The cardinality of an element <code>e</code>
+     * in the returned list is the same as the cardinality of <code>e</code>
+     * in <code>collection</code> unless <code>retain</code> does not contain <code>e</code>, in which
+     * case the cardinality is zero. This method is useful if you do not wish to modify
+     * the collection <code>c</code> and thus cannot call <code>collection.retainAll(retain);</code>.
+     * 
+     * @param collection  the collection whose contents are the target of the #retailAll operation
+     * @param retain  the collection containing the elements to be retained in the returned collection
+     * @return a <code>List</code> containing all the elements of <code>c</code>
+     * that occur at least once in <code>retain</code>.
+     * @throws NullPointerException if either parameter is null
+     * @since Commons Collections 3.2
+     */
+    public static List retainAll(Collection collection, Collection retain) {
+        List list = new ArrayList(Math.min(collection.size(), retain.size()));
+
+        for (Iterator iter = collection.iterator(); iter.hasNext();) {
+            Object obj = iter.next();
+            if (retain.contains(obj)) {
+                list.add(obj);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Removes the elements in <code>remove</code> from <code>collection</code>. That is, this
+     * method returns a list containing all the elements in <code>c</code>
+     * that are not in <code>remove</code>. The cardinality of an element <code>e</code>
+     * in the returned collection is the same as the cardinality of <code>e</code>
+     * in <code>collection</code> unless <code>remove</code> contains <code>e</code>, in which
+     * case the cardinality is zero. This method is useful if you do not wish to modify
+     * <code>collection</code> and thus cannot call <code>collection.removeAll(remove);</code>.
+     * 
+     * @param collection  the collection from which items are removed (in the returned collection)
+     * @param remove  the items to be removed from the returned <code>collection</code>
+     * @return a <code>List</code> containing all the elements of <code>c</code> except
+     * any elements that also occur in <code>remove</code>.
+     * @throws NullPointerException if either parameter is null
+     * @since Commons Collections 3.2
+     */
+    public static List removeAll(Collection collection, Collection remove) {
+        List list = new ArrayList();
+        for (Iterator iter = collection.iterator(); iter.hasNext();) {
+            Object obj = iter.next();
+            if (remove.contains(obj) == false) {
+                list.add(obj);
+            }
+        }
+        return list;
+    }
 
     //-----------------------------------------------------------------------
     /**

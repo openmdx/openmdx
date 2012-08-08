@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DeploymentConfiguration_1.java,v 1.7 2004/04/02 16:59:03 wfro Exp $
+ * Name:        $Id: DeploymentConfiguration_1.java,v 1.8 2008/03/21 18:34:48 hburger Exp $
  * Description: ModelPackage_1_0 interface
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:03 $
+ * Date:        $Date: 2008/03/21 18:34:48 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,6 +73,7 @@ import org.openmdx.kernel.log.SysLog;
  * 
  * @author hburger
  */
+@SuppressWarnings("unchecked")
 public class DeploymentConfiguration_1 
     implements DeploymentConfiguration_1_0
 {

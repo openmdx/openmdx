@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RMIMapper.java,v 1.21 2008/01/27 17:45:04 wfro Exp $
+ * Name:        $Id: RMIMapper.java,v 1.22 2008/03/28 18:06:12 hburger Exp $
  * Description: RMIMapper class
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/27 17:45:04 $
+ * Date:        $Date: 2008/03/28 18:06:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -103,7 +103,8 @@ public class RMIMapper {
         (DataproviderObjectInterceptor) new org.openmdx.compatibility.base.dataprovider.transport.rmi.websphere.StreamMarshaller() :
       System.getProperty(JSAS_PORPERTY) != null ?
         (DataproviderObjectInterceptor) new org.openmdx.compatibility.base.dataprovider.transport.rmi.jsas.StreamMarshaller() :
-      LightweightContainer.getMode() == LightweightContainer.Mode.ENTERPRISE_JAVA_BEAN_CONTAINER ?
+      LightweightContainer.getMode() == LightweightContainer.Mode.ENTERPRISE_JAVA_BEAN_CONTAINER ||
+      LightweightContainer.getMode() == LightweightContainer.Mode.ENTERPRISE_APPLICATION_CONTAINER ? // TODO replace by local call detection
         (DataproviderObjectInterceptor) new org.openmdx.compatibility.base.dataprovider.transport.rmi.inprocess.StreamMarshaller() :
         (DataproviderObjectInterceptor) new org.openmdx.compatibility.base.dataprovider.transport.rmi.standard.StreamMarshaller();
 

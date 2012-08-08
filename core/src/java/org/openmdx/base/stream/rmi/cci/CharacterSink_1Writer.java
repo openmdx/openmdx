@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CharacterSink_1Writer.java,v 1.4 2004/09/26 22:34:35 hburger Exp $
+ * Name:        $Id: CharacterSink_1Writer.java,v 1.5 2008/03/21 18:31:57 hburger Exp $
  * Description: Streams: Character Sink Writer
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/09/26 22:34:35 $
+ * Date:        $Date: 2008/03/21 18:31:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -185,8 +185,8 @@ public class CharacterSink_1Writer extends Writer {
 					sourceCursor += remainingInTarget;
 					try {
 			            this.callbackContext.execute(
-			                new PrivilegedExceptionAction(){
-			                    public Object run() throws Exception {
+			                new PrivilegedExceptionAction<Void>(){
+			                    public Void run() throws Exception {
 			    					out.writeCharacters(buffer);
 			                        return null;
 			                    }					        
@@ -214,8 +214,8 @@ public class CharacterSink_1Writer extends Writer {
 			this.buffer[this.cursor++] = (char) c;
 			if(this.cursor == this.buffer.length) try {
 	            this.callbackContext.execute(
-	                new PrivilegedExceptionAction(){
-	                    public Object run() throws Exception {
+	                new PrivilegedExceptionAction<Void>(){
+	                    public Void run() throws Exception {
 	        				out.writeCharacters(buffer);
 	        				cursor = 0;
 	                        return null;
@@ -245,8 +245,8 @@ public class CharacterSink_1Writer extends Writer {
 			}
 			try {
 	            this.callbackContext.execute(
-	                new PrivilegedExceptionAction(){
-	                    public Object run() throws Exception {
+	                new PrivilegedExceptionAction<Void>(){
+	                    public Void run() throws Exception {
 	            			out.writeCharacters(flushBuffer);
 	                        return null;
 	                    }					        
@@ -266,8 +266,8 @@ public class CharacterSink_1Writer extends Writer {
 		synchronized(super.lock){
 			if(isOpen()) try {
 	            this.callbackContext.execute(
-	                new PrivilegedExceptionAction(){
-	                    public Object run() throws Exception {
+	                new PrivilegedExceptionAction<Void>(){
+	                    public Void run() throws Exception {
 	        				flush();
 	        				out.close();
 	        				buffer = null;

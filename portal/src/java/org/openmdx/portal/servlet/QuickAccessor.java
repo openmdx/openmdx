@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: QuickAccessor.java,v 1.4 2007/09/24 13:39:48 wfro Exp $
+ * Name:        $Id: QuickAccessor.java,v 1.6 2008/04/04 11:53:44 hburger Exp $
  * Description: QuickAccess 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/09/24 13:39:48 $
+ * Date:        $Date: 2008/04/04 11:53:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,20 +56,21 @@ import java.util.List;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.text.conversion.Base64;
+import org.openmdx.compatibility.base.naming.Path;
 
 public class QuickAccessor {
     
     //-----------------------------------------------------------------------
     public QuickAccessor(
-        String targetXri,
+        Path targetIdentity,
         String name,
         String description,
         String iconKey,
         Number actionType,
         String actionName,
-        List actionParams
+        List<String> actionParams
     ) {
-        this.targetXri = targetXri;
+        this.targetIdentity = targetIdentity;
         this.name = name;
         this.description = description;
         this.iconKey = iconKey;
@@ -77,7 +78,7 @@ public class QuickAccessor {
             ? Action.MACRO_TYPE_NA 
             : actionType.intValue();
         this.actionName = actionName == null ? "" : actionName;
-        this.actionParams = (String[])actionParams.toArray(new String[actionParams.size()]);
+        this.actionParams = actionParams.toArray(new String[actionParams.size()]);
     }
     
     //-----------------------------------------------------------------------
@@ -87,9 +88,9 @@ public class QuickAccessor {
     }
     
     //-----------------------------------------------------------------------
-    public String getTargetXri(
+    public Path getTargetIdentity(
     ) {
-        return this.targetXri;
+        return this.targetIdentity;
     }
     
     //-----------------------------------------------------------------------
@@ -100,7 +101,7 @@ public class QuickAccessor {
               this.action = new Action(
                   Action.EVENT_MACRO,
                   new Action.Parameter[]{
-                      new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.targetXri),
+                      new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.targetIdentity.toXri()),
                       new Action.Parameter(Action.PARAMETER_NAME, Base64.encode(this.actionName.getBytes())),
                       new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(this.actionType))                    
                   },
@@ -121,12 +122,13 @@ public class QuickAccessor {
     }
 
     //-----------------------------------------------------------------------
-    private final String targetXri;
+    private final Path targetIdentity;
     private final String name;
     private final String description;
     private final String iconKey;
     private final int actionType;
     private final String actionName;
+    @SuppressWarnings("unused")
     private final String[] actionParams;
     private Action action = null;
     

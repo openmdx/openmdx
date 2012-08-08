@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HashMapContext.java,v 1.5 2008/01/10 15:26:58 hburger Exp $
+ * Name:        $Id: HashMapContext.java,v 1.6 2008/06/28 00:21:33 hburger Exp $
  * Description: Hashtable Based Context
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/10 15:26:58 $
+ * Date:        $Date: 2008/06/28 00:21:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -190,7 +190,7 @@ public class HashMapContext extends NameBasedContext {
             }
             if(obj instanceof HashMapContext){
                 HashMapContext subContext = (HashMapContext) obj;
-                if(HashMapContext.nameParser.equals(nameParser)) subContext.namePrefix = this;
+                if(AbstractContext.nameParser.equals(nameParser)) subContext.namePrefix = this;
             }
         } else {
             super.bind(name, obj);

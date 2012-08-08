@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Path.java,v 1.26 2008/01/06 02:38:52 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Path.java,v 1.29 2008/04/25 00:51:25 hburger Exp $
  * Description: Profile Path 
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/06 02:38:52 $
+ * Date:        $Date: 2008/04/25 00:51:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -87,6 +87,7 @@ import org.openxri.XRI;
  * concurrent multithreaded access if that access is not
  * read-only.
  */
+@SuppressWarnings("unchecked")
 public final class Path
     implements Comparable, Cloneable, Serializable, Externalizable  
 {
@@ -317,7 +318,7 @@ s    */
      *              if any of the components is null or empty
      */
     public Path getDescendant(
-        String[] suffix
+        String... suffix
     ){
     int size = this.size();
         String[] components = new String[size+suffix.length];
@@ -349,7 +350,7 @@ s    */
      */
     public String getBase(
     ){
-        return get(size()-1); 
+        return this.components[this.components.length-1]; 
     }
 
     /**
@@ -621,7 +622,7 @@ s    */
      * @return          true if components is a prefix of this path, false otherwise
      */
     public boolean startsWith(
-        String[] prefix
+        String... prefix
     ) {
         if(prefix.length > size()) return false;
         for(
@@ -657,7 +658,7 @@ s    */
      * @return  true if suffix is a suffix of this path, false otherwise
      */
     public boolean endsWith(
-        String[] suffix
+        String... suffix
     ) {
         int offset = size() - suffix.length;
         if (offset < 0) return false;
@@ -684,7 +685,7 @@ s    */
      *              syntax rules of this path
      */
     public Path addAll(
-        String[] suffix
+        String... suffix
     ){
         return addAll(size(), suffix);
     }
@@ -709,7 +710,7 @@ s    */
      */
     public Path addAll (
         int position,
-        String[] components
+        String... components
     ){
         checkState();
     int size = this.size();

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ApplicationDeploymentDescriptor.java,v 1.10 2008/01/13 21:37:33 hburger Exp $
+ * Name:        $Id: ApplicationDeploymentDescriptor.java,v 1.11 2008/03/21 18:38:41 hburger Exp $
  * Description: Application Deployment Descriptor
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/13 21:37:33 $
+ * Date:        $Date: 2008/03/21 18:38:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,6 +70,7 @@ import org.w3c.dom.Element;
 /**
  * Application Deployment Descriptor
  */
+@SuppressWarnings("unchecked")
 public class ApplicationDeploymentDescriptor
     extends AbstractDeploymentDescriptor
     implements Application

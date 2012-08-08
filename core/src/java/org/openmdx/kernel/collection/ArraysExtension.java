@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ArraysExtension.java,v 1.6 2008/02/28 13:57:35 hburger Exp $
+ * Name:        $Id: ArraysExtension.java,v 1.7 2008/06/27 16:59:28 hburger Exp $
  * Description: Arrays Extension 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/28 13:57:35 $
+ * Date:        $Date: 2008/06/27 16:59:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -112,7 +112,7 @@ public class ArraysExtension {
     }
 
     
-    private static Object clone(
+    static Object clone(
         Object original
     ){
         int length = Array.getLength(original);
@@ -446,7 +446,7 @@ public class ArraysExtension {
             return size() == 0;
         }
         
-        private class EntrySet extends AbstractSet{
+        class EntrySet extends AbstractSet{
         
             public Iterator iterator(
             ){
@@ -460,17 +460,17 @@ public class ArraysExtension {
         
         }
 
-        private final class EntryIterator implements Iterator{
+        final class EntryIterator implements Iterator{
         
             public boolean hasNext(
             ){
-                return index < size();
+                return this.index < size();
             }
             
             public Map.Entry next(
             ){
                 if(!hasNext())throw new NoSuchElementException();
-                return new MapEntry(index++);
+                return new MapEntry(this.index++);
             }
 
             public void remove(

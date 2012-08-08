@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Loader.java,v 1.6 2007/01/21 20:46:42 wfro Exp $
+ * Name:        $Id: Loader.java,v 1.8 2008/04/04 17:01:12 hburger Exp $
  * Description: Loader
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:46:42 $
+ * Date:        $Date: 2008/04/04 17:01:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,8 +68,6 @@ import java.util.zip.CRC32;
 
 import javax.servlet.ServletContext;
 
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 
 public class Loader {
@@ -103,10 +101,10 @@ public class Loader {
   }
   
   //-------------------------------------------------------------------------
-  protected List getDirectories(
+  protected List<String> getDirectories(
       String path
   ) {
-      List dirs = new ArrayList();
+      List<String> dirs = new ArrayList<String>();
       Set paths = this.context.getResourcePaths(path);
       if(paths != null) {
           for(
@@ -122,26 +120,6 @@ public class Loader {
       return dirs;
   }
   
-  //-------------------------------------------------------------------------
-  protected void removeTrailingEmptyStrings(
-      DataproviderObject object
-  ) throws ServiceException {
-      for(
-          Iterator i = object.attributeNames().iterator(); 
-          i.hasNext();
-      ) {
-          String attributeName = (String)i.next();
-          List values = object.values(attributeName);
-          while(
-              (values.size() > 0) &&
-              (values.get(values.size()-1) instanceof String) &&
-              (((String)values.get(values.size()-1)).length() == 0)
-          ) {
-              values.remove(values.size()-1);
-          }
-      }
-  }
-    
   //-------------------------------------------------------------------------
   protected long getCRCForResourcePath(
     ServletContext context,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderObjectFilter.java,v 1.9 2007/11/04 16:14:56 hburger Exp $
+ * Name:        $Id: DataproviderObjectFilter.java,v 1.10 2008/03/21 18:45:24 hburger Exp $
  * Description: Dataprovider Object Filter
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/04 16:14:56 $
+ * Date:        $Date: 2008/03/21 18:45:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import org.openmdx.compatibility.base.query.FilterProperty;
 /**
  * Dataprovider Object Filter
  */
+@SuppressWarnings("unchecked")
 public class DataproviderObjectFilter extends AbstractFilter {
 
     /**

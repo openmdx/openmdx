@@ -22,7 +22,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/bcel.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jdo2-api.jar" sourcepath="src/jdo2-api.java.zip">
 		<attributes>
-			<attribute name="javadoc_location" value="http://db.apache.org/jdo/api20/apidocs/"/>
+			<attribute name="javadoc_location" value="http://db.apache.org/jdo/api21/apidocs/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/smtp.jar"/>

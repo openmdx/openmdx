@@ -17,12 +17,12 @@
    -----------------------
 
    First you need to get the distribution of openMDX/Core
-   (e.g. openmdx-2.0.0-core.jre-1.5.zip) from 
+   (e.g. openmdx-2.1.0-core.jre-1.5.zip) from 
    http://www.openmdx.org/downloads.htm. You can get distributions 
    for jre-1.5.
 
    Second you need to get the distribution of openMDX/Portal
-   (e.g. openmdx-2.0.0-portal.jre-1.5.zip) from 
+   (e.g. openmdx-2.1.0-portal.jre-1.5.zip) from 
    http://www.openmdx.org/downloads.htm.
 
    IMPORTANT
@@ -47,7 +47,7 @@
    
    The top level structure of the unzipped folder should look like:
    
-   openmdx-2.0.0
+   openmdx-2.1.0
      ant
      core
        build.xml
@@ -69,10 +69,10 @@
    Setting up openMDX/Portal
    -------------------------------------
    Unzip the openMDX/Portal distribution to the same project directory
-   as openMDX/Core. This adds the directory portal to openmdx-2.0.0.
+   as openMDX/Core. This adds the directory portal to openmdx-2.1.0.
    The top level structure of the unzipped folder should look like:
    
-   openmdx-2.0.0
+   openmdx-2.1.0
      ant
      core
        build.xml
@@ -113,7 +113,7 @@
    
    Builds the distributions for jre-1.5.
    
-   > ant -Dproject.platform.list="jre-1.5" distribution
+   > ant distribution
    
    Builds the distribution for jre-1.5.
              

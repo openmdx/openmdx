@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusPacket.java,v 1.5 2004/10/26 16:56:33 hburger Exp $
+ * Name:        $Id: RadiusPacket.java,v 1.6 2008/04/04 17:55:32 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/10/26 16:56:33 $
+ * Date:        $Date: 2008/04/04 17:55:32 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG
@@ -56,20 +56,19 @@ package org.openmdx.uses.net.sourceforge.jradiusclient;
 
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
 
 import org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameterException;
 import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
 /**
  * Released under the LGPL<BR>
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RadiusPacket {
     public static final int MIN_PACKET_LENGTH       = 20;
@@ -103,9 +102,10 @@ public class RadiusPacket {
 
     private int packetType = 0;
     private byte packetIdentifier = (byte)0;
-    private Map attributes;
+    private Map<Integer,RadiusAttribute> attributes;
     private int socketIndex = -1;
     
+    private final static List<RadiusAttribute> NO_ATTRIBUTES = Collections.emptyList(); 
     /**
      * builds a type RadiusPacket with no Attributes set
      *
@@ -113,7 +113,7 @@ public class RadiusPacket {
      * @throws InvalidParameterException if the attributeList is null or contains non-RadiusAttribute type entries
      */
     public RadiusPacket(final int type) throws InvalidParameterException{
-        this(type, getAndIncrementPacketIdentifier(),new ArrayList());
+        this(type, getAndIncrementPacketIdentifier(),new ArrayList<RadiusAttribute>());
     }
     /**
      *
@@ -122,7 +122,7 @@ public class RadiusPacket {
      * @throws InvalidParameterException
      */
     public RadiusPacket(final int type, final byte identifier) throws InvalidParameterException{
-        this(type, identifier, new ArrayList());
+        this(type, identifier, new ArrayList<RadiusAttribute>());
     }
     /**
      * Constructor
@@ -137,7 +137,7 @@ public class RadiusPacket {
         final byte identifier,
         final int socketIndex
     ) throws InvalidParameterException{
-        this(type, identifier, Collections.EMPTY_LIST);
+        this(type, identifier, NO_ATTRIBUTES);
         this.setSocketIndex(socketIndex);
     }
     
@@ -148,7 +148,7 @@ public class RadiusPacket {
      * @param attributeList a list of RadiusAttribute objects to initialize this RadiusPacket with
      * @throws InvalidParameterException if the attributeList is null or contains non-RadiusAttribute type entries
      */
-    public RadiusPacket(final int type, final List attributeList) throws InvalidParameterException{
+    public RadiusPacket(final int type, final List<RadiusAttribute> attributeList) throws InvalidParameterException{
         this(type, getAndIncrementPacketIdentifier(), attributeList);
     }
     /**
@@ -159,7 +159,7 @@ public class RadiusPacket {
      * @param attributeList
      * @throws InvalidParameterException
      */
-    public RadiusPacket(final int type, final byte identifier, final List attributeList) throws InvalidParameterException{
+    public RadiusPacket(final int type, final byte identifier, final List<RadiusAttribute> attributeList) throws InvalidParameterException{
         if((type < 1)||(type > 256)){
             throw new InvalidParameterException("Type was out of bounds");
         }
@@ -168,7 +168,7 @@ public class RadiusPacket {
         }
         this.packetType = type;
         this.packetIdentifier = identifier;
-        this.attributes = new HashMap();
+        this.attributes = new HashMap<Integer,RadiusAttribute>();
         this.setAttributes(attributeList);
     }
     /**
@@ -190,19 +190,12 @@ public class RadiusPacket {
      * @param attributeList a list of RadiusAttribute objects to add to this RadiusPacket
      * @throws InvalidParameterException if the attributeList is null or contains non-RadiusAttribute type entries
      */
-    public void setAttributes(final List attributeList) throws InvalidParameterException{
+    public void setAttributes(final List<RadiusAttribute> attributeList) throws InvalidParameterException{
         if(null == attributeList){
             throw new InvalidParameterException("Attribute List was null");
         }
-        RadiusAttribute tempRa;
-        Iterator iter = attributeList.iterator();
-        while(iter.hasNext()){
-            try{
-                tempRa = (RadiusAttribute)iter.next();
-                validateAttribute(tempRa);
-            }catch(ClassCastException ccex){
-                throw new InvalidParameterException("Attribute List contained an entry that was not a net.sourceforge.jradiusclient.RadiusAttribute");
-            }
+        for(RadiusAttribute tempRa : attributeList) {
+            validateAttribute(tempRa);
             synchronized(this.attributes){
                 this.attributes.put(new Integer(tempRa.getType()),tempRa);
             }
@@ -239,7 +232,7 @@ public class RadiusPacket {
      * get all of the RadiusAttributes in this RadiusPacket
      * @return a java.util.Collection of RadiusAttributes
      */
-    public Collection getAttributes(){
+    public Collection<RadiusAttribute> getAttributes(){
         //I am concerned about handing out a Collection that is backed by the attributes map,
         //i.e. changes to our own internal provate data can happen this way!!!!
         return this.attributes.values();
@@ -268,10 +261,9 @@ public class RadiusPacket {
         //check for an empty packet
         ByteArrayOutputStream bytes = new  ByteArrayOutputStream();
         synchronized (this.attributes){
-            Iterator attributeList = this.attributes.values().iterator();
-            while(attributeList.hasNext()){
+        	for(RadiusAttribute attribute : this.attributes.values()) {
                 try{
-                    bytes.write(((RadiusAttribute)attributeList.next()).getBytes());
+                    bytes.write(attribute.getBytes());
                 }catch(java.io.IOException ioex){
                     throw new RadiusException (ioex, "Error writing bytes to ByteArrayOutputStream!!!");
                 }
@@ -289,20 +281,16 @@ public class RadiusPacket {
     ) throws RadiusException{
         try {
 	        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-	        Map attributes = new HashMap(this.attributes);
+	        Map<Integer,RadiusAttribute> attributes = new HashMap<Integer,RadiusAttribute>(this.attributes);
             for(
                 int i = 0;
                 i < order.length;
                 i++
             ){
-                RadiusAttribute candidate = (RadiusAttribute) attributes.remove(new Integer(order[i]));
+                RadiusAttribute candidate = attributes.remove(new Integer(order[i]));
                 if(candidate != null) bytes.write(candidate.getBytes()); 
             }
-            for (
-                Iterator i = attributes.values().iterator();
-                i.hasNext();
-            ){
-                RadiusAttribute attribute = (RadiusAttribute) i.next();
+            for (RadiusAttribute attribute : attributes.values()){
                 bytes.write(attribute.getBytes());
             }
 	        return bytes.toByteArray();

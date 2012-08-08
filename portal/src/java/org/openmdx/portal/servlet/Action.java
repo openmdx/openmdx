@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Action.java,v 1.30 2007/11/22 18:31:04 wfro Exp $
+ * Name:        $Id: Action.java,v 1.35 2008/06/26 00:39:15 wfro Exp $
  * Description: Action
- * Revision:    $Revision: 1.30 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/22 18:31:04 $
+ * Date:        $Date: 2008/06/26 00:39:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,8 +59,8 @@
 package org.openmdx.portal.servlet;
 
 import java.io.Serializable;
-
-import org.openmdx.kernel.text.StringBuilders;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 public final class Action
   implements Serializable {
@@ -147,6 +147,23 @@ public final class Action
       }
   }
   
+  //-------------------------------------------------------------------------
+  public static Action getFindObjectAction(
+      String feature,
+      String id
+  ) {
+      return new Action(
+          Action.EVENT_FIND_OBJECT,
+          new Action.Parameter[]{
+              new Action.Parameter(Action.PARAMETER_REFERENCE, feature),
+              new Action.Parameter(Action.PARAMETER_ID, id)
+          },
+          "",
+          WebKeys.ICON_LOOKUP, 
+          true
+      );
+  }
+  
   //-------------------------------------------------------------------------  
   /**
    * Returns the value of parameter with specified name. The parameter 
@@ -161,13 +178,22 @@ public final class Action
           return "";
       }
       start += name.length() + 2;
-      int end = parameter.indexOf(")", start);
-      if(end > start) {
-          return parameter.substring(start, end);
+      int end = start;
+      int nesting = 1;
+      while(
+          (end < parameter.length()) && 
+          (nesting > 0)
+      ) {
+          char c = parameter.charAt(end);
+          if(c == '(') {
+              nesting++;
+          }
+          else if(c == ')') {
+              nesting--;
+          }
+          end++;
       }
-      else {
-          return parameter.substring(start, parameter.length()-1);
-      }
+      return parameter.substring(start, end - 1);
   }
 
   //-------------------------------------------------------------------------
@@ -192,11 +218,10 @@ public final class Action
     public String getParameter(
     ) {
         if(this.parameter == null) {
-            CharSequence parameter = StringBuilders.newStringBuilder();
+            StringBuilder parameter = new StringBuilder();
             if(this.parameters != null) {
                 for(int i = 0; i < this.parameters.length; i++) {
-                   	StringBuilders.asStringBuilder(parameter)
-                    .append(
+                   	parameter.append(
                         (i == 0) ? "" : "*" 
                     ).append(
                     	parameters[i].getName()
@@ -221,41 +246,41 @@ public final class Action
     public String getParameterEncoded(
     ) {      
         String s = this.getParameter();
-        CharSequence t = StringBuilders.newStringBuilder();
+        StringBuilder t = new StringBuilder();
         for(int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             if(c == '+') {
-            	StringBuilders.asStringBuilder(t).append("%2B");
+            	t.append("%2B");
             }
             else if(c == '=') {
-            	StringBuilders.asStringBuilder(t).append("%3D");
+            	t.append("%3D");
             }
             else if(c == '$') {
-            	StringBuilders.asStringBuilder(t).append("%24");
+            	t.append("%24");
             }
             else if(c == ',') {
-            	StringBuilders.asStringBuilder(t).append("%2C");
+            	t.append("%2C");
             }
             else if(c == '/') {
-            	StringBuilders.asStringBuilder(t).append("%2F");
+            	t.append("%2F");
             }
             else if(c == '?') {
-            	StringBuilders.asStringBuilder(t).append("%3F");
+            	t.append("%3F");
             }
             else if(c == ':') {
-            	StringBuilders.asStringBuilder(t).append("%3A");
+            	t.append("%3A");
             }
             else if(c == '@') {
-            	StringBuilders.asStringBuilder(t).append("%40");
+            	t.append("%40");
             }
             else if(c == '&') {
-            	StringBuilders.asStringBuilder(t).append("%26");
+            	t.append("%26");
             }
             else if(c == '#') {
-            	StringBuilders.asStringBuilder(t).append("%23");
+            	t.append("%23");
             }
             else {
-            	StringBuilders.asStringBuilder(t).append(c);                
+            	t.append(c);                
             }
         }
         return t.toString();
@@ -312,6 +337,110 @@ public final class Action
     }
   
     //-------------------------------------------------------------------------
+    public String getEncodedHRef(
+    ) {
+        return this.getEncodedHRef(null);            
+    }
+    
+    //-------------------------------------------------------------------------
+    public String getEncodedHRef(
+        String requestId
+    ) {
+        String[] components = this.getHRef(
+            requestId
+        );
+        StringBuilder href = new StringBuilder(components[0]);
+        for(int i = 1; i < components.length; i+=2) try {
+            href.append(
+                i == 1 ? "?" : "&"
+            ).append(
+                components[i]
+            ).append(
+                "="
+            ).append(
+                URLEncoder.encode(components[i+1], "UTF-8")
+            );
+        } catch(UnsupportedEncodingException e) {}
+        return href.toString();
+    }
+        
+    //-------------------------------------------------------------------------
+    public String[] getHRef(
+    ) {
+        return this.getHRef(null);
+    }
+    
+    //-------------------------------------------------------------------------
+    public String[] getHRef(
+        String requestId
+    ) {
+        String actionParameter = this.getParameter();
+        int n = 3;
+        if(requestId != null) n+=2;
+        if(actionParameter.length() > 0) n+=2;
+        String[] components = new String[n];
+        n = 0;
+        // Servlet name
+        // Return download URLs as SERVLET_NAME/<file name>?params. This is
+        // an IE workaround. Setting the reply header fields is not sufficient.
+        // Also see http://ppewww.ph.gla.ac.uk/~flavell/www/content-type.html
+        StringBuilder href = new StringBuilder(WebKeys.SERVLET_NAME);      
+        if(
+            (this.getEvent() == Action.EVENT_DOWNLOAD_FROM_LOCATION) || 
+            (this.getEvent() == Action.EVENT_DOWNLOAD_FROM_FEATURE)
+        ) {
+            href.append(
+                "/"
+            ).append(
+                this.getParameter(Action.PARAMETER_NAME)
+            );
+        }
+        components[n++] = href.toString();      
+        // REQUEST_ID
+        if(requestId != null) {
+            components[n++] = WebKeys.REQUEST_ID;
+            components[n++] = requestId;
+        }      
+        // REQUEST_EVENT
+        components[n++] = WebKeys.REQUEST_EVENT;
+        components[n++] = Integer.toString(this.getEvent());      
+        // Parameter name
+        if(actionParameter.length() > 0) {
+            components[n++] = WebKeys.REQUEST_PARAMETER;
+            components[n++] = actionParameter;
+        }      
+        return components;
+    }
+
+    //-------------------------------------------------------------------------
+    public String getEvalHRef(        
+    ) {
+        return this.getEvalHRef(null);
+    }
+    
+    //-------------------------------------------------------------------------
+    public String getEvalHRef(
+        String requestId
+    ) {
+        String[] components = this.getHRef(
+            requestId
+        );
+        StringBuilder href = new StringBuilder("getEncodedHRef([");
+        for(int i = 0; i < components.length; i++) {
+            (
+               i > 0 ? href.append(", ") : href
+            ).append(
+                "'"
+            ).append(
+                components[i]
+            ).append(
+                "'"
+            );
+        }
+        return href.append("])").toString();
+    }
+            
+    //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3616453392827103289L;
@@ -350,6 +479,8 @@ public final class Action
     public static final String PARAMETER_POSITION = "position";
     public static final String PARAMETER_FORMAT = "format";
     public static final String PARAMETER_SIZE = "size";
+    public static final String PARAMETER_MODE = "mode";
+    public static final String PARAMETER_SCOPE = "scope";
     public static final String PARAMETER_FILTER_BY_FEATURE = "filterByFeature";
     public static final String PARAMETER_FILTER_BY_TYPE = "filterByType";
     public static final String PARAMETER_FILTER_OPERATOR = "filterOperator";
@@ -402,8 +533,7 @@ public final class Action
     public final static int EVENT_SELECT_GUI_MODE = 42;
     public final static int EVENT_MACRO = 43;
     public final static int EVENT_GRID_GET_ROW_MENU = 44;
-    public final static int EVENT_GET_OBJECT_ATTRIBUTES = 45;
-    public final static int EVENT_EDIT_MODAL = 46;
+    public final static int EVENT_OBJECT_GET_ATTRIBUTES = 45;
     public final static int EVENT_SET_ROLE = 47;
     
     //-----------------------------------------------------------------------

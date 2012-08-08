@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LayoutFactory.java,v 1.6 2007/08/07 22:59:58 wfro Exp $
+ * Name:        $Id: LayoutFactory.java,v 1.8 2008/04/04 11:55:19 hburger Exp $
  * Description: TextsFactory
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/07 22:59:58 $
+ * Date:        $Date: 2008/04/04 11:55:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,10 +75,10 @@ public class LayoutFactory
   //-------------------------------------------------------------------------
   public LayoutFactory(
       String[] locales,
-      List[] layoutNames,
+      List<String>[] layoutNames,
       Model_1_0 model
   ) {
-      this.layouts = new HashMap();
+      this.layouts = new HashMap<String,List<String>>();
       this.locales = Arrays.asList(locales);
       for(int i = 0; i < locales.length; i++) {
           this.layouts.put(
@@ -93,7 +93,7 @@ public class LayoutFactory
   //-------------------------------------------------------------------------
   public String[] getLocale(
   ) {
-    return (String[])this.locales.toArray(new String[this.locales.size()]);    
+    return this.locales.toArray(new String[this.locales.size()]);    
   }
   
   //-------------------------------------------------------------------------
@@ -108,8 +108,8 @@ public class LayoutFactory
           // Lookup layout for currentLocale. If not found perform
           // locale fallback back to locale 0
           while(true) {
-              List layouts = (List)this.layouts.get(this.locales.get(currentLocale));
-              List candidates = new ArrayList();
+              List<String> layouts = this.layouts.get(this.locales.get(currentLocale));
+              List<String> candidates = new ArrayList<String>();
               for(
                   Iterator j = layouts.iterator();
                   j.hasNext();
@@ -148,7 +148,7 @@ public class LayoutFactory
       }
       catch(Exception e) {
           AppLog.warning("Can not get layout", e.getMessage());
-          AppLog.detail(e.getMessage(), e.getCause(), 1);
+          AppLog.detail(e.getMessage(), e.getCause());
       }
       return forEditing 
          ? DEFAULT_EDIT_LAYOUT
@@ -163,8 +163,8 @@ public class LayoutFactory
   private final static String DEFAULT_SHOW_LAYOUT = "/WEB-INF/config/layout/en_US/show-Default.jsp";
   private final static String DEFAULT_EDIT_LAYOUT = "/WEB-INF/config/layout/en_US/edit-Default.jsp";
   
-  private final Map layouts;
-  private final List locales;
+  private final Map<String,List<String>> layouts;
+  private final List<String> locales;
   private final Model_1_0 model;
   
 }

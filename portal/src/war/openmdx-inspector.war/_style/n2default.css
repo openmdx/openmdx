@@ -156,6 +156,13 @@ img {
 .clicked{
   border: solid 1px green;
 }
+.alertBox {
+  padding-right:10px;
+  margin-top:1px;
+  color:#888888;
+  float:right;
+  cursor:pointer;
+}
 .printButton {
   width: 16px;
   margin-top:2px;
@@ -1280,6 +1287,9 @@ form {
   padding-right: 2px;
   padding-top: 2px;
   padding-bottom: 0px;
+}
+form #inspector {
+  background-color:#F4F4F4;
 }
 .menuOpPanelActions {
   width: 240px;

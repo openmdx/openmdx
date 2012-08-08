@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1Accessor.java,v 1.12 2007/10/10 16:06:09 hburger Exp $
+ * Name:        $Id: Model_1Accessor.java,v 1.13 2008/03/21 18:40:08 hburger Exp $
  * Description: Wrapper for a org::omg::model1 compliant in-process dataprovider.
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:09 $
+ * Date:        $Date: 2008/03/21 18:40:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -76,6 +76,7 @@ import org.openmdx.model1.importer.cci.ModelImporter_1_0;
 import org.openmdx.model1.layer.application.LayerConfigurationEntries;
 
 //---------------------------------------------------------------------------  
+@SuppressWarnings("unchecked")
 public class Model_1Accessor {
 
      /**

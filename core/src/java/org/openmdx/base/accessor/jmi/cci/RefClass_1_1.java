@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RefClass_1_1.java,v 1.2 2008/02/08 16:51:24 hburger Exp $
+ * Name:        $Id: RefClass_1_1.java,v 1.4 2008/04/21 17:05:11 hburger Exp $
  * Description: RefClass_1_1 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:24 $
+ * Date:        $Date: 2008/04/21 17:05:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,6 +54,8 @@ package org.openmdx.base.accessor.jmi.cci;
 
 import java.util.Set;
 
+import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+
 /**
  * RefClass_1_1
  *
@@ -65,7 +67,6 @@ public interface RefClass_1_1 extends RefClass_1_0 {
      * The set is not managed by users of a RefClass_1_1 implementation and not by
      * the implementation itself.
      */
-    public Set<String> refFeaturesHavingNoImpl(
-    );
+    Set<ModelElement_1_0> refFeaturesHavingNoImpl();
     
 }

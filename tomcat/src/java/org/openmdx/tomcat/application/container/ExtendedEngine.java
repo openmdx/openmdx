@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ExtendedEngine.java,v 1.9 2008/02/11 14:44:03 wfro Exp $
+ * Name:        $Id: ExtendedEngine.java,v 1.10 2008/06/06 17:44:57 wfro Exp $
  * Description: Extended Engine
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/11 14:44:03 $
+ * Date:        $Date: 2008/06/06 17:44:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -283,7 +283,7 @@ public class ExtendedEngine extends StandardEngine {
 	        		// 
 		    		File[] resourceAdapterFiles = getResourceAdapterFiles(true);
 	    			log.info(
-    					"Process " + resourceAdapterFiles.length + " pending resource adapter deplyoments from '" + stagingDir + "'"
+    					"Process " + resourceAdapterFiles.length + " pending resource adapter deployments from '" + stagingDir + "'"
 	    			);
 	    			for(File newArchive : resourceAdapterFiles){
 	    				File oldArchive = new File(getDeploymentDir(), newArchive.getName());

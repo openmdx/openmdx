@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardsLoader.java,v 1.9 2007/08/07 22:23:38 wfro Exp $
+ * Name:        $Id: WizardsLoader.java,v 1.10 2008/04/04 17:01:12 hburger Exp $
  * Description: ReportsLoader
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/07 22:23:38 $
+ * Date:        $Date: 2008/04/04 17:01:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -92,6 +92,7 @@ public class WizardsLoader
     /**
      * Loads wizard definitions.
      */
+    @SuppressWarnings("unchecked")
     synchronized public WizardDefinitionFactory loadWizardDefinitions(
         ServletContext context,
         String[] locale,

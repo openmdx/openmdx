@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PageEpilogControl.java,v 1.61 2007/08/06 11:22:19 wfro Exp $
+ * Name:        $Id: PageEpilogControl.java,v 1.64 2008/06/01 11:26:18 wfro Exp $
  * Description: PageEpilogControl 
- * Revision:    $Revision: 1.61 $
+ * Revision:    $Revision: 1.64 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/06 11:22:19 $
+ * Date:        $Date: 2008/06/01 11:26:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,7 +66,6 @@ import java.util.Map;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlPage;
@@ -98,6 +97,7 @@ public class PageEpilogControl
     }
     
     //-----------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,
@@ -108,12 +108,20 @@ public class PageEpilogControl
         
         ObjectView view = (ObjectView)p.getView();
         ApplicationContext app = view.getApplicationContext();
+        SimpleDateFormat dateFormatter = DateValue.getLocalizedDateFormatter(
+            null, 
+            true,
+            app
+        );
+        SimpleDateFormat dateTimeFormatter = DateValue.getLocalizedDateTimeFormatter(
+            null, 
+            true, 
+            app
+        );        
         boolean editMode = view instanceof EditObjectView;
         String guiLook = app.getCurrentGuiMode();
         boolean noLayoutManager = 
             guiLook.equals(WebKeys.SETTING_GUI_MODE_BASIC);
-        boolean useYuiExtTabs = 
-            guiLook.equals(WebKeys.SETTING_GUI_MODE_ADVANCED);
         
         int currentChartId = p.getProperty(HtmlPage.PROPERTY_CHART_ID) != null
             ? ((Integer)p.getProperty(HtmlPage.PROPERTY_CHART_ID)).intValue()
@@ -131,6 +139,465 @@ public class PageEpilogControl
         
         // Init scripts
         p.write("<script language=\"javascript\" type=\"text/javascript\">");
+        
+        // Popup's for multi-valued attributes
+        // multi-valued Strings
+        p.write("    var multiValuedHigh = 1; // 0..multiValuedHigh-1");
+        p.write("");
+        p.write("    function editstrings_onchange_checkbox(checkbox, field) {");
+        p.write("      if(!checkbox.checked) {");
+        p.write("        field.value = \"*\";");
+        p.write("      }");
+        p.write("      else {");
+        p.write("        field.value = \"\";");
+        p.write("      }");
+        p.write("    }");
+        p.write("");
+        p.write("    editstrings_maxLength = 2147483647;");
+        p.write("    function editstrings_onchange_field(checkbox, field) {");
+        p.write("      if(field.value.length > 0) {");
+        p.write("        checkbox.checked = true;");
+        p.write("        if(field.value.length > editstrings_maxLength) {");
+        p.write("          field.value = field.value.substr(0, editstrings_maxLength)");
+        p.write("        }");
+        p.write("      }");
+        p.write("    }");
+        p.write("");
+        p.write("    function editstrings_click_OK() {");
+        p.write("      var nFields = 0;");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if($('editstringIsSelected_' + i).checked) {");
+        p.write("          nFields = i+1;");
+        p.write("        }");
+        p.write("      }");
+        p.write("      values = \"\";");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editstringIsSelected_' + i).checked ? $('editstringField_' + i).value : \"#NULL\");");
+        p.write("      }");
+        p.write("      POPUP_FIELD.value = values;");
+        p.write("      editstrings_click_Cancel();");
+        p.write("    }");
+        p.write("");
+        p.write("    function editstrings_click_Cancel() {");
+        p.write("      var IfrRef = document.getElementById('DivShim');");
+        p.write("      IfrRef.style.display = 'none';");
+        p.write("      shownPopup.style.display =  'none';");
+        p.write("    }");
+        p.write("");
+        p.write("    function editstrings_on_load() {");
+        p.write("      var i = 0;");
+        p.write("      while ($('editstringrow' + i)) {");
+        p.write("        var toBeRemoved = $('editstringrow' + i);");
+        p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
+        p.write("        i += 1;");
+        p.write("      }");
+        p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
+        p.write("      var templateRow = $('editstringrow');");
+        p.write("      var el_idx = $('editstringIdx_');");
+        p.write("      var el_checkbox = $('editstringIsSelected_');");
+        p.write("      var el_field = $('editstringField_');");
+        p.write("");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
+        p.write("        el_checkbox.name = 'isSelected' + i;");
+        p.write("        el_field.name = 'field' + i;");
+        p.write("        el_idx.id = 'editstringIdx_' + i;");
+        p.write("        el_checkbox.id = 'editstringIsSelected_' + i;");
+        p.write("        el_field.id = 'editstringField_' + i;");
+        p.write("        el_idx.value = i;");
+        p.write("        var newRow = templateRow.cloneNode(true);");
+        p.write("        newRow.id = 'editstringrow' + i;");
+        p.write("        el_checkbox.name = 'isSelected';");
+        p.write("        el_field.name = 'field';");
+        p.write("        el_idx.id = 'editstringIdx_';");
+        p.write("        el_checkbox.id = 'editstringIsSelected_';");
+        p.write("        el_field.id = 'editstringField_';");
+        p.write("        templateRow.parentNode.appendChild(newRow);");
+        p.write("        newRow.style.display = 'block';");
+        p.write("        $('editstringIdx_' + i).appendChild(document.createTextNode(i + ':'));");
+        p.write("        $('editstringField_' + i).value = value != \"#NULL\" ? value : \"\";");
+        p.write("        $('editstringIsSelected_' + i).checked = value != \"#NULL\";");
+        p.write("      }");
+        p.write("      templateRow.style.display = 'none';");
+        p.write("    }");
+        // multi-valued Numbers
+        p.write("    function editnumbers_onchange_checkbox(checkbox, field) {");
+        p.write("      if(!checkbox.checked) {");
+        p.write("        field.value = \"0.00\";");
+        p.write("      }");
+        p.write("      else {");
+        p.write("        field.value = \"\";");
+        p.write("      }");
+        p.write("    }");
+        p.write("");
+        p.write("    function editnumbers_onchange_field(checkbox, field) {");
+        p.write("      checkbox.checked = field.value.length > 0;");
+        p.write("    }");
+        p.write("");
+        p.write("    function editnumbers_click_OK() {");
+        p.write("      var nFields = 0;");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if($('editnumberIsSelected_' + i).checked) {");
+        p.write("          nFields = i+1;");
+        p.write("        }");
+        p.write("      }");
+        p.write("      values = \"\";");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editnumberIsSelected_' + i).checked ? $('editnumberField_' + i).value : \"\");");
+        p.write("      }");
+        p.write("      POPUP_FIELD.value = values;");
+        p.write("      editnumbers_click_Cancel();");
+        p.write("    }");
+        p.write("");
+        p.write("    function editnumbers_click_Cancel() {");
+        p.write("      var IfrRef = document.getElementById('DivShim');");
+        p.write("      IfrRef.style.display = 'none';");
+        p.write("      shownPopup.style.display =  'none';");
+        p.write("    }");
+        p.write("");
+        p.write("    function editnumbers_on_load() {");
+        p.write("      var i = 0;");
+        p.write("      while ($('editnumberrow' + i)) {");
+        p.write("        var toBeRemoved = $('editnumberrow' + i);");
+        p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
+        p.write("        i += 1;");
+        p.write("      }");
+        p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
+        p.write("      var templateRow = $('editnumberrow');");
+        p.write("      var el_idx = $('editnumberIdx_');");
+        p.write("      var el_checkbox = $('editnumberIsSelected_');");
+        p.write("      var el_field = $('editnumberField_');");
+        p.write("");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
+        p.write("        el_checkbox.name = 'isSelected' + i;");
+        p.write("        el_field.name = 'field' + i;");
+        p.write("        el_idx.id = 'editnumberIdx_' + i;");
+        p.write("        el_checkbox.id = 'editnumberIsSelected_' + i;");
+        p.write("        el_field.id = 'editnumberField_' + i;");
+        p.write("        el_idx.value = i;");
+        p.write("        var newRow = templateRow.cloneNode(true);");
+        p.write("        newRow.id = 'editnumberrow' + i;");
+        p.write("        el_checkbox.name = 'isSelected';");
+        p.write("        el_field.name = 'field';");
+        p.write("        el_idx.id = 'editnumberIdx_';");
+        p.write("        el_checkbox.id = 'editnumberIsSelected_';");
+        p.write("        el_field.id = 'editnumberField_';");
+        p.write("        templateRow.parentNode.appendChild(newRow);");
+        p.write("        newRow.style.display = 'block';");
+        p.write("        $('editnumberIdx_' + i).appendChild(document.createTextNode(i + ':'));");
+        p.write("        $('editnumberField_' + i).value = value != \"#NULL\" ? value : \"\";");
+        p.write("        $('editnumberIsSelected_' + i).checked =  (value.length > 0) && (value != \"#NULL\");");
+        p.write("      }");
+        p.write("      templateRow.style.display = 'none';");
+        p.write("    }");        
+        // multi-valued Dates
+        p.write("    function editdates_onchange_checkbox(checkbox, field) {");
+        p.write("      if(checkbox.checked) {");
+        p.write("        field.value = \"\";");
+        p.write("      }");
+        p.write("    }");
+        p.write("");
+        p.write("    function editdates_onchange_field(checkbox, field) {");
+        p.write("      checkbox.checked = field.value.length > 0;");
+        p.write("    }");
+        p.write("");
+        p.write("    function editdates_click_OK() {");
+        p.write("      var nFields = 0;");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if($('editdateIsSelected_' + i).checked) {");
+        p.write("          nFields = i+1;");
+        p.write("        }");
+        p.write("      }");
+        p.write("      values = \"\";");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editdateIsSelected_' + i).checked ? $('editdateField_' + i).value : \"\");");
+        p.write("      }");
+        p.write("      POPUP_FIELD.value = values;");
+        p.write("      editdates_click_Cancel();");
+        p.write("    }");
+        p.write("");
+        p.write("    function editdates_click_Cancel() {");
+        p.write("      var IfrRef = document.getElementById('DivShim');");
+        p.write("      IfrRef.style.display = 'none';");
+        p.write("      shownPopup.style.display =  'none';");
+        p.write("    }");
+        p.write("");
+        p.write("    function editdates_on_load() {");
+        p.write("      var i = 0;");
+        p.write("      while ($('editdaterow' + i)) {");
+        p.write("        var toBeRemoved = $('editdaterow' + i);");
+        p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
+        p.write("        i += 1;");
+        p.write("      }");
+        p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
+        p.write("      var templateRow = $('editdaterow');");
+        p.write("      var el_idx = $('editdateIdx_');");
+        p.write("      var el_checkbox = $('editdateIsSelected_');");
+        p.write("      var el_field = $('editdateField_');");
+        p.write("      var el_cal = $('cal_date_trigger_');");
+        p.write("");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
+        p.write("        el_checkbox.name = 'isSelected' + i;");
+        p.write("        el_field.name = 'field' + i;");
+        p.write("        el_idx.id = 'editdateIdx_' + i;");
+        p.write("        el_checkbox.id = 'editdateIsSelected_' + i;");
+        p.write("        el_field.id = 'editdateField_' + i;");
+        p.write("        el_cal.id = 'cal_date_trigger_' + i;");
+        p.write("        el_idx.value = i;");
+        p.write("        var newRow = templateRow.cloneNode(true);");
+        p.write("        newRow.id = 'editdaterow' + i;");
+        p.write("        el_checkbox.name = 'isSelected';");
+        p.write("        el_field.name = 'field';");
+        p.write("        el_idx.id = 'editdateIdx_';");
+        p.write("        el_checkbox.id = 'editdateIsSelected_';");
+        p.write("        el_field.id = 'editdateField_';");
+        p.write("        el_cal.id = 'cal_date_trigger_';");
+        p.write("        templateRow.parentNode.appendChild(newRow);");
+        p.write("        newRow.style.display = 'block';");
+        p.write("        $('editdateIdx_' + i).appendChild(document.createTextNode(i + ':'));");
+        p.write("        $('editdateField_' + i).value = value != \"#NULL\" ? value : \"\";");
+        p.write("        $('editdateIsSelected_' + i).checked = (value.length > 0) && (value != \"#NULL\");");
+        p.write("        Calendar.setup({");
+        p.write("          inputField   : \"editdateField_\" + i,");
+        p.write("          ifFormat     : \"", DateValue.getCalendarFormat(dateFormatter), "\",");
+        p.write("          firstDay     : ", Integer.toString(dateFormatter.getCalendar().getFirstDayOfWeek()-1), ",");
+        p.write("          timeFormat   : \"24\",");
+        p.write("          button       : \"cal_date_trigger_\" + i,");
+        p.write("          align        : \"Tr\",");
+        p.write("          singleClick  : true,");
+        p.write("          showsTime    : false");
+        p.write("        });");
+        p.write("      }");
+        p.write("      templateRow.style.display = 'none';");
+        p.write("    }");
+        // multi-valued dateTime        
+        p.write("    function editdatetimes_onchange_checkbox(checkbox, field) {");
+        p.write("      if(checkbox.checked) {");
+        p.write("        field.value = \"\";");
+        p.write("      }");
+        p.write("    }");
+        p.write("");
+        p.write("    function editdatetimes_onchange_field(checkbox, field) {");
+        p.write("      checkbox.checked = field.value.length > 0;");
+        p.write("    }");
+        p.write("");
+        p.write("    function editdatetimes_click_OK() {");
+        p.write("      var nFields = 0;");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if($('editdatetimeIsSelected_' + i).checked) {");
+        p.write("          nFields = i+1;");
+        p.write("        }");
+        p.write("      }");
+        p.write("      values = \"\";");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editdatetimeIsSelected_' + i).checked ? $('editdatetimeField_' + i).value : \"\");");
+        p.write("      }");
+        p.write("      POPUP_FIELD.value = values;");
+        p.write("      editdatetimes_click_Cancel();");
+        p.write("    }");
+        p.write("");
+        p.write("    function editdatetimes_click_Cancel() {");
+        p.write("      var IfrRef = document.getElementById('DivShim');");
+        p.write("      IfrRef.style.display = 'none';");
+        p.write("      shownPopup.style.display =  'none';");
+        p.write("    }");
+        p.write("");
+        p.write("    function editdatetimes_on_load() {");
+        p.write("      var i = 0;");
+        p.write("      while ($('editdatetimerow' + i)) {");
+        p.write("        var toBeRemoved = $('editdatetimerow' + i);");
+        p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
+        p.write("        i += 1;");
+        p.write("      }");
+        p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
+        p.write("      var templateRow = $('editdatetimerow');");
+        p.write("      var el_idx = $('editdatetimeIdx_');");
+        p.write("      var el_checkbox = $('editdatetimeIsSelected_');");
+        p.write("      var el_field = $('editdatetimeField_');");
+        p.write("      var el_cal = $('cal_datetime_trigger_');");
+        p.write("");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
+        p.write("        el_checkbox.name = 'isSelected' + i;");
+        p.write("        el_field.name = 'field' + i;");
+        p.write("        el_idx.id = 'editdatetimeIdx_' + i;");
+        p.write("        el_checkbox.id = 'editdatetimeIsSelected_' + i;");
+        p.write("        el_field.id = 'editdatetimeField_' + i;");
+        p.write("        el_cal.id = 'cal_datetime_trigger_' + i;");
+        p.write("        el_idx.value = i;");
+        p.write("        var newRow = templateRow.cloneNode(true);");
+        p.write("        newRow.id = 'editdatetimerow' + i;");
+        p.write("        el_checkbox.name = 'isSelected';");
+        p.write("        el_field.name = 'field';");
+        p.write("        el_idx.id = 'editdatetimeIdx_';");
+        p.write("        el_checkbox.id = 'editdatetimeIsSelected_';");
+        p.write("        el_field.id = 'editdatetimeField_';");
+        p.write("        el_cal.id = 'cal_datetime_trigger_';");
+        p.write("        templateRow.parentNode.appendChild(newRow);");
+        p.write("        newRow.style.display = 'block';");
+        p.write("        $('editdatetimeIdx_' + i).appendChild(document.createTextNode(i + ':'));");
+        p.write("        $('editdatetimeField_' + i).value = value != \"#NULL\" ? value : \"\";");
+        p.write("        $('editdatetimeIsSelected_' + i).checked = (value.length > 0) && (value != \"#NULL\");");
+        p.write("        Calendar.setup({");
+        p.write("          inputField   : \"editdatetimeField_\" + i,");
+        p.write("          ifFormat     : \"", DateValue.getCalendarFormat(dateTimeFormatter), "\",");
+        p.write("          firstDay     : ", Integer.toString(dateTimeFormatter.getCalendar().getFirstDayOfWeek()-1), ",");
+        p.write("          timeFormat   : \"24\",");
+        p.write("          button       : \"cal_datetime_trigger_\" + i,");
+        p.write("          align        : \"Tr\",");
+        p.write("          singleClick  : true,");
+        p.write("          showsTime    : true");
+        p.write("        });");
+        p.write("      }");
+        p.write("      templateRow.style.display = 'none';");
+        p.write("    }");
+        // multi-valued Booleans
+        p.write("    function editbooleans_onchange_checkbox(checkbox, field) {");
+        p.write("      if(!checkbox.checked) {");
+        p.write("        field.checked = true;");
+        p.write("      }");
+        p.write("      else {");
+        p.write("        field.checked = false;");
+        p.write("      }");
+        p.write("    }");
+        p.write("");
+        p.write("    function editbooleans_onchange_field(checkbox, field) {");
+        p.write("      checkbox.checked = true;");
+        p.write("    }");
+        p.write("");
+        p.write("    function editbooleans_click_OK() {");
+        p.write("      var nFields = 0;");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if($('editbooleanIsSelected_' + i).checked) {");
+        p.write("          nFields = i+1;");
+        p.write("        }");
+        p.write("      }");
+        p.write("      values = \"\";");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editbooleanIsSelected_' + i).checked ? $('editbooleanField_' + i).checked : \"\");");
+        p.write("      }");
+        p.write("      POPUP_FIELD.value = values;");
+        p.write("      editbooleans_click_Cancel();");
+        p.write("    }");
+        p.write("");
+        p.write("    function editbooleans_click_Cancel() {");
+        p.write("      var IfrRef = document.getElementById('DivShim');");
+        p.write("      IfrRef.style.display = 'none';");
+        p.write("      shownPopup.style.display =  'none';");
+        p.write("    }");
+        p.write("");
+        p.write("    function editbooleans_on_load() {");
+        p.write("      var i = 0;");
+        p.write("      while ($('editbooleanrow' + i)) {");
+        p.write("        var toBeRemoved = $('editbooleanrow' + i);");
+        p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
+        p.write("        i += 1;");
+        p.write("      }");
+        p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
+        p.write("      var templateRow = $('editbooleanrow');");
+        p.write("      var el_idx = $('editbooleanIdx_');");
+        p.write("      var el_checkbox = $('editbooleanIsSelected_');");
+        p.write("      var el_field = $('editbooleanField_');");
+        p.write("");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
+        p.write("        el_checkbox.name = 'isSelected' + i;");
+        p.write("        el_field.name = 'field' + i;");
+        p.write("        el_idx.id = 'editbooleanIdx_' + i;");
+        p.write("        el_checkbox.id = 'editbooleanIsSelected_' + i;");
+        p.write("        el_field.id = 'editbooleanField_' + i;");
+        p.write("        el_idx.value = i;");
+        p.write("        var newRow = templateRow.cloneNode(true);");
+        p.write("        newRow.id = 'editbooleanrow' + i;");
+        p.write("        el_checkbox.name = 'isSelected';");
+        p.write("        el_field.name = 'field';");
+        p.write("        el_idx.id = 'editbooleanIdx_';");
+        p.write("        el_checkbox.id = 'editbooleanIsSelected_';");
+        p.write("        el_field.id = 'editbooleanField_';");
+        p.write("        templateRow.parentNode.appendChild(newRow);");
+        p.write("        newRow.style.display = 'block';");
+        p.write("        $('editbooleanIdx_' + i).appendChild(document.createTextNode(i + ':'));");
+        p.write("        $('editbooleanField_' + i).checked = value != \"#NULL\" ? value == \"true\" : \"\";");
+        p.write("        $('editbooleanIsSelected_' + i).checked = (value.length > 0) && (value != \"#NULL\");");
+        p.write("      }");
+        p.write("      templateRow.style.display = 'none';");
+        p.write("    }");
+        // multi-valued Codes
+        p.write("    function editcodes_onchange_checkbox(checkbox, field) {");
+        p.write("      if(checkbox.checked) {");
+        p.write("        field.value = POPUP_OPTIONS[1];");
+        p.write("      }");
+        p.write("      else {");
+        p.write("        field.value = POPUP_OPTIONS[0];");
+        p.write("      }");
+        p.write("    }");
+        p.write("");
+        p.write("    function editcodes_onchange_field(checkbox, field) {");
+        p.write("      checkbox.checked = field.value.length > 0;");
+        p.write("    }");
+        p.write("");
+        p.write("    function editcodes_click_OK() {");
+        p.write("      var nFields = 0;");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if($('editcodeIsSelected_' + i).checked) {");
+        p.write("          nFields = i+1;");
+        p.write("        }");
+        p.write("      }");
+        p.write("      values = \"\";");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editcodeIsSelected_' + i).checked ? $('editcodeField_' + i).value : \"\");");
+        p.write("      }");
+        p.write("      POPUP_FIELD.value = values;");
+        p.write("      editcodes_click_Cancel();");
+        p.write("    }");
+        p.write("");
+        p.write("    function editcodes_click_Cancel() {");
+        p.write("      var IfrRef = document.getElementById('DivShim');");
+        p.write("      IfrRef.style.display = 'none';");
+        p.write("      shownPopup.style.display =  'none';");
+        p.write("    }");
+        p.write("");
+        p.write("    function editcodes_on_load() {");
+        p.write("      var i = 0;");
+        p.write("      while ($('editcoderow' + i)) {");
+        p.write("        var toBeRemoved = $('editcoderow' + i);");
+        p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
+        p.write("        i += 1;");
+        p.write("      }");
+        p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
+        p.write("      var templateRow = $('editcoderow');");
+        p.write("      var el_idx = $('editcodeIdx_');");
+        p.write("      var el_checkbox = $('editcodeIsSelected_');");
+        p.write("      var el_field = $('editcodeField_');");
+        p.write("");
+        p.write("      for (i=0;i<multiValuedHigh;i++) {");
+        p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
+        p.write("        el_checkbox.name = 'isSelected' + i;");
+        p.write("        el_field.name = 'field' + i;");
+        p.write("        el_idx.id = 'editcodeIdx_' + i;");
+        p.write("        el_checkbox.id = 'editcodeIsSelected_' + i;");
+        p.write("        el_field.id = 'editcodeField_' + i;");
+        p.write("        el_idx.value = i;");
+        p.write("        var newRow = templateRow.cloneNode(true);");
+        p.write("        newRow.id = 'editcoderow' + i;");
+        p.write("        el_checkbox.name = 'isSelected';");
+        p.write("        el_field.name = 'field';");
+        p.write("        el_idx.id = 'editcodeIdx_';");
+        p.write("        el_checkbox.id = 'editcodeIsSelected_';");
+        p.write("        el_field.id = 'editcodeField_';");
+        p.write("        templateRow.parentNode.appendChild(newRow);");
+        p.write("        newRow.style.display = 'block';");
+        p.write("        for(j = 0; j < POPUP_OPTIONS.length; j++) {");
+        p.write("          $('editcodeField_' + i).options[j] = new Option(POPUP_OPTIONS[j], POPUP_OPTIONS[j]);");
+        p.write("        }");
+        p.write("        $('editcodeIdx_' + i).appendChild(document.createTextNode(i + ':'));");
+        p.write("        $('editcodeIsSelected_' + i).checked =  (value.length > 0) && (value != \"#NULL\");");
+        p.write("        $('editcodeField_' + i).value = value != \"#NULL\" ? value : \"\";");
+        p.write("      }");
+        p.write("      templateRow.style.display = 'none';");
+        p.write("    }");
         
         // Does page contains charts?
         if(!editMode) {
@@ -154,11 +621,6 @@ public class PageEpilogControl
         p.write("  if (calendar.dateClicked) {");
         p.write("  };");
         p.write("}");
-        SimpleDateFormat dateFormatter = DateValue.getLocalizedDateFormatter(
-            null, 
-            true, 
-            app
-        );
         List calendarIds = (List)p.getProperty(HtmlPage.PROPERTY_CALENDAR_IDS);
         for(Iterator i = calendarIds.iterator(); i.hasNext(); ) {
             String calendarId = (String)i.next();
@@ -190,7 +652,7 @@ public class PageEpilogControl
             for(int i = 0; i < selectParentActions .length; i++) {
                 Action selectParentAction = selectParentActions[i];
                 if(selectParentAction != null) {
-                    String breadcrum = StringBuilders.newStringBuilder(
+                    String breadcrum = new StringBuilder(
                         i > 0 ? " > " : "" 
                     ).append(
                          "<a href=\"#\""
@@ -248,31 +710,6 @@ public class PageEpilogControl
                 p.write("");
             }
         }
-        // Prepare attribute inspector panel
-        if(nActiveTab > 0) {
-            if(useYuiExtTabs) {
-                p.write("      var attributePanel = new YAHOO.ext.TabPanel('inspector');");
-                p.write("      attributePanel.beginUpdate();");
-                AttributeTabControl[] attributeTabControl = 
-                    view.getAttributePane().getAttributePaneControl().getAttributeTabControl();
-                int nAttributeTabs = attributeTabControl.length;
-                for(int i = 0; i < nAttributeTabs; i++) {
-                    AttributeTabControl tab = attributeTabControl[i];                            
-                    p.write("      attributePanel.addTab('tab", Integer.toString(i), "', \"", tab.getName(), "\");");
-                }
-                p.write("      var allTab = attributePanel.addTab('tab", Integer.toString(nAttributeTabs+1), "', \"*\");");
-                p.write("      allTab.on('activate', function(){");
-                for(int i = 0; i < nAttributeTabs; i++) {
-                    p.write("        attributePanel.getTab('tab", Integer.toString(i), "').show();");
-                }
-                p.write("      });");
-                if(currentChartId > 0) {
-                    p.write("      attributePanel.addListener('tabchange', function(tp, tab){if(pageHasCharts) {window.onresize();}});");
-                }
-                p.write("      attributePanel.endUpdate();");
-                p.write("      attributePanel.activate('tab0');");
-            }
-        }
         // No grid panels in edit mode
         if(!editMode) {
             ShowObjectView showView = (ShowObjectView)view;
@@ -282,10 +719,6 @@ public class PageEpilogControl
                 ReferencePane referencePane = showView.getReferencePane()[i];                
                 int paneIndex = referencePane.getReferencePaneControl().getPaneIndex();
                 String paneId = Integer.toString(paneIndex);
-                if(useYuiExtTabs) {
-                    p.write("      gridPanel", paneId, " = new YAHOO.ext.TabPanel('gridPanel", paneId, "');");
-                    p.write("      gridPanel", paneId, ".beginUpdate();");
-                }
                 boolean isGroupTabActive = false;
                 int lastGroupTabIndex = 0;
                 int nGridControl = referencePane.getReferencePaneControl().getGridControl().length;
@@ -305,53 +738,16 @@ public class PageEpilogControl
                     if(!isGroupTabActive && isGroupTab) {
                         isGroupTabActive = true;
                         lastGroupTabIndex = j;
-                        if(useYuiExtTabs) {
-                            p.write("      var gridTab", tabId, "s = gridPanel", paneId, ".addTab('gridTab", tabId, "s', \"", WebKeys.TAB_GROUPING_CHARACTER, "\");");
-                            p.write("      gridTab", tabId, "s.setTooltip('');");
-                            p.write("      gridTab", tabId, "s.on('activate',function(){try{gridTab", tabId, "s.prevActiveTab.activate();}catch(e){}});");
-                        }
                     }
                     // Add tab
-                    if(useYuiExtTabs) {
-                        p.write("      var gridTab", tabId, " = gridPanel", paneId, ".addTab('gridTab", tabId, "', \"", tabTitle.replaceAll("'", "\\\\'"), "\");");
-                        p.write("      gridTab", tabId, ".getUpdateManager().loadScripts = true;");
-                        p.write("      gridTab", tabId, ".setTooltip('", selectReferenceTabAction.getToolTip().replaceAll("'", "\\\\'"), "');");
-                        p.write("      $('gridTab", tabId, "').parentNode.style.overflow = \'visible\';");                    
-                        p.write("      var gridTab", tabId, "Mgr = gridTab", tabId, ".setUrl(", p.getEvalHRef(selectReferenceTabAction), ", null, false); // true=load once, false=load multiple");
-                        p.write("      gridTab", tabId, "Mgr.onUpdate.subscribe(function(){try{gridTab", tabId, ".bodyEl.setHeight('');makeZebraTable('gridTable", tabId, "',1);}catch(e){}});");
-                        if(isGroupTab) {
-                            p.write("      gridPanel", paneId, ".hideTab('gridTab", tabId, "');");
-                        }
-                    }
-                    else {
-                        // Get content for selected grid
-                        if(j == referencePane.getSelectedReference()) {
-                            p.write("      new Ajax.Updater('gridContent", paneId, "', ", p.getEvalHRef(selectReferenceTabAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});");
-                        }
+                    // Get content for selected grid
+                    if(j == referencePane.getSelectedReference()) {
+                        p.write("      new Ajax.Updater('gridContent", paneId, "', ", p.getEvalHRef(selectReferenceTabAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});");
                     }
                     // Epilog hidden tabs. Special treatment if last tab of grid is a group tab 
                     if(isGroupTabActive && (!isGroupTab || (j == nGridControl-1))) {
                         isGroupTabActive = false;
-                        if(useYuiExtTabs) {
-                            // Activate hidden tabs if group tab is selected
-                            p.write("      gridPanel", paneId, ".addListener('beforetabchange', function(tp, e, tab) {");
-                            p.write("        if(tab == gridTab", Integer.toString(paneIndex*100 + lastGroupTabIndex), "s) {");                        
-                            p.write("          gridPanel", paneId, ".hideTab('gridTab", Integer.toString(paneIndex*100 + lastGroupTabIndex), "s');");
-                            for(int k = lastGroupTabIndex; k <= j; k++) {
-                                p.write("          gridPanel", paneId, ".unhideTab('gridTab", Integer.toString(paneIndex*100 + k), "');");
-                            }
-                            p.write("          tab.prevActiveTab = tp.active;");
-                            p.write("        }");
-                            p.write("      });");
-                            p.write("");
-                        }
                     }                    
-                }
-                if(useYuiExtTabs) {
-                    p.write("      gridPanel", paneId, ".addListener('beforetabchange', function(tp, e, tab){try{var h=tp.active.bodyEl.getHeight();tab.bodyEl.setHeight(h);}catch(e){}});");                    
-                    p.write("      gridPanel", paneId, ".unhideTab('gridTab", Integer.toString(paneIndex*100 + referencePane.getSelectedReference()), "');");
-                    p.write("      gridPanel", paneId, ".endUpdate();");
-                    p.write("      gridTab", Integer.toString(paneIndex*100 + referencePane.getSelectedReference()), ".activate();");
                 }
             }
             p.write("");

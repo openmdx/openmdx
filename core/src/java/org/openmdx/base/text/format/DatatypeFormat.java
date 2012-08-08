@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatatypeFormat.java,v 1.5 2007/01/16 15:49:55 hburger Exp $
+ * Name:        $Id: DatatypeFormat.java,v 1.6 2008/03/21 18:32:18 hburger Exp $
  * Description: DatatypeFormat 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/16 15:49:55 $
+ * Date:        $Date: 2008/03/21 18:32:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * DatatypeFormat<ul>
@@ -211,7 +210,7 @@ public class DatatypeFormat implements Marshaller {
     ){
         int t = date.length();
         return this.datatypeFactory.newXMLGregorianCalendar(
-            this.basicFormat ? StringBuilders.newStringBuilder(
+            this.basicFormat ? new StringBuilder(
                 date
             ).insert(
                 t - 2, 
@@ -238,7 +237,7 @@ public class DatatypeFormat implements Marshaller {
         return t < 0 ? parseDate(
             dateTime
         ) : this.datatypeFactory.newXMLGregorianCalendar(
-            this.basicFormat ? StringBuilders.newStringBuilder(
+            this.basicFormat ? new StringBuilder(
                 dateTime
             ).insert(
                 t + 5,

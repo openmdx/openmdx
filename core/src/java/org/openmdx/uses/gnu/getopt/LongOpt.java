@@ -23,7 +23,6 @@ package org.openmdx.uses.gnu.getopt;
 
 import java.text.MessageFormat;
 import java.util.Locale;
-import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 /**************************************************************************/
@@ -100,7 +99,7 @@ protected int val;
 /**
   * Localized strings for error messages
   */
-private ResourceBundle _messages = PropertyResourceBundle.getBundle(
+private ResourceBundle _messages = ResourceBundle.getBundle(
                             "org/openmdx/uses/gnu/getopt/MessagesBundle", Locale.getDefault());
 
 /**************************************************************************/

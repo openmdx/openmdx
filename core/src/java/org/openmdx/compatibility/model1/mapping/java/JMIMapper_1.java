@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JMIMapper_1.java,v 1.9 2007/03/26 23:57:29 hburger Exp $
+ * Name:        $Id: JMIMapper_1.java,v 1.13 2008/06/28 00:21:35 hburger Exp $
  * Description: JMIExternalizer_1
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/26 23:57:29 $
+ * Date:        $Date: 2008/06/28 00:21:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,12 +67,12 @@ import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.accessor.basic.spi.ModelElement_1;
 import org.openmdx.model1.code.ModelAttributes;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.mapping.AbstractMapper_1;
+import org.openmdx.model1.mapping.AbstractNames;
 import org.openmdx.model1.mapping.AttributeDef;
 import org.openmdx.model1.mapping.ClassDef;
 import org.openmdx.model1.mapping.ClassifierDef;
@@ -82,6 +82,7 @@ import org.openmdx.model1.mapping.ReferenceDef;
 import org.openmdx.model1.mapping.StructDef;
 
 //---------------------------------------------------------------------------
+@SuppressWarnings("unchecked")
 public class JMIMapper_1
   extends AbstractMapper_1 {
 
@@ -141,7 +142,7 @@ public class JMIMapper_1
         
         AttributeDef mAttributeDef = new AttributeDef(
             attributeDef,
-            (Model_1_3)this.model, 
+            this.model, 
             true // openmdx1
         );       
         ClassDef mClassDef = new ClassDef(
@@ -765,7 +766,7 @@ public class JMIMapper_1
       ) {
         AttributeDef att = new AttributeDef(
           attributeDef,
-          (Model_1_3)this.model, 
+          this.model, 
           true // openmdx1
         );
         allAttributes.add(att);
@@ -843,7 +844,7 @@ public class JMIMapper_1
           structuralFeatures.add(
             new AttributeDef(
               feature, 
-              (Model_1_3)this.model, 
+              this.model, 
               true // openmdx1
             )
           );
@@ -987,7 +988,7 @@ public class JMIMapper_1
     //--------------------------------------------------------------------------------
   /**
    * Is called for all ModelAttribute features of a class including suerptyes.
-   * This method must check wheter modelAttribute.container = modelClass and
+   * This method must check whether modelAttribute.container = modelClass and
    * behave accordingly. 
  * @param queryMapper TODO
    */
@@ -1012,7 +1013,7 @@ public class JMIMapper_1
     try {
         AttributeDef mStructureFieldDef = new AttributeDef(
             structureFieldDef,
-            (Model_1_3)this.model, 
+            this.model, 
             true // openmdx1
         );
         StructDef mStructDef = new StructDef(
@@ -1253,7 +1254,7 @@ public class JMIMapper_1
   //---------------------------------------------------------------------------    
   public void externalize(
     String qualifiedPackageName,
-    Model_1_0 model,
+    Model_1_3 model,
     ZipOutputStream zip
   ) throws ServiceException {
   
@@ -1700,7 +1701,7 @@ public class JMIMapper_1
             zip, 
             pkgCompatibilityFile, 
             currentPackage, 
-            Names.openmdx2PackageName(
+            AbstractNames.openmdx2PackageName(
                 new StringBuffer(),
                 mofName
             ).toString(),

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: EjbConfiguration.java,v 1.8 2005/05/18 16:10:59 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: EjbConfiguration.java,v 1.10 2008/04/14 18:37:14 hburger Exp $
  * Description: EjbConfiguration class 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/05/18 16:10:59 $
+ * Date:        $Date: 2008/04/14 18:37:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -45,11 +45,12 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.application.j2ee;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.naming.Binding;
@@ -66,6 +67,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Command option parser
  */
+@SuppressWarnings("unchecked")
 public class EjbConfiguration 
 	extends Configuration
 { 
@@ -87,10 +89,18 @@ public class EjbConfiguration
 	) throws ServiceException {
 		super();
 		try {
+	        Context base = context;
+	        if(section != null) for(
+	           int i = 0, iLimit = section.length - 1;
+	           i < iLimit;
+	           i++
+	        ){
+	            base = (Context) base.lookup(section[i]);
+	        }
 			String sectionName =
-				section == null ? "" : section[0];
+				section == null ? "" : section[section.length - 1];
 			for(
-				NamingEnumeration bindings = context.listBindings(sectionName);
+				NamingEnumeration bindings = base.listBindings(sectionName);
 				bindings.hasMore();
 			) try {
 				Binding binding = (Binding)bindings.next();
@@ -113,7 +123,7 @@ public class EjbConfiguration
 					BasicException.Code.DEFAULT_DOMAIN, 
 					BasicException.Code.ACTIVATION_FAILURE, 
 					new BasicException.Parameter[] {
-						new BasicException.Parameter("section", section)
+						new BasicException.Parameter("section", Arrays.toString(section))
 					},
 					"Naming exception in section"
 				);

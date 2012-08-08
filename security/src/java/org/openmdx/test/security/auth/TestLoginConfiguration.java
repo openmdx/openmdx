@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestLoginConfiguration.java,v 1.6 2005/06/15 14:31:12 hburger Exp $
+ * Name:        $Id: TestLoginConfiguration.java,v 1.7 2008/04/04 17:55:31 hburger Exp $
  * Description: Test Login Configuration
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/15 14:31:12 $
+ * Date:        $Date: 2008/04/04 17:55:31 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -153,12 +153,12 @@ public class TestLoginConfiguration extends TestCase {
 	
 	public void testLoginConfiguration(
 	) throws IOException{
-        Map sharedOptions = new HashMap();
+        Map<String,Object> sharedOptions = new HashMap<String,Object>();
         sharedOptions.put(
             "spiOption",
             Boolean.TRUE
         );
-		Map kerberosOptions = new HashMap(sharedOptions);
+		Map<String,Object> kerberosOptions = new HashMap<String,Object>(sharedOptions);
 		kerberosOptions.put(
 			"ticketCache",
 			System.getProperty("user.home") + System.getProperty("file.separator") + "tickets"

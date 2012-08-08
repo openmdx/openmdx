@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OperationResult.java,v 1.4 2005/02/21 13:10:11 hburger Exp $
+ * Name:        $Id: OperationResult.java,v 1.5 2008/03/19 17:07:05 hburger Exp $
  * Description: Dataprovider Adapter: Operation Result
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:10:11 $
+ * Date:        $Date: 2008/03/19 17:07:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,7 +62,7 @@ import javax.resource.cci.MappedRecord;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 
-
+@SuppressWarnings("unchecked")
 class OperationResult 
     extends AbstractMap 
 implements MappedRecord {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: BinarySink_1OutputStream.java,v 1.3 2004/09/26 22:34:35 hburger Exp $
+ * Name:        $Id: BinarySink_1OutputStream.java,v 1.4 2008/03/21 18:31:57 hburger Exp $
  * Description: Streams: Character Sink Writer
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/09/26 22:34:35 $
+ * Date:        $Date: 2008/03/21 18:31:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -185,8 +185,8 @@ public class BinarySink_1OutputStream extends OutputStream {
 					sourceCursor += remainingInTarget;
 					try {
                         this.callbackContext.execute(
-                            new PrivilegedExceptionAction(){
-                                public Object run() throws Exception {
+                            new PrivilegedExceptionAction<Void>(){
+                                public Void run() throws Exception {
                         			out.writeBytes(buffer);
                                     return null;
                                 }					        
@@ -213,8 +213,8 @@ public class BinarySink_1OutputStream extends OutputStream {
 		this.buffer[this.cursor++] = (byte) b;
 		if(this.cursor == this.buffer.length) try {
 		    this.callbackContext.execute(
-                new PrivilegedExceptionAction(){
-                    public Object run() throws Exception {
+                new PrivilegedExceptionAction<Void>(){
+                    public Void run() throws Exception {
             		    out.writeBytes(buffer);
             			cursor = 0;
                         return null;
@@ -242,8 +242,8 @@ public class BinarySink_1OutputStream extends OutputStream {
 			}
 			try {
 			    this.callbackContext.execute(
-	                new PrivilegedExceptionAction(){
-	                    public Object run() throws Exception {
+	                new PrivilegedExceptionAction<Void>(){
+	                    public Void run() throws Exception {
 	            		    out.writeBytes(flushBuffer);
 	                        return null;
 	                    }					        
@@ -263,8 +263,8 @@ public class BinarySink_1OutputStream extends OutputStream {
 		if(isOpen()) try {
 			flush();
 			this.callbackContext.execute(
-                new PrivilegedExceptionAction(){
-                    public Object run() throws Exception {
+                new PrivilegedExceptionAction<Void>(){
+                    public Void run() throws Exception {
             			out.close();
                         return null;
                     }					        

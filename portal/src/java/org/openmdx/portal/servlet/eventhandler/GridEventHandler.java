@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GridEventHandler.java,v 1.30 2008/01/27 00:37:48 wfro Exp $
- * Description: ShowObjectView 
- * Revision:    $Revision: 1.30 $
+ * Name:        $Id: GridEventHandler.java,v 1.41 2008/05/31 23:40:08 wfro Exp $
+ * Description: GridEventHandler 
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/27 00:37:48 $
+ * Date:        $Date: 2008/05/31 23:40:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,7 +75,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.compatibility.base.dataprovider.cci.Orders;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.portal.servlet.Action;
@@ -82,6 +82,7 @@ import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.HtmlPageFactory;
+import org.openmdx.portal.servlet.PaintScope;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
@@ -89,12 +90,13 @@ import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ReferencePane;
 import org.openmdx.portal.servlet.view.ShowObjectView;
-import org.openmdx.portal.servlet.view.View;
+import org.openmdx.portal.servlet.view.ViewMode;
 
 public class GridEventHandler {
 
     //-----------------------------------------------------------------------
-    public static void handleEvent(
+    @SuppressWarnings("unchecked")
+    public static HandleEventResult handleEvent(
         int event,
         ObjectView view,
         HttpServletRequest request,
@@ -105,7 +107,7 @@ public class GridEventHandler {
         ViewsCache showViewsCache
     ) throws IOException {
         if(view instanceof ShowObjectView) {
-            ShowObjectView showView = (ShowObjectView)view;
+            ShowObjectView currentView = (ShowObjectView)view;
             HtmlPage p = HtmlPageFactory.openPage(
                 view,
                 request,
@@ -114,16 +116,17 @@ public class GridEventHandler {
             p.setProperty(
                 HtmlPage.PROPERTY_POPUP_IMAGES,
                 new HashMap()
-            );            
+            );
+            PersistenceManager pm = currentView.getPersistenceManager();
             switch(event) {
             
                 case Action.EVENT_SELECT_REFERENCE:
                     try {
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -136,8 +139,8 @@ public class GridEventHandler {
                             }
                         }
                     }
-                    catch(ServiceException e) {
-                        AppLog.warning(e.getMessage(), e.getCause(), 1);
+                    catch(Exception e) {
+                        AppLog.warning(e.getMessage(), e.getCause());
                     }
                     break;
                         
@@ -145,9 +148,9 @@ public class GridEventHandler {
                     try {
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -162,7 +165,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
         
@@ -170,9 +173,9 @@ public class GridEventHandler {
                     try {
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -187,7 +190,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                         
@@ -196,9 +199,9 @@ public class GridEventHandler {
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
                         int pageNumber = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PAGE));
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -213,7 +216,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                        
@@ -224,9 +227,9 @@ public class GridEventHandler {
                         String filterValues = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         String filterName = Action.getParameter(parameter, Action.PARAMETER_NAME);
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if(grid != null) {
@@ -242,7 +245,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
     
@@ -263,9 +266,9 @@ public class GridEventHandler {
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
                         String filterName = Action.getParameter(parameter, Action.PARAMETER_NAME);
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -281,19 +284,19 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
         
                 case Action.EVENT_SET_ORDER_ASC:
                 case Action.EVENT_ADD_ORDER_ASC:
                     try {
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
                         String featureName = Action.getParameter(parameter, Action.PARAMETER_NAME);
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -308,19 +311,19 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
         
                 case Action.EVENT_SET_ORDER_DESC:
                 case Action.EVENT_ADD_ORDER_DESC:
                     try {
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
                         String featureName = Action.getParameter(parameter, Action.PARAMETER_NAME);
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -335,19 +338,19 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
         
                 case Action.EVENT_SET_ORDER_ANY:
                 case Action.EVENT_ADD_ORDER_ANY:
                     try {
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
                         String featureName = Action.getParameter(parameter, Action.PARAMETER_NAME);
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -362,18 +365,18 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                         
                 case Action.EVENT_SET_GRID_ALIGNMENT_WIDE:
                 case Action.EVENT_SET_GRID_ALIGNMENT_NARROW:
                     try {
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -392,17 +395,17 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
     
                 case Action.EVENT_SET_CURRENT_FILTER_AS_DEFAULT:
                     try {
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -417,18 +420,18 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
     
                 case Action.EVENT_SET_SHOW_ROWS_ON_INIT:
                 case Action.EVENT_SET_HIDE_ROWS_ON_INIT:
                     try {
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
@@ -445,27 +448,26 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                     
                 case Action.EVENT_ADD_OBJECT:
                     try {
-                        ReferencePane[] referencePanes = showView.getReferencePane();
+                        ReferencePane[] referencePanes = currentView.getReferencePane();
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         if (paneIndex < referencePanes.length) {
-                            showView.selectReferencePane(paneIndex);
+                            currentView.selectReferencePane(paneIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
                                 String feature = Action.getParameter(parameter, Action.PARAMETER_REFERENCE);
                                 String addRemoveMode = Action.getParameter(parameter, Action.PARAMETER_NAME);
-                                RefPackage_1_0 rootPkg = (RefPackage_1_0)showView.getRefObject().refOutermostPackage();
-                                Collection values = (Collection)showView.getRefObject().refGetValue(feature);
+                                Collection values = (Collection)currentView.getRefObject().refGetValue(feature);
                                 // test whether all referenced objects are accessible.
                                 // If object is not accessible remove it from list.
                                 // TODO: objects may be temporarly not available. In this
                                 // case they should not be removed
-                                rootPkg.refBegin();
+                                pm.currentTransaction().begin();
                                 for (Iterator i = values.iterator(); i.hasNext();) {
                                     RefObject r = (RefObject) i.next();
                                     if (r == null)
@@ -482,7 +484,7 @@ public class GridEventHandler {
                                     Path refPath = new Path(refMofId);
                                     // Must be at least a segment
                                     if(refPath.size() >= 5) {
-                                        RefObject referencedObject = ((RefPackage_1_0)showView.getRefObject().refOutermostPackage()).refObject(refPath.toXri());
+                                        RefObject referencedObject = ((RefPackage_1_0)currentView.getRefObject().refOutermostPackage()).refObject(refPath.toXri());
                                         if ("+".equals(addRemoveMode)) {
                                             AppLog.trace("adding referenced object");
                                             values.add(referencedObject);
@@ -493,7 +495,7 @@ public class GridEventHandler {
                                         }
                                     }
                                 }
-                                rootPkg.refCommit();
+                                pm.currentTransaction().commit();
                                 referencePanes[paneIndex].getReferencePaneControl().paint(
                                     p,
                                     ReferencePaneControl.FRAME_CONTENT,
@@ -504,7 +506,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
     
@@ -520,7 +522,7 @@ public class GridEventHandler {
                             ShowObjectView selectedObjectView = new ShowObjectView(
                                 view.getId(),
                                 gridRowDetailsId,
-                                targetRowXri,
+                                new Path(targetRowXri),
                                 application,
                                 view.getHistoryActions(),
                                 null,
@@ -537,29 +539,13 @@ public class GridEventHandler {
                             p.write("  <ul id=\"nav\" class=\"nav\">");
                             p.write("    <li><a href=\"#\"><img id=\"gridRow", rowId, "-details-opener\" border=\"0\" height=\"16\" width=\"15\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" /></a>");
                             p.write("      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-                            Action getAttributesAction = selectedObjectView.getObjectReference().getGetAttributesAction(); 
-                            p.write("        <li><a", p.getOnClick("javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', ", selectedObjectView.getEvalHRef(getAttributesAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';}});$('gridRow", rowId, "-details-closer').style.display='block';return false;"), " href=\"#\">000 - ", htmlEncoder.encode(getAttributesAction.getTitle(), false), "</a></li>");                            
-                            // Edit object action as macro
-                            // 1. select object
-                            // 2. switch into edit mode
-                            Action editObjectAction = selectedObjectView.getObjectReference().getEditObjectAction(true);
+                            // 000 - Show
+                            Action getAttributesAction = selectedObjectView.getObjectReference().getObjectGetAttributesAction(); 
+                            p.write("        <li><a", p.getOnClick("javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', ", selectedObjectView.getEvalHRef(getAttributesAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';}});$('gridRow", rowId, "-details-closer').style.display='block';return false;"), " href=\"#\">000 - ", htmlEncoder.encode(getAttributesAction.getTitle(), false), "</a></li>");
+                            // 001 - Edit
+                            Action editObjectAction = selectedObjectView.getObjectReference().getEditObjectAction(ViewMode.EMBEDDED);
                             if(editObjectAction.isEnabled()) {
-                                Action editObjectMacro = new Action(
-                                    Action.EVENT_MACRO,
-                                    new Action.Parameter[]{
-                                        new Action.Parameter(Action.PARAMETER_OBJECTXRI, selectedObjectView.getRefObject().refMofId()),
-                                        new Action.Parameter(
-                                            Action.PARAMETER_NAME, 
-                                            Base64.encode(
-                                                ("window.location.href=" + view.getEvalHRef(editObjectAction, View.REQUEST_ID_FORMAT_TEMPLATE)).getBytes()
-                                            )
-                                        ),
-                                        new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
-                                    },
-                                    application.getTexts().getEditTitle(),
-                                    true
-                                );                            
-                                p.write("        <li><a", p.getOnClick("javascript:window.open(", p.getEvalHRef(editObjectMacro, true), ", '_blank');return false;"), " href=\"#\">001 - ", htmlEncoder.encode(editObjectMacro.getTitle(), false), "</a></li>");
+                                p.write("        <li><a", p.getOnClick("javascript:$('", gridRowDetailsId, "').parentNode.className+=' wait';$('", gridRowDetailsId, "').innerHTML='';new Ajax.Updater('", gridRowDetailsId, "', ", selectedObjectView.getEvalHRef(editObjectAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){$('", gridRowDetailsId, "').parentNode.className='';}});$('gridRow", rowId, "-details-closer').style.display='block';return false;"), " href=\"#\">001 - ", htmlEncoder.encode(editObjectAction.getTitle(), false), "</a></li>");                            
                             }
                             else {
                                 p.write("        <li><a href=\"#\"><span>001 - ", htmlEncoder.encode(application.getTexts().getEditTitle(), false), "</span></a></li>");                                
@@ -623,20 +609,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
-                    }
-                    break;
-                    
-                case Action.EVENT_GET_OBJECT_ATTRIBUTES:                    
-                    try {
-                        showView.getAttributePane().getAttributePaneControl().paint(
-                            p, 
-                            false
-                        );
-                    }
-                    catch (Exception e) {
-                        ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                        AppLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                     
@@ -646,9 +619,12 @@ public class GridEventHandler {
             }
             catch (Exception e) {
                 ServiceException e0 = new ServiceException(e);
-                AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                AppLog.warning(e0.getMessage(), e0.getCause());
             }            
-        }        
+        }       
+        return new HandleEventResult(
+            HandleEventResult.StatusCode.DONE
+        );        
     }
 
     //-------------------------------------------------------------------------
@@ -675,7 +651,6 @@ public class GridEventHandler {
             (event == Action.EVENT_ADD_OBJECT) ||
             (event == Action.EVENT_SET_SHOW_ROWS_ON_INIT) ||
             (event == Action.EVENT_GRID_GET_ROW_MENU) ||
-            (event == Action.EVENT_GET_OBJECT_ATTRIBUTES) ||
             (event == Action.EVENT_SET_HIDE_ROWS_ON_INIT);
     }
 

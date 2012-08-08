@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CalendarControl.java,v 1.15 2007/12/13 01:24:03 wfro Exp $
+ * Name:        $Id: CalendarControl.java,v 1.18 2008/05/01 21:43:57 wfro Exp $
  * Description: CalendarControl
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:24:03 $
+ * Date:        $Date: 2008/05/01 21:43:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -87,6 +87,8 @@ public class CalendarControl
     }
     
     //-----------------------------------------------------------------------
+    @Override
+    @SuppressWarnings("unchecked")
     public void paint(
         HtmlPage p, 
         String frame,
@@ -98,7 +100,7 @@ public class CalendarControl
         List calendarIds = (List)p.getProperty(HtmlPage.PROPERTY_CALENDAR_IDS);
         calendarIds.add(this.id);
         p.write("<div id=\"", this.id, "\" style=\"overflow:hidden;padding:0px;\"></div>");
-        p.write("<div id=\"timestamp\">", timeFormat.format(app.getDataPackageReloadedAt()), "</div>");        
+        p.write("<div id=\"timestamp\">", timeFormat.format(app.getPmDataReloadedAt()), "</div>");        
     }
 
     //-----------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LayerStatistics_1.java,v 1.4 2004/04/02 16:59:01 wfro Exp $
+ * Name:        $Id: LayerStatistics_1.java,v 1.5 2008/03/21 20:17:16 hburger Exp $
  * Description: LayerStatistics_1 class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:01 $
+ * Date:        $Date: 2008/03/21 20:17:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.compatibility.base.dataprovider.spi.LayerStatistics_1_0;
 /**
  * A class for storing and managing Layer statistics data.
  */
+@SuppressWarnings("unchecked")
 public class LayerStatistics_1
     implements LayerStatistics_1_0
 {

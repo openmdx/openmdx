@@ -1229,7 +1229,7 @@
       </ownedAttribute>
       <ownedAttribute xmi:id="_3C7B8A60016D3FC609B402DF" name="subject" type="_3C7B8A60016D3FC602C4017B" isUnique="false" association="_3C7B8A60016D3FC609B30388">
         <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hWSEYt6-EdmkJO73lqONhA" value="1"/>
-        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hWSEYd6-EdmkJO73lqONhA" value="1"/>
+        <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hWSEYd6-EdmkJO73lqONhA"/>
       </ownedAttribute>
       <ownedAttribute xmi:id="_3C7B8A60016D3FC608DB03B9" name="isMemberOf" type="_3C7B8A60016D3FC606E402DA" isUnique="false" association="_3C7B8A60016D3FC608DA0281">
         <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hWSEad6-EdmkJO73lqONhA" value="1"/>

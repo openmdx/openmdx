@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Control.java,v 1.17 2007/01/21 20:46:18 wfro Exp $
+ * Name:        $Id: Control.java,v 1.18 2008/05/01 21:43:56 wfro Exp $
  * Description: Control
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:46:18 $
+ * Date:        $Date: 2008/05/01 21:43:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,37 +58,56 @@
  */
 package org.openmdx.portal.servlet.control;
 
-import java.io.Serializable;
-import java.util.Locale;
+import groovy.lang.Binding;
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.Script;
+import groovy.util.ResourceException;
+import groovy.util.ScriptException;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.jmi.reflect.RefObject;
+import javax.servlet.http.HttpServletRequest;
+
+import org.codehaus.groovy.runtime.InvokerHelper;
+import org.openmdx.application.log.AppLog;
+import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 
 public abstract class Control
-  implements Serializable {
+    implements Serializable {
   
-  //-------------------------------------------------------------------------
-  public Control(
-      String id,
-      String locale,
-      int localeAsIndex,
-      ControlFactory controlFactory
-  ) {
-      this.id = id;
-      this.locale = locale;
-      this.localeAsIndex = localeAsIndex;
-      this.controlFactory = controlFactory;
-  }
+    //-------------------------------------------------------------------------
+    public Control(
+        String id,
+        String locale,
+        int localeAsIndex,
+        ControlFactory controlFactory
+    ) {
+        this.id = id;
+        this.locale = locale;
+        this.localeAsIndex = localeAsIndex;
+        this.controlFactory = controlFactory;
+    }
 
-  //-------------------------------------------------------------------------
-  protected Locale getCurrentLocale(
-  ) {
-      return new Locale(
-          this.locale.substring(0, 2), 
-          this.locale.substring(locale.indexOf("_") + 1)
-      );      
-  }
+    //-------------------------------------------------------------------------
+    protected Locale getCurrentLocale(
+    ) {
+        return new Locale(
+            this.locale.substring(0, 2), 
+            this.locale.substring(locale.indexOf("_") + 1)
+        );      
+    }
 
     //-------------------------------------------------------------------------
     public void setId(
@@ -119,37 +138,182 @@ public abstract class Control
         );
     }
     
-  //-------------------------------------------------------------------------
-  public abstract void paint(
-      HtmlPage p,
-      String frame,
-      boolean forEditing
-  ) throws ServiceException;
+    //-------------------------------------------------------------------------
+    protected URL getGroovyURL(
+        HttpServletRequest request
+    ) throws MalformedURLException {
+        return request.getSession().getServletContext().getResource(
+            "/WEB-INF/config/control/" + this.id
+        );
+    }
+    
+    //-------------------------------------------------------------------------
+    public void paint(
+        HtmlPage p,
+        String frame,
+        boolean forEditing
+    ) throws ServiceException {
+        try {
+            URL groovyURL = this.getGroovyURL(p.getHttpServletRequest());
+            if(groovyURL != null) {
+                ScriptEngine scriptEngine = scriptEngines.get(this.id);
+                if(scriptEngine == null) {
+                    scriptEngines.put(
+                        this.id,
+                        scriptEngine = new ScriptEngine(
+                            new URL[]{groovyURL}
+                        )
+                    );
+                }
+                Binding binding = new Binding();
+                binding.setVariable("p", p);
+                binding.setVariable("frame", frame);
+                binding.setVariable("forEditing", forEditing);
+                binding.setVariable("control", this);
+                binding.setVariable("id", this.id);
+                String scriptName = "Default.groovy";
+                // Try to find a model-specific script
+                if(p.getView().getObject() instanceof RefObject) {
+                    RefMetaObject_1 classDef = (RefMetaObject_1)((RefObject)p.getView().getObject()).refMetaObject();
+                    String qualifiedClassName = (String)classDef.getElementDef().values("qualifiedName").get(0);
+                    String qualifiedPackageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(":"));
+                    String qualifiedScriptName = this.id + ":" + qualifiedPackageName;
+                    String name = scriptNames.get(qualifiedScriptName);
+                    if(name == null) {
+                        name = qualifiedPackageName.replace(":", ".") + ".groovy";
+                        URL realPath = this.getGroovyURL(p.getHttpServletRequest());
+                        if(!new File(realPath + "/" + name).exists()) {
+                            name = scriptName;   
+                        }
+                        scriptNames.put(qualifiedScriptName, name);
+                    }
+                    scriptName = name;
+                }
+                scriptEngine.run(scriptName, binding);
+            }
+        }
+        catch(Exception e) {
+            AppLog.warning("Script exception", e);
+            new ServiceException(e).log();
+        }
+    }
   
-  //-------------------------------------------------------------------------
-  public void paint(
-      HtmlPage p,
-      boolean forEditing
-  ) throws ServiceException {
-      this.paint(
-          p,
-          null,
-          forEditing
-      );
-  }
+    //-------------------------------------------------------------------------
+    public void paint(
+        HtmlPage p,
+        boolean forEditing
+    ) throws ServiceException {
+        this.paint(
+            p,
+            null,
+            forEditing
+        );
+    }
   
-  //-------------------------------------------------------------------------
-  public ControlFactory getControlFactory(
-  ) {
-      return this.controlFactory;
-  }
+    //-------------------------------------------------------------------------
+    public ControlFactory getControlFactory(
+    ) {
+        return this.controlFactory;
+    }
   
-  //-------------------------------------------------------------------------
-  protected String id;
-  protected String locale;
-  protected int localeAsIndex;
-  protected final ControlFactory controlFactory;
+    //-------------------------------------------------------------------------
+    // Members
+    //-----------------------------------------------------------------------
+    protected static Map<String,ScriptEngine> scriptEngines = new HashMap<String,ScriptEngine>();
+    protected static Map<String,String> scriptNames = new HashMap<String,String>();
   
+    protected String id;
+    protected String locale;
+    protected int localeAsIndex;
+    protected final ControlFactory controlFactory;
+  
+    //-------------------------------------------------------------------------
+    public static class ScriptEngine {
+
+        private static class ScriptCacheEntry {
+            private Class scriptClass; 
+        }
+
+        public ScriptEngine(
+            URL[] roots
+        ) {
+            this.roots = roots;
+        }
+
+        public ScriptEngine(
+            URL[] roots, 
+            ClassLoader parentClassLoader
+        ) {
+            this(roots);
+            this.parentClassLoader = parentClassLoader;
+        }
+
+        public ClassLoader getParentClassLoader(
+        ) {
+            return parentClassLoader;
+        }
+
+        public void setParentClassLoader(
+            ClassLoader parentClassLoader
+        ) {
+            if (parentClassLoader == null) {
+                throw new IllegalArgumentException("The parent class loader must not be null.");
+            }
+            this.parentClassLoader = parentClassLoader;
+        }
+
+        private ScriptCacheEntry updateCacheEntry(
+            String scriptName, 
+            final ClassLoader parentClassLoader
+        ) throws ResourceException, ScriptException {
+            ScriptCacheEntry entry;
+            scriptName = scriptName.intern();
+            synchronized (scriptName) {
+                entry = (ScriptCacheEntry)this.scriptCache.get(scriptName);            
+                if(entry == null) {
+                    entry = new ScriptCacheEntry();
+                    GroovyClassLoader groovyLoader = new GroovyClassLoader();
+                    try {
+                        entry.scriptClass = null;
+                        for(int i = 0; i < roots.length; i++) {
+                            URL scriptURL = new URL(roots[i] + "/" + scriptName);
+                            try {
+                                entry.scriptClass = groovyLoader.parseClass(scriptURL.openStream(), scriptName);
+                                break;
+                            }
+                            catch(IOException e) {}
+                        }
+                        if(entry.scriptClass == null) {
+                            throw new ScriptException("Could not locate scriptName: " + scriptName);                    
+                        }
+                    } 
+                    catch(Exception e) {
+                        throw new ScriptException("Could not parse scriptName: " + scriptName, e);
+                    }
+                    this.scriptCache.put(scriptName, entry);
+                }
+            }
+            return entry;
+        }
+
+        public Object run(
+            String scriptName, 
+            Binding binding
+        ) throws ResourceException, ScriptException {
+            ScriptCacheEntry entry = updateCacheEntry(scriptName, getParentClassLoader());
+            Script scriptObject = InvokerHelper.createScript(entry.scriptClass, binding);
+            return scriptObject.run();
+        }
+
+        //-----------------------------------------------------------------------
+        // Members
+        //-----------------------------------------------------------------------
+        private URL[] roots;
+        private Map<String,ScriptCacheEntry> scriptCache = Collections.synchronizedMap(new HashMap<String,ScriptCacheEntry>());
+        private ClassLoader parentClassLoader = getClass().getClassLoader();
+
+    }
+    
 }
 
 //--- End of File -----------------------------------------------------------

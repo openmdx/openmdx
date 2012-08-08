@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MatchableTypePredicate.java,v 1.1 2008/01/08 16:16:33 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: MatchableTypePredicate.java,v 1.2 2008/05/06 09:24:26 hburger Exp $
  * Description: Matchable Type Predicate
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:33 $
+ * Date:        $Date: 2008/05/06 09:24:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2007, OMEX AG, Switzerland
+ * Copyright (c) 2006-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,11 +57,7 @@ import java.util.Collection;
  * <p>
  * The matching rules depend on the element type
  */
-
 public interface MatchableTypePredicate<V>
-
-
-
     extends AnyTypePredicate
 {
 
@@ -71,11 +67,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void like(
-
         V operand
-
-
-
     );
 
     /**
@@ -84,11 +76,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void like(
-
         V... operand
-
-
-
     );
 
     /**
@@ -97,11 +85,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void like(
-
         Collection<V> operand
-
-
-
     );
 
     /**
@@ -110,11 +94,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void unlike(
-
         V operand
-
-
-
     );
 
     /**
@@ -123,11 +103,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void unlike(
-
         V... operand
-
-
-
     );
 
     /**
@@ -136,11 +112,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void unlike(
-
         Collection<V> operand
-
-
-
     );
 
     /**
@@ -149,11 +121,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void startsWith(
-
         V operand
-
-
-
     );
 
     /**
@@ -162,11 +130,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void startsWith(
-
         V... operand
-
-
-
     );
 
     /**
@@ -175,11 +139,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void startsWith(
-
         Collection<V> operand
-
-
-
     );
 
     /**
@@ -188,11 +148,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void endsWith(
-
         V operand
-
-
-
     );
 
     /**
@@ -201,11 +157,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void endsWith(
-
         V... operand
-
-
-
     );
 
     /**
@@ -214,11 +166,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void endsWith(
-
         Collection<V> operand
-
-
-
     );
 
     /**
@@ -227,11 +175,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void startsNotWith(
-
         V operand
-
-
-
     );
 
     /**
@@ -240,11 +184,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void startsNotWith(
-
         V... operand
-
-
-
     );
 
     /**
@@ -253,11 +193,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void startsNotWith(
-
         Collection<V> operand
-
-
-
     );
 
     /**
@@ -266,11 +202,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void endsNotWith(
-
         V operand
-
-
-
     );
 
     /**
@@ -279,11 +211,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void endsNotWith(
-
         V... operand
-
-
-
     );
 
     /**
@@ -292,11 +220,7 @@ public interface MatchableTypePredicate<V>
      * @param operand the operand the attribute's value is compared to 
      */
     void endsNotWith(
-
         Collection<V> operand
-
-
-
     );
 
 }

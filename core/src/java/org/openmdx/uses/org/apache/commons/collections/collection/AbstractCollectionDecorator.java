@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -34,11 +35,12 @@ import java.util.Iterator;
  * to write an unmodifiable implementation it might provide a loophole.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:23 $
+ * @version $Revision: 1.5 $ $Date: 2008/06/27 16:59:27 $
  * 
  * @author Stephen Colebourne
  * @author Paul Jack
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractCollectionDecorator implements Collection {
 
     /** The collection being decorated */
@@ -71,75 +73,75 @@ public abstract class AbstractCollectionDecorator implements Collection {
      * @return the decorated collection
      */
     protected Collection getCollection() {
-        return collection;
+        return this.collection;
     }
 
     //-----------------------------------------------------------------------
     public boolean add(Object object) {
-        return collection.add(object);
+        return this.collection.add(object);
     }
 
     public boolean addAll(Collection coll) {
-        return collection.addAll(coll);
+        return this.collection.addAll(coll);
     }
 
     public void clear() {
-        collection.clear();
+        this.collection.clear();
     }
 
     public boolean contains(Object object) {
-        return collection.contains(object);
+        return this.collection.contains(object);
     }
 
     public boolean isEmpty() {
-        return collection.isEmpty();
+        return this.collection.isEmpty();
     }
 
     public Iterator iterator() {
-        return collection.iterator();
+        return this.collection.iterator();
     }
 
     public boolean remove(Object object) {
-        return collection.remove(object);
+        return this.collection.remove(object);
     }
 
     public int size() {
-        return collection.size();
+        return this.collection.size();
     }
 
     public Object[] toArray() {
-        return collection.toArray();
+        return this.collection.toArray();
     }
 
     public Object[] toArray(Object[] object) {
-        return collection.toArray(object);
+        return this.collection.toArray(object);
     }
 
     public boolean containsAll(Collection coll) {
-        return collection.containsAll(coll);
+        return this.collection.containsAll(coll);
     }
 
     public boolean removeAll(Collection coll) {
-        return collection.removeAll(coll);
+        return this.collection.removeAll(coll);
     }
 
     public boolean retainAll(Collection coll) {
-        return collection.retainAll(coll);
+        return this.collection.retainAll(coll);
     }
 
     public boolean equals(Object object) {
         if (object == this) {
             return true;
         }
-        return collection.equals(object);
+        return this.collection.equals(object);
     }
 
     public int hashCode() {
-        return collection.hashCode();
+        return this.collection.hashCode();
     }
 
     public String toString() {
-        return collection.toString();
+        return this.collection.toString();
     }
 
 }

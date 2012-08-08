@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StructDef.java,v 1.4 2007/03/26 16:09:17 hburger Exp $
+ * Name:        $Id: StructDef.java,v 1.5 2008/03/21 18:40:17 hburger Exp $
  * Description: VelocityStructDef class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/26 16:09:17 $
+ * Date:        $Date: 2008/03/21 18:40:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,6 +62,7 @@ import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 
+@SuppressWarnings("unchecked")
 public class StructDef
   extends ClassifierDef {
 

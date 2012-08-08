@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePaneControl.java,v 1.136 2008/02/04 13:21:10 wfro Exp $
+ * Name:        $Id: ReferencePaneControl.java,v 1.139 2008/06/01 11:26:18 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.136 $
+ * Revision:    $Revision: 1.139 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/04 13:21:10 $
+ * Date:        $Date: 2008/06/01 11:26:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -116,7 +116,7 @@ public class ReferencePaneControl
             paneIndex
         );
         
-        List references = new ArrayList();
+        List<Action> references = new ArrayList<Action>();
         this.gridControl = new GridControl[pane.getMember().size()];
         for(
             int i = 0; 
@@ -215,6 +215,7 @@ public class ReferencePaneControl
     }
     
     //---------------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,
@@ -227,9 +228,6 @@ public class ReferencePaneControl
         ReferencePane referencePane = view.getReferencePane()[this.getPaneIndex()];
         Texts_1_0 texts = app.getTexts();
         HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
-        String guiLook = app.getCurrentGuiMode();
-        boolean useYuiExtTabs = 
-            guiLook.equals(WebKeys.SETTING_GUI_MODE_ADVANCED);
             
         int paneIndex = this.getPaneIndex();
         String containerId = view.getContainerElementId() == null
@@ -239,45 +237,36 @@ public class ReferencePaneControl
         // View
         int zIndex = (view.getReferencePane().length - this.getPaneIndex()) * 10;
         if(FRAME_VIEW.equals(frame)) {
-            // The simple look does not use a tab view library. The tabs are generated statically
-            if(!useYuiExtTabs) {
-                p.write("<div class=\"gTabPanel\" style=\"position:relative;z-index:", Integer.toString(zIndex+1), ";\">");
-                boolean isGroupTabActive = false;
-                int nReferences = this.getSelectReferenceAction().length;
-                for(int i = 0; i < nReferences; i++) {
-                    Action action = this.getSelectReferenceAction()[i];
-                    int tabIndex = 100*paneIndex + i;
-                    String tabId = view.getContainerElementId() == null
-                        ? Integer.toString(tabIndex)
-                        : view.getContainerElementId() + "-" + Integer.toString(tabIndex);                                    
-                    String tabTitle = action.getTitle();
-                    boolean isGroupTab = tabTitle.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
-                    if(isGroupTab) tabTitle = tabTitle.substring(1);
-                    if(!isGroupTabActive && isGroupTab) {
-                        isGroupTabActive = true;
-                        p.write("  <a href=\"#\" onclick=\"javascript:gTabSelect(this, true);return false;\">", WebKeys.TAB_GROUPING_CHARACTER, "</a>");                        
-                    }
-                    if(isGroupTabActive && (!isGroupTab || (i == nReferences-1))) {
-                        isGroupTabActive = false;
-                    }
-                    String tabClass = i == referencePane.getSelectedReference()
-                        ? "selected"
-                        : isGroupTabActive
-                            ? "hidden"
-                            : "";
-                    p.write("  <a href=\"#\" class=\"", tabClass, "\"", p.getOnClick("javascript:gTabSelect(this);new Ajax.Updater('", containerId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});return false;"), ">", tabTitle, "</a>");
+            p.write("<div class=\"gTabPanel\" style=\"position:relative;z-index:", Integer.toString(zIndex+1), ";\">");
+            boolean isGroupTabActive = false;
+            int nReferences = this.getSelectReferenceAction().length;
+            for(int i = 0; i < nReferences; i++) {
+                Action action = this.getSelectReferenceAction()[i];
+                int tabIndex = 100*paneIndex + i;
+                String tabId = view.getContainerElementId() == null
+                    ? Integer.toString(tabIndex)
+                    : view.getContainerElementId() + "-" + Integer.toString(tabIndex);                                    
+                String tabTitle = action.getTitle();
+                boolean isGroupTab = tabTitle.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
+                if(isGroupTab) tabTitle = tabTitle.substring(1);
+                if(!isGroupTabActive && isGroupTab) {
+                    isGroupTabActive = true;
+                    p.write("  <a href=\"#\" onclick=\"javascript:gTabSelect(this, true);return false;\">", WebKeys.TAB_GROUPING_CHARACTER, "</a>");                        
                 }
-                p.write("</div>");
-                p.write("<div id=\"", containerId, "\" class=\"gContent\" style=\"position:relative;z-index:", Integer.toString(zIndex), ";\">");
-                p.write("  <div class=\"loading\" style=\"height:40px;\"></div>");
-                p.write("</div>");                
+                if(isGroupTabActive && (!isGroupTab || (i == nReferences-1))) {
+                    isGroupTabActive = false;
+                }
+                String tabClass = i == referencePane.getSelectedReference()
+                    ? "selected"
+                    : isGroupTabActive
+                        ? "hidden"
+                        : "";
+                p.write("  <a href=\"#\" class=\"", tabClass, "\"", p.getOnClick("javascript:gTabSelect(this);new Ajax.Updater('", containerId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});return false;"), ">", tabTitle, "</a>");
             }
-            // Generate containers for tab view library. The tabs are created and initialized
-            // at the end of the page in PageEpilogControl
-            else {
-                p.write("<div id=\"gridPanel", Integer.toString(paneIndex), "\" style=\"padding-top:10px;position:relative;z-index:", Integer.toString(zIndex), ";\">");
-                p.write("</div>");
-            }
+            p.write("</div>");
+            p.write("<div id=\"", containerId, "\" class=\"gContent\" style=\"position:relative;z-index:", Integer.toString(zIndex), ";\">");
+            p.write("  <div class=\"loading\" style=\"height:40px;\"></div>");
+            p.write("</div>");                
         }
         // Content
         else if(FRAME_CONTENT.equals(frame)) {
@@ -289,14 +278,8 @@ public class ReferencePaneControl
                 : view.getContainerElementId() + "-" + Integer.toString(tabIndex);                
             String updateTabScriptletPre = null;
             String updateTabScriptletPost = null;
-            if(useYuiExtTabs) {
-                updateTabScriptletPre = "var tab=getEl('gridTab" + tabId + "');tab.setHeight(tab.getHeight());tab.getUpdateManager().update(";
-                updateTabScriptletPost = ");return false;";
-            }
-            else {
-                updateTabScriptletPre = "new Ajax.Updater('" + containerId + "', ";
-                updateTabScriptletPost = ", {asynchronous:true, evalScripts:true, onComplete: function(){try{makeZebraTable('gridTable" + tabId + "',1);}catch(e){};}});loadingIndicator($('" + containerId + "'));return false;";
-            }
+            updateTabScriptletPre = "new Ajax.Updater('" + containerId + "', ";
+            updateTabScriptletPost = ", {asynchronous:true, evalScripts:true, onComplete: function(){try{makeZebraTable('gridTable" + tabId + "',1);}catch(e){};}});loadingIndicator($('" + containerId + "'));return false;";
             Action selectGridTabAction = referencePane.getSelectReferenceAction()[referencePane.getSelectedReference()];
             if(grid != null) {
                 

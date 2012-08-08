@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -21,44 +22,58 @@ import java.util.Collection;
 import org.openmdx.uses.org.apache.commons.collections.Predicate;
 
 /**
- * Predicate implementation that returns true if only one of the predicates return true.
- * 
+ * Predicate implementation that returns true if only one of the
+ * predicates return true.
+ * If the array of predicates is empty, then this predicate returns false.
+ * <p>
+ * NOTE: In versions prior to 3.2 an array size of zero or one
+ * threw an exception.
+ *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:13 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:21 $
  *
  * @author Stephen Colebourne
+ * @author Matt Benson
  */
+@SuppressWarnings("unchecked")
 public final class OnePredicate implements Predicate, PredicateDecorator, Serializable {
 
     /** Serial version UID */
-    static final long serialVersionUID = -8125389089924745785L;
+    private static final long serialVersionUID = -8125389089924745785L;
     
     /** The array of predicates to call */
     private final Predicate[] iPredicates;
     
     /**
      * Factory to create the predicate.
-     * 
+     * <p>
+     * If the array is size zero, the predicate always returns false.
+     * If the array is size one, then that predicate is returned.
+     *
      * @param predicates  the predicates to check, cloned, not null
      * @return the <code>any</code> predicate
      * @throws IllegalArgumentException if the predicates array is null
-     * @throws IllegalArgumentException if the predicates array has less than 2 elements
      * @throws IllegalArgumentException if any predicate in the array is null
      */
     public static Predicate getInstance(Predicate[] predicates) {
-        FunctorUtils.validateMin2(predicates);
+        FunctorUtils.validate(predicates);
+        if (predicates.length == 0) {
+            return FalsePredicate.INSTANCE;
+        }
+        if (predicates.length == 1) {
+            return predicates[0];
+        }
         predicates = FunctorUtils.copy(predicates);
         return new OnePredicate(predicates);
     }
 
     /**
      * Factory to create the predicate.
-     * 
+     *
      * @param predicates  the predicates to check, cloned, not null
      * @return the <code>one</code> predicate
      * @throws IllegalArgumentException if the predicates array is null
      * @throws IllegalArgumentException if any predicate in the array is null
-     * @throws IllegalArgumentException if the predicates array has less than 2 elements
      */
     public static Predicate getInstance(Collection predicates) {
         Predicate[] preds = FunctorUtils.validate(predicates);

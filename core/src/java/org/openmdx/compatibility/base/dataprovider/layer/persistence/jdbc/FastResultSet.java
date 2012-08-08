@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FastResultSet.java,v 1.10 2007/08/24 14:44:48 hburger Exp $
+ * Name:        $Id: FastResultSet.java,v 1.11 2008/03/21 18:47:37 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/24 14:44:48 $
+ * Date:        $Date: 2008/03/21 18:47:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,6 +68,7 @@ import org.openmdx.oracle.base.Datums;
  * JdbcOdbc driver in .NET) a) rs.getObject() is very slow and b) may be
  * called at most once.
  */
+@SuppressWarnings("unchecked")
 public class FastResultSet {
 
     //-----------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Plugin_1.java,v 1.40 2008/02/29 14:42:31 hburger Exp $
+ * Name:        $Id: Plugin_1.java,v 1.42 2008/05/05 13:54:50 hburger Exp $
  * Description: Plugin_1
- * Revision:    $Revision: 1.40 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 14:42:31 $
+ * Date:        $Date: 2008/05/05 13:54:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,11 +52,14 @@ package org.openmdx.compatibility.base.dataprovider.transport.dispatching;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.openmdx.base.accessor.generic.cci.LargeObject_1_0;
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.collection.FetchSize;
 import org.openmdx.base.collection.FilterableMap;
@@ -82,8 +85,15 @@ import org.openmdx.kernel.log.SysLog;
  * ObjectFactory_1_0 object requests.
  */
 abstract public class Plugin_1
-    extends OperationAwarePlugin_1 {
-  
+    extends OperationAwarePlugin_1 
+{
+
+    /**
+     * This value means that potentially expensive counting has been avoided.
+     */
+    protected final static Integer UNKNOWN_TOTAL = new Integer(Integer.MAX_VALUE);
+
+    
     //---------------------------------------------------------------------------
     // Layer_1_0
     //---------------------------------------------------------------------------
@@ -280,7 +290,7 @@ abstract public class Plugin_1
         try {
             reply.context(DataproviderReplyContexts.HAS_MORE).set(
                 0,
-                new Boolean(hasMore)
+                Boolean.valueOf(hasMore)
             );
         } 
         catch(Exception e) {
@@ -299,7 +309,7 @@ abstract public class Plugin_1
         try {
             reply.context(DataproviderReplyContexts.TOTAL).set(
                 0,
-                new Integer(hasMore ? Integer.MAX_VALUE : paths.size())
+                hasMore ? UNKNOWN_TOTAL : Integer.valueOf(replyPosition + result.size())     
             );
         } 
         catch(Exception e) {
@@ -507,10 +517,48 @@ abstract public class Plugin_1
         return reply;
     }
 
-    //-------------------------------------------------------------------------
-    // Members
-    //-------------------------------------------------------------------------
-  
+    //---------------------------------------------------------------------------  
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.OutputStream, long)
+     */
+    @Override
+    protected DataproviderObject getStreamOperation(
+        ServiceHeader header,
+        Path objectPath,
+        String feature,
+        OutputStream value, 
+        long position, 
+        Path replyPath
+    ) throws ServiceException {
+        LargeObject_1_0 object = this.retrieveObject(objectPath).objGetLargeObject(feature); 
+        object.getBinaryStream(value, position);
+        return this.createResponse(
+            replyPath, 
+            object.length()
+        );
+    }
+
+    //---------------------------------------------------------------------------  
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.Writer, long)
+     */
+    @Override
+    protected DataproviderObject getStreamOperation(
+        ServiceHeader header,
+        Path objectPath,
+        String feature,
+        Writer value, 
+        long position, 
+        Path replyPath
+    ) throws ServiceException {
+        LargeObject_1_0 object = this.retrieveObject(objectPath).objGetLargeObject(feature); 
+        object.getCharacterStream(value, position);
+        return this.createResponse(
+            replyPath, 
+            object.length()
+        );
+    }
+        
 }
 
 //--- End of File -----------------------------------------------------------

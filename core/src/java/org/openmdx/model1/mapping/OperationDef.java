@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OperationDef.java,v 1.5 2007/10/10 16:06:11 hburger Exp $
+ * Name:        $Id: OperationDef.java,v 1.7 2008/04/02 17:38:40 wfro Exp $
  * Description: VelocityOperationDef class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:11 $
+ * Date:        $Date: 2008/04/02 17:38:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,7 +52,6 @@
 package org.openmdx.model1.mapping;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -64,6 +63,7 @@ import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 
+@SuppressWarnings("unchecked")
 public class OperationDef 
   extends FeatureDef {
   
@@ -80,9 +80,8 @@ public class OperationDef
       new HashSet(operationDef.values("stereotype")),
       (String)operationDef.values("visibility").get(0),
       getResultParamTypeName(operationDef, (Model_1_3)model, openmdx1),
-      getInParamTypeName(operationDef, (Model_1_3)model, openmdx1),
       ((Boolean)operationDef.values("isQuery").get(0)).booleanValue(),
-      getInParameterFields(operationDef, (Model_1_3)model, openmdx1),
+      getInParameters(operationDef, (Model_1_3)model, openmdx1),
       getExceptions(operationDef, model, openmdx1)
     );
   }
@@ -137,85 +136,31 @@ public class OperationDef
     );
   }
   
-  //-------------------------------------------------------------------------
-  private static String getInParamTypeName(
-    ModelElement_1_0 operationDef,
-    Model_1_3 model, boolean openmdx1
-  )  throws ServiceException {
-    for(
-      Iterator i = operationDef.values("content").iterator();
-      i.hasNext();
-    ) {
-      ModelElement_1_0 paramDef = model.getElement(i.next());
-      if("in".equals(paramDef.values("name").get(0))) {
-        return (String)model.getDereferencedType(
-          paramDef.values("type").get(0),
-          openmdx1
-        ).values("qualifiedName").get(0);
-      }
+    //-------------------------------------------------------------------------
+    private static List<AttributeDef> getInParameters(
+        ModelElement_1_0 operationDef,
+        Model_1_3 model, 
+        boolean openmdx1
+    ) throws ServiceException {
+        List<AttributeDef> inParameters = new ArrayList<AttributeDef>();
+        for(
+            Iterator i = operationDef.values("content").iterator();
+            i.hasNext();
+        ) {
+            ModelElement_1_0 param = model.getElement(i.next());
+            String direction = (String)param.values("direction").get(0);
+            if(org.omg.model1.code.DirectionKind.IN_DIR.equals(direction)) {
+                inParameters.add(
+                    new AttributeDef(
+                        param, 
+                        model, 
+                        openmdx1
+                    )              
+                );
+            }
+        }
+        return inParameters;
     }
-    throw new ServiceException(
-      BasicException.Code.DEFAULT_DOMAIN,
-      BasicException.Code.ASSERTION_FAILURE,
-      new BasicException.Parameter[]{
-        new BasicException.Parameter("operation", operationDef.path())
-      },
-      "no parameter with name \"in\" defined for operation"
-    );
-  }
-  
-  //-------------------------------------------------------------------------
-  private static List getInParameterFields(
-    ModelElement_1_0 operationDef,
-    Model_1_3 model, 
-    boolean openmdx1
-  ) throws ServiceException {
-
-    HashMap params = new HashMap();
-    for(
-      Iterator i = operationDef.values("content").iterator();
-      i.hasNext();
-    ) {
-      ModelElement_1_0 param = model.getElement(i.next());
-      params.put(
-        param.values("name").get(0),
-        param
-      );
-    }
-    // in and result must be there
-    if(params.get("in") == null) {
-      throw new ServiceException(
-        BasicException.Code.DEFAULT_DOMAIN,
-        BasicException.Code.ASSERTION_FAILURE,
-        new BasicException.Parameter[]{
-          new BasicException.Parameter("operation", operationDef.path()),
-          new BasicException.Parameter("params", params)
-        },
-        "no parameter with name \"in\" defined for operation"
-      );
-    }
-
-    // fields of in-parameter
-    ModelElement_1_0 inParamType = model.getDereferencedType(
-      ((ModelElement_1_0)params.get("in")).values("type").get(0),
-      openmdx1
-    );
-    List fields = new ArrayList();
-    for(
-      Iterator it = inParamType.values("content").iterator();
-      it.hasNext();
-    ) {
-      ModelElement_1_0 inParam = model.getElement(it.next());
-      fields.add(
-        new AttributeDef(
-          inParam, 
-          model, 
-          openmdx1
-        )
-      );
-    }
-    return fields;
-  }
   
   //-------------------------------------------------------------------------
     public OperationDef(
@@ -225,7 +170,6 @@ public class OperationDef
     Set stereotype,
     String visibility,
     String qualifiedReturnTypeName,
-    String qualifiedInParameterTypeName,
     boolean isQuery,
     List parameters,
     List exceptions
@@ -240,7 +184,6 @@ public class OperationDef
     this.parameters = parameters;
     this.exceptions = exceptions;
     this.qualifiedReturnTypeName = qualifiedReturnTypeName;
-    this.qualifiedInParameterTypeName = qualifiedInParameterTypeName;
     this.isQuery = isQuery;
     }
   
@@ -251,19 +194,13 @@ public class OperationDef
   }
 
   //-------------------------------------------------------------------------
-  public String getQualifiedInParameterTypeName(
-  ) {
-    return this.qualifiedInParameterTypeName;  
-  }
-
-  //-------------------------------------------------------------------------
   public boolean isQuery(
   ) {
     return this.isQuery;
   }
 
   //-------------------------------------------------------------------------
-  public List getParameters(
+  public List<StructuralFeatureDef> getParameters(
   ) {
     return this.parameters;
   }
@@ -277,10 +214,9 @@ public class OperationDef
   //-------------------------------------------------------------------------
   // Variables
   //-------------------------------------------------------------------------
-  private final List parameters;
+  private final List<StructuralFeatureDef> parameters;
   private final List exceptions;
   private final String qualifiedReturnTypeName;
-  private final String qualifiedInParameterTypeName;
   private final boolean isQuery;
 
 }

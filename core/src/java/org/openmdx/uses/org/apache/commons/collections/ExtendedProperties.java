@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -34,6 +35,10 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
+
+import org.openmdx.uses.org.apache.commons.collections.ExtendedProperties;
+//import org.apache.commons.collections.PropertiesReader;
+//import org.apache.commons.collections.PropertiesTokenizer;
 
 /**
  * This class extends normal Java properties by adding the possibility
@@ -69,7 +74,7 @@ import java.util.Vector;
  *  </li>
  *  <li>
  *   If a <i>key</i> is used more than once, the values are appended
- *   like if they were on the same line separated with commas.
+ *   as if they were on the same line separated with commas.
  *  </li>
  *  <li>
  *   Blank lines and lines starting with character '#' are skipped.
@@ -123,7 +128,7 @@ import java.util.Vector;
  * it, go ahead and tune it up!
  *
  * @since Commons Collections 1.0
- * @version $Revision: 1.5 $ $Date: 2007/10/10 16:06:13 $
+ * @version $Revision: 1.8 $ $Date: 2008/06/28 00:21:30 $
  * 
  * @author <a href="mailto:stefano@apache.org">Stefano Mazzocchi</a>
  * @author <a href="mailto:jon@latchkey.com">Jon S. Stevens</a>
@@ -137,14 +142,14 @@ import java.util.Vector;
  * @author Janek Bogucki
  * @author Mohan Kishore
  * @author Stephen Colebourne
+ * @author Shinobu Kawai
+ * @author <a href="mailto:hps@intermeta.de">Henning P. Schmiedehausen</a>
  */
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class ExtendedProperties extends Hashtable {
     
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3834871377717901108L;
-
     /**
      * Default configurations repository.
      */
@@ -366,25 +371,21 @@ public class ExtendedProperties extends Hashtable {
          */
         public String readProperty() throws IOException {
             StringBuffer buffer = new StringBuffer();
-
-            try {
-                while (true) {
-                    String line = readLine().trim();
-                    if ((line.length() != 0) && (line.charAt(0) != '#')) {
-                        if (endsWithSlash(line)) {
-                            line = line.substring(0, line.length() - 1);
-                            buffer.append(line);
-                        } else {
-                            buffer.append(line);
-                            break;
-                        }
+            String line = readLine();
+            while (line != null) {
+                line = line.trim();
+                if ((line.length() != 0) && (line.charAt(0) != '#')) {
+                    if (endsWithSlash(line)) {
+                        line = line.substring(0, line.length() - 1);
+                        buffer.append(line);
+                    } else {
+                        buffer.append(line);
+                        return buffer.toString();  // normal method end
                     }
                 }
-            } catch (NullPointerException ex) {
-                return null;
+                line = readLine();
             }
-
-            return buffer.toString();
+            return null;  // EOF reached
         }
     }
 
@@ -479,9 +480,7 @@ public class ExtendedProperties extends Hashtable {
                 if (in != null) {
                     in.close();
                 }
-            } catch (IOException ex) {
-                // ignore
-            }
+            } catch (IOException ex) {}
         }
 
         if (defaultFile != null) {
@@ -560,6 +559,9 @@ public class ExtendedProperties extends Hashtable {
         try {
             while (true) {
                 String line = reader.readProperty();
+                if (line == null) {
+                    return;  // EOF
+                }
                 int equalSign = line.indexOf('=');
 
                 if (equalSign > 0) {
@@ -598,9 +600,6 @@ public class ExtendedProperties extends Hashtable {
                     }
                 }
             }
-        } catch (NullPointerException ex) {
-            // Should happen only when EOF is reached.
-            return;
         } finally {
             // Loading is initializing
             isInitialized = true;
@@ -701,14 +700,14 @@ public class ExtendedProperties extends Hashtable {
 
         if (current instanceof String) {
             // one object already in map - convert it to a vector
-            Vector v = new Vector(2);
-            v.addElement(current);
-            v.addElement(value);
-            put(key, v);
+            List values = new Vector(2);
+            values.add(current);
+            values.add(value);
+            put(key, values);
             
-        } else if (current instanceof Vector) {
-            // already a vector - just add the new token
-            ((Vector) current).addElement(value);
+        } else if (current instanceof List) {
+            // already a list - just add the new token
+            ((List) current).add(value);
             
         } else {
             // brand new key - store in keysAsListed to retain order
@@ -762,11 +761,10 @@ public class ExtendedProperties extends Hashtable {
                     currentOutput.append(escape((String) value));
                     theWrtr.println(currentOutput.toString());
                     
-                } else if (value instanceof Vector) {
-                    Vector values = (Vector) value;
-                    Enumeration valuesEnum = values.elements();
-                    while (valuesEnum.hasMoreElements()) {
-                        String currentElement = (String) valuesEnum.nextElement();
+                } else if (value instanceof List) {
+                    List values = (List) value;
+                    for (Iterator it = values.iterator(); it.hasNext(); ) {
+                        String currentElement = (String) it.next();
                         StringBuffer currentOutput = new StringBuffer();
                         currentOutput.append(key);
                         currentOutput.append("=");
@@ -941,8 +939,8 @@ public class ExtendedProperties extends Hashtable {
             } else {
                 return interpolate(defaultValue);
             }
-        } else if (value instanceof Vector) {
-            return interpolate((String) ((Vector) value).get(0));
+        } else if (value instanceof List) {
+            return interpolate((String) ((List) value).get(0));
         } else {
             throw new ClassCastException('\'' + key + "' doesn't map to a String object");
         }
@@ -955,7 +953,7 @@ public class ExtendedProperties extends Hashtable {
      * @param key The configuration key.
      * @return The associated properties if key is found.
      * @throws ClassCastException is thrown if the key maps to an
-     * object that is not a String/Vector.
+     * object that is not a String/List.
      * @throws IllegalArgumentException if one of the tokens is
      * malformed (does not contain an equals sign).
      */
@@ -970,7 +968,7 @@ public class ExtendedProperties extends Hashtable {
      * @param key The configuration key.
      * @return The associated properties if key is found.
      * @throws ClassCastException is thrown if the key maps to an
-     * object that is not a String/Vector.
+     * object that is not a String/List.
      * @throws IllegalArgumentException if one of the tokens is
      * malformed (does not contain an equals sign).
      */
@@ -1003,19 +1001,18 @@ public class ExtendedProperties extends Hashtable {
      * @param key The configuration key.
      * @return The associated string array if key is found.
      * @throws ClassCastException is thrown if the key maps to an
-     * object that is not a String/Vector.
+     * object that is not a String/List.
      */
     public String[] getStringArray(String key) {
         Object value = get(key);
 
-        // What's your vector, Victor?
-        Vector vector;
+        List values;
         if (value instanceof String) {
-            vector = new Vector(1);
-            vector.addElement(value);
+            values = new Vector(1);
+            values.add(value);
             
-        } else if (value instanceof Vector) {
-            vector = (Vector) value;
+        } else if (value instanceof List) {
+            values = (List) value;
             
         } else if (value == null) {
             if (defaults != null) {
@@ -1024,12 +1021,12 @@ public class ExtendedProperties extends Hashtable {
                 return new String[0];
             }
         } else {
-            throw new ClassCastException('\'' + key + "' doesn't map to a String/Vector object");
+            throw new ClassCastException('\'' + key + "' doesn't map to a String/List object");
         }
 
-        String[] tokens = new String[vector.size()];
+        String[] tokens = new String[values.size()];
         for (int i = 0; i < tokens.length; i++) {
-            tokens[i] = (String) vector.elementAt(i);
+            tokens[i] = (String) values.get(i);
         }
 
         return tokens;
@@ -1049,8 +1046,10 @@ public class ExtendedProperties extends Hashtable {
     }
 
     /**
-     * Get a Vector of strings associated with the given configuration
-     * key.
+     * Get a Vector of strings associated with the given configuration key.
+     * <p>
+     * The list is a copy of the internal data of this object, and as
+     * such you may alter it freely.
      *
      * @param key The configuration key.
      * @param defaultValue The default value.
@@ -1061,14 +1060,14 @@ public class ExtendedProperties extends Hashtable {
     public Vector getVector(String key, Vector defaultValue) {
         Object value = get(key);
 
-        if (value instanceof Vector) {
-            return (Vector) value;
+        if (value instanceof List) {
+            return new Vector((List) value);
             
         } else if (value instanceof String) {
-            Vector v = new Vector(1);
-            v.addElement(value);
-            put(key, v);
-            return v;
+            Vector values = new Vector(1);
+            values.add(value);
+            put(key, values);
+            return values;
             
         } else if (value == null) {
             if (defaults != null) {
@@ -1078,6 +1077,58 @@ public class ExtendedProperties extends Hashtable {
             }
         } else {
             throw new ClassCastException('\'' + key + "' doesn't map to a Vector object");
+        }
+    }
+
+    /**
+     * Get a List of strings associated with the given configuration key.
+     * <p>
+     * The list is a copy of the internal data of this object, and as
+     * such you may alter it freely.
+     *
+     * @param key The configuration key.
+     * @return The associated List object.
+     * @throws ClassCastException is thrown if the key maps to an
+     * object that is not a List.
+     * @since Commons Collections 3.2
+     */
+    public List getList(String key) {
+        return getList(key, null);
+    }
+
+    /**
+     * Get a List of strings associated with the given configuration key.
+     * <p>
+     * The list is a copy of the internal data of this object, and as
+     * such you may alter it freely.
+     *
+     * @param key The configuration key.
+     * @param defaultValue The default value.
+     * @return The associated List.
+     * @throws ClassCastException is thrown if the key maps to an
+     * object that is not a List.
+     * @since Commons Collections 3.2
+     */
+    public List getList(String key, List defaultValue) {
+        Object value = get(key);
+
+        if (value instanceof List) {
+            return new ArrayList((List) value);
+            
+        } else if (value instanceof String) {
+            List values = new ArrayList(1);
+            values.add(value);
+            put(key, values);
+            return values;
+            
+        } else if (value == null) {
+            if (defaults != null) {
+                return defaults.getList(key, defaultValue);
+            } else {
+                return ((defaultValue == null) ? new ArrayList() : defaultValue);
+            }
+        } else {
+            throw new ClassCastException('\'' + key + "' doesn't map to a List object");
         }
     }
 
@@ -1621,6 +1672,9 @@ public class ExtendedProperties extends Hashtable {
 
     /**
      * Convert a standard properties class into a configuration class.
+     * <p>
+     * NOTE: From Commons Collections 3.2 this method will pick up
+     * any default parent Properties of the specified input object.
      *
      * @param props  the properties object to convert
      * @return new ExtendedProperties created from props
@@ -1628,12 +1682,12 @@ public class ExtendedProperties extends Hashtable {
     public static ExtendedProperties convertProperties(Properties props) {
         ExtendedProperties c = new ExtendedProperties();
 
-        for (Enumeration e = props.keys(); e.hasMoreElements();) {
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
             String s = (String) e.nextElement();
             c.setProperty(s, props.getProperty(s));
         }
 
         return c;
     }
-    
+
 }

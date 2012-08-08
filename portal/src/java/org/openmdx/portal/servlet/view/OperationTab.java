@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: OperationTab.java,v 1.9 2007/08/09 17:14:41 wfro Exp $
+ * Name:        $Id: OperationTab.java,v 1.10 2008/04/04 11:53:56 hburger Exp $
  * Description: CompositeGrid
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2007/08/09 17:14:41 $
+ * Date:        $Date: 2008/04/04 11:53:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,10 +61,7 @@ package org.openmdx.portal.servlet.view;
 import java.io.Serializable;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.Action;
-import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.control.OperationTabControl;
-import org.openmdx.ui1.layer.application.Ui_1;
 
 public class OperationTab 
     extends ControlState

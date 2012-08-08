@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeValue.java,v 1.32 2007/08/12 23:02:26 wfro Exp $
+ * Name:        $Id: CodeValue.java,v 1.34 2008/05/08 16:38:11 wfro Exp $
  * Description: CodeValue
- * Revision:    $Revision: 1.32 $
+ * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/12 23:02:26 $
+ * Date:        $Date: 2008/05/08 16:38:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,11 +64,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.HtmlPage;
@@ -221,6 +221,7 @@ public class CodeValue
     }
 
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public Object getValue(
         boolean shortFormat
     ) {
@@ -291,6 +292,7 @@ public class CodeValue
     }
   
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public void paint(
         Attribute attribute,
         HtmlPage p,
@@ -320,16 +322,16 @@ public class CodeValue
                 ? feature + "[" + Integer.toString(tabIndex) + "]"
                 : id;            
             p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
-            SortedMap longTextsT = this.getLongText(false, false);
-            CharSequence longTextsAsJsArray = StringBuilders.newStringBuilder();
-            for(Iterator options = longTextsT.keySet().iterator(); options.hasNext(); ) {
+            Map longTextsT = this.getLongText(false, false);
+            StringBuilder longTextsAsJsArray = new StringBuilder();
+            for(String option: (Set<String>)longTextsT.keySet()) {
             	(longTextsAsJsArray.length() > 0 ?
-            		StringBuilders.asStringBuilder(longTextsAsJsArray).append(",") :
-        			StringBuilders.asStringBuilder(longTextsAsJsArray)
+            		longTextsAsJsArray.append(",") :
+        			longTextsAsJsArray
 		        ).append(
 		        	"'"
 		        ).append(
-		        	options.next()
+		        	option.replaceAll("'", "\\\\'")
 		        ).append(
 		        	"'"
 		        );

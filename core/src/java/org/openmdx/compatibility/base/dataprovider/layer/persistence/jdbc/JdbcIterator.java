@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JdbcIterator.java,v 1.9 2005/02/21 13:08:56 hburger Exp $
+ * Name:        $Id: JdbcIterator.java,v 1.10 2008/03/21 18:47:37 hburger Exp $
  * Description: JDBC Iterator for find requests
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:08:56 $
+ * Date:        $Date: 2008/03/21 18:47:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.compatibility.base.naming.Path;
  * Stores the status of an JDBC SQL iterator. Stored is the prepared statement
  * and the parameters (values) for the prepared statement.
  */
+@SuppressWarnings("unchecked")
 class JdbcIterator
   extends AbstractIterator {
 

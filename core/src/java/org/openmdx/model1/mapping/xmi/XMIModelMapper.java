@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIModelMapper.java,v 1.1 2005/12/11 23:52:21 wfro Exp $
+ * Name:        $Id: XMIModelMapper.java,v 1.2 2008/03/21 18:40:22 hburger Exp $
  * Description: write model as org.omg.model1.xsd compliant XML file
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/12/11 23:52:21 $
+ * Date:        $Date: 2008/03/21 18:40:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,6 +62,7 @@ import java.util.List;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 
+@SuppressWarnings("unchecked")
 public class XMIModelMapper {
 
   //---------------------------------------------------------------------------

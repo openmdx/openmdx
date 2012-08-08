@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: NamingExceptions.java,v 1.1 2005/06/29 15:25:45 hburger Exp $
+ * Name:        $Id: NamingExceptions.java,v 1.2 2008/03/21 18:30:07 hburger Exp $
  * Description: Naming Exception Categorization
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/29 15:25:45 $
+ * Date:        $Date: 2008/03/21 18:30:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -121,7 +121,7 @@ public class NamingExceptions {
         if(
             object != null
         ) for(
-            Class type = object.getClass();
+            Class<?> type = object.getClass();
             type != null;
             type = type.getSuperclass()
         ) if (
@@ -185,7 +185,7 @@ public class NamingExceptions {
             retriableRootCauseThrowables = new String[s];
             int i = 0;
             for(
-                Enumeration e = properties.propertyNames();
+                Enumeration<?> e = properties.propertyNames();
                 e.hasMoreElements();
                 i++
             ){

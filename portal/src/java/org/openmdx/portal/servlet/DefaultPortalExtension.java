@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultPortalExtension.java,v 1.29 2008/01/25 21:09:52 wfro Exp $
+ * Name:        $Id: DefaultPortalExtension.java,v 1.39 2008/04/29 18:17:37 wfro Exp $
  * Description: DefaultEvaluator
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 21:09:52 $
+ * Date:        $Date: 2008/04/29 18:17:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -77,7 +77,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -90,6 +89,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
+import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefStruct;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -130,6 +130,7 @@ import org.openmdx.ui1.jmi1.FeatureDefinition;
 import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
 import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
+@SuppressWarnings("unchecked")
 public class DefaultPortalExtension
   implements PortalExtension_1_0, Serializable {
   
@@ -286,7 +287,8 @@ public class DefaultPortalExtension
                 RefObject lookupObject = this.getLookupObject(
                     lookupType, 
                     context, 
-                    application
+                    application,
+                    application.getPmData()
                 );
                 Path lookupObjectIdentity = new Path(lookupObject.refMofId());
                 Map filterByFeatures = new TreeMap();
@@ -324,20 +326,22 @@ public class DefaultPortalExtension
                             // which include the strings name, description, title or number and
                             // the attribute type is PrimitiveTypes.STRING
                             // Find reference of lookup object which references objects of type contextClass
-                            Map lookupTypeAttributes = model.getAttributeDefs(referencedType, true, false);
+                            Map lookupTypeAttributes = model.getAttributeDefs(lookupType, true, false);
                             for(Iterator k = lookupTypeAttributes.values().iterator(); k.hasNext(); ) {
                                 ModelElement_1_0 attributeDef = (ModelElement_1_0)k.next();
                                 ModelElement_1_0 attributeType = model.getElement(attributeDef.values("type").get(0));
                                 String attributeName = (String)attributeDef.values("name").get(0);
                                 if(
-                                    (attributeName.startsWith("name") ||
-                                    attributeName.endsWith("Name") ||
-                                    attributeName.startsWith("description") ||
-                                    attributeName.endsWith("Description") ||
-                                    attributeName.startsWith("title") ||
-                                    attributeName.endsWith("Title") ||
-                                    attributeName.startsWith("number") ||
-                                    attributeName.endsWith("Number")) &&
+                                    (attributeName.indexOf("name") >= 0 ||
+                                    attributeName.indexOf("Name") >= 0 ||
+                                    attributeName.indexOf("description") >= 0 ||
+                                    attributeName.indexOf("Description") >= 0 ||
+                                    attributeName.indexOf("title") >= 0 ||
+                                    attributeName.indexOf("Title") >= 0 ||
+                                    attributeName.indexOf("address") >= 0 ||
+                                    attributeName.indexOf("Address") >= 0 ||
+                                    attributeName.indexOf("number") >= 0 ||
+                                    attributeName.indexOf("Number") >= 0) &&
                                     PrimitiveTypes.STRING.equals(attributeType.values("qualifiedName").get(0))                                    
                                 ) {
                                     int order = 10000 * (filterByFeatures.size() + 1);
@@ -423,6 +427,7 @@ public class DefaultPortalExtension
             }        
         }
         catch(Exception e) {
+            SysLog.warning("Error getting autocompleter", Arrays.asList(new String[]{context == null ? "N/A" : context.refMofId(), qualifiedFeatureName}));
             new ServiceException(e).log();
         }
         return null;
@@ -434,7 +439,7 @@ public class DefaultPortalExtension
         RefObject_1_0 context,
         String qualifiedFeatureName
     ) {
-        return Collections.EMPTY_LIST;
+        return new ArrayList();
     }
     
     //-------------------------------------------------------------------------
@@ -475,11 +480,11 @@ public class DefaultPortalExtension
         Map parameterMap,
         Map fieldMap,
         ApplicationContext application,
-        RefPackage_1_0 rootPkg
+        PersistenceManager pm
     ) {
         AppLog.trace("fieldMap", fieldMap);
         AppLog.trace("parameterMap", parameterMap);
-        Model_1_0 model = rootPkg.refModel();
+        Model_1_0 model = application.getModel();
 
         int count = 0;
         // Data bindings require multi-pass update of object
@@ -1189,8 +1194,8 @@ public class DefaultPortalExtension
                               AppLog.trace("ObjRef xri", xri);
                               try {
                                 RefObject mappedNewValue = (xri == null) || "".equals(xri)
-                                  ? null
-                                  : rootPkg.refObject(xri);
+                                    ? null
+                                    : (RefObject)pm.getObjectById(new Path(xri));
                                 if(target instanceof RefObject) {
                                   boolean isModified = true;
                                   // force modify in case the referenced object does not exist
@@ -1262,30 +1267,30 @@ public class DefaultPortalExtension
                               ? new Short((short)0)
                               : (Short)longTexts.get(newValues.get(0).toString());
                           if(mappedNewValue != null) {
-                            if(target instanceof RefObject) {
-                              boolean isModified = !areEqual(
-                                  valueHolder.getDataBinding().getValue(
-                                      (RefObject)target,
-                                      feature
-                                  ),
-                                  mappedNewValue
-                              );
-                              AppLog.trace("modify feature", feature + "=" + isModified);
-                              if(isModified) {
-                                  valueHolder.getDataBinding().setValue(
-                                      (RefObject)target,
+                              if(target instanceof RefObject) {
+                                  boolean isModified = !areEqual(
+                                      valueHolder.getDataBinding().getValue(
+                                          (RefObject)target,
+                                          feature
+                                      ),
+                                      mappedNewValue
+                                  );
+                                  AppLog.trace("modify feature", feature + "=" + isModified);
+                                  if(isModified) {
+                                      valueHolder.getDataBinding().setValue(
+                                          (RefObject)target,
+                                          feature,
+                                          mappedNewValue
+                                      );
+                                      modifiedFeatures.add(feature);
+                                  }
+                              }
+                              else {
+                                  ((Map)target).put(
                                       feature,
                                       mappedNewValue
                                   );
-                                  modifiedFeatures.add(feature);
                               }
-                            }
-                            else {
-                                ((Map)target).put(
-                                    feature,
-                                    mappedNewValue
-                                );
-                            }
                           }
                         }
                         catch(JmiServiceException e) {
@@ -1624,7 +1629,7 @@ public class DefaultPortalExtension
                                   valueHolder.getDataBinding().setValue(
                                       (RefObject)target,
                                       feature,
-                                      bytes
+                                      org.w3c.cci2.BinaryLargeObjects.valueOf(bytes) // bytes
                                   );
                               }
                               else {
@@ -1719,10 +1724,11 @@ public class DefaultPortalExtension
     public RefObject_1_0 getLookupObject(
         ModelElement_1_0 lookupType,
         RefObject_1_0 startFrom,
-        ApplicationContext application
+        ApplicationContext application,
+        PersistenceManager pm
     ) throws ServiceException {
 
-        Model_1_0 model = ((RefPackage_1_0)startFrom.refOutermostPackage()).refModel();
+        Model_1_0 model = application.getModel();
         String qualifiedNameLookupType = (String)lookupType.values("qualifiedName").get(0);
         Map compositionHierarchy = new HashMap();
         this.createCompositionHierarchy(
@@ -1736,7 +1742,6 @@ public class DefaultPortalExtension
         // get object to show. This is the first object which is member
         // of the composition hierarchy of the referenced object.
         RefObject_1_0 current = startFrom;
-        Path currentIdentity = new Path(current.refMofId());
         while(true) {
           for(
               Iterator i = compositionHierarchy.keySet().iterator(); 
@@ -1750,15 +1755,14 @@ public class DefaultPortalExtension
                   break;
               }
           }
+          Path currentIdentity = current.refGetPath();
           if(
               (objectToShow != null) ||
               (currentIdentity.size() < 7)
           ) break;
           // go to parent
           currentIdentity = currentIdentity.getParent().getParent();
-          current = (RefObject_1_0)((RefPackage_1_0)startFrom.refOutermostPackage()).refObject(
-            currentIdentity.toString()
-          );
+          current = (RefObject_1_0)pm.getObjectById(currentIdentity);
         }
         
         // If not found get root object which is in the composition hierarchy
@@ -1797,13 +1801,14 @@ public class DefaultPortalExtension
         RefObject_1_0 lookupObject = this.getLookupObject(
             lookupType, 
             startFrom, 
-            application
+            application,
+            application.getPmData()
         );
         String qualifiedNameLookupType = (String)lookupType.values("qualifiedName").get(0);        
         ObjectView view = new ShowObjectView(
             id,
             null,
-            lookupObject.refMofId(),
+            lookupObject.refGetPath(),
             application,
             MapUtils.orderedMap(new HashMap()),
             qualifiedNameLookupType,

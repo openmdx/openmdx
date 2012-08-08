@@ -24,6 +24,7 @@ package org.openxri;
 * This class is used to indicate a parsing failure of an XRI syntax element.
 * @author =chetan
 */
+@SuppressWarnings("serial")
 public class XRIParseException
     extends java.lang.RuntimeException
 {

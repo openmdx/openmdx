@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: IntegerMarshaller.java,v 1.8 2008/02/08 16:51:25 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: IntegerMarshaller.java,v 1.9 2008/04/09 12:34:01 hburger Exp $
  * Description: IntegerMarshaller class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/04/09 12:34:01 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,13 +45,14 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.accessor.jmi.spi;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
 
 
@@ -62,7 +62,7 @@ import org.openmdx.kernel.exception.BasicException;
  * Number to the specific type Integer (which is also a Number).
  */
 public class IntegerMarshaller
-  implements Marshaller {
+  implements Marshaller, ReluctantUnmarshalling {
 
   //-------------------------------------------------------------------------
   private IntegerMarshaller(
@@ -128,7 +128,7 @@ public class IntegerMarshaller
   //-------------------------------------------------------------------------
   // Variables
   //-------------------------------------------------------------------------
-  static private IntegerMarshaller instance = new IntegerMarshaller();
+  static private final IntegerMarshaller instance = new IntegerMarshaller();
 }
   
 //--- End of File -----------------------------------------------------------

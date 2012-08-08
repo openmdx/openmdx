@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefObjectFactory_1.java,v 1.38 2008/02/18 14:11:33 hburger Exp $
+ * Name:        $Id: RefObjectFactory_1.java,v 1.49 2008/06/28 00:21:50 hburger Exp $
  * Description: RefObjectFactory_1 class
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.49 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/06/28 00:21:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.generic.cci.LargeObject_1_0;
 import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
@@ -94,7 +95,6 @@ import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.transaction.UnitOfWork_1_0;
-import org.openmdx.compatibility.base.collection.Container;
 import org.openmdx.compatibility.base.exception.StackedException;
 import org.openmdx.compatibility.base.marshalling.CachingMarshaller;
 import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
@@ -106,6 +106,7 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.code.PrimitiveTypes;
+import org.w3c.cci2.BinaryLargeObject;
 
 //---------------------------------------------------------------------------
 /**
@@ -141,6 +142,16 @@ public class RefObjectFactory_1
     );
   }
   
+  /**
+   * @serial
+   */
+  final RefRootPackage_1 refRootPackage;
+
+  /**
+   * @serial
+   */
+  final Set<Path> directAccessPaths;
+    
   //-------------------------------------------------------------------------
   // CachingMarshaller
   //-------------------------------------------------------------------------
@@ -150,7 +161,7 @@ public class RefObjectFactory_1
     Object source
   ) throws ServiceException {
     return source instanceof RefObject_1_0 ?
-        new RefDelegatingObject_1(
+        new DelegatingObject(
           (RefObject_1_0)source,
           null
         ) :
@@ -161,14 +172,14 @@ public class RefObjectFactory_1
   public Object unmarshal(
     Object source
   ) {
-    if(source instanceof RefDelegatingObject_1) {
+    if(source instanceof DelegatingObject) {
       try {
-        ((RefDelegatingObject_1)source).getDelegate();
+        ((DelegatingObject)source).getDelegate();
       }
       catch(ServiceException e) {
         throw new RuntimeServiceException(e);
       }
-      return ((RefDelegatingObject_1)source).refObject;
+      return ((DelegatingObject)source).refObject;
     }
     else {
       return source;
@@ -200,7 +211,7 @@ public class RefObjectFactory_1
   private Object_1_0 getObject(
       Path accessPath
   ) throws ServiceException{
-      return new RefDelegatingObject_1(accessPath);  
+      return new DelegatingObject(accessPath);  
   }
   
   //-------------------------------------------------------------------------
@@ -224,7 +235,7 @@ public class RefObjectFactory_1
     public Object_1_0 createObject(
         String objectClass
     ) throws ServiceException {
-        return new RefDelegatingObject_1(
+        return new DelegatingObject(
           (RefObject_1_0)this.refRootPackage.refClass(objectClass).refCreateInstance(null),
           objectClass
         );
@@ -235,7 +246,7 @@ public class RefObjectFactory_1
         String objectClass,
         Object_1_0 base
     ) throws ServiceException {
-      return new RefDelegatingObject_1(
+      return new DelegatingObject(
         (RefObject_1)this.refRootPackage.refClass(objectClass).refCreateInstance(
           Arrays.asList(new Object[]{base})
         ),
@@ -260,7 +271,7 @@ public class RefObjectFactory_1
   /**
    * Maps the generic Object_1_0 feature accessors to typed JMI methods.  
    */
-  class RefDelegatingObject_1
+  class DelegatingObject
     implements Serializable, Object_1_1 {
   
     /**
@@ -272,7 +283,7 @@ public class RefObjectFactory_1
     /**
      * @param identity identity of JMI object.
      */
-    public RefDelegatingObject_1(
+    public DelegatingObject(
       Path identity
     ) throws ServiceException {
       this.identity = identity;
@@ -281,7 +292,7 @@ public class RefObjectFactory_1
     }
       
     //-------------------------------------------------------------------------
-    public RefDelegatingObject_1(
+    public DelegatingObject(
       RefObject_1_0 delegation,
       String qualifiedClassName
     ) throws ServiceException {
@@ -434,7 +445,9 @@ public class RefObjectFactory_1
      * get&lt;feature&gt; can not be found then refGetValue() is called and an
      * info message is logged.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+        "unchecked", "deprecation"
+    })
     Object getValue(
       String feature
     ) throws ServiceException {
@@ -532,7 +545,7 @@ public class RefObjectFactory_1
       }
       
       // Container. objects in CONTAINER_TYPE are marshalled and implement Object_1_0
-      else if(values instanceof Container) {
+      else if(values instanceof org.openmdx.compatibility.base.collection.Container || values instanceof RefContainer) {
         return values;
       }
       
@@ -737,7 +750,7 @@ public class RefObjectFactory_1
           this.getModel().isClassType(featureType) ||
           PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
         ) {
-          return new RefDelegatingObject_1(
+          return new DelegatingObject(
             (RefObject_1_0)values,
             null
           );
@@ -944,10 +957,9 @@ public class RefObjectFactory_1
 
       // get container from refObject
       Object container = this.getValue(feature);
-
-      return container instanceof RefContainer_1_0 ? new StandardContainer(
+      return container instanceof LegacyContainer ? new StandardContainer(
          RefObjectFactory_1.this,
-         (RefContainer_1_0)this.getValue(feature)
+         (LegacyContainer)container
        ) : new DirectAccessContainer(
            (FilterableMap<String,Object_1_0>)container
        );        
@@ -1054,22 +1066,37 @@ public class RefObjectFactory_1
       try {
         RefRootPackage_1 rootPackage = (RefRootPackage_1)this.refObject.refOutermostPackage();
         Method method = null;
+        boolean hasNoParams = false;
         try { 
             // Try to find signature matching the binding suffix
+            String bindingPackageSuffix = rootPackage.refBindingPackageSuffix();
             Class<?> inParamClass = Classes.getApplicationClass(
               this.getModel().toJavaPackageName(
                   qualifiedNameInParamType, 
-                  rootPackage.refBindingPackageSuffix()
+                  bindingPackageSuffix
               ) +  
-              "." + 
-              JavaNames.toClassName(nameInParamType)
+              "." + (
+                  "cci".equals(bindingPackageSuffix) ? nameInParamType : JavaNames.toClassName(nameInParamType)
+              )
             );
-            method = this.refObject.getClass().getMethod(
-              JavaNames.toMethodName(operation),
-              new Class[]{
-                inParamClass
-              }
-            );
+            try {
+                method = this.refObject.getClass().getMethod(
+                  JavaNames.toMethodName(operation),
+                  new Class[]{
+                    inParamClass
+                  }
+                );
+            }
+            catch(NoSuchMethodException e) {
+                if(!"org:openmdx:base:Void".equals(qualifiedNameInParamType)) {
+                    throw e;                    
+                }
+                method = this.refObject.getClass().getMethod(
+                    JavaNames.toMethodName(operation),
+                    new Class[]{}
+                );   
+                hasNoParams = true;
+            }
         }
         // Fallback to cci2
         catch(NoSuchMethodException e) {
@@ -1081,58 +1108,70 @@ public class RefObjectFactory_1
                 "." + 
                 JavaNames.toClassName(nameInParamType)
             );
-            method = this.refObject.getClass().getMethod(
-                JavaNames.toMethodName(operation),
-                new Class[]{
-                  inParamClass
+            try {
+                method = this.refObject.getClass().getMethod(
+                    JavaNames.toMethodName(operation),
+                    new Class[]{
+                      inParamClass
+                    }
+                );
+            }
+            catch(NoSuchMethodException e0) {
+                if(!"org:openmdx:base:Void".equals(qualifiedNameInParamType)) {
+                    throw e;                    
                 }
-            );            
+                method = this.refObject.getClass().getMethod(
+                    JavaNames.toMethodName(operation),
+                    new Class[]{}
+                );      
+                hasNoParams = true;
+            }
         }
         // invoke operation
         try {
-          return (Structure_1_0)this.toRefStructMarshaller(
-            qualifiedNameResultType
-          ).unmarshal(
-            method.invoke(
-              this.refObject,
-              new Object[]{
-                this.toRefStructMarshaller(qualifiedNameInParamType).marshal(parameter)
-              }
-            )
-          );
-        } catch(InvocationTargetException e) {
-          Throwable t = e.getTargetException();
-          if(t instanceof ServiceException) {
-            throw (ServiceException)t;
-          }
-          else if(t instanceof RefException_1) {
-            throw ((RefException_1)t).refGetServiceException();
-          }
-          else if(t instanceof JmiServiceException) {
-            throw new ServiceException(
-              ((JmiServiceException)t).getExceptionStack()
+            return (Structure_1_0)this.toRefStructMarshaller(
+                qualifiedNameResultType
+            ).unmarshal(
+                hasNoParams
+                    ? method.invoke(this.refObject, new Object[]{})
+                    : method.invoke(
+                        this.refObject, new Object[]{
+                            this.toRefStructMarshaller(qualifiedNameInParamType).marshal(parameter)
+                        }
+                      )
             );
-          }
-          else if(t instanceof RuntimeServiceException) {
-            throw (RuntimeServiceException)t;
-          }
-          throw new RuntimeServiceException(
-            StackedException.toStackedException(t)
-          );
+        } 
+        catch(InvocationTargetException e) {
+            Throwable t = e.getTargetException();
+            if(t instanceof ServiceException) {
+                throw (ServiceException)t;
+            }
+            else if(t instanceof RefException_1) {
+                throw ((RefException_1)t).refGetServiceException();
+            }
+            else if(t instanceof JmiServiceException) {
+                throw new ServiceException((JmiServiceException)t);
+            }
+            else if(t instanceof RuntimeServiceException) {
+                throw (RuntimeServiceException)t;
+            }
+            throw new RuntimeServiceException(
+                BasicException.toStackedException(t)
+            );
         }
         catch(IllegalAccessException e) {
-          throw new ServiceException(e);
+            throw new ServiceException(e);
         }
       }
       catch(ClassNotFoundException e) {
-        throw new ServiceException(e);
+          throw new ServiceException(e);
       }
       catch(NoSuchMethodException e) {
-        SysLog.info("method " + operation + " is not defined for class " + this.getClass().getName() + ". Invoking objInvokeOperation()");
-        return this.refObject.refDelegate().objInvokeOperation(
-          operation,
-          parameter
-        );
+          SysLog.info("method " + operation + " is not defined for class " + this.getClass().getName() + ". Invoking objInvokeOperation()");
+          return this.refObject.refDelegate().objInvokeOperation(
+            operation,
+            parameter
+          );
       }
     }
       
@@ -1293,25 +1332,6 @@ public class RefObjectFactory_1
     }  
     
     //-------------------------------------------------------------------------
-    /**
-     * Register a synchronization object for upward delegation.
-     *
-     * @param   synchronization
-     *          The synchronization object to be registered
-     *
-     * @exception ServiceException TOO_MANY_EVENT_LISTENERS
-     *            if an attempt is made to register more than one 
-     *            synchronization object.
-     * 
-     * @deprecated  use addEventListener(String,EventListener) instead
-     */
-    public void objRegisterSynchronization(
-      org.openmdx.compatibility.base.accessor.object.cci.InstanceCallbacks_1_0 synchronization
-    ) throws ServiceException {
-      this.getDelegate().objRegisterSynchronization(synchronization);
-    }
-  
-    //-------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objAddEventListener(java.lang.String, java.util.EventListener)
      */
@@ -1413,7 +1433,15 @@ public class RefObjectFactory_1
        * @see org.openmdx.compatibility.base.accessor.object.cci.ReadableLargeObject#getBinaryStream()
        */
       public InputStream getBinaryStream() throws ServiceException {
-          return (InputStream)getValue(this.feature);
+          try {
+              Object value = getValue(this.feature);
+              return value instanceof InputStream
+                  ? (InputStream)value
+                  : ((BinaryLargeObject)value).getContent();
+          }
+          catch(Exception e) {
+              throw new ServiceException(e);
+          }
       }
 
       /* (non-Javadoc)
@@ -1616,18 +1644,20 @@ public class RefObjectFactory_1
      */
     private static final long serialVersionUID = 3257001038556051255L;
 
-    protected Container<?> refSelection;
+    @SuppressWarnings("deprecation")
+    protected org.openmdx.compatibility.base.collection.Container<?> refSelection;
     
-    protected RefContainer_1_0 refContainer;
+    protected LegacyContainer refContainer;
 
-    protected org.openmdx.base.object.spi.Marshaller marshaller;
+    protected org.openmdx.base.persistence.spi.Marshaller marshaller;
     
     transient private Set<Map.Entry<String,Object_1_0>> entries = null;
 
+    @SuppressWarnings("deprecation")
     private StandardContainer(
-      org.openmdx.base.object.spi.Marshaller marshaller,
-      RefContainer_1_0 refContainer,
-      Container<?> refSelection
+      org.openmdx.base.persistence.spi.Marshaller marshaller,
+      LegacyContainer refContainer,
+      org.openmdx.compatibility.base.collection.Container<?> refSelection
     ) {
         this.marshaller = marshaller;
         this.refContainer = refContainer;
@@ -1635,20 +1665,20 @@ public class RefObjectFactory_1
     }
         
     public StandardContainer(
-      org.openmdx.base.object.spi.Marshaller marshaller,
-      RefContainer_1_0 refContainer
+      org.openmdx.base.persistence.spi.Marshaller marshaller,
+      LegacyContainer refContainer
     ) {
         this(marshaller, refContainer, refContainer);
     }
 
     public StandardContainer(
         Marshaller marshaller,
-        RefContainer_1_0 refContainer
+        LegacyContainer refContainer
     ) {
           this(new CollectionMarshallerAdapter(marshaller), refContainer);
     }
     
-    RefContainer_1_0 getDelegate(
+    LegacyContainer getDelegate(
     ){
         return this.refContainer;
     }
@@ -1667,6 +1697,7 @@ public class RefObjectFactory_1
     /* (non-Javadoc)
      * @see org.openmdx.provider.object.cci.Container#subSet(java.lang.Object)
      */
+    @SuppressWarnings("deprecation")
     public FilterableMap<String,Object_1_0> subMap(Object filter) {
         return new StandardContainer(
             this.marshaller,
@@ -1678,6 +1709,7 @@ public class RefObjectFactory_1
     /* (non-Javadoc)
      * @see org.openmdx.provider.object.cci.Container#toList(java.lang.Object)
      */
+    @SuppressWarnings("deprecation")
     public List<Object_1_0> values(Object criteria) {
         return new MarshallingSequentialList<Object_1_0>(
             this.marshaller,
@@ -1704,7 +1736,7 @@ public class RefObjectFactory_1
     public Collection<Object_1_0> values() {
       return new MarshallingSet<Object_1_0>(
         this.marshaller,
-        this.refSelection
+        this.refSelection, null
       );
     }
 
@@ -1718,6 +1750,7 @@ public class RefObjectFactory_1
     /* (non-Javadoc)
      * @see java.util.Map#get(java.lang.Object)
      */
+    @SuppressWarnings("deprecation")
     public Object_1_0 get(Object key) {
         return (Object_1_0) this.marshaller.marshal(this.refSelection.get(key));
     }
@@ -1789,10 +1822,10 @@ public class RefObjectFactory_1
     /**
      * @serial
      */
-    org.openmdx.base.object.spi.Marshaller marshaller;
+    org.openmdx.base.persistence.spi.Marshaller marshaller;
     
     ContainerMarshaller(
-        org.openmdx.base.object.spi.Marshaller marshaller
+        org.openmdx.base.persistence.spi.Marshaller marshaller
     ){
         this.marshaller = marshaller;
     }
@@ -1824,10 +1857,10 @@ public class RefObjectFactory_1
 
     RefObject_1_0 value;
     
-    org.openmdx.base.object.spi.Marshaller marshaller;
+    org.openmdx.base.persistence.spi.Marshaller marshaller;
     
     ContainerEntry(
-        org.openmdx.base.object.spi.Marshaller marshaller,
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
         RefObject_1_0 value
     ){
         this.value = value;
@@ -1859,20 +1892,32 @@ public class RefObjectFactory_1
       
   }
 
+
   //-------------------------------------------------------------------------
-  // Variables
+  // Interface LegacyContainer
   //-------------------------------------------------------------------------
 
   /**
-   * @serial
+   * This interface keeps the legacy code running!
    */
-  final RefRootPackage_1 refRootPackage;
+  @SuppressWarnings("deprecation")
+public interface LegacyContainer
+    extends org.openmdx.compatibility.base.collection.Container<RefObject_1_0> 
+  {
 
-  /**
-   * @serial
-   */
-  final Set<Path> directAccessPaths;
-    
+    /**
+     * Adds object to the container with qualifier. Adding an object to a container
+     * with add(value) is equivalent to refAddValue(null, value).
+     * 
+     * @throws JmiServiceException in case the object can not be added to the container.
+     */
+    public void refAddValue(
+      String qualifier,
+      RefObject_1_0 value
+    );
+
+  }
+
 }
 
 //--- End of File -----------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: CompositeGrid.java,v 1.11 2007/11/29 14:24:52 wfro Exp $
+ * Name:        $Id: CompositeGrid.java,v 1.16 2008/04/25 23:39:22 wfro Exp $
  * Description: CompositeGrid
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2007/11/29 14:24:52 $
+ * Date:        $Date: 2008/04/25 23:39:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,8 +64,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.jmi.cci.RefContainer_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.portal.servlet.Filter;
@@ -110,29 +110,23 @@ public class CompositeGrid
     }
     
     //-------------------------------------------------------------------------
-    protected List getFilteredObjects(
+    protected List<?> getFilteredObjects(
         Filter filter
     ) {
         Collection allObjects = this.getAllObjects();
         List filteredObjects = null;
         if(filter == null) {
-            filteredObjects = ((RefContainer_1_0)allObjects).toList(null);
+             filteredObjects = ((RefContainer)allObjects).refGetAll(null);
         }
         else {
             try {
                 try {
-                    filteredObjects = ((RefContainer_1_0)allObjects).subSet(
-                        filter
-                    ).toList(
-                        filter
-                    );
+                    filteredObjects = ((RefContainer)allObjects).refGetAll(filter);
                 }
                 catch(UnsupportedOperationException e) {}
                 if(filteredObjects == null) {
-                    filteredObjects = new ArrayList(
-                        ((RefContainer_1_0)allObjects).subSet(
-                            filter
-                        )
+                    filteredObjects = new ArrayList<Object>(
+                        ((RefContainer)allObjects).refGetAll(filter)
                     );
                 }
             }
@@ -150,7 +144,7 @@ public class CompositeGrid
                     },
                     "error getting filtered objects"
                 );
-                AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                AppLog.warning(e0.getMessage(), e0.getCause());
             }
         }
         return filteredObjects;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RemoteInvocationHandler.java,v 1.4 2006/09/12 13:46:01 hburger Exp $
+ * Name:        $Id: RemoteInvocationHandler.java,v 1.5 2008/03/21 18:29:52 hburger Exp $
  * Description: Remote Invocation Handler
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/09/12 13:46:01 $
+ * Date:        $Date: 2008/03/21 18:29:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,6 +66,7 @@ import org.openmdx.kernel.io.Resettable;
 /**
  * Remote <code>InvocationHandler</code>
  */
+@SuppressWarnings("deprecation")
 final class RemoteInvocationHandler implements InvocationHandler, Resettable {
 
     /**

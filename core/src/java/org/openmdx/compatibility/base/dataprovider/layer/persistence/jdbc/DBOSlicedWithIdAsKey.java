@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.23 2008/02/05 17:11:58 wfro Exp $
+ * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.28 2008/06/30 22:31:47 wfro Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/05 17:11:58 $
+ * Date:        $Date: 2008/06/30 22:31:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.compatibility.base.collection.SparseList;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.exception.StackedException;
@@ -96,7 +97,7 @@ public class DBOSlicedWithIdAsKey
     public DBOSlicedWithIdAsKey(
         AbstractDatabase_1 database,
         Connection conn, 
-        DbObjectConfiguration typeConfigurationEntry,
+        DbObjectConfiguration typeConfiguration,
         Path accessPath, 
         boolean isExtent, 
         boolean isQuery
@@ -104,7 +105,7 @@ public class DBOSlicedWithIdAsKey
         super(
             database, 
             conn, 
-            typeConfigurationEntry, 
+            typeConfiguration, 
             accessPath, 
             isExtent,
             isQuery
@@ -139,7 +140,13 @@ public class DBOSlicedWithIdAsKey
                     DatabaseMetaData dbm = conn.getMetaData();
                     databaseProductName = dbm.getDatabaseProductName();
                 } catch(Exception e) {}
-                if(databaseProductName.startsWith("PostgreSQL")) {
+                String useLikeForOidMatching = System.getProperty(
+                    "org.openmdx.persistence.jdbc.useLikeForOidMatching",
+                    Boolean.toString(databaseProductName.startsWith("PostgreSQL"))
+                );
+                // Use like for oid matching (e.g. required for PostgreSQL databases with non-C locale)
+                // Otherwise use the more efficient <> operators
+                if(Boolean.valueOf(useLikeForOidMatching).booleanValue()) {
                     this.referenceValues.clear();
                     this.referenceValues.add(rid + "/%");
                     this.referenceClause = "(v." + database.OBJECT_ID + " LIKE ?)";                     
@@ -182,25 +189,27 @@ public class DBOSlicedWithIdAsKey
     }
     
     //---------------------------------------------------------------------------  
+    @Override
     public Path getObjectReference(
         FastResultSet frs
     ) throws SQLException, ServiceException {      
-      String objectId = (String)frs.getObject("object_id");
-      if(objectId == null) {
-          throw new SQLException(
-              "column object_id in result set not found"
-          );
-      }
-      // Map objectId to reference
-      else {          
-          return this.database.getReference(
-              conn,
-              objectId.substring(0, objectId.lastIndexOf("/"))
-          );
-      }
+        String objectId = (String)frs.getObject("object_id");
+        if(objectId == null) {
+            throw new SQLException(
+                "column object_id in result set not found"
+            );
+        }
+        // Map objectId to reference
+        else {          
+            return this.database.getReference(
+                conn,
+                objectId.substring(0, objectId.lastIndexOf("/"))
+            );
+        }
     }
       
     //---------------------------------------------------------------------------  
+    @Override
     public String getObjectId(
         FastResultSet frs
     ) throws SQLException {
@@ -217,6 +226,7 @@ public class DBOSlicedWithIdAsKey
     }
           
     //---------------------------------------------------------------------------  
+    @Override
     public boolean includeColumn(
         String columnName
     ) {
@@ -228,6 +238,7 @@ public class DBOSlicedWithIdAsKey
     }
       
     //---------------------------------------------------------------------------  
+    @Override
     public int getIndex(
         FastResultSet frs
     ) throws SQLException {
@@ -240,6 +251,7 @@ public class DBOSlicedWithIdAsKey
     }
           
     //-------------------------------------------------------------------------
+    @Override
     public void remove(
     ) throws ServiceException {
       
@@ -247,7 +259,7 @@ public class DBOSlicedWithIdAsKey
       String currentStatement = null;
       Path accessPath = this.reference.getChild(this.objectId);
       Path type = this.getConfiguration().getType();
-      List dbObjects = new ArrayList();
+      List<String> dbObjects = new ArrayList<String>();
       if(this.getConfiguration().getDbObjectForUpdate1() != null) {
           dbObjects.add(
               this.getConfiguration().getDbObjectForUpdate1()
@@ -260,16 +272,16 @@ public class DBOSlicedWithIdAsKey
       }
       try {
           for(
-              Iterator i = dbObjects.iterator();
+              Iterator<String> i = dbObjects.iterator();
               i.hasNext();
           ) {
-              String dbObject = (String)i.next();          
+              String dbObject = i.next();          
               // Object (only if dbObject (=table) is configured)
               if(
                   ((type.size() == 1) || // catch all type
                   (type.size() == accessPath.size() && accessPath.isLike(type)))
               ) {
-                  List statementParameters = new ArrayList();
+                  List<Object> statementParameters = new ArrayList<Object>();
                   statementParameters.addAll(
                       this.getObjectIdValues()
                   );
@@ -297,7 +309,7 @@ public class DBOSlicedWithIdAsKey
                   ((type.size() == 1) || // catch all type
                   ((type.size() > accessPath.size()) && accessPath.isLike(type.getPrefix(accessPath.size()))))
               ) {
-                  List statementParameters = new ArrayList();
+                  List<Object> statementParameters = new ArrayList<Object>();
                   Object rid = this.database.getReferenceId(
                       this.conn,
                       accessPath.getDescendant(type.getSuffix(accessPath.size())),
@@ -367,6 +379,8 @@ public class DBOSlicedWithIdAsKey
     }
       
     //---------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    @Override
     public DataproviderObject[] sliceAndNormalizeObject(
         DataproviderObject object
     ) throws ServiceException {
@@ -380,11 +394,7 @@ public class DBOSlicedWithIdAsKey
             ModelElement_1_0 classDef = this.database.model.getElement(
                 object.values(SystemAttributes.OBJECT_CLASS).get(0)
             );
-            for(
-                Iterator i = this.database.model.getAttributeDefs(classDef, false, false).values().iterator();
-                i.hasNext();
-            ) {
-                ModelElement_1_0 feature = (ModelElement_1_0)i.next();
+            for(ModelElement_1_0 feature : this.database.model.getAttributeDefs(classDef, false, false).values()) {
                 String featureName = (String)feature.values("name").get(0);
                 String featureQualifiedName = (String)feature.values("qualifiedName").get(0);                
                 if(
@@ -407,10 +417,14 @@ public class DBOSlicedWithIdAsKey
                         Multiplicities.SET.equals(multiplicity) ||
                         Multiplicities.SPARSEARRAY.equals(multiplicity)                    
                     ) {
-                        object.clearValues(featureName + "_").add(
-                            object.getValues(featureName) == null
-                                ? new Integer(0)
-                                : new Integer(object.values(featureName).size())
+                        SparseList<?> source = object.getValues(featureName); 
+                        SparseList target = object.clearValues(
+                            featureName + "_"
+                        ); 
+                        target.add(
+                            Integer.valueOf(
+                                source == null ? 0 : source.size()
+                            )
                         );
                     }
                 }
@@ -448,14 +462,14 @@ public class DBOSlicedWithIdAsKey
           // Add id for all attributes with values of type path
           if(pathNormalizeLevel > 1) {    
             for(
-              Iterator i = object.attributeNames().iterator();
+              Iterator<String> i = object.attributeNames().iterator();
               i.hasNext();
             ) {
-              String attributeName = (String)i.next();
-              List values = object.values(attributeName);
+              String attributeName = i.next();
+              List<Object> values = object.values(attributeName);
               if((values.size() > 0) && (values.get(0) instanceof Path)) {
                 for(
-                  Iterator j = values.iterator();
+                  Iterator<Object> j = values.iterator();
                   j.hasNext();
                 ) {
                   Object v = j.next();
@@ -506,20 +520,20 @@ public class DBOSlicedWithIdAsKey
         // get number of partitions
         int maxSize = 0;
         for(
-          Iterator i = object.attributeNames().iterator();
+          Iterator<String> i = object.attributeNames().iterator();
           i.hasNext();
         ) {
-          String attributeName = (String)i.next();
+          String attributeName = i.next();
           maxSize = java.lang.Math.max(maxSize, object.values(attributeName).size());
         }
         
         // Create partitioned objects
         DataproviderObject[] slices = new DataproviderObject[maxSize];
         for(
-          Iterator i = object.attributeNames().iterator();
+          Iterator<String> i = object.attributeNames().iterator();
           i.hasNext();
         ) {
-          String attributeName = (String)i.next();            
+          String attributeName = i.next();            
           for(
             int j = 0; 
             j < object.values(attributeName).size();
@@ -549,6 +563,7 @@ public class DBOSlicedWithIdAsKey
     }
 
     //---------------------------------------------------------------------------
+    @Override
     protected String toObjectIdQuery (
       Path path
     ) throws ServiceException {

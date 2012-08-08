@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: NamingExceptionMapper.java,v 1.3 2005/06/06 14:07:54 hburger Exp $
+ * Name:        $Id: NamingExceptionMapper.java,v 1.4 2008/03/21 18:35:32 hburger Exp $
  * Description: Naming Exception Mapper
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/06 14:07:54 $
+ * Date:        $Date: 2008/03/21 18:35:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import javax.naming.NamingException;
 /**
  * Naming Exception Manager
  */
+@SuppressWarnings("unchecked")
 final class NamingExceptionMapper 
     implements BasicException.Mapper
 {

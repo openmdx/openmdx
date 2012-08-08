@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StringTypePredicate.java,v 1.1 2008/01/08 16:16:33 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: StringTypePredicate.java,v 1.2 2008/05/06 09:24:27 hburger Exp $
  * Description: String Type Predicate
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:33 $
+ * Date:        $Date: 2008/05/06 09:24:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2007, OMEX AG, Switzerland
+ * Copyright (c) 2006-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -63,11 +63,7 @@ import java.util.Collection;
  * </ul>
  */
 public interface StringTypePredicate
-
     extends ComparableTypePredicate<String>, MatchableTypePredicate<String>
-
-
-
 {
 
     /**
@@ -134,11 +130,7 @@ public interface StringTypePredicate
      */
     void like(
         int flags,
-
         String... operand
-
-
-
     );
 
     /**
@@ -160,11 +152,7 @@ public interface StringTypePredicate
      */
     void like(
         int flags,
-
         Collection<String> operand
-
-
-
     );
 
     /**
@@ -208,11 +196,7 @@ public interface StringTypePredicate
      */
     void unlike(
         int flags,
-
         String... operand
-
-
-
     );
 
     /**
@@ -234,11 +218,7 @@ public interface StringTypePredicate
      */
     void unlike(
         int flags,
-
         Collection<String> operand
-
-
-
     );
 
 }

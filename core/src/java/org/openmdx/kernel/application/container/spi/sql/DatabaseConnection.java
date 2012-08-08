@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseConnection.java,v 1.5 2008/01/08 16:16:31 hburger Exp $
+ * Name:        $Id: DatabaseConnection.java,v 1.6 2008/03/21 18:38:39 hburger Exp $
  * Description: DatabaseConnection
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2008/03/21 18:38:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,6 +66,7 @@ import org.openmdx.kernel.callback.CloseCallback;
 /**
  * DatabaseConnection
  */
+@SuppressWarnings("unchecked")
 public class DatabaseConnection implements Connection {
 
     /**

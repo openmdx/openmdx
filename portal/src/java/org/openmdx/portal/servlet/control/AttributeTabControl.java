@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeTabControl.java,v 1.9 2007/12/13 01:24:00 wfro Exp $
+ * Name:        $Id: AttributeTabControl.java,v 1.10 2008/05/01 21:43:56 wfro Exp $
  * Description: TabControl
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:24:00 $
+ * Date:        $Date: 2008/05/01 21:43:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -88,6 +88,7 @@ public class AttributeTabControl
   }
   
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,

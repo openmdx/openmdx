@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ConfigurationValidationReport.java,v 1.10 2006/08/11 09:24:07 hburger Exp $
+ * Name:        $Id: ConfigurationValidationReport.java,v 1.11 2008/03/21 18:28:05 hburger Exp $
  * Description: Configuration result
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:07 $
+ * Date:        $Date: 2008/03/21 18:28:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import org.openmdx.kernel.text.StringBuilders;
  * @deprecated in favour of {@link 
  * org.openmdx.kernel.application.configuration.Report Report}.
  */
+@SuppressWarnings("unchecked")
 public class ConfigurationValidationReport extends Report
 {
 

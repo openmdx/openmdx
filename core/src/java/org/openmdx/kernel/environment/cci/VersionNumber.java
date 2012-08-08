@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: VersionNumber.java,v 1.11 2006/08/11 09:24:13 hburger Exp $
+ * Name:        $Id: VersionNumber.java,v 1.12 2008/03/21 18:36:29 hburger Exp $
  * Description: openMDX: Version Number Class
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:13 $
+ * Date:        $Date: 2008/03/21 18:36:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,12 +55,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * openMDX
  * Version Number Class
  */
+@SuppressWarnings("unchecked")
 public final class VersionNumber
     implements Cloneable, Serializable, Comparable
 {
@@ -125,7 +124,7 @@ public final class VersionNumber
     ){
         this(
             toExternal(components),
-                        (int[]) components.clone()
+                        components.clone()
                 );
     }
 
@@ -229,14 +228,12 @@ public final class VersionNumber
         int[] internal
     ){
         if(internal.length == 0) return "";
-        CharSequence external = StringBuilders.newStringBuilder().append(internal[0]);
+        StringBuilder external = new StringBuilder().append(internal[0]);
         for(
             int i=1;
             i< internal.length;
             i++
-        ) StringBuilders.asStringBuilder(
-            external
-        ).append(
+        ) external.append(
             '.'
         ).append(
             internal[i]

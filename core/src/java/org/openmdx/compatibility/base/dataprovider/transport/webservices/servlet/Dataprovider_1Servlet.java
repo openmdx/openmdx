@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Servlet.java,v 1.31 2006/08/11 09:24:11 hburger Exp $
+ * Name:        $Id: Dataprovider_1Servlet.java,v 1.32 2008/03/19 17:10:05 hburger Exp $
  * Description: Dataprovider_1Servlet
- * Revision:    $Revision: 1.31 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:11 $
+ * Date:        $Date: 2008/03/19 17:10:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,8 +74,6 @@ import org.openmdx.compatibility.base.dataprovider.transport.webservices.Request
 import org.openmdx.compatibility.base.exception.StackedException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * Servlet for SPICE webservices transport. 
@@ -176,7 +174,7 @@ public class Dataprovider_1Servlet
     HttpServletResponse res
   ) throws IOException {
     SysLog.detail("Request size", "" + req.getContentLength());
-    CharSequence result = StringBuilders.newStringBuilder(
+    StringBuilder result = new StringBuilder(
         2048
     ).append(
         "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"

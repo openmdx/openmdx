@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SimpleTypePredicate_1.java,v 1.4 2006/10/19 17:07:10 hburger Exp $
+ * Name:        $Id: SimpleTypePredicate_1.java,v 1.5 2008/03/19 17:22:02 hburger Exp $
  * Description: Any Type Predicate implementation
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/19 17:07:10 $
+ * Date:        $Date: 2008/03/19 17:22:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -97,7 +97,7 @@ class SimpleTypePredicate_1
      */
     protected void refAddValue(
         short operator,
-        Collection operand
+        Collection<?> operand
     ){
         refAddValue(
             this.quantor,
@@ -121,7 +121,7 @@ class SimpleTypePredicate_1
      * @see org.w3c.cci2.AnyTypePredicate#elementOf(V...)
      */
     public void elementOf(
-        Object[] operand
+        Object... operand
     ) {
         elementOf(
             Arrays.asList(operand)
@@ -132,7 +132,7 @@ class SimpleTypePredicate_1
      * @see org.w3c.cci2.AnyTypePredicate#elementOf(Collection<V>)
      */
     public void elementOf(
-        Collection operand
+        Collection<?> operand
     ) {
         refAddValue(
             FilterOperators.IS_IN,
@@ -155,7 +155,7 @@ class SimpleTypePredicate_1
      * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(V...)
      */
     public void notAnElementOf(
-        Object[] operand
+        Object... operand
     ) {
         notAnElementOf(
             Arrays.asList(operand)
@@ -166,7 +166,7 @@ class SimpleTypePredicate_1
      * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(Collection<V>)
      */
     public void notAnElementOf(
-        Collection operand
+        Collection<?> operand
     ) {
         refAddValue(
             FilterOperators.IS_NOT_IN,

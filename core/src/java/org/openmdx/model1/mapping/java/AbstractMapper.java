@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractMapper.java,v 1.44 2008/02/16 19:40:00 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AbstractMapper.java,v 1.50 2008/06/28 00:21:23 hburger Exp $
  * Description: JMITemplate 
- * Revision:    $Revision: 1.44 $
+ * Revision:    $Revision: 1.50 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/16 19:40:00 $
+ * Date:        $Date: 2008/06/28 00:21:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2006, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,6 +61,7 @@ import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
 import org.openmdx.model1.code.Stereotypes;
 import org.openmdx.model1.importer.metadata.Visibility;
+import org.openmdx.model1.mapping.AbstractNames;
 import org.openmdx.model1.mapping.ClassDef;
 import org.openmdx.model1.mapping.ElementDef;
 import org.openmdx.model1.mapping.MapperTemplate;
@@ -96,7 +97,7 @@ public abstract class AbstractMapper
      * 
      */
     protected Model_1_3 getModel(){
-        return (Model_1_3) super.model;
+        return super.model;
     }
     
     // -----------------------------------------------------------------------
@@ -113,34 +114,137 @@ public abstract class AbstractMapper
             this.model
         );
         ClassType resultType = this.getClassType(resultTypeDef);
-        return resultType.getResultType(resultTypeDef, this.getFormat());
-    }
-    
-    // -----------------------------------------------------------------------
-    protected String getParameterType(
-        OperationDef featureDef
-    ) throws ServiceException {
-        ClassDef parameterTypeDef = new ClassDef(
-            this.model.getElement(featureDef.getQualifiedInParameterTypeName()),
-            this.model
-        );
-        ClassType parameterType = this.getClassType(parameterTypeDef);
-        return parameterType.getParameterType(parameterTypeDef, this.getFormat());
+        return resultType.getType(resultTypeDef, this.getFormat(), TypeMode.RESULT);
     }
     
     // -----------------------------------------------------------------------
     protected String getType(
         StructuralFeatureDef featureDef, 
         String collectionClass, 
-        Boolean returnValue
+        Boolean returnValue,
+        TypeMode featureUsage
     ) throws ServiceException {
-        return this.getType(
+        return this.getFeatureType(
             featureDef.getQualifiedTypeName(),
             collectionClass,
-            returnValue
+            returnValue,
+            featureUsage
         );
     }
 
+    // -----------------------------------------------------------------------
+    protected String getFeatureType(
+        StructuralFeatureDef featureDef,
+        Boolean returnValue,
+        TypeMode featureUsage
+    ) throws ServiceException {
+        String multiplicity = featureDef.getMultiplicity();
+        String type = featureDef.getQualifiedTypeName();
+        return 
+            Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ? (
+                this.model.isPrimitiveType(type) ? this.getObjectType(type) : getFeatureType(type, null, returnValue, featureUsage) 
+            ) :
+            Multiplicities.SINGLE_VALUE.equals(multiplicity) ? ( 
+                this.model.isPrimitiveType(type) ? this.getType(type) : getFeatureType(type, null, returnValue, featureUsage) 
+            ) :
+            Multiplicities.LIST.equals(multiplicity) ? this.getType(featureDef, "java.util.List", returnValue, featureUsage) :
+            Multiplicities.SET.equals(multiplicity) ? this.getType(featureDef, "java.util.Set", returnValue, featureUsage) :
+            Multiplicities.SPARSEARRAY.equals(multiplicity) ? this.getType(featureDef, "org.w3c.cci2.SparseArray", returnValue, featureUsage) :
+            Multiplicities.STREAM.equals(multiplicity) ? (
+                PrimitiveTypes.BINARY.equals(type) ? "java.io.InputStream" :
+                PrimitiveTypes.STRING.equals(type) ? "java.io.Reader" :
+                "java.io.DataInput" 
+            ) : this.getType(featureDef, "java.util.List", returnValue, featureUsage);
+    }
+        
+    // -----------------------------------------------------------------------
+    private String getFeatureType(
+        String qualifiedTypeName, 
+        String collectionClass, 
+        Boolean returnValue,
+        TypeMode featureUsage
+    ) throws ServiceException {
+        boolean multiValued = collectionClass != null;
+        if(this.model.isPrimitiveType(qualifiedTypeName)) {
+            String javaType = this.getObjectType(qualifiedTypeName);
+            return (
+               getFormat() == Format.JDO2 && Boolean.TRUE.equals(returnValue) ? "final " : ""
+            ) + (
+               multiValued ? collectionClass + '<' + javaType + '>' : javaType
+            );
+        } else if(returnValue == null) {
+            ClassDef classDef = this.getClassDef(qualifiedTypeName);
+            Format format = this.getFormat();
+            String javaType = this.getClassType(classDef).getType(
+                classDef, 
+                getFormat() == Format.JDO2 && this.model.isStructureType(qualifiedTypeName) ? Format.CCI2 : format,
+                featureUsage
+            ); 
+            return multiValued ? qualified(collectionClass,qualifiedTypeName,false) + '<' + javaType + '>' : javaType;
+        } else {
+            String javaType = this.interfaceType(
+                qualifiedTypeName, 
+                org.openmdx.model1.importer.metadata.Visibility.CCI, 
+                multiValued ? false : returnValue
+            );
+            return 
+                returnValue ? "<T extends " + javaType + "> " + (
+                    multiValued ? qualified(collectionClass,qualifiedTypeName,true) + "<T>" : "T"
+                ) :
+                multiValued ? qualified(collectionClass,qualifiedTypeName,false) + "<? extends " + javaType + '>' :
+                javaType; 
+        }
+    }
+    
+    /**
+     * Add a scope to collectionClass if it is unqualified
+     * 
+     * @param collectionClass
+     * @param javaType
+     * 
+     * @return the qualifiedCollection class
+     * 
+     * @throws ServiceException
+     */
+    private String qualified(
+        String collectionClass,
+        String qualifiedTypeName,
+        boolean returnValue
+    ) throws ServiceException {
+        if(collectionClass.indexOf('.') < 0) {
+            return this.interfaceType(
+                qualifiedTypeName, 
+                org.openmdx.model1.importer.metadata.Visibility.CCI, 
+                returnValue
+            ) + '.' + collectionClass;
+        } else {
+            return collectionClass;
+        }
+    }
+    
+    // -----------------------------------------------------------------------
+    protected String getType(
+        String qualifiedTypeName
+    ) throws ServiceException {        
+        return getType(
+            qualifiedTypeName,
+            this.model.isStructureType(qualifiedTypeName) && getFormat() == Format.JDO2
+        );
+    }
+    
+    // -----------------------------------------------------------------------
+    protected String getType(
+        String qualifiedTypeName,
+        boolean cci
+    ) throws ServiceException {        
+        return 
+            this.model.isPrimitiveType(qualifiedTypeName) ? 
+                getPrimitiveType(qualifiedTypeName) :
+            cci ? 
+               this.interfaceType(qualifiedTypeName, org.openmdx.model1.importer.metadata.Visibility.CCI, false) : 
+               this.getModelType(qualifiedTypeName);
+    }
+    
     // -----------------------------------------------------------------------
     protected String printAnnotationAndReturnCast(
         StructuralFeatureDef featureDef, 
@@ -159,47 +263,6 @@ public abstract class AbstractMapper
         }
     }
 
-    // -----------------------------------------------------------------------
-    private String getType(
-        String qualifiedTypeName, 
-        String collectionClass, 
-        Boolean returnValue
-    ) throws ServiceException {
-        boolean multiValued = collectionClass != null;
-        if(this.model.isPrimitiveType(qualifiedTypeName)) {
-            String javaType = this.getObjectType(qualifiedTypeName);
-            return (
-               getFormat() == Format.JDO2 && Boolean.TRUE.equals(returnValue) ? "final " : ""
-            ) + (
-               multiValued ? collectionClass + '<' + javaType + '>' : javaType
-            );
-        } else if(returnValue == null) {
-            ClassDef classDef = this.getClassDef(qualifiedTypeName);
-            Format format = this.getFormat();
-            String javaType = this.getClassType(classDef).getMemberType(
-                classDef, 
-                getFormat() == Format.JDO2 && this.model.isStructureType(qualifiedTypeName) ? Format.CCI2 : format
-            ); 
-            return multiValued ? collectionClass + '<' + javaType + '>' : javaType;
-        } else {
-            String javaType = this.interfaceType(
-                qualifiedTypeName, 
-                org.openmdx.model1.importer.metadata.Visibility.CCI, 
-                returnValue
-            );
-            if(returnValue) {
-                return "<T extends " + javaType + "> " + (
-                    multiValued ? collectionClass + "<T>" : "T"
-                );
-            } 
-            else {
-                return multiValued 
-                    ? collectionClass + "<? extends " + javaType + '>' 
-                    : javaType; 
-            }
-        }
-    }
-    
     // -----------------------------------------------------------------------
     protected String printAnnotationAndReturnMapCast(
         StructuralFeatureDef featureDef, 
@@ -223,44 +286,47 @@ public abstract class AbstractMapper
         Boolean returnValue
     ) throws ServiceException {
         String qualifiedTypeName = featureDef.getQualifiedTypeName();
-        String elementTypeName = this.getObjectType(qualifiedTypeName);
+        boolean primitive = this.model.isPrimitiveType(qualifiedTypeName);
+        String baseTypeName = primitive ? getObjectType(
+            qualifiedTypeName
+        ) : interfaceType(
+            qualifiedTypeName, 
+            Visibility.CCI, 
+            Boolean.TRUE.equals(returnValue)
+        ); 
         String keyTypeName = keyClass.getName();
-        if(
-            returnValue != null && 
-            !this.model.isPrimitiveType(qualifiedTypeName)
-        ) {
+        if(returnValue != null && !primitive) {
             if(returnValue) {
-                return "<T extends " + elementTypeName + "> " + "java.util.Map<" + keyTypeName +",T>"; 
+                return "<T extends " + baseTypeName + "> java.util.Map<" + keyTypeName +",T>"; 
             } else {
-                return "java.util.Map<" + keyTypeName +",? extends " + elementTypeName + '>'; 
+                return "java.util.Map<" + keyTypeName +",? extends " + baseTypeName + '>'; 
             }
         } else {
-            return "java.util.Map<" + keyTypeName +',' + elementTypeName + '>';
+            return "java.util.Map<" + keyTypeName +',' + baseTypeName + '>';
         }
     }
     
     // -----------------------------------------------------------------------
     protected String getFeatureType(
-        StructuralFeatureDef featureDef, 
-        Boolean returnType
+        StructuralFeatureDef featureDef,
+        Boolean returnValue
     ) throws ServiceException {
-        String multiplicity = featureDef.getMultiplicity();
-        String type = featureDef.getQualifiedTypeName();
-        return 
-            Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ? (
-                this.model.isPrimitiveType(type) ? this.getObjectType(type) : getType(type, null, returnType) 
-            ) :
-            Multiplicities.SINGLE_VALUE.equals(multiplicity) ? ( 
-                this.model.isPrimitiveType(type) ? this.getType(type) : getType(type, null, returnType) 
-            ) :
-            Multiplicities.LIST.equals(multiplicity) ? this.getType(featureDef, "java.util.List", returnType) :
-            Multiplicities.SET.equals(multiplicity) ? this.getType(featureDef, "java.util.Set", returnType) :
-            Multiplicities.SPARSEARRAY.equals(multiplicity) ? this.getType(featureDef, "org.w3c.cci2.SparseArray", returnType) :
-            Multiplicities.STREAM.equals(multiplicity) ? (
-                PrimitiveTypes.BINARY.equals(type) ? "java.io.InputStream" :
-                PrimitiveTypes.STRING.equals(type) ? "java.io.Reader" :
-                "java.io.DataInput" 
-            ) : this.getType(featureDef, "java.util.List", returnType);
+        return this.getFeatureType(
+            featureDef,
+            returnValue,
+            TypeMode.MEMBER            
+        );
+    }
+    
+    // -----------------------------------------------------------------------
+    protected String getParameterType(
+        StructuralFeatureDef featureDef 
+    ) throws ServiceException {
+        return this.getFeatureType(
+            featureDef,
+            null,
+            TypeMode.PARAMETER            
+        );
     }
     
     // -----------------------------------------------------------------------
@@ -271,7 +337,7 @@ public abstract class AbstractMapper
     ) throws ServiceException {
         this.pw.println(
             prefix +
-            getFeatureType(featureDef, Boolean.FALSE) +
+            this.getParameterType(featureDef) +
             ' ' +
             this.getFeatureName(featureDef) +
             suffix
@@ -327,24 +393,24 @@ public abstract class AbstractMapper
             this.pw.println("    return (" + this.getObjectType(featureDef.getQualifiedTypeName()) +  ")this.refGetValue(\"" + featureDef.getName() + "\", 0);");
             this.pw.println("  }");
         } else if (Multiplicities.LIST.equals(featureDef.getMultiplicity())) {
-            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE) + ' ' + featureDef.getBeanGetterName() + " (");
+            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
             this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+            this.pw.println("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
             this.pw.println("  }");
         } else if (Multiplicities.SET.equals(featureDef.getMultiplicity())) {
-            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.Set", Boolean.TRUE) + ' ' + featureDef.getBeanGetterName() + " (");
+            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
             this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getType(featureDef, "java.util.Set", Boolean.FALSE) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+            this.pw.println("    return (" + this.getType(featureDef, "java.util.Set", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
             this.pw.println("  }");
         } else if (Multiplicities.MAP.equals(featureDef.getMultiplicity())) {
-            this.pw.println("  " + accessModifier + ' ' + this.getMapType(featureDef, java.lang.String.class, true) + ' ' + featureDef.getBeanGetterName() + " (");
+            this.pw.println("  " + accessModifier + ' ' + this.getMapType(featureDef, java.lang.String.class, Boolean.TRUE) + ' ' + featureDef.getBeanGetterName() + " (");
             this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getMapType(featureDef, java.lang.String.class, false) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+            this.pw.println("    return (" + this.getMapType(featureDef, java.lang.String.class, Boolean.FALSE) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
             this.pw.println("  }");
         } else if (Multiplicities.SPARSEARRAY.equals(featureDef.getMultiplicity())) {
-            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.TRUE) + ' ' + featureDef.getBeanGetterName() + " (");
+            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
             this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.FALSE) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+            this.pw.println("    return (" + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
             this.pw.println("  }");
         } else if (Multiplicities.STREAM.equals(featureDef.getMultiplicity())) {
             if (PrimitiveTypes.BINARY.equals(featureDef.getQualifiedTypeName())) {
@@ -364,9 +430,9 @@ public abstract class AbstractMapper
                 this.pw.println("  }");
             }
         } else {
-            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE) + ' ' + featureDef.getBeanGetterName() + " (");
+            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
             this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+            this.pw.println("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
             this.pw.println("  }");
         }
     }
@@ -486,7 +552,7 @@ public abstract class AbstractMapper
             int i = 0, iLimit = namespaceNameComponents.size(); 
             i < iLimit; 
             i++
-        ) Names.openmdx2NamespaceElement(
+        ) AbstractNames.openmdx2NamespaceElement(
             i == 0 ? namespace : namespace.append('.'),
             namespaceNameComponents.get(i)
         );
@@ -538,8 +604,8 @@ public abstract class AbstractMapper
         );
         ClassType interfaceType = this.getClassType(interfaceTypeDef);
         return returnValue
-            ? interfaceType.getResultType(interfaceTypeDef, this.getFormat())
-            : interfaceType.getInterfaceType(interfaceTypeDef, this.getFormat());
+            ? interfaceType.getType(interfaceTypeDef, this.getFormat(), TypeMode.RESULT)
+            : interfaceType.getType(interfaceTypeDef, this.getFormat(), TypeMode.INTERFACE);
     }
 
     // -----------------------------------------------------------------------
@@ -564,15 +630,6 @@ public abstract class AbstractMapper
             case SPI : return Names.SPI2_PACKAGE_SUFFIX;
             default: return null;
         }
-    }
-    
-    // -----------------------------------------------------------------------
-    protected String getType(
-        OperationDef operationDef
-    ) throws ServiceException {
-        return "org:openmdx:base:Void".equals(operationDef.getQualifiedReturnTypeName()) ?
-            "void" :
-            getType(operationDef.getQualifiedReturnTypeName());
     }
     
     // -----------------------------------------------------------------------
@@ -682,31 +739,6 @@ public abstract class AbstractMapper
         }
     }
     
-    // -----------------------------------------------------------------------
-
-    protected String getType(
-        String qualifiedTypeName
-    ) throws ServiceException {        
-        return getType(
-            qualifiedTypeName,
-            this.model.isStructureType(qualifiedTypeName) && getFormat() == Format.JDO2
-        );
-    }
-
-    // -----------------------------------------------------------------------
-    
-    protected String getType(
-        String qualifiedTypeName,
-        boolean cci
-    ) throws ServiceException {        
-        return 
-            this.model.isPrimitiveType(qualifiedTypeName) ? 
-                getPrimitiveType(qualifiedTypeName) :
-            cci ? 
-               this.interfaceType(qualifiedTypeName, org.openmdx.model1.importer.metadata.Visibility.CCI, false) : 
-               this.getModelType(qualifiedTypeName);
-    }
-
     // -----------------------------------------------------------------------
 
     protected String getObjectType(
@@ -840,7 +872,7 @@ public abstract class AbstractMapper
     ) {
         this.pw.println("//////////////////////////////////////////////////////////////////////////////");
         this.pw.println("//");
-        this.pw.println("// Name: $Id: AbstractMapper.java,v 1.44 2008/02/16 19:40:00 hburger Exp $");
+        this.pw.println("// Name: $Id: AbstractMapper.java,v 1.50 2008/06/28 00:21:23 hburger Exp $");
         this.pw.println("// Generated by: openMDX JMI Mapper");
         this.pw.println("// Date: " + new Date().toString());
         this.pw.println("//");

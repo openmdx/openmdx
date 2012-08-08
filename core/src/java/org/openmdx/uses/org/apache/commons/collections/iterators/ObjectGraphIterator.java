@@ -1,9 +1,10 @@
 /*
- *  Copyright 2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -70,15 +71,16 @@ import org.openmdx.uses.org.apache.commons.collections.Transformer;
  * more efficient (and convenient) than using nested for loops to extract a list.
  * 
  * @since Commons Collections 3.1
- * @version $Revision: 1.1 $ $Date: 2004/10/24 12:17:21 $
+ * @version $Revision: 1.3 $ $Date: 2008/04/25 14:32:12 $
  * 
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class ObjectGraphIterator implements Iterator {
 
     /** The stack of iterators */
     protected final ArrayStack stack = new ArrayStack(8);
-	/** The root object in the tree */
+    /** The root object in the tree */
     protected Object root;
     /** The transformer to use */
     protected Transformer transformer;

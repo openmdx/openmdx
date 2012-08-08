@@ -4,6 +4,516 @@
                     =====================================
 
 ==============================================================================
+Version 2.1.0                                                       2008-07-10
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20012701
+      DBOSlicedWithIdAsKey: add option org.openmdx.persistence.jdbc.useLikeForOidMatching.
+      Option allows to configure whether to use LIKE or <> operators to filter oid patterns.      
+      
+      CR20012403
+      Add Plug-In Configuration To EntityManager
+      
+      The content of package
+      * org.openmdx.kernel.persistence.spi 
+      has been merged into
+      * org.openmdx.base.persistence.spi 
+            
+      An entity manager factory configuration could look like this:
+			<env-entry>
+				<env-entry-name>EntityManager/plugIn[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>App1</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/modelPackage[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org:openmdx:test:app1</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/packageImpl[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.test.app1.aop2.standard</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/modelPackage[1]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org:openmdx:base</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/packageImpl[1]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.base.aop2.standard</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/userObject[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>PriceCalculator</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/PriceCalculator/class</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.test.app1.aop2.standard.PriceCalculator</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/PriceCalculator/duration</env-entry-name>
+				<env-entry-type>java.lang.Long</env-entry-type>
+				<env-entry-value>1000</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/userObject[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>SharedConfiguration</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/SharedConfiguration/class</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.test.aop2.standard.SharedConfiguration</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/SharedConfiguration/example</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>an entity manager scoped configuration value</env-entry-value>
+			</env-entry>
+
+      A persistence manager factory configuration supports LegacyPlugIn only at the moment:
+			<env-entry>
+				<env-entry-name>PersistenceManager/LegacyPlugIn/modelPackage[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org:openmdx:test:app1</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PersistenceManager/LegacyPlugIn/packageImpl[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.test.app1.aop2.legacy</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PersistenceManager/LegacyPlugIn/userObject[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>LegacyConfiguration</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PersistenceManager/LegacyPlugIn/LegacyConfiguration/class</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.test.app1.aop2.legacy.LegacyConfiguration</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PersistenceManager/LegacyPlugIn/LegacyConfiguration/example</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>a legacy plug-in scoped configuration value</env-entry-value>
+			</env-entry>
+            
+      CR20011100
+      Optimistic_1Bean
+
+      Typical configuration entries for the gateway-Managing EJB are:
+
+        <ejb-name>gateway1-Managing</ejb-name>
+        <home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+        <remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+        <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+        <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Optimistic_1Bean</ejb-class>
+        <session-type>Stateless</session-type>
+        <transaction-type>Bean</transaction-type>
+        [...]
+        <env-entry>
+          <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.interception.Entity_1</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>KERNEL/TYPE</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Standard_1</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>KERNEL/APPLICATION</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.Layer_1</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>KERNEL/MODEL</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.Layer_1</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.delegation.Entity_1</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>APPLICATION/disableRouter</env-entry-name>
+          <env-entry-type>java.lang.Boolean</env-entry-type>
+          <env-entry-value>true</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>PERSISTENCE/retrievalSize</env-entry-name>
+          <env-entry-type>java.lang.Integer</env-entry-type>
+          <env-entry-value>1000</env-entry-value>
+        </env-entry>
+
+      CR20012101
+      Database: add DBOSlicedWithParentAndIdAsKey. Add DBO which supports 
+      composed primary key (parent, qualifier, type).
+      
+      CR20011800
+      Database: support added for HSQLDB 1.8.
+      
+      CR20010702 
+      CCI2 Container interface 
+      
+      public interface <associationName> {
+        public interface <referenceName> extends org.w3c.cci2.Container<E> {
+          void add(
+             org.oasisopen.cci2.QualifierType <qualifierName>Type,
+             <qualifierType> <qualifierName>,
+             E <referenceName>
+          );       
+          E get(
+            org.oasisopen.cci2.QualifierType <qualifierName>Type,
+            <qualifierType> <qualifierName>
+          );
+          void remove(
+             org.oasisopen.cci2.QualifierType <qualifierName>Type,
+            <qualifierType> <qualifierName>
+          );
+        }
+      }
+      
+      public interface Container<E> extends Collection<E> {
+        List<E> getAll(
+          AnyTypePredicate predicate
+        );
+        void removeAll(
+          AnyTypePredicate predicate
+        );
+      }
+      
+      CR20010702 
+      CCI2 Container interface 
+
+      The interface is implemented by the proxy class only:
+
+      /**
+       * RefContainer
+       */
+      public interface RefContainer {
+      
+        /**
+         * Adds an object to the container
+         * 
+         * @param arguments there is always an odd number of arguments:
+         * ((REASSIGNABLE|PERSISTENT) identifier)+ value
+         */
+        void refAdd(
+          Object... arguments 
+        );
+    
+        /**
+         * Retrieves an object from the container
+         * 
+         * @param arguments there is always an even number of arguments:
+         * ((REASSIGNABLE|PERSISTENT) identifier)+
+         * 
+         * @return the object
+         */
+        Object refGet(
+          Object... arguments 
+        );
+        
+        /**
+         * Removes an object from the container
+         * 
+         * @param arguments there is always an even number of arguments:
+         * ((REASSIGNABLE|PERSISTENT) identifier)+
+         */
+        void refRemove(
+          Object... arguments 
+        );
+        
+        /**
+         * Precedes a persistent sub-segment.
+         */
+        Object PERSISTENT = QualifierType.PERSISTENT;
+    
+        /**
+         * Precedes re-assignable sub-segment.
+         */
+        Object REASSIGABLE = QualifierType.REASSIGNABLE;
+
+        /**
+         * Executes a query 
+         * 
+         * @param query
+         * 
+         * @return the result
+         */
+        List<?> refGetAll(
+            Object query
+        );
+    
+        /**
+         * Executes a query 
+         * 
+         * @param query
+         * 
+         * @return the result
+         */
+        List<?> refRemoveAll(
+           Object query
+        );
+
+      }
+
+      
+      CR20010001
+      SLF4J logging
+      
+      openMDX 2's logging API is org.slf4j
+      
+      A configuration such as
+      
+        # Example Log Properties
+        handlers= java.util.logging.FileHandler
+        java.util.logging.FileHandler.level = INFO
+        java.util.logging.FileHandler.pattern = %t/junit.%u.log
+        java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+      
+      leads to a JDK-log file similar to openMDX/1's log files with the 
+      following main differences
+      * The initial line declaring fields missing.
+      * The date/time field is in extended ISO format, i.e. it includes the 
+        characters 'T' and 'Z'.
+      * SysLog's and AppLog's logsource field is not at openMDX/1's default 
+        place but just before the message field.
+      * The thread field contains the log thread id (a number starting with 10) 
+        as opposed to the thread's id or name
+      * The line number field is missing.
+
+      CR20009700 
+      TransactionSynchronizationRegistry 
+      
+      The LightweightContainer supports the TransactionSynchronizationRegistry
+      as defined by JTA 1.1 and Java EE 5 respectively. 
+        
+      CR20007105
+      CollectionMarshaller
+      
+      The org.openmdx.base.persistence.spi.Marshaller interface with its 
+      unmarshal() method throwing now an IllegalArgumentException in case of
+      failure replaces the org.openmdx.base.collection.CollectionMarshaller 
+      interface with its unmarshal() method throwing a ServiceException in 
+      case of failure. 
+
+      CR20007105
+      Gateway as PersistenceManagerFactory
+
+      The PersistenceManagerConnectionFactory is formally declared as an EJB 
+      reference in the web.xml:
+      
+        <ejb-local-ref id="ejb_gateway">
+		  <ejb-ref-name>ejb/gateway</ejb-ref-name>
+          <ejb-ref-type>Session</ejb-ref-type>
+          <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+          <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_2Local</local>
+          <ejb-link>test-gateway.jar#gateway-Mandatory</ejb-link>
+        </ejb-local-ref>
+
+      The PersistenceManagerFactory is formally declared as resource environment
+      reference in the web.xml:
+      
+        <resource-env-ref id="jdo_gateway">
+          <description>JDO Reference to the application's persistence manager factory</description>
+          <resource-env-ref-name>persistence/gateway</resource-env-ref-name>
+          <resource-env-ref-type>javax.jdo.PersistenceManagerFactory</resource-env-ref-type>
+        </resource-env-ref>
+
+      It is resolved in the Tomcat's context XML
+      
+        <Resource
+          name="persistence/gateway"
+          auth="Container"
+          type="javax.jdo.PersistenceManagerFactory"
+          factory="org.openmdx.base.persistence.tomcat.AccessorFactoryBuilder"
+          AccessorFactoryClass="org.openmdx.base.accessor.jmi1.AccessorFactory_2"
+        />
+
+      The persistence manager factory is then acquired like that:
+      
+        public void init(
+        ) throws ServletException {
+          this.persistenceManagerFactory = JDOHelper.getPersistenceManagerFactory(
+            "java:comp/env/persistence/gateway",
+            (Context)null
+          );
+        }
+
+      The changes to the gateway EJB are as following:
+      
+        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_2Local</local>
+        <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Gateway_1Bean</ejb-class>
+     
+        <env-entry>
+          <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.runtime1.layer.interception.EntityProviderLayer_1</env-entry-value>
+        </env-entry>
+
+        <assembly-descriptor>
+          <container-transaction>
+            <method>
+              <ejb-name>gateway-Mandatory</ejb-name>
+              <method-name>process</method-name>
+            </method>
+            <trans-attribute>Required</trans-attribute>
+          </container-transaction>
+          <container-transaction>
+            <method>
+              <ejb-name>gateway-Mandatory</ejb-name>
+              <method-name>createEntityManager</method-name>
+            </method>
+            <trans-attribute>Never</trans-attribute>
+          </container-transaction>
+          <container-transaction>
+            <method>
+              <ejb-name>gateway-Mandatory</ejb-name>
+              <method-name>createEntityProvider</method-name>
+            </method>
+            <trans-attribute>Never</trans-attribute>
+          </container-transaction>
+          <container-transaction>
+            <method>
+              <ejb-name>gateway-Mandatory</ejb-name>
+              <method-name>commit</method-name>
+            </method>
+            <trans-attribute>RequiresNew</trans-attribute>
+          </container-transaction>
+        </assembly-descriptor>
+
+      The changes to the provider EJBs are as following:
+
+        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_1Local</local>
+     
+        <assembly-descriptor>
+          <container-transaction>
+            <method>
+              <ejb-name>clock-1</ejb-name>
+              <method-name>process</method-name>
+            </method>
+            <trans-attribute>Required</trans-attribute>
+          </container-transaction>
+          <container-transaction>
+            <method>
+              <ejb-name>clock-1</ejb-name>
+              <method-name>createEntityProvider</method-name>
+            </method>
+            <trans-attribute>Never</trans-attribute>
+          </container-transaction>
+        </assembly-descriptor>
+     
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20012707
+      ManagerFactory/DataProvider
+            
+      EJB Interface & Bean Configuration
+      * DataProvider EJB Configuration
+          <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+	      <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+	      <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
+      * Entity Manager Factory EJB Configuration 
+          <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2LocalHome</local-home>
+	      <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2_0Local</local>
+	      <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.EntityManagerFactory_2Bean</ejb-class>
+      * Gateway EJB Configuration
+          <ejb-name>Gateway</ejb-name>
+	      <home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+	      <remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+	      <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+	      <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+	      <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Gateway_1Bean</ejb-class>                
+       
+      CR20011701 
+      The predicates' equals() methods
+       
+      Deprecate the predicates' equals() methods to avoid its erroneous use 
+      in lieu of equalTo().
+       
+      CR20010001
+      openMDX/Log
+
+      openMDX 1' logging API (SysLog & Applog):
+      * openMDX 1's logging API (org.openmdx.kernel.SysLog and 
+        org.openmdx.application.log.AppLog) delegates to SLF4J now.
+      * openMDX 1's logging implementation has been moved to 
+        org.openmdx.compatibility.kernel.SysLog and 
+        org.openmdx.compatibility.application.log.AppLog. 
+        It is activated by adding slf4j-openmdx1.jar to the same classloader 
+        as openmdx-kernel.jar. 
+
+      CR20009904 
+      PersistenceManager in JBoss
+      
+      The javax/jdo classes have been moved from openmdx-base.jar to
+      openmdx-kernel.jar.      
+      
+2.1.  FIXED BUGS
+      
+      CR20010802
+      StateQuery
+      
+      Un-escape attribute filter values when replacing IS_LIKE by IS_IN.       
+
+      CR20011501
+      Plugin_1's total reply leads to iteration 
+      
+      Recounting must be avoided.
+      
+      CR20010003
+      DataproviderObject.values() returns null. DataproviderObject.values() 
+      must return a non-null SparseList<Object>. In case of multiple threads, 
+      the current implementation may return null. DataproviderObject must be 
+      thread-safe because it is used in the Model_1 repository. 
+
+2.2.  DEPRECATED FEATURES
+      
+      CR20008100
+      RefObjectFactory_1
+      
+      The class org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1 has been
+      deprecated as it is used by test programs only.
+
+2.3.  REMOVED FEATURES
+      
+      CR20008100
+      Application_1_0 & ApplicationController_1_0
+      
+      The deprecated classes Application_1_0 and ApplicationController_1_0 in
+      the package org.openmdx.compatibility.base.application.control
+      have been removed.
+
+      CR20008100
+      InProcessDataproviderConnectionFactory
+      
+      The deprecated class InProcessDataproviderConnectionFactory
+      in package org.openmdx.compatibility.base.application.cci has been
+      removed.
+
+      CR20008100
+      InstanceCallbacks_1_0 & InstanceCallbackAdapter
+      
+      The deprecated interface InstanceCallbacks_1_0 in package
+      org.openmdx.compatibility.base.accessor.object.cci and the deprecated
+      class InstanceCallbackAdapter in package 
+      org.openmdx.compatibility.base.accessor.object.spi have been removed.
+            
+            
+==============================================================================
 Version 2.0.0                                                       2008-02-22
 ==============================================================================
 
@@ -36,15 +546,6 @@ Version 2.0.0                                                       2008-02-22
       * org.openmdx.base.collection.TreeSparseArray is a TreeMap base
         org.w3c.cci2.SparseArray implementation.   
 
-      CR20007105
-      CollectionMarshaller
-      
-      The org.openmdx.base.object.spi.Marshaller interface with its 
-      unmarshal() method throwing now an IllegalArgumentException in case of
-      failure replaces the org.openmdx.base.collection.CollectionMarshaller 
-      interface with its unmarshal() method throwing a ServiceException in 
-      case of failure. 
-      
       CR20007302
       Tomcat/Embedded Lightweight Container
       
@@ -1024,10 +1525,10 @@ Version 1.18.2                                                      2007-08-26
       Sounds like
 
       SOUNDS flag support added to StringTypePredicate
-			
+
       CR20006237
       Allow query context's being added to JMI queries. A query such as
-			
+
         SegmentQuery query = this.clock1.createSegmentQuery();
         QueryFilter context = this.datastore1.getQueryFilter().createQueryFilter();
         context.setClause(
@@ -1040,7 +1541,7 @@ Version 1.18.2                                                      2007-08-26
             new int[]{1, 2, 3}
         );
         query.thereExistsContext().equalTo(context);        
-			
+
 			leads to a filter similar to
 			
 			[org.openmdx.compatibility.base.query.FilterProperty (THERE_EXISTS object_instanceof IS_IN [org:openmdx:test:clock1:Segment]): {

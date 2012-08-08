@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractObjectIdBuilder.java,v 1.3 2007/07/11 17:30:50 hburger Exp $
+ * Name:        $Id: AbstractObjectIdBuilder.java,v 1.7 2008/05/16 09:21:43 hburger Exp $
  * Description: AbstractObjectIdBuiler 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/07/11 17:30:50 $
+ * Date:        $Date: 2008/05/16 09:21:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,8 +53,8 @@ package org.openmdx.compatibility.base.naming.jdo2;
 
 import java.util.List;
 
-import org.oasisopen.spi2.ObjectId;
 import org.oasisopen.spi2.ObjectIdBuilder;
+import org.oasisopen.spi2.ObjectIdParser;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.compatibility.base.naming.Path;
@@ -76,18 +76,11 @@ public abstract class AbstractObjectIdBuilder
     protected AbstractObjectIdBuilder() {
     }
 
-    /* (non-Javadoc)
-     * @see org.oasisopen.spi2.ObjectIdBuilder#getObjectId(java.lang.String)
+    /**
+     * The UUID generator
      */
-    public ObjectId toObjectId(
-        String objectId
-    ) {
-        return new ObjectIdParser(
-            toPath(objectId), 
-            getTargetClass(objectId)
-        );
-    }
-
+    protected final UUIDGenerator uuidGenerator = UUIDs.getGenerator();
+    
     /* (non-Javadoc)
      * @see org.oasisopen.spi2.ObjectIdBuilder#newObjectId(java.lang.Boolean, java.lang.String, java.util.List, java.util.List, java.util.List, java.util.List)
      */
@@ -101,8 +94,6 @@ public abstract class AbstractObjectIdBuilder
             "The arguments qualifier und persistentQualifier must have the same size" :
           qualifier.size() != 1 ?
             "This object id builder expects a single qualifier" :
-          persistentQualifier.get(0) ?
-            "This object id builder expects the qualifier being re-assignable" :
           !(qualifier.get(0) instanceof String) ?
             "This object id builder expects the qualifier being of type String" :
             null;
@@ -120,7 +111,9 @@ public abstract class AbstractObjectIdBuilder
             },
             message
         );
-        String component = qualifier.get(0).toString();
+        String component = (
+            persistentQualifier.get(0) ? "!" : ""
+        ) + qualifier.get(0);
         return fromPath(
             mixinParent == null ? new Path(
                 new String[]{component}
@@ -140,7 +133,8 @@ public abstract class AbstractObjectIdBuilder
     public <T> String newObjectId(
         Boolean mixinParent, String parentObjectId,
         String referenceName,
-        List<Class<T>> qualifierClass, List<String> objectClass
+        List<Class<T>> qualifierClass, 
+        List<String> baseClass, List<String> objectClass
     ) {
         String message = mixinParent == null ?
             "The authority's id can't be generated" :
@@ -180,58 +174,49 @@ public abstract class AbstractObjectIdBuilder
      * 
      * @return the object id representing the given path
      */
-    protected abstract String fromPath(
+    abstract protected String fromPath(
         Path path
     );
     
     /**
-     * Convert an object id to a path
+     * Convert an object id to a path.
+     * <p><em>
+     * Note:</br>
+     * A subclass must override <code>toPath()</code> or <code>newObjectId()</code>.
+     * </em>
      * 
      * @param objectId the object id to be converted to a path
      * 
      * @return the path represented by the given object id
      */
-    protected abstract Path toPath(
+    abstract protected Path toPath(
         String objectId
     );
 
-    /**
-     * Retrieve an object id's target class
-     * 
-     * @param objectId the object id to be inspected
-     * 
-     * @return the object id's target class
-     */
-    protected abstract List<String> getTargetClass(
-        String objectId
-    );
+    
+    //------------------------------------------------------------------------
+    // Class AbstractObjectIdParser
+    //------------------------------------------------------------------------
     
     /**
-     * The UUID generator
+     * Abstract Object Id Parser
      */
-    protected final UUIDGenerator uuidGenerator = UUIDs.getGenerator();
-
-    /**
-     * Class Object Id Parser
-     */
-    protected class ObjectIdParser implements ObjectId {
+    public abstract static class AbstractObjectIdParser implements ObjectIdParser {
         
         /**
          * Constructor 
          *
          * @param path
-         * @param targetClass TODO
          */
-        protected ObjectIdParser(
-            final Path path, 
-            final List<String> targetClass
+        protected AbstractObjectIdParser(
+            final Path path
         ) {
             this.path = path;
-            this.targetClass = targetClass;
             if(path.size() % 2 != 1) throw new RuntimeServiceException(           
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
                 new BasicException.Parameter[]{
+                    new BasicException.Parameter("ObjectIdParser", getClass().getName()),
                     new BasicException.Parameter("path", path.getSuffix(0))
                 },
                 "An object id requires an odd number of path components"
@@ -241,27 +226,12 @@ public abstract class AbstractObjectIdBuilder
         /**
          * 
          */
-        private final Path path;
-
-        /**
-         * 
-         */
-        private final List<String> targetClass;
-        
-        /* (non-Javadoc)
-         * @see org.oasisopen.spi2.ObjectId#getParentIdentity(java.util.List)
-         */
-        public ObjectId getParentObjectId(
-            List<String> baseClass
-        ) {
-            return path.size() == 1 ? 
-                null :
-                toObjectId(fromPath(this.path.getPrefix(this.path.size() - 2)));
-        }
+        protected final Path path;
 
         /* (non-Javadoc)
          * @see org.oasisopen.spi2.ObjectId#getQualifier(java.lang.Class, int)
          */
+        @SuppressWarnings("unchecked")
         public <E> E getQualifier(
             Class<E> qualifierClass, 
             int index
@@ -275,35 +245,25 @@ public abstract class AbstractObjectIdBuilder
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
                 new BasicException.Parameter[]{
-                    new BasicException.Parameter("ObjectIdBuilder", getClass().getName()),
+                    new BasicException.Parameter("ObjectIdParser", getClass().getName()),
                     new BasicException.Parameter("qualifierClass", qualifierClass),
                     new BasicException.Parameter("index", index)
                 },
                 message
             );
-            return (E) this.path.getBase();
-        }
-
-        /* (non-Javadoc)
-         * @see org.oasisopen.spi2.ObjectId#getQualifierCount()
-         */
-        public int getQualifierCount() {
-            return 1;
-        }
-
-        /* (non-Javadoc)
-         * @see org.oasisopen.spi2.ObjectId#getTargetClass()
-         */
-        public List<String> getTargetClass() {
-            return this.targetClass;
+            String value = this.path.getBase();
+            return (E) (
+                value.startsWith("!") ? value.substring(1) : value
+            );
         }
 
         /* (non-Javadoc)
          * @see org.oasisopen.spi2.ObjectId#isQualifierPersistent(int)
          */
         public boolean isQualifierPersistent(int index) {
-            return false;
+            return this.path.getBase().startsWith("!");
         }
 
     }
+    
 }

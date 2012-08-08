@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsAutocompleter.java,v 1.22 2007/11/23 00:21:03 wfro Exp $
+ * Name:        $Id: FindObjectsAutocompleter.java,v 1.23 2008/04/04 11:55:48 hburger Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/23 00:21:03 $
+ * Date:        $Date: 2008/04/04 11:55:48 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -105,7 +105,7 @@ public class FindObjectsAutocompleter
             i < this.filterByFeature.length;
             i++
         ) {
-            List parameters = new ArrayList();
+            List<Action.Parameter> parameters = new ArrayList<Action.Parameter>();
 
             // xri
             parameters.add(
@@ -171,7 +171,7 @@ public class FindObjectsAutocompleter
             );
             this.findObjectsActions[i] = new Action(
                 Action.EVENT_FIND_OBJECTS,
-                (Action.Parameter[])parameters.toArray(new Action.Parameter[parameters.size()]),
+                parameters.toArray(new Action.Parameter[parameters.size()]),
                 this.filterByLabel[i],
                 true
             );     

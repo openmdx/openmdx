@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderObjectMarshaller.java,v 1.20 2008/02/18 13:34:10 hburger Exp $
+ * Name:        $Id: DataproviderObjectMarshaller.java,v 1.22 2008/06/27 15:04:34 hburger Exp $
  * Description: DataproviderObjectMarshaller
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 13:34:10 $
+ * Date:        $Date: 2008/06/27 15:04:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -95,6 +95,7 @@ import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
 
 //---------------------------------------------------------------------------
+@SuppressWarnings("unchecked")
 public class DataproviderObjectMarshaller {
 
     /**
@@ -409,7 +410,7 @@ public class DataproviderObjectMarshaller {
             model.referenceIsStoredAsAttribute(featureDef) && 
             Multiplicities.MAP.equals(featureDef.values("multiplicity").get(0))
         ){
-            Object_1_0 lock = (Object_1_0) source.objGetContainer(
+            Object_1_0 lock = source.objGetContainer(
                 SystemAttributes.CONTEXT_CAPABLE_CONTEXT
             ).get(
                 SystemAttributes.LOCK_CONTEXT
@@ -637,8 +638,7 @@ public class DataproviderObjectMarshaller {
             }
             else if(Multiplicities.MAP.equals(multiplicity)) {
               // TODO: map Container as MAP to DataproviderObject
-              //... FilterableMap map = 
-              source.objGetContainer(feature);
+              //... FilterableMap map = source.objGetContainer(feature);
             }
             else if(Multiplicities.SPARSEARRAY.equals(multiplicity)) {
               SortedMap sourceValues = new MarshallingSortedMap(

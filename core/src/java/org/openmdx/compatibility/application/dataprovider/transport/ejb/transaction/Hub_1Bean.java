@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Hub_1Bean.java,v 1.13 2008/02/19 13:52:26 hburger Exp $
+ * Name:        $Id: Hub_1Bean.java,v 1.15 2008/03/25 23:20:19 hburger Exp $
  * Description: Hub_1Bean class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/19 13:52:26 $
+ * Date:        $Date: 2008/03/25 23:20:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

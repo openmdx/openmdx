@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -49,12 +50,19 @@ import org.openmdx.uses.org.apache.commons.collections.list.UnmodifiableList;
  * <p>
  * The implementation is also designed to be subclassed, with lots of useful
  * methods exposed.
- * 
+ * <p>
+ * <strong>Note that LinkedMap is not synchronized and is not thread-safe.</strong>
+ * If you wish to use this map from multiple threads concurrently, you must use
+ * appropriate synchronization. The simplest approach is to wrap this map
+ * using {@link java.util.Collections#synchronizedMap(Map)}. This class may throw 
+ * exceptions when accessed by concurrent threads without synchronization.
+ *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:17 $
+ * @version $Revision: 1.5 $ $Date: 2008/06/28 00:21:22 $
  *
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class LinkedMap
         extends AbstractLinkedMap implements Serializable, Cloneable {
 
@@ -156,8 +164,8 @@ public class LinkedMap
      * @param key  the key to find the index of
      * @return the index, or -1 if not found
      */
-    public int indexOf(Object key) {
-        key = convertKey(key);
+    public int indexOf(Object _key) {
+        Object key = convertKey(_key);
         int i = 0;
         for (LinkEntry entry = header.after; entry != header; entry = entry.after, i++) {
             if (isEqualKey(key, entry.key)) {

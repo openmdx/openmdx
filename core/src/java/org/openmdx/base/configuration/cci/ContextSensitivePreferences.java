@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ContextSensitivePreferences.java,v 1.2 2007/10/10 16:05:52 hburger Exp $
+ * Name:        $Id: ContextSensitivePreferences.java,v 1.3 2008/03/21 18:29:02 hburger Exp $
  * Description: Context Sensitive Preferences
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:52 $
+ * Date:        $Date: 2008/03/21 18:29:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,6 +67,7 @@ import org.openmdx.compatibility.kernel.application.cci.Classes;
  * <li>module
  * <li>component
  */
+@SuppressWarnings("unchecked")
 public class ContextSensitivePreferences {
 
     /**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderRequest.java,v 1.16 2008/01/25 17:18:46 wfro Exp $
+ * Name:        $Id: DataproviderRequest.java,v 1.18 2008/06/11 17:08:17 hburger Exp $
  * Description: Dataprovider Cursor
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 17:18:46 $
+ * Date:        $Date: 2008/06/11 17:08:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,7 +53,9 @@ package org.openmdx.compatibility.base.dataprovider.cci;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.resource.ResourceException;
@@ -69,6 +71,7 @@ import org.openmdx.kernel.log.SysLog;
 /**
  * DataproviderRequest
  */
+@SuppressWarnings("unchecked")
 public class DataproviderRequest
     extends DataproviderContext
     implements MappedRecord
@@ -391,7 +394,7 @@ public class DataproviderRequest
      * the entries are attribute.name(), the value is the
      * attribute itself.
      */
-    public Map attributeSpecifierAsMap() {
+    public Map<String,AttributeSpecifier> attributeSpecifierAsMap() {
       if(this.attributeSpecifierAsMap == null) {
         this.attributeSpecifierAsMap = new HashMap();
         if(attributeSpecifier != null) {
@@ -414,19 +417,7 @@ public class DataproviderRequest
      * @see org.openmdx.compatibility.base.dataprovider.cci.DataproviderContext#keys()
      */
     protected Collection keys() {
-        return Arrays.asList(
-            new String[]{
-                "object",
-                "operation",
-                "attributeFilter",
-                "position",
-                "size",
-                "direction",
-                "attributeSelector",
-                "attributeSpecifier",
-                "contexts",
-            }
-        );
+        return KEYS;
     }
 
     /* (non-Javadoc)
@@ -524,6 +515,20 @@ public class DataproviderRequest
     /**
      * Attribute specifier as HashMap
      */
-    private transient Map attributeSpecifierAsMap;
+    private transient Map<String,AttributeSpecifier> attributeSpecifierAsMap;
+
+    private static final List<String> KEYS = Collections.unmodifiableList(
+        Arrays.asList(
+            "object",
+            "operation",
+            "attributeFilter",
+            "position",
+            "size",
+            "direction",
+            "attributeSelector",
+            "attributeSpecifier",
+            "contexts"
+        )
+    );
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TabControl.java,v 1.12 2007/12/13 18:58:09 wfro Exp $
+ * Name:        $Id: TabControl.java,v 1.13 2008/04/04 17:01:09 hburger Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:58:09 $
+ * Date:        $Date: 2008/04/04 17:01:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -87,7 +87,7 @@ public abstract class TabControl
         this.paneIndex = paneIndex;
         this.tabIndex = tabIndex;
         
-        List fieldGroups = new ArrayList();
+        List<FieldGroupControl> fieldGroups = new ArrayList<FieldGroupControl>();
         if(tab != null) {
             int index = 0;
             for(

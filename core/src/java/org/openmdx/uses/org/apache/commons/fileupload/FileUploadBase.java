@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/FileUploadBase.java,v 1.4 2005/04/07 14:15:24 hburger Exp $
- * $Revision: 1.4 $
- * $Date: 2005/04/07 14:15:24 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/FileUploadBase.java,v 1.5 2008/03/21 18:42:11 hburger Exp $
+ * $Revision: 1.5 $
+ * $Date: 2008/03/21 18:42:11 $
  *
  * ====================================================================
  *
@@ -94,8 +94,9 @@ import javax.servlet.http.HttpServletRequest;
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
  *
- * @version $Id: FileUploadBase.java,v 1.4 2005/04/07 14:15:24 hburger Exp $
+ * @version $Id: FileUploadBase.java,v 1.5 2008/03/21 18:42:11 hburger Exp $
  */
+@SuppressWarnings("unchecked")
 public abstract class FileUploadBase
 {
 

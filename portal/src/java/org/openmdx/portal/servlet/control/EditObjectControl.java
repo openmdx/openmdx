@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectControl.java,v 1.30 2007/08/10 12:41:52 wfro Exp $
+ * Name:        $Id: EditObjectControl.java,v 1.38 2008/06/01 16:52:33 wfro Exp $
  * Description: EditObjectControl
- * Revision:    $Revision: 1.30 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/10 12:41:52 $
+ * Date:        $Date: 2008/06/01 16:52:33 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,16 +59,16 @@
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.Iterator;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlPage;
-import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.EditObjectView;
+import org.openmdx.portal.servlet.view.View;
+import org.openmdx.portal.servlet.view.ViewMode;
 
 public class EditObjectControl
     extends ContainerControl
@@ -90,6 +90,17 @@ public class EditObjectControl
     }
 
     //-------------------------------------------------------------------------
+    public String getFormName(
+        View view
+    ) {
+        String formName = this.getId();
+        return view.getContainerElementId() == null
+            ? formName
+            : formName + "-" + view.getContainerElementId();        
+    }
+    
+    //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p, 
         String frame,
@@ -99,101 +110,8 @@ public class EditObjectControl
         Texts_1_0 texts = application.getTexts();
         if(forEditing) {
             EditObjectView editView =  (EditObjectView)p.getView();
-            SimpleDateFormat dateFormatter = DateValue.getLocalizedDateFormatter(
-                null, 
-                true,
-                application 
-            );
-            SimpleDateFormat dateTimeFormatter = DateValue.getLocalizedDateTimeFormatter(
-                null, 
-                true, 
-                application
-            );
-            
             // Popup multi-valued strings
             p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_STRINGS, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <script language=\"javascript\" type=\"text/javascript\">");
-            p.write("");
-            p.write("    var multiValuedHigh = 1; // 0..multiValuedHigh-1");
-            p.write("");
-            p.write("    function editstrings_onchange_checkbox(checkbox, field) {");
-            p.write("      if(!checkbox.checked) {");
-            p.write("        field.value = \"*\";");
-            p.write("      }");
-            p.write("      else {");
-            p.write("        field.value = \"\";");
-            p.write("      }");
-            p.write("    }");
-            p.write("");
-            p.write("    editstrings_maxLength = 2147483647;");
-            p.write("    function editstrings_onchange_field(checkbox, field) {");
-            p.write("      if(field.value.length > 0) {");
-            p.write("        checkbox.checked = true;");
-            p.write("        if(field.value.length > editstrings_maxLength) {");
-            p.write("          field.value = field.value.substr(0, editstrings_maxLength)");
-            p.write("        }");
-            p.write("      }");
-            p.write("    }");
-            p.write("");
-            p.write("    function editstrings_click_OK() {");
-            p.write("      var nFields = 0;");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if($('editstringIsSelected_' + i).checked) {");
-            p.write("          nFields = i+1;");
-            p.write("        }");
-            p.write("      }");
-            p.write("      values = \"\";");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editstringIsSelected_' + i).checked ? $('editstringField_' + i).value : \"#NULL\");");
-            p.write("      }");
-            p.write("      POPUP_FIELD.value = values;");
-            p.write("      editstrings_click_Cancel();");
-            p.write("    }");
-            p.write("");
-            p.write("    function editstrings_click_Cancel() {");
-            p.write("      var IfrRef = document.getElementById('DivShim');");
-            p.write("      IfrRef.style.display = 'none';");
-            p.write("      shownPopup.style.display =  'none';");
-            p.write("    }");
-            p.write("");
-            p.write("    function editstrings_on_load() {");
-            p.write("      var i = 0;");
-            p.write("      while ($('editstringrow' + i)) {");
-            p.write("        var toBeRemoved = $('editstringrow' + i);");
-            p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
-            p.write("        i += 1;");
-            p.write("      }");
-            p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
-            p.write("      var templateRow = $('editstringrow');");
-            p.write("      var el_idx = $('editstringIdx_');");
-            p.write("      var el_checkbox = $('editstringIsSelected_');");
-            p.write("      var el_field = $('editstringField_');");
-            p.write("");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
-            p.write("        el_checkbox.name = 'isSelected' + i;");
-            p.write("        el_field.name = 'field' + i;");
-            p.write("        el_idx.id = 'editstringIdx_' + i;");
-            p.write("        el_checkbox.id = 'editstringIsSelected_' + i;");
-            p.write("        el_field.id = 'editstringField_' + i;");
-            p.write("        el_idx.value = i;");
-            p.write("        var newRow = templateRow.cloneNode(true);");
-            p.write("        newRow.id = 'editstringrow' + i;");
-            p.write("        el_checkbox.name = 'isSelected';");
-            p.write("        el_field.name = 'field';");
-            p.write("        el_idx.id = 'editstringIdx_';");
-            p.write("        el_checkbox.id = 'editstringIsSelected_';");
-            p.write("        el_field.id = 'editstringField_';");
-            p.write("        templateRow.parentNode.appendChild(newRow);");
-            p.write("        newRow.style.display = 'block';");
-            p.write("        $('editstringIdx_' + i).appendChild(document.createTextNode(i + ':'));");
-            p.write("        $('editstringField_' + i).value = value != \"#NULL\" ? value : \"\";");
-            p.write("        $('editstringIsSelected_' + i).checked = value != \"#NULL\";");
-            p.write("      }");
-            p.write("      templateRow.style.display = 'none';");
-            p.write("    }");
-            p.write("");
-            p.write("  </script>");
             p.write("  <form name=\"editstrings\" method=\"post\" action=\"\">");
             p.write("    <table class=\"popUpTable\">");
             p.write("      <!-- template row -->");
@@ -218,78 +136,6 @@ public class EditObjectControl
 
             // Popup multi-valued numbers
             p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_NUMBERS, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <script language=\"javascript\" type=\"text/javascript\">");
-            p.write("    function editnumbers_onchange_checkbox(checkbox, field) {");
-            p.write("      if(!checkbox.checked) {");
-            p.write("        field.value = \"0.00\";");
-            p.write("      }");
-            p.write("      else {");
-            p.write("        field.value = \"\";");
-            p.write("      }");
-            p.write("    }");
-            p.write("");
-            p.write("    function editnumbers_onchange_field(checkbox, field) {");
-            p.write("      checkbox.checked = field.value.length > 0;");
-            p.write("    }");
-            p.write("");
-            p.write("    function editnumbers_click_OK() {");
-            p.write("      var nFields = 0;");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if($('editnumberIsSelected_' + i).checked) {");
-            p.write("          nFields = i+1;");
-            p.write("        }");
-            p.write("      }");
-            p.write("      values = \"\";");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editnumberIsSelected_' + i).checked ? $('editnumberField_' + i).value : \"\");");
-            p.write("      }");
-            p.write("      POPUP_FIELD.value = values;");
-            p.write("      editnumbers_click_Cancel();");
-            p.write("    }");
-            p.write("");
-            p.write("    function editnumbers_click_Cancel() {");
-            p.write("      var IfrRef = document.getElementById('DivShim');");
-            p.write("      IfrRef.style.display = 'none';");
-            p.write("      shownPopup.style.display =  'none';");
-            p.write("    }");
-            p.write("");
-            p.write("    function editnumbers_on_load() {");
-            p.write("      var i = 0;");
-            p.write("      while ($('editnumberrow' + i)) {");
-            p.write("        var toBeRemoved = $('editnumberrow' + i);");
-            p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
-            p.write("        i += 1;");
-            p.write("      }");
-            p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
-            p.write("      var templateRow = $('editnumberrow');");
-            p.write("      var el_idx = $('editnumberIdx_');");
-            p.write("      var el_checkbox = $('editnumberIsSelected_');");
-            p.write("      var el_field = $('editnumberField_');");
-            p.write("");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
-            p.write("        el_checkbox.name = 'isSelected' + i;");
-            p.write("        el_field.name = 'field' + i;");
-            p.write("        el_idx.id = 'editnumberIdx_' + i;");
-            p.write("        el_checkbox.id = 'editnumberIsSelected_' + i;");
-            p.write("        el_field.id = 'editnumberField_' + i;");
-            p.write("        el_idx.value = i;");
-            p.write("        var newRow = templateRow.cloneNode(true);");
-            p.write("        newRow.id = 'editnumberrow' + i;");
-            p.write("        el_checkbox.name = 'isSelected';");
-            p.write("        el_field.name = 'field';");
-            p.write("        el_idx.id = 'editnumberIdx_';");
-            p.write("        el_checkbox.id = 'editnumberIsSelected_';");
-            p.write("        el_field.id = 'editnumberField_';");
-            p.write("        templateRow.parentNode.appendChild(newRow);");
-            p.write("        newRow.style.display = 'block';");
-            p.write("        $('editnumberIdx_' + i).appendChild(document.createTextNode(i + ':'));");
-            p.write("        $('editnumberField_' + i).value = value != \"#NULL\" ? value : \"\";");
-            p.write("        $('editnumberIsSelected_' + i).checked =  (value.length > 0) && (value != \"#NULL\");");
-            p.write("      }");
-            p.write("      templateRow.style.display = 'none';");
-            p.write("    }");
-            p.write("  </script>");
             p.write("  <form name=\"editnumbers\" method=\"post\" action=\"\">");
             p.write("    <table class=\"popUpTable\">");
             p.write("        <!-- template row -->");
@@ -314,89 +160,6 @@ public class EditObjectControl
 
             // Popup multi-valued dates
             p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_DATES, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <script language=\"javascript\" type=\"text/javascript\">");
-            p.write("    function editdates_onchange_checkbox(checkbox, field) {");
-            p.write("      if(checkbox.checked) {");
-            p.write("        field.value = \"\";");
-            p.write("      }");
-            p.write("    }");
-            p.write("");
-            p.write("    function editdates_onchange_field(checkbox, field) {");
-            p.write("      checkbox.checked = field.value.length > 0;");
-            p.write("    }");
-            p.write("");
-            p.write("    function editdates_click_OK() {");
-            p.write("      var nFields = 0;");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if($('editdateIsSelected_' + i).checked) {");
-            p.write("          nFields = i+1;");
-            p.write("        }");
-            p.write("      }");
-            p.write("      values = \"\";");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editdateIsSelected_' + i).checked ? $('editdateField_' + i).value : \"\");");
-            p.write("      }");
-            p.write("      POPUP_FIELD.value = values;");
-            p.write("      editdates_click_Cancel();");
-            p.write("    }");
-            p.write("");
-            p.write("    function editdates_click_Cancel() {");
-            p.write("      var IfrRef = document.getElementById('DivShim');");
-            p.write("      IfrRef.style.display = 'none';");
-            p.write("      shownPopup.style.display =  'none';");
-            p.write("    }");
-            p.write("");
-            p.write("    function editdates_on_load() {");
-            p.write("      var i = 0;");
-            p.write("      while ($('editdaterow' + i)) {");
-            p.write("        var toBeRemoved = $('editdaterow' + i);");
-            p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
-            p.write("        i += 1;");
-            p.write("      }");
-            p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
-            p.write("      var templateRow = $('editdaterow');");
-            p.write("      var el_idx = $('editdateIdx_');");
-            p.write("      var el_checkbox = $('editdateIsSelected_');");
-            p.write("      var el_field = $('editdateField_');");
-            p.write("      var el_cal = $('cal_date_trigger_');");
-            p.write("");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
-            p.write("        el_checkbox.name = 'isSelected' + i;");
-            p.write("        el_field.name = 'field' + i;");
-            p.write("        el_idx.id = 'editdateIdx_' + i;");
-            p.write("        el_checkbox.id = 'editdateIsSelected_' + i;");
-            p.write("        el_field.id = 'editdateField_' + i;");
-            p.write("        el_cal.id = 'cal_date_trigger_' + i;");
-            p.write("        el_idx.value = i;");
-            p.write("        var newRow = templateRow.cloneNode(true);");
-            p.write("        newRow.id = 'editdaterow' + i;");
-            p.write("        el_checkbox.name = 'isSelected';");
-            p.write("        el_field.name = 'field';");
-            p.write("        el_idx.id = 'editdateIdx_';");
-            p.write("        el_checkbox.id = 'editdateIsSelected_';");
-            p.write("        el_field.id = 'editdateField_';");
-            p.write("        el_cal.id = 'cal_date_trigger_';");
-            p.write("        templateRow.parentNode.appendChild(newRow);");
-            p.write("        newRow.style.display = 'block';");
-            p.write("        $('editdateIdx_' + i).appendChild(document.createTextNode(i + ':'));");
-            p.write("        $('editdateField_' + i).value = value != \"#NULL\" ? value : \"\";");
-            p.write("        $('editdateIsSelected_' + i).checked = (value.length > 0) && (value != \"#NULL\");");
-            p.write("        Calendar.setup({");
-            p.write("          inputField   : \"editdateField_\" + i,");
-            p.write("          ifFormat     : \"", DateValue.getCalendarFormat(dateFormatter), "\",");
-            p.write("          firstDay     : ", Integer.toString(dateFormatter.getCalendar().getFirstDayOfWeek()-1), ",");
-            p.write("          timeFormat   : \"24\",");
-            p.write("          button       : \"cal_date_trigger_\" + i,");
-            p.write("          align        : \"Tr\",");
-            p.write("          singleClick  : true,");
-            p.write("          showsTime    : false");
-            p.write("        });");
-            p.write("      }");
-            p.write("      templateRow.style.display = 'none';");
-            p.write("    }");
-            p.write("  </script>");
-            p.write("");
             p.write("  <form name=\"editdates\" method=\"post\" action=\"\">");
             p.write("    <table class=\"popUpTable\">");
             p.write("        <!-- template row -->");
@@ -422,89 +185,6 @@ public class EditObjectControl
                         
             // Popup multi-valued datetime
             p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_DATETIMES, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <script language=\"javascript\" type=\"text/javascript\">");
-            p.write("    function editdatetimes_onchange_checkbox(checkbox, field) {");
-            p.write("      if(checkbox.checked) {");
-            p.write("        field.value = \"\";");
-            p.write("      }");
-            p.write("    }");
-            p.write("");
-            p.write("    function editdatetimes_onchange_field(checkbox, field) {");
-            p.write("      checkbox.checked = field.value.length > 0;");
-            p.write("    }");
-            p.write("");
-            p.write("    function editdatetimes_click_OK() {");
-            p.write("      var nFields = 0;");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if($('editdatetimeIsSelected_' + i).checked) {");
-            p.write("          nFields = i+1;");
-            p.write("        }");
-            p.write("      }");
-            p.write("      values = \"\";");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editdatetimeIsSelected_' + i).checked ? $('editdatetimeField_' + i).value : \"\");");
-            p.write("      }");
-            p.write("      POPUP_FIELD.value = values;");
-            p.write("      editdatetimes_click_Cancel();");
-            p.write("    }");
-            p.write("");
-            p.write("    function editdatetimes_click_Cancel() {");
-            p.write("      var IfrRef = document.getElementById('DivShim');");
-            p.write("      IfrRef.style.display = 'none';");
-            p.write("      shownPopup.style.display =  'none';");
-            p.write("    }");
-            p.write("");
-            p.write("    function editdatetimes_on_load() {");
-            p.write("      var i = 0;");
-            p.write("      while ($('editdatetimerow' + i)) {");
-            p.write("        var toBeRemoved = $('editdatetimerow' + i);");
-            p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
-            p.write("        i += 1;");
-            p.write("      }");
-            p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
-            p.write("      var templateRow = $('editdatetimerow');");
-            p.write("      var el_idx = $('editdatetimeIdx_');");
-            p.write("      var el_checkbox = $('editdatetimeIsSelected_');");
-            p.write("      var el_field = $('editdatetimeField_');");
-            p.write("      var el_cal = $('cal_datetime_trigger_');");
-            p.write("");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
-            p.write("        el_checkbox.name = 'isSelected' + i;");
-            p.write("        el_field.name = 'field' + i;");
-            p.write("        el_idx.id = 'editdatetimeIdx_' + i;");
-            p.write("        el_checkbox.id = 'editdatetimeIsSelected_' + i;");
-            p.write("        el_field.id = 'editdatetimeField_' + i;");
-            p.write("        el_cal.id = 'cal_datetime_trigger_' + i;");
-            p.write("        el_idx.value = i;");
-            p.write("        var newRow = templateRow.cloneNode(true);");
-            p.write("        newRow.id = 'editdatetimerow' + i;");
-            p.write("        el_checkbox.name = 'isSelected';");
-            p.write("        el_field.name = 'field';");
-            p.write("        el_idx.id = 'editdatetimeIdx_';");
-            p.write("        el_checkbox.id = 'editdatetimeIsSelected_';");
-            p.write("        el_field.id = 'editdatetimeField_';");
-            p.write("        el_cal.id = 'cal_datetime_trigger_';");
-            p.write("        templateRow.parentNode.appendChild(newRow);");
-            p.write("        newRow.style.display = 'block';");
-            p.write("        $('editdatetimeIdx_' + i).appendChild(document.createTextNode(i + ':'));");
-            p.write("        $('editdatetimeField_' + i).value = value != \"#NULL\" ? value : \"\";");
-            p.write("        $('editdatetimeIsSelected_' + i).checked = (value.length > 0) && (value != \"#NULL\");");
-            p.write("        Calendar.setup({");
-            p.write("          inputField   : \"editdatetimeField_\" + i,");
-            p.write("          ifFormat     : \"", DateValue.getCalendarFormat(dateTimeFormatter), "\",");
-            p.write("          firstDay     : ", Integer.toString(dateTimeFormatter.getCalendar().getFirstDayOfWeek()-1), ",");
-            p.write("          timeFormat   : \"24\",");
-            p.write("          button       : \"cal_datetime_trigger_\" + i,");
-            p.write("          align        : \"Tr\",");
-            p.write("          singleClick  : true,");
-            p.write("          showsTime    : true");
-            p.write("        });");
-            p.write("      }");
-            p.write("      templateRow.style.display = 'none';");
-            p.write("    }");
-            p.write("  </script>");
-            p.write("");
             p.write("  <form name=\"editdatetimes\" method=\"post\" action=\"\">");
             p.write("    <table class=\"popUpTable\">");
             p.write("        <!-- template row -->");
@@ -530,79 +210,6 @@ public class EditObjectControl
                         
             // Poup multi-valued booleans
             p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_BOOLEANS, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <script language=\"javascript\" type=\"text/javascript\">");
-            p.write("    function editbooleans_onchange_checkbox(checkbox, field) {");
-            p.write("      if(!checkbox.checked) {");
-            p.write("        field.checked = true;");
-            p.write("      }");
-            p.write("      else {");
-            p.write("        field.checked = false;");
-            p.write("      }");
-            p.write("    }");
-            p.write("");
-            p.write("    function editbooleans_onchange_field(checkbox, field) {");
-            p.write("      checkbox.checked = true;");
-            p.write("    }");
-            p.write("");
-            p.write("    function editbooleans_click_OK() {");
-            p.write("      var nFields = 0;");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if($('editbooleanIsSelected_' + i).checked) {");
-            p.write("          nFields = i+1;");
-            p.write("        }");
-            p.write("      }");
-            p.write("      values = \"\";");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editbooleanIsSelected_' + i).checked ? $('editbooleanField_' + i).checked : \"\");");
-            p.write("      }");
-            p.write("      POPUP_FIELD.value = values;");
-            p.write("      editbooleans_click_Cancel();");
-            p.write("    }");
-            p.write("");
-            p.write("    function editbooleans_click_Cancel() {");
-            p.write("      var IfrRef = document.getElementById('DivShim');");
-            p.write("      IfrRef.style.display = 'none';");
-            p.write("      shownPopup.style.display =  'none';");
-            p.write("    }");
-            p.write("");
-            p.write("    function editbooleans_on_load() {");
-            p.write("      var i = 0;");
-            p.write("      while ($('editbooleanrow' + i)) {");
-            p.write("        var toBeRemoved = $('editbooleanrow' + i);");
-            p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
-            p.write("        i += 1;");
-            p.write("      }");
-            p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
-            p.write("      var templateRow = $('editbooleanrow');");
-            p.write("      var el_idx = $('editbooleanIdx_');");
-            p.write("      var el_checkbox = $('editbooleanIsSelected_');");
-            p.write("      var el_field = $('editbooleanField_');");
-            p.write("");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
-            p.write("        el_checkbox.name = 'isSelected' + i;");
-            p.write("        el_field.name = 'field' + i;");
-            p.write("        el_idx.id = 'editbooleanIdx_' + i;");
-            p.write("        el_checkbox.id = 'editbooleanIsSelected_' + i;");
-            p.write("        el_field.id = 'editbooleanField_' + i;");
-            p.write("        el_idx.value = i;");
-            p.write("        var newRow = templateRow.cloneNode(true);");
-            p.write("        newRow.id = 'editbooleanrow' + i;");
-            p.write("        el_checkbox.name = 'isSelected';");
-            p.write("        el_field.name = 'field';");
-            p.write("        el_idx.id = 'editbooleanIdx_';");
-            p.write("        el_checkbox.id = 'editbooleanIsSelected_';");
-            p.write("        el_field.id = 'editbooleanField_';");
-            p.write("        templateRow.parentNode.appendChild(newRow);");
-            p.write("        newRow.style.display = 'block';");
-            p.write("        $('editbooleanIdx_' + i).appendChild(document.createTextNode(i + ':'));");
-            p.write("        $('editbooleanField_' + i).checked = value != \"#NULL\" ? value == \"true\" : \"\";");
-            p.write("        $('editbooleanIsSelected_' + i).checked = (value.length > 0) && (value != \"#NULL\");");
-            p.write("      }");
-            p.write("      templateRow.style.display = 'none';");
-            p.write("    }");
-            p.write("  </script>");
-            p.write("");
             p.write("  <form name=\"editbooleans\" method=\"post\" action=\"\">");
             p.write("    <table class=\"popUpTable\">");
             p.write("        <!-- template row -->");
@@ -627,82 +234,6 @@ public class EditObjectControl
             
             // Popup multi-valued codes
             p.write("<div class=\"popUp\" id=\"", POPUP_EDIT_CODES, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\">");
-            p.write("  <script language=\"javascript\" type=\"text/javascript\">");
-            p.write("    function editcodes_onchange_checkbox(checkbox, field) {");
-            p.write("      if(checkbox.checked) {");
-            p.write("        field.value = POPUP_OPTIONS[1];");
-            p.write("      }");
-            p.write("      else {");
-            p.write("        field.value = POPUP_OPTIONS[0];");
-            p.write("      }");
-            p.write("    }");
-            p.write("");
-            p.write("    function editcodes_onchange_field(checkbox, field) {");
-            p.write("      checkbox.checked = field.value.length > 0;");
-            p.write("    }");
-            p.write("");
-            p.write("    function editcodes_click_OK() {");
-            p.write("      var nFields = 0;");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if($('editcodeIsSelected_' + i).checked) {");
-            p.write("          nFields = i+1;");
-            p.write("        }");
-            p.write("      }");
-            p.write("      values = \"\";");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editcodeIsSelected_' + i).checked ? $('editcodeField_' + i).value : \"\");");
-            p.write("      }");
-            p.write("      POPUP_FIELD.value = values;");
-            p.write("      editcodes_click_Cancel();");
-            p.write("    }");
-            p.write("");
-            p.write("    function editcodes_click_Cancel() {");
-            p.write("      var IfrRef = document.getElementById('DivShim');");
-            p.write("      IfrRef.style.display = 'none';");
-            p.write("      shownPopup.style.display =  'none';");
-            p.write("    }");
-            p.write("");
-            p.write("    function editcodes_on_load() {");
-            p.write("      var i = 0;");
-            p.write("      while ($('editcoderow' + i)) {");
-            p.write("        var toBeRemoved = $('editcoderow' + i);");
-            p.write("        toBeRemoved.parentNode.removeChild(toBeRemoved);");
-            p.write("        i += 1;");
-            p.write("      }");
-            p.write("      var values = POPUP_FIELD.value.split(\"\\n\");");
-            p.write("      var templateRow = $('editcoderow');");
-            p.write("      var el_idx = $('editcodeIdx_');");
-            p.write("      var el_checkbox = $('editcodeIsSelected_');");
-            p.write("      var el_field = $('editcodeField_');");
-            p.write("");
-            p.write("      for (i=0;i<multiValuedHigh;i++) {");
-            p.write("        value = RTrim(values.length > i ? values[i] : \"#NULL\");");
-            p.write("        el_checkbox.name = 'isSelected' + i;");
-            p.write("        el_field.name = 'field' + i;");
-            p.write("        el_idx.id = 'editcodeIdx_' + i;");
-            p.write("        el_checkbox.id = 'editcodeIsSelected_' + i;");
-            p.write("        el_field.id = 'editcodeField_' + i;");
-            p.write("        el_idx.value = i;");
-            p.write("        var newRow = templateRow.cloneNode(true);");
-            p.write("        newRow.id = 'editcoderow' + i;");
-            p.write("        el_checkbox.name = 'isSelected';");
-            p.write("        el_field.name = 'field';");
-            p.write("        el_idx.id = 'editcodeIdx_';");
-            p.write("        el_checkbox.id = 'editcodeIsSelected_';");
-            p.write("        el_field.id = 'editcodeField_';");
-            p.write("        templateRow.parentNode.appendChild(newRow);");
-            p.write("        newRow.style.display = 'block';");
-            p.write("        for(j = 0; j < POPUP_OPTIONS.length; j++) {");
-            p.write("          $('editcodeField_' + i).options[j] = new Option(POPUP_OPTIONS[j], POPUP_OPTIONS[j]);");
-            p.write("        }");
-            p.write("        $('editcodeIdx_' + i).appendChild(document.createTextNode(i + ':'));");
-            p.write("        $('editcodeIsSelected_' + i).checked =  (value.length > 0) && (value != \"#NULL\");");
-            p.write("        $('editcodeField_' + i).value = value != \"#NULL\" ? value : \"\";");
-            p.write("      }");
-            p.write("      templateRow.style.display = 'none';");
-            p.write("    }");
-            p.write("  </script>");
-            p.write("");
             p.write("  <form name=\"editcodes\" method=\"post\" action=\"\">");
             p.write("    <table class=\"popUpTable\">");
             p.write("        <!-- template row -->");
@@ -725,8 +256,8 @@ public class EditObjectControl
             p.write("  </form>");
             p.write("</div>");
             
-            String formId = (String)p.getProperty(HtmlPage.PROPERTY_FORM_ID);
-            p.write("<form name=\"", formId, "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" action=\"\">");
+            String formName = this.getFormName(editView);
+            p.write("<form name=\"", formName, "\" id=\"", formName, "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" action=\"\">");
             p.write("  <table cellspacing=\"8\" class=\"tableLayout\">");
             int ii = 0;
             for(
@@ -736,7 +267,7 @@ public class EditObjectControl
             ) {
                 Control control = (Control)i.next();
                 p.write("    <tr>");
-                p.write("      <td><br />");
+                p.write("      <td>", (ii > 0 ? "<br />" : ""));
                 control.paint(
                     p, 
                     (String)this.frames.get(ii),
@@ -764,14 +295,28 @@ public class EditObjectControl
             }
             p.write("  <tr>");
             p.write("    <td><br />");
-            p.write("      <input type=\"hidden\" name=\"requestId.submit\" value=\"", p.getView().getRequestId(), "\">");
+            p.write("      <input type=\"hidden\" name=\"requestId.submit\" value=\"", editView.getRequestId(), "\">");
             p.write("      <input type=\"hidden\" name=\"event.submit\" value=\"" + saveAction.getEvent(), "\">");
-            p.write("      <a id=\"editObjectSave\" class=\"abutton\" href=\"#\"", p.getOnClick("javascript:try{HTMLArea._currentlyActiveEditor.setMode('textmode');}catch(e){};", p.getButtonEffectHighlight(), "document.forms['editObject'].submit();"), ">", saveAction.getTitle(), "</a>");
-            p.write("      <a id=\"editObjectCancel\" class=\"abutton\" href=\"#\"", p.getOnClick("javascript:", p.getButtonEffectHighlight(), "this.href=", p.getEvalHRef(cancelAction), ";"), ">", cancelAction.getTitle(), "</a>");
+            // In case of an embedded view submit the form as an Ajax request
+            // and put the attributes pane at the element with id aPanel
+            String containerElementId = editView.getContainerElementId() == null
+                ? "aPanel"
+                : editView.getContainerElementId();
+            if(editView.getMode() == ViewMode.EMBEDDED) {
+                p.write("      <a id=\"editSave-", containerElementId, "\" class=\"abutton\" href=\"#\"", p.getOnClick("javascript:var editForm = document.forms['", formName, "']; var params = Form.serialize(editForm); new Ajax.Updater('", containerElementId, "', ", p.getEvalHRef(saveAction), ", {asynchronous:true, evalScripts: true, parameters: params, onComplete: function(){}});return false;"), ">", saveAction.getTitle(), "</a>");
+                p.write("      <a id=\"editCancel-", containerElementId, "\" class=\"abutton\" href=\"#\"", p.getOnClick("javascript:new Ajax.Updater('", containerElementId, "', ", p.getEvalHRef(cancelAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){}});return false;"), ">", cancelAction.getTitle(), "</a>");
+            }
+            else {
+                p.write("      <a id=\"editSave-", containerElementId, "\" class=\"abutton\" href=\"#\"", p.getOnClick("javascript:", p.getButtonEffectHighlight(), "document.forms['", formName, "'].submit();"), ">", saveAction.getTitle(), "</a>");
+                p.write("      <a id=\"editCancel-", containerElementId, "\" class=\"abutton\" href=\"#\"", p.getOnClick("javascript:", p.getButtonEffectHighlight(), "this.href=", p.getEvalHRef(cancelAction), ";"), ">", cancelAction.getTitle(), "</a>");                              
+            }
             p.write("    </td>");
             p.write("  </tr>");       
             p.write("  </table>");
             p.write("</form>");
+            if(editView.getContainerElementId() != null) {
+                p.write("<div class=\"gridSpacerBottom\"></div>");                        
+            }                                                            
         }
     }
 

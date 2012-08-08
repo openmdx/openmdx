@@ -1,10 +1,10 @@
 /*
  * ==================================================================== 
  * Project: openmdx, http://www.openmdx.org
- * Name: $Id: AbstractClassMapper.java,v 1.20 2007/12/18 13:10:01 hburger Exp $ 
- * Description: JMIClassLevelTemplate Revision: $Revision: 1.20 $ 
+ * Name: $Id: AbstractClassMapper.java,v 1.22 2008/03/26 19:29:57 hburger Exp $ 
+ * Description: JMIClassLevelTemplate Revision: $Revision: 1.22 $ 
  * Owner: OMEX AG, Switzerland, http://www.omex.ch 
- * Date: $Date: 2007/12/18 13:10:01 $
+ * Date: $Date: 2008/03/26 19:29:57 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -228,8 +228,15 @@ class AbstractClassMapper
         ClassMetaData classMetaData = (ClassMetaData) getClassDef(className).getClassMetaData();
         return classMetaData == null ? null : classMetaData.getFieldMetaData(fieldName);
     }
-    
-    
+
+    /**
+     * Retrieve className.
+     *
+     * @return Returns the className.
+     */
+     public String getClassName() {
+         return this.className;
+     }
 
     /**
      * Tells whether the current class a mix-in class
@@ -299,7 +306,7 @@ class AbstractClassMapper
     /**
      * References to the following object types are considered to be transient
      */
-    private static final Set TRANSIENT_REFERENCES = new HashSet(
+    private static final Set<String> TRANSIENT_REFERENCES = new HashSet<String>(
         Arrays.asList(
 //          "org:openmdx:base:BasicObject",
             "org:openmdx:base:Context",

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.5-properties.xml,v 1.38 2008/02/15 23:28:02 wfro Exp $
+= Name:        $Id: jre-1.5-properties.xml,v 1.41 2008/07/03 00:42:52 hburger Exp $
 = Description: JRE 5.0 Platform Properties
-= Revision:    $Revision: 1.38 $
-= Date:        $Date: 2008/02/15 23:28:02 $
+= Revision:    $Revision: 1.41 $
+= Date:        $Date: 2008/07/03 00:42:52 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -87,40 +87,41 @@
 	</patternset>
 
 	<path id="java2.endorsed.lib">
-		<pathelement location="${openmdx.home}/java2/jre-1.5/endorsed/lib/jaxp-api.jar"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/endorsed/lib/jaxp-ri.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/endorsed/lib/jaxp-api.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/endorsed/lib/jaxp-ri.jar"/>
 	</path>
 	<path id="java2.extension.lib">
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/commons-collections-extendedproperties.jar"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/junit.jar"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/xmlunit.jar"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/bp-ui-14.jar"/>		
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/bp-ui-5.jar"/>		
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/jcl104-over-slf4j.jar"/>		
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/wsdl4j-1.6.1.jar"/>		
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/jdo2-api.jar"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/jpox.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/commons-collections-extendedproperties.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/junit.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/xmlunit.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/bp-ui-14.jar"/>		
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/bp-ui-5.jar"/>		
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/jcl104-over-slf4j.jar"/>		
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/wsdl4j-1.6.1.jar"/>		
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/jdo2-api.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/jpox.jar"/>
 	</path>
 	<path id="java2.standard.lib">
 		<pathelement location="${build.target.jre}/lib/jce.jar"/>
 		<pathelement location="${build.target.jre}/lib/jsse.jar"/>
 	</path>
 	<path id="java2.enterprise.api">
-		<pathelement location="${openmdx.home}/java2/jre-1.5/enterprise/lib/javaee.jar"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/enterprise/lib/el-api.jar"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/enterprise/lib/jsf-api.jar"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/enterprise/lib/mailapi.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/enterprise/lib/javaee.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/enterprise/lib/el-api.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/enterprise/lib/jsf-api.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/enterprise/lib/mailapi.jar"/>
 	</path>
 	<path id="java2.enterprise.lib">
 		<path refid="java2.enterprise.api"/>
 		<path refid="java2.standard.lib"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/enterprise/lib/netscape-ldap.jar"/>				
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/enterprise/lib/netscape-ldap.jar"/>				
 	</path>
 	<path id="jpox.ant.lib">
 		<path refid="java2.extension.lib"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/log4j-over-slf4j.jar"/>
-		<pathelement location="${openmdx.home}/java2/jre-1.5/extension/lib/bcel.jar"/>		
-		<pathelement location="${openmdx.home}/java2/jre-1.3/extension/lib/jpox-enhancer.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/log4j-over-slf4j.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/bcel.jar"/>		
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/jpox-enhancer.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/asm.jar"/>
 		<pathelement location="${openmdx.home}/jre-1.3/ant/lib/openmdx-ant.jar"/>
 	</path>
 	<path id="jpox.ant.bin">
@@ -128,28 +129,27 @@
 		<path refid="project.bin.classpath"/>
 	</path>	
 	<path id="openmdx.core.lib">
-		<pathelement location="${openmdx.home}/jre-1.5/core/lib/openmdx-kernel.jar"/>
-		<pathelement location="${openmdx.home}/jre-1.5/core/lib/openmdx-base.jar"/>
-		<pathelement location="${openmdx.home}/jre-1.5/core/lib/openmdx-application.jar"/>
-		<pathelement location="${openmdx.home}/jre-1.5/core/lib/slf4j-openmdx1.jar"/>	
+		<pathelement location="${openmdx.home}/${build.java.platform}/core/lib/openmdx-kernel.jar"/>
+		<pathelement location="${openmdx.home}/${build.java.platform}/core/lib/openmdx-base.jar"/>
+		<pathelement location="${openmdx.home}/${build.java.platform}/core/lib/openmdx-application.jar"/>
 	</path>
 	<path id="microsoft.sql-server.lib">
-		<pathelement location="${openmdx.home}/opt/microsoft/jre-1.4/sql-server-2005/lib/sqljdbc.jar"/>
+		<pathelement location="${openmdx.home}/opt/microsoft/${build.java.platform}/sql-server-2005/lib/sqljdbc.jar"/>
 	</path>
 	<path id="oracle.jdbc.lib">
-		<pathelement location="${openmdx.home}/opt/oracle/jre-1.5/oracle-10/lib/ojdbc14.jar"/>
-		<pathelement location="${openmdx.home}/opt/oracle/jre-1.5/oracle-10/lib/orai18n.jar"/>
+		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-10/lib/ojdbc14.jar"/>
+		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-10/lib/orai18n.jar"/>
 	</path>
 
 	<path id="openmdx.bootstrap.bin">
 	    <path refid="java2.enterprise.lib"/>
 	    <path refid="java2.extension.lib"/>
 	    <pathelement location="${openmdx.home}/core/src/resource"/>
-		<pathelement location="${openmdx.home}/core/build/jre-1.5/bin"/>
+		<pathelement location="${openmdx.home}/core/build/${build.java.platform}/bin"/>
 	</path>
 	<path id="openmdx.core.bin">
 	    <path refid="openmdx.bootstrap.bin"/>
-		<pathelement location="${openmdx.home}/core/build/jre-1.5/model/openmdx-core.openmdx-xmi.zip"/>
+		<pathelement location="${openmdx.home}/core/build/${build.java.platform}/model/openmdx-core.openmdx-xmi.zip"/>
 	</path>
 
 </project>

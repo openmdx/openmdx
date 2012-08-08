@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FeatureDef.java,v 1.1 2005/12/12 18:08:51 wfro Exp $
+ * Name:        $Id: FeatureDef.java,v 1.2 2008/03/21 18:40:16 hburger Exp $
  * Description: VelocityFeatureDef class
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/12/12 18:08:51 $
+ * Date:        $Date: 2008/03/21 18:40:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,6 +53,7 @@ package org.openmdx.model1.mapping;
 
 import java.util.Set;
 
+@SuppressWarnings("unchecked")
 public abstract class FeatureDef 
   extends ElementDef {
 

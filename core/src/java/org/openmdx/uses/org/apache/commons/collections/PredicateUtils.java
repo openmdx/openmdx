@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -66,11 +67,12 @@ import org.openmdx.uses.org.apache.commons.collections.functors.UniquePredicate;
  * All the supplied predicates are Serializable.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:08 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:27 $
  * 
  * @author Stephen Colebourne
  * @author Ola Berg
  */
+@SuppressWarnings("unchecked")
 public class PredicateUtils {
 
     /**
@@ -264,13 +266,13 @@ public class PredicateUtils {
     /**
      * Create a new Predicate that returns true only if all of the specified
      * predicates are true.
+     * If the array of predicates is empty, then this predicate returns true.
      * 
      * @see org.openmdx.uses.org.apache.commons.collections.functors.AllPredicate
      * 
      * @param predicates  an array of predicates to check, may not be null
      * @return the <code>all</code> predicate
      * @throws IllegalArgumentException if the predicates array is null
-     * @throws IllegalArgumentException if the predicates array has less than 2 elements
      * @throws IllegalArgumentException if any predicate in the array is null
      */
     public static Predicate allPredicate(Predicate[] predicates) {
@@ -280,13 +282,13 @@ public class PredicateUtils {
     /**
      * Create a new Predicate that returns true only if all of the specified
      * predicates are true. The predicates are checked in iterator order.
+     * If the collection of predicates is empty, then this predicate returns true.
      * 
      * @see org.openmdx.uses.org.apache.commons.collections.functors.AllPredicate
      * 
      * @param predicates  a collection of predicates to check, may not be null
      * @return the <code>all</code> predicate
      * @throws IllegalArgumentException if the predicates collection is null
-     * @throws IllegalArgumentException if the predicates collection has less than 2 elements
      * @throws IllegalArgumentException if any predicate in the collection is null
      */
     public static Predicate allPredicate(Collection predicates) {
@@ -311,13 +313,13 @@ public class PredicateUtils {
     /**
      * Create a new Predicate that returns true if any of the specified
      * predicates are true.
+     * If the array of predicates is empty, then this predicate returns false.
      * 
      * @see org.openmdx.uses.org.apache.commons.collections.functors.AnyPredicate
      * 
      * @param predicates  an array of predicates to check, may not be null
      * @return the <code>any</code> predicate
      * @throws IllegalArgumentException if the predicates array is null
-     * @throws IllegalArgumentException if the predicates array has less than 2 elements
      * @throws IllegalArgumentException if any predicate in the array is null
      */
     public static Predicate anyPredicate(Predicate[] predicates) {
@@ -327,13 +329,13 @@ public class PredicateUtils {
     /**
      * Create a new Predicate that returns true if any of the specified
      * predicates are true. The predicates are checked in iterator order.
+     * If the collection of predicates is empty, then this predicate returns false.
      * 
      * @see org.openmdx.uses.org.apache.commons.collections.functors.AnyPredicate
      * 
      * @param predicates  a collection of predicates to check, may not be null
      * @return the <code>any</code> predicate
      * @throws IllegalArgumentException if the predicates collection is null
-     * @throws IllegalArgumentException if the predicates collection has less than 2 elements
      * @throws IllegalArgumentException if any predicate in the collection is null
      */
     public static Predicate anyPredicate(Collection predicates) {
@@ -358,13 +360,13 @@ public class PredicateUtils {
     /**
      * Create a new Predicate that returns true if only one of the specified
      * predicates are true.
+     * If the array of predicates is empty, then this predicate returns false.
      * 
      * @see org.openmdx.uses.org.apache.commons.collections.functors.OnePredicate
      * 
      * @param predicates  an array of predicates to check, may not be null
      * @return the <code>one</code> predicate
      * @throws IllegalArgumentException if the predicates array is null
-     * @throws IllegalArgumentException if the predicates array has less than 2 elements
      * @throws IllegalArgumentException if any predicate in the array is null
      */
     public static Predicate onePredicate(Predicate[] predicates) {
@@ -374,13 +376,13 @@ public class PredicateUtils {
     /**
      * Create a new Predicate that returns true if only one of the specified
      * predicates are true. The predicates are checked in iterator order.
+     * If the collection of predicates is empty, then this predicate returns false.
      * 
      * @see org.openmdx.uses.org.apache.commons.collections.functors.OnePredicate
      * 
      * @param predicates  a collection of predicates to check, may not be null
      * @return the <code>one</code> predicate
      * @throws IllegalArgumentException if the predicates collection is null
-     * @throws IllegalArgumentException if the predicates collection has less than 2 elements
      * @throws IllegalArgumentException if any predicate in the collection is null
      */
     public static Predicate onePredicate(Collection predicates) {
@@ -405,13 +407,13 @@ public class PredicateUtils {
     /**
      * Create a new Predicate that returns true if none of the specified
      * predicates are true.
+     * If the array of predicates is empty, then this predicate returns true.
      * 
      * @see org.openmdx.uses.org.apache.commons.collections.functors.NonePredicate
      * 
      * @param predicates  an array of predicates to check, may not be null
      * @return the <code>none</code> predicate
      * @throws IllegalArgumentException if the predicates array is null
-     * @throws IllegalArgumentException if the predicates array has less than 2 elements
      * @throws IllegalArgumentException if any predicate in the array is null
      */
     public static Predicate nonePredicate(Predicate[] predicates) {
@@ -421,13 +423,13 @@ public class PredicateUtils {
     /**
      * Create a new Predicate that returns true if none of the specified
      * predicates are true. The predicates are checked in iterator order.
+     * If the collection of predicates is empty, then this predicate returns true.
      * 
      * @see org.openmdx.uses.org.apache.commons.collections.functors.NonePredicate
      * 
      * @param predicates  a collection of predicates to check, may not be null
      * @return the <code>none</code> predicate
      * @throws IllegalArgumentException if the predicates collection is null
-     * @throws IllegalArgumentException if the predicates collection has less than 2 elements
      * @throws IllegalArgumentException if any predicate in the collection is null
      */
     public static Predicate nonePredicate(Collection predicates) {
@@ -526,7 +528,7 @@ public class PredicateUtils {
      * @param predicate  the predicate to call with the result of the transform
      * @return the predicate
      * @throws IllegalArgumentException if the transformer or the predicate is null
-	 * @since Commons Collections 3.1
+     * @since Commons Collections 3.1
      */
     public static Predicate transformedPredicate(Transformer transformer, Predicate predicate) {
         return TransformedPredicate.getInstance(transformer, predicate);

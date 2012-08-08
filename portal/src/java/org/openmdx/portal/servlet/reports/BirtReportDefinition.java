@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BirtReportDefinition.java,v 1.5 2007/01/21 20:46:51 wfro Exp $
+ * Name:        $Id: BirtReportDefinition.java,v 1.6 2008/04/04 17:01:11 hburger Exp $
  * Description: Reports
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:46:51 $
+ * Date:        $Date: 2008/04/04 17:01:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -98,7 +98,7 @@ public class BirtReportDefinition
                 ? document.getElementsByTagName("report").item(0)
                 : null;
             if(reportNode != null) {
-                Map reportProperties = new HashMap();
+                Map<String,String> reportProperties = new HashMap<String,String>();
                 org.w3c.dom.Node reportElement = reportNode.getFirstChild();
                 while(reportElement != null) {
                     if("property".equals(reportElement.getNodeName())) {
@@ -123,11 +123,11 @@ public class BirtReportDefinition
                         );                            
                     }
                     else if("parameters".equals(reportElement.getNodeName())) {
-                        List parameters = new ArrayList();
+                        List<Parameter> parameters = new ArrayList<Parameter>();
                         org.w3c.dom.Node parameterElement = reportElement.getFirstChild();
                         while(parameterElement != null) {
                             if("scalar-parameter".equals(parameterElement.getNodeName())) {
-                                Map parameterProperties = new HashMap();
+                                Map<String,String> parameterProperties = new HashMap<String,String>();
                                 parameterProperties.put(
                                     "name",
                                     parameterElement.getAttributes().getNamedItem("name").getNodeValue()

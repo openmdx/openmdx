@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Uml2Mapper_1.java,v 1.7 2007/07/31 20:15:52 wfro Exp $
+ * Name:        $Id: Uml2Mapper_1.java,v 1.9 2008/04/02 17:38:40 wfro Exp $
  * Description: XMIExternalizer_1
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/07/31 20:15:52 $
+ * Date:        $Date: 2008/04/02 17:38:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,11 +69,12 @@ import org.openmdx.compatibility.base.collection.SparseList;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.ModelAttributes;
 import org.openmdx.model1.mapping.AbstractMapper_1;
 
 //---------------------------------------------------------------------------
+@SuppressWarnings("unchecked")
 public class Uml2Mapper_1
     extends AbstractMapper_1 {
 
@@ -87,7 +88,7 @@ public class Uml2Mapper_1
     //---------------------------------------------------------------------------
     public void externalize(
         String qualifiedPackageName,
-        Model_1_0 model,
+        Model_1_3 model,
         ZipOutputStream zip)
         throws ServiceException {
 

@@ -11,6 +11,7 @@ import com.ibm.icu.text.UTF16;
  * @author wtan
  *
  */
+@SuppressWarnings({"unused","cast"})
 public class IRIUtils
 {
 	private static final int[] HEXCHARS = {
@@ -23,7 +24,7 @@ public class IRIUtils
 	
 	private static final String RFC3986_GEN_DELIMS = ":/?#[]@";
 	private static final String RFC3986_SUB_DELIMS = "!$&'()*+,;=";
-	private static final String RFC3986_RESERVED = RFC3986_GEN_DELIMS + RFC3986_SUB_DELIMS;
+    private static final String RFC3986_RESERVED = RFC3986_GEN_DELIMS + RFC3986_SUB_DELIMS;
 	private static final String ALPHA_LOWER = "abcdefghijklmnopqrstuvwxyz";
 	private static final String ALPHA = ALPHA_LOWER + ALPHA_LOWER.toUpperCase();
 	
@@ -328,10 +329,10 @@ public class IRIUtils
 	}
 	
 	
-	private static int countUTF8Sequence(String in, int inIndex, byte[] u8buf)
+	private static int countUTF8Sequence(String in, int _inIndex, byte[] u8buf)
 	{
 		int c[] = new int[4];
-		
+		int inIndex = _inIndex;
 		if (!isPercentEncoded(in, inIndex))
 			return 0;
 		

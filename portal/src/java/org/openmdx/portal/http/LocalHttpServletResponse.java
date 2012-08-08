@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LocalHttpServletResponse.java,v 1.3 2007/01/21 20:45:28 wfro Exp $
+ * Name:        $Id: LocalHttpServletResponse.java,v 1.4 2008/04/04 17:01:13 hburger Exp $
  * Description: BirtReportServlet
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:45:28 $
+ * Date:        $Date: 2008/04/04 17:01:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,7 +75,7 @@ public class LocalHttpServletResponse
         HttpServletResponse response,
         OutputStream buffer
     ) {
-        this.response = response;
+//      this.response = response;
         this.buffer = new LocalHttpServletOutputStream(buffer);
         this.writer = new PrintWriter(this.buffer);
     }    
@@ -119,7 +119,7 @@ public class LocalHttpServletResponse
     }
 
     public void setBufferSize(int bufferSize) {
-        this.bufferSize = bufferSize;
+//      this.bufferSize = bufferSize;
     }
 
     public void setCharacterEncoding(String encoding) {
@@ -127,7 +127,7 @@ public class LocalHttpServletResponse
     }
 
     public void setContentLength(int contentLength) {
-        this.contentLength = contentLength;
+//      this.contentLength = contentLength;
     }
 
     public void setContentType(String contentType) {
@@ -226,13 +226,13 @@ public class LocalHttpServletResponse
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    private final HttpServletResponse response;
+//  private final HttpServletResponse response;
     private final LocalHttpServletOutputStream buffer;
     private final PrintWriter writer;
     private Locale locale = new Locale("en_US");
     private String contentType = "text/xml";
-    private int contentLength = 0;
+//  private int contentLength = 0;
     private String encoding = "UTF-8";
-    private int bufferSize = 0;
+//  private int bufferSize = 0;
 
 }

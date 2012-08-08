@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObjectIdBuilder.java,v 1.9 2008/02/22 17:56:42 hburger Exp $
+ * Name:        $Id: DataObjectIdBuilder.java,v 1.11 2008/05/15 18:07:25 hburger Exp $
  * Description: Standard ObjectId Builder 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/22 17:56:42 $
+ * Date:        $Date: 2008/05/15 18:07:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -77,6 +77,12 @@ public class DataObjectIdBuilder
     protected DataObjectIdBuilder() {
     }
 
+    /**
+     * A singleton is sufficiont for the StandardIdentityBuilder as the
+     * StandardIdentityBuilder itself is not configurable.
+     */
+    private static final ObjectIdBuilder instance = new DataObjectIdBuilder();
+    
     /* (non-Javadoc)
      * @see org.oasisopen.spi2.ApplicationIdentityBuilder#newIdentity(java.lang.Boolean, java.lang.Object, java.util.List, java.util.List, java.util.List, java.util.List)
      */
@@ -86,7 +92,8 @@ public class DataObjectIdBuilder
         String referenceName,
         List<Boolean> persistentQualifier,
         List<?> qualifier,
-        List<String> baseClass, List<String> objectClass
+        List<String> baseClass, 
+        List<String> objectClass
     ) {
         return null; // TODO
     }
@@ -117,17 +124,11 @@ public class DataObjectIdBuilder
     public <T> String newObjectId(
         Boolean mixinParent, String parentObjectId,
         String referenceName,
-        List<Class<T>> qualifierClass, List<String> objectClass
+        List<Class<T>> qualifierClass, 
+        List<String> baseClass, 
+        List<String> objectClass
     ) {
         return null; // TODO
-    }
-
-    /* (non-Javadoc)
-     * @see org.oasisopen.spi2.ApplicationIdentityBuilder#getIdentity(java.lang.String)
-     */
-    public ObjectId toObjectId(String identity) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     /**
@@ -141,16 +142,20 @@ public class DataObjectIdBuilder
     }
 
     /**
-     * A singleton is sufficiont for the StandardIdentityBuilder as the
-     * StandardIdentityBuilder itself is not configurable.
-     */
-    static final ObjectIdBuilder instance = new DataObjectIdBuilder();
-    
-    /**
      * The qualifier provider instance used by this application identity builder.
      */
 //  private QualifierProvider qualifierProvider;
     
+    /* (non-Javadoc)
+     * @see org.oasisopen.spi2.ObjectIdBuilder#parseObjectId(java.lang.String, java.util.List, java.util.List)
+     */
+    public ObjectIdParser parseObjectId(
+        String objectId,
+        List<String> baseClass
+     ) {
+        return new StandardObjectIdParser(objectId);
+    }
+
     
     //------------------------------------------------------------------------
     // Class Identity
@@ -159,17 +164,16 @@ public class DataObjectIdBuilder
     /**
      * Standard Application Identity
      */
-    protected static class StandardObjectId
-        implements ObjectId
+    protected static class StandardObjectIdParser
+        implements ObjectIdParser
     {
 
-        StandardObjectId(
+        StandardObjectIdParser(
             String objectId
         ) {
             int classDelimiter = objectId.lastIndexOf(' ');
             int segmentDelimiter = objectId.lastIndexOf('/');
             if(segmentDelimiter < 0) {
-                this.parent = null;
                 if(classDelimiter < 0) {
                     this.targetClass = AUTHORITY_CLASS;
                     this.segment = new XRISegment(objectId);
@@ -183,7 +187,7 @@ public class DataObjectIdBuilder
                     );
                 }
             } else {
-                this.parent = objectId.substring(0, segmentDelimiter);
+                objectId.substring(0, segmentDelimiter);
                 if(classDelimiter < segmentDelimiter) {
                     this.targetClass = null;
                     this.segment = new XRISegment(
@@ -201,6 +205,23 @@ public class DataObjectIdBuilder
             }
         }
         
+        /**
+         * The target class, if encoded into the object id
+         */
+        private final List<String> targetClass;
+        
+        /**
+         * The object id's last segment
+         */
+        private final XRISegment segment;
+        
+        /**
+         * The default authority class
+         */
+        private static final List<String> AUTHORITY_CLASS = Arrays.asList(
+            "org", "openmdx", "base", "Authority"
+        );
+
         private static List<String> toClass(
             String authorityPart,
             String classPart
@@ -235,13 +256,6 @@ public class DataObjectIdBuilder
                 // 
                 return Arrays.asList(classComponents);
             }
-        }
-
-        /* (non-Javadoc)
-         * @see org.oasisopen.spi2.ObjectId#getParentIdentity(java.util.List)
-         */
-        public ObjectId getParentObjectId(List<String> baseClass) {
-            return new StandardObjectId(this.parent);
         }
 
         /* (non-Javadoc)
@@ -283,27 +297,12 @@ public class DataObjectIdBuilder
             return this.segment.getSubSegmentAt(index).isPersistant();
         }
 
-        /**
-         * The target class, if encoded into the object id
+        /* (non-Javadoc)
+         * @see org.oasisopen.spi2.ObjectIdParser#getParentClass(java.lang.String)
          */
-        private final List<String> targetClass;
-        
-        /**
-         * The stringified form of the parent object id
-         */
-        private final String parent;
-        
-        /**
-         * The object id's last segment
-         */
-        private final XRISegment segment;
-        
-        /**
-         * The default authority class
-         */
-        private static final List<String> AUTHORITY_CLASS = Arrays.asList(
-            "org", "openmdx", "base", "Authority"
-        );
+        public List<String> getParentClass(String parentObjectId) {
+            return null;
+        }
         
     }
 

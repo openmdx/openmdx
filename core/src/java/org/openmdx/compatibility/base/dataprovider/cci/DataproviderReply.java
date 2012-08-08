@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderReply.java,v 1.6 2005/02/27 22:31:12 wfro Exp $
+ * Name:        $Id: DataproviderReply.java,v 1.7 2008/03/21 18:45:24 hburger Exp $
  * Description: DataproviderReply class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/27 22:31:12 $
+ * Date:        $Date: 2008/03/21 18:45:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,7 +60,7 @@ import javax.resource.ResourceException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
 
-
+@SuppressWarnings("unchecked")
 public class DataproviderReply
     extends DataproviderContext
 {

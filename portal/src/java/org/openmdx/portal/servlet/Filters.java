@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filters.java,v 1.9 2007/10/01 15:16:16 wfro Exp $
+ * Name:        $Id: Filters.java,v 1.10 2008/04/04 11:56:08 hburger Exp $
  * Description: Filters
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/01 15:16:16 $
+ * Date:        $Date: 2008/04/04 11:56:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -223,7 +223,7 @@ public class Filters
           }
       }
       // Prepare filters. Skip base filters and add conditions of base filter to all returned filters.
-      Map preparedFilters = new TreeMap();
+      Map<String,Filter> preparedFilters = new TreeMap<String,Filter>();
       for(int i = 0; i < this.filter.length; i++) {
           Filter f = filter[i];
           // Replace default filter by supplied default filter
@@ -236,7 +236,7 @@ public class Filters
               Filter preparedFilter = null;
               if(baseFilter != null) {          
                   // Combine conditions of f and baseFilter
-                  List preparedConditions = new ArrayList();
+                  List<Condition> preparedConditions = new ArrayList<Condition>();
                   preparedConditions.addAll(
                       Arrays.asList(baseFilter.getCondition())
                   );
@@ -245,8 +245,8 @@ public class Filters
                   );
                   // Combine order specifiers of f and baseFilter. Ordering of base filter 
                   // has lower priority. Eliminate duplicate order specifiers.
-                  List orderSpecifiers = new ArrayList();
-                  Set orderedFeatures = new HashSet();
+                  List<OrderSpecifier> orderSpecifiers = new ArrayList<OrderSpecifier>();
+                  Set<String> orderedFeatures = new HashSet<String>();
                   for(int j = 0; j < f.getOrderSpecifier().length; j++) {
                       OrderSpecifier orderSpecifier = f.getOrderSpecifier()[j];
                       if(!orderedFeatures.contains(orderSpecifier.getFeature())) {

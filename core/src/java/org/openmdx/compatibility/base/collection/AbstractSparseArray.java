@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractSparseArray.java,v 1.1 2008/02/18 13:34:05 hburger Exp $
+ * Name:        $Id: AbstractSparseArray.java,v 1.2 2008/06/27 16:59:28 hburger Exp $
  * Description: SPICE Abstract SparseArray Implementation
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 13:34:05 $
+ * Date:        $Date: 2008/06/27 16:59:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -815,7 +815,7 @@ public abstract class AbstractSparseArray<E>
      * size() is the sparse array's lastIndex() + 1 and the sparse array's
      * un-populated positions are represented as null values.
      */ 
-    private class ValueList extends AbstractList<E> {
+    class ValueList extends AbstractList<E> {
         
         /**
          * Returns the sparse array's end.
@@ -889,7 +889,7 @@ public abstract class AbstractSparseArray<E>
      * proper sequence). The first index is start() and the last end() - 1
      * respectively. The indices are not contiguous.
      */
-    private class PopulationIteratorImpl implements PopulationIterator<E> {
+    class PopulationIteratorImpl implements PopulationIterator<E> {
 
         /**
          * Iterate internally over the data entries. 
@@ -917,7 +917,7 @@ public abstract class AbstractSparseArray<E>
          */
         public boolean hasNext(
         ){
-            return nextEntry != null || this.entries.hasNext();
+            return this.nextEntry != null || this.entries.hasNext();
         }
     
         /**
@@ -931,11 +931,11 @@ public abstract class AbstractSparseArray<E>
          */
         public E next(
         ){
-            currentEntry = this.nextEntry == null ?
+            this.currentEntry = this.nextEntry == null ?
                 this.entries.next() : 
                 this.nextEntry;
             this.nextEntry = null;
-            return currentEntry.getValue();
+            return this.currentEntry.getValue();
         }
     
         /**
@@ -949,12 +949,12 @@ public abstract class AbstractSparseArray<E>
          */
         public int nextIndex(
         ){
-            if(nextEntry == null){
+            if(this.nextEntry == null){
                 if (! this.entries.hasNext()) return end();
                 this.nextEntry = this.entries.next();
                 this.currentEntry = null;
             }
-            return nextEntry.getKey().intValue(); 
+            return this.nextEntry.getKey().intValue(); 
         }
     
         /**

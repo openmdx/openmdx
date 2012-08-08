@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReplicateHandler.java,v 1.15 2006/07/10 04:31:57 hburger Exp $
+ * Name:        $Id: ReplicateHandler.java,v 1.17 2008/05/12 10:45:50 wfro Exp $
  * Description: handler for replicating a target provider to a source
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/07/10 04:31:57 $
+ * Date:        $Date: 2008/05/12 10:45:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -89,6 +89,7 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 /**
  * @author anyff
  */
+@SuppressWarnings("unchecked")
 public class ReplicateHandler 
     implements TraversalHandler, ErrorHandler {
 
@@ -162,6 +163,7 @@ public class ReplicateHandler
      * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#startObject(java.lang.String, java.lang.String, java.lang.String, short)
      */
     public boolean startObject(
+        Path parentPath,
         String qualifiedName,
         String qualifierName,
         String id,
@@ -225,6 +227,7 @@ public class ReplicateHandler
      * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#featureComplete(org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0)
      */
     public boolean featureComplete(
+        Path parentPath,
         DataproviderObject_1_0 object
     ) throws ServiceException {
         StopWatch_1.instance().startTimer("featureComplete");
@@ -1963,7 +1966,7 @@ public class ReplicateHandler
             String searchDate = dateWithin(validFrom, validTo);
 
             ServiceHeader header = 
-                new ServiceHeader((String[]) _header.getPrincipalChain().toArray(
+                new ServiceHeader(_header.getPrincipalChain().toArray(
                         new String[0]
                     ),
                     _header.getCorrelationId(),

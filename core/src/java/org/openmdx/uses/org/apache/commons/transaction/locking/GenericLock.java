@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/locking/GenericLock.java,v 1.1 2005/03/24 13:43:56 hburger Exp $
- * $Revision: 1.1 $
- * $Date: 2005/03/24 13:43:56 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/locking/GenericLock.java,v 1.2 2008/03/21 18:42:16 hburger Exp $
+ * $Revision: 1.2 $
+ * $Date: 2008/03/21 18:42:16 $
  *
  * ====================================================================
  *
@@ -100,8 +100,9 @@ import org.openmdx.uses.org.apache.commons.transaction.util.LoggerFacade;
  * forgets to release a lock or is not able to do so due to error states or abnormal termination.  
  * </ul>
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
+@SuppressWarnings("unchecked")
 public class GenericLock implements MultiLevelLock {
 
     public static final int COMPATIBILITY_NONE = 0;

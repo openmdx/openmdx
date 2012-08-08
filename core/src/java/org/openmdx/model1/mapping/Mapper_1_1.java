@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Mapper_1_1.java,v 1.1 2007/04/27 12:00:35 hburger Exp $
+ * Name:        $Id: Mapper_1_1.java,v 1.2 2008/04/02 17:38:40 wfro Exp $
  * Description: Mapper_1_1 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/04/27 12:00:35 $
+ * Date:        $Date: 2008/04/02 17:38:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,7 +80,7 @@ public interface Mapper_1_1
      */
     void externalize(
       String qualifiedPackageName,
-      org.openmdx.model1.accessor.basic.cci.Model_1_0 model,
+      org.openmdx.model1.accessor.basic.cci.Model_1_3 model,
       ZipOutputStream os,
       String openmdxjdoMetadataDirectory
     ) throws ServiceException;

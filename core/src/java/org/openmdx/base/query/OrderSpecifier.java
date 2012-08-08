@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OrderSpecifier.java,v 1.5 2005/04/06 15:28:18 wfro Exp $
+ * Name:        $Id: OrderSpecifier.java,v 1.6 2008/04/25 23:34:30 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/06 15:28:18 $
+ * Date:        $Date: 2008/04/25 23:34:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,10 +62,6 @@ import org.openmdx.compatibility.base.dataprovider.cci.Orders;
 public class OrderSpecifier
   implements Serializable {
   
-  /**
-     * 
-     */
-    private static final long serialVersionUID = 3258134635077645875L;
 public OrderSpecifier(
   ) {
     this(null, (short)-1);
@@ -122,6 +118,7 @@ public OrderSpecifier(
   //-------------------------------------------------------------------------
   // Variables
   //-------------------------------------------------------------------------
+  private static final long serialVersionUID = 3258134635077645875L;
   private String feature;
   private short order;
   

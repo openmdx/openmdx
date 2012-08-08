@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JMIAbstractMapper.java,v 1.11 2007/01/21 18:48:40 hburger Exp $
+ * Name:        $Id: JMIAbstractMapper.java,v 1.14 2008/04/21 16:57:12 hburger Exp $
  * Description: JMITemplate 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 18:48:40 $
+ * Date:        $Date: 2008/04/21 16:57:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,7 +60,7 @@ import java.util.Set;
 
 import org.openmdx.base.Version;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
 import org.openmdx.model1.mapping.MapperTemplate;
@@ -70,6 +70,7 @@ import org.openmdx.model1.mapping.Names;
 import org.openmdx.model1.mapping.StructuralFeatureDef;
 
 //---------------------------------------------------------------------------
+@SuppressWarnings("unchecked")
 public abstract class JMIAbstractMapper
     extends MapperTemplate {
     
@@ -83,7 +84,7 @@ public abstract class JMIAbstractMapper
     //-----------------------------------------------------------------------
     public JMIAbstractMapper(
         Writer writer,
-        Model_1_0 model,
+        Model_1_3 model,
         String format, 
         String packageSuffix
     ) {
@@ -135,7 +136,7 @@ public abstract class JMIAbstractMapper
     protected String getContainerType(
         StructuralFeatureDef featureDef
     ) throws ServiceException {
-        return "org.openmdx.compatibility.base.collection.Container";
+        return "org.oasisopen.jmi1.RefContainer";
     }
     
     //-----------------------------------------------------------------------

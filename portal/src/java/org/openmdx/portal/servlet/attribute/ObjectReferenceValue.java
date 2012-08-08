@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReferenceValue.java,v 1.49 2007/08/24 09:42:18 wfro Exp $
+ * Name:        $Id: ObjectReferenceValue.java,v 1.51 2008/04/04 17:01:11 hburger Exp $
  * Description: ObjectReferenceValue 
- * Revision:    $Revision: 1.49 $
+ * Revision:    $Revision: 1.51 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/24 09:42:18 $
+ * Date:        $Date: 2008/04/04 17:01:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,6 +68,7 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.collection.MarshallingCollection;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -142,6 +143,7 @@ public class ObjectReferenceValue
     }
   
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public Object getValue(
         boolean shortFormat
     ) {
@@ -181,8 +183,9 @@ public class ObjectReferenceValue
             );
         }
         else {
+            Path objectIdentity = new Path(value.toString());
             return new ObjectReference(
-                (RefObject_1_0)this.application.getDataPackage().refObject(value.toString()),
+                (RefObject_1_0)this.application.getPmData().getObjectById(objectIdentity),
                 this.application
             );
         }
@@ -225,7 +228,7 @@ public class ObjectReferenceValue
             return ((ObjectReference)value).getTitle();
         }
         else if(value instanceof Collection) {
-            List titles = new ArrayList();
+            List<String> titles = new ArrayList<String>();
             for(Iterator i = ((Collection)value).iterator(); i.hasNext(); ) {
                 titles.add(((ObjectReference)i.next()).getTitle());
             }

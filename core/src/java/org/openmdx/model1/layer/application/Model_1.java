@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.28 2007/10/10 16:06:11 hburger Exp $
+ * Name:        $Id: Model_1.java,v 1.30 2008/04/02 17:38:40 wfro Exp $
  * Description: model1 application plugin
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:11 $
+ * Date:        $Date: 2008/04/02 17:38:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -90,7 +90,7 @@ import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelUtils;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.AggregationKind;
 import org.openmdx.model1.code.ModelAttributes;
 import org.openmdx.model1.code.ModelExceptions;
@@ -100,6 +100,7 @@ import org.openmdx.model1.mapping.Mapper_1_1;
 import org.openmdx.model1.mapping.MappingTypes;
 
 //---------------------------------------------------------------------------
+@SuppressWarnings("unchecked")
 public class Model_1 
   extends Layer_1 {
 
@@ -1166,7 +1167,7 @@ public class Model_1
         try {
             
           SysLog.trace("activating model");
-          Model_1_0 model = new org.openmdx.model1.accessor.basic.spi.Model_1(
+          Model_1_3 model = new org.openmdx.model1.accessor.basic.spi.Model_1(
             this,
             true
           );

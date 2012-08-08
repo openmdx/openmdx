@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JavaClock_1.java,v 1.1 2004/07/14 17:46:25 hburger Exp $
+ * Name:        $Id: JavaClock_1.java,v 1.2 2008/03/07 22:22:07 hburger Exp $
  * Description: Java Clock Provider
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/07/14 17:46:25 $
+ * Date:        $Date: 2008/03/07 22:22:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -99,7 +99,7 @@ public class JavaClock_1 extends Layer_1 {
 	    );
 		if(
 			!accessPath.isLike(A_SEGMENT_PATH) ||
-			!"getTime".equals(operationName)
+			!"currentDateAndTime".equals(operationName)
 		) return super.operation(header, request);
 		DataproviderObject time = new DataproviderObject(
 			request.path().getDescendant(new String[]{"reply","-"})

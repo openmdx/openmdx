@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationPaneControl.java,v 1.73 2008/02/15 17:34:58 wfro Exp $
+ * Name:        $Id: OperationPaneControl.java,v 1.75 2008/05/01 21:43:57 wfro Exp $
  * Description: UiBasedOperationPaneControl class
- * Revision:    $Revision: 1.73 $
+ * Revision:    $Revision: 1.75 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/15 17:34:58 $
+ * Date:        $Date: 2008/05/01 21:43:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -114,7 +114,7 @@ public class OperationPaneControl
 
         int tabIndex = 0;
         // Operations
-        List operationTabs = new ArrayList();
+        List<OperationTabControl> operationTabs = new ArrayList<OperationTabControl>();
         for(
             int i = 0; 
             i < pane.getMember().size(); 
@@ -191,6 +191,7 @@ public class OperationPaneControl
     }
     
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractIterator.java,v 1.7 2005/02/21 13:09:00 hburger Exp $
+ * Name:        $Id: AbstractIterator.java,v 1.8 2008/03/21 18:46:49 hburger Exp $
  * Description: JDBC Iterator for find requests
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:09:00 $
+ * Date:        $Date: 2008/03/21 18:46:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -104,7 +104,8 @@ public static byte[] serialize(
     }
   }
 
-  public static Serializable deserialize(
+  @SuppressWarnings("unchecked")
+public static Serializable deserialize(
     byte[] object
   ) throws ServiceException {
     if(object.length == 0) return new HashMap();

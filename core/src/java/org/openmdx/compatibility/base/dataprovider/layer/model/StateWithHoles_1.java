@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateWithHoles_1.java,v 1.44 2007/11/22 14:41:13 hburger Exp $
+ * Name:        $Id: StateWithHoles_1.java,v 1.45 2008/03/21 18:46:24 hburger Exp $
  * Description: DateStateExcludingEnd_1 
- * Revision:    $Revision: 1.44 $
+ * Revision:    $Revision: 1.45 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/22 14:41:13 $
+ * Date:        $Date: 2008/03/21 18:46:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +62,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 /**
  * DateStateExcludingEnd_1
  */
+@SuppressWarnings("unchecked")
 public class StateWithHoles_1
     extends AbstractState_1
 {

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE connector SYSTEM "xri:+resource/org/openmdx/kernel/application/deploy/connector_1_0.dtd">
+<connector>
+	<display-name>postgresql</display-name>
+	<description>openMDX/Core PostgreSQL Connector</description>
+	<vendor-name>OMEX AG</vendor-name>
+	<spec-version>1.0</spec-version>
+	<eis-type>JDBC</eis-type>
+	<version>2.0</version>
+	<resourceadapter>
+		<managedconnectionfactory-class>org.openmdx.kernel.application.container.spi.sql.ManagedDatabaseConnectionFactory</managedconnectionfactory-class>
+		<connectionfactory-interface>javax.sql.DataSource</connectionfactory-interface>
+		<connectionfactory-impl-class>org.openmdx.kernel.application.container.spi.sql.DatabaseConnectionFactory</connectionfactory-impl-class>
+		<connection-interface>java.sql.Connection</connection-interface>
+		<connection-impl-class>org.openmdx.kernel.application.container.spi.sql.DatabaseConnection</connection-impl-class>
+		<transaction-support>LocalTransaction</transaction-support>
+		<config-property>
+			<config-property-name>UserName</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>postgres</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>Password</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>manager99</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>ConnectionURL</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>jdbc:postgresql://127.0.0.1/Template</config-property-value>
+		</config-property>
+		<authentication-mechanism>
+			<authentication-mechanism-type>BasicPassword</authentication-mechanism-type>
+			<credential-interface>javax.resource.spi.security.PasswordCredential</credential-interface>
+		</authentication-mechanism>
+		<reauthentication-support>false</reauthentication-support>
+	</resourceadapter>
+</connector>

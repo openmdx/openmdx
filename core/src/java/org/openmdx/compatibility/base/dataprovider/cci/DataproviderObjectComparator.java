@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderObjectComparator.java,v 1.5 2005/12/12 14:15:32 hburger Exp $
+ * Name:        $Id: DataproviderObjectComparator.java,v 1.6 2008/03/21 18:45:24 hburger Exp $
  * Description: Dataprovider Object Filter
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/12/12 14:15:32 $
+ * Date:        $Date: 2008/03/21 18:45:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import org.openmdx.compatibility.base.dataprovider.spi.AbstractComparator;
  * To change the template for this generated type comment go to
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
+@SuppressWarnings("unchecked")
 public class DataproviderObjectComparator extends AbstractComparator {
 
     /**

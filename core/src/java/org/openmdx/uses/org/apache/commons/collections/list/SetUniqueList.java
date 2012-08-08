@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -35,6 +36,7 @@ import org.openmdx.uses.org.apache.commons.collections.set.UnmodifiableSet;
  * This implementation breaks these in certain ways, but this is merely the
  * result of rejecting duplicates.
  * Each violation is explained in the method, but it should not affect you.
+ * Bear in mind that Sets require immutable objects to function correctly.
  * <p>
  * The {@link org.openmdx.uses.org.apache.commons.collections.set.ListOrderedSet ListOrderedSet}
  * class provides an alternative approach, by wrapping an existing Set and
@@ -43,11 +45,13 @@ import org.openmdx.uses.org.apache.commons.collections.set.UnmodifiableSet;
  * This class is Serializable from Commons Collections 3.1.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:19 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:18 $
  * 
  * @author Matthew Hawthorne
  * @author Stephen Colebourne
+ * @author Tom Dunham
  */
+@SuppressWarnings("unchecked")
 public class SetUniqueList extends AbstractSerializableListDecorator {
 
     /** Serialization version */
@@ -198,7 +202,7 @@ public class SetUniqueList extends AbstractSerializableListDecorator {
      * The object is set into the specified index.
      * Afterwards, any previous duplicate is removed
      * If the object is not already in the list then a normal set occurs.
-     * If it is present, then the old version is removed and re-added at this index
+     * If it is present, then the old version is removed.
      * 
      * @param index  the index to insert at
      * @param object  the object to set
@@ -206,11 +210,16 @@ public class SetUniqueList extends AbstractSerializableListDecorator {
      */
     public Object set(int index, Object object) {
         int pos = indexOf(object);
-        Object result = super.set(index, object);
+        Object removed = super.set(index, object);
         if (pos == -1 || pos == index) {
-            return result;
+            return removed;
         }
-        return remove(pos);
+        
+        // the object is already in the uniq list
+        // (and it hasn't been swapped with itself)
+        super.remove(pos);  // remove the duplicate by index
+        set.remove(removed);  // remove the item deleted by the set
+        return removed;  // return the item deleted by the set
     }
 
     public boolean remove(Object object) {

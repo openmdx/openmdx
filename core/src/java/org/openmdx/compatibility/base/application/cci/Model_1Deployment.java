@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1Deployment.java,v 1.2 2007/10/10 16:05:55 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Model_1Deployment.java,v 1.3 2008/04/10 18:16:59 hburger Exp $
  * Description: Model_1Deployment
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:55 $
+ * Date:        $Date: 2008/04/10 18:16:59 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.application.cci;
 
@@ -70,7 +69,7 @@ public class Model_1Deployment implements Deployment {
      * 
      */
     public Model_1Deployment(
-        String[] models
+        String... models
     ) {
         this.pending = models;
     }

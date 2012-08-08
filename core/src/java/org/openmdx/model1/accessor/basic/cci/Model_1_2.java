@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1_2.java,v 1.1 2006/10/02 15:38:14 hburger Exp $
+ * Name:        $Id: Model_1_2.java,v 1.2 2008/03/21 18:40:07 hburger Exp $
  * Description: Model interface 1.2
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/02 15:38:14 $
+ * Date:        $Date: 2008/03/21 18:40:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,7 @@ import org.openmdx.base.accessor.generic.cci.Object_1_0;
 /**
  * Model interface 1.2
  */
+@SuppressWarnings("unchecked")
 public interface Model_1_2
     extends Model_1_1
 {

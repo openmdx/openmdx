@@ -22,8 +22,9 @@ import java.io.Serializable;
 /**
  * FetchPlan for fields for use within JPOX Core.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
+@SuppressWarnings("serial")
 public class FetchPlan implements Serializable
 {
 //    /** Localisation utility for output messages */

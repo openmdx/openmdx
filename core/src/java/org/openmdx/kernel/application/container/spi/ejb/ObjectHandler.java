@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectHandler.java,v 1.3 2008/01/25 13:02:50 hburger Exp $
+ * Name:        $Id: ObjectHandler.java,v 1.4 2008/06/28 00:21:49 hburger Exp $
  * Description: Local Object Invocation Handler
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 13:02:50 $
+ * Date:        $Date: 2008/06/28 00:21:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -84,7 +84,7 @@ extends AbstractObjectHandler<HomeHandler>
         super(homeHandler);
     }
 
-    private static boolean VALIDATE_SERIALIZED_OBJECT = false;
+    static boolean VALIDATE_SERIALIZED_OBJECT = false;
 
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])

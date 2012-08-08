@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RequestMapper.java,v 1.8 2004/04/02 16:59:02 wfro Exp $
+ * Name:        $Id: RequestMapper.java,v 1.9 2008/03/19 17:10:05 hburger Exp $
  * Description: SoapClientMapper class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:02 $
+ * Date:        $Date: 2008/03/19 17:10:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -81,7 +81,8 @@ public class RequestMapper
   /**
    * Map ServiceHeader to SOAP
    */    
-  void mapServiceHeader(
+  @SuppressWarnings("unchecked")
+void mapServiceHeader(
     ServiceHeader source
   ) throws ServiceException, IOException {
     writer.write("<ServiceHeader>");

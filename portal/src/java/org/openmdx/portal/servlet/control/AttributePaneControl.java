@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributePaneControl.java,v 1.24 2007/12/13 01:24:02 wfro Exp $
+ * Name:        $Id: AttributePaneControl.java,v 1.27 2008/05/28 12:02:09 wfro Exp $
  * Description: TabControl
  * Revision:    $AttributePaneRenderer: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:24:02 $
+ * Date:        $Date: 2008/05/28 12:02:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,6 +68,7 @@ import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.ObjectView;
 
 public class AttributePaneControl
@@ -92,7 +93,7 @@ public class AttributePaneControl
             paneIndex
         );
         AppLog.detail("Preparing attribute tabs");
-        List attributeTab = new ArrayList();
+        List<AttributeTabControl> attributeTab = new ArrayList<AttributeTabControl>();
         for (int i = 0; i < pane.getMember().size(); i++) {
             AppLog.detail("Preparing attribute tab", new Integer(i));
             org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab) pane.getMember().get(i);
@@ -110,6 +111,7 @@ public class AttributePaneControl
     }
     
     //---------------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,
@@ -183,10 +185,9 @@ public class AttributePaneControl
             // Inheritance breaker for IE
             p.write("<div style=\"padding:1px;\"></div>");
         }
-        if(view.getContainerElementId() != null) {
+        if(view.getContainerElementId() != null && !(view instanceof EditObjectView)) {
             p.write("<div class=\"gridSpacerBottom\"></div>");                        
-        }                                        
-        
+        }                                                
         AppLog.detail("< paint");
     }
     

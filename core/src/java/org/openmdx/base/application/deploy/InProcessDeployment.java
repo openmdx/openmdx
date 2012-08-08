@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InProcessDeployment.java,v 1.3 2008/01/25 00:58:53 hburger Exp $
+ * Name:        $Id: InProcessDeployment.java,v 1.4 2008/03/21 18:28:07 hburger Exp $
  * Description: In-Process Deployment
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:53 $
+ * Date:        $Date: 2008/03/21 18:28:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,6 +72,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
 /**
  * In-Process Deployment
  */
+@SuppressWarnings("unchecked")
 public class InProcessDeployment implements Deployment {
 
     /**

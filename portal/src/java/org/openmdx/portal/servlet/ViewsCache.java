@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ViewsCache.java,v 1.1 2008/01/27 00:37:33 wfro Exp $
+ * Name:        $Id: ViewsCache.java,v 1.2 2008/04/04 17:01:13 hburger Exp $
  * Description: ViewsCache 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/27 00:37:33 $
+ * Date:        $Date: 2008/04/04 17:01:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -124,6 +124,7 @@ public class ViewsCache {
     }
 
     //-----------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public void addView(
         String requestId,
         ObjectView view

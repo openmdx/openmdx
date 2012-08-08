@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="**/CVS/**|com/**|org/apache/juli/logging/*|org/apache/juli/logging/impl/*|org/openmdx/uses/java/lang/**|org/openmdx/uses/java/util/**|org/openmdx/uses/javax/**|org/openmdx/uses/org/apache/xerces/internal/**|org/slf4j/impl/*" kind="src" path="src/java"/>
+	<classpathentry excluding="**/CVS/**|org/apache/juli/logging/*|org/apache/juli/logging/impl/*" kind="src" path="src/java"/>
 	<classpathentry kind="src" path="build/jre-1.5/src/java"/>
 	<classpathentry exported="true" kind="lib" path="src/resource"/>
 	<classpathentry exported="true" kind="lib" path="build/jre-1.5/src/resource"/>

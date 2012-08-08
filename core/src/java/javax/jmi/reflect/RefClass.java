@@ -2,6 +2,7 @@ package javax.jmi.reflect;
 
 import java.util.*;
 
+@SuppressWarnings("unchecked")
 public interface RefClass extends RefFeatured {
     public RefObject refCreateInstance(List args);
     public Collection refAllOfType();

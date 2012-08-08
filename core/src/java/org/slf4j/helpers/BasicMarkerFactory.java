@@ -20,8 +20,13 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * ______________________________________________________________________
+ *
+ * Copyright (c) 2008, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * JAVA 5 support added
  */
-
 package org.slf4j.helpers;
 
 import java.util.HashMap;
@@ -41,7 +46,7 @@ import org.slf4j.Marker;
  */
 public class BasicMarkerFactory implements IMarkerFactory {
 
-  Map markerMap = new HashMap();
+  Map<String,Marker> markerMap = new HashMap<String,Marker>();
   
   /**
    * Regular users should <em>not</em> create
@@ -50,7 +55,6 @@ public class BasicMarkerFactory implements IMarkerFactory {
    * org.slf4j.MarkerFactory#getMarker} method.
    */
   public BasicMarkerFactory() {
-      super();
   }
 
   /**
@@ -65,7 +69,7 @@ public class BasicMarkerFactory implements IMarkerFactory {
       throw new IllegalArgumentException("Marker name cannot be null");
     }
 
-    Marker marker = (Marker) markerMap.get(name);
+    Marker marker = markerMap.get(name);
     if (marker == null) {
       marker = new BasicMarker(name);
       markerMap.put(name, marker);

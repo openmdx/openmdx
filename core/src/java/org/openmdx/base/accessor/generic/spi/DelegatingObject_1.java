@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingObject_1.java,v 1.8 2007/11/04 16:14:58 hburger Exp $
+ * Name:        $Id: DelegatingObject_1.java,v 1.10 2008/04/04 01:11:56 hburger Exp $
  * Description: DelegatingObject_1 class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/04 16:14:58 $
+ * Date:        $Date: 2008/04/04 01:11:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,6 +67,7 @@ import org.openmdx.compatibility.base.naming.Path;
 /**
  * An abstract delegating object
  */
+@SuppressWarnings("unchecked")
 public class DelegatingObject_1
     implements Object_1_0, Object_1_3, Delegating_1_0 
 {
@@ -743,29 +744,6 @@ public class DelegatingObject_1
         Class listenerType
     ) throws ServiceException {
         return getDelegate().objGetEventListeners(feature,listenerType);
-    }
-
-
-    //--------------------------------------------------------------------------
-    // Synchronization
-    //--------------------------------------------------------------------------
-
-    /**
-     * Register a synchronization object for upward delegation.
-     *
-     * @param   synchronization
-     *          The synchronization object to be registered
-     *
-     * @exception ServiceException TOO_MANY_EVENT_LISTENERS
-     *            if an attempt is made to register more than one 
-     *            synchronization object.
-     * 
-     * @deprecated
-     */
-    public void objRegisterSynchronization(
-    org.openmdx.compatibility.base.accessor.object.cci.InstanceCallbacks_1_0 synchronization
-    ) throws ServiceException {
-        getDelegate().objRegisterSynchronization(synchronization);
     }
 
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OpenMdxInteractionSpec.java,v 1.3 2007/03/07 09:26:37 wfro Exp $
+ * Name:        $Id: OpenMdxInteractionSpec.java,v 1.4 2008/03/21 18:32:57 hburger Exp $
  * Description: AbstractInteractionSpec
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/07 09:26:37 $
+ * Date:        $Date: 2008/03/21 18:32:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,6 +72,10 @@ import javax.resource.cci.InteractionSpec;
 public class OpenMdxInteractionSpec 
     implements InteractionSpec {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 661467233378326060L;
     //------------------------------------------------------------------------
     public OpenMdxInteractionSpec(
     ) {

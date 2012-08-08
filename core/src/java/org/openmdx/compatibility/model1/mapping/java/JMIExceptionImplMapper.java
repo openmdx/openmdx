@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JMIExceptionImplMapper.java,v 1.3 2007/03/12 14:58:56 hburger Exp $
+ * Name:        $Id: JMIExceptionImplMapper.java,v 1.5 2008/04/02 17:39:09 wfro Exp $
  * Description: JMIExceptionTemplate 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/12 14:58:56 $
+ * Date:        $Date: 2008/04/02 17:39:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,12 +58,13 @@ import java.util.Iterator;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.mapping.AttributeDef;
 import org.openmdx.model1.mapping.ExceptionDef;
 import org.openmdx.model1.mapping.FeatureDef;
 import org.openmdx.model1.mapping.MapperUtils;
 
+@SuppressWarnings("unchecked")
 public class JMIExceptionImplMapper
     extends JMIAbstractMapper {
     
@@ -71,7 +72,7 @@ public class JMIExceptionImplMapper
     public JMIExceptionImplMapper(
         ModelElement_1_0 exceptionDef,
         Writer writer,
-        Model_1_0 model,
+        Model_1_3 model,
         String format, 
         String packageSuffix
     ) throws ServiceException {
@@ -88,7 +89,7 @@ public class JMIExceptionImplMapper
      * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
      */
     protected String mapperId() {
-        return "$Id: JMIExceptionImplMapper.java,v 1.3 2007/03/12 14:58:56 hburger Exp $";
+        return "$Id: JMIExceptionImplMapper.java,v 1.5 2008/04/02 17:39:09 wfro Exp $";
     }
 
     //-----------------------------------------------------------------------

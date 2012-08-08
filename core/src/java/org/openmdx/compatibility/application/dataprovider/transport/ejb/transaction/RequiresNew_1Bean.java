@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RequiresNew_1Bean.java,v 1.4 2008/02/19 13:55:15 hburger Exp $
+ * Name:        $Id: RequiresNew_1Bean.java,v 1.5 2008/06/11 17:08:46 hburger Exp $
  * Description: RequiresNew_1Bean
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/19 13:55:15 $
+ * Date:        $Date: 2008/06/11 17:08:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,7 @@ import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.base.transaction.Synchronization_1_0;
 import org.openmdx.base.transaction.TransactionManager_1;
 import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.DataproviderWrapper_1_0;
-import org.openmdx.compatibility.base.application.j2ee.SessionBean_1;
+import org.openmdx.compatibility.base.application.j2ee.AbstractDataprovider_1Bean;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequestContexts;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
@@ -76,7 +76,7 @@ import org.openmdx.kernel.exception.BasicException;
  * This EJB should have the transaction attribute NotSupported!
  */
 public class RequiresNew_1Bean
-    extends SessionBean_1
+    extends AbstractDataprovider_1Bean
     implements DataproviderWrapper_1_0 
 {
 

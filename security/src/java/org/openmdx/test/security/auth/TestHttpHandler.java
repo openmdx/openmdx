@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestHttpHandler.java,v 1.11 2005/06/16 15:09:08 hburger Exp $
+ * Name:        $Id: TestHttpHandler.java,v 1.12 2008/04/04 17:55:31 hburger Exp $
  * Description: Test Callback Handler
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/16 15:09:08 $
+ * Date:        $Date: 2008/04/04 17:55:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -104,7 +104,7 @@ public class TestHttpHandler extends ServletTestCase {
     }
 
     protected ServletConfig newConfig(){
-        Map map = new HashMap();
+        Map<String,Object> map = new HashMap<String,Object>();
         map.put("debug", "true");
         map.put("login-configuration", "xri:+resource/org/openmdx/test/security/auth/login.configuration");
         return new TestConfig(map);

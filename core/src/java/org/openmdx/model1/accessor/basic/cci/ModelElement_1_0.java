@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelElement_1_0.java,v 1.3 2004/04/02 16:59:04 wfro Exp $
+ * Name:        $Id: ModelElement_1_0.java,v 1.6 2008/03/31 15:55:41 hburger Exp $
  * Description: ModelElement_1_0 interface
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:04 $
+ * Date:        $Date: 2008/03/31 15:55:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,14 +51,38 @@
  */
 package org.openmdx.model1.accessor.basic.cci;
 
+import java.util.Map;
+
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
 
 public interface ModelElement_1_0
-  extends DataproviderObject_1_0 {
+    extends DataproviderObject_1_0 {
 
-  /**
-   * Returns the containing model package of the element.
-   */
-  public Model_1_0 getModel();
+    /**
+     * Returns the containing model package of the element.
+     */
+    public Model_1_4 getModel();
   
+    public boolean isAliasType();
+  
+    public boolean isPrimitiveType();
+  
+    public boolean isStructureType();
+  
+    public boolean isStructureFieldType();
+    
+    public boolean isClassType();
+    
+    public boolean isReferenceType();
+    
+    public boolean isAttributeType();
+    
+    public boolean isOperationType();
+    
+    public boolean isPackageType();
+    
+    @SuppressWarnings("unchecked")
+    public boolean isReferenceStoredAsAttribute(Map elements) throws ServiceException;
+    
 }

@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings({"serial","unchecked"})
 public final class DirectionKindEnum implements DirectionKind {
     public static final DirectionKindEnum IN_DIR = new DirectionKindEnum("in_dir");
     public static final DirectionKindEnum OUT_DIR = new DirectionKindEnum("out_dir");

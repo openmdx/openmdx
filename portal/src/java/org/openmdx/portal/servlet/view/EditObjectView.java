@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectView.java,v 1.28 2008/02/09 00:50:32 wfro Exp $
+ * Name:        $Id: EditObjectView.java,v 1.35 2008/05/27 00:28:59 wfro Exp $
  * Description: EditObjectView
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/09 00:50:32 $
+ * Date:        $Date: 2008/05/27 00:28:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,12 +61,14 @@ package org.openmdx.portal.servlet.view;
 import java.io.Serializable;
 import java.util.Map;
 
+import javax.jdo.PersistenceManager;
+
+import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.jmi.cci.RefContainer_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.conversion.UUIDConversion;
+import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -87,26 +89,28 @@ public class EditObjectView
         String id,
         String containerElementId,
         RefObject_1_0 object,
-        String editObjectRefMofId,
+        Path editObjectIdentity,
         ApplicationContext application,
-        Map historyActions,
+        PersistenceManager pm,
+        Map<Path,Action> historyActions,
         String lookupType,
         Map restrictToElements, 
-        boolean isModal,
+        ViewMode mode,
         ControlFactory controlFactory
     ) {
         this(
             id,
             containerElementId,
             object,
-            editObjectRefMofId,
+            editObjectIdentity,
             application,
+            pm,
             historyActions,
             lookupType,
             restrictToElements,       
             null,
             null,
-            isModal,
+            mode,
             controlFactory
         );
     }
@@ -130,14 +134,15 @@ public class EditObjectView
         String id,
         String containerElementId,
         RefObject_1_0 object,
-        String editObjectRefMofId,
+        Path editObjectIdentity,
         ApplicationContext application,
-        Map historyActions,
+        PersistenceManager pm,
+        Map<Path,Action> historyActions,
         String lookupType,
         Map restrictToElements,       
         RefObject_1_0 parent,
         String forReference,
-        boolean isModal,
+        ViewMode mode,
         ControlFactory controlFactory
     ) {
         super(
@@ -150,9 +155,9 @@ public class EditObjectView
             restrictToElements,
             controlFactory
         );
-        this.editObjectRefMofId = editObjectRefMofId;    
+        this.editObjectIdentity = editObjectIdentity;    
         this.forReference = forReference;
-        this.isModal = isModal;
+        this.mode = mode;
         this.parent = parent;
         EditInspectorControl inspectorControl = controlFactory.createEditInspectorControl(
             id,
@@ -177,6 +182,7 @@ public class EditObjectView
     return this.parent == null;
   }
   
+  //-------------------------------------------------------------------------
   public RefObject_1_0 getParent(
   ) {
       return this.parent;
@@ -194,11 +200,8 @@ public class EditObjectView
   //-------------------------------------------------------------------------
   public void storeObject(
       Map parameterMap,
-      Map attributeMap
+      Map<String,Attribute> attributeMap
   ) {
-      RefPackage_1_0 pkg = (RefPackage_1_0)this.getRefObject().refOutermostPackage();
-      pkg.refBegin();
-
       // Collect all attributes
       for(int i = 0; i < this.getAttributePane().getAttributeTab().length; i++) {
         AttributeTab tab = this.getAttributePane().getAttributeTab()[i];
@@ -218,16 +221,16 @@ public class EditObjectView
           }
         }
       }
-      RefObject_1_0 target = this.editObjectRefMofId == null
+      RefObject_1_0 target = this.editObjectIdentity == null
           ? this.getRefObject()
-          : (RefObject_1_0)pkg.refObject(this.editObjectRefMofId);
-      this.editObjectRefMofId = target.refMofId();
+          : (RefObject_1_0)pm.getObjectById(this.editObjectIdentity);
+      this.editObjectIdentity = target.refGetPath();
       this.application.getPortalExtension().updateObject(
           target,
           parameterMap,
           attributeMap,
           this.application,
-          (RefPackage_1_0)this.getRefObject().refOutermostPackage()
+          this.getPersistenceManager()
       );
       if(!this.isEditMode()) {
           Object[] qualifiers = (Object[])parameterMap.get("qualifier");
@@ -236,16 +239,17 @@ public class EditObjectView
                   UUIDConversion.toUID(UUIDs.getGenerator().next())
               };    
           }
-          // Assert that this.parent is retrieved from the same package as this.object
+          // Assert that this.parent is retrieved from the same persistence manager as this.object
           // A reload during edit can change the package which would lead to an exception
           // when adding the object with refAddValue
-          this.parent = (RefObject_1_0)((RefPackage_1_0)this.getRefObject().refOutermostPackage()).refObject(this.parent.refMofId());
-          ((RefContainer_1_0)this.parent.refGetValue(this.forReference)).refAddValue(
+          this.parent = (RefObject_1_0)this.getPersistenceManager().getObjectById(this.parent.refGetPath());
+          Object container = this.parent.refGetValue(this.forReference);
+          ((RefContainer)container).refAdd(
+              org.oasisopen.cci2.QualifierType.REASSIGNABLE,
               qualifiers.length > 0 ? (String)qualifiers[0] : "",
               (RefObject_1_0)this.object
           );
       }
-      pkg.refCommit();    
   }
   
   //-------------------------------------------------------------------------
@@ -303,15 +307,15 @@ public class EditObjectView
     }
     
     //-------------------------------------------------------------------------
-    public boolean isModal(
+    public ViewMode getMode(
     ) {
-        return this.isModal;
+        return this.mode;
     }
     
     //-------------------------------------------------------------------------
-    public String getEditObjectRefMofId(
+    public Path getEditObjectIdentity(
     ) {
-        return this.editObjectRefMofId;
+        return this.editObjectIdentity;
     }
     
     //-------------------------------------------------------------------------
@@ -328,9 +332,9 @@ public class EditObjectView
     private static final long serialVersionUID = 3258411746451731505L;
 
     private RefObject_1_0 parent = null;
-    private String editObjectRefMofId = null;
+    private Path editObjectIdentity = null;
     private String forReference = null;
-    private boolean isModal = false;
+    private ViewMode mode = ViewMode.STANDARD;
   
 }
 

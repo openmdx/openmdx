@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1Bean.java,v 1.34 2008/02/19 13:56:54 hburger Exp $
- * Description: Dataprovider_1Bean class
- * Revision:    $Revision: 1.34 $
+ * Name:        $Id: UnitOfWork_1Bean.java,v 1.39 2008/06/11 17:08:33 hburger Exp $
+ * Description: Unit Of Work Bean
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/19 13:56:54 $
+ * Date:        $Date: 2008/06/11 17:08:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,7 @@ import javax.transaction.UserTransaction;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.base.transaction.Synchronization_1_0;
-import org.openmdx.compatibility.base.application.j2ee.SessionBean_1;
+import org.openmdx.compatibility.base.application.j2ee.AbstractDataprovider_1Bean;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequestContexts;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
@@ -74,10 +74,10 @@ import org.openmdx.kernel.log.SysLog;
 
 
 /**
- * UnitOfWork_1Bean
+ * Unit Of Work Bean
  */
 public abstract class UnitOfWork_1Bean 
-    extends SessionBean_1 
+    extends AbstractDataprovider_1Bean 
     implements Dataprovider_1_0, Synchronization_1_0
 {
 
@@ -419,7 +419,6 @@ public abstract class UnitOfWork_1Bean
      * Pre-process a single of unit of work
      *
      * @param   header          the service header
-     * @param   transaction     the user transaction
      * @param   unitOfWork      thr unit of work
      *
      * @return  the reply
@@ -497,7 +496,7 @@ public abstract class UnitOfWork_1Bean
      *
      * @param   header          the service header
      * @param   transaction     the user transaction
-     * @param   unitOfWork      thr unit of work
+     * @param   unitOfWork      the unit of work
      *
      * @return  the reply
      */

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestIdentifier.java,v 1.8 2007/04/10 13:56:24 hburger Exp $
+ * Name:        $Id: TestIdentifier.java,v 1.9 2008/03/04 14:23:17 hburger Exp $
  * Description: Test "ear" Protocol Handler
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/04/10 13:56:24 $
+ * Date:        $Date: 2008/03/04 14:23:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -277,6 +277,7 @@ public class TestIdentifier extends TestCase {
 				modelElementName, 
 				removablePrefix, 
 				prependablePrefix, 
+				null, // removableSuffix
 				appendableSuffix
     		)
     	);

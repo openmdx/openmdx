@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: NameBasedContext.java,v 1.7 2008/01/09 15:55:07 hburger Exp $
+ * Name:        $Id: NameBasedContext.java,v 1.8 2008/06/28 00:21:33 hburger Exp $
  * Description: Name Based Context
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/09 15:55:07 $
+ * Date:        $Date: 2008/06/28 00:21:33 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -210,7 +210,7 @@ public abstract class NameBasedContext extends AbstractContext {
         Name name
     ) throws NamingException {
         return name.isEmpty() ?
-            NameBasedContext.nameParser :
+            AbstractContext.nameParser :
             lookupPrefix1(name).getNameParser(name.getSuffix(1));
     }
 
@@ -315,7 +315,7 @@ public abstract class NameBasedContext extends AbstractContext {
                 try {
                     return NamingManager.getObjectInstance(
                     	object, 
-						NameBasedContext.nameParser.parse(nameComponent), 
+						AbstractContext.nameParser.parse(nameComponent), 
 						this, 
 						this.environment
 					);
@@ -332,7 +332,7 @@ public abstract class NameBasedContext extends AbstractContext {
                 return object;
             }
         } catch (NamingException namingException){
-            namingException.setRemainingName(NameBasedContext.nameParser.parse(nameComponent));
+            namingException.setRemainingName(AbstractContext.nameParser.parse(nameComponent));
             namingException.setResolvedObj(object);
             throw namingException;
         }
@@ -376,7 +376,7 @@ public abstract class NameBasedContext extends AbstractContext {
         String name, 
         Object obj
     ) throws NamingException {
-        bind(NameBasedContext.nameParser.parse(name), obj);
+        bind(AbstractContext.nameParser.parse(name), obj);
     }
     
     /* (non-Javadoc)
@@ -385,7 +385,7 @@ public abstract class NameBasedContext extends AbstractContext {
     public void unbind(
         String name
     ) throws NamingException {
-        unbind(NameBasedContext.nameParser.parse(name));
+        unbind(AbstractContext.nameParser.parse(name));
     }
 
     /* (non-Javadoc)
@@ -396,8 +396,8 @@ public abstract class NameBasedContext extends AbstractContext {
         String prefix
     ) throws NamingException {
     	return composeName(
-    		NameBasedContext.nameParser.parse(name),
-			NameBasedContext.nameParser.parse(prefix)
+    		AbstractContext.nameParser.parse(name),
+			AbstractContext.nameParser.parse(prefix)
 		).toString();
     }
 
@@ -407,7 +407,7 @@ public abstract class NameBasedContext extends AbstractContext {
     public Context createSubcontext(
          String name
     ) throws NamingException {
-        return createSubcontext(NameBasedContext.nameParser.parse(name));
+        return createSubcontext(AbstractContext.nameParser.parse(name));
     }
 
     /* (non-Javadoc)
@@ -416,7 +416,7 @@ public abstract class NameBasedContext extends AbstractContext {
     public void destroySubcontext(
         String name
     ) throws NamingException {
-        destroySubcontext(NameBasedContext.nameParser.parse(name));
+        destroySubcontext(AbstractContext.nameParser.parse(name));
     }
 
     /* (non-Javadoc)
@@ -426,8 +426,8 @@ public abstract class NameBasedContext extends AbstractContext {
         String name
     ) throws NamingException {
         return "".equals(name) ?
-            NameBasedContext.nameParser :
-            getNameParser(NameBasedContext.nameParser.parse(name));
+            AbstractContext.nameParser :
+            getNameParser(AbstractContext.nameParser.parse(name));
     }
 
     /* (non-Javadoc)
@@ -435,7 +435,7 @@ public abstract class NameBasedContext extends AbstractContext {
      */
     public NamingEnumeration<Binding> listBindings(String name) throws NamingException
     {
-        return listBindings(NameBasedContext.nameParser.parse(name));
+        return listBindings(AbstractContext.nameParser.parse(name));
     }
 
     /* (non-Javadoc)
@@ -444,7 +444,7 @@ public abstract class NameBasedContext extends AbstractContext {
     public NamingEnumeration<NameClassPair> list(
         String name
     ) throws NamingException {
-        return list(NameBasedContext.nameParser.parse(name));
+        return list(AbstractContext.nameParser.parse(name));
     }
 
     /* (non-Javadoc)
@@ -453,7 +453,7 @@ public abstract class NameBasedContext extends AbstractContext {
     public Object lookup(
         String name
     ) throws NamingException {
-        return lookup(NameBasedContext.nameParser.parse(name));
+        return lookup(AbstractContext.nameParser.parse(name));
     }
 
     /* (non-Javadoc)
@@ -462,7 +462,7 @@ public abstract class NameBasedContext extends AbstractContext {
     public Object lookupLink(
         String name
     ) throws NamingException {
-        return lookupLink(NameBasedContext.nameParser.parse(name));
+        return lookupLink(AbstractContext.nameParser.parse(name));
     }
 
     /* (non-Javadoc)
@@ -472,7 +472,7 @@ public abstract class NameBasedContext extends AbstractContext {
         String name, 
         Object obj
     ) throws NamingException {
-        rebind(NameBasedContext.nameParser.parse(name), obj);
+        rebind(AbstractContext.nameParser.parse(name), obj);
     }
 
     /* (non-Javadoc)
@@ -482,7 +482,7 @@ public abstract class NameBasedContext extends AbstractContext {
          String oldName, 
          String newName
     ) throws NamingException {
-        rename(NameBasedContext.nameParser.parse(oldName), NameBasedContext.nameParser.parse(newName));
+        rename(AbstractContext.nameParser.parse(oldName), AbstractContext.nameParser.parse(newName));
     }
 
 }

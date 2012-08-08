@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateMarshaller.java,v 1.14 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: DateMarshaller.java,v 1.15 2008/04/09 12:34:01 hburger Exp $
  * Description: DateMarshaller class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/04/09 12:34:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,22 +50,23 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
-import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.Datatypes;
 
 //---------------------------------------------------------------------------
 /**
  * Marshals Object -> XMLGregorianCalendar and XMLGregorianCalendar -> Object. 
  */
 public class DateMarshaller
-  implements Marshaller {
+  extends Datatypes
+  implements Marshaller, ReluctantUnmarshalling 
+{
 
   //-------------------------------------------------------------------------
   private DateMarshaller(
@@ -98,25 +99,25 @@ public class DateMarshaller
         if(limit >= 0) date = date.substring(0, limit);
         int length = date.length();
         switch (length) {
-          case 0: return xmlDatatypeFactory().newXMLGregorianCalendarDate(
+          case 0: return getFactory().newXMLGregorianCalendarDate(
             DatatypeConstants.FIELD_UNDEFINED, // year
             DatatypeConstants.FIELD_UNDEFINED, // month
             DatatypeConstants.FIELD_UNDEFINED, // day 
             DatatypeConstants.FIELD_UNDEFINED // timezone
           );
-          case 1: case 2: return xmlDatatypeFactory().newXMLGregorianCalendarDate(
+          case 1: case 2: return getFactory().newXMLGregorianCalendarDate(
             DatatypeConstants.FIELD_UNDEFINED, // year
             DatatypeConstants.FIELD_UNDEFINED, // month
             Integer.parseInt(date), // day
             DatatypeConstants.FIELD_UNDEFINED // timezone
           );
-          case 3: case 4: return xmlDatatypeFactory().newXMLGregorianCalendarDate(
+          case 3: case 4: return getFactory().newXMLGregorianCalendarDate(
             DatatypeConstants.FIELD_UNDEFINED, // year
             Integer.parseInt(date.substring(0, length - 2)), // month
             Integer.parseInt(date.substring(length - 2)), // day
             DatatypeConstants.FIELD_UNDEFINED // timezone
           );
-          default: return xmlDatatypeFactory().newXMLGregorianCalendarDate(
+          default: return getFactory().newXMLGregorianCalendarDate(
             Integer.parseInt(date.substring(0, length - 4)), // year
             Integer.parseInt(date.substring(length - 4, length - 2)), // month
             Integer.parseInt(date.substring(length - 2)), // day
@@ -189,26 +190,8 @@ public class DateMarshaller
   //-------------------------------------------------------------------------
   private final boolean forward;
 
-  static private DateMarshaller toMarshaller = new DateMarshaller(true);
-  static private DateMarshaller fromMarshaller = new DateMarshaller(false);
-
-  /**
-   * A lazy initialized DatatypeFactory instance
-   */
-  private DatatypeFactory datatypeFactory = null;
-
-  /**
-   * @return a Datatype Factory Instance
-   */
-  protected synchronized DatatypeFactory xmlDatatypeFactory(
-  ){
-    if(datatypeFactory == null) try {
-      datatypeFactory = DatatypeFactory.newInstance();
-    } catch (DatatypeConfigurationException e) {
-      throw new RuntimeServiceException(e);
-    }
-    return datatypeFactory;
-  }
+  static private final DateMarshaller toMarshaller = new DateMarshaller(true);
+  static private final DateMarshaller fromMarshaller = new DateMarshaller(false);
 
 }
 

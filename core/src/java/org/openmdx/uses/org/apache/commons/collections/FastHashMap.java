@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -57,17 +58,15 @@ import java.util.Set;
  * Double-Checked Locking Idiom Is Broken Declaration</a>.</p>
  *
  * @since Commons Collections 1.0
- * @version $Revision: 1.4 $ $Date: 2007/10/10 16:06:13 $
+ * @version $Revision: 1.7 $ $Date: 2008/06/27 16:59:28 $
  * 
  * @author Craig R. McClanahan
  * @author Stephen Colebourne
  */
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class FastHashMap extends HashMap {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3258688814791734580L;
 
     /**
      * The underlying map we are managing.
@@ -159,11 +158,11 @@ public class FastHashMap extends HashMap {
      * @return the value mapped to that key, or null
      */
     public Object get(Object key) {
-        if (fast) {
-            return (map.get(key));
+        if (this.fast) {
+            return (this.map.get(key));
         } else {
-            synchronized (map) {
-                return (map.get(key));
+            synchronized (this.map) {
+                return (this.map.get(key));
             }
         }
     }
@@ -174,11 +173,11 @@ public class FastHashMap extends HashMap {
      * @return the current size of the map
      */
     public int size() {
-        if (fast) {
-            return (map.size());
+        if (this.fast) {
+            return (this.map.size());
         } else {
-            synchronized (map) {
-                return (map.size());
+            synchronized (this.map) {
+                return (this.map.size());
             }
         }
     }
@@ -189,11 +188,11 @@ public class FastHashMap extends HashMap {
      * @return is the map currently empty
      */
     public boolean isEmpty() {
-        if (fast) {
-            return (map.isEmpty());
+        if (this.fast) {
+            return (this.map.isEmpty());
         } else {
-            synchronized (map) {
-                return (map.isEmpty());
+            synchronized (this.map) {
+                return (this.map.isEmpty());
             }
         }
     }
@@ -467,7 +466,6 @@ public class FastHashMap extends HashMap {
     private abstract class CollectionView implements Collection {
 
         public CollectionView() {
-            super();
         }
 
         protected abstract Collection get(Map map);
@@ -676,7 +674,7 @@ public class FastHashMap extends HashMap {
     /**
      * Set implementation over the keys of the FastHashMap
      */
-    private class KeySet extends CollectionView implements Set {
+    class KeySet extends CollectionView implements Set {
     
         protected Collection get(Map map) {
             return map.keySet();
@@ -691,7 +689,7 @@ public class FastHashMap extends HashMap {
     /**
      * Collection implementation over the values of the FastHashMap
      */
-    private class Values extends CollectionView {
+    class Values extends CollectionView {
     
         protected Collection get(Map map) {
             return map.values();
@@ -705,7 +703,7 @@ public class FastHashMap extends HashMap {
     /**
      * Set implementation over the entries of the FastHashMap
      */
-    private class EntrySet extends CollectionView implements Set {
+    class EntrySet extends CollectionView implements Set {
     
         protected Collection get(Map map) {
             return map.entrySet();

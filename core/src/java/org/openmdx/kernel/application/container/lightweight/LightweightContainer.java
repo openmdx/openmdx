@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightContainer.java,v 1.77 2008/01/25 08:24:50 hburger Exp $
+ * Name:        $Id: LightweightContainer.java,v 1.81 2008/05/05 17:51:20 hburger Exp $
  * Description: Lightweight Container
- * Revision:    $Revision: 1.77 $
+ * Revision:    $Revision: 1.81 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 08:24:50 $
+ * Date:        $Date: 2008/05/05 17:51:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -96,7 +96,6 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.TextOutputCallback;
 import javax.sql.XADataSource;
-import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -133,6 +132,7 @@ import org.openmdx.kernel.naming.container.openmdx.ContainerContextFactory;
 import org.openmdx.kernel.naming.container.openmdx.openmdxURLContextFactory;
 import org.openmdx.kernel.naming.spi.ClassLoadertContextFactory;
 import org.openmdx.kernel.naming.spi.rmi.Context_1;
+import org.openmdx.kernel.naming.tomcat.LinkReference;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.openmdx.kernel.url.protocol.AbstractURLConnection;
@@ -159,7 +159,7 @@ public class LightweightContainer {
      * @param mode the mode in which the lightweight container shall be launched
      * @param applicationContextFactory
      * @param componentContextFactory 
-     * @param contextSwitcher TODO
+     * @param contextSwitcher 
      * @throws NamingException 
      */
     private LightweightContainer(
@@ -168,7 +168,7 @@ public class LightweightContainer {
         InitialContextFactory componentContextFactory, 
         ContextSwitcher contextSwitcher
     ) throws NamingException {
-        logger.info("{}|{}", "Starting", mode);
+        logger.info("Starting {}", mode);
         LightweightContainer.instance = this;
         this.mode = mode;
         //
@@ -260,7 +260,7 @@ public class LightweightContainer {
                 i.hasNext();
             ){
                 String url = i.next();
-                logger.info("{}|{}","Auto-deploying connector", url);
+                logger.info("Auto-deploying connector {}", url);
                 try {
                     Report report = deployConnector(new URL(url));
                     log("connector", url, report);
@@ -276,7 +276,7 @@ public class LightweightContainer {
                 i.hasNext();
             ){
                 String url = i.next();
-                logger.info("{}|{}","Auto-deploying application", url);
+                logger.info("Auto-deploying application {}", url);
                 try {
                     Report[] reports = deployApplication(new URL(url));
                     log("application", url, reports);
@@ -493,8 +493,7 @@ public class LightweightContainer {
             return LightweightContainer.instance;
         } else {
             logger.warn(
-                "{}|{}", 
-                "LightweightContainer.getInstance() in order to acquire an instance is deprecated",
+                "LightweightContainer.getInstance() in order to acquire an instance is deprecated. " +
                 "Use getInstance(Mode.ENTERPRISE_APPLICATION_CONTAINER) instead"
              );
             return getInstance(Mode.ENTERPRISE_APPLICATION_CONTAINER);
@@ -1189,6 +1188,11 @@ public class LightweightContainer {
             componentContext.bind("UserTransaction", userTransaction);
             report.addInfo("'UserTransaction' bound to 'java:comp'");
         }
+        componentContext.bind(
+            "TransactionSynchronizationRegistry",
+            this.transactionManager.getTransactionSynchronizationRegistry()
+        );
+        report.addInfo("'TransactionSynchronizationRegistry' bound to 'java:comp'");
         //
         // Create Instance Pool
         //
@@ -1223,12 +1227,14 @@ public class LightweightContainer {
             instanceFactory,
             sessionBean.getMaximumCapacity().intValue(),
             GenericObjectPool.WHEN_EXHAUSTED_FAIL,
-            GenericObjectPool.DEFAULT_MAX_WAIT
+            GenericObjectPool.DEFAULT_MAX_WAIT,
+            sessionBean.getMaximumCapacity().intValue()
         ) : new GenericObjectPool(
             instanceFactory,
             sessionBean.getMaximumCapacity().intValue(),
             GenericObjectPool.WHEN_EXHAUSTED_BLOCK,
-            sessionBean.getMaximumWait().longValue()
+            sessionBean.getMaximumWait().longValue(),
+            sessionBean.getMaximumCapacity().intValue()
         );
             Object callerContext = instanceFactory.setBeanContext();
             //
@@ -1254,19 +1260,26 @@ public class LightweightContainer {
                     containerTransaction,
                     this.transactionManager
                 );
-                sessionContext.remoteReference = getMode() == Mode.ENTERPRISE_JAVA_BEAN_CONTAINER ? createProxyReference (
-                    homeFactory.getHomeClass(),
-                    homeFactory.getHomeHandler()
-                ) : createRemoteReference(
-                    homeFactory.getHome()
-                );
-                sessionContext.localReference = createLocalReference(
-                    homeFactory.getLocalHome()
-                );
+                if(getMode() == Mode.ENTERPRISE_JAVA_BEAN_CONTAINER){
+                    sessionContext.remoteReference = createProxyReference (
+                        homeFactory.getHomeClass(),
+                        homeFactory.getHomeHandler()
+                    );
+                    sessionContext.localReference = createExplicitReference(
+                        homeFactory.getLocalHome()
+                    );
+                } else {
+                    sessionContext.remoteReference = createStandardReference(
+                        homeFactory.getHome()
+                    );
+                    sessionContext.localReference = createStandardReference(
+                        homeFactory.getLocalHome()
+                    );
+                }
                 for(
-                        int i = sessionBean.getInitialCapacity().intValue();
-                        i > 0;
-                        i--
+                    int i = sessionBean.getInitialCapacity().intValue();
+                    i > 0;
+                    i--
                 ) try {
                     instancePool.addObject();
                 } catch (Exception exception) {
@@ -1323,6 +1336,10 @@ public class LightweightContainer {
         componentContext.bind(
             "UserTransaction",
             new LightweightUserTransaction(this.transactionManager)
+        );
+        componentContext.bind(
+            "TransactionSynchronizationRegistry",
+            this.transactionManager.getTransactionSynchronizationRegistry()
         );
         try {
             return new Main(
@@ -1782,37 +1799,15 @@ public class LightweightContainer {
     }
 
     /**
-     * Create a LinkRef for a given object
+     * Create a link reference for a given home or local home object
      * 
-     * @param object
-     * 
-     * @return the link ref or <code>null</code> if the object is <code>null</code>
-     * 
-     * @throws NamingException
-     */
-    private LinkRef createLocalReference(
-        Object object
-    ) throws NamingException{
-        if(object == null) {
-            return null;
-        } else {
-            String id = this.uuidGenerator.next().toString();
-            this.privateContext.bind(id, object);
-            return new LinkRef(PRIVATE_PREFIX + id);
-        }
-    }
-
-    /**
-     * Create a HomeReference for a given handler
-     * 
-     * @param homeInterface
-     * @param homeHandler
+     * @param object home or local home object
      * 
      * @return the Reference or <code>null</code> if the object is <code>null</code>
      * 
      * @throws NamingException
      */
-    private Reference createRemoteReference(
+    private Reference createStandardReference(
         Object object
     ) throws NamingException{
         if(object == null) {
@@ -1845,6 +1840,27 @@ public class LightweightContainer {
             homeInterface,
             PRIVATE_PREFIX + id
         );
+    }
+
+    /**
+     * Create a link reference for a given local home object
+     * 
+     * @param object local home object
+     * 
+     * @return the Reference or <code>null</code> if the object is <code>null</code>
+     * 
+     * @throws NamingException
+     */
+    private Reference createExplicitReference(
+        Object object
+    ) throws NamingException{
+        if(object == null) {
+            return null;
+        } else {
+            String id = this.uuidGenerator.next().toString();
+            this.privateContext.bind(id, object);
+            return new LinkReference(PRIVATE_PREFIX + id);
+        }
     }
 
     
@@ -1921,9 +1937,9 @@ public class LightweightContainer {
     ){
         reports.add(report);
         if(report.isSuccess()){
-            logger.info("{}|{}","Successfully validated", report);
+            logger.info("Successfully validated|{}", report);
         } else {
-            logger.warn("{}|{}","Validation failed", report);
+            logger.warn("Validation failed|{}", report);
         }
         return report.isSuccess();
     }
@@ -2047,8 +2063,7 @@ public class LightweightContainer {
             );
             System.out.flush();
             logger.info(
-                "{}|{}",
-                "ENTERPRISE_JAVA_BEAN_SERVER is listening",
+                "ENTERPRISE_JAVA_BEAN_SERVER is listening at {}",
                 providerURL
             );
         } catch (Exception e) {
@@ -2140,7 +2155,8 @@ public class LightweightContainer {
     /**
      * Transaction Manager
      */
-    private final TransactionManager transactionManager = new LightweightTransactionManager();
+    private final LightweightTransactionManager transactionManager = 
+        new LightweightTransactionManager();
 
     /**
      * The callback handler in case of an application client

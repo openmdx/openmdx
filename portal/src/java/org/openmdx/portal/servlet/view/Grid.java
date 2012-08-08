@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Grid.java,v 1.46 2007/12/13 01:24:03 wfro Exp $
+ * Name:        $Id: Grid.java,v 1.48 2008/04/04 11:55:30 hburger Exp $
  * Description: GridControl
- * Revision:    $Revision: 1.46 $
+ * Revision:    $Revision: 1.48 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:24:03 $
+ * Date:        $Date: 2008/04/04 11:55:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -120,6 +120,7 @@ import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 
+@SuppressWarnings("unchecked")
 public abstract class Grid
     extends ControlState
     implements Serializable {
@@ -245,7 +246,7 @@ public abstract class Grid
             );
           }
           catch(ServiceException e) {
-              AppLog.warning(e.getMessage(), e.getCause(), 1);
+              AppLog.warning(e.getMessage(), e.getCause());
           }
           this.addObjectAction = addObjectAction;
           this.removeObjectAction = removeObjectAction;
@@ -342,7 +343,7 @@ public abstract class Grid
                 }
             }
             catch(ServiceException e) {
-                AppLog.warning(e.getMessage(), e.getCause(), 1);
+                AppLog.warning(e.getMessage(), e.getCause());
             }
         }
     
@@ -1380,7 +1381,7 @@ public abstract class Grid
       short order,
       boolean add
   ) {
-      ApplicationContext application = this.view.getApplicationContext();
+      /* ApplicationContext application = */ this.view.getApplicationContext();
       GridControl gridControl = this.getGridControl();
       
     // current implementation allows only one column to be ordered

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ServiceException.java,v 1.10 2006/08/11 09:24:07 hburger Exp $
+ * Name:        $Id: ServiceException.java,v 1.11 2008/03/21 18:30:08 hburger Exp $
  * Description: ServiceException class
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:07 $
+ * Date:        $Date: 2008/03/21 18:30:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +57,6 @@ import java.text.SimpleDateFormat;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.text.StringBuilders;
 
 public final class ServiceException
   extends Exception
@@ -170,7 +169,7 @@ public final class ServiceException
      */
     public ServiceException log(
     ) {
-        SysLog.warning(getMessage(), getCause(), 1);
+        SysLog.warning(this);
         return this;
       }
 
@@ -523,7 +522,7 @@ public final class ServiceException
 
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        CharSequence     tmp = StringBuilders.newStringBuilder();
+        StringBuilder     tmp = new StringBuilder();
         String           placeHolder;
         BasicException.Parameter[]         props = getParameters();
         boolean          replaced;
@@ -535,9 +534,7 @@ public final class ServiceException
             if (startPos >= 0) {
                 endPos = format.indexOf("}",startPos);
                 if (endPos >= 0) {
-                    StringBuilders.asStringBuilder(
-                        tmp
-                    ).append(
+                    tmp.append(
                         format.substring(pos, startPos)
                     );
                     placeHolder=format.substring(startPos+2, endPos);
@@ -547,9 +544,7 @@ public final class ServiceException
                     for(int ii=0; ii<props.length; ii++) {
                         if (props[ii].getName().equals(placeHolder)) {
                             replaced = true;
-                            StringBuilders.asStringBuilder(
-                                tmp
-                            ).append(
+                            tmp.append(
                                 props[ii].getValue()
                             );
                         }
@@ -558,51 +553,35 @@ public final class ServiceException
                     // check for exception parameters
                     if (!replaced) {
                         if (placeHolder.equals("EX_TIMESTAMP")) {
-                            StringBuilders.asStringBuilder(
-                                tmp
-                            ).append(
+                            tmp.append(
                                 formatter.format(getTimestamp())
                             );
                         }else if (placeHolder.equals("EX_CLASS")) {
-                            StringBuilders.asStringBuilder(
-                                tmp
-                            ).append(
+                            tmp.append(
                                 getClassName()
                             );
                         }else if (placeHolder.equals("EX_METHOD")) {
-                            StringBuilders.asStringBuilder(
-                                tmp
-                            ).append(
+                            tmp.append(
                                 getMethodName()
                             );
                         }else if (placeHolder.equals("EX_LINE")) {
-                            StringBuilders.asStringBuilder(
-                                tmp
-                            ).append(
+                            tmp.append(
                                 getLineNr()
                             );
                         }else if (placeHolder.equals("EX_DOMAIN")) {
-                            StringBuilders.asStringBuilder(
-                                tmp
-                            ).append(
+                            tmp.append(
                                 getDomain()
                             );
                         }else if (placeHolder.equals("EX_ERRORCODE")) {
-                            StringBuilders.asStringBuilder(
-                                tmp
-                            ).append(
+                            tmp.append(
                                 getErrorCode()
                             );
                         }else if (placeHolder.equals("EX_DESCRIPTION")) {
-                            StringBuilders.asStringBuilder(
-                                tmp
-                            ).append(
+                            tmp.append(
                                 getDescription()
                             );
                         }else{
-                            StringBuilders.asStringBuilder(
-                                tmp
-                            ).append(
+                            tmp.append(
                                 "<unknown '"
                             ).append(
                                 placeHolder
@@ -614,17 +593,13 @@ public final class ServiceException
 
                     pos = endPos + 1;
                 }else{
-                    StringBuilders.asStringBuilder(
-                        tmp
-                    ).append(
+                    tmp.append(
                         format.substring(pos, format.length())
                     );
                     break;
                 }
             }else{
-                StringBuilders.asStringBuilder(
-                    tmp
-                ).append(
+                tmp.append(
                     format.substring(pos, format.length())
                 );
                 break;

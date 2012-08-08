@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -15,6 +16,7 @@
  */
 package org.openmdx.uses.org.apache.commons.collections.buffer;
 
+import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -44,21 +46,28 @@ import org.openmdx.uses.org.apache.commons.collections.BufferUnderflowException;
  * {@link org.openmdx.uses.org.apache.commons.collections.BufferUtils#synchronizedBuffer(Buffer)} or
  * {@link org.openmdx.uses.org.apache.commons.collections.buffer.SynchronizedBuffer#decorate(Buffer)}
  * to provide synchronized access to a <code>PriorityBuffer</code>:
- *
  * <pre>
  * Buffer heap = SynchronizedBuffer.decorate(new PriorityBuffer());
  * </pre>
+ * <p>
+ * This class is Serializable from Commons Collections 3.2.
  *
  * @since Commons Collections 3.0 (previously BinaryHeap v1.0)
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:24 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:09 $
  * 
  * @author Peter Donald
  * @author Ram Chidambaram
  * @author Michael A. Smith
  * @author Paul Jack
  * @author Stephen Colebourne
+ * @author Steve Phelps
  */
-public class PriorityBuffer extends AbstractCollection implements Buffer {
+@SuppressWarnings("unchecked")
+public class PriorityBuffer extends AbstractCollection
+        implements Buffer, Serializable {
+
+    /** Serialization lock. */
+    private static final long serialVersionUID = 6891186490470027896L;
 
     /**
      * The default capacity for the buffer.

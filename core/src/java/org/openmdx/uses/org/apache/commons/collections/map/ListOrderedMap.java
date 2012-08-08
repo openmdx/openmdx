@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -19,7 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.AbstractCollection;
+import java.util.AbstractList;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,14 +53,22 @@ import org.openmdx.uses.org.apache.commons.collections.list.UnmodifiableList;
  * If an object is added to the Map for a second time, it will remain in the
  * original position in the iteration.
  * <p>
+ * <strong>Note that ListOrderedMap is not synchronized and is not thread-safe.</strong>
+ * If you wish to use this map from multiple threads concurrently, you must use
+ * appropriate synchronization. The simplest approach is to wrap this map
+ * using {@link java.util.Collections#synchronizedMap(Map)}. This class may throw 
+ * exceptions when accessed by concurrent threads without synchronization.
+ * <p>
  * This class is Serializable from Commons Collections 3.1.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:17 $
+ * @version $Revision: 1.5 $ $Date: 2008/06/28 00:21:22 $
  * 
  * @author Henri Yandell
  * @author Stephen Colebourne
+ * @author Matt Benson
  */
+@SuppressWarnings("unchecked")
 public class ListOrderedMap
         extends AbstractMapDecorator
         implements OrderedMap, Serializable {
@@ -228,18 +237,72 @@ public class ListOrderedMap
     }
 
     //-----------------------------------------------------------------------
+    /**
+     * Gets a view over the keys in the map.
+     * <p>
+     * The Collection will be ordered by object insertion into the map.
+     *
+     * @see #keyList()
+     * @return the fully modifiable collection view over the keys
+     */
     public Set keySet() {
         return new KeySetView(this);
     }
 
+    /**
+     * Gets a view over the keys in the map as a List.
+     * <p>
+     * The List will be ordered by object insertion into the map.
+     * The List is unmodifiable.
+     *
+     * @see #keySet()
+     * @return the unmodifiable list view over the keys
+     * @since Commons Collections 3.2
+     */
+    public List keyList() {
+        return UnmodifiableList.decorate(insertOrder);
+    }
+
+    /**
+     * Gets a view over the values in the map.
+     * <p>
+     * The Collection will be ordered by object insertion into the map.
+     * <p>
+     * From Commons Collections 3.2, this Collection can be cast
+     * to a list, see {@link #valueList()}
+     *
+     * @see #valueList()
+     * @return the fully modifiable collection view over the values
+     */
     public Collection values() {
         return new ValuesView(this);
     }
 
+    /**
+     * Gets a view over the values in the map as a List.
+     * <p>
+     * The List will be ordered by object insertion into the map.
+     * The List supports remove and set, but does not support add.
+     *
+     * @see #values()
+     * @return the partially modifiable list view over the values
+     * @since Commons Collections 3.2
+     */
+    public List valueList() {
+        return new ValuesView(this);
+    }
+
+    /**
+     * Gets a view over the entries in the map.
+     * <p>
+     * The Set will be ordered by object insertion into the map.
+     *
+     * @return the fully modifiable set view over the entries
+     */
     public Set entrySet() {
         return new EntrySetView(this, this.insertOrder);
     }
-    
+
     //-----------------------------------------------------------------------
     /**
      * Returns the Map as a string.
@@ -305,11 +368,62 @@ public class ListOrderedMap
     }
 
     /**
+     * Sets the value at the specified index.
+     *
+     * @param index  the index of the value to set
+     * @return the previous value at that index
+     * @throws IndexOutOfBoundsException if the index is invalid
+     * @since Commons Collections 3.2
+     */
+    public Object setValue(int index, Object value) {
+        Object key = insertOrder.get(index);
+        return put(key, value);
+    }
+
+    /**
+     * Puts a key-value mapping into the map at the specified index.
+     * <p>
+     * If the map already contains the key, then the original mapping
+     * is removed and the new mapping added at the specified index.
+     * The remove may change the effect of the index. The index is
+     * always calculated relative to the original state of the map.
+     * <p>
+     * Thus the steps are: (1) remove the existing key-value mapping,
+     * then (2) insert the new key-value mapping at the position it
+     * would have been inserted had the remove not ocurred.
+     *
+     * @param index  the index at which the mapping should be inserted
+     * @param key  the key
+     * @param value  the value
+     * @return the value previously mapped to the key
+     * @throws IndexOutOfBoundsException if the index is out of range
+     * @since Commons Collections 3.2
+     */
+    public Object put(int _index, Object key, Object value) {
+        int index = _index;
+        Map m = getMap();
+        if (m.containsKey(key)) {
+            Object result = m.remove(key);
+            int pos = insertOrder.indexOf(key);
+            insertOrder.remove(pos);
+            if (pos < index) {
+                index--;
+            }
+            insertOrder.add(index, key);
+            m.put(key, value);
+            return result;
+        } else {
+            insertOrder.add(index, key);
+            m.put(key, value);
+            return null;
+        }
+    }
+
+    /**
      * Removes the element at the specified index.
      *
      * @param index  the index of the object to remove
-     * @return the previous value corresponding the <code>key</code>,
-     *  or <code>null</code> if none existed
+     * @return the removed value, or <code>null</code> if none existed
      * @throws IndexOutOfBoundsException if the index is invalid
      */
     public Object remove(int index) {
@@ -326,17 +440,19 @@ public class ListOrderedMap
      * value of a list.  This occurs because changing the key, changes when the
      * mapping is added to the map and thus where it appears in the list.
      * <p>
-     * An alternative to this method is to use {@link #keySet()}.
+     * An alternative to this method is to use the better named
+     * {@link #keyList()} or {@link #keySet()}.
      *
+     * @see #keyList()
      * @see #keySet()
      * @return The ordered list of keys.  
      */
     public List asList() {
-        return UnmodifiableList.decorate(insertOrder);
+        return keyList();
     }
 
     //-----------------------------------------------------------------------
-    static class ValuesView extends AbstractCollection {
+    static class ValuesView extends AbstractList {
         private final ListOrderedMap parent;
 
         ValuesView(ListOrderedMap parent) {
@@ -363,8 +479,20 @@ public class ListOrderedMap
                 }
             };
         }
+
+        public Object get(int index) {
+            return this.parent.getValue(index);
+        }
+
+        public Object set(int index, Object value) {
+            return this.parent.setValue(index, value);
+        }
+
+        public Object remove(int index) {
+            return this.parent.remove(index);
+        }
     }
-    
+
     //-----------------------------------------------------------------------
     static class KeySetView extends AbstractSet {
         private final ListOrderedMap parent;

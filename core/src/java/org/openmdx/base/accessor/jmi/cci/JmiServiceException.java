@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JmiServiceException.java,v 1.15 2007/10/10 16:05:51 hburger Exp $
+ * Name:        $Id: JmiServiceException.java,v 1.16 2008/03/24 20:11:28 hburger Exp $
  * Description: JmiServiceException class
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:51 $
+ * Date:        $Date: 2008/03/24 20:11:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -151,9 +151,8 @@ public class JmiServiceException
      *
      * @return this RuntimeServiceException
      */
-    public JmiServiceException log()
-    {
-        SysLog.warning(getMessage(), getCause(), 1);
+    public JmiServiceException log() {
+        SysLog.warning(this);
         return this;
     }
 

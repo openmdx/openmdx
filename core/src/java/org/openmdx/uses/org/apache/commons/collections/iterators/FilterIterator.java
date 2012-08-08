@@ -1,9 +1,10 @@
 /*
- *  Copyright 1999-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -21,17 +22,20 @@ import java.util.NoSuchElementException;
 import org.openmdx.uses.org.apache.commons.collections.Predicate;
 
 /** 
- * Decorates an iterator such that only elements matching a predicate filter
- * are returned.
+ * Decorates another {@link Iterator} using a predicate to filter elements.
+ * <p>
+ * This iterator decorates the underlying iterator, only allowing through
+ * those elements that match the specified {@link Predicate Predicate}.
  *
  * @since Commons Collections 1.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:21 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:11 $
  * 
  * @author James Strachan
  * @author Jan Sorensen
  * @author Ralph Wagner
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class FilterIterator implements Iterator {
 
     /** The iterator being used */
@@ -81,7 +85,8 @@ public class FilterIterator implements Iterator {
      * Returns true if the underlying iterator contains an object that 
      * matches the predicate.
      *
-     * @return true if there is another object that matches the predicate 
+     * @return true if there is another object that matches the predicate
+     * @throws NullPointerException if either the iterator or predicate are null
      */
     public boolean hasNext() {
         if (nextObjectSet) {
@@ -93,8 +98,9 @@ public class FilterIterator implements Iterator {
 
     /** 
      * Returns the next object that matches the predicate.
-     * 
+     *
      * @return the next object which matches the given predicate
+     * @throws NullPointerException if either the iterator or predicate are null
      * @throws NoSuchElementException if there are no more elements that
      *  match the predicate 
      */
@@ -115,7 +121,7 @@ public class FilterIterator implements Iterator {
      * if <code>next()</code> was called, but not after
      * <code>hasNext()</code>, because the <code>hasNext()</code> call
      * changes the base iterator.
-     * 
+     *
      * @throws IllegalStateException if <code>hasNext()</code> has already
      *  been called.
      */
@@ -129,8 +135,8 @@ public class FilterIterator implements Iterator {
     //-----------------------------------------------------------------------
     /** 
      * Gets the iterator this iterator is using.
-     * 
-     * @return the iterator.
+     *
+     * @return the iterator
      */
     public Iterator getIterator() {
         return iterator;
@@ -139,18 +145,20 @@ public class FilterIterator implements Iterator {
     /** 
      * Sets the iterator for this iterator to use.
      * If iteration has started, this effectively resets the iterator.
-     * 
+     *
      * @param iterator  the iterator to use
      */
     public void setIterator(Iterator iterator) {
         this.iterator = iterator;
+        nextObject = null;
+        nextObjectSet = false;
     }
 
     //-----------------------------------------------------------------------
     /** 
      * Gets the predicate this iterator is using.
-     * 
-     * @return the predicate.
+     *
+     * @return the predicate
      */
     public Predicate getPredicate() {
         return predicate;
@@ -158,11 +166,13 @@ public class FilterIterator implements Iterator {
 
     /** 
      * Sets the predicate this the iterator to use.
-     * 
-     * @param predicate  the transformer to use
+     *
+     * @param predicate  the predicate to use
      */
     public void setPredicate(Predicate predicate) {
         this.predicate = predicate;
+        nextObject = null;
+        nextObjectSet = false;
     }
 
     //-----------------------------------------------------------------------
@@ -181,4 +191,5 @@ public class FilterIterator implements Iterator {
         }
         return false;
     }
+
 }

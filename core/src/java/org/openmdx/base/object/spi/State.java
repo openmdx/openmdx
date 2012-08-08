@@ -1,15 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: State.java,v 1.5 2008/01/08 16:16:31 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: State.java,v 1.6 2008/05/01 22:19:52 hburger Exp $
  * Description: Object States
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2008/05/01 22:19:52 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2005, OMEX AG, Switzerland
  * All rights reserved.
@@ -51,12 +50,7 @@
  */
 package org.openmdx.base.object.spi;
 
-
 import java.util.EnumSet;
-
-
-
-
 
 /**
  * Object States
@@ -105,7 +99,6 @@ import java.util.EnumSet;
  *
  * @since openMDX 2.0
  */
-
 public enum State {
 
     TRANSIENT(

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StreamMarshaller.java,v 1.2 2008/02/04 15:48:55 wfro Exp $
+ * Name:        $Id: StreamMarshaller.java,v 1.3 2008/03/19 17:08:26 hburger Exp $
  * Description: Inprocess Stream Marshaller
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/04 15:48:55 $
+ * Date:        $Date: 2008/03/19 17:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,6 +72,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Marshals streams and service exceptions
  */
+@SuppressWarnings("unchecked")
 public class StreamMarshaller
     implements DataproviderObjectInterceptor
 {

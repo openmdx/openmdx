@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SinkConnection_1.java,v 1.27 2007/12/20 00:52:11 hburger Exp $
+ * Name:        $Id: SinkConnection_1.java,v 1.28 2008/03/19 17:13:11 hburger Exp $
  * Description: Propagating Connection
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/20 00:52:11 $
+ * Date:        $Date: 2008/03/19 17:13:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -76,6 +76,7 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 /**
  * Propagating Connection
  */
+@SuppressWarnings("unchecked")
 public class SinkConnection_1 implements Synchronization_1_0 {
 
     /**

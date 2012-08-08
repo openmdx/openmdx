@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClassType.java,v 1.6 2007/12/20 18:57:06 wfro Exp $
+ * Name:        $Id: ClassType.java,v 1.9 2008/06/28 00:21:25 hburger Exp $
  * Description: Class Type 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/20 18:57:06 $
+ * Date:        $Date: 2008/06/28 00:21:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import org.openmdx.model1.mapping.Names;
 /**
  * Class Type
  */
+@SuppressWarnings("unchecked")
 public enum ClassType {
     
     /**
@@ -68,268 +69,215 @@ public enum ClassType {
      */
     OBJECT {
 
-        public String getParameterType(
+        public String getType(
             ClassDef classDef,
-            Format format
+            Format format,
+            TypeMode featureUsage
         ){
-            if(format == Format.JMI1) { 
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.JMI1_PACKAGE_SUFFIX
-                );
+            if(featureUsage == TypeMode.PARAMETER) {
+                if(format == Format.JMI1) { 
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.JMI1_PACKAGE_SUFFIX
+                    );
+                }
+                else {
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.CCI2_PACKAGE_SUFFIX
+                    );
+                }
             }
-            else {
+            else if(featureUsage == TypeMode.RESULT) {
+                if(format == Format.JMI1) { 
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.JMI1_PACKAGE_SUFFIX
+                    );
+                }
+                else {
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.CCI2_PACKAGE_SUFFIX
+                    );
+                }
+            }
+            else if(featureUsage == TypeMode.MEMBER) {
+                if(format == Format.JDO2) {
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.JDO2_PACKAGE_SUFFIX
+                    );
+                }
+                else if(format == Format.JMI1) { 
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.JMI1_PACKAGE_SUFFIX
+                    );
+                }
+                else {
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.CCI2_PACKAGE_SUFFIX
+                    );
+                }
+            }
+            else if(featureUsage == TypeMode.INTERFACE) {
                 return getType(
                     classDef.getQualifiedName(), 
                     Names.CCI2_PACKAGE_SUFFIX
                 );
             }
-        }
-        
-        public String getResultType(
-            ClassDef classDef,
-            Format format
-        ){
-            if(format == Format.JMI1) { 
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.JMI1_PACKAGE_SUFFIX
-                );
-            }
             else {
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.CCI2_PACKAGE_SUFFIX
-                );
+                throw new UnsupportedOperationException("Unsupported feature usage " + featureUsage);                
             }
-        }
-        
-        public String getMemberType(
-            ClassDef classDef,
-            Format format
-        ){
-            if(format == Format.JDO2) {
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.JDO2_PACKAGE_SUFFIX
-                );
-            }
-            else if(format == Format.JMI1) { 
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.JMI1_PACKAGE_SUFFIX
-                );
-            }
-            else {
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.CCI2_PACKAGE_SUFFIX
-                );
-            }
-        }
-
-        public String getInterfaceType(
-            ClassDef classDef,
-            Format format
-        ) {
-            return getType(
-                classDef.getQualifiedName(), 
-                Names.CCI2_PACKAGE_SUFFIX
-            );
         }
                 
     },
     
     /**
-     * The model class is representetd by a CCI interface and has a 
+     * The model class is represented by a CCI interface and has a 
      * super-class represented by a JDO class.
      */
     EXTENSION {
 
-        public String getParameterType(
+        public String getType(
             ClassDef classDef,
-            Format format
+            Format format,
+            TypeMode featureUsage
         ){
-            if(format == Format.JMI1) { 
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.JMI1_PACKAGE_SUFFIX
-                );
+            if(featureUsage == TypeMode.PARAMETER) {
+                if(format == Format.JMI1) { 
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.JMI1_PACKAGE_SUFFIX
+                    );
+                }
+                else {
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.CCI2_PACKAGE_SUFFIX
+                    );
+                }
             }
-            else {
+            else if(featureUsage == TypeMode.RESULT) {
+                if(format == Format.JMI1) { 
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.JMI1_PACKAGE_SUFFIX
+                    );
+                }
+                else {
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.CCI2_PACKAGE_SUFFIX
+                    );
+                }
+            }
+            else if(featureUsage == TypeMode.MEMBER) {
+                ClassDef current = classDef;
+                ClassDef next;
+                while(
+                    current.isAbstract() &&
+                    (next = getSuperClassDef(current)) != null
+                ){
+                    current = next;
+                 }
+                 return getType(
+                     current.getQualifiedName(), 
+                     Names.JDO2_PACKAGE_SUFFIX
+                 );
+            }
+            else if(featureUsage == TypeMode.INTERFACE) {
                 return getType(
                     classDef.getQualifiedName(), 
                     Names.CCI2_PACKAGE_SUFFIX
                 );
             }
-        }
-        
-        public String getResultType(
-            ClassDef classDef,
-            Format format
-        ){
-            if(format == Format.JMI1) { 
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.JMI1_PACKAGE_SUFFIX
-                );
-            }
             else {
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.CCI2_PACKAGE_SUFFIX
-                );
+                throw new UnsupportedOperationException("Unsupported feature usage " + featureUsage);
             }
-        }
-        
-        public String getMemberType(
-            ClassDef classDef,
-            Format format
-        ){
-            ClassDef current = classDef;
-            ClassDef next;
-            while(
-                current.isAbstract() &&
-                (next = getSuperClassDef(current)) != null
-            ){
-                current = next;
-             }
-             return getType(
-                 current.getQualifiedName(), 
-                 Names.JDO2_PACKAGE_SUFFIX
-             );
-        }
-        
-        public String getInterfaceType(
-            ClassDef classDef,
-            Format format
-        ) {
-            return getType(
-                classDef.getQualifiedName(), 
-                Names.CCI2_PACKAGE_SUFFIX
-            );            
         }
                 
     },
     
     /**
-     * The model class is representetd by a CCI interface and has no
+     * The model class is represented by a CCI interface and has no
      * super-class represented by a JDO class.
      */
     MIXIN {
 
-        public String getParameterType(
+        public String getType(
             ClassDef classDef,
-            Format format
+            Format format,
+            TypeMode featureUsage
         ){
-            if(format == Format.JMI1) { 
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.JMI1_PACKAGE_SUFFIX
-                );
+            if(featureUsage == TypeMode.PARAMETER) {
+                if(format == Format.JMI1) { 
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.JMI1_PACKAGE_SUFFIX
+                    );
+                }
+                else {
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.CCI2_PACKAGE_SUFFIX
+                    );
+                }
             }
-            else {
+            else if(featureUsage == TypeMode.RESULT) {
+                if(format == Format.JMI1) { 
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.JMI1_PACKAGE_SUFFIX
+                    );
+                }
+                else {
+                    return getType(
+                        classDef.getQualifiedName(), 
+                        Names.CCI2_PACKAGE_SUFFIX
+                    );
+                }
+            }
+            else if(featureUsage == TypeMode.MEMBER) {
                 return getType(
                     classDef.getQualifiedName(), 
                     Names.CCI2_PACKAGE_SUFFIX
                 );
             }
-        }
-        
-        public String getResultType(
-            ClassDef classDef,
-            Format format            
-        ){
-            if(format == Format.JMI1) { 
-                return getType(
-                    classDef.getQualifiedName(), 
-                    Names.JMI1_PACKAGE_SUFFIX
-                );
-            }
-            else {
+            else if(featureUsage == TypeMode.INTERFACE) {
                 return getType(
                     classDef.getQualifiedName(), 
                     Names.CCI2_PACKAGE_SUFFIX
                 );
             }
-        }
-        
-        public String getMemberType(
-            ClassDef classDef,
-            Format format
-        ){
-            return getType(
-                classDef.getQualifiedName(), 
-                Names.CCI2_PACKAGE_SUFFIX
-            );
-        }
-
-        public String getInterfaceType(
-            ClassDef classDef,
-            Format format
-        ) {
-            return getType(
-                classDef.getQualifiedName(), 
-                Names.CCI2_PACKAGE_SUFFIX
-            );            
+            else {
+                throw new UnsupportedOperationException("Unsupported feature usage " + featureUsage);                
+            }
         }
         
     };
 
     /**
-     * Retrieve the qualified member type
+     * Retrieve type with specified usage and format.
      * 
      * @param classDef
      * 
-     * @return the qualified member type
+     * @return the type with specified usage and format.
      */
-    public abstract String getMemberType(
+    public abstract String getType(
         ClassDef classDef,
-        Format format
+        Format format,
+        TypeMode featureUsage
     );
-    
-    /**
-     * Retrieve the qualified parameter type
-     * 
-     * @param classDef
-     * 
-     * @return the qualified parameter type
-     */
-    public abstract String getParameterType(
-        ClassDef classDef,
-        Format format
-    );
-    
-    /**
-     * Retrieve the qualified result type
-     * 
-     * @param classDef
-     * 
-     * @return the qualified result type
-     */
-    public abstract String getResultType(
-        ClassDef classDef,
-        Format format
-    );
-    
-    /**
-     * Retrieve the qualified interface type
-     * 
-     * @param classDef
-     * 
-     * @return the qualified result type
-     */
-    public abstract String getInterfaceType(
-        ClassDef classDef,
-        Format format
-    );
-    
+        
     /**
      * 
      * @param classDef
      * @return
      */
-    private static ClassDef getSuperClassDef(
+    static ClassDef getSuperClassDef(
         ClassDef classDef
     ){
         for(

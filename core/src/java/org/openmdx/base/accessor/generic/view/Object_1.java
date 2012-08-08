@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Object_1.java,v 1.26 2007/10/23 10:27:23 hburger Exp $
+ * Name:        $Id: Object_1.java,v 1.27 2008/03/19 17:18:51 hburger Exp $
  * Description: Embedded Object Provider
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/23 10:27:23 $
+ * Date:        $Date: 2008/03/19 17:18:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -77,6 +77,7 @@ import org.openmdx.compatibility.base.naming.Path;
  * <li>view
  * </ul>
  */
+@SuppressWarnings("unchecked")
 class Object_1 
     extends MarshallingObject_1 
     implements Object_1_2

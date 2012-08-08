@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XmlConfiguration.java,v 1.1 2004/07/15 15:56:37 hburger Exp $
+ * Name:        $Id: XmlConfiguration.java,v 1.2 2008/03/21 18:45:22 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/07/15 15:56:37 $
+ * Date:        $Date: 2008/03/21 18:45:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -81,7 +81,8 @@ public class XmlConfiguration
 	 * @param		specification
 	 *				a map of id/ConfigurationSpecifier entries, may be null
 	 */
-	public XmlConfiguration(
+	@SuppressWarnings("unchecked")
+    public XmlConfiguration(
 		URL source,
 		String[] section,
 		Map specification

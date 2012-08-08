@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractSubjectHandler.java,v 1.9 2006/01/12 16:24:54 hburger Exp $
+ * Name:        $Id: AbstractSubjectHandler.java,v 1.10 2008/04/04 17:55:31 hburger Exp $
  * Description: Signed Token
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/01/12 16:24:54 $
+ * Date:        $Date: 2008/04/04 17:55:31 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -240,7 +240,7 @@ public abstract class AbstractSubjectHandler
                 (PrivateKey) getKeyProvider().getKey()
             );
             if(isDebug()) {
-                log("$Id: AbstractSubjectHandler.java,v 1.9 2006/01/12 16:24:54 hburger Exp $");
+                log("$Id: AbstractSubjectHandler.java,v 1.10 2008/04/04 17:55:31 hburger Exp $");
                 log("token-timeout:" + this.tokenTimeout);
                 log("signature-algorithm:" + this.signatureAlgorithm);
                 log("cookie-name:" + this.cookieName);
@@ -258,7 +258,7 @@ public abstract class AbstractSubjectHandler
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
                 new BasicException.Parameter[]{
-                    new BasicException.Parameter("info", "$Id: AbstractSubjectHandler.java,v 1.9 2006/01/12 16:24:54 hburger Exp $"),
+                    new BasicException.Parameter("info", "$Id: AbstractSubjectHandler.java,v 1.10 2008/04/04 17:55:31 hburger Exp $"),
                     new BasicException.Parameter("name", getServletName()),
                     new BasicException.Parameter("token-timeout", this.tokenTimeout),
                     new BasicException.Parameter("signature-algorithm", this.signatureAlgorithm),
@@ -285,7 +285,7 @@ public abstract class AbstractSubjectHandler
     protected byte[] getToken(
         Subject subject
     ) throws LoginException {
-        Set principalSet = subject.getPrincipals();
+        Set<Principal> principalSet = subject.getPrincipals();
         try {
             return getTokenFactory(
             ).create(

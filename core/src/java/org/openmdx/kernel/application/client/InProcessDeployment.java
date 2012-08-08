@@ -1,10 +1,10 @@
 /*
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InProcessDeployment.java,v 1.4 2006/10/30 15:00:06 hburger Exp $
+ * Name:        $Id: InProcessDeployment.java,v 1.5 2008/03/21 18:38:38 hburger Exp $
  * Description: In-Process Deployment
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/30 15:00:06 $
+ * Date:        $Date: 2008/03/21 18:38:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.kernel.exception.BasicException;
  * 
  * @deprecated in favour of org.openmdx.base.application.deploy.InProcessDeployment
  */
+@SuppressWarnings("unchecked")
 public class InProcessDeployment implements Runnable {
 
     /**

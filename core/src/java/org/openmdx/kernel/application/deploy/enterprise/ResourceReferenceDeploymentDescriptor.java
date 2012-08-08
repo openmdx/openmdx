@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ResourceReferenceDeploymentDescriptor.java,v 1.13 2008/01/13 21:37:34 hburger Exp $
+ * Name:        $Id: ResourceReferenceDeploymentDescriptor.java,v 1.14 2008/03/21 18:38:43 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/13 21:37:34 $
+ * Date:        $Date: 2008/03/21 18:38:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,8 +60,6 @@ import org.openmdx.kernel.naming.Contexts;
 import org.openmdx.kernel.naming.container.openmdx.openmdxURLContextFactory;
 import org.w3c.dom.Element;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 public class ResourceReferenceDeploymentDescriptor
   extends AbstractConfiguration
 {
@@ -91,7 +89,7 @@ public class ResourceReferenceDeploymentDescriptor
     if (this.getJndiName() != null && this.getJndiName().length() != 0)
     {
       // external link
-      CharSequence sb = StringBuilders.newStringBuilder(
+        StringBuilder sb = new StringBuilder(
           openmdxURLContextFactory.URL_PREFIX
       ).append(
           openmdxURLContextFactory.CONTAINER_CONTEXT

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMISchemaMapper.java,v 1.5 2007/10/10 17:16:09 hburger Exp $
+ * Name:        $Id: XMISchemaMapper.java,v 1.6 2008/03/21 18:40:22 hburger Exp $
  * Description: write XML schema (XSD)
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 17:16:09 $
+ * Date:        $Date: 2008/03/21 18:40:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
 import org.openmdx.model1.code.Stereotypes;
 
+@SuppressWarnings("unchecked")
 public class XMISchemaMapper {
   
   //---------------------------------------------------------------------------

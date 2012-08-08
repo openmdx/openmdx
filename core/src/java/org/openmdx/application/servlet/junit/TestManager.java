@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestManager.java,v 1.3 2007/10/10 16:05:49 hburger Exp $
+ * Name:        $Id: TestManager.java,v 1.4 2008/03/21 18:34:15 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:49 $
+ * Date:        $Date: 2008/03/21 18:34:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,8 +55,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * A class that runs tests and provides output to an PrintWriter object.
  *
@@ -71,6 +69,7 @@ import org.openmdx.kernel.text.StringBuilders;
  * @author Tracie Karsjens
  * @author Dave Robinson
  */
+@SuppressWarnings("unchecked")
 public class TestManager {
 
   /**
@@ -144,9 +143,9 @@ public class TestManager {
   }
 
   private String getKey(String[] classesToTest) {
-    CharSequence sb = StringBuilders.newStringBuilder();
+      StringBuilder sb = new StringBuilder();
     for (int x=0; x< classesToTest.length; x++)
-      StringBuilders.asStringBuilder(sb).append(classesToTest[x]);
+      sb.append(classesToTest[x]);
     return sb.toString();
   }
 }

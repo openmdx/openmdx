@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.4 2007/10/10 16:05:59 hburger Exp $
+ * Name:        $Id: LayerConfigurationEntries.java,v 1.5 2008/04/25 00:50:42 hburger Exp $
  * Description: Generated constants for LayerConfigurationEntries
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:59 $
+ * Date:        $Date: 2008/04/25 00:50:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -107,6 +107,13 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
    * The notification topic  
    */
   static public final String JMS_CONNECTION_FACTORY = "jmsConnectionFactory";
+
+
+
+  /**
+   * Defines the "set" operation behaviour   
+   */
+  static public final String PROPAGATE_SET = "propagateSet";
 
 
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractPersistence_1.java,v 1.10 2006/07/13 23:57:29 hburger Exp $
+ * Name:        $Id: AbstractPersistence_1.java,v 1.11 2008/06/28 00:21:27 hburger Exp $
  * Description: Abstract persistence layer
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/07/13 23:57:29 $
+ * Date:        $Date: 2008/06/28 00:21:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
+import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1;
@@ -114,7 +115,7 @@ abstract public class AbstractPersistence_1
                 new File(pathname);
         }
 	    this.sequenceSupported = configuration.isOn(
-            CommonConfigurationEntries.SEQUENCE_SUPPORTED
+            SharedConfigurationEntries.SEQUENCE_SUPPORTED
         );
     }
 

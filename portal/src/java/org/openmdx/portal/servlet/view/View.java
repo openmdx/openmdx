@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: View.java,v 1.48 2007/12/13 01:24:03 wfro Exp $
+ * Name:        $Id: View.java,v 1.52 2008/06/26 00:39:15 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.48 $
+ * Revision:    $Revision: 1.52 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:24:03 $
+ * Date:        $Date: 2008/06/26 00:39:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,13 +59,12 @@
 package org.openmdx.portal.servlet.view;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefStruct;
 
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -73,7 +72,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -109,6 +107,9 @@ public abstract class View
         this.containerElementId = containerElementId;
         this.object = object;
         this.application = application;
+        // View must only work with this persistence manager and must not
+        // get the persistence manager from application.getPmData.
+        this.pm = application.getPmData(); 
         this.controlFactory = controlFactory;
         this.setGuiModeActions = new Action[]{
             new Action(
@@ -126,15 +127,7 @@ public abstract class View
                 }, 
                 "1", 
                 true
-            ),      
-            new Action(
-                Action.EVENT_SELECT_GUI_MODE, 
-                new Action.Parameter[]{ 
-                   new Action.Parameter(Action.PARAMETER_NAME, WebKeys.SETTING_GUI_MODE_ADVANCED) 
-                }, 
-                "2", 
-                true
-            )            
+            )      
         };
     }
 
@@ -291,6 +284,7 @@ public abstract class View
     }
     
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public void structToMap(
         RefStruct from,
         Map to,
@@ -323,7 +317,7 @@ public abstract class View
             );
         }
         else if(application.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
-            List parameters = new ArrayList();
+            List<String> parameters = new ArrayList<String>();
             int i = 0;
             while(e0.getParameter("param" + i) != null) {
                 parameters.add(e0.getParameter("param" + i));
@@ -387,17 +381,21 @@ public abstract class View
     }
     
     //-------------------------------------------------------------------------
+    public PersistenceManager getPersistenceManager(
+    ) {
+        return this.pm;
+    }
+    
+    //-------------------------------------------------------------------------
     public Object getObject(
     ) {
         return this.object;
     }
     
     //-------------------------------------------------------------------------
-    private String[] getHRef(
-        Action action,
+    protected String getRequestId(
         short requestIdFormat
     ) {
-        String actionParameter = action.getParameter();
         String requestId = null;
         switch(requestIdFormat) {
             case REQUEST_ID_FORMAT_NONE:
@@ -412,50 +410,9 @@ public abstract class View
                 requestId = View.REQUEST_ID_TEMPLATE;
                 break;
         }
-        int n = 3;
-        if(requestId != null) n+=2;
-        if(actionParameter.length() > 0) n+=2;
-        String[] components = new String[n];
-        n = 0;
-      
-        // Servlet name
-        // Return download URLs as SERVLET_NAME/<file name>?params. This is
-        // an IE workaround. Setting the reply header fields is not sufficient.
-        // Also see http://ppewww.ph.gla.ac.uk/~flavell/www/content-type.html
-        CharSequence href = StringBuilders.newStringBuilder(WebKeys.SERVLET_NAME);      
-        if(
-            (action.getEvent() == Action.EVENT_DOWNLOAD_FROM_LOCATION) || 
-            (action.getEvent() == Action.EVENT_DOWNLOAD_FROM_FEATURE)
-        ) {
-            StringBuilders.asStringBuilder(
-                href
-            ).append(
-                "/"
-            ).append(
-                action.getParameter(Action.PARAMETER_NAME)
-            );
-        }
-        components[n++] = href.toString();
-      
-        // REQUEST_ID
-        if(requestId != null) {
-            components[n++] = WebKeys.REQUEST_ID;
-            components[n++] = requestId;
-        }
-      
-        // REQUEST_EVENT
-        components[n++] = WebKeys.REQUEST_EVENT;
-        components[n++] = Integer.toString(action.getEvent());
-      
-        // Parameter name
-        if(actionParameter.length() > 0) {
-            components[n++] = WebKeys.REQUEST_PARAMETER;
-            components[n++] = actionParameter;
-        }
-      
-        return components;
+        return requestId;
     }
-  
+    
     //-------------------------------------------------------------------------
     public String getEvalHRef(
         Action action
@@ -484,25 +441,9 @@ public abstract class View
         Action action,
         short requestIdFormat
     ) {
-        String[] components = this.getHRef(
-            action, 
-            requestIdFormat
+        return action.getEvalHRef(
+            this.getRequestId(requestIdFormat)
         );
-        CharSequence href = StringBuilders.newStringBuilder("getEncodedHRef([");
-        for(int i = 0; i < components.length; i++) {
-            (i > 0 ? 
-                StringBuilders.asStringBuilder(href).append(", ") :
-                StringBuilders.asStringBuilder(href)
-            ).append(
-                "'"
-            ).append(
-                components[i]
-            ).append(
-                "'"
-            );
-        }
-        StringBuilders.asStringBuilder(href).append("])");
-        return href.toString();
     }
         
     //-------------------------------------------------------------------------
@@ -522,9 +463,9 @@ public abstract class View
     ) {
        return this.getEncodedHRef(
            action,
-            includeRequestId
-                ? REQUEST_ID_FORMAT_UID
-                : REQUEST_ID_FORMAT_NONE
+           includeRequestId
+               ? REQUEST_ID_FORMAT_UID
+               : REQUEST_ID_FORMAT_NONE
        );
     }
     
@@ -533,25 +474,9 @@ public abstract class View
         Action action,
         short requestIdFormat
     ) {
-        String[] components = this.getHRef(
-            action, 
-            requestIdFormat
+        return action.getEncodedHRef(
+            this.getRequestId(requestIdFormat)
         );
-        CharSequence href = StringBuilders.newStringBuilder(components[0]);
-        for(int i = 1; i < components.length; i+=2) try {
-            StringBuilders.asStringBuilder(
-                href
-            ).append(
-                i == 1 ? "?" : "&"
-            ).append(
-                components[i]
-            ).append(
-                "="
-            ).append(
-                URLEncoder.encode(components[i+1], "UTF-8")
-            );
-        } catch(UnsupportedEncodingException e) {}
-        return href.toString();
     }
         
     //-------------------------------------------------------------------------
@@ -559,15 +484,9 @@ public abstract class View
         String feature,
         String id
     ) {
-        return new Action(
-            Action.EVENT_FIND_OBJECT,
-            new Action.Parameter[]{
-                new Action.Parameter(Action.PARAMETER_REFERENCE, feature),
-                new Action.Parameter(Action.PARAMETER_ID, id)
-            },
-            "",
-            WebKeys.ICON_LOOKUP, 
-            true
+        return Action.getFindObjectAction(
+            feature, 
+            id
         );
     }
 
@@ -588,6 +507,7 @@ public abstract class View
     protected final String id;
     protected final String containerElementId;
     protected Object object;
+    protected PersistenceManager pm;
   
     protected String requestId = null;
     protected Action[] setGuiModeActions = null;

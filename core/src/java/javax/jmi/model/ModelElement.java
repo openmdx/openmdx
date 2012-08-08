@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings("unchecked")
 public interface ModelElement extends RefObject {
     public String CONTAINERDEP = "container";
     public String CONTENTSDEP = "contents";

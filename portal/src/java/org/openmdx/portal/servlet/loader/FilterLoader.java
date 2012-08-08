@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FilterLoader.java,v 1.14 2008/01/09 09:38:04 wfro Exp $
+ * Name:        $Id: FilterLoader.java,v 1.15 2008/04/04 17:01:12 hburger Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/09 09:38:04 $
+ * Date:        $Date: 2008/04/04 17:01:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -101,6 +101,7 @@ public class FilterLoader
     }
 
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     private void createDefaultFilters(
         String qualifiedReferenceName,
         ModelElement_1_0 referencedType,
@@ -207,6 +208,7 @@ public class FilterLoader
     /**
      * Loads filter configuration. Assumes that ui config is loaded.
      */
+    @SuppressWarnings("unchecked")
     synchronized public boolean loadFilters(
         UiContext uiContext,
         Map target

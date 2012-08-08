@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Throwables.java,v 1.3 2007/10/10 16:06:06 hburger Exp $
+ * Name:        $Id: Throwables.java,v 1.4 2008/03/21 18:35:32 hburger Exp $
  * Description: Throwables
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:06 $
+ * Date:        $Date: 2008/03/21 18:35:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -123,6 +123,7 @@ public class Throwables {
      *          or the initial cause if <code>exceptionDomain</code> is
      *          <code>null</code>.  
      */
+    @SuppressWarnings("deprecation")
     public static BasicException getCause(
         Throwable throwable,
         String exceptionDomain

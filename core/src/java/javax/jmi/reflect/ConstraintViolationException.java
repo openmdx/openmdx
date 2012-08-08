@@ -2,6 +2,7 @@ package javax.jmi.reflect;
 
 /** Exception thrown when a constraint is violated.
  */
+@SuppressWarnings("serial")
 public class ConstraintViolationException extends JmiException {
     
     /**

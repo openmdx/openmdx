@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardDefinition.java,v 1.12 2007/12/03 11:04:10 wfro Exp $
+ * Name:        $Id: WizardDefinition.java,v 1.13 2008/04/04 11:51:24 hburger Exp $
  * Description: WizardDefinition 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/03 11:04:10 $
+ * Date:        $Date: 2008/04/04 11:51:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -86,7 +86,7 @@ public class WizardDefinition
         // Extract the type from the name
         String s = name.substring(name.lastIndexOf("/") + 1);
         // As default take file name as forClass
-        this.forClass = new ArrayList();
+        this.forClass = new ArrayList<String>();
         this.forClass.add(
             s.indexOf("-") > 0
                 ? s.substring(0, s.indexOf("-")).replace('.', ':')
@@ -96,7 +96,7 @@ public class WizardDefinition
         this.toolTip = null;
         this.targetType = "";
         this.openParameter = "";
-        this.order = new ArrayList();
+        this.order = new ArrayList<String>();
         this.order.add("0");
     }
     
@@ -163,12 +163,12 @@ public class WizardDefinition
     protected final short index;
     protected final String name;
     // Wizard is applied for the specified class
-    protected List forClass;
+    protected List<String> forClass;
     protected String label;
     protected String toolTip;
     protected String targetType;
     protected String openParameter;
-    protected List order;
+    protected List<String> order;
     
 }
 

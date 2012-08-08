@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/DiskFileUpload.java,v 1.3 2004/06/29 07:40:54 wfro Exp $
- * $Revision: 1.3 $
- * $Date: 2004/06/29 07:40:54 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/DiskFileUpload.java,v 1.4 2008/03/21 18:42:11 hburger Exp $
+ * $Revision: 1.4 $
+ * $Date: 2008/03/21 18:42:11 $
  *
  * ====================================================================
  *
@@ -89,8 +89,9 @@ import javax.servlet.http.HttpServletRequest;
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
  *
- * @version $Id: DiskFileUpload.java,v 1.3 2004/06/29 07:40:54 wfro Exp $
+ * @version $Id: DiskFileUpload.java,v 1.4 2008/03/21 18:42:11 hburger Exp $
  */
+@SuppressWarnings("unchecked")
 public class DiskFileUpload
     extends FileUploadBase
  {

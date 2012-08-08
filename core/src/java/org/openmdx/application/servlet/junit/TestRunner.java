@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestRunner.java,v 1.3 2007/10/10 16:05:49 hburger Exp $
+ * Name:        $Id: TestRunner.java,v 1.4 2008/03/21 18:34:15 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:49 $
+ * Date:        $Date: 2008/03/21 18:34:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -143,7 +143,7 @@ public class TestRunner extends Thread{
    * @param Exception numerous causes: ClassNotFound, InvocationTargetException, ClassCastException, etc.
    */
   protected Test createTestSuite(String classUnderTest) throws Exception {
-    Class testClass = null;
+    Class<?> testClass = null;
     Method suiteMethod = null;
     Test suite = null;
 
@@ -268,7 +268,7 @@ public class TestRunner extends Thread{
    * @param output The servlet's output destination
    * @param problems The collection of problems.  These might be test case errors or failures.
    */
-  protected void print(PrintWriter output, final HTMLWriter scrubber, Enumeration problems) {
+  protected void print(PrintWriter output, final HTMLWriter scrubber, Enumeration<?> problems) {
     while(problems.hasMoreElements()) {
       TestFailure problem = (TestFailure) problems.nextElement();
       output.println("<b>");

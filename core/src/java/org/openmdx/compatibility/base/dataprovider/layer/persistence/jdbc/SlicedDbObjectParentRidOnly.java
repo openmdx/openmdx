@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObjectParentRidOnly.java,v 1.7 2006/10/23 00:23:26 wfro Exp $
+ * Name:        $Id: SlicedDbObjectParentRidOnly.java,v 1.8 2008/03/21 18:47:38 hburger Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/23 00:23:26 $
+ * Date:        $Date: 2008/03/21 18:47:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.compatibility.base.naming.Path;
  * object type is used when the calculation of object_rid is expensive
  * compared to the calculation of the object_parent columns.
  */
+@SuppressWarnings("unchecked")
 public class SlicedDbObjectParentRidOnly
   extends SlicedDbObject 
 {

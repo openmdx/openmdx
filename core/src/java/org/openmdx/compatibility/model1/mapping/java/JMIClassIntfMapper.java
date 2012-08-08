@@ -1,10 +1,10 @@
 /*
  * ==================================================================== 
  * Project: openmdx, http://www.openmdx.org
- * Name: $Id: JMIClassIntfMapper.java,v 1.2 2007/01/06 16:29:27 hburger Exp $ 
- * Description: JMIClassLevelTemplate Revision: $Revision: 1.2 $ 
+ * Name: $Id: JMIClassIntfMapper.java,v 1.4 2008/04/02 17:39:09 wfro Exp $ 
+ * Description: JMIClassLevelTemplate Revision: $Revision: 1.4 $ 
  * Owner: OMEX AG, Switzerland, http://www.omex.ch 
- * Date: $Date: 2007/01/06 16:29:27 $
+ * Date: $Date: 2008/04/02 17:39:09 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -47,11 +47,12 @@ import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.mapping.AttributeDef;
 import org.openmdx.model1.mapping.ClassDef;
 import org.openmdx.model1.mapping.MapperUtils;
 
+@SuppressWarnings("unchecked")
 public class JMIClassIntfMapper
     extends JMIAbstractMapper {
 
@@ -59,7 +60,7 @@ public class JMIClassIntfMapper
     public JMIClassIntfMapper(
         ModelElement_1_0 classDef,        
         Writer writer, 
-        Model_1_0 model,
+        Model_1_3 model,
         String format, 
         String packageSuffix
     ) throws ServiceException {
@@ -76,7 +77,7 @@ public class JMIClassIntfMapper
      * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
      */
     protected String mapperId() {
-        return "$Id: JMIClassIntfMapper.java,v 1.2 2007/01/06 16:29:27 hburger Exp $";
+        return "$Id: JMIClassIntfMapper.java,v 1.4 2008/04/02 17:39:09 wfro Exp $";
     }
 
     //-----------------------------------------------------------------------

@@ -2,6 +2,7 @@ package javax.jmi.reflect;
 
 /** Exception thrown when an instance object is going to become owned by more than one element (in sense of aggregation semantics).
  */
+@SuppressWarnings("serial")
 public class CompositionViolationException extends JmiException {
     
     /**

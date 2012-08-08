@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LenientPathComparator.java,v 1.4 2006/07/03 13:54:20 hburger Exp $
+ * Name:        $Id: LenientPathComparator.java,v 1.5 2008/03/21 20:14:51 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/07/03 13:54:20 $
+ * Date:        $Date: 2008/03/21 20:14:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import org.openmdx.compatibility.base.naming.Path;
 /**
  * Allows comparison of not directly comparable classes
  */
+@SuppressWarnings("unchecked")
 public class LenientPathComparator extends StrictDatatypeComparator {
 
     /**

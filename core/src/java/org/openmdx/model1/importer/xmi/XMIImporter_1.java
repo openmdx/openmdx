@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIImporter_1.java,v 1.36 2008/02/14 12:55:41 wfro Exp $
+ * Name:        $Id: XMIImporter_1.java,v 1.40 2008/06/28 00:21:57 hburger Exp $
  * Description: XMI Model Importer
- * Revision:    $Revision: 1.36 $
+ * Revision:    $Revision: 1.40 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/14 12:55:41 $
+ * Date:        $Date: 2008/06/28 00:21:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,6 +75,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.BasicException.Code;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.code.AggregationKind;
 import org.openmdx.model1.code.ModelAttributes;
@@ -98,8 +99,7 @@ import org.openmdx.model1.uml1.UML1Parameter;
 import org.openmdx.model1.uml1.UML1TaggedValue;
 import org.openmdx.model1.uml1.UML1VisibilityKind;
 
-import org.openmdx.kernel.text.StringBuilders;
-
+@SuppressWarnings("unchecked")
 public class XMIImporter_1
   extends ModelImporter_1
   implements UML1Consumer {
@@ -268,7 +268,7 @@ public class XMIImporter_1
           if(resolver.hasErrors()) {
               throw new ServiceException(
                   ModelExceptions.MODEL_DOMAIN,
-                  ModelExceptions.ABORT,
+                  Code.ABORT,
                   null,
                   "Parsing reported errors"
               );
@@ -283,7 +283,7 @@ public class XMIImporter_1
               if(this.hasErrors) {
                   throw new ServiceException(
                       ModelExceptions.MODEL_DOMAIN,
-                      ModelExceptions.ABORT,
+                      Code.ABORT,
                       null,
                       "Parsing reported errors"
                   );
@@ -1438,7 +1438,7 @@ public class XMIImporter_1
   private String toMOFMultiplicity(
     UML1MultiplicityRange range
   ) {
-      return StringBuilders.newStringBuilder(
+      return new StringBuilder(
       ).append(
           range.getLower()
       ).append(
@@ -1480,20 +1480,11 @@ public class XMIImporter_1
   private String getAnnotation(
     UML1ModelElement modelElement
   ) {
-    // the information about the annotation of a model element is stored as a
-    // tagged value; the UML Profile for MOF defines:
-    // annotation(MOF) <-> tagged value "documentation" (UML)
-    for(
-      Iterator it = modelElement.getTaggedValues().iterator();
-      it.hasNext();
-    ) {
-      UML1TaggedValue taggedValue = (UML1TaggedValue)it.next();
-      if ("documentation".equals(taggedValue.getType().getName()))
-      {
-        return taggedValue.getDataValue();
+      StringBuilder annotation = new StringBuilder();
+      for(String comment: modelElement.getComment()) {
+          annotation.append(comment);
       }
-    }
-    return new String();
+      return annotation.toString();
   }
 
   //---------------------------------------------------------------------------
@@ -1519,7 +1510,7 @@ public class XMIImporter_1
   private String getOperationExceptions(
       UML1Operation operation
   ) {
-      for(String comment: (List<String>)operation.getComment()) {
+      for(String comment: operation.getComment()) {
           if(comment.startsWith(THROWS_EXCEPTION_PREFIX)) {
               return comment.substring(THROWS_EXCEPTION_PREFIX.length());
           }

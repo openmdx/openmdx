@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusLoginModule.java,v 1.4 2007/08/08 13:29:36 hburger Exp $
+ * Name:        $Id: RadiusLoginModule.java,v 1.5 2008/04/04 17:55:31 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/08 13:29:36 $
+ * Date:        $Date: 2008/04/04 17:55:31 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG
@@ -80,7 +80,7 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.packets.PapAccessRequest;
  * This is an implementation of javax.security.auth.spi.LoginModule specific to
  * using a RADIUS Server for authentication.
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RadiusLoginModule implements LoginModule {
 
@@ -88,8 +88,8 @@ public class RadiusLoginModule implements LoginModule {
     //initial state variables
     protected Subject radiusSubject;
     protected CallbackHandler callbackHandler;
-    protected Map sharedState;
-    protected Map moduleOptions;
+    protected Map<String,?> sharedState;
+    protected Map<String,?> moduleOptions;
     //private state of the authentication attempt
     private boolean authenticationSucceeded = false;
     private boolean authenticationCommitted = false;
@@ -183,7 +183,7 @@ public class RadiusLoginModule implements LoginModule {
      * @param options java.util.Map
      */
     public void initialize(Subject subject, CallbackHandler callbackHandler,
-            Map sharedState, Map options) {
+            Map<String,?> sharedState, Map<String,?> options) {
         this.radiusSubject = subject;
         this.callbackHandler = callbackHandler;
         this.sharedState = sharedState;

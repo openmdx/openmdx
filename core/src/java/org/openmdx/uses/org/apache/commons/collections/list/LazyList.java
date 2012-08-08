@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -46,15 +47,21 @@ import org.openmdx.uses.org.apache.commons.collections.Factory;
  * instance is the fourth element in the list.  The first, second, 
  * and third element are all set to <code>null</code>.
  * <p>
+ * This class differs from {@link GrowthList} because here growth occurs on
+ * get, where <code>GrowthList</code> grows on set and add. However, they
+ * could easily be used together by decorating twice.
+ * <p>
  * This class is Serializable from Commons Collections 3.1.
  *
+ * @see GrowthList
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:20 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:17 $
  * 
  * @author Stephen Colebourne
  * @author Arron Bates
  * @author Paul Jack
  */
+@SuppressWarnings("unchecked")
 public class LazyList extends AbstractSerializableListDecorator {
 
     /** Serialization version */

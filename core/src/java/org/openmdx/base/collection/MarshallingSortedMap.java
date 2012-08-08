@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSortedMap.java,v 1.9 2008/02/18 14:11:33 hburger Exp $
+ * Name:        $Id: MarshallingSortedMap.java,v 1.11 2008/04/09 12:33:43 hburger Exp $
  * Description: Marshalling Sorted Map
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/04/09 12:33:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,11 +64,24 @@ public class MarshallingSortedMap<K,V>
   implements SortedMap<K,V>, Serializable 
 {
 
-
     /**
+     * Constructor
      * 
-     */
-    private static final long serialVersionUID = 3761121648119788080L;
+     * @param marshaller
+     * @param sortedMap
+     * @param unmarshalling 
+     */    
+    public MarshallingSortedMap(
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
+        SortedMap<K,?> sortedMap, 
+        Unmarshalling unmarshalling 
+    ) {
+        super(
+            marshaller, 
+            sortedMap, 
+            unmarshalling
+        );
+    }
 
     /**
      * Constructor
@@ -77,7 +90,7 @@ public class MarshallingSortedMap<K,V>
      * @param sortedMap
      */    
     public MarshallingSortedMap(
-        org.openmdx.base.object.spi.Marshaller marshaller,
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
         SortedMap<K,?> sortedMap 
     ) {
         super(marshaller, sortedMap);
@@ -105,9 +118,19 @@ public class MarshallingSortedMap<K,V>
     ) {
         return new MarshallingSortedMap<K,V>(
             super.marshaller,
-            getDelegate().subMap(fromKey, toKey)
+            getDelegate().subMap(fromKey, toKey), Unmarshalling.EAGER
         );  
     }
+    
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3761121648119788080L;
+
+    
+    //------------------------------------------------------------------------
+    // Implements SortedMap
+    //------------------------------------------------------------------------
 
     /**
      * 
@@ -133,7 +156,7 @@ public class MarshallingSortedMap<K,V>
     ) {
         return new MarshallingSortedMap<K,V>(
             super.marshaller,
-            getDelegate().headMap(toKey)
+            getDelegate().headMap(toKey), Unmarshalling.EAGER
         );  
     }
 
@@ -145,7 +168,7 @@ public class MarshallingSortedMap<K,V>
     ) {
         return new MarshallingSortedMap<K,V>(
             super.marshaller,
-            getDelegate().tailMap(fromKey)
+            getDelegate().tailMap(fromKey), Unmarshalling.EAGER
         );  
     }
   

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: MenuControl.java,v 1.20 2007/02/03 00:47:55 wfro Exp $
+ * Name:        $Id: MenuControl.java,v 1.23 2008/05/02 15:42:56 wfro Exp $
  * Description: MenuControl
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/02/03 00:47:55 $
+ * Date:        $Date: 2008/05/02 15:42:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,10 +59,6 @@
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
-import java.util.Iterator;
-
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.HtmlPage;
 
 public class MenuControl
     extends ContainerControl
@@ -82,41 +78,12 @@ public class MenuControl
              controlFactory
          );
     }
-
-    //-------------------------------------------------------------------------
-    public void paint(
-        HtmlPage p, 
-        String frame,
-        boolean forEditing    
-    ) throws ServiceException {
-        p.write("<div id=\"", this.id, "\" >");
-        if(this.hasPrintOption) {
-            p.write("<div class=\"printButton\" id=\"printButton\" onClick=\"javascript:yuiPrint();\">&nbsp;</div>");
-        }
-        p.write("  <ul id=\"", this.menuClass, "\" class=\"", this.menuClass, "\" onmouseover=\"sfinit(this);\" >");        
-        int ii = 0;
-        for(
-            Iterator i = this.controls.iterator();
-            i.hasNext();
-            ii++
-        ) {
-            Control control = (Control)i.next();
-            // Menu entry
-            control.paint(
-                p, 
-                (String)this.frames.get(ii),
-                forEditing
-            );
-        }
-        p.write("  </ul>&nbsp;");
-        p.write("</div>");  
-    }
-
+    
     //-------------------------------------------------------------------------
     public void setLayout(
         String layout
     ) {
-        this.layout = layout;
+//      this.layout = layout;
     }
     
     //-------------------------------------------------------------------------
@@ -127,10 +94,22 @@ public class MenuControl
     }
     
     //-------------------------------------------------------------------------
+    public String getMenuClass(
+    ) {
+        return this.menuClass;
+    }
+    
+    //-------------------------------------------------------------------------
     public void setHasPrintOption(
         boolean newValue
     ) {
         this.hasPrintOption = newValue;
+    }
+
+    //-------------------------------------------------------------------------
+    public boolean hasPrintOption(
+    ) {        
+        return this.hasPrintOption;
     }
     
     //-------------------------------------------------------------------------
@@ -141,7 +120,7 @@ public class MenuControl
     public static final String LAYOUT_HORIZONTAL = "horizontal";
     public static final String LAYOUT_VERTICAL = "vertical";
     
-    private String layout;
+//  private String layout;
     private String menuClass;
     private boolean hasPrintOption = false;
     

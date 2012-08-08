@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderContainer_1.java,v 1.12 2007/12/13 18:19:20 hburger Exp $
+ * Name:        $Id: DataproviderContainer_1.java,v 1.13 2008/03/19 17:07:55 hburger Exp $
  * Description: spice: container implementation
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:19:20 $
+ * Date:        $Date: 2008/03/19 17:07:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,6 +68,7 @@ import org.openmdx.kernel.log.SysLog;
  * org.openmdx.kernel.application.container.lightweight.LightweightContainer 
  * LightweightContainer} and its implementation classes.
  */
+@SuppressWarnings("unchecked")
 public class DataproviderContainer_1 {
 
     /**

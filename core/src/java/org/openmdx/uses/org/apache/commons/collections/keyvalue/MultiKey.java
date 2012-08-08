@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -39,11 +40,12 @@ import java.util.Arrays;
  * </pre>
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:20 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:17 $
  * 
  * @author Howard Lewis Ship
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class MultiKey implements Serializable {
     // This class could implement List, but that would confuse it's purpose
 
@@ -158,7 +160,7 @@ public class MultiKey implements Serializable {
             throw new IllegalArgumentException("The array of keys must not be null");
         }
         if (makeClone) {
-            this.keys = (Object[]) keys.clone();
+            this.keys = keys.clone();
         } else {
             this.keys = keys;
         }
@@ -182,7 +184,7 @@ public class MultiKey implements Serializable {
      * @return the individual keys
      */
     public Object[] getKeys() {
-        return (Object[]) keys.clone();
+        return keys.clone();
     }
     
     /**

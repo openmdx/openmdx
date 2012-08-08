@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ResourceAdapterDeploymentDescriptor.java,v 1.3 2008/01/13 21:37:34 hburger Exp $
+ * Name:        $Id: ResourceAdapterDeploymentDescriptor.java,v 1.4 2008/03/21 18:38:43 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/13 21:37:34 $
+ * Date:        $Date: 2008/03/21 18:38:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import org.openmdx.kernel.application.deploy.spi.Deployment.ResourceAdapter;
 import org.openmdx.kernel.naming.Contexts;
 import org.w3c.dom.Element;
 
+@SuppressWarnings("unchecked")
 public class ResourceAdapterDeploymentDescriptor
   extends AbstractConfiguration
   implements ResourceAdapter

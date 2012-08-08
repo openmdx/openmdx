@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1.java,v 1.15 2008/02/29 18:08:54 hburger Exp $
+ * Name:        $Id: Dataprovider_1.java,v 1.23 2008/06/27 13:56:09 hburger Exp $
  * Description: The dataprovider kernel
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:08:54 $
+ * Date:        $Date: 2008/06/27 13:56:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,51 +50,44 @@
  */
 package org.openmdx.compatibility.base.dataprovider.kernel;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import javax.jdo.PersistenceManager;
-
-import org.openmdx.base.accessor.generic.view.Manager_1;
-import org.openmdx.base.accessor.jmi.spi.PersistenceManagerFactory_1;
-import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.object.spi.PersistenceManagerFactory_2_0;
-import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.PersistenceManagerFactory_1_0;
 import org.openmdx.compatibility.base.application.cci.ConfigurationProvider_1_0;
-import org.openmdx.compatibility.base.application.cci.ConfigurationSpecifier;
 import org.openmdx.compatibility.base.application.cci.Configuration_1_0;
 import org.openmdx.compatibility.base.application.configuration.Configuration;
 import org.openmdx.compatibility.base.application.spi.ConfigurationProviderAdapter_1;
 import org.openmdx.compatibility.base.collection.SparseList;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderLayers;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.compatibility.base.dataprovider.spi.LayerStatistics_1_0;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.dataprovider.transport.adapter.Provider_1;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_2Connection;
-import org.openmdx.compatibility.base.dataprovider.transport.delegation.Connection_1;
-import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_5;
+import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
+import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.accessor.basic.spi.Model_1;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is the dataprovider builder.
  */
 public class Dataprovider_1 
-    implements Dataprovider_1_2Connection
+    extends EntityManagerFactory_2
+    implements Dataprovider_1_1Connection
 {
 
     /**
@@ -144,34 +137,19 @@ public class Dataprovider_1
         ConfigurationProvider_1_0 configurationProvider, 
         Dataprovider_1_0 self
     ) throws ServiceException {
-
-        Configuration kernelConfiguration;
-        String namespace;
+        super(configurationProvider);
         
-        // Get kernel configuration
-        try {
-            kernelConfiguration = configurationProvider.getConfiguration(
-                new String[]{KERNEL_CONFIGURATION_SECTION},
-                this.configurationSpecification()
-            );
-            namespace = kernelConfiguration.getFirstValue(
-                SharedConfigurationEntries.NAMESPACE_ID
-            );
-        } catch (Exception exception) {
-            throw new ServiceException (
-                exception, 
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.ACTIVATION_FAILURE, 
-                new BasicException.Parameter [] {
-                    new BasicException.Parameter("section", KERNEL_CONFIGURATION_SECTION)
-                },
-                "Error retrieving dataprovider kernel options"
-            );
-        }
+        String namespace = super.kernelConfiguration.getFirstValue(
+            SharedConfigurationEntries.NAMESPACE_ID
+        );
+        super.kernelConfiguration.getFirstValue(
+            SharedConfigurationEntries.PERSISTENCE_MANAGER_BINDING
+        );
         
         try {
-            SysLog.trace (
-                "Creating kernel for namespace \"" + namespace + '"',
+            this.logger.trace (
+                "Creating kernel for namespace \"{}\"",
+                namespace,
                 kernelConfiguration
             );
         
@@ -247,17 +225,17 @@ public class Dataprovider_1
             dataproviderConfiguration.values(
               SharedConfigurationEntries.MODEL
             ).add(model);
-            model.addModels(
-              dataproviderConfiguration.values(SharedConfigurationEntries.MODEL_PACKAGE)
-            );
+            List<String> modelPackages = new ArrayList<String>();
+            for(Object modelPackage : dataproviderConfiguration.values(SharedConfigurationEntries.MODEL_PACKAGE).population()) {
+                modelPackages.add((String) modelPackage);
+            }
+            model.addModels(modelPackages);
 
             // DATAPROVIDER_CONNECTION
             dataproviderConfiguration.values(
                 SharedConfigurationEntries.DATAPROVIDER_CONNECTION
             ); // Like that even an initially empty entry is sharable
             
-            // SELF
-            this.self = self;
             if(self != null) dataproviderConfiguration.values(
                 SharedConfigurationEntries.THIS_DATAPROVIDER
             ).add(
@@ -329,10 +307,10 @@ public class Dataprovider_1
                     "Could not activate " + id + " layer plugin " + className
                 ).log();
             }
-
-            SysLog.detail(
-                "Kernel for namespace \"" + namespace + "\" created",
-                 kernelConfiguration
+            logger.debug(
+                "Kernel for namespace \"{}\" created",
+                namespace,
+                kernelConfiguration
             );
 
             this.delegation = layers[DataproviderLayers.INTERCEPTION];
@@ -348,59 +326,60 @@ public class Dataprovider_1
         }
     }
 
+    
+    //------------------------------------------------------------------------
+    // Instance Members
+    //------------------------------------------------------------------------
 
     /**
-     * The kernel's specific configuration specifiers.
-     *
-     * @return    a map with id/ConfigurationSpecifier entries
+     * The model repository is propagated to the layer configuration as well.
      */
-    private Map<String,ConfigurationSpecifier> configurationSpecification(
-    ){
-        Map<String,ConfigurationSpecifier> specification = 
-            new HashMap<String,ConfigurationSpecifier>();
-        for(
-            int layer = DataproviderLayers.PERSISTENCE;
-            layer <= DataproviderLayers.INTERCEPTION;
-            layer++
-        ) specification.put(
-            DataproviderLayers.toString(layer),
-            new ConfigurationSpecifier (
-                DataproviderLayers.toString(layer) + " layer plug-in class",
-                true, 1, 1
-            )
-        );
-        specification.put(
-            SharedConfigurationEntries.NAMESPACE_ID,
-              new ConfigurationSpecifier (
-                "The namespace ID. Where <value> is a simple string",
-                true, 1, 1
-            )
-        );
-        specification.put(
-            SharedConfigurationEntries.EXPOSED_PATH,
-            new ConfigurationSpecifier (
-                "A requests is not accepted " +
-                    " unless its path starts with one of the exposed ones",
-                true, 1, 100
-            )
-        );
-        specification.put(
-            SharedConfigurationEntries.DELEGATION_PATH,
-            new ConfigurationSpecifier (
-                "Requests to be delegated use the dataprovider with the same " +
-					"index as its matching delegation path.",
-                false, 1, 100
-            )
-        );
-		specification.put(
-            SharedConfigurationEntries.MODEL_PACKAGE,
-            new ConfigurationSpecifier (
-                "Optional model packages specified as full qualified class names.",
-                true, 0, 100
-              )
-          );
-        return specification;
-    }
+    private final Model_1_3 model;
+    /**
+     * Initialized when the kernel is ready to act as dataprovider connection.
+     */
+    private Layer_1_0 delegation = null;
+    
+    /**
+     * The layer instances
+     */
+    final protected Layer_1_0[] layers = new Layer_1_0[LAYERS];
+
+    /**
+     * The logger instance
+     */
+    private final Logger logger = LoggerFactory.getLogger(Dataprovider_1.class);
+    
+    
+    //------------------------------------------------------------------------
+    // Class Members
+    //------------------------------------------------------------------------
+
+    /**
+     * Number of layers
+     */
+    final static int LAYERS = DataproviderLayers.INTERCEPTION + 1;
+    
+    /**
+     * Plugin activation step
+     */
+    final private static short LOAD_PLUGIN         = 0;
+    
+    /**
+     * Plugin activation step
+     */
+    final private static short CONFIGURE_PLUGIN    = 1;
+
+    /**
+     * Plugin activation step
+     */
+    final private static short ACTIVATE_PLUGIN    = 2;
+
+    /**
+     * Contains one layer statistic array per namespace.
+     */
+    final static Map<String,LayerStatistics_1_0[]> namespaceStatistics = 
+        new HashMap<String,LayerStatistics_1_0[]>();
 
     /**
      * The toPath method accepts any input class
@@ -416,65 +395,9 @@ public class Dataprovider_1
                 new Path(path.toString());
     }
 
-    
-    //------------------------------------------------------------------------
-    // Implements PersistenceManagerFactory_2_0
-    //------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.object.spi.PersistenceManagerFactory_2_0#getPersistenceManager()
-     */
-    public PersistenceManager getPersistenceManager(
-    ) throws ServiceException{
-        return this.delegation instanceof PersistenceManagerFactory_2_0 ?
-            ((PersistenceManagerFactory_2_0)this.delegation).getPersistenceManager() :
-            getPersistenceManager(new ServiceHeader());
+    protected Model_1_0 getModel(){
+        return this.model;
     }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.object.spi.PersistenceManagerFactory_2_0#getPersistenceManager(java.lang.String, java.lang.String)
-     */
-    public PersistenceManager getPersistenceManager(
-        String userid,
-        String password
-    ) throws ServiceException {
-        return this.delegation instanceof PersistenceManagerFactory_2_0 ?
-            ((PersistenceManagerFactory_2_0)this.delegation).getPersistenceManager(userid, password) :
-            getPersistenceManager(PersistenceManagerFactory_1.newServiceHeader(userid));
-    }
-
-    
-    //------------------------------------------------------------------------
-    // Implements PersistenceManagerFactory_1_0
-    //------------------------------------------------------------------------
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.PersistenceManagerFactory_1_0#getPersistenceManager(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader)
-     */
-    public PersistenceManager getPersistenceManager(
-        ServiceHeader serviceHeader
-    ) throws ServiceException {
-        if(this.delegation instanceof PersistenceManagerFactory_1_0) {
-            return ((PersistenceManagerFactory_1_0)this.delegation).getPersistenceManager(serviceHeader);
-        } else {
-            Connection_1_5 connection = new Connection_1(
-                new Provider_1(
-                    new RequestCollection(
-                        serviceHeader,
-                        this.self
-                    ),
-                    false // transactionPolicyIsNew
-                ),
-                true // containerManagedUnitOfWork
-            ); 
-            connection.setModel(this.model);
-            return new RefRootPackage_1(
-                new Manager_1(connection),
-                false // throwNotFoundIfNull
-            ).refPersistenceManager();
-        }
-    }
-
     
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0
@@ -492,9 +415,10 @@ public class Dataprovider_1
         ServiceHeader header,
         UnitOfWorkRequest[] workingUnits
     ){
-        if (SysLog.isTraceOn()) SysLog.trace(
-            "Requested by " + header.getPrincipalChain(),
-            Arrays.asList(workingUnits)
+        this.logger.trace(
+            "{} requested by {}",
+            Arrays.asList(workingUnits),
+            header.getPrincipalChain()
         );
         return delegation.process(header, workingUnits);
     }
@@ -543,64 +467,5 @@ public class Dataprovider_1
     ){
         close();
     }
-    
-
-    //------------------------------------------------------------------------
-    // Instance Members
-    //------------------------------------------------------------------------
-
-    /**
-     * The model repository is propagated to the layer configuration as well.
-     */
-    private final Model_1_3 model;
-    /**
-     * Initialized when the kernel is ready to act as dataprovider connection.
-     */
-    private Layer_1_0 delegation = null;
-    
-    /**
-     * The layer instances
-     */
-    final protected Layer_1_0[] layers = new Layer_1_0[LAYERS];
-
-    /**
-     * EJB self reference
-     */
-    private final Dataprovider_1_0 self;
-
-    
-    //------------------------------------------------------------------------
-    // Class Members
-    //------------------------------------------------------------------------
-
-    /**
-     *
-     */
-    static private final String KERNEL_CONFIGURATION_SECTION = "KERNEL";
-
-    /**
-     * Number of layers
-     */
-    final static int LAYERS = DataproviderLayers.INTERCEPTION + 1;
-    
-    /**
-     * Plugin activation step
-     */
-    final private static short LOAD_PLUGIN         = 0;
-    
-    /**
-     * Plugin activation step
-     */
-    final private static short CONFIGURE_PLUGIN    = 1;
-
-    /**
-     * Plugin activation step
-     */
-    final private static short ACTIVATE_PLUGIN    = 2;
-
-    /**
-     * Contains one layer statistic array per namespace.
-     */
-    final static Map<String,LayerStatistics_1_0[]> namespaceStatistics = new HashMap<String,LayerStatistics_1_0[]>();
 
 }

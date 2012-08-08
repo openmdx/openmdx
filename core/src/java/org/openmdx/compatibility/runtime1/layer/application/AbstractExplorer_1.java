@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractExplorer_1.java,v 1.5 2008/02/29 18:04:46 hburger Exp $
+ * Name:        $Id: AbstractExplorer_1.java,v 1.6 2008/06/28 00:21:20 hburger Exp $
  * Description: Abstract Explorer Plug-In
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:04:46 $
+ * Date:        $Date: 2008/06/28 00:21:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -146,7 +146,7 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
             LayerConfigurationEntries.IGNORE_PREFIX
         );
         this.dataproviders = configuration.values(
-            LayerConfigurationEntries.DATAPROVIDER_CONNECTION
+            SharedConfigurationEntries.DATAPROVIDER_CONNECTION
         );
         if(
             this.dataproviders.isEmpty() == 
@@ -156,7 +156,7 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
             BasicException.Code.INVALID_CONFIGURATION,
             new BasicException.Parameter[]{
                 new BasicException.Parameter(
-                    LayerConfigurationEntries.DATAPROVIDER_CONNECTION,
+                    SharedConfigurationEntries.DATAPROVIDER_CONNECTION,
                     this.dataproviders
                 ),
                 new BasicException.Parameter(
@@ -168,14 +168,14 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
                     serviceLocatorContext
                 ),
             },
-            "Either " + LayerConfigurationEntries.DATAPROVIDER_CONNECTION + 
+            "Either " + SharedConfigurationEntries.DATAPROVIDER_CONNECTION + 
             " or " + LayerConfigurationEntries.JNDI_CONTEXT + " and " +
             LayerConfigurationEntries.SERVICE_LOCATOR_CONTEXT + 
             " must be empty, but not all of them"
         );
         if (! this.dataproviders.isEmpty()) {
             List scopes = configuration.values(
-                LayerConfigurationEntries.EXPOSED_PATH
+                SharedConfigurationEntries.EXPOSED_PATH
             );
             this.scopes = new Path[scopes.size()];
             for(

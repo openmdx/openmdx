@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SystemPrintHandler.java,v 1.4 2005/01/21 23:39:19 wfro Exp $
+ * Name:        $Id: SystemPrintHandler.java,v 1.6 2008/05/12 10:45:50 wfro Exp $
  * Description: SystemPrintHandler class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/01/21 23:39:19 $
+ * Date:        $Date: 2008/05/12 10:45:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.naming.Path;
 
+@SuppressWarnings("unchecked")
 public class SystemPrintHandler extends DelegatingHandler {
 
     public SystemPrintHandler(TraversalHandler delegation) {
@@ -93,22 +94,26 @@ public class SystemPrintHandler extends DelegatingHandler {
     }
 
     public boolean startObject(
+        Path parentPath,
         String qualifiedName, 
         String qualifierName, 
         String id,
         short properties
     ) throws ServiceException {
-
         System.out.println("startObject");
-
         System.out.println("\t qualifiedName:");
         System.out.println("\t\t" + qualifiedName);
         System.out.println("\t qualifierName:");
         System.out.println("\t\t" + qualifierName);
         System.out.println("\t id:");
         System.out.println("\t\t" + id);
-
-        return super.startObject(qualifiedName, qualifierName, id, properties);
+        return super.startObject(
+            parentPath,
+            qualifiedName, 
+            qualifierName, 
+            id, 
+            properties
+        );
     }
 
     public void endObject(
@@ -124,6 +129,7 @@ public class SystemPrintHandler extends DelegatingHandler {
     }
 
     public boolean featureComplete(
+        Path parentPath,
         DataproviderObject_1_0 object
     ) throws ServiceException {
 
@@ -140,6 +146,7 @@ public class SystemPrintHandler extends DelegatingHandler {
         );
 
         return super.featureComplete(
+            parentPath,
             object
         );
     }

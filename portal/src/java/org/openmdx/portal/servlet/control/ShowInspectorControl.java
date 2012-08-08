@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowInspectorControl.java,v 1.9 2007/12/13 23:42:20 wfro Exp $
+ * Name:        $Id: ShowInspectorControl.java,v 1.11 2008/05/01 21:43:55 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 23:42:20 $
+ * Date:        $Date: 2008/05/01 21:43:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -96,8 +96,8 @@ public class ShowInspectorControl
         );
 
         AppLog.detail("Preparing operation and reference panes");
-        List paneOp = new ArrayList();
-        List paneRef = new ArrayList();
+        List<Object> paneOp = new ArrayList<Object>();
+        List<Object> paneRef = new ArrayList<Object>();
         for(Iterator i = inspector.getMember().iterator(); i.hasNext();) {
             Object pane = i.next();
             if (pane instanceof org.openmdx.ui1.jmi1.OperationPane) {
@@ -114,7 +114,7 @@ public class ShowInspectorControl
 
         // Operation pane
         AppLog.detail("Preparing operation panes");
-        List operationPaneControls = new ArrayList();
+        List<OperationPaneControl> operationPaneControls = new ArrayList<OperationPaneControl>();
         for (int i = 0; i < this.paneOp.length; i++) {
             org.openmdx.ui1.jmi1.OperationPane pane = this.paneOp[i];
             operationPaneControls.add(
@@ -208,6 +208,7 @@ public class ShowInspectorControl
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,

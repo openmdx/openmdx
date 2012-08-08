@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObject.java,v 1.23 2007/07/27 16:51:32 wfro Exp $
+ * Name:        $Id: DbObject.java,v 1.25 2008/05/15 23:33:23 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/07/27 16:51:32 $
+ * Date:        $Date: 2008/05/15 23:33:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -106,6 +106,7 @@ import org.openmdx.compatibility.base.query.FilterProperty;
  * </org.openmdx.deployment1.DataproviderTypeStringProperty>
  * </pre>
  */
+@SuppressWarnings("unchecked")
 public abstract class DbObject
   implements Serializable {
 
@@ -419,15 +420,15 @@ public abstract class DbObject
   //---------------------------------------------------------------------------  
   private Path referencedType;
 
-  protected List referenceColumn = null;
-  protected List referenceValues = null;
+  protected List<String> referenceColumn = null;
+  protected List<Object> referenceValues = null;
   protected String indexColumn = null;
-  protected List objectIdColumn = null;
+  protected List<String> objectIdColumn = null;
   protected String objectIdClause = null;
   protected String referenceClause = null;
   protected DbObjectConfiguration dbObjectConfiguration = null;
-  protected List objectIdValues = null;
-  protected final Set excludeAttributes;
+  protected List<String> objectIdValues = null;
+  protected final Set<String> excludeAttributes;
 
   protected final AbstractDatabase_1 database;
   protected final Connection conn;

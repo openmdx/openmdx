@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FieldGroupControl.java,v 1.33 2007/12/13 23:42:20 wfro Exp $
+ * Name:        $Id: FieldGroupControl.java,v 1.36 2008/06/18 22:42:30 wfro Exp $
  * Description: FieldGroupControl
- * Revision:    $Revision: 1.33 $
+ * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 23:42:20 $
+ * Date:        $Date: 2008/06/18 22:42:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,14 +64,16 @@ import java.util.List;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
+import org.openmdx.portal.servlet.attribute.BinaryValue;
 import org.openmdx.portal.servlet.attribute.TextValue;
+import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.view.ViewMode;
 import org.openmdx.ui1.jmi1.FieldGroup;
 
 public class FieldGroupControl
@@ -119,10 +121,10 @@ public class FieldGroupControl
       ApplicationContext application
   ) {    
     
-    List columns = new ArrayList();
-    List attributes = null;
+    List<List<Attribute>> columns = new ArrayList<List<Attribute>>();
+    List<Attribute> attributes = null;
     columns.add(
-      attributes = new ArrayList()
+      attributes = new ArrayList<Attribute>()
     );
         
     int col = 0;
@@ -134,7 +136,7 @@ public class FieldGroupControl
         while(count < this.fieldGroup.getMember().size()) {
           if(count == this.fieldGroup.getColumnBreakAtElement().get(col)) {
             columns.add(
-              attributes = new ArrayList()
+              attributes = new ArrayList<Attribute>()
             );
             col++;
           }
@@ -179,6 +181,7 @@ public class FieldGroupControl
   }
     
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,
@@ -186,6 +189,7 @@ public class FieldGroupControl
     ) throws ServiceException {
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();
         ObjectView view = (ObjectView)p.getView();
+        ViewMode viewMode = view instanceof EditObjectView ? ((EditObjectView)view).getMode() : ViewMode.STANDARD;
         Attribute[][] attributes = view.getAttributePane().getAttributeTab()[this.tabControl.getTabIndex()].getFieldGroup()[this.fieldGroupIndex].getAttribute();
         int nCols = attributes.length;
         int nRows = nCols > 0 ? attributes[0].length : 0;
@@ -200,11 +204,9 @@ public class FieldGroupControl
                 for(int u = 0; u < nCols; u++) {                  
                   Attribute attribute = attributes[u][v];
                   int tabIndex = fieldGroupId + 100*(u+1) + v;
-                  CharSequence rowSpanModifier = StringBuilders.newStringBuilder();
+                  StringBuilder rowSpanModifier = new StringBuilder();
                   if((attribute != null) && (attribute.getSpanRow() > 1)) {
-                      StringBuilders.asStringBuilder(
-                    	rowSpanModifier
-                      ).append(
+                      rowSpanModifier.append(
                       	"rowspan=\""
                       ).append(
                     	attribute.getSpanRow()
@@ -212,11 +214,9 @@ public class FieldGroupControl
                         "\""
                       );
                   }
-                  CharSequence gapModifier = StringBuilders.newStringBuilder();
+                  StringBuilder gapModifier = new StringBuilder();
                   if(u > 0) {
-                      StringBuilders.asStringBuilder(
-                    	  gapModifier
-                      ).append(
+                      gapModifier.append(
                     	  "<td class=\"gap\" "
                       ).append(
                     	  rowSpanModifier
@@ -224,11 +224,9 @@ public class FieldGroupControl
                     	  "></td>"
                       );
                   }
-                  CharSequence widthModifier = StringBuilders.newStringBuilder();
+                  StringBuilder widthModifier = new StringBuilder();
                   if(v == 0) {
-                	  StringBuilders.asStringBuilder(
-                		widthModifier
-                	  ).append(
+                	  widthModifier.append(
                 		"width=\""
                 	  ).append(
                 		100/nCols
@@ -263,14 +261,18 @@ public class FieldGroupControl
                     // styles
                     String color = valueHolder.getColor();
                     String backColor = valueHolder.getBackColor();
-                    String readonlyModifier = valueHolder.isEnabled() && valueHolder.isChangeable() ? "" : "readonly";
-                    String disabledModifier = valueHolder.isEnabled() && valueHolder.isChangeable() ? "" : "disabled";                    
-                    String lockedModifier = valueHolder.isEnabled() && valueHolder.isChangeable() ? "" : "Locked";
-                    CharSequence styleModifier = StringBuilders.newStringBuilder("style=\"");
+                    // A field is modifiable if it is enabled and changeable. BinaryValues are
+                    // not modifiable if the view is embedded.
+                    boolean isModifiable = 
+                        valueHolder.isEnabled() && 
+                        valueHolder.isChangeable() && 
+                        (viewMode != ViewMode.EMBEDDED || !(valueHolder instanceof BinaryValue));
+                    String readonlyModifier = isModifiable ? "" : "readonly";
+                    String disabledModifier = isModifiable ? "" : "disabled";                    
+                    String lockedModifier = isModifiable ? "" : "Locked";
+                    StringBuilder styleModifier = new StringBuilder("style=\"");
                     if(color != null) {
-                        StringBuilders.asStringBuilder(
-                        	styleModifier
-                        ).append(
+                        styleModifier.append(
                         	"color:"
                         ).append(
                         	color
@@ -279,9 +281,7 @@ public class FieldGroupControl
                         );
                     }
                     if(backColor != null) {
-                        StringBuilders.asStringBuilder(
-                        	styleModifier
-                        ).append(
+                        styleModifier.append(
                         	"background-color:"
                         ).append(
                         	backColor

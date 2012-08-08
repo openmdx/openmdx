@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightTransaction.java,v 1.9 2007/10/10 16:06:04 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: LightweightTransaction.java,v 1.10 2008/03/06 00:00:52 hburger Exp $
  * Description: Lightweight Transaction
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:04 $
+ * Date:        $Date: 2008/03/06 00:00:52 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,10 +45,9 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
-
 package org.openmdx.kernel.application.container.lightweight;
 
 import java.io.PrintWriter;
@@ -70,11 +68,10 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 import org.openmdx.kernel.application.container.transaction.TransactionIdFactory;
-import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.text.format.IndentingFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JTA Transaction implementation.
@@ -98,56 +95,63 @@ final class LightweightTransaction implements Transaction {
     
     // ----------------------------------------------------- Instance Variables
     
+    /**
+     * The logger instance
+     */
+    private final Logger logger = LoggerFactory.getLogger(
+        LightweightTransactionManager.class
+    );
+    
     
     /**
      * Transaction Id factory
      */
-    private TransactionIdFactory xidFactory;
+    private final TransactionIdFactory xidFactory;
    
     
     /**
      * Global transaction id.
      */
-    private Xid xid;
+    final Xid xid;
     
     
     /**
      * Branches.
      * Keyed : branch xid -> resource manager.
      */
-    private Hashtable branches = new Hashtable();
+    private final Hashtable<Xid,XAResource> branches = new Hashtable<Xid,XAResource>();
     
     
     /**
      * Active branches.
      * Keyed : resource manager -> branches xid.
      */
-    private Hashtable activeBranches = new Hashtable();
+    private final Hashtable<XAResource,Xid> activeBranches = new Hashtable<XAResource,Xid>();
     
     
     /**
      * Enlisted resources.
      */
-    private Vector enlistedResources = new Vector();
+    private final Vector<XAResource> enlistedResources = new Vector<XAResource>();
     
     
     /**
      * Suspended resources.
      * Keyed : resource manager -> branches xid.
      */
-    private Hashtable suspendedResources = new Hashtable();
+    private Hashtable<XAResource,Xid> suspendedResources = new Hashtable<XAResource,Xid>();
     
     
     /**
      * Transaction status.
      */
-    private int status = Status.STATUS_ACTIVE;
+    int status = Status.STATUS_ACTIVE;
     
     
     /**
      * Synchronization objects.
      */
-    private Vector synchronizationObjects = new Vector();
+    private final Vector<Synchronization> synchronizationObjects = new Vector<Synchronization>();
     
     
     /**
@@ -155,7 +159,23 @@ final class LightweightTransaction implements Transaction {
      */
     private int branchCounter = 1;
     
-        
+    
+    /**
+     * Map of resources being managed for the transaction 
+     */
+    final Hashtable<Object,Object> managedResources = new Hashtable<Object,Object>();
+    
+    
+    /**
+     * A Synchronization instance with special ordering semantics. Its beforeCompletion will 
+     * be called after all SessionSynchronization beforeCompletion callbacks and callbacks 
+     * registered directly with the Transaction, but before the 2-phase commit process starts. 
+     * Similarly, the afterCompletion callback will be called after 2-phase commit completes 
+     * but before any SessionSynchronization and Transaction afterCompletion callbacks.
+     */
+    Synchronization interposedSynchronization;
+    
+    
     // ------------------------------------------------------------- Properties
     
     
@@ -197,16 +217,16 @@ final class LightweightTransaction implements Transaction {
             throw new IllegalStateException();
         
         // Call synchronized objects beforeCompletion
-        Enumeration syncList = synchronizationObjects.elements();
+        Enumeration<Synchronization> syncList = synchronizationObjects.elements();
         while (syncList.hasMoreElements()) {
-            Synchronization sync = (Synchronization) syncList.nextElement();
+            Synchronization sync = syncList.nextElement();
             sync.beforeCompletion();
         }
         
-        Vector exceptions = new Vector();
+        Vector<Throwable> exceptions = new Vector<Throwable>();
         boolean fail = false;
         
-        Enumeration enumeration = branches.keys();
+        Enumeration<Xid> enumeration = branches.keys();
         
         switch (enlistedResources.size()) {
             case 0: 
@@ -215,8 +235,7 @@ final class LightweightTransaction implements Transaction {
                 status = Status.STATUS_COMMITTING;
                 while (enumeration.hasMoreElements()) {
                     Object key = enumeration.nextElement();
-                    XAResource resourceManager =
-                        (XAResource) branches.get(key);
+                    XAResource resourceManager = branches.get(key);
                     try {
                         if (!fail)
                             resourceManager.commit(xid, true);
@@ -248,8 +267,7 @@ final class LightweightTransaction implements Transaction {
                 status = Status.STATUS_PREPARING;
                 while ((!fail) && (enumeration.hasMoreElements())) {
                     Object key = enumeration.nextElement();
-                    XAResource resourceManager =
-                        (XAResource) branches.get(key);
+                    XAResource resourceManager = branches.get(key);
                     try {
                         // Preparing the resource manager using its branch xid
                         resourceManager.prepare((Xid) key);
@@ -283,8 +301,7 @@ final class LightweightTransaction implements Transaction {
                     enumeration = branches.keys();
                     while (enumeration.hasMoreElements()) {
                         Object key = enumeration.nextElement();
-                        XAResource resourceManager =
-                            (XAResource) branches.get(key);
+                        XAResource resourceManager = branches.get(key);
                         try {
                             resourceManager.rollback((Xid) key);
                         } catch(Throwable e) {
@@ -313,8 +330,7 @@ final class LightweightTransaction implements Transaction {
                     enumeration = branches.keys();
                     while (enumeration.hasMoreElements()) {
                         Object key = enumeration.nextElement();
-                        XAResource resourceManager =
-                            (XAResource) branches.get(key);
+                        XAResource resourceManager = branches.get(key);
                         try {
                             resourceManager.commit((Xid) key, false);
                         } catch(Throwable e) {
@@ -343,8 +359,7 @@ final class LightweightTransaction implements Transaction {
         // Call synchronized objects afterCompletion
         syncList = synchronizationObjects.elements();
         while (syncList.hasMoreElements()) {
-            Synchronization sync =
-                (Synchronization) syncList.nextElement();
+            Synchronization sync = syncList.nextElement();
             sync.afterCompletion(status);
         }
         
@@ -353,7 +368,7 @@ final class LightweightTransaction implements Transaction {
             case Status.STATUS_ROLLEDBACK: 
                 if(fail) {
                     HeuristicRollbackException heuristicException = new HeuristicRollbackException();
-                    if(exceptions.size() == 1) heuristicException.initCause((Throwable)exceptions.get(0));
+                    if(exceptions.size() == 1) heuristicException.initCause(exceptions.get(0));
                     throw heuristicException;
                 } else {
                     throw new RollbackException();
@@ -361,7 +376,7 @@ final class LightweightTransaction implements Transaction {
             case Status.STATUS_COMMITTED : 
                 if (fail) {
                     HeuristicMixedException heuristicException = new HeuristicMixedException();
-                    if(exceptions.size() == 1) heuristicException.initCause((Throwable)exceptions.get(0));
+                    if(exceptions.size() == 1) heuristicException.initCause(exceptions.get(0));
                     throw heuristicException;
                 } else {
                     break;
@@ -391,21 +406,18 @@ final class LightweightTransaction implements Transaction {
         if (status != Status.STATUS_ACTIVE)
             throw new IllegalStateException();
         
-        Xid xid = (Xid) activeBranches.get(xaRes);
+        Xid xid = activeBranches.get(xaRes);
         
         if (xid == null)
             throw new IllegalStateException();
         
         activeBranches.remove(xaRes);
         
-        if (SysLog.isTraceOn()) SysLog.trace(
-            "Transaction.delist",
-            new IndentingFormatter(
-                ArraysExtension.asMap(
-                    new String[]{"xaResource", "xaFlag", "transaction"},
-                    new Object[]{xaRes, getXAFlag(flag), toString()}
-                )
-            )  
+        this.logger.trace(
+            "Delist xaResource {} from transaction {} ({})",
+            xaRes,
+            getXAFlag(flag),
+            this.xid
         );
         
         try {
@@ -464,19 +476,19 @@ final class LightweightTransaction implements Transaction {
         
         // Preventing two branches from being active at the same time on the
         // same resource manager
-        Xid activeXid = (Xid) activeBranches.get(xaRes);
+        Xid activeXid = activeBranches.get(xaRes);
         if (activeXid != null)
             return false;
         
         boolean alreadyEnlisted = false;
         int flag = XAResource.TMNOFLAGS;
         
-        Xid branchXid = (Xid) suspendedResources.get(xaRes);
+        Xid branchXid = suspendedResources.get(xaRes);
         
         if (branchXid == null) {
-            Enumeration enumeration = enlistedResources.elements();
+            Enumeration<XAResource> enumeration = enlistedResources.elements();
             while ((!alreadyEnlisted) && (enumeration.hasMoreElements())) {
-                XAResource resourceManager = (XAResource) enumeration.nextElement();
+                XAResource resourceManager = enumeration.nextElement();
                 try {
                     if (resourceManager.isSameRM(xaRes)) {
                         flag = XAResource.TMJOIN;
@@ -496,14 +508,11 @@ final class LightweightTransaction implements Transaction {
             suspendedResources.remove(xaRes);
         }
         
-        if (SysLog.isTraceOn()) SysLog.trace(
-            "Transaction.enlist",
-            new IndentingFormatter(
-                ArraysExtension.asMap(
-                    new String[]{"xaResource", "xaFlag", "transaction"},
-                    new Object[]{xaRes, getXAFlag(flag), toString()}
-                )
-            )  
+        this.logger.trace(
+            "Enlist xaResource {} with transaction {} ({})",
+            xaRes,
+            getXAFlag(flag),
+            this.xid
         );
         
         try {
@@ -562,14 +571,14 @@ final class LightweightTransaction implements Transaction {
         if (status != Status.STATUS_ACTIVE && status != Status.STATUS_MARKED_ROLLBACK)
             throw new IllegalStateException();
         
-        Vector exceptions = new Vector();
+        Vector<Throwable> exceptions = new Vector<Throwable>();
         
-        Enumeration enumeration = branches.keys();
+        Enumeration<Xid> enumeration = branches.keys();
         
         status = Status.STATUS_ROLLING_BACK;
         while (enumeration.hasMoreElements()) {
-            Xid xid = (Xid) enumeration.nextElement();
-            XAResource resourceManager = (XAResource) branches.get(xid);
+            Xid xid = enumeration.nextElement();
+            XAResource resourceManager = branches.get(xid);
             try {
                 resourceManager.rollback(xid);
             } catch (Throwable e) {
@@ -593,10 +602,9 @@ final class LightweightTransaction implements Transaction {
         status = Status.STATUS_ROLLEDBACK;
 		
         // Call synchronized objects afterCompletion
-        Enumeration syncList = synchronizationObjects.elements();
+        Enumeration<Synchronization> syncList = synchronizationObjects.elements();
         while (syncList.hasMoreElements()) {
-            Synchronization sync =
-                (Synchronization) syncList.nextElement();
+            Synchronization sync = syncList.nextElement();
             sync.afterCompletion(status);
         }
         
@@ -681,8 +689,9 @@ final class LightweightTransaction implements Transaction {
         }
         return result;
     }
+    
     /**
-     * Return a String representation of the error code contained in a
+     * Return a String representation of the error code contained in an
      * XAException.
      */
     public static String getXAErrorCode(XAException xae) {
@@ -780,10 +789,10 @@ final class LightweightTransaction implements Transaction {
      * 
      * @param exception
      */
-    private static Throwable log(
+    private Throwable log(
         Throwable exception
     ){
-        SysLog.warning(exception.getMessage(), exception);
+        this.logger.warn(exception.getMessage(), exception);
         return exception;
     }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WebKeys.java,v 1.24 2007/11/15 17:05:48 wfro Exp $
+ * Name:        $Id: WebKeys.java,v 1.25 2008/06/01 11:24:19 wfro Exp $
  * Description: WebKeys 
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/15 17:05:48 $
+ * Date:        $Date: 2008/06/01 11:24:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -136,7 +136,6 @@ public class WebKeys {
     public static final String SETTING_GUI_MODE = "Gui.Look";
     public static final String SETTING_GUI_MODE_BASIC = "basic";
     public static final String SETTING_GUI_MODE_STANDARD = "standard";
-    public static final String SETTING_GUI_MODE_ADVANCED = "advanced";
     
     // Special Characters    
     public static final String TAB_GROUPING_CHARACTER = "\u00bb";

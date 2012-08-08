@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -33,6 +34,7 @@ import org.openmdx.uses.org.apache.commons.collections.map.FixedSizeSortedMap;
 import org.openmdx.uses.org.apache.commons.collections.map.LazyMap;
 import org.openmdx.uses.org.apache.commons.collections.map.LazySortedMap;
 import org.openmdx.uses.org.apache.commons.collections.map.ListOrderedMap;
+import org.openmdx.uses.org.apache.commons.collections.map.MultiValueMap;
 import org.openmdx.uses.org.apache.commons.collections.map.PredicatedMap;
 import org.openmdx.uses.org.apache.commons.collections.map.PredicatedSortedMap;
 import org.openmdx.uses.org.apache.commons.collections.map.TransformedMap;
@@ -64,10 +66,13 @@ import org.openmdx.uses.org.apache.commons.collections.map.UnmodifiableSortedMap
  *  <li>{@link #transformedSortedMap(SortedMap, Transformer, Transformer)}
  *  <li>{@link #typedMap(Map, Class, Class)}
  *  <li>{@link #typedSortedMap(SortedMap, Class, Class)}
+ *  <li>{@link #multiValueMap( Map )}
+ *  <li>{@link #multiValueMap( Map, Class )}
+ *  <li>{@link #multiValueMap( Map, Factory )}
  *  </ul>
  *
  * @since Commons Collections 1.0
- * @version $Revision: 1.4 $ $Date: 2007/10/10 16:06:13 $
+ * @version $Revision: 1.6 $ $Date: 2008/04/25 14:32:26 $
  * 
  * @author <a href="mailto:jstrachan@apache.org">James Strachan</a>
  * @author <a href="mailto:nissim@nksystems.com">Nissim Karpenstein</a>
@@ -79,7 +84,10 @@ import org.openmdx.uses.org.apache.commons.collections.map.UnmodifiableSortedMap
  * @author Janek Bogucki
  * @author Max Rydahl Andersen
  * @author <a href="mailto:equinus100@hotmail.com">Ashwin S</a>
+ * @author <a href="mailto:jcarman@apache.org">James Carman</a>
+ * @author Neil O'Toole
  */
+@SuppressWarnings("unchecked")
 public class MapUtils {
     
     /**
@@ -101,7 +109,6 @@ public class MapUtils {
      * <code>MapUtils</code> should not normally be instantiated.
      */
     public MapUtils() {
-        super();
     }    
     
     // Type safe getters
@@ -1059,7 +1066,7 @@ public class MapUtils {
      * If the input map had multiple entries with the same value mapped to
      * different keys, the returned map will map one of those keys to the 
      * value, but the exact key which will be mapped is undefined.
-     * 
+     *
      * @param map  the map to invert, may not be null
      * @return a new HashMap containing the inverted data
      * @throws NullPointerException if the map is null
@@ -1073,26 +1080,137 @@ public class MapUtils {
         return out;
     }
      
+    //-----------------------------------------------------------------------
     /**
-     * Nice method for adding data to a map in such a way
-     * as to not get NPE's. The point being that if the
-     * value is null, map.put() will throw an exception.
-     * That blows in the case of this class cause you may want to
-     * essentially treat put("Not Null", null ) == put("Not Null", "")
-     * We will still throw a NPE if the key is null cause that should
-     * never happen.
+     * Protects against adding null values to a map.
+     * <p>
+     * This method checks the value being added to the map, and if it is null
+     * it is replaced by an empty string.
+     * <p>
+     * This could be useful if the map does not accept null values, or for
+     * receiving data from a source that may provide null or empty string
+     * which should be held in the same way in the map.
+     * <p>
+     * Keys are not validated.
      * 
      * @param map  the map to add to, may not be null
      * @param key  the key
-     * @param value  the value
+     * @param value  the value, null converted to ""
      * @throws NullPointerException if the map is null
      */
     public static void safeAddToMap(Map map, Object key, Object value) throws NullPointerException {
         if (value == null) {
-            map.put ( key, "" );
+            map.put(key, "");
         } else {
-           map.put ( key, value );
+            map.put(key, value);
         }
+    }
+
+    //-----------------------------------------------------------------------
+    /**
+     * Puts all the keys and values from the specified array into the map.
+     * <p>
+     * This method is an alternative to the {@link java.util.Map#putAll(java.util.Map)}
+     * method and constructors. It allows you to build a map from an object array
+     * of various possible styles.
+     * <p>
+     * If the first entry in the object array implements {@link java.util.Map.Entry}
+     * or {@link KeyValue} then the key and value are added from that object.
+     * If the first entry in the object array is an object array itself, then
+     * it is assumed that index 0 in the sub-array is the key and index 1 is the value.
+     * Otherwise, the array is treated as keys and values in alternate indices.
+     * <p>
+     * For example, to create a color map:
+     * <pre>
+     * Map colorMap = MapUtils.putAll(new HashMap(), new String[][] {
+     *     {"RED", "#FF0000"},
+     *     {"GREEN", "#00FF00"},
+     *     {"BLUE", "#0000FF"}
+     * });
+     * </pre>
+     * or:
+     * <pre>
+     * Map colorMap = MapUtils.putAll(new HashMap(), new String[] {
+     *     "RED", "#FF0000",
+     *     "GREEN", "#00FF00",
+     *     "BLUE", "#0000FF"
+     * });
+     * </pre>
+     * or:
+     * <pre>
+     * Map colorMap = MapUtils.putAll(new HashMap(), new Map.Entry[] {
+     *     new DefaultMapEntry("RED", "#FF0000"),
+     *     new DefaultMapEntry("GREEN", "#00FF00"),
+     *     new DefaultMapEntry("BLUE", "#0000FF")
+     * });
+     * </pre>
+     *
+     * @param map  the map to populate, must not be null
+     * @param array  an array to populate from, null ignored
+     * @return the input map
+     * @throws NullPointerException  if map is null
+     * @throws IllegalArgumentException  if sub-array or entry matching used and an
+     *  entry is invalid
+     * @throws ClassCastException if the array contents is mixed
+     * @since Commons Collections 3.2
+     */
+    public static Map putAll(Map map, Object[] array) {
+        map.size();  // force NPE
+        if (array == null || array.length == 0) {
+            return map;
+        }
+        Object obj = array[0];
+        if (obj instanceof Map.Entry) {
+            for (int i = 0; i < array.length; i++) {
+                Map.Entry entry = (Map.Entry) array[i];
+                map.put(entry.getKey(), entry.getValue());
+            }
+        } else if (obj instanceof KeyValue) {
+            for (int i = 0; i < array.length; i++) {
+                KeyValue keyval = (KeyValue) array[i];
+                map.put(keyval.getKey(), keyval.getValue());
+            }
+        } else if (obj instanceof Object[]) {
+            for (int i = 0; i < array.length; i++) {
+                Object[] sub = (Object[]) array[i];
+                if (sub == null || sub.length < 2) {
+                    throw new IllegalArgumentException("Invalid array element: " + i);
+                }
+                map.put(sub[0], sub[1]);
+            }
+        } else {
+            for (int i = 0; i < array.length - 1;) {
+                map.put(array[i++], array[i++]);
+            }
+        }
+        return map;
+    }
+
+    //-----------------------------------------------------------------------
+    /**
+     * Null-safe check if the specified map is empty.
+     * <p>
+     * Null returns true.
+     * 
+     * @param map  the map to check, may be null
+     * @return true if empty or null
+     * @since Commons Collections 3.2
+     */
+    public static boolean isEmpty(Map map) {
+        return (map == null || map.isEmpty());
+    }
+
+    /**
+     * Null-safe check if the specified map is not empty.
+     * <p>
+     * Null returns false.
+     * 
+     * @param map  the map to check, may be null
+     * @return true if non-null and non-empty
+     * @since Commons Collections 3.2
+     */
+    public static boolean isNotEmpty(Map map) {
+        return !MapUtils.isEmpty(map);
     }
 
     // Map decorators
@@ -1174,11 +1292,19 @@ public class MapUtils {
     /**
      * Returns a transformed map backed by the given map.
      * <p>
+     * This method returns a new map (decorating the specified map) that
+     * will transform any new entries added to it.
+     * Existing entries in the specified map will not be transformed.
+     * If you want that behaviour, see {@link TransformedMap#decorateTransform}.
+     * <p>
      * Each object is passed through the transformers as it is added to the
      * Map. It is important not to use the original map after invoking this 
      * method, as it is a backdoor for adding untransformed objects.
+     * <p>
+     * If there are any elements already in the map being decorated, they
+     * are NOT transformed.
      *
-     * @param map  the map to transform, must not be null
+     * @param map  the map to transform, must not be null, typically empty
      * @param keyTransformer  the transformer for the map keys, null means no transformation
      * @param valueTransformer  the transformer for the map values, null means no transformation
      * @return a transformed map backed by the given map
@@ -1287,7 +1413,50 @@ public class MapUtils {
     public static Map orderedMap(Map map) {
         return ListOrderedMap.decorate(map);
     }
-    
+
+    /**
+     * Creates a mult-value map backed by the given map which returns
+     * collections of type ArrayList.
+     *
+     * @param map  the map to decorate
+     * @return a multi-value map backed by the given map which returns ArrayLists of values.
+     * @see MultiValueMap
+     * @since Commons Collections 3.2
+     */
+    public static Map multiValueMap(Map map) {
+        return MultiValueMap.decorate(map);
+    }
+
+    /**
+     * Creates a multi-value map backed by the given map which returns
+     * collections of the specified type.
+     *
+     * @param map  the map to decorate
+     * @param collectionClass  the type of collections to return from the map (must contain public no-arg constructor
+     *  and extend Collection).
+     * @return a multi-value map backed by the given map which returns collections of the specified type
+     * @see MultiValueMap
+     * @since Commons Collections 3.2
+     */
+    public static Map multiValueMap(Map map, Class collectionClass) {
+        return MultiValueMap.decorate(map, collectionClass);
+    }
+
+    /**
+     * Creates a multi-value map backed by the given map which returns
+     * collections created by the specified collection factory.
+     *
+     * @param map  the map to decorate
+     * @param collectionFactory  a factor which creates collection objects
+     * @return a multi-value map backed by the given map which returns collections
+     * created by the specified collection factory
+     * @see MultiValueMap
+     * @since Commons Collections 3.2
+     */
+    public static Map multiValueMap(Map map, Factory collectionFactory) {
+        return MultiValueMap.decorate(map, collectionFactory);
+    }
+
     // SortedMap decorators
     //-----------------------------------------------------------------------
     /**
@@ -1366,11 +1535,19 @@ public class MapUtils {
     /**
      * Returns a transformed sorted map backed by the given map.
      * <p>
+     * This method returns a new sorted map (decorating the specified map) that
+     * will transform any new entries added to it.
+     * Existing entries in the specified map will not be transformed.
+     * If you want that behaviour, see {@link TransformedSortedMap#decorateTransform}.
+     * <p>
      * Each object is passed through the transformers as it is added to the
      * Map. It is important not to use the original map after invoking this 
      * method, as it is a backdoor for adding untransformed objects.
+     * <p>
+     * If there are any elements already in the map being decorated, they
+     * are NOT transformed.
      *
-     * @param map  the map to transform, must not be null
+     * @param map  the map to transform, must not be null, typically empty
      * @param keyTransformer  the transformer for the map keys, null means no transformation
      * @param valueTransformer  the transformer for the map values, null means no transformation
      * @return a transformed map backed by the given map

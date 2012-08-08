@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMLEncoder.java,v 1.6 2007/10/10 16:05:54 hburger Exp $
+ * Name:        $Id: XMLEncoder.java,v 1.7 2008/03/21 18:32:18 hburger Exp $
  * Description: XML Encoder 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:54 $
+ * Date:        $Date: 2008/03/21 18:32:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,8 +51,6 @@
  */
 package org.openmdx.base.text.conversion;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * XML Encoder
  */
@@ -75,7 +73,7 @@ public class XMLEncoder {
     public static String encode(
         String s
     ) {
-        CharSequence result = null;
+        StringBuilder result = null;
         for (int i = 0, max = s.length(), delta = 0; i < max; i++) {
             char c = s.charAt(i);
             String replacement =
@@ -87,8 +85,8 @@ public class XMLEncoder {
                 c == '\'' ?"&apos;" :
                 null;
             if (replacement != null) {
-                if (result == null) result = StringBuilders.newStringBuilder(s);
-                StringBuilders.asStringBuilder(result).replace(i + delta, i + delta + 1, replacement);
+                if (result == null) result = new StringBuilder(s);
+                result.replace(i + delta, i + delta + 1, replacement);
                 delta += (replacement.length() - 1);
             }
         }

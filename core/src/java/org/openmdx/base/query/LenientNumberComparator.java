@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LenientNumberComparator.java,v 1.3 2004/04/02 16:59:00 wfro Exp $
+ * Name:        $Id: LenientNumberComparator.java,v 1.4 2008/03/21 18:30:56 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:00 $
+ * Date:        $Date: 2008/03/21 18:30:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import java.util.Comparator;
 /**
  * Allows comparison of not directly comparable classes
  */
+@SuppressWarnings("unchecked")
 public class LenientNumberComparator extends LenientCharacterComparator {
 
     /**

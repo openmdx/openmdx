@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RequestCollection.java,v 1.23 2008/02/29 17:57:59 hburger Exp $
+ * Name:        $Id: RequestCollection.java,v 1.25 2008/03/07 03:25:09 hburger Exp $
  * Description: RequestCollection class
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 17:57:59 $
+ * Date:        $Date: 2008/03/07 03:25:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,7 +52,6 @@ package org.openmdx.compatibility.base.dataprovider.cci;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -139,8 +138,7 @@ public final class RequestCollection
     /**
      * Creates a new RequestCollection
      * 
-     * @param requestedFor
-     * @param requestedAt
+     * @param header
      * 
      * @return a new request collection with the same provider and the specified header.
      **/
@@ -222,18 +220,18 @@ public final class RequestCollection
             null,
             "Request collection is not in batch mode"
         );
-        Object[] requests = batchRequests.toArray(
+        UnitOfWorkRequest[] requests = batchRequests.toArray(
             new UnitOfWorkRequest[batchRequests.size()]
         );
         batchRequests.clear();
-        Object[] listeners = batchListeners.toArray(
+        DataproviderReplyListener[][] listeners = batchListeners.toArray(
             new DataproviderReplyListener[batchListeners.size()][]
         );
         batchListeners.clear(); 
         this.inBatch = false;
         return dispatch(
-            (UnitOfWorkRequest[])requests,
-            (DataproviderReplyListener[][])listeners
+            requests,
+            listeners
         );
     }
 
@@ -279,20 +277,20 @@ public final class RequestCollection
             null,
             "Request collection is not in working unit mode"
         );
-        Object[] requests = this.workingUnitRequests.toArray(
+        DataproviderRequest[] requests = this.workingUnitRequests.toArray(
             new DataproviderRequest[this.workingUnitRequests.size()]
         );
         this.workingUnitRequests.clear();
-        Object[] listeners = this.workingUnitListeners.toArray(
+        DataproviderReplyListener[] listeners = this.workingUnitListeners.toArray(
             new DataproviderReplyListener[this.workingUnitListeners.size()]
         );
         this.workingUnitListeners.clear();  
         dispatch(
             new UnitOfWorkRequest(
                 this.transactionalUnit,
-                (DataproviderRequest[])requests
+                requests
             ),
-            (DataproviderReplyListener[])listeners
+            listeners
         );
         this.inUnitOfWork = false;
         this.transactionalUnit = false;
@@ -366,7 +364,7 @@ public final class RequestCollection
      * @param       path
      *              the object's path
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifier
      *              An array specifying additional attributes to be returned;
@@ -417,14 +415,14 @@ public final class RequestCollection
     }
 
     /** 
-     * Adds a create request retrieveing all attributes specified by either 
+     * Adds a create request retrieving all attributes specified by either 
      * the <code>attributeSelector</code> or the
      * <code>attributeSpecifier</code>.
      *
      * @param       object
      *              the object to be created
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifier
      *              An array specifying additional attributes to be returned;
@@ -451,14 +449,14 @@ public final class RequestCollection
     }
 
     /** 
-     * Adds a create request retrieveing all attributes specified by either 
+     * Adds a create request retrieving all attributes specified by either 
      * the <code>attributeSelector</code> or the
      * <code>attributeSpecifier</code>.
      *
      * @param       object
      *              the object to be created
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifier
      *              An array specifying additional attributes to be returned;
@@ -491,7 +489,7 @@ public final class RequestCollection
      * Adds a modify request retrieving the typical attributes.
      *
      * @param       object
-     *              thr object to be modified
+     *              the object to be modified
      *
      * @return      the reply
      *
@@ -509,14 +507,14 @@ public final class RequestCollection
     }
 
     /** 
-     * Adds a modify request retrieveing all attributes specified by either 
+     * Adds a modify request retrieving all attributes specified by either 
      * the <code>attributeSelector</code> or the
      * <code>attributeSpecifier</code>.
      *
      * @param       object
      *              the object to be modified
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifier
      *              An array specifying additional attributes to be returned;
@@ -543,14 +541,14 @@ public final class RequestCollection
     }
 
     /** 
-     * Adds a modify request retrieveing all attributes specified by either 
+     * Adds a modify request retrieving all attributes specified by either 
      * the <code>attributeSelector</code> or the
      * <code>attributeSpecifier</code>.
      *
      * @param       object
      *              the object to be modified
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifier
      *              An array specifying additional attributes to be returned;
@@ -601,23 +599,20 @@ public final class RequestCollection
     }
 
     /** 
-     * Adds a replace request retrieveing all attributes specified by either 
+     * Adds a replace request retrieving all attributes specified by either 
      * the <code>attributeSelector</code> or the
      * <code>attributeSpecifier</code>.
      *
      * @param       object
      *              the object to be modified
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifier
      *              An array specifying additional attributes to be returned;
      *              this argument may be <code>null</code>.
      *
      * @return      the reply
-     *
-     * @exception   ServiceException
-     *              if no valid request can be added
      *
      * @exception   ServiceException
      *              if no valid request can be added
@@ -638,23 +633,20 @@ public final class RequestCollection
     }
     
     /** 
-     * Adds a replace request retrieveing all attributes specified by either 
+     * Adds a replace request retrieving all attributes specified by either 
      * the <code>attributeSelector</code> or the
      * <code>attributeSpecifier</code>.
      *
      * @param       object
      *              the object to be modified
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifier
      *              An array specifying additional attributes to be returned;
      *              this argument may be <code>null</code>.
      * @param       listener
      *              The dataprovider reply listener
-     *
-     * @exception   ServiceException
-     *              if no valid request can be added
      *
      * @exception   ServiceException
      *              if no valid request can be added
@@ -733,14 +725,14 @@ public final class RequestCollection
     }
 
     /** 
-     * Adds a set request retrieveing all attributes specified by either 
+     * Adds a set request retrieving all attributes specified by either 
      * the <code>attributeSelector</code> or the
      * <code>attributeSpecifier</code>.
      *
      * @param       object
      *              the object to be modified
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifier
      *              An array specifying additional attributes to be returned;
@@ -791,7 +783,7 @@ public final class RequestCollection
     }
 
     /** 
-     * Adds a remove request retrieveing all attributes specified by either 
+     * Adds a remove request retrieving all attributes specified by either 
      * the <code>attributeSelector</code> or the
      * <code>attributeSpecifier</code>.
      *
@@ -825,14 +817,14 @@ public final class RequestCollection
     }
 
     /** 
-     * Adds a remove request retrieveing all attributes specified by either 
+     * Adds a remove request retrieving all attributes specified by either 
      * the <code>attributeSelector</code> or the
      * <code>attributeSpecifier</code>.
      *
      * @param       path
      *              the object's path
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifier
      *              An array specifying additional attributes to be returned;
@@ -869,7 +861,7 @@ public final class RequestCollection
      *
      * @param       referenceFilter
      *              an object may be included into the result sets only if it
-     *              is accessable through the path passed as
+     *              is accessible through the path passed as
      *              <code>referenceFilter</code>
      * @param       attributeFilter
      *              an object may be included into the result sets only if all
@@ -881,7 +873,8 @@ public final class RequestCollection
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    public List<DataproviderObject_1_0> addFindRequest(
+    @SuppressWarnings("unchecked")
+    public List addFindRequest(
         Path referenceFilter,
         FilterProperty[] attributeFilter
     ) throws ServiceException {
@@ -902,14 +895,14 @@ public final class RequestCollection
      *
      * @param       referenceFilter
      *              an object may be included into the result sets only if it
-     *              is accessable through the path passed as
+     *              is accessible through the path passed as
      *              <code>referenceFilter</code>
      * @param       attributeFilter
      *              an object may be included into the result sets only if all
      *              the filter properties evaluate to true if applied to it; 
      *              this argument may be <code>null</code>.
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       position
      *              Index of the first or last object to be retrieved
@@ -926,7 +919,8 @@ public final class RequestCollection
      *
      * @see org.openmdx.compatibility.base.dataprovider.cci.Directions
      */
-    public List<DataproviderObject_1_0> addFindRequest(
+    @SuppressWarnings("unchecked")
+    public List addFindRequest(
         Path referenceFilter,
         FilterProperty[] attributeFilter,
         short attributeSelector,
@@ -952,14 +946,14 @@ public final class RequestCollection
      *
      * @param       referenceFilter
      *              an object may be included into the result sets only if it
-     *              is accessable through the path passed as
+     *              is accessible through the path passed as
      *              <code>referenceFilter</code>
      * @param       attributeFilter
      *              an object may be included into the result sets only if all
      *              the filter properties evaluate to true if applied to it; 
      *              this argument may be <code>null</code>.
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifiers
      *              An array of attribute specifiers
@@ -978,7 +972,8 @@ public final class RequestCollection
      *
      * @see org.openmdx.compatibility.base.dataprovider.cci.Directions
      */
-    public List<DataproviderObject_1_0> addFindRequest(
+    @SuppressWarnings("unchecked")
+    public List addFindRequest(
         Path referenceFilter,
         FilterProperty[] attributeFilter,
         short attributeSelector,
@@ -987,7 +982,7 @@ public final class RequestCollection
         int size,
         short direction
     ) throws ServiceException {
-        RequestedList<DataproviderObject_1_0> target = new RequestedList<DataproviderObject_1_0> (
+        RequestedList target = new RequestedList(
             (IterationProcessor)clone(),
             referenceFilter
         );
@@ -1065,14 +1060,14 @@ public final class RequestCollection
      *
      * @param       referenceFilter
      *              an object may be included into the result sets only if it
-     *              is accessable through the path passed as
+     *              is accessible through the path passed as
      *              <code>referenceFilter</code>
      * @param       attributeFilter
      *              an object may be included into the result sets only if all
      *              the filter properties evaluate to true if applied to it; 
      *              this argument may be <code>null</code>.
      * @param       attributeSelector
-     *              A (class dependent) predfined set of attributes to be
+     *              A (class dependent) predefined set of attributes to be
      *              returned
      * @param       attributeSpecifier
      *              An array of attribute specifiers
@@ -1407,7 +1402,7 @@ public final class RequestCollection
         }
         if (this.inBatch){
             this.batchRequests.add(request);
-            this.batchListeners.addAll(Arrays.asList(listeners));
+            this.batchListeners.add(listeners);
         } else {
             UnitOfWorkReply reply = dispatch(
                 new UnitOfWorkRequest[]{request},
@@ -1562,7 +1557,7 @@ public final class RequestCollection
     /**
      *
      */
-    final protected List<DataproviderReplyListener> batchListeners = new ArrayList<DataproviderReplyListener>();
+    final protected List<DataproviderReplyListener[]> batchListeners = new ArrayList<DataproviderReplyListener[]>();
 
     /**
      *

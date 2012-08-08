@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: OffsetArrayList.java,v 1.14 2008/02/28 13:58:54 hburger Exp $
+ * Name:        $Id: OffsetArrayList.java,v 1.15 2008/06/28 00:21:49 hburger Exp $
  * Description: Sparsely Populated List Implementation
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/28 13:58:54 $
+ * Date:        $Date: 2008/06/28 00:21:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -1191,7 +1191,7 @@ public class OffsetArrayList<E>
     return new ListItr(index);
     }
 
-    private class Itr implements Iterator<E> {
+    class Itr implements Iterator<E> {
     /**
      * Index of element to be returned by subsequent call to next.
      */
@@ -1250,7 +1250,8 @@ public class OffsetArrayList<E>
     }
 
     private class ListItr extends Itr implements ListIterator<E> {
-    ListItr(int index) {
+    @SuppressWarnings("synthetic-access")
+    ListItr(final int index) {
         cursor = index;
     }
 

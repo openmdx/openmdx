@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings({"serial","unchecked"})
 public final class ScopeKindEnum implements ScopeKind {
     public static final ScopeKindEnum INSTANCE_LEVEL = new ScopeKindEnum("instance_level");
     public static final ScopeKindEnum CLASSIFIER_LEVEL = new ScopeKindEnum("classifier_level");

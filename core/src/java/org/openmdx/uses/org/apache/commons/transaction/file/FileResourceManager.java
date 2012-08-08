@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/file/FileResourceManager.java,v 1.5 2007/10/10 16:06:13 hburger Exp $
- * $Revision: 1.5 $
- * $Date: 2007/10/10 16:06:13 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/file/FileResourceManager.java,v 1.6 2008/03/21 18:42:15 hburger Exp $
+ * $Revision: 1.6 $
+ * $Date: 2008/03/21 18:42:15 $
  *
  * ====================================================================
  *
@@ -119,8 +119,9 @@ import org.openmdx.uses.org.apache.commons.transaction.util.LoggerFacade;
  * <em>Special Caution</em>: Be very careful not to have two instances of
  * <code>FileResourceManager</code> working in the same store and/or working dir.
  *   
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
+@SuppressWarnings("unchecked")
 public class FileResourceManager implements ResourceManager, ResourceManagerErrorCodes {
 
     // reflects the natural isolation level of this store

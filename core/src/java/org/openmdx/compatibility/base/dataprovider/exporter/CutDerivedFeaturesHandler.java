@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CutDerivedFeaturesHandler.java,v 1.2 2005/01/21 23:39:17 wfro Exp $
+ * Name:        $Id: CutDerivedFeaturesHandler.java,v 1.4 2008/05/12 10:45:51 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/01/21 23:39:17 $
+ * Date:        $Date: 2008/05/12 10:45:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,6 +58,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
@@ -69,6 +70,7 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
  * Eg.
  * ProviderTraverser --> DelegatingHandler --> XmlExporter 
  */
+@SuppressWarnings("unchecked")
 public class CutDerivedFeaturesHandler extends DelegatingHandler {
 
    /**
@@ -101,6 +103,7 @@ public class CutDerivedFeaturesHandler extends DelegatingHandler {
     * @see ch.omex.spice.dataprovider.exporter.TraversalHandler#featureComplete(ch.omex.spice.dataprovider.generic.DataproviderObject_1_0)
     */
    public boolean featureComplete(
+       Path reference,
        DataproviderObject_1_0 object,
        Map tags
    ) throws ServiceException {
@@ -150,6 +153,7 @@ public class CutDerivedFeaturesHandler extends DelegatingHandler {
       }
       
       return super.featureComplete(
+          reference,
           object
       );
    }

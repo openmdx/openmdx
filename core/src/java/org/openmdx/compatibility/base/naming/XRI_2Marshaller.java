@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XRI_2Marshaller.java,v 1.13 2007/10/10 16:06:03 hburger Exp $
+ * Name:        $Id: XRI_2Marshaller.java,v 1.14 2008/03/21 18:48:02 hburger Exp $
  * Description: Path/ObjectId Marshaller 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:03 $
+ * Date:        $Date: 2008/03/21 18:48:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,7 +53,6 @@ package org.openmdx.compatibility.base.naming;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openxri.AuthorityPath;
 import org.openxri.XRI;
 import org.openxri.XRIParseException;
@@ -67,6 +66,7 @@ import org.openxri.XRef;
 /**
  * Path/ObjectId Marshaller
  */
+@SuppressWarnings("unchecked")
 public final class XRI_2Marshaller
     implements Marshaller
 {
@@ -107,16 +107,14 @@ public final class XRI_2Marshaller
     ) throws ServiceException {
         if (charSequences == null) return null;
         Object[]segments = (Object[])charSequences;        
-        CharSequence oid = StringBuilders.newStringBuilder("xri://@openmdx");
+        StringBuilder oid = new StringBuilder("xri://@openmdx");
         char separator = '*';
         for(
             int i = 0;
             i < segments.length;
             i++
         ){
-            StringBuilders.asStringBuilder(
-                oid
-            ).append(
+            oid.append(
                 separator
             );
             String segment = segments[i].toString();
@@ -131,9 +129,7 @@ public final class XRI_2Marshaller
             } else if (segment.indexOf('/') < 0) {
                 if(segment.endsWith("%")) {
                     if(segment.length() == 1) {
-                        StringBuilders.asStringBuilder(
-                            oid
-                        ).append(
+                        oid.append(
                             "($...)"
                         );
                     } else {
@@ -147,9 +143,7 @@ public final class XRI_2Marshaller
                     }
                 } else if (segment.startsWith(":") && segment.endsWith("*")) {
                     if (segment.length() == 2) {
-                        StringBuilders.asStringBuilder(
-                            oid
-                        ).append(
+                        oid.append(
                             "($.)"
                         );
                     } else {
@@ -173,9 +167,7 @@ public final class XRI_2Marshaller
             } else {
                 try {
                     Object xRef = marshal(new Path(segment).getSuffix(0));
-                    StringBuilders.asStringBuilder(
-                        oid
-                    ).append(
+                    oid.append(
                         '('
                     ).append(
                         xRef
@@ -211,12 +203,12 @@ public final class XRI_2Marshaller
      */
     private static void encode (
         String source,
-        CharSequence oid, 
+        StringBuilder oid, 
         boolean authority, 
         String prefix, 
         String suffix
     ){
-        StringBuilders.asStringBuilder(oid).append(prefix);
+        oid.append(prefix);
         String subSegment = authority ? 
             source.replace(':', '.') : 
             source.replace('=', ':');
@@ -224,11 +216,11 @@ public final class XRI_2Marshaller
             appendCaseExactString(oid, subSegment);
         } else try {
             new XRISubSegment('*' + subSegment, true);
-            StringBuilders.asStringBuilder(oid).append(subSegment);
+            oid.append(subSegment);
         } catch (XRIParseException exception) {
             appendCaseExactString(oid, subSegment);
         }
-        StringBuilders.asStringBuilder(oid).append(suffix);
+        oid.append(suffix);
     }
     
     /**
@@ -271,7 +263,7 @@ public final class XRI_2Marshaller
             i++
         ) {
             XRISegment segment = path.getSegmentAt(i - 1); 
-            CharSequence target = StringBuilders.newStringBuilder();
+            StringBuilder target = new StringBuilder();
             boolean parameter = false;
             boolean wildcard = false;
             SubSegments: for(
@@ -296,48 +288,48 @@ public final class XRI_2Marshaller
                 parameter = false;
                 XRef xRef = subSegment.getXRef();
                 if(xRef == null) {
-                    StringBuilders.asStringBuilder(target).append(delimiter).append(source);
+                    target.append(delimiter).append(source);
                 } else {
                     XRIReference xriReference = xRef.getXRIReference();
                     if (xriReference != null) {
                         AuthorityPath authorityPath = xriReference.getAuthorityPath();
                         if(authorityPath == null) {
-                            StringBuilders.asStringBuilder(target).append(delimiter).append(source);
+                            target.append(delimiter).append(source);
                         } else {
                             String xrefAuthority = authorityPath.toString();
                             if("$..".equals(xrefAuthority)) {
                                 if(i + 1 == reply.length && treeWildcard) {
-                                    StringBuilders.asStringBuilder(target).append(":%");
+                                    target.append(":%");
                                 } else if(!wasWildcard) {
-                                    if(j > 0) StringBuilders.asStringBuilder(target).insert(0, ':');
-                                    StringBuilders.asStringBuilder(target).append(":*");
+                                    if(j > 0) target.insert(0, ':');
+                                    target.append(":*");
                                 }
                             } else if ("$.".equals(xrefAuthority)) {
                                 XRIPath xriPath = xriReference.getXRIPath();
                                 if(i + 1 == reply.length && treeWildcard) {
-                                    if(xriPath != null) StringBuilders.asStringBuilder(target).append(
+                                    if(xriPath != null) target.append(
                                         xriPath.toString().substring(1)
                                     );
-                                    StringBuilders.asStringBuilder(target).append('%');
+                                    target.append('%');
                                     break SubSegments;
                                 } else {
-                                    StringBuilders.asStringBuilder(target).append(":");
-                                    if(xriPath != null) StringBuilders.asStringBuilder(target).append(
+                                    target.append(":");
+                                    if(xriPath != null) target.append(
                                         xriPath.toString().substring(1)
                                     );
-                                    StringBuilders.asStringBuilder(target).append('*');
+                                    target.append('*');
                                 }
                                 wildcard = true;
                             } else if (xrefAuthority.startsWith("$.*")) {
                                 if(i + 1 == reply.length && treeWildcard) {
-                                    StringBuilders.asStringBuilder(target).append(
+                                    target.append(
                                         xrefAuthority.substring(3)
                                     ).append(
                                         '%'
                                     );
                                     break SubSegments;
                                 } else {
-                                    StringBuilders.asStringBuilder(target).append(
+                                    target.append(
                                         ':'
                                     ).append(
                                         xrefAuthority.substring(3)
@@ -348,14 +340,14 @@ public final class XRI_2Marshaller
                                 wildcard = true;
                             } else if (xrefAuthority.startsWith("$.!")) {
                                 if(i + 1 == reply.length && treeWildcard) {
-                                    StringBuilders.asStringBuilder(target).append(
+                                    target.append(
                                         xrefAuthority.substring(2)
                                     ).append(
                                         '%'
                                     );
                                     break SubSegments;
                                 } else {
-                                    StringBuilders.asStringBuilder(target).append(
+                                    target.append(
                                         ':'
                                     ).append(
                                         xrefAuthority.substring(2)
@@ -365,9 +357,9 @@ public final class XRI_2Marshaller
                                 }                                   
                                 wildcard = true;
                             } else if ("$...".equals(xrefAuthority)) {
-                                StringBuilders.asStringBuilder(target).append('%');
+                                target.append('%');
                             } else if (xrefAuthority.startsWith("@openmdx")) {
-                                StringBuilders.asStringBuilder(target).append(
+                                target.append(
                                     delimiter
                                 ).append(
                                     new Path(
@@ -375,7 +367,7 @@ public final class XRI_2Marshaller
                                     )
                                 );
                             } else {
-                                StringBuilders.asStringBuilder(target).append(
+                                target.append(
                                     delimiter
                                 ).append(
                                     source
@@ -383,7 +375,7 @@ public final class XRI_2Marshaller
                             }
                         }
                     } else {
-                        StringBuilders.asStringBuilder(target).append(delimiter).append(source);
+                        target.append(delimiter).append(source);
                     }
                 }
             }
@@ -461,12 +453,10 @@ public final class XRI_2Marshaller
     }
 
     private static void appendCaseExactString(
-        CharSequence target,
+        StringBuilder target,
         String source
     ){
-        StringBuilders.asStringBuilder(
-            target
-        ).append(
+        target.append(
             "($t*ces*"
         );
         byte[] utf8 = UnicodeTransformation.toByteArray(source);
@@ -482,14 +472,10 @@ public final class XRI_2Marshaller
                 (octet >= '0' && octet <= '9') ||
                 (octet == '-' || octet == '.' || octet == '_' || octet == '~')
             ) {
-                StringBuilders.asStringBuilder(
-                    target
-                ).append((char)octet);
+                target.append((char)octet);
             } else {
                 int digits = 0xFF & octet;
-                StringBuilders.asStringBuilder(
-                    target
-                ).append(
+                target.append(
                     '%'
                 ).append(
                     characterForDigit(digits / 0x10)
@@ -498,9 +484,7 @@ public final class XRI_2Marshaller
                 );
             }
         }
-        StringBuilders.asStringBuilder(
-            target
-        ).append(
+        target.append(
             ')'
         );
     }

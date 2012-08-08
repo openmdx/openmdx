@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UIDFactory.java,v 1.5 2006/08/11 09:24:11 hburger Exp $
+ * Name:        $Id: UIDFactory.java,v 1.6 2008/03/21 20:14:15 hburger Exp $
  * Description: Profile Context
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:11 $
+ * Date:        $Date: 2008/03/21 20:14:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,6 +68,7 @@ import org.openmdx.kernel.text.StringBuilders;
  *
  * @deprecated use org.openmdx.kernel.id.UUIDs#getGenerator() 
  */
+@SuppressWarnings("unchecked")
 public class UIDFactory
 {
     

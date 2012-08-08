@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XmlContentHandler.java,v 1.8 2006/08/11 09:24:09 hburger Exp $
+ * Name:        $Id: XmlContentHandler.java,v 1.10 2008/06/28 00:21:58 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:09 $
+ * Date:        $Date: 2008/06/28 00:21:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,7 +63,6 @@ import java.util.Stack;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 
 
 /**
@@ -73,6 +72,7 @@ import org.openmdx.kernel.text.StringBuilders;
  * 
  * @author anyff
  */
+@SuppressWarnings("unchecked")
 public class XmlContentHandler {
   
   /**
@@ -131,7 +131,7 @@ public class XmlContentHandler {
    * 
    */
   static private class Attribute{
-    private Attribute(String qName, String value) {
+    Attribute(String qName, String value) {
       _qName = qName;
       _value = value;
     }
@@ -220,9 +220,9 @@ public class XmlContentHandler {
    * the indentation must be turned on with setIndentation.
    */
   public void setIndentationLength(int indentationLength) {
-    CharSequence buffer = StringBuilders.newStringBuilder();
+      StringBuilder buffer = new StringBuilder();
     for (int i = 0; i < indentationLength; i++) {
-      StringBuilders.asStringBuilder(buffer).append(' ');
+      buffer.append(' ');
     }
     this.indentString = buffer.toString();
   }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingHandler.java,v 1.5 2005/01/21 23:39:17 wfro Exp $
+ * Name:        $Id: DelegatingHandler.java,v 1.7 2008/05/12 10:45:51 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/01/21 23:39:17 $
+ * Date:        $Date: 2008/05/12 10:45:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import org.openmdx.compatibility.base.naming.Path;
  * 
  * @author anyff
  */
+@SuppressWarnings("unchecked")
 public class DelegatingHandler implements TraversalHandler {
 
     /**
@@ -106,12 +107,19 @@ public class DelegatingHandler implements TraversalHandler {
      * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#startObject(java.lang.String, java.lang.String, java.lang.String, short)
      */
     public boolean startObject(
+        Path reference,
         String qualifiedName,
         String qualifierName,
         String id,
         short operation
     ) throws ServiceException {
-        return this.delegation.startObject(qualifiedName, qualifierName, id, operation);
+        return this.delegation.startObject(
+            reference,
+            qualifiedName, 
+            qualifierName, 
+            id, 
+            operation
+        );
     }
 
     /**
@@ -137,9 +145,13 @@ public class DelegatingHandler implements TraversalHandler {
      * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#featureComplete(org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0)
      */
     public boolean featureComplete(
+        Path reference,
         DataproviderObject_1_0 object
     ) throws ServiceException {
-        return this.delegation.featureComplete(object);
+        return this.delegation.featureComplete(
+            reference,
+            object
+        );
     }
 
     /**

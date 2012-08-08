@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ManagedDatabaseConnectionFactory.java,v 1.7 2007/10/10 16:06:04 hburger Exp $
+ * Name:        $Id: ManagedDatabaseConnectionFactory.java,v 1.8 2008/03/21 18:38:41 hburger Exp $
  * Description: Managed Database Connection Factory
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:04 $
+ * Date:        $Date: 2008/03/21 18:38:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,6 +70,7 @@ import javax.sql.XADataSource;
 /**
  * Managed Database Connection Factory
  */
+@SuppressWarnings("unchecked")
 public class ManagedDatabaseConnectionFactory implements ManagedConnectionFactory {
 
     public ManagedDatabaseConnectionFactory(

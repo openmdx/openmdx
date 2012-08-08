@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Bean.java,v 1.20 2008/02/19 13:47:40 hburger Exp $
+ * Name:        $Id: Dataprovider_1Bean.java,v 1.21 2008/06/11 17:15:05 hburger Exp $
  * Description: Dataprovider_1Bean class
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/19 13:47:40 $
+ * Date:        $Date: 2008/06/11 17:15:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,7 @@ import javax.naming.InitialContext;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1ConnectionFactoryImpl;
-import org.openmdx.compatibility.base.application.j2ee.SessionBean_1;
+import org.openmdx.compatibility.application.dataprovider.transport.ejb.spi.AbstractDataprovider_1Bean;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
@@ -73,7 +73,7 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 
 public class Dataprovider_1Bean 
-    extends SessionBean_1 
+    extends AbstractDataprovider_1Bean 
     implements Dataprovider_1_0
 {
     /**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: RootMenuControl.java,v 1.3 2007/11/27 16:51:36 wfro Exp $
+ * Name:        $Id: RootMenuControl.java,v 1.4 2008/05/01 21:43:57 wfro Exp $
  * Description: ReferencePaneRenderer
  * Revision:    $AttributePaneRenderer: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/27 16:51:36 $
+ * Date:        $Date: 2008/05/01 21:43:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,7 +68,7 @@ import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.ObjectView;
 
 public class RootMenuControl
-    extends ScriptControl
+    extends Control
     implements Serializable {
 
     //-------------------------------------------------------------------------

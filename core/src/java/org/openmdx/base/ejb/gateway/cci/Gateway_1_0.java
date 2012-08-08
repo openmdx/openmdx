@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Gateway_1_0.java,v 1.1 2005/06/28 14:07:05 hburger Exp $
+ * Name:        $Id: Gateway_1_0.java,v 1.2 2008/03/21 18:29:52 hburger Exp $
  * Description: Gateway 1.0
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/28 14:07:05 $
+ * Date:        $Date: 2008/03/21 18:29:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,6 +56,7 @@ import org.openmdx.base.exception.ServiceException;
 /**
  * Gateway 1.0
  */
+@SuppressWarnings("unchecked")
 public interface Gateway_1_0 {
 
     /**

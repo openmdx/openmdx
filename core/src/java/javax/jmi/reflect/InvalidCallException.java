@@ -4,6 +4,7 @@ package javax.jmi.reflect;
  * (e.g. when <code>refSetValue</code> is called for attribute which is not
  * changeable)
  */
+@SuppressWarnings("serial")
 public class InvalidCallException extends JmiException {
     
     /**

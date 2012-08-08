@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BooleanMarshaller.java,v 1.8 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: BooleanMarshaller.java,v 1.9 2008/04/09 12:34:01 hburger Exp $
  * Description: BooleanMarshaller class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/04/09 12:34:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -128,7 +128,7 @@ public class BooleanMarshaller
   //-------------------------------------------------------------------------
   // Variables
   //-------------------------------------------------------------------------
-  static private BooleanMarshaller instance = new BooleanMarshaller();
+  static private final BooleanMarshaller instance = new BooleanMarshaller();
 
 }
   

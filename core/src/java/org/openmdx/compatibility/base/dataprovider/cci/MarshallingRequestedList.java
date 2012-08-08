@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingRequestedList.java,v 1.5 2008/02/29 17:58:19 hburger Exp $
+ * Project:     openmdx, http://www.openmdx.org/
+ * Name:        $Id: MarshallingRequestedList.java,v 1.6 2008/03/07 03:25:09 hburger Exp $
  * Description: MarshallingRequestedList class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 17:58:19 $
+ * Date:        $Date: 2008/03/07 03:25:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +19,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in
- *   the documentation and/or other materials provided with the
- *   distribution.
+ * notice, this list of conditions and the following disclaimer in
+ * the documentation and/or other materials provided with the
+ * distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- *   contributors may be used to endorse or promote products derived
- *   from this software without specific prior written permission.
+ * contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +46,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by other organizations as
- * listed in the NOTICE file.
+ * This product includes software developed by the Apache Software
+ * Foundation (http://www.apache.org/).
  */
 package org.openmdx.compatibility.base.dataprovider.cci;
 
@@ -58,8 +58,8 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.naming.Path;
 
 
-public class MarshallingRequestedList<E> 
-  extends RequestedList<E> {
+public class MarshallingRequestedList 
+  extends RequestedList {
 
     /**
      * 
@@ -123,7 +123,8 @@ public class MarshallingRequestedList<E>
      *              if the index is out of range (index < 0 || index >
      *              size()).
      */
-    public ListIterator<E> listIterator(
+    @SuppressWarnings("unchecked")
+    public ListIterator listIterator(
         int index
     ){
         return new MarshallingIterator(

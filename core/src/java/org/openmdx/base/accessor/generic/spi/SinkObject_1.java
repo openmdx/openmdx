@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SinkObject_1.java,v 1.32 2008/02/05 18:42:57 hburger Exp $
+ * Name:        $Id: SinkObject_1.java,v 1.35 2008/06/28 00:21:44 hburger Exp $
  * Description: Date State View Object
- * Revision:    $Revision: 1.32 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/05 18:42:57 $
+ * Date:        $Date: 2008/06/28 00:21:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -82,12 +82,12 @@ import org.openmdx.compatibility.base.query.FilterOperators;
 import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 import org.slf4j.LoggerFactory;
 
 /**
  * Date State View Object
  */
+@SuppressWarnings("unchecked")
 class SinkObject_1 {
 
     private SinkObject_1(
@@ -300,7 +300,7 @@ class SinkObject_1 {
     public String toString(
     ){
         try {
-            return StringBuilders.newStringBuilder(
+            return new StringBuilder(
                 getClass().getName()
             ).append(
                 ": "
@@ -429,7 +429,7 @@ class SinkObject_1 {
             STATES_COMPLETED_BY_SERVICE &&
             criteria != null &&
             criteria.substring(qualifier.length()).startsWith(';' + State_1_Attributes.OP_STATE);
-        return StringBuilders.newStringBuilder(
+        return new StringBuilder(
             basedOnPersistentState ? criteria : qualifier
         ).append(
             ';'
@@ -514,15 +514,16 @@ class SinkObject_1 {
                 } else if (state.objIsDirty()) {
                     delegates.add(state);
                 } else {
-                    delegates.add(
-                        clone(
-                            state,
-                            (String)state.objGetValue(State_1_Attributes.STATE_VALID_FROM),
-                            (String)state.objGetValue(State_1_Attributes.STATE_VALID_TO), 
-                            false // newObject
-                        )
-                    );
-                    states.set(i, new InactiveObject_1(state, false));
+                    Object_1_0 delegate = clone(
+                        state,
+                        (String)state.objGetValue(State_1_Attributes.STATE_VALID_FROM),
+                        (String)state.objGetValue(State_1_Attributes.STATE_VALID_TO), 
+                        false // newObject
+                    ); 
+                    if(delegate != state) {
+                        states.set(i, new InactiveObject_1(state, false));
+                    }
+                    delegates.add(delegate);
                 }
             }
         }
@@ -802,7 +803,9 @@ class SinkObject_1 {
         if(object.objIsDirty()) {
             object.objAddToUnitOfWork();
         }
-        getStates().add(object);
+        if(source != object) {
+            getStates().add(object);
+        }
         return object;
     }
 
@@ -1137,7 +1140,7 @@ class SinkObject_1 {
             int year = value.getYear();
             int month = value.getMonth();
             int day = value.getDay();
-            return StringBuilders.newStringBuilder(
+            return new StringBuilder(
             ).append(
                 year
             ).append(
@@ -1230,7 +1233,7 @@ class SinkObject_1 {
     /**
      * Date State Valid From Comparator 
      */
-    private final static class ValidFromComparator
+    final static class ValidFromComparator
         implements Comparator, Serializable
     {
 

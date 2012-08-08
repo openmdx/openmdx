@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SimpleAuthenticationHandler.java,v 1.3 2005/06/15 22:32:10 hburger Exp $
+ * Name:        $Id: SimpleAuthenticationHandler.java,v 1.4 2008/04/04 17:55:33 hburger Exp $
  * Description: Standard HTTP Authentication Handler
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/15 22:32:10 $
+ * Date:        $Date: 2008/04/04 17:55:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -77,9 +77,9 @@ public class SimpleAuthenticationHandler
      * 
      * @throws ServletException
      */
-    protected Map getSharedOptions(
+    protected Map<String,?> getSharedOptions(
     ) throws ServletException {
-        return Collections.EMPTY_MAP;        
+        return Collections.emptyMap();        
     }
     
 }

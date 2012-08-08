@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -44,11 +45,12 @@ import org.openmdx.uses.org.apache.commons.collections.list.UnmodifiableList;
  * This class is Serializable from Commons Collections 3.1.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.4 $ $Date: 2005/04/07 14:15:24 $
+ * @version $Revision: 1.8 $ $Date: 2008/06/28 00:21:36 $
  * 
  * @author Stephen Colebourne
  * @author Henning P. Schmiedehausen
  */
+@SuppressWarnings("unchecked")
 public class ListOrderedSet extends AbstractSerializableSetDecorator implements Set {
 
     /** Serialization version */
@@ -59,6 +61,8 @@ public class ListOrderedSet extends AbstractSerializableSetDecorator implements 
 
     /**
      * Factory method to create an ordered set specifying the list and set to use.
+     * <p>
+     * The list and set must both be empty.
      * 
      * @param set  the set to decorate, must be empty and not null
      * @param list  the list to decorate, must be empty and not null
@@ -95,6 +99,9 @@ public class ListOrderedSet extends AbstractSerializableSetDecorator implements 
      * Factory method to create an ordered set using the supplied list to retain order.
      * <p>
      * A <code>HashSet</code> is used for the set behaviour.
+     * <p>
+     * NOTE: If the list contains duplicates, the duplicates are removed,
+     * altering the specified list.
      * 
      * @param list  the list to decorate, must not be null
      * @throws IllegalArgumentException if list is null
@@ -118,7 +125,7 @@ public class ListOrderedSet extends AbstractSerializableSetDecorator implements 
      */
     public ListOrderedSet() {
         super(new HashSet());
-        setOrder = new ArrayList();
+        this.setOrder = new ArrayList();
     }
 
     /**
@@ -129,7 +136,7 @@ public class ListOrderedSet extends AbstractSerializableSetDecorator implements 
      */
     protected ListOrderedSet(Set set) {
         super(set);
-        setOrder = new ArrayList(set);
+        this.setOrder = new ArrayList(set);
     }
 
     /**
@@ -146,7 +153,7 @@ public class ListOrderedSet extends AbstractSerializableSetDecorator implements 
         if (list == null) {
             throw new IllegalArgumentException("List must not be null");
         }
-        setOrder = list;
+        this.setOrder = list;
     }
 
     //-----------------------------------------------------------------------
@@ -156,27 +163,27 @@ public class ListOrderedSet extends AbstractSerializableSetDecorator implements 
      * @return an unmodifiable list view
      */
     public List asList() {
-        return UnmodifiableList.decorate(setOrder);
+        return UnmodifiableList.decorate(this.setOrder);
     }
 
     //-----------------------------------------------------------------------
     public void clear() {
-        collection.clear();
-        setOrder.clear();
+        this.collection.clear();
+        this.setOrder.clear();
     }
 
     public Iterator iterator() {
-        return new OrderedSetIterator(setOrder.iterator(), collection);
+        return new OrderedSetIterator(this.setOrder.iterator(), this.collection);
     }
 
     public boolean add(Object object) {
-        if (collection.contains(object)) {
+        if (this.collection.contains(object)) {
             // re-adding doesn't change order
-            return collection.add(object);
+            return this.collection.add(object);
         } else {
             // first add, so add to both set and list
-            boolean result = collection.add(object);
-            setOrder.add(object);
+            boolean result = this.collection.add(object);
+            this.setOrder.add(object);
             return result;
         }
     }
@@ -246,7 +253,8 @@ public class ListOrderedSet extends AbstractSerializableSetDecorator implements 
         }
     }
 
-    public boolean addAll(int index, Collection coll) {
+    public boolean addAll(int _index, Collection coll) {
+        int index = _index;
         boolean changed = false;
         for (Iterator it = coll.iterator(); it.hasNext();) {
             Object object = it.next();

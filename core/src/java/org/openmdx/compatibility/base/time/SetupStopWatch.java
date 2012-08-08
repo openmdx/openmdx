@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SetupStopWatch.java,v 1.4 2007/10/10 16:06:04 hburger Exp $
+ * Name:        $Id: SetupStopWatch.java,v 1.5 2008/03/21 20:14:51 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:04 $
+ * Date:        $Date: 2008/03/21 20:14:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,7 @@ import java.util.Map;
 /**
  * @author anyff
  */
+@SuppressWarnings("unchecked")
 public class SetupStopWatch {
     
     public static String EXECUTION = "execution";

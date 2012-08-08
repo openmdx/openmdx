@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReferenceDef.java,v 1.12 2007/08/08 13:27:14 hburger Exp $
+ * Name:        $Id: ReferenceDef.java,v 1.13 2008/03/21 18:40:17 hburger Exp $
  * Description: VelocityReferenceDef class
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/08 13:27:14 $
+ * Date:        $Date: 2008/03/21 18:40:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,7 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.AggregationKind;
 
+@SuppressWarnings("unchecked")
 public class ReferenceDef 
   extends StructuralFeatureDef {
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseConfiguration.java,v 1.19 2007/10/10 17:16:06 hburger Exp $
+ * Name:        $Id: DatabaseConfiguration.java,v 1.21 2008/03/29 01:22:16 wfro Exp $
  * Description: DatabaseConfiguration 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 17:16:06 $
+ * Date:        $Date: 2008/03/29 01:22:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -77,6 +77,7 @@ import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
+@SuppressWarnings("unchecked")
 public class DatabaseConfiguration {
     
     //---------------------------------------------------------------------------
@@ -194,7 +195,7 @@ public class DatabaseConfiguration {
                     }
                     SparseList values = null;
                     if(this.configuration.containsEntry(name)) {
-                        values = (SparseList)this.configuration.entries().get(name);
+                        values = this.configuration.entries().get(name);
                     }
                     else {
                         this.configuration.entries().put(
@@ -261,8 +262,8 @@ public class DatabaseConfiguration {
                 (String)configuration.values(LayerConfigurationEntries.COLUMN_NAME_TO).get(index)
               );
             }
-            SysLog.info("fromToColumnNameMapping", this.fromToColumnNameMapping);
-            SysLog.info("toFromColumnNameMapping", this.toFromColumnNameMapping);
+            SysLog.detail("fromToColumnNameMapping", this.fromToColumnNameMapping);
+            SysLog.detail("toFromColumnNameMapping", this.toFromColumnNameMapping);
 
             // Read configuration entries and create DbObjectConfigurations
             for(
@@ -439,7 +440,7 @@ public class DatabaseConfiguration {
                 );
               }
             }                
-            SysLog.info("typeConfigurationEntry", this.dbObjectConfigurations.values());          
+            SysLog.detail("typeConfigurationEntry", this.dbObjectConfigurations.values());          
         }
     }
     

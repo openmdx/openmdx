@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings("unchecked")
 public interface Aliases extends RefAssociation {
     public boolean exists(Import importer, Namespace imported);
     public java.util.Collection getImporter(Namespace imported);

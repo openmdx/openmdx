@@ -1,15 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XriAuthorities.java,v 1.2 2007/10/10 16:06:08 hburger Exp $
+ * Project:     openMEX, http://www.openmdx.org/
+ * Name:        $Id: XriAuthorities.java,v 1.3 2008/03/13 17:16:15 hburger Exp $
  * Description: XIR authorities
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:08 $
+ * Date:        $Date: 2008/03/13 17:16:15 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2004, OMEX AG, Switzerland
  * All rights reserved.
@@ -48,6 +47,9 @@
  * 
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
+ * ___________________________________________________________________________ 
+ *
+ * This class should log as it has to be loaded by the system class loader. 
  */
 package org.openmdx.kernel.url.protocol;
 

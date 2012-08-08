@@ -1,0 +1,8 @@
+Welcome to openMDX Tomcat/LWC!
+------------------------------
+
+This installer has created an instance of Tomcat 6 extended by the
+openMDX Lightweight EJB Container. This enables Tomcat 6 to deploy
+EARs containing EJBs.
+
+----

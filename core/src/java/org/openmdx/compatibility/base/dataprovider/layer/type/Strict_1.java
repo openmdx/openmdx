@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Strict_1.java,v 1.16 2007/10/24 07:50:15 hburger Exp $
+ * Name:        $Id: Strict_1.java,v 1.17 2008/03/21 20:17:17 hburger Exp $
  * Description: Strict_1 class performing type checking of DataproviderRequest/DataproviderReply
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/24 07:50:15 $
+ * Date:        $Date: 2008/03/21 20:17:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -94,6 +94,7 @@ import org.openmdx.model1.accessor.basic.spi.ModelElement_1;
  *   <li>verifyReply: true --> reply objects are verified for model compliance.</li>
  * </ul>
  */
+@SuppressWarnings("unchecked")
 public class Strict_1
   extends StreamOperationAwareLayer_1 {
 

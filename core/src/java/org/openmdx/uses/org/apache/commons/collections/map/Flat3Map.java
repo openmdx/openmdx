@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -59,12 +60,19 @@ import org.openmdx.uses.org.apache.commons.collections.iterators.EmptyMapIterato
  * This is because it contains no complex objects or arrays which slow the progress.
  * <p>
  * Do not use <code>Flat3Map</code> if the size is likely to grow beyond 3.
- * 
+ * <p>
+ * <strong>Note that Flat3Map is not synchronized and is not thread-safe.</strong>
+ * If you wish to use this map from multiple threads concurrently, you must use
+ * appropriate synchronization. The simplest approach is to wrap this map
+ * using {@link java.util.Collections#synchronizedMap(Map)}. This class may throw 
+ * exceptions when accessed by concurrent threads without synchronization.
+ *
  * @since Commons Collections 3.0
- * @version $Revision: 1.4 $ $Date: 2005/04/07 14:15:24 $
+ * @version $Revision: 1.7 $ $Date: 2008/06/28 00:21:21 $
  *
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class Flat3Map implements IterableMap, Serializable, Cloneable {
 
     /** Serialization version */
@@ -1041,24 +1049,27 @@ public class Flat3Map implements IterableMap, Serializable, Cloneable {
             switch (size) {  // drop through
                 case 3:
                     if (other.containsKey(key3) == false) {
-                        otherValue = other.get(key3);
-                        if (value3 == null ? otherValue != null : !value3.equals(otherValue)) {
-                            return false;
-                        }
+                        return false;
+                    }
+                    otherValue = other.get(key3);
+                    if (value3 == null ? otherValue != null : !value3.equals(otherValue)) {
+                        return false;
                     }
                 case 2:
                     if (other.containsKey(key2) == false) {
-                        otherValue = other.get(key2);
-                        if (value2 == null ? otherValue != null : !value2.equals(otherValue)) {
-                            return false;
-                        }
+                        return false;
+                    }
+                    otherValue = other.get(key2);
+                    if (value2 == null ? otherValue != null : !value2.equals(otherValue)) {
+                        return false;
                     }
                 case 1:
                     if (other.containsKey(key1) == false) {
-                        otherValue = other.get(key1);
-                        if (value1 == null ? otherValue != null : !value1.equals(otherValue)) {
-                            return false;
-                        }
+                        return false;
+                    }
+                    otherValue = other.get(key1);
+                    if (value1 == null ? otherValue != null : !value1.equals(otherValue)) {
+                        return false;
                     }
             }
         }

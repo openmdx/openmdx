@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1LocalConnection.java,v 1.5 2008/02/29 18:24:50 hburger Exp $
+ * Name:        $Id: Dataprovider_1LocalConnection.java,v 1.10 2008/07/01 19:22:34 hburger Exp $
  * Description: Local Dataprovider  Connection
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:24:50 $
+ * Date:        $Date: 2008/07/01 19:22:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,29 +50,35 @@
  */
 package org.openmdx.compatibility.application.dataprovider.transport.ejb.cci;
 
+import javax.ejb.EJBException;
+import javax.ejb.TransactionRolledbackLocalException;
 import javax.jdo.PersistenceManager;
+import javax.resource.ResourceException;
+import javax.security.auth.Subject;
+import javax.transaction.Synchronization;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.object.spi.PersistenceManagerFactory_2_0;
+import org.openmdx.base.persistence.spi.ManagerFactory_2_0;
+import org.openmdx.base.persistence.spi.OptimisticTransaction_2_0;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_2Connection;
+import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_3Connection;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Local Dataprovider Connection
  */
-public class Dataprovider_1LocalConnection<D extends Dataprovider_1_0Local>
-    implements Dataprovider_1_2Connection
+public class Dataprovider_1LocalConnection
+    implements Dataprovider_1_3Connection
 {
 
     /**
      * Constructor
      */
     public Dataprovider_1LocalConnection(
-        D local
+        Dataprovider_1_0Local local
     ) throws ServiceException {
         this.ejbLocalObject = local;
     }
@@ -81,15 +87,50 @@ public class Dataprovider_1LocalConnection<D extends Dataprovider_1_0Local>
     /**
      * The delegation object.
      */
-    private D ejbLocalObject;
+    private Dataprovider_1_0Local ejbLocalObject;
 
     /**
      * Retrieve the underlying EJB accessor
      * 
      * @return the underlying EJB accessor
+     * @throws BasicException 
      */
-    protected D getDelegate(){
-        return this.ejbLocalObject;
+    protected final Dataprovider_1_0Local getDelegate(
+    ) throws ServiceException{
+        if(this.ejbLocalObject != null) {
+            return this.ejbLocalObject;
+        } else throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.ILLEGAL_STATE,
+            null,
+            "Attempt to use removed dataprovider connection"
+        );
+    }
+    
+    /**
+     * Cast the delegate
+     * 
+     * @param extension
+     * 
+     * @return the delegate
+     * @throws ServiceException  
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T getDelegate(
+        Class<T> extension
+    ) throws ServiceException {
+        Dataprovider_1_0Local delegate = getDelegate();
+        if(extension.isInstance(delegate)) {
+            return (T)delegate;
+        } else throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            new BasicException.Parameter[]{
+                new BasicException.Parameter("required", extension.getName()),
+                new BasicException.Parameter("actual", delegate.getClass().getName())
+            },
+            "The EJBLocalObject does not implement the required interface"
+        );
     }
     
     
@@ -110,13 +151,7 @@ public class Dataprovider_1LocalConnection<D extends Dataprovider_1_0Local>
         UnitOfWorkRequest[] workingUnits
     ){
         try {
-            if(this.ejbLocalObject == null) throw new BasicException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE,
-                null,
-                "Attempt to use removed dataprovider connection"
-            );
-            return this.ejbLocalObject.process(
+            return getDelegate().process(
                 header, 
                 workingUnits
             );
@@ -127,29 +162,31 @@ public class Dataprovider_1LocalConnection<D extends Dataprovider_1_0Local>
 
         
     //------------------------------------------------------------------------
-    // Implements LifeCycleObject_1_0
+    // Implements Dataprovider_1_0Connection
     //------------------------------------------------------------------------
 
     /**
      * Releases a dataprovider connection
      *
      * @exception   ServiceException    DEACTIVATION_FAILURE
-     *              If decativation of dataprovider connection fails
+     *              If deactivation of dataprovider connection fails
      */
     public void remove(
     ) throws ServiceException {
-        try {
-            if (this.ejbLocalObject != null) this.ejbLocalObject.remove();
-        } catch (Exception exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.DEACTIVATION_FAILURE,
-                null,
-                "Failure during deactivation of dataprovider connection"
-            );
-        } finally {
-            close();
+        if (this.ejbLocalObject != null) {
+            try {
+                 this.ejbLocalObject.remove();
+            } catch (Exception exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.DEACTIVATION_FAILURE,
+                    null,
+                    "Failure during deactivation of dataprovider connection"
+                );
+            } finally {
+                close();
+            }
         }
     }
 
@@ -170,45 +207,69 @@ public class Dataprovider_1LocalConnection<D extends Dataprovider_1_0Local>
 
 
     //------------------------------------------------------------------------
-    // Implements PersistenceManagerFactory_2_0
+    // Implements OptimisticTransaction_2_0
     //------------------------------------------------------------------------
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.object.spi.PersistenceManagerFactory_2_0#getPersistenceManager()
+     * @see org.openmdx.base.persistence.spi.OptimisticTransaction_2_0#commit(javax.transaction.Synchronization)
      */
-    public PersistenceManager getPersistenceManager() throws ServiceException {
-        return this.ejbLocalObject instanceof PersistenceManagerFactory_2_0 ?
-            ((PersistenceManagerFactory_2_0)this.ejbLocalObject).getPersistenceManager() :
-            null;
-    }
-
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.object.spi.PersistenceManagerFactory_2_0#getPersistenceManager(java.lang.String, java.lang.String)
-     */
-    public PersistenceManager getPersistenceManager(
-        String userid,
-        String password
+    public void commit(
+        Synchronization synchronization
     ) throws ServiceException {
-        return this.ejbLocalObject instanceof PersistenceManagerFactory_2_0 ? 
-            ((PersistenceManagerFactory_2_0)this.ejbLocalObject).getPersistenceManager(userid, password) :
-            null;
+        try {
+            getDelegate(
+                OptimisticTransaction_2_0.class
+            ).commit(
+                synchronization
+            );
+        } catch (TransactionRolledbackLocalException exception) {
+            throw new ServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ROLLBACK,
+                null,
+                "Unit of work has been rolled back"
+            );
+        } catch (EJBException exception) {
+            throw new ServiceException(exception);
+        }
     }
 
+    
     //------------------------------------------------------------------------
-    // Implements PersistenceManagerFactory_1_0
+    // Implements EntityManagerFactory_2_0
     //------------------------------------------------------------------------
-
 
     /* (non-Javadoc)
-     * @see org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.PersistenceManagerFactory_1_0#getPersistenceManager(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader)
+     * @see org.openmdx.kernel.persistence.spi.EntityManagerFactory_2_0#createEntityManager(javax.security.auth.Subject)
      */
-    public PersistenceManager getPersistenceManager(
-        ServiceHeader serviceHeader
-    ) throws ServiceException {
-        return this.ejbLocalObject instanceof PersistenceManagerFactory_1_0 ? 
-            ((PersistenceManagerFactory_1_0)this.ejbLocalObject).getPersistenceManager(serviceHeader) :
-            null;
+    public PersistenceManager createManager(
+        Subject subject
+    ) throws ResourceException {
+        try {
+            return getDelegate(
+                ManagerFactory_2_0.class
+            ).createManager(
+                subject
+            );
+        } catch (ServiceException exception) {
+            throw new ResourceException(exception);
+        }
     }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.persistence.spi.EntityManagerFactory_2_0#createEntityManager()
+     */
+    public PersistenceManager createManager(
+    ) throws ResourceException {
+        try {
+            return getDelegate(
+                ManagerFactory_2_0.class
+            ).createManager(
+            );
+        } catch (ServiceException exception) {
+            throw new ResourceException(exception);
+        }
+    }
+    
 }

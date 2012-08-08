@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CutDerivedFeaturesXmlExporter.java,v 1.6 2007/10/10 16:05:58 hburger Exp $
- * Description: 
- * Revision:    $Revision: 1.6 $
+ * Name:        $Id: CutDerivedFeaturesXmlExporter.java,v 1.9 2008/05/14 09:47:42 hburger Exp $
+ * Description: Cut Derived Features XML Exporter
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:58 $
+ * Date:        $Date: 2008/05/14 09:47:42 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,18 +45,21 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.exporter;
 
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.query.Filter;
 import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
+import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
 
@@ -73,6 +75,7 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
  * 
  * @author anyff
  */
+@SuppressWarnings("unchecked")
 public class CutDerivedFeaturesXmlExporter {
 
     /**
@@ -89,14 +92,14 @@ public class CutDerivedFeaturesXmlExporter {
     public CutDerivedFeaturesXmlExporter(
         ServiceHeader header,
         RequestCollection reader, 
-        List startPoints,
-        List referenceFilters,
-        Map attributeFilters,
+        List<Path> startPoints,
+        Set<String> referenceFilters,
+        Map<String,Filter> attributeFilters,
         PrintStream exportStream,
         String schemaString,
         Model_1_0 model        
     ) {
-        this.header = header;
+//      this.header = header;
         this.reader = reader;
         this.startPoints = startPoints;
         this.referenceFilters = referenceFilters;
@@ -191,7 +194,6 @@ public class CutDerivedFeaturesXmlExporter {
    ) {
       ProviderTraverser traverser = 
             new ProviderTraverser(
-                this.header, 
                 this.reader, 
                 this.model, 
                 this.startPoints, 
@@ -273,13 +275,13 @@ public class CutDerivedFeaturesXmlExporter {
     private final String schemaString;    
 
     /** start points for the export */
-    private final List startPoints;
+    private final List<Path> startPoints;
     
-    private final ServiceHeader header;   
+//  private final ServiceHeader header;   
     
     private final RequestCollection reader;
-    private final List referenceFilters;
-    private final Map attributeFilters;
+    private final Set<String> referenceFilters;
+    private final Map<String,Filter> attributeFilters;
     
 }
 

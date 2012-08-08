@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -54,10 +55,11 @@ import org.openmdx.uses.org.apache.commons.collections.keyvalue.TiedMapEntry;
  * </ul>
  * 
  * @since Commons Collections 3.1
- * @version $Revision: 1.1 $ $Date: 2004/10/24 12:17:15 $
+ * @version $Revision: 1.3 $ $Date: 2008/04/25 14:32:16 $
  *
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class SingletonMap
         implements OrderedMap, BoundedMap, KeyValue, Serializable, Cloneable {
 
@@ -103,12 +105,12 @@ public class SingletonMap
     /**
      * Constructor specifying the key and value as a <code>MapEntry</code>.
      *
-     * @param keyValue  the key value pair to use
+     * @param mapEntry  the mapEntry to use
      */
-    public SingletonMap(Map.Entry entry) {
+    public SingletonMap(Map.Entry mapEntry) {
         super();
-        this.key = entry.getKey();
-        this.value = entry.getValue();
+        this.key = mapEntry.getKey();
+        this.value = mapEntry.getValue();
     }
 
     /**

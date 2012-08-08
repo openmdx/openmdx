@@ -24,7 +24,6 @@ package org.openmdx.uses.gnu.getopt;
 
 import java.text.MessageFormat;
 import java.util.Locale;
-import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 /**************************************************************************/
@@ -540,7 +539,7 @@ protected String progname;
 /**
   * The localized strings are kept in a separate file
   */
-private ResourceBundle _messages = PropertyResourceBundle.getBundle(
+private ResourceBundle _messages = ResourceBundle.getBundle(
                            "org/openmdx/uses/gnu/getopt/MessagesBundle", Locale.getDefault());
 
 /**************************************************************************/
@@ -618,7 +617,7 @@ Getopt(String progname, String[] argv, String _optstring,
   else
     {
       posixly_correct = true;
-      _messages = PropertyResourceBundle.getBundle("org/openmdx/uses/gnu/getopt/MessagesBundle",
+      _messages = ResourceBundle.getBundle("org/openmdx/uses/gnu/getopt/MessagesBundle",
                                                    Locale.US);
     }
 

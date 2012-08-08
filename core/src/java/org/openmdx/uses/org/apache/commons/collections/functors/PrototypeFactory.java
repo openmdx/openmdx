@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -31,7 +32,7 @@ import org.openmdx.uses.org.apache.commons.collections.FunctorException;
  * Factory implementation that creates a new instance each time based on a prototype.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.5 $ $Date: 2006/10/30 15:00:05 $
+ * @version $Revision: 1.7 $ $Date: 2008/06/28 00:21:50 $
  *
  * @author Stephen Colebourne
  */
@@ -59,7 +60,7 @@ public class PrototypeFactory {
             return ConstantFactory.NULL_INSTANCE;
         }
         try {
-            Method method = prototype.getClass().getMethod("clone", (Class[])null);
+            Method method = prototype.getClass().getMethod("clone", (Class[]) null);
             return new PrototypeCloneFactory(prototype, method);
 
         } catch (NoSuchMethodException ex) {
@@ -95,7 +96,7 @@ public class PrototypeFactory {
     static class PrototypeCloneFactory implements Factory, Serializable {
         
         /** The serial version */
-        static final long serialVersionUID = 5604271422565175555L;
+        private static final long serialVersionUID = 5604271422565175555L;
         
         /** The object to clone each time */
         private final Object iPrototype;
@@ -116,7 +117,7 @@ public class PrototypeFactory {
          */
         private void findCloneMethod() {
             try {
-                iCloneMethod = iPrototype.getClass().getMethod("clone", (Class[])null);
+                iCloneMethod = iPrototype.getClass().getMethod("clone", (Class[]) null);
 
             } catch (NoSuchMethodException ex) {
                 throw new IllegalArgumentException("PrototypeCloneFactory: The clone method must exist and be public ");
@@ -153,7 +154,7 @@ public class PrototypeFactory {
     static class PrototypeSerializationFactory implements Factory, Serializable {
         
         /** The serial version */
-        static final long serialVersionUID = -8704966966139178833L;
+        private static final long serialVersionUID = -8704966966139178833L;
         
         /** The object to clone via serialization each time */
         private final Serializable iPrototype;

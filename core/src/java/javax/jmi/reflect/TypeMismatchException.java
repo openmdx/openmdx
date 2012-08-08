@@ -3,6 +3,7 @@ package javax.jmi.reflect;
 /** Thrown to indicate that provided parameter or element of collection is
  * is of wrong type.
  */
+@SuppressWarnings({"unchecked", "serial"})
 public class TypeMismatchException extends JmiException {
 
     private final Class expectedType;

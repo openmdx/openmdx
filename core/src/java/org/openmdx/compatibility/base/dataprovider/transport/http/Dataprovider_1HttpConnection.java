@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1HttpConnection.java,v 1.4 2006/06/13 23:17:57 wfro Exp $
+ * Name:        $Id: Dataprovider_1HttpConnection.java,v 1.5 2008/03/19 17:07:15 hburger Exp $
  * Description: Lightweight Container's Dataprovider Connection  
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/06/13 23:17:57 $
+ * Date:        $Date: 2008/03/19 17:07:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,6 +73,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * The Lightweight Container's Dataprovider Connection
  */
+@SuppressWarnings("unchecked")
 public class Dataprovider_1HttpConnection 
 	implements Dataprovider_1_1Connection
 {

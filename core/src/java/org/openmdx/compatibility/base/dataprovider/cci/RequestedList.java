@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX http://www.openmdx.org/
- * Name:        $Id: RequestedList.java,v 1.13 2008/02/29 17:57:34 hburger Exp $
+ * Name:        $Id: RequestedList.java,v 1.14 2008/03/07 03:25:10 hburger Exp $
  * Description: RequestedList class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 17:57:34 $
+ * Date:        $Date: 2008/03/07 03:25:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2007, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -18,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
+ * notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in
- *   the documentation and/or other materials provided with the
- *   distribution.
+ * notice, this list of conditions and the following disclaimer in
+ * the documentation and/or other materials provided with the
+ * distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- *   contributors may be used to endorse or promote products derived
- *   from this software without specific prior written permission.
+ * contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -71,8 +71,8 @@ import org.openmdx.kernel.log.SysLog;
  * its actual size can't be determined.
  */
 @SuppressWarnings("unchecked")
-public class RequestedList<E> 
-  extends AbstractSequentialList<E>
+public class RequestedList 
+  extends AbstractSequentialList
   implements Serializable, DataproviderReplyListener, Reconstructable
 {
 
@@ -379,7 +379,7 @@ public class RequestedList<E>
   // BufferingIterator
   //------------------------------------------------------------------------
     protected class BufferingIterator 
-        implements Serializable, ListIterator<E>, DataproviderReplyListener
+        implements Serializable, ListIterator, DataproviderReplyListener
     {
 
         /**
@@ -495,7 +495,7 @@ public class RequestedList<E>
          * @exception   NoSuchElementException
          *              if the iteration has no next element.
          */
-        public E next(
+        public Object next(
         ){
             if (! this.iterator.hasNext()) this.iterator = cache(
                 this.nextIndex,
@@ -503,7 +503,7 @@ public class RequestedList<E>
             );
             this.currentIndex = this.previousIndex = this.nextIndex;
             this.nextIndex++; 
-            return (E) this.iterator.next();
+            return this.iterator.next();
         }
         
         /**
@@ -532,7 +532,7 @@ public class RequestedList<E>
          * @exception   NoSuchElementException
          *              if the iteration has no previous element.
          */
-        public E previous(
+        public Object previous(
         ){
             if (! this.iterator.hasPrevious()) this.iterator = cache(
                 this.previousIndex,
@@ -540,7 +540,7 @@ public class RequestedList<E>
             );
             this.currentIndex = this.nextIndex = this.previousIndex;
             this.previousIndex--; 
-            return (E) this.iterator.previous();
+            return this.iterator.previous();
         }
 
         /**
@@ -692,10 +692,10 @@ public class RequestedList<E>
      * @exception NoSuchElementException
      *        if the iteration has no next element.
      */
-    public E next(
+    public Object next(
     ){
       try {
-        return (E) marshaller.fromDataproviderObject(
+        return marshaller.fromDataproviderObject(
           (DataproviderObject_1_0)super.next()
         );
       } catch (ServiceException exception) {
@@ -715,10 +715,10 @@ public class RequestedList<E>
      * @exception NoSuchElementException
      *        if the iteration has no previous element.
      */
-    public E previous(
+    public Object previous(
     ){
       try {
-        return (E) marshaller.fromDataproviderObject(
+        return marshaller.fromDataproviderObject(
           (DataproviderObject_1_0)super.previous()
         );
       } catch (ServiceException exception) {

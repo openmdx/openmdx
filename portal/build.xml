@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.41 2008/02/12 18:03:43 wfro Exp $
+= Name:        $Id: build.xml,v 1.45 2008/06/04 22:06:24 wfro Exp $
 = Description: ant build for openMDX/Portal
-= Revision:    $Revision: 1.41 $
-= Date:        $Date: 2008/02/12 18:03:43 $
+= Revision:    $Revision: 1.45 $
+= Date:        $Date: 2008/06/04 22:06:24 $
 = Copyright:   (c) 2004-2006 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -67,6 +67,7 @@
 		<path refid="openmdx.core.lib"/>
 		<path refid="openmdx.core.bin"/>
 		<pathelement location="../codehaus/${build.target.platform}/groovy/lib/groovy.jar"/>
+		<pathelement location="${openmdx.home}/${build.target.platform}/security/lib/openmdx-security.jar"/>
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>
@@ -84,12 +85,96 @@
 	<!-- ******************************************************************* -->
 	<!-- * Generate -->
 	<!-- ******************************************************************* -->
+	<target name="-compress-and-append-">
+		<java 
+			classname="com.yahoo.platform.yui.compressor.YUICompressor" 
+			classpath="etc/yuicompressor/yuicompressor.jar"
+	  >
+	    <arg line="--line-break 1000 -o ${build.dir}/src/js/${file.name} ${in.dir.name}/${file.name}"/>		
+		</java>
+		<concat
+			destfile="${build.dir}/src/js/portal-all.js"
+			append="true"
+			outputencoding="UTF-8"
+			eol="cr"
+		>
+		  <fileset dir="${build.dir}/src/js">
+		  	<include name="${file.name}"/>		  	
+		  </fileset>
+		</concat>				
+	</target>		
 	<target 
 	  name="generate" 
 	  description="Generate version, jt and model dependend files" 
 	  depends="build-init"
 	>
 		<antcall target="-preprocess-model-files-"/>
+		<!-- portal-all.js -->
+		<mkdir dir="${build.dir}/src/js"/>
+		<echo message="" file="${build.dir}/src/js/portal-all.js"/>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/org/prototypejs"/>
+			<param name="file.name" value="prototype.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="file.name" value="scriptaculous.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="file.name" value="builder.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="file.name" value="effects.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="file.name" value="controls.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="file.name" value="dragdrop.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="file.name" value="slider.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/org/openmdx/portal"/>
+			<param name="file.name" value="ssf.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/com/yahoo/yui"/>
+			<param name="file.name" value="utilities.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/com/yui-ext"/>
+			<param name="file.name" value="yui-ext.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/org/openmdx/portal"/>
+			<param name="file.name" value="Element-FASTgetStyle.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/com/dynarch/calendar"/>
+			<param name="file.name" value="calendar.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/com/dynarch/calendar"/>
+			<param name="file.name" value="calendar-setup.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/org/openmdx/portal"/>
+			<param name="file.name" value="findobject.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="src/js/org/openmdx/portal"/>
+			<param name="file.name" value="guicontrol.js"/>
+		</antcall>
+		<copy file="${build.dir}/src/js/portal-all.js" todir="src/war/openmdx-inspector.war/javascript"/>
+		<copy file="${build.dir}/src/js/findobject.js" todir="src/war/openmdx-inspector.war/javascript"/>
+		<copy file="${build.dir}/src/js/guicontrol.js" todir="src/war/openmdx-inspector.war/javascript"/>		
 	</target>
 	
 	<!-- ******************************************************************* -->
@@ -112,6 +197,7 @@
 			</manifest>
 			<zipfileset dir="src/war/openmdx-inspector.war" />
 			<zipfileset dir="src/js/org/wymeditor" prefix="javascript/wymeditor" />
+			<zipfileset dir="src/js/org/jit" prefix="javascript/jit" />
 			<zipfileset dir="src/js/com/dynarch/calendar/lang" prefix="javascript/calendar/lang" />
 			<zipfileset dir="src/js/com/yui-ext/resources" prefix="javascript/yui-ext/resources" />
 			<zipfileset dir="src/js/org/prototypejs" prefix="javascript" />
@@ -164,6 +250,7 @@
 				<include name="${build.target.platform}/portal/**"/>
 				<include name="planetj/${build.target.platform}/compfilter/**"/>
 				<include name="codehaus/${build.target.platform}/groovy/**"/>
+				<include name="tuckey/${build.target.platform}/filters/**"/>
 				<include name="eclipse/${build.target.platform}/${base.dir.name}/**"/>				
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 

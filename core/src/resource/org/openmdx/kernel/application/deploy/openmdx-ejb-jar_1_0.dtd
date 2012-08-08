@@ -1,17 +1,17 @@
 <!--
  ! ====================================================================
  ! Project:     openmdx, http://www.openmdx.org/
- ! Name:        $Id: openmdx-ejb-jar_1_0.dtd,v 1.12 2004/05/19 06:58:35 rbruder Exp $
+ ! Name:        $Id: openmdx-ejb-jar_1_0.dtd,v 1.13 2008/03/20 12:57:16 wfro Exp $
  ! Description: openMDX Enterprise JavaBean Configuration DTD 1.0
- ! Revision:    $Revision: 1.12 $
+ ! Revision:    $Revision: 1.13 $
  ! Owner:       OMEX AG, Switzerland, http://www.omex.ch
- ! Date:        $Date: 2004/05/19 06:58:35 $
+ ! Date:        $Date: 2008/03/20 12:57:16 $
  ! ====================================================================
  !
  ! This software is published under the BSD license
  ! as listed below.
  ! 
- ! Copyright (c) 2004, OMEX AG, Switzerland
+ ! Copyright (c) 2004-2008, OMEX AG, Switzerland
  ! All rights reserved.
  ! 
  ! Redistribution and use in source and binary forms, with or
@@ -79,30 +79,26 @@ Example:
         <openmdx-ejb-jar>
         	<enterprise-beans>
         		<session>
-        			<ejb-name>Roger</ejb-name>
+        			<ejb-name>gateway</ejb-name>
         			<ejb-ref>
-        				<ejb-ref-name>ejb/Daniel</ejb-ref-name>
-        				<jndi-name>org/openmdx/test/Daniel</jndi-name>
+        				<ejb-ref-name>ejb/clock1</ejb-ref-name>
+        				<jndi-name>org/openmdx/test/clock1</jndi-name>
         			</ejb-ref>
         			<ejb-local-ref>
-        				<ejb-ref-name>ejb/Markus</ejb-ref-name>
-        				<local-jndi-name>org/openmdx/test/Markus</local-jndi-name>
+        				<ejb-ref-name>ejb/clock1</ejb-ref-name>
+        				<local-jndi-name>org/openmdx/test/clock1</local-jndi-name>
         			</ejb-local-ref>
         			<pool>
         				<initial-capacity>1</initial-capacity>
         				<maximum-capacity>100</maximum-capacity>
-        				<timeout>1000000</timeout>
+        				<maximum-wait>1000</timeout>
         			</pool>
         		</session>
         		<session>
-        			<ejb-name>Martin</ejb-name>
-        			<jndi-name>org/openmdx/test/Martin</jndi-name>
+        			<ejb-name>clock1</ejb-name>
+        			<jndi-name>org/openmdx/test/clock1</jndi-name>
         			<home-class>TestHomeClass</home-class>
         			<local-home-class>TestLocalHomeClass</local-home-class>
-        		</session>
-        		<session>
-        			<ejb-name>Juerg</ejb-name>
-        			<local-jndi-name>org/openmdx/test/Juerg</local-jndi-name>
         		</session>
         	</enterprise-beans>
         </openmdx-ejb-jar>	

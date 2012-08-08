@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Codes.java,v 1.8 2007/02/06 23:06:32 wfro Exp $
+ * Name:        $Id: Codes.java,v 1.9 2008/04/04 11:57:31 hburger Exp $
  * Description: Codes
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/02/06 23:06:32 $
+ * Date:        $Date: 2008/04/04 11:57:31 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -77,6 +77,7 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 
+@SuppressWarnings("unchecked")
 public final class Codes
   implements Serializable {
   

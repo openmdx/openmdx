@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BinaryLargeObjects.java,v 1.2 2007/12/17 16:54:04 hburger Exp $
+ * Name:        $Id: BinaryLargeObjects.java,v 1.6 2008/07/03 23:02:49 wfro Exp $
  * Description: Binary Large Object Factory 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/17 16:54:04 $
+ * Date:        $Date: 2008/07/03 23:02:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,11 +51,14 @@
 package org.w3c.cci2;
 
 import java.io.ByteArrayInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLConnection;
 
 import org.openmdx.base.exception.ExtendedIOException;
 import org.openmdx.base.exception.ServiceException;
@@ -89,9 +92,16 @@ public class BinaryLargeObjects {
          *
          * @param value
          */
-        public ArrayLargeObject(final byte[] value) {
+        ArrayLargeObject(
+            final byte[] value
+        ) {
             this.value = value;
         }
+
+        /**
+         * 
+         */
+        private final byte[] value;
 
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
@@ -108,10 +118,19 @@ public class BinaryLargeObjects {
             return Long.valueOf(this.value.length);
         }
 
-        /**
-         * 
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
          */
-        private final byte[] value;
+        public void getContent(
+            OutputStream stream, 
+            long position
+        ) throws IOException {
+            int length = (int) (this.value.length - position);
+            if(length < 0) throw new EOFException(
+                "Position " + position + " is larger than the objects length " + this.value.length
+            );
+            stream.write(this.value, (int) position, length);
+        }
 
     }
        
@@ -135,12 +154,27 @@ public class BinaryLargeObjects {
             this.url = url;
         }
 
+        /**
+         * 
+         */
+        private final URL url;
+
+        /**
+         * 
+         */
+        private transient URLConnection connection;
+        
+        /**
+         * 
+         */
+        private transient Long length = null;
+        
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
         public InputStream getContent(
         ) throws IOException {
-            return this.url.openStream();
+            return getConnection().getInputStream();
         }
 
         /* (non-Javadoc)
@@ -148,14 +182,38 @@ public class BinaryLargeObjects {
          */
         public Long getLength(
         ) throws IOException{
-            return asLength(this.url.openConnection().getContentLength());
+            return this.length == null ?
+                this.length = asLength(getConnection().getContentLength()) :
+                this.length;
+        }
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
+         */
+        public void getContent(
+            OutputStream stream, 
+            long position
+        ) throws IOException {
+            this.length = position + streamCopy(
+                getContent(),
+                position,
+                stream
+            );
         }
 
         /**
+         * Opens the URL connection
          * 
+         * @return the URL connection
+         * 
+         * @throws IOException
          */
-        private final URL url;
-
+        protected URLConnection getConnection() throws IOException{
+            return this.connection == null ?
+                this.connection = url.openConnection() :
+                this.connection;
+        }
+        
     }
 
     public static BinaryLargeObject valueOf(
@@ -178,6 +236,12 @@ public class BinaryLargeObjects {
             this.file = file;
         }
 
+        /**
+         * 
+         */
+        private final File file;
+        private transient Long length = null;
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
@@ -191,13 +255,24 @@ public class BinaryLargeObjects {
          */
         public Long getLength(
         ){
-            return asLength(this.file.length());
+            return this.length == null ?
+                this.length = asLength(this.file.length()) :
+                this.length;
         }
 
-        /**
-         * 
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
          */
-        private final File file;
+        public void getContent(
+            OutputStream stream, 
+            long position
+        ) throws IOException {
+            this.length = position + streamCopy(
+                getContent(),
+                position,
+                stream
+            );
+        }
 
     }
 
@@ -221,6 +296,11 @@ public class BinaryLargeObjects {
             this.delegate = delegate;
         }
 
+        /**
+         * 
+         */
+        private final ReadableLargeObject delegate;
+        
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
@@ -242,12 +322,21 @@ public class BinaryLargeObjects {
             } catch (ServiceException exception) {
                 throw new ExtendedIOException(exception);
             }
-        }        
-        
-        /**
-         * 
+        }
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
          */
-        private final ReadableLargeObject delegate;
+        public void getContent(
+            OutputStream stream, 
+            long position
+        ) throws IOException {
+            try {
+                this.delegate.getBinaryStream(stream, position);
+            } catch (ServiceException exception) {
+                throw new ExtendedIOException(exception);
+            }
+        }        
         
     }
 
@@ -264,5 +353,38 @@ public class BinaryLargeObjects {
     ){
         return length < 0 ? null : Long.valueOf(length);
     }
+
+    /**
+     * Copy an input stream's content to an output stream
+     * @param source
+     * @param position
+     * @param target
+     * 
+     * @return the number of byte written to the output stream
+     * @throws IOException
+     */
+    public static long streamCopy(
+        InputStream source,
+        long position,
+        OutputStream target
+    ) throws IOException {
+        byte[] buffer = new byte[CAPACITY];
+        long count = 0l;
+        if(position != 0l) {
+            source.skip(position);
+        }
+        int n = source.read(buffer);
+        while(n > 0) {
+            count += n;
+            target.write(buffer, 0, n);
+            n = source.read(buffer);
+        }
+        return count;
+    }
+
+    /**
+     * Default capacity for stream copy
+     */
+    private final static int CAPACITY = 10000;
 
 }

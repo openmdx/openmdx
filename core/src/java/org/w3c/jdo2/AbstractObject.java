@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractObject.java,v 1.36 2008/02/13 13:07:14 hburger Exp $
+ * Name:        $Id: AbstractObject.java,v 1.39 2008/06/28 00:21:26 hburger Exp $
  * Description: Object Relational Mapping 
- * Revision:    $Revision: 1.36 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/13 13:07:14 $
+ * Date:        $Date: 2008/06/28 00:21:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,7 @@ package org.w3c.jdo2;
 
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -65,6 +66,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +85,6 @@ import org.oasisopen.spi2.DataObjectIdBuilder;
 import org.oasisopen.spi2.ObjectIdBuilder;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.CharacterLargeObject;
-import org.w3c.cci2.CloseableCollection;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 
@@ -107,6 +108,16 @@ public abstract class AbstractObject
     	return null;
     }
 
+    /**
+     * Create a new map instance
+     * 
+     * @return a map instance
+     */
+    protected <T> Map<String,T> openmdxjdoNewMap(
+    ){
+        return new HashMap<String,T>();
+    }
+    
     /**
      * Create a new array slice instance
      * <p>
@@ -295,7 +306,7 @@ public abstract class AbstractObject
      * 
      * @return the set of children
      */
-    protected static final <T> CloseableCollection<T> openmdxjdoGetObjectsByParent(
+    protected static final <T> Collection<T> openmdxjdoGetObjectsByParent(
         Class<T> objectClass, String queryName,
         boolean mixinParent,  Object parent
     ){
@@ -628,12 +639,13 @@ public abstract class AbstractObject
          */
         @Override
         public final void add(int index, E element) {
+            E e = element; 
             for(
                 int i = index;
                 element != null;
                 i++
             ) {
-                element = set(i, element);                
+                e = set(i, e);                
             }
         }
 
@@ -794,7 +806,7 @@ public abstract class AbstractObject
         /**
          * The <code>Set</code>'s field id
          */
-        private final int field;
+        final int field;
         
         /* (non-Javadoc)
          * @see java.util.AbstractCollection#iterator()
@@ -1049,12 +1061,12 @@ public abstract class AbstractObject
         /**
          * The <code>Map</code>'s field id
          */
-        private final int field;
+        final int field;
     
         /**
          * The slices backing this map.
          */
-        private final SortedMap<Integer, Slice> delegate;
+        final SortedMap<Integer, Slice> delegate;
         
         /**
          * <code>view</code> is <code>true</code> for headMaps,
@@ -1262,7 +1274,7 @@ public abstract class AbstractObject
      */
     private static class ResultSet<E> 
         extends AbstractCollection<E> 
-        implements CloseableCollection<E>
+        implements Closeable
     {
 
         /**

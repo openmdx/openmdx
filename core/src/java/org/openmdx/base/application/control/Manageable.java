@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Manageable.java,v 1.4 2004/04/02 16:59:00 wfro Exp $
+ * Name:        $Id: Manageable.java,v 1.5 2008/03/21 18:28:07 hburger Exp $
  * Description: A manageable application
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:00 $
+ * Date:        $Date: 2008/03/21 18:28:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -96,7 +96,8 @@ public abstract class Manageable
 	 *
 	 * @return List. A list of cmd line options (objects of class CmdLineOption)
 	 */
-	public List getCmdLineOptions()
+	@SuppressWarnings("unchecked")
+    public List getCmdLineOptions()
 	{
 		return new ArrayList();
 	}

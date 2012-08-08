@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: GenericClob.java,v 1.6 2007/10/10 16:06:00 hburger Exp $
+ * Name:        $Id: GenericClob.java,v 1.7 2008/03/21 18:47:37 hburger Exp $
  * Description: Generic Character Large Object 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:00 $
+ * Date:        $Date: 2008/03/21 18:47:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,6 +72,7 @@ import org.openmdx.kernel.log.SysLog;
 /**
  * Generic Character Large Object 
  */
+@SuppressWarnings("unchecked")
 class GenericClob
     implements Clob {
 

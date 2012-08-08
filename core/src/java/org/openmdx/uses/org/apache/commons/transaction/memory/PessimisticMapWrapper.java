@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/memory/PessimisticMapWrapper.java,v 1.1 2005/03/24 13:43:56 hburger Exp $
- * $Revision: 1.1 $
- * $Date: 2005/03/24 13:43:56 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/memory/PessimisticMapWrapper.java,v 1.2 2008/03/21 18:42:17 hburger Exp $
+ * $Revision: 1.2 $
+ * $Date: 2008/03/21 18:42:17 $
  *
  * ====================================================================
  *
@@ -49,10 +49,11 @@ import org.openmdx.uses.org.apache.commons.transaction.util.LoggerFacade;
  * <br>
  * <em>Note:</em> This wrapper guarantees isolation level <code>SERIALIZABLE</code>.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see TransactionalMapWrapper
  * @see OptimisticMapWrapper
  */
+@SuppressWarnings("unchecked")
 public class PessimisticMapWrapper extends TransactionalMapWrapper {
 
     protected static final int READ = 1;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StatusCodes.java,v 1.1 2005/09/16 00:44:42 hburger Exp $
+ * Name:        $Id: StatusCodes.java,v 1.2 2008/03/19 17:07:45 hburger Exp $
  * Description: Remote Exception Categorization
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/09/16 00:44:42 $
+ * Date:        $Date: 2008/03/19 17:07:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,7 @@ import org.openmdx.kernel.log.SysLog;
 /**
  * Remote Exception Categorization
  */
+@SuppressWarnings("unchecked")
 public class StatusCodes {
 
     /**

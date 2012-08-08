@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CharacterSource_1Reader.java,v 1.5 2004/09/26 22:34:35 hburger Exp $
+ * Name:        $Id: CharacterSource_1Reader.java,v 1.6 2008/03/21 18:31:57 hburger Exp $
  * Description: Streams: Character Source Reader
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/09/26 22:34:35 $
+ * Date:        $Date: 2008/03/21 18:31:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -180,8 +180,8 @@ public class CharacterSource_1Reader
     ) throws IOException {
         if(this.length == null) try {
             this.length = (Long) this.callbackContext.execute(
-                new PrivilegedExceptionAction(){
-                    public Object run() throws Exception {
+                new PrivilegedExceptionAction<Long>(){
+                    public Long run() throws Exception {
                         return new Long(in.length());
                     }					        
                 }
@@ -198,8 +198,8 @@ public class CharacterSource_1Reader
     public void close() throws IOException {
     	if(isOpen()) try {
             this.callbackContext.execute(
-                new PrivilegedExceptionAction(){
-                    public Object run() throws Exception {
+                new PrivilegedExceptionAction<Void>(){
+                    public Void run() throws Exception {
                         in.close();
                         return null;
                     }					        
@@ -239,8 +239,8 @@ public class CharacterSource_1Reader
         if(this.cursor == this.buffer.length){
             try {
                 this.buffer = (char[]) this.callbackContext.execute(
-                    new PrivilegedExceptionAction(){
-                        public Object run() throws Exception {
+                    new PrivilegedExceptionAction<char[]>(){
+                        public char[] run() throws Exception {
                             return in.readCharacters(capacity);
                         }					        
                     }

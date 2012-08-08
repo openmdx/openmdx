@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSet.java,v 1.10 2008/02/18 14:11:33 hburger Exp $
+ * Name:        $Id: MarshallingSet.java,v 1.12 2008/04/09 12:33:43 hburger Exp $
  * Description: Marshalling Set
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/04/09 12:33:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,21 +66,32 @@ public class MarshallingSet<E>
 {
  
     /**
-     * 
-     */
-    private static final long serialVersionUID = 3256439200998961717L;
-
-    /**
      * Standard constructor
      * 
      * @param marshaller
      * @param set
      */   
     public MarshallingSet(
-        org.openmdx.base.object.spi.Marshaller marshaller,
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
         Set<?> set
     ) {
         super(marshaller, set);
+        this.delegateIsInstanceOfSet = true;
+    }
+
+    /**
+     * Standard constructor
+     * 
+     * @param marshaller
+     * @param set
+     * @param reluctantUnmarshalling 
+     */   
+    public MarshallingSet(
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
+        Set<?> set, 
+        Unmarshalling unmarshalling
+    ) {
+        super(marshaller, set, unmarshalling);
         this.delegateIsInstanceOfSet = true;
     }
 
@@ -106,10 +117,27 @@ public class MarshallingSet<E>
      *        A collection behaving like a set
      */
     public MarshallingSet(
-        org.openmdx.base.object.spi.Marshaller marshaller,
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
         Collection<?> set
     ) {
         super(marshaller, set);
+        this.delegateIsInstanceOfSet = set instanceof Set;
+    }
+
+    /**
+     * Be very carefully when using this constructor!
+     * 
+     * @param marshaller
+     * @param set
+     *        A collection behaving like a set
+     * @param unmarshalling 
+     */
+    public MarshallingSet(
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
+        Collection<?> set, 
+        Unmarshalling unmarshalling
+    ) {
+        super(marshaller, set, unmarshalling);
         this.delegateIsInstanceOfSet = set instanceof Set;
     }
 
@@ -127,17 +155,22 @@ public class MarshallingSet<E>
         super(marshaller, set);
         this.delegateIsInstanceOfSet = set instanceof Set;
     }
+    
+    /**
+     * Implements <code>Seriakizable</code>
+     */
+    private static final long serialVersionUID = 3256439200998961717L;
   
-    
-    //------------------------------------------------------------------------
-    // Implements Set
-    //------------------------------------------------------------------------
-    
     /**
      * True unless the delegate is a Collection but not a Set.
      */
     private final boolean delegateIsInstanceOfSet;
         
+    
+    //------------------------------------------------------------------------
+    // Implements Set
+    //------------------------------------------------------------------------
+    
     /* (non-Javadoc)
      * @see java.util.Collection#add(java.lang.Object)
      */
@@ -156,4 +189,5 @@ public class MarshallingSet<E>
     	Collection<?> that = (Collection<?>) object;
     	return that.size() == this.size() && this.containsAll(that);  
     }
+
 }

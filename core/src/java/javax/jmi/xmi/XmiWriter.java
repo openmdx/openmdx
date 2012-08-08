@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collection;
 import javax.jmi.reflect.RefPackage;
 
+@SuppressWarnings("unchecked")
 public interface XmiWriter {
     public void write(OutputStream stream, RefPackage extent, String xmiVersion)
         throws IOException;

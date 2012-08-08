@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Datatypes.java,v 1.1 2008/02/22 17:55:11 hburger Exp $
+ * Name:        $Id: Datatypes.java,v 1.2 2008/03/06 17:31:55 hburger Exp $
  * Description: Date 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/22 17:55:11 $
+ * Date:        $Date: 2008/03/06 17:31:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,7 +69,6 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.base.text.format.DateFormat;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.spi2.Structures;
 
@@ -96,6 +95,9 @@ public class Datatypes {
      * @param string the values string representation, which can be <code>null</code>
      * 
      * @return the value, or <code>null</code> if the value's string was <code>null</code>
+     * 
+     * @exception IllegalArgumentException if the string can't be parsed according to the
+     * requested type
      */
     @SuppressWarnings("unchecked")
     public static <V> V create(
@@ -252,8 +254,12 @@ public class Datatypes {
         if (Datatypes.factory == null) try {
             Datatypes.factory = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException exception) {
-            Logger logger = LoggerFactory.getLogger(Datatypes.class);
-            logger.error("Datatype factory acquisition failed", exception);
+            LoggerFactory.getLogger(
+                Datatypes.class
+            ).error(
+                "Datatype factory acquisition failed", 
+                exception
+            );
             throw new RuntimeException(
                 "Datatype factory acquisition failed",
                 exception
@@ -262,12 +268,19 @@ public class Datatypes {
         return Datatypes.factory;
     }
 
+    /**
+     * Create a qualified type name
+     * 
+     * @param components the qualified type name's components
+     * 
+     * @return the qualified type name
+     */
     public static List<String> typeName(
-        String... qualifiedType
+        String... components
     ){
         return Collections.unmodifiableList(
             Arrays.asList(
-                qualifiedType
+                components
             )
         );  
     }

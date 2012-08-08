@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PanelControl.java,v 1.20 2007/02/20 00:35:24 wfro Exp $
+ * Name:        $Id: PanelControl.java,v 1.21 2008/05/01 21:43:55 wfro Exp $
  * Description: ContainerControl
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/02/20 00:35:24 $
+ * Date:        $Date: 2008/05/01 21:43:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -85,6 +85,7 @@ public class PanelControl
   }
 
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,

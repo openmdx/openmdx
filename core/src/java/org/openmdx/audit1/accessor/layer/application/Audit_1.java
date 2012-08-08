@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Audit_1.java,v 1.27 2007/10/10 17:16:04 hburger Exp $
+ * Name:        $Id: Audit_1.java,v 1.29 2008/06/28 00:21:28 hburger Exp $
  * Description: accessor.Audit_1 plugin
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 17:16:04 $
+ * Date:        $Date: 2008/06/28 00:21:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -79,7 +79,6 @@ import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequestContexts;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.Orders;
 import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
@@ -110,6 +109,7 @@ import org.openmdx.kernel.log.SysLog;
  *       by openMDX 1 and not by the Audit_1 plugin itself.</li> 
  * </ul> 
  */
+@SuppressWarnings("unchecked")
 public class Audit_1
 	extends Database_1Jdbc2 {
 
@@ -476,7 +476,7 @@ public class Audit_1
                 new AttributeSpecifier(
                     SystemAttributes.CREATED_AT,
                     0,
-                    Orders.ASCENDING
+                    Directions.ASCENDING
                 )
             },
             0,

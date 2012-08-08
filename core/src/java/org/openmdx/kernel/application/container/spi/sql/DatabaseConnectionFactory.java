@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseConnectionFactory.java,v 1.6 2008/01/08 16:16:31 hburger Exp $
+ * Name:        $Id: DatabaseConnectionFactory.java,v 1.7 2008/03/21 18:38:39 hburger Exp $
  * Description: Database Connection Factory
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2008/03/21 18:38:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,6 +73,7 @@ import org.openmdx.kernel.exception.Throwables;
 /**
  * Database Connection Factory
  */
+@SuppressWarnings("unchecked")
 public class DatabaseConnectionFactory
     implements DataSource
 {

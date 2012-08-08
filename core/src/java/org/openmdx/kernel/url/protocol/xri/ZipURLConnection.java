@@ -1,8 +1,55 @@
 /*
- * Created on Jun 15, 2004
+ * ====================================================================
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ZipURLConnection.java,v 1.6 2008/06/28 00:21:33 hburger Exp $
+ * Description: Resource URL Connection
+ * Revision:    $Revision: 1.6 $
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Date:        $Date: 2008/06/28 00:21:33 $
+ * ====================================================================
  *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * This software is published under the BSD license as listed below.
+ * 
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * ------------------
+ * 
+ * This product includes software developed by the Apache Software
+ * Foundation (http://www.apache.org/).
+ * ___________________________________________________________________________ 
+ *
+ * This class should log as it has to be loaded by the system class loader. 
  */
 package org.openmdx.kernel.url.protocol.xri;
 
@@ -13,17 +60,18 @@ import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Permission;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.openmdx.kernel.url.protocol.XriAuthorities;
 import org.openmdx.kernel.url.protocol.XriProtocols;
 
 /**
  * An delegating URLConnection support class.
- *
- * @todo resolve 1.4 specific issues.
  */
 public class ZipURLConnection extends JarURLConnection {
 
@@ -75,7 +123,7 @@ public class ZipURLConnection extends JarURLConnection {
             "No separator ('" + XriProtocols.ZIP_SEPARATOR + "' found in URL " + url
         );
         return new URL(
-            JAR_PREFIX + url.substring(XriProtocols.ZIP_AUTHORITY.length() + 8, i) + 
+            JAR_PREFIX + url.substring(XriAuthorities.ZIP_AUTHORITY.length() + 8, i) + 
 			JAR_SEPARATOR + url.substring(i + XriProtocols.ZIP_SEPARATOR.length())
         );
 	}
@@ -277,11 +325,9 @@ public class ZipURLConnection extends JarURLConnection {
       return delegateConnection.getHeaderField(name);
    }
 
-   /* This is specific to 1.4
-   public Map getHeaderFields() {
+   public Map<String,List<String>> getHeaderFields() {
       return delegateConnection.getHeaderFields();
    }
-   */
    
    public int getHeaderFieldInt(String name, int _default) {
       return delegateConnection.getHeaderFieldInt(name, _default);
@@ -309,6 +355,7 @@ public class ZipURLConnection extends JarURLConnection {
  	  }
    }
 
+   @SuppressWarnings("unchecked")
    public Object getContent(Class[] classes) throws IOException {
    	  try {
           return delegateConnection.getContent(classes);
@@ -405,20 +452,48 @@ public class ZipURLConnection extends JarURLConnection {
       delegateConnection.setRequestProperty(key, value);
    }
 
-   /* This is specific to 1.4
    public void addRequestProperty(String key, String value) {
       delegateConnection.addRequestProperty(key, value);
    }
-   */
    
    public String getRequestProperty(String key) {
       return delegateConnection.getRequestProperty(key);
    }
 
-   /* This is specific to 1.4
-   public Map getRequestProperties() {
+   public Map<String,List<String>> getRequestProperties() {
       return delegateConnection.getRequestProperties();
    }
-   */
+
+   /**
+    * @return
+    * @see java.net.URLConnection#getConnectTimeout()
+    */
+   public int getConnectTimeout() {
+      return this.delegateConnection.getConnectTimeout();
+   }
+    
+   /**
+    * @return
+    * @see java.net.URLConnection#getReadTimeout()
+    */
+   public int getReadTimeout() {
+      return this.delegateConnection.getReadTimeout();
+   }
+    
+   /**
+    * @param timeout
+    * @see java.net.URLConnection#setConnectTimeout(int)
+    */
+   public void setConnectTimeout(int timeout) {
+      this.delegateConnection.setConnectTimeout(timeout);
+   }
+    
+   /**
+    * @param timeout
+    * @see java.net.URLConnection#setReadTimeout(int)
+    */
+   public void setReadTimeout(int timeout) {
+      this.delegateConnection.setReadTimeout(timeout);
+   }
 
 }

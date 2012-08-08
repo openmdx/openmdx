@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FilterProperty.java,v 1.8 2008/01/06 01:43:44 wfro Exp $
+ * Name:        $Id: FilterProperty.java,v 1.9 2008/03/21 20:14:51 hburger Exp $
  * Description: Filter Property
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/06 01:43:44 $
+ * Date:        $Date: 2008/03/21 20:14:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,8 +52,6 @@
 package org.openmdx.compatibility.base.query;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -63,13 +61,9 @@ import javax.resource.ResourceException;
 
 import org.openmdx.base.exception.ExtendedIOException;
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.io.ByteArrayInputStream;
-import org.openmdx.base.io.ByteArrayOutputStream;
 import org.openmdx.base.io.DataInput;
 import org.openmdx.base.io.DataOutput;
 import org.openmdx.base.io.Externalizable;
-import org.openmdx.base.io.NativeDataInputStream;
-import org.openmdx.base.io.NativeDataOutputStream;
 import org.openmdx.base.resource.Records;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
@@ -83,6 +77,7 @@ import org.openmdx.kernel.exception.BasicException;
  * <li>an array of values (its minimal and maximal length is defined by the operator
  * </ol> 
  */
+@SuppressWarnings("unchecked")
 public final class FilterProperty 
   implements Serializable, Externalizable {
 

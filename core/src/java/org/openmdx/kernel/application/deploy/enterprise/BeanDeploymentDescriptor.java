@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: BeanDeploymentDescriptor.java,v 1.15 2008/01/07 09:19:07 hburger Exp $
+ * Name:        $Id: BeanDeploymentDescriptor.java,v 1.16 2008/03/21 18:38:42 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/07 09:19:07 $
+ * Date:        $Date: 2008/03/21 18:38:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,6 +71,7 @@ import org.w3c.dom.Element;
 /**
  * BeanDeploymentDescriptor
  */
+@SuppressWarnings("unchecked")
 public class BeanDeploymentDescriptor 
   extends ComponentDeploymentDescriptor
   implements Bean

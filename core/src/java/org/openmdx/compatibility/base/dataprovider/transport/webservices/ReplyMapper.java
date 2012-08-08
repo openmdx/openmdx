@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReplyMapper.java,v 1.10 2004/07/11 19:15:26 hburger Exp $
+ * Name:        $Id: ReplyMapper.java,v 1.11 2008/03/19 17:10:05 hburger Exp $
  * Description: SoapServerMapper
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/07/11 19:15:26 $
+ * Date:        $Date: 2008/03/19 17:10:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -132,7 +132,8 @@ public class ReplyMapper
   /**
    * Map ServiceException to SOAP
    */    
-  void mapServiceException(
+  @SuppressWarnings("unchecked")
+void mapServiceException(
     ServiceException source
   ) throws ServiceException, IOException {
     writer.write("<ServiceException>");

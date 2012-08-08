@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DurationMarshaller.java,v 1.13 2008/02/08 16:51:25 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: DurationMarshaller.java,v 1.14 2008/04/09 12:34:01 hburger Exp $
  * Description: DurationMarshaller class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/04/09 12:34:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,25 +46,26 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.accessor.jmi.spi;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.Datatypes;
 
 /**
  * DurationMarshaller
  */
 public class DurationMarshaller
-  implements Marshaller {
+   extends Datatypes
+  implements Marshaller, ReluctantUnmarshalling 
+{
 
   //-------------------------------------------------------------------------
   private DurationMarshaller(
@@ -92,7 +93,7 @@ public class DurationMarshaller
     }
     if(forward) {
       try {
-        return this.xmlDatatypeFactory().newDuration((String)source);
+        return getFactory().newDuration((String)source);
       } catch(IllegalArgumentException e) {
         throw new ServiceException(
             e,
@@ -151,26 +152,8 @@ public class DurationMarshaller
   //-------------------------------------------------------------------------
   private final boolean forward;
 
-  static private DurationMarshaller toMarshaller = new DurationMarshaller(true);
-  static private DurationMarshaller fromMarshaller = new DurationMarshaller(false);
-
-  /**
-   * A lazy initialized DatatypeFactory instance
-   */
-  private DatatypeFactory datatypeFactory = null;
-
-  /**
-   * @return a Datatype Factory Instance
-   */
-  protected synchronized DatatypeFactory xmlDatatypeFactory(
-  ){
-    if(datatypeFactory == null) try {
-      datatypeFactory = DatatypeFactory.newInstance();
-    } catch (DatatypeConfigurationException e) {
-      throw new RuntimeServiceException(e);
-    }
-    return datatypeFactory;
-  }
+  static private final DurationMarshaller toMarshaller = new DurationMarshaller(true);
+  static private final DurationMarshaller fromMarshaller = new DurationMarshaller(false);
 
 }
 

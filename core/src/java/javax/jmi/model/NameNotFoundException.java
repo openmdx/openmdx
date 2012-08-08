@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings("serial")
 public class NameNotFoundException extends RefException {
     private final String name;
     public NameNotFoundException(String name) {

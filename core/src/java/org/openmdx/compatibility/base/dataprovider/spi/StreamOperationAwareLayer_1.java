@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StreamOperationAwareLayer_1.java,v 1.6 2007/12/25 14:39:00 wfro Exp $
+ * Name:        $Id: StreamOperationAwareLayer_1.java,v 1.7 2008/03/21 20:17:18 hburger Exp $
  * Description: Stream Operation Aware Layer_1_0 Implementation
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/25 14:39:00 $
+ * Date:        $Date: 2008/03/21 20:17:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,6 +74,7 @@ import org.openmdx.kernel.exception.BasicException;
  * <li>otherOperation
  * </ul>
  */
+@SuppressWarnings("unchecked")
 public abstract class StreamOperationAwareLayer_1 extends Layer_1 {
 
     /**

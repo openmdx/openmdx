@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ListStructure_1.java,v 1.8 2005/02/21 13:10:11 hburger Exp $
+ * Name:        $Id: ListStructure_1.java,v 1.9 2008/03/19 17:06:09 hburger Exp $
  * Description: Structure_1_0 standard implementation
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:10:11 $
+ * Date:        $Date: 2008/03/19 17:06:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * ListStructure_1
  */
+@SuppressWarnings("unchecked")
 class ListStructure_1
   implements Serializable, Structure_1_0 
 {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DateValue.java,v 1.42 2007/11/15 11:01:11 wfro Exp $
+ * Name:        $Id: DateValue.java,v 1.43 2008/04/04 17:01:10 hburger Exp $
  * Description: DateValue 
- * Revision:    $Revision: 1.42 $
+ * Revision:    $Revision: 1.43 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/15 11:01:11 $
+ * Date:        $Date: 2008/04/04 17:01:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -163,7 +163,7 @@ public class DateValue
         boolean useEditStyle,        
         ApplicationContext application
     ) {
-        Map cachedDateFormatters = (Map)DateValue.cachedLocalizedDateFormatters.get();
+        Map<String,SimpleDateFormat> cachedDateFormatters = DateValue.cachedLocalizedDateFormatters.get();
         String key = application.getCurrentLocaleAsString() + ":" + application.getCurrentTimeZone() + ":" + useEditStyle;
         SimpleDateFormat dateFormatter = (SimpleDateFormat)cachedDateFormatters.get(key);
         if(dateFormatter == null) {
@@ -211,8 +211,8 @@ public class DateValue
         ApplicationContext application
     ) {
         String key = application.getCurrentLocaleAsString() + ":" + application.getCurrentTimeZone() + ":" + useEditStyle;
-        Map cachedDateTimeFormatters = (Map)DateValue.cachedLocalizedDateTimeFormatters.get();
-        SimpleDateFormat dateTimeFormatter = (SimpleDateFormat)cachedDateTimeFormatters.get(key);
+        Map<String,SimpleDateFormat> cachedDateTimeFormatters = DateValue.cachedLocalizedDateTimeFormatters.get();
+        SimpleDateFormat dateTimeFormatter = cachedDateTimeFormatters.get(key);
         if(dateTimeFormatter == null) {
             dateTimeFormatter = (SimpleDateFormat)SimpleDateFormat.getDateTimeInstance(
                 useEditStyle ? java.text.DateFormat.SHORT : application.getPortalExtension().getDateStyle(qualifiedFeatureName, application),
@@ -450,14 +450,14 @@ public class DateValue
     public static final String DATE_FORMAT = "d";
     public static final String DATETIME_FORMAT = "g";
 
-    private static ThreadLocal cachedLocalizedDateFormatters = new ThreadLocal() {
-        protected synchronized Object initialValue() {
-            return new HashMap();
+    private static ThreadLocal<Map<String,SimpleDateFormat>> cachedLocalizedDateFormatters = new ThreadLocal<Map<String,SimpleDateFormat>>() {
+        protected synchronized Map<String,SimpleDateFormat> initialValue() {
+            return new HashMap<String,SimpleDateFormat>();
         } 
     };
-    private static ThreadLocal cachedLocalizedDateTimeFormatters = new ThreadLocal() {
-        protected synchronized Object initialValue() {
-            return new HashMap();
+    private static ThreadLocal<Map<String,SimpleDateFormat>> cachedLocalizedDateTimeFormatters = new ThreadLocal<Map<String,SimpleDateFormat>>() {
+        protected synchronized Map<String,SimpleDateFormat> initialValue() {
+            return new HashMap<String,SimpleDateFormat>();
         }
     };
     private Date defaultValue = null;

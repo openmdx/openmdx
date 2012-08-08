@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI2Parser.java,v 1.18 2007/10/10 16:06:11 hburger Exp $
+ * Name:        $Id: XMI2Parser.java,v 1.19 2008/03/21 18:40:12 hburger Exp $
  * Description: XMI2 Parser
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:11 $
+ * Date:        $Date: 2008/03/21 18:40:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -88,8 +88,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.XMLReader;
 
-import org.openmdx.kernel.text.StringBuilders;
 
+@SuppressWarnings("unchecked")
 public class XMI2Parser
     implements XMIParser {
 
@@ -797,10 +797,10 @@ public class XMI2Parser
     //---------------------------------------------------------------------------
     private String getScopeAsQualifiedName(
     ) {
-        CharSequence sb = StringBuilders.newStringBuilder();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < this.scope.size(); i++) {
-            if(i > 0) StringBuilders.asStringBuilder(sb).append("::");
-            StringBuilders.asStringBuilder(sb).append(this.scope.get(i));
+            if(i > 0) sb.append("::");
+            sb.append(this.scope.get(i));
         }
         return sb.toString();
     }

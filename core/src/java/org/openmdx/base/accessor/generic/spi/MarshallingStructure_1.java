@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MarshallingStructure_1.java,v 1.7 2008/02/18 13:34:06 hburger Exp $
+ * Name:        $Id: MarshallingStructure_1.java,v 1.8 2008/03/19 17:13:11 hburger Exp $
  * Description: SPICE Basic Accessor Object interface
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 13:34:06 $
+ * Date:        $Date: 2008/03/19 17:13:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,6 +69,7 @@ import org.openmdx.compatibility.base.collection.SparseArray;
 /**
  * The Structure_1_0 interface.
  */
+@SuppressWarnings("unchecked")
 public class MarshallingStructure_1 
     extends DelegatingStructure_1
     implements Serializable

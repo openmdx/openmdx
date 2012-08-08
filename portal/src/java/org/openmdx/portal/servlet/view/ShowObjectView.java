@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectView.java,v 1.55 2007/04/30 17:03:54 wfro Exp $
+ * Name:        $Id: ShowObjectView.java,v 1.59 2008/04/04 17:01:13 hburger Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.55 $
+ * Revision:    $Revision: 1.59 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/04/30 17:03:54 $
+ * Date:        $Date: 2008/04/04 17:01:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,6 +69,7 @@ import java.util.TreeMap;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -86,9 +87,9 @@ public class ShowObjectView
     public ShowObjectView(
         String id, 
         String containerElementId,
-        String objectRefMofId, 
+        Path objectIdentity, 
         ApplicationContext application, 
-        Map historyActions, 
+        Map<Path,Action> historyActions, 
         String lookupType,
         Map restrictToElements, 
         ControlFactory controlFactory
@@ -96,8 +97,8 @@ public class ShowObjectView
         super(
             id, 
             containerElementId,
-            (RefObject_1_0)application.refreshDataPkg().refObject(
-                objectRefMofId
+            (RefObject_1_0)application.getPmData().getObjectById(
+                objectIdentity
             ), 
             application, 
             historyActions,
@@ -179,7 +180,7 @@ public class ShowObjectView
            );
         }
         else if (application.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
-            List parameters = new ArrayList();
+            List<String> parameters = new ArrayList<String>();
             int i = 0;
             while (e0.getParameter("param" + i) != null) {
                 parameters.add(e0.getParameter("param" + i));
@@ -205,6 +206,7 @@ public class ShowObjectView
     }
 
     // -------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public Map createHistoryAppendCurrent(
     ) {
         Map historyActions = MapUtils.orderedMap(new HashMap());
@@ -218,10 +220,10 @@ public class ShowObjectView
         }
         // Remove current and add it again. This moves current to the end
         historyActions.remove(
-            this.objectReference.getObject().refMofId()
+            this.objectReference.getObject().refGetPath()
         );
         historyActions.put(
-            this.objectReference.getObject().refMofId(), 
+            this.objectReference.getObject().refGetPath(), 
             new Action(
                 Action.EVENT_SELECT_OBJECT,
                 new Action.Parameter[] { 
@@ -248,7 +250,7 @@ public class ShowObjectView
           );
       }
       else if(this.application.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
-          List parameters = new ArrayList();
+          List<String> parameters = new ArrayList<String>();
           int i = 0;
           while(e0.getParameter("param" + i) != null) {
               parameters.add(e0.getParameter("param" + i));
@@ -256,7 +258,7 @@ public class ShowObjectView
           }
           this.application.addErrorMessage(
               application.getTexts().getUserDefinedText(e0.getExceptionCode() + ""),
-              (String[])parameters.toArray(new String[parameters.size()])
+              parameters.toArray(new String[parameters.size()])
           );             
       }
       else {
@@ -271,7 +273,7 @@ public class ShowObjectView
     public Action[] getSelectLocaleAction(
     ) {
         Texts_1_0[] texts = this.application.getTextsFactory().getTexts();
-        Map actions = new TreeMap();
+        Map<String,Action> actions = new TreeMap<String,Action>();
         for (int i = 0; i < texts.length; i++) {
             String locale = texts[i].getLocale();
             if ((locale != null) && !actions.keySet().contains(locale)) {
@@ -288,7 +290,7 @@ public class ShowObjectView
                 );
             }
         }
-        return (Action[]) (actions.values().toArray(new Action[actions.size()]));
+        return actions.values().toArray(new Action[actions.size()]);
     }
 
     // -------------------------------------------------------------------------

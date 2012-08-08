@@ -30,6 +30,7 @@ import java.util.Vector;
 *
 * @author =chetan
 */
+@SuppressWarnings("unchecked")
 public class XRISegment
     extends Parsable
 {

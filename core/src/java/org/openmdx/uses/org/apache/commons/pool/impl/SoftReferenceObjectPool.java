@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/SoftReferenceObjectPool.java,v $
- * $Revision: 1.3 $
- * $Date: 2004/06/29 10:33:53 $
+ * $Revision: 1.4 $
+ * $Date: 2008/03/21 18:42:15 $
  *
  * ====================================================================
  *
@@ -76,8 +76,9 @@ import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
  * {@link ObjectPool}.
  *
  * @author Rodney Waldhoff
- * @version $Revision: 1.3 $ $Date: 2004/06/29 10:33:53 $
+ * @version $Revision: 1.4 $ $Date: 2008/03/21 18:42:15 $
  */
+@SuppressWarnings("unchecked")
 public class SoftReferenceObjectPool extends BaseObjectPool implements ObjectPool {
     public SoftReferenceObjectPool() {
         _pool = new ArrayList();

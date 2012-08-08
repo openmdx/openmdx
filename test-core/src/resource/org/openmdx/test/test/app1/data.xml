@@ -4,6 +4,7 @@
 	<_object/>
 	<_content>
 		<provider>
+<!-- 	
 			<org.openmdx.base.Provider qualifiedName="JmiNone" _operation="null">
 				<_object/>
 				<_content>
@@ -16,7 +17,6 @@
 							<_object/>
 							<_content>
 								<person>
-									<!-- create request -->
 									<org.openmdx.test.app1.Person id="10000" _operation="set">
 										<_object>
 											<birthdate>2001-01-01</birthdate>
@@ -28,7 +28,6 @@
 										</_object>
 										<_content/>
 									</org.openmdx.test.app1.Person>
-									<!-- set request -->
 									<org.openmdx.test.app1.Person id="10000" _operation="update">
 										<_object>
 											<birthdate>2001-01-01</birthdate>
@@ -46,6 +45,7 @@
 					</segment>
 				</_content>
 			</org.openmdx.base.Provider>
+-->			
 			<org.openmdx.base.Provider qualifiedName="JmiJdbc" _operation="null">
 				<_object/>
 				<_content>
@@ -88,6 +88,7 @@
 					</segment>
 				</_content>
 			</org.openmdx.base.Provider>
+<!-- 			
 			<org.openmdx.base.Provider qualifiedName="Generic" _operation="null">
 				<_object/>
 				<_content>
@@ -117,6 +118,7 @@
 					</segment>
 				</_content>
 			</org.openmdx.base.Provider>
+-->			
 		</provider>
 	</_content>
 </org.openmdx.base.Authority>

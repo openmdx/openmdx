@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestRadiusClient.java,v 1.1 2004/10/14 19:28:24 hburger Exp $
+ * Name:        $Id: TestRadiusClient.java,v 1.2 2008/04/04 17:55:33 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/10/14 19:28:24 $
+ * Date:        $Date: 2008/04/04 17:55:33 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG
@@ -57,8 +57,6 @@ package org.openmdx.test.uses.net.sourceforge.jradiusclient;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Iterator;
-
 
 import org.openmdx.uses.gnu.getopt.Getopt;
 import org.openmdx.uses.gnu.getopt.LongOpt;
@@ -74,7 +72,7 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.packets.PapAccessRequest;
 import org.openmdx.uses.net.sourceforge.jradiusclient.util.ChapUtil;
 /**
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TestRadiusClient{
     public static String getUsage(){
@@ -329,12 +327,9 @@ public class TestRadiusClient{
         printAttributes(accountResponse);
     }
     private static void printAttributes(RadiusPacket rp){
-        Iterator attributes = rp.getAttributes().iterator();
-        RadiusAttribute tempRa;
         System.out.println("Response Packet Attributes");
         System.out.println("\tType\tValue");
-        while(attributes.hasNext()){
-            tempRa = (RadiusAttribute)attributes.next();
+        for(RadiusAttribute tempRa : rp.getAttributes()) {
             System.out.println("\t" + tempRa.getType() + "\t" + new String(tempRa.getValue()));
         }
     }

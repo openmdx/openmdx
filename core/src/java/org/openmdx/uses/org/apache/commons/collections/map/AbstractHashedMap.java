@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -52,11 +53,13 @@ import org.openmdx.uses.org.apache.commons.collections.iterators.EmptyMapIterato
  * This extends clause will be removed in v4.0.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.3 $ $Date: 2007/10/10 16:06:13 $
+ * @version $Revision: 1.6 $ $Date: 2008/06/28 00:21:20 $
  *
  * @author java util HashMap
  * @author Stephen Colebourne
+ * @author Christian Siefkes
  */
+@SuppressWarnings("unchecked")
 public class AbstractHashedMap extends AbstractMap implements IterableMap {
     
     protected static final String NO_NEXT_ENTRY = "No next() entry in the iteration";
@@ -136,8 +139,9 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
      * @throws IllegalArgumentException if the initial capacity is less than one
      * @throws IllegalArgumentException if the load factor is less than or equal to zero
      */
-    protected AbstractHashedMap(int initialCapacity, float loadFactor) {
+    protected AbstractHashedMap(int _initialCapacity, float loadFactor) {
         super();
+        int initialCapacity = _initialCapacity;
         if (initialCapacity < 1) {
             throw new IllegalArgumentException("Initial capacity must be greater than 0");
         }
@@ -145,8 +149,8 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
             throw new IllegalArgumentException("Load factor must be greater than 0");
         }
         this.loadFactor = loadFactor;
-        this.threshold = calculateThreshold(initialCapacity, loadFactor);
         initialCapacity = calculateNewCapacity(initialCapacity);
+        this.threshold = calculateThreshold(initialCapacity, loadFactor);
         this.data = new HashEntry[initialCapacity];
         init();
     }
@@ -166,7 +170,6 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
      * Initialise subclasses during construction, cloning or deserialization.
      */
     protected void init() {
-        //
     }
 
     //-----------------------------------------------------------------------
@@ -176,8 +179,8 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
      * @param key  the key
      * @return the mapped value, null if no match
      */
-    public Object get(Object key) {
-        key = convertKey(key);
+    public Object get(Object _key) {
+        Object key = convertKey(_key);
         int hashCode = hash(key);
         HashEntry entry = data[hashIndex(hashCode, data.length)]; // no local for hash index
         while (entry != null) {
@@ -214,8 +217,8 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
      * @param key  the key to search for
      * @return true if the map contains the key
      */
-    public boolean containsKey(Object key) {
-        key = convertKey(key);
+    public boolean containsKey(Object _key) {
+        Object key = convertKey(_key);
         int hashCode = hash(key);
         HashEntry entry = data[hashIndex(hashCode, data.length)]; // no local for hash index
         while (entry != null) {
@@ -266,8 +269,8 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
      * @param value  the value to add
      * @return the value previously mapped to this key, null if none
      */
-    public Object put(Object key, Object value) {
-        key = convertKey(key);
+    public Object put(Object _key, Object value) {
+        Object key = convertKey(_key);
         int hashCode = hash(key);
         int index = hashIndex(hashCode, data.length);
         HashEntry entry = data[index];
@@ -312,8 +315,8 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
      * @param key  the mapping to remove
      * @return the value mapped to the removed key, null if key not in map
      */
-    public Object remove(Object key) {
-        key = convertKey(key);
+    public Object remove(Object _key) {
+        Object key = convertKey(_key);
         int hashCode = hash(key);
         int index = hashIndex(hashCode, data.length);
         HashEntry entry = data[index];
@@ -427,8 +430,8 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
      * @param key  the key
      * @return the entry, null if no match
      */
-    protected HashEntry getEntry(Object key) {
-        key = convertKey(key);
+    protected HashEntry getEntry(Object _key) {
+        Object key = convertKey(_key);
         int hashCode = hash(key);
         HashEntry entry = data[hashIndex(hashCode, data.length)]; // no local for hash index
         while (entry != null) {
@@ -1205,13 +1208,13 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
         int capacity = in.readInt();
         int size = in.readInt();
         init();
+        threshold = calculateThreshold(capacity, loadFactor);
         data = new HashEntry[capacity];
         for (int i = 0; i < size; i++) {
             Object key = in.readObject();
             Object value = in.readObject();
             put(key, value);
         }
-        threshold = calculateThreshold(data.length, loadFactor);
     }
     
     //-----------------------------------------------------------------------

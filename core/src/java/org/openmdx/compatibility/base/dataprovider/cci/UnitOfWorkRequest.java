@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UnitOfWorkRequest.java,v 1.12 2008/01/25 17:18:46 wfro Exp $
+ * Name:        $Id: UnitOfWorkRequest.java,v 1.13 2008/03/21 18:45:25 hburger Exp $
  * Description: UnitOfWorkRequest class
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 17:18:46 $
+ * Date:        $Date: 2008/03/21 18:45:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,7 @@ import javax.resource.ResourceException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
 
-
+@SuppressWarnings("unchecked")
 public class UnitOfWorkRequest 
     extends DataproviderContext
 {

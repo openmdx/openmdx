@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObjectConfiguration.java,v 1.11 2007/07/27 16:51:32 wfro Exp $
+ * Name:        $Id: DbObjectConfiguration.java,v 1.12 2008/03/21 18:47:36 hburger Exp $
  * Description: TypeConfigurationEntry class
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/07/27 16:51:32 $
+ * Date:        $Date: 2008/03/21 18:47:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,6 +71,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  * 'pathNormalizeLevel' is a write-only attribute and defines at what 
  * level attribute values of type path should be normalized.
  */
+@SuppressWarnings("unchecked")
 public class DbObjectConfiguration {
     
   //-------------------------------------------------------------------------

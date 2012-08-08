@@ -20,8 +20,9 @@ package org.openmdx.compatibility.base.dataprovider.layer.persistence.jdo;
 /**
  * Base exception thrown by JPOX.
  *
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
+@SuppressWarnings("serial")
 public class JPOXException extends RuntimeException
 {
     /** Array of nested Throwables (optional) */

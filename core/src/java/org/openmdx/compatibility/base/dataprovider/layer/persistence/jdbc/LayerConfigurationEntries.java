@@ -2,8 +2,8 @@
  * ==================================================================== Project:
  * openmdx, http://www.openmdx.org/ Name: $Id: LayerConfigurationEntries.java,v
  * 1.37 2006/11/17 16:55:57 hburger Exp $ Description: Generated constants for
- * LayerConfigurationEntries Revision: $Revision: 1.46 $ Owner: OMEX AG,
- * Switzerland, http://www.omex.ch Date: $Date: 2007/10/10 16:06:00 $
+ * LayerConfigurationEntries Revision: $Revision: 1.47 $ Owner: OMEX AG,
+ * Switzerland, http://www.omex.ch Date: $Date: 2008/05/15 23:33:23 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -257,12 +257,20 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
   
   /**
      * The format 'slicedWithIdAsKey' contains object slices. The schema is:
-     * object_id, p$$parent, <user defined attributes>. Object references are
+     * object_id, p$$parent, <user defined attributes>. The primary key is
      * mapped to a single column. Object collections are accessed with the
-     * clause object_id LIKE <reference>/%.
+     * clause object_id LIKE 'reference'/%.
      */
   static public final String DB_OBJECT_FORMAT_SLICED_WITH_ID_AS_KEY = "slicedWithIdAsKey";
   
+  /**
+    * The format 'slicedWithParentAndIdAsKey' contains object slices. The schema is:
+    * object_id, p$$parent, <user defined attributes>. The primary key is mapped
+    * to the columns p$$parent and object_id. Object collections are accessed with the
+    * clause p$$parent = 'parent path'.
+    */
+  static public final String DB_OBJECT_FORMAT_SLICED_WITH_PARENT_AND_ID_AS_KEY = "slicedWithParentAndIdAsKey";
+
   /**
      * The OBJECT_ID_ATTRIBUTES_SUFFIX defines the suffix which is added to
      * attributes which are object id's. Default value is 'objectId'. Typical

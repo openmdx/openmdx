@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractConnectionManager.java,v 1.8 2006/08/07 05:51:15 hburger Exp $
+ * Name:        $Id: AbstractConnectionManager.java,v 1.10 2008/06/05 17:39:59 hburger Exp $
  * Description: Abstract Connection Manager
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/07 05:51:15 $
+ * Date:        $Date: 2008/06/05 17:39:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import org.openmdx.compatibility.kernel.application.cci.Classes;
 /**
  * Abstract Connection Manager
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractConnectionManager
     implements ConnectionManager 
 {
@@ -194,7 +195,7 @@ public abstract class AbstractConnectionManager
     /**
      * Establish and return the subject
      * 
-     * @return the subject with its private credetnial set 
+     * @return the subject with its private credentials set 
      */
     protected Subject getSubject(
     ){

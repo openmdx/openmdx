@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SharedConfigurationEntries.java,v 1.14 2007/10/10 16:05:58 hburger Exp $
+ * Name:        $Id: SharedConfigurationEntries.java,v 1.17 2008/07/01 00:26:18 hburger Exp $
  * Description: Generated constants for SharedConfigurationEntries
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:58 $
+ * Date:        $Date: 2008/07/01 00:26:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,10 +57,6 @@ package org.openmdx.compatibility.base.dataprovider.cci;
  * constants identifying the dataprovider configuration entries
  * shared by all layers.
  */
-
-
-
-
 public class SharedConfigurationEntries {
 
   
@@ -116,6 +112,13 @@ public class SharedConfigurationEntries {
 
 
 
+  /**
+   * The PERSISTENCE_MANAGER_BINDING configuration entry, defaults to "cci2".
+   */
+  static public final String PERSISTENCE_MANAGER_BINDING = "persistenceManagerBinding";
+
+  
+  
   /**
    * The DATAPROVIDER_CONNECTION configuration entry  
    * <p>

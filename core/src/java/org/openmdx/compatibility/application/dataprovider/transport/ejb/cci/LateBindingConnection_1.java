@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LateBindingConnection_1.java,v 1.14 2008/01/21 17:05:46 hburger Exp $
- * Description: Dataprovider_1Bean class
- * Revision:    $Revision: 1.14 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: LateBindingConnection_1.java,v 1.20 2008/07/01 21:54:55 hburger Exp $
+ * Description: Late Binding Connection
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/21 17:05:46 $
+ * Date:        $Date: 2008/07/01 21:54:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,20 +46,24 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.application.dataprovider.transport.ejb.cci;
 
 import java.io.Serializable;
 import java.util.Hashtable;
 
+import javax.jdo.PersistenceManager;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.resource.ResourceException;
+import javax.security.auth.Subject;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.persistence.spi.ManagerFactory_2_0;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
@@ -72,7 +76,7 @@ import org.openmdx.kernel.exception.BasicException;
  * Late Binding Connection
  */
 public class LateBindingConnection_1 
-    implements Dataprovider_1_1Connection, Serializable 
+    implements Dataprovider_1_1Connection, ManagerFactory_2_0, Serializable 
 {
 
     /**
@@ -128,7 +132,7 @@ public class LateBindingConnection_1
      * 
      * @exception   RuntimeServiceException COMMUNICATION_FAILURE
      */
-    private Dataprovider_1_0 getDelegate(
+    protected Dataprovider_1_0 getDelegate(
     ){
         if(this.dataprovider == null) try {
             this.dataprovider = createConnection();
@@ -181,14 +185,31 @@ public class LateBindingConnection_1
     //------------------------------------------------------------------------
 
     /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.EntityManagerFactory_2_0#createManager(javax.security.auth.Subject)
      */
-    public void remove() throws ServiceException {
-        //
-        // If late binding is required, then the garbage collector should
-        // cleann up in return.
-        //
-        close();
+    public PersistenceManager createManager(
+        Subject subject
+    ) throws ResourceException {
+        Object delegate = getDelegate();
+        return delegate instanceof ManagerFactory_2_0 ?
+            ((ManagerFactory_2_0)delegate).createManager(subject) :
+            null;
     }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.EntityManagerFactory_2_0#createManager()
+     */
+    public PersistenceManager createManager(
+    ) throws ResourceException {
+        Object delegate = getDelegate();
+        return delegate instanceof ManagerFactory_2_0 ?
+            ((ManagerFactory_2_0)delegate).createManager() :
+            null;
+    }
+    
+    //------------------------------------------------------------------------
+    // Implements Dataprovider_1_1Connection
+    //------------------------------------------------------------------------
 
     /**
      * Close the connection.
@@ -198,6 +219,21 @@ public class LateBindingConnection_1
     public void close(
     ){
         this.dataprovider = null;
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Implements Dataprovider_1_0Connection
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     */
+    public void remove() throws ServiceException {
+        //
+        // If late binding is required, then the garbage collector should
+        // clean up in return.
+        //
+        close();
     }
 
     /* (non-Javadoc)

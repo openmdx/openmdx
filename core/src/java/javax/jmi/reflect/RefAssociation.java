@@ -2,6 +2,7 @@ package javax.jmi.reflect;
 
 import java.util.Collection;
 
+@SuppressWarnings("unchecked")
 public interface RefAssociation extends RefBaseObject {
     public Collection refAllLinks();
     public boolean refLinkExists(RefObject firstEnd, RefObject secondEnd);

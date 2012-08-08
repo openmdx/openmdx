@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JMIPackageForwardCompatibilityMapper.java,v 1.8 2008/02/18 09:18:21 hburger Exp $
+ * Name:        $Id: JMIPackageForwardCompatibilityMapper.java,v 1.10 2008/06/28 00:21:36 hburger Exp $
  * Description: JMIPackageTemplate 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 09:18:21 $
+ * Date:        $Date: 2008/06/28 00:21:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,11 +57,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
+import org.openmdx.model1.mapping.AbstractNames;
 import org.openmdx.model1.mapping.ClassDef;
 import org.openmdx.model1.mapping.ClassifierDef;
 import org.openmdx.model1.mapping.MapperUtils;
-import org.openmdx.model1.mapping.Names;
 import org.openmdx.model1.mapping.StructDef;
 import org.openmdx.model1.mapping.StructuralFeatureDef;
 
@@ -71,7 +71,7 @@ public class JMIPackageForwardCompatibilityMapper
     //-----------------------------------------------------------------------
     public JMIPackageForwardCompatibilityMapper(
         Writer writer,
-        Model_1_0 model,
+        Model_1_3 model,
         String format, 
         String packageSuffix
     ) {
@@ -87,7 +87,7 @@ public class JMIPackageForwardCompatibilityMapper
      * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
      */
     protected String mapperId() {
-        return "$Id: JMIPackageForwardCompatibilityMapper.java,v 1.8 2008/02/18 09:18:21 hburger Exp $";
+        return "$Id: JMIPackageForwardCompatibilityMapper.java,v 1.10 2008/06/28 00:21:36 hburger Exp $";
     }
 
     //-----------------------------------------------------------------------
@@ -133,7 +133,7 @@ public class JMIPackageForwardCompatibilityMapper
         this.trace("Package/IntfBegin");
         this.fileHeader();
         List<String> nameComponents = MapperUtils.getNameComponents(MapperUtils.getPackageName(qualifiedPackageName));
-        StringBuffer buffer = Names.openmdx2PackageName(
+        StringBuffer buffer = AbstractNames.openmdx2PackageName(
             new StringBuffer(),
             MapperUtils.getElementName(qualifiedPackageName)
         );

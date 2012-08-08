@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CollectionMarshallerAdapter.java,v 1.11 2008/02/18 14:11:34 hburger Exp $
+ * Name:        $Id: CollectionMarshallerAdapter.java,v 1.12 2008/03/06 19:03:23 hburger Exp $
  * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:34 $
+ * Date:        $Date: 2008/03/06 19:03:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
 * This class signals marshal exceptions.
 */
 public class CollectionMarshallerAdapter
-    implements org.openmdx.base.object.spi.Marshaller, Serializable
+    implements org.openmdx.base.persistence.spi.Marshaller, Serializable
 {
 
     /**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Notification_1.java,v 1.3 2004/04/02 16:59:01 wfro Exp $
+ * Name:        $Id: Notification_1.java,v 1.5 2008/06/28 00:21:45 hburger Exp $
  * Description: Notification_1 class
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:01 $
+ * Date:        $Date: 2008/06/28 00:21:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@ import java.util.ListIterator;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
+import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.jms.TopicConnectionFactory;
@@ -77,6 +78,7 @@ import org.openmdx.compatibility.base.naming.Path;
 /**
  * A notifying interception layer plugin
  */
+@SuppressWarnings("unchecked")
 public class Notification_1
     extends Standard_1
 {
@@ -98,7 +100,7 @@ public class Notification_1
         this.connection = factory.createTopicConnection();
         this.session = this.connection.createTopicSession(
             false, 
-            TopicSession.AUTO_ACKNOWLEDGE // WLTopicSession.NO_ACKNOWLEDGE
+            Session.AUTO_ACKNOWLEDGE // WLTopicSession.NO_ACKNOWLEDGE
         );
         this.topic = (Topic) context.lookup(
             (String)configuration.values(

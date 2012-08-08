@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: BooleanTypePredicate.java,v 1.1 2006/10/19 17:07:11 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: BooleanTypePredicate.java,v 1.3 2008/05/07 11:16:50 hburger Exp $
  * Description: Boolean Predicate
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/19 17:07:11 $
+ * Date:        $Date: 2008/05/07 11:16:50 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,7 +48,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.w3c.cci2;
 
 /**
@@ -77,5 +75,16 @@ public interface BooleanTypePredicate {
     void equalTo(
         boolean operand
     );
+
+    /**
+     * This method is deprecated to avoid its erroneous use as in lieu of
+     * equalTo().
+     * 
+     * @deprecated to avoid erroneous use 
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     * @see BooleanTypePredicate#equalTo(Object);
+     */
+    boolean equals(Object obj);
 
 }

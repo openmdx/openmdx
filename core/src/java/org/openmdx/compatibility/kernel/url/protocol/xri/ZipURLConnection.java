@@ -18,6 +18,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.openmdx.kernel.url.protocol.XriAuthorities;
 import org.openmdx.kernel.url.protocol.XriProtocols;
 
 /**
@@ -75,7 +76,7 @@ public class ZipURLConnection extends JarURLConnection {
             "No separator ('" + XriProtocols.ZIP_SEPARATOR + "' found in url " + path
         );
         return new URL(
-            JAR_PREFIX + path.substring(XriProtocols.ZIP_AUTHORITY.length() + 2, i) + 
+            JAR_PREFIX + path.substring(XriAuthorities.ZIP_AUTHORITY.length() + 2, i) + 
 			JAR_SEPARATOR + path.substring(i + XriProtocols.ZIP_SEPARATOR.length())
         );
 	}
@@ -309,7 +310,8 @@ public class ZipURLConnection extends JarURLConnection {
  	  }
    }
 
-   public Object getContent(Class[] classes) throws IOException {
+   @SuppressWarnings("unchecked")
+public Object getContent(Class[] classes) throws IOException {
    	  try {
           return delegateConnection.getContent(classes);
  	  } catch (IOException ioException) {

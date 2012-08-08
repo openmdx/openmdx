@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StandardDbObject.java,v 1.43 2007/10/10 16:06:00 hburger Exp $
+ * Name:        $Id: StandardDbObject.java,v 1.45 2008/06/11 17:05:32 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.45 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:00 $
+ * Date:        $Date: 2008/06/11 17:05:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
+@SuppressWarnings("unchecked")
 public abstract class StandardDbObject 
   extends DbObject {
   
@@ -181,7 +182,7 @@ public abstract class StandardDbObject
   }
 
   //---------------------------------------------------------------------------  
-  public List getReferenceValues(
+  public List<Object> getReferenceValues(
   ) {
     return this.referenceValues;
   }
@@ -193,7 +194,7 @@ public abstract class StandardDbObject
   }
 
   //---------------------------------------------------------------------------
-  public List getObjectIdValues(
+  public List<String> getObjectIdValues(
   ) throws ServiceException {
     return this.objectIdValues;
   }

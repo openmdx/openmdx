@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.5-properties.xml,v 1.14 2008/01/21 17:42:05 hburger Exp $
+= Name:        $Id: jre-1.5-properties.xml,v 1.15 2008/03/12 15:59:12 hburger Exp $
 = Description: openMDX/Core jre-1.5 Platform Properties
-= Revision:    $Revision: 1.14 $
-= Date:        $Date: 2008/01/21 17:42:05 $
+= Revision:    $Revision: 1.15 $
+= Date:        $Date: 2008/03/12 15:59:12 $
 = Copyright:   (c) 2003-2004 OMEX AG
 =======================================================================
 =
-= This software is published under the BSD license
-= as listed below.
+= This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2005-2007, OMEX AG, Switzerland
+= Copyright (c) 2005-2008, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -46,10 +45,5 @@
 = 
 -->
 <project name="openmdx-core-jre-1.5-properties">
-	<property name="project.build.exclude.1" value="org/openmdx/uses/java/lang/**"/>
-	<property name="project.build.exclude.2" value="org/openmdx/uses/java/util/**"/>
-	<property name="project.build.exclude.3" value="org/openmdx/uses/javax/**"/>
-	<property name="project.build.exclude.4" value="org/openmdx/uses/org/apache/xerces/internal/**"/>
 	<property name="project.build.exclude.5" value="org/openmdx/compatibility/base/dataprovider/layer/persistence/jdo/**"/>
-	<property name="project.build.exclude.6" value="com/**"/>
 </project>

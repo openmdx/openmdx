@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JndiServiceLocator_1.java,v 1.6 2007/12/13 18:19:20 hburger Exp $
+ * Name:        $Id: JndiServiceLocator_1.java,v 1.7 2008/03/21 18:45:21 hburger Exp $
  * Description: JndiServiceLocator_1 class 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:19:20 $
+ * Date:        $Date: 2008/03/21 18:45:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -208,6 +208,7 @@ public class JndiServiceLocator_1
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.kernel.application.cci.ServiceLocator_1_0#listBindings(java.lang.String)
      */
+    @SuppressWarnings("unchecked")
     public Enumeration listBindings(
         String registrationId
     ) throws ServiceException {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InitialContainerContext.java,v 1.4 2005/07/22 12:25:59 hburger Exp $
+ * Name:        $Id: InitialContainerContext.java,v 1.5 2008/03/21 18:48:01 hburger Exp $
  * Description: InitialContainerContext class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/07/22 12:25:59 $
+ * Date:        $Date: 2008/03/21 18:48:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,7 @@ import javax.naming.NamingException;
 /**
  * @deprecated in favour of org.openmdx.kernel.naming.LocalContext 
  */
+@SuppressWarnings("unchecked")
 class InitialContainerContext extends HashtableContext {
 
 	/**

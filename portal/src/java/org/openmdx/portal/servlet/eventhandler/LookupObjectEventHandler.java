@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LookupObjectEventHandler.java,v 1.7 2007/12/12 17:20:07 wfro Exp $
- * Description: ShowObjectView 
- * Revision:    $Revision: 1.7 $
+ * Name:        $Id: LookupObjectEventHandler.java,v 1.13 2008/05/31 23:40:07 wfro Exp $
+ * Description: LookupObjectEventHandler 
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/12 17:20:07 $
+ * Date:        $Date: 2008/05/31 23:40:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,6 +61,7 @@ package org.openmdx.portal.servlet.eventhandler;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.jdo.PersistenceManager;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -73,6 +74,7 @@ import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.PaintScope;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.ObjectView;
@@ -83,7 +85,7 @@ import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
 public class LookupObjectEventHandler {
 
     //-----------------------------------------------------------------------
-    public static ObjectView handleEvent(
+    public static HandleEventResult handleEvent(
         int event,
         ObjectView view,
         HttpServletRequest request,
@@ -94,6 +96,7 @@ public class LookupObjectEventHandler {
     ) throws IOException, ServletException {
 
         ObjectView nextView = null;
+        PaintScope nextPaintMode = PaintScope.FULL;
         if(view instanceof ShowObjectView) {
             ShowObjectView currentView = (ShowObjectView)view;
             
@@ -138,14 +141,14 @@ public class LookupObjectEventHandler {
         else if(view instanceof EditObjectView) {
 
             EditObjectView currentView = (EditObjectView)view;
+            PersistenceManager pm = currentView.getPersistenceManager();
             
             switch(event) {
               case Action.EVENT_FIND_OBJECT:
                 ModelElement_1_0 lookupType = null;
                 try {
                   String referenceName = Action.getParameter(parameter, Action.PARAMETER_REFERENCE);
-                  RefPackage_1_0 rootPkg = (RefPackage_1_0)currentView.getRefObject().refOutermostPackage();
-                  Model_1_0 model = rootPkg.refModel();
+                  Model_1_0 model = application.getModel();
                   // Try to get lookup type from model
                   try {
                       ModelElement_1_0 reference = model.getElement(referenceName);
@@ -164,9 +167,9 @@ public class LookupObjectEventHandler {
                   
                   // start lookup navigation either on parent or object itself
                   RefObject_1_0 startWith = currentView.getParentObject() == null
-                      ? currentView.getEditObjectRefMofId() == null 
+                      ? currentView.getEditObjectIdentity() == null 
                           ? currentView.getRefObject() 
-                          : (RefObject_1_0)rootPkg.refObject(currentView.getEditObjectRefMofId())
+                          : (RefObject_1_0)pm.getObjectById(currentView.getEditObjectIdentity())
                       : currentView.getParentObject();
                   Object[] parameterValues = (Object[]) parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
                   String filterValues = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);                  
@@ -189,7 +192,10 @@ public class LookupObjectEventHandler {
                 break;
             }            
         }
-        return nextView;
+        return new HandleEventResult(
+            nextView,
+            nextPaintMode
+        );
     }
 
     //-------------------------------------------------------------------------

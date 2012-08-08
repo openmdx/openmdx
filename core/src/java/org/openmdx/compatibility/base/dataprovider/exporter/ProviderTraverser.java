@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ProviderTraverser.java,v 1.38 2007/12/28 19:37:06 wfro Exp $
+ * Name:        $Id: ProviderTraverser.java,v 1.44 2008/06/20 17:02:47 wfro Exp $
  * Description: Traversing a provider
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/28 19:37:06 $
+ * Date:        $Date: 2008/06/20 17:02:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,6 @@ package org.openmdx.compatibility.base.dataprovider.exporter;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +70,6 @@ import org.openmdx.compatibility.base.dataprovider.cci.Directions;
 import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.layer.model.RoleAttributes;
 import org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.naming.PathComponent;
@@ -81,7 +79,6 @@ import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.BasicException.Parameter;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.code.AggregationKind;
@@ -91,109 +88,10 @@ import org.openmdx.model1.code.AggregationKind;
  * correct sequence. The sequence is important for correct treatment of 
  * states and roles.
  */
+@SuppressWarnings("unchecked")
 public class ProviderTraverser 
    implements Traverser {
 
-    //-----------------------------------------------------------------------
-    /** 
-     * Helper class for holding composite references declared within a role 
-     * and the type of the role. 
-     * <p>
-     * roleCompositePath is the relative path within the core object of the 
-     * role. It consists of a string array. 
-     * <p>
-     * roleType is the type of the role having the composite reference. 
-     */ 
-    private static class RoleCompositeReferences {
-        
-        public RoleCompositeReferences() {
-            _roleTypeList = new ArrayList();
-            _compositeReferenceTypeList = new ArrayList();
-        }
-        
-        /**
-         * Adds the roleType and roleInstance to its internal structure. 
-         * <p>
-         * If the roleType is already present, the index of the existing 
-         * roleType is returned.
-         * 
-         * @param roleType
-         */
-        public int addContainerRole(
-            ModelElement_1_0 roleType
-        ) {
-            int roleTypeIndex = getRoleTypeIndex(roleType);
-            if (roleTypeIndex < 0) {
-               roleTypeIndex = _roleTypeList.size();
-               _roleTypeList.add(roleType);
-            }
-            return roleTypeIndex;
-        }
-        
-        /**
-         * Is the containerRole already been added.
-         * @param roleType
-         */
-        public boolean hasContainerRole(
-            ModelElement_1_0 roleType
-        ) {
-            return getRoleTypeIndex(roleType) >= 0;
-        }
-        
-        public int containerRoleSize() {
-            return _roleTypeList.size();
-        }
-        
-        public ModelElement_1_0 getContainerRole(int number) {
-            return (ModelElement_1_0) _roleTypeList.get(number);
-        }
-        
-        public Set getCompositeReferencesForContainerRole(int number) {
-            return (Set) _compositeReferenceTypeList.get(number);
-        }
-        
-        public void addCompositeReference(
-            int roleTypeIndex,
-            ModelElement_1_0 compositeReferenceType
-        ) {
-            Set compRefs = null;
-            if (roleTypeIndex < _compositeReferenceTypeList.size()) {
-                compRefs = (Set)_compositeReferenceTypeList.get(roleTypeIndex);
-            }
-            else {
-                for (int i = _compositeReferenceTypeList.size(); i <= roleTypeIndex; i++) {
-                    _compositeReferenceTypeList.add(compRefs = new HashSet());
-                }
-            }
-            
-            for (Iterator i = compRefs.iterator(); i.hasNext(); ) {
-                if (i.next() == compositeReferenceType) {
-                    return; // already present
-                }
-            }
-            compRefs.add(compositeReferenceType);
-        }
-        
-        /**
-         * Get the index of the roleType. Returns -1 if not present.
-         * @param roleType
-         */
-        private int getRoleTypeIndex(
-            ModelElement_1_0 roleType
-        ) {
-            for (int i = 0; i < _roleTypeList.size(); i++) {
-                if (roleType == _roleTypeList.get(i)) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-        
-        private List _roleTypeList;
-        private List _compositeReferenceTypeList;
-        
-    }
-        
     //-----------------------------------------------------------------------
     /**
      * Initialize a provider traverser with the needed information.
@@ -212,33 +110,27 @@ public class ProviderTraverser
         ServiceHeader header,
         Dataprovider_1_0 provider,
         Model_1_0 model,
-        List startPoints,
-        List referenceFilters,
-        Map attributeFilters
+        List<Path> startPoints,
+        Set<String> referenceFilter,
+        Map<String,Filter> attributeFilter
     ) throws java.lang.NullPointerException {
         this(
-            header,
             new RequestCollection(header, provider),
             model,
             startPoints,
-            referenceFilters,
-            attributeFilters
+            referenceFilter,
+            attributeFilter
         );
     }
     
     //-----------------------------------------------------------------------
     public ProviderTraverser(
-        ServiceHeader header,
         RequestCollection reader,
         Model_1_0 model,
-        List startPoints,
-        List referenceFilters,
-        Map attributeFilters
+        List<Path> startPoints,
+        Set<String> referenceFilter,
+        Map<String,Filter> attributeFilter
     ) throws NullPointerException {
-        if(header == null) {
-            throw new NullPointerException("header must not be null");
-        }
-        this.header = header;
         if (reader == null) {
             throw new NullPointerException("reader must not be null");
         }
@@ -251,8 +143,8 @@ public class ProviderTraverser
             throw new NullPointerException("sourcePaths must not be null and not empty.");
         }
         this.startPoints = startPoints;
-        this.referenceFilters = referenceFilters;
-        this.attributeFilters = attributeFilters;
+        this.referenceFilter = referenceFilter;
+        this.attributeFilter = attributeFilter;
     }
 
     //-----------------------------------------------------------------------
@@ -344,53 +236,55 @@ public class ProviderTraverser
     ) throws ServiceException {
         boolean ending = false;
         try {
-            getTraversalHandler().startTraversal(this.startPoints);
+            this.getTraversalHandler().startTraversal(this.startPoints);
             if(!this.startPoints.isEmpty()) {
-                Path startPath = null;
+                Path objectPath = null;
                 Path lastStartPath = null;
                 int ii = 0;
                 for(
-                    Iterator i = this.startPoints.iterator(); 
+                    Iterator<Path> i = this.startPoints.iterator(); 
                     i.hasNext();
                     ii++
                 ) {
-                    Path next = (Path) i.next();
-                    lastStartPath = startPath;
-                    startPath = next;
-                    SysLog.trace("starting traversal from: " + startPath);
+                    Path startPoint = i.next();
+                    lastStartPath = objectPath;
+                    objectPath = startPoint;
+                    SysLog.trace("starting traversal from: " + objectPath);
                     ModelElement_1_0 classOfLast = this.traverseParents(
                         lastStartPath, 
-                        startPath
+                        objectPath
                     );
-                    if (startPath.size() < 5) {
+                    if (objectPath.size() < 5) {
                         throw new ServiceException( 
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.ACTIVATION_FAILURE,
                             new Parameter[] { 
-                                new Parameter("path", startPath)
+                                new Parameter("path", objectPath)
                             },
                             "Can handle only one segment, path must be at least of size 5"
                         );
-                    } else if (startPath.size() % 2 == 0) {
+                    } else if (objectPath.size() % 2 == 0) {
                         this.traverseFromReference(
-                            startPath, 
+                            objectPath, 
                             classOfLast 
                         );
                     } else {
                         this.startTraversalAtObject(
-                            startPath 
+                            objectPath.getParent(),
+                            objectPath 
                         );
                     }
-                    this.traversedPaths.add(startPath);
+                    this.traversedPaths.add(objectPath);
                 }
-                this.traverseParents(startPath, null);
+                this.traverseParents(objectPath, null);
             }
             ending = true;
             this.traversalHandler.endTraversal();
-        } catch (java.lang.Exception ex) {
+        } 
+        catch(java.lang.Exception ex) {
             // all exceptions that get here are fatal, because the position to 
             // continue is lost. 
-            handleFatalError(ex);
+            this.handleFatalError(ex);
             // Fatal errors can just be thrown from anywhere out of the code.
             ServiceException se = new ServiceException(ex); 
             if(!ending) try {
@@ -399,30 +293,31 @@ public class ProviderTraverser
                 se = ee.appendCause(se);
             }
             throw se;
-        }
-        
+        }        
     }
 
     //-----------------------------------------------------------------------
     /**
      * Start traversal at the object denoted by startPath.
      * 
-     * @param startPath
+     * @param objectPath
      * @throws ServiceException
      * @throws Exception
      */
     protected void startTraversalAtObject(
-        Path startPath
+        Path reference,
+        Path objectPath
     ) throws ServiceException, Exception {
-        List objects = this.findObjectAndStates(startPath);
+        List<DataproviderObject_1_0> objects = this.findObjectAndStates(objectPath);
         if(objects != null) {
-            if(objects.size() > 0) {
-                DataproviderObject_1_0 object = (DataproviderObject_1_0)objects.get(0);
+            if(!objects.isEmpty()) {
+                DataproviderObject_1_0 object = objects.get(0);
                 ModelElement_1_0 objectClass = this.model.getDereferencedType(
                     object.getValues(SystemAttributes.OBJECT_CLASS).get(0)
                 );
                 this.traverseObject(
-                    startPath, 
+                    reference,
+                    objectPath, 
                     objects, 
                     objectClass, 
                     this.model.isSubtypeOf(objectClass, BASIC_STATE) // IS_STATE
@@ -446,46 +341,32 @@ public class ProviderTraverser
      * @return List      
      * @throws ServiceException
      */
-    protected List findAtPath(
+    protected List<DataproviderObject_1_0> findAtPath(
         Path reference,
         Path identity
     ) throws ServiceException {
-        List objects = null;
-        boolean matches = this.referenceFilters == null;
+        List<DataproviderObject_1_0> objects = null;
+        boolean matches = this.referenceFilter == null;
         if(!matches) {
-            for(Iterator i = this.referenceFilters.iterator(); i.hasNext(); ) {
-                Path referenceFilter = (Path)i.next();                
-                // In case the reference pattern ends with a wildcard (:*) the corresponding
-                // exposed end must have aggregation kind composite and the reference must not
-                // be derived
-                boolean isComposite = false;
-                boolean isDerived = true;
-                try {
-                    ModelElement_1_0 referenceType = this.model.getReferenceType(reference);
-                    if(referenceType != null) {
-                        isDerived = this.model.referenceIsDerived(referenceType);
-                        ModelElement_1_0 referencedEnd = this.model.getElement(referenceType.values("referencedEnd").get(0));
-                        if(referencedEnd != null) {
-                            isComposite = AggregationKind.COMPOSITE.equals(referencedEnd.values("aggregation").get(0));
-                        }
-                    }
-                } catch(ServiceException e) {
-                    // ignore
-                }                
-                if(
-                    reference.isLike(referenceFilter) &&
-                    (!referenceFilter.endsWith(new String[]{":*"}) || (!isDerived && isComposite))
-                ) {
-                    matches = true;
-                    break;
-                }            
-            }
+            try {
+                ModelElement_1_0 referenceDef = this.model.getReferenceType(reference);
+                if(referenceDef != null) {
+                    String referenceName = (String)referenceDef.values("name").get(0);
+                    String qualifiedReferenceName = (String)referenceDef.values("qualifiedName").get(0);
+                    if(
+                        this.referenceFilter.contains(referenceName) ||
+                        this.referenceFilter.contains(qualifiedReferenceName)
+                    ) {
+                        matches = true;
+                    }            
+                }
+            } catch(ServiceException e) {}
         }
         if(matches) {
             try {            
-                Filter filter = this.attributeFilters == null 
+                Filter filter = this.attributeFilter == null 
                     ? null 
-                    : (Filter)this.attributeFilters.get(reference);
+                    : (Filter)this.attributeFilter.get(reference);
                 if(filter != null) {
                     FilterProperty[] filterProperties = new FilterProperty[filter.getCondition().length];
                     for(int i = 0; i < filterProperties.length; i++) {
@@ -523,35 +404,6 @@ public class ProviderTraverser
                 // executed on the current date (header.requestedFor, 
                 // header.requestedAt)
                 else {
-//                  FilterProperty validToFilter =
-//                  new FilterProperty(
-//                      Quantors.FOR_ALL,
-//                      State_1_Attributes.VALID_TO,
-//                      FilterOperators.IS_NOT_IN,
-//                      new Object[] {
-//              });        
-//              // Add identity filter for reducing the number of objects
-//              FilterProperty idFilter = null;
-//              if(identity != null) {
-//                  idFilter = new FilterProperty(
-//                      Quantors.THERE_EXISTS,
-//                      SystemAttributes.OBJECT_IDENTITY,
-//                      FilterOperators.IS_IN,
-//                      new String[] {identity.toUri()}
-//                  );
-//              }
-//              objects = this.reader.addFindRequest(
-//                  reference,
-//                  (idFilter == null ? 
-//                      new FilterProperty[] {validToFilter} : 
-//                      new FilterProperty[] {validToFilter, idFilter}
-//                  ),
-//                  AttributeSelectors.ALL_ATTRIBUTES,
-//                  0,
-//                  Integer.MAX_VALUE,
-//                  Directions.ASCENDING
-//              );
-//          }
                     ModelElement_1_0 referenceType = this.model.getReferenceType(reference);
                     if(referenceType != null) {
                         ModelElement_1_0 referencedEnd = this.model.getElement(referenceType.values("referencedEnd").get(0));
@@ -577,16 +429,19 @@ public class ProviderTraverser
                             );
                         }
                     }
-                }
-                
+                }               
             }
-            // Don't care about NOT_FOUND exceptions
-            catch(ServiceException e) {
-                if(e.getExceptionStack().getExceptionCode() != BasicException.Code.NOT_FOUND) {
-                    throw e;
+            // Don't care about NOT_FOUND and AUTHORIZATION_FAILURE exceptions
+            catch(Exception e) {
+                ServiceException e0 = new ServiceException(e);
+                if(
+                    (e0.getExceptionCode() != BasicException.Code.NOT_FOUND) &&
+                    (e0.getExceptionCode() != BasicException.Code.AUTHORIZATION_FAILURE)                    
+                ) {
+                    throw e0;
                 }
                 else {
-                    objects = new ArrayList();
+                    objects = new ArrayList<DataproviderObject_1_0>();
                 }
             }
         }
@@ -606,10 +461,10 @@ public class ProviderTraverser
      * @return List      
      * @throws ServiceException
      */
-    protected List findObjectAndStates(
+    protected List<DataproviderObject_1_0> findObjectAndStates(
         Path objectPath
     ) throws ServiceException {
-        List objects = new ArrayList();
+        List<DataproviderObject_1_0> objects = new ArrayList<DataproviderObject_1_0>();
         try {
             if(objectPath.size() % 2 == 0) {
                 throw new ServiceException(
@@ -656,55 +511,53 @@ public class ProviderTraverser
      * <n>
      * Any exceptions thrown here will lead to a fatal exception.
      * 
-     * @param startPath   path ending in a reference
+     * @param reference   path ending in a reference
      * 
      * @return collection with ids of referenced objects
      * 
      * @throws Exception  
      */
-    protected Collection traverseFromReference(
-        Path startPath,
+    protected Collection<Path> traverseFromReference(
+        Path reference,
         ModelElement_1_0 referenceType
     ) throws Exception {
-        List containedIds = new ArrayList();
-        List objects = this.findAtPath(
-            startPath, 
+        List<Path> containedIds = new ArrayList<Path>();
+        List<DataproviderObject_1_0> objects = this.findAtPath(
+            reference, 
             null 
         );
         if(objects != null) {
-            if(objects.size() > 0) {
+            if(!objects.isEmpty()) {
                 this.startReference(referenceType);
             }
             // traverse object (states) recursively
-            for(Iterator i = objects.listIterator(); i.hasNext();) {
-                DataproviderObject next = new DataproviderObject(
-                    (DataproviderObject_1_0) i.next()
+            for(Iterator<DataproviderObject_1_0> i = objects.listIterator(); i.hasNext();) {
+                DataproviderObject object = new DataproviderObject(
+                    i.next()
                 );                   
                 ModelElement_1_0 objectClass =
                     this.model.getDereferencedType(
-                        next.values(SystemAttributes.OBJECT_CLASS).get(0));
-                
+                        object.values(SystemAttributes.OBJECT_CLASS).get(0)
+                    );                
                 if(objectClass == null) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
                         new Parameter[] {
-                            new Parameter(
-                                "object class",
-                                next.values(
-                                    SystemAttributes.OBJECT_CLASS).get(
-                                    0)),
-                            new Parameter("object path", next.path())},
+                            new Parameter("object class", object.values(SystemAttributes.OBJECT_CLASS).get(0)),
+                            new Parameter("object path", object.path())
+                        },
                         "Unknown object class.");
                 }
-                // it is a stated object, the id of the object must be provided
-                // in the first state
-                if(this.model.isSubtypeOf(next, BASIC_STATE)) {
-                    Path path = getStatelessPath(next.path());
-                    if (!containedIds.contains(path)) {
-                        containedIds.add(path);
-                        this.traverseObject(
-                            path, 
+                // it is a stated object, the id of the object must be provided in the first state
+                boolean continueTraversal = true;
+                if(this.model.isSubtypeOf(object, BASIC_STATE)) {
+                    Path objectPath = getStatelessPath(object.path());
+                    if (!containedIds.contains(objectPath)) {
+                        containedIds.add(objectPath);
+                        continueTraversal = this.traverseObject(
+                            reference,
+                            objectPath, 
                             objects, 
                             objectClass, 
                             IS_STATE 
@@ -713,19 +566,24 @@ public class ProviderTraverser
                     // else nothing, object and all its states already treated
                 }
                 else {
-                    containedIds.add(next.path());
-                    List nonStatedObjects = new ArrayList();
-                    nonStatedObjects.add(next);
-                    this.traverseObject(
-                        next.path(), 
+                    containedIds.add(object.path());
+                    List<DataproviderObject_1_0> nonStatedObjects = new ArrayList<DataproviderObject_1_0>();
+                    nonStatedObjects.add(object);
+                    continueTraversal = this.traverseObject(
+                        reference,
+                        object.path(), 
                         nonStatedObjects, 
                         objectClass, 
                         !IS_STATE 
                     );
                 }
+                if(!continueTraversal) break;
             }
-            if(objects.size() > 0) {
-                this.completeReference(startPath, containedIds);
+            if(!objects.isEmpty()) {
+                this.completeReference(
+                    reference, 
+                    containedIds
+                );
                 this.endReference(referenceType);
             }
         }
@@ -748,34 +606,29 @@ public class ProviderTraverser
      * @throws Exception
      */
     protected boolean traverseObjectStates(
+        Path reference,
         Path objectPath,
-        List allStates,
+        List<DataproviderObject_1_0> allStates,
         ModelElement_1_0 objectClass
     ) throws java.lang.Exception {
         boolean continueTraversal = true;
-//      Set containedIds = new HashSet();
-        List validFromSorted = new ArrayList();
-        
-        for (Iterator s = allStates.iterator();
+        List<DataproviderObject_1_0> validFromSorted = new ArrayList<DataproviderObject_1_0>();        
+        for(
+            Iterator<DataproviderObject_1_0> s = allStates.iterator(); 
             s.hasNext() && continueTraversal;
         ) {
-            DataproviderObject state = (DataproviderObject) s.next();
-
+            DataproviderObject_1_0 state = s.next();
             // if it is a state of the object treated right now
-            if (state.path().toString().startsWith(objectPath.toString())) {
-                
+            if (state.path().toString().startsWith(objectPath.toString())) {                
                 int pos = -1; 
                 if (state.getValues(State_1_Attributes.VALID_FROM) != null &&
                     !state.getValues(State_1_Attributes.VALID_FROM).isEmpty()
                 ) {
                     String validFrom = 
-                        (String) state.getValues(State_1_Attributes.VALID_FROM).get(0);
-                    
+                        (String) state.getValues(State_1_Attributes.VALID_FROM).get(0);                    
                     for (int i = 0; i < validFromSorted.size() && pos == -1; i++) {
-                        List current = 
-                            ((DataproviderObject_1_0)validFromSorted.get(i))
-                                .getValues(State_1_Attributes.VALID_FROM);
-                                        
+                        List<Object> current = 
+                            validFromSorted.get(i).getValues(State_1_Attributes.VALID_FROM);                                        
                         if (current != null 
                             && current.get(0) != null
                             && validFrom.compareTo((String) current.get(0)) < 0
@@ -799,22 +652,24 @@ public class ProviderTraverser
                     validFromSorted.add(state);
                 }
             }
-        }
-        
-        for (Iterator s = validFromSorted.iterator(); s.hasNext(); ) {
-                
-            DataproviderObject state = (DataproviderObject) s.next();
-              
-//          containedIds.add(objectPath); //state.path());   
-            
-            continueTraversal = startObject(state.path(), objectClass, TraversalHandler.SET_OP);
-
+        }        
+        for(Iterator<DataproviderObject_1_0> s = validFromSorted.iterator(); s.hasNext(); ) {                
+            DataproviderObject_1_0 state = s.next();
+            continueTraversal = this.startObject(
+                reference,
+                state.path(), 
+                objectClass, 
+                TraversalHandler.SET_OP
+            );
             if (continueTraversal) {
-                continueTraversal = completeFeatures(state, objectClass);
+                continueTraversal = this.completeFeatures(
+                    reference,
+                    state, 
+                    objectClass
+                );
             }
-            endObject(objectClass);
+            this.endObject(objectClass);
         }
-
         return continueTraversal;
     }
 
@@ -826,206 +681,96 @@ public class ProviderTraverser
      * path. Thus the correct states must be searched for with the help of the
      * path.
      * 
-     * @param path               path to traverse from
-     * @param objectStates       all states of all objects at path  to traverse
-     * @param objectClass        class of that object
-     * @param isState            if it is a state rather than an object
+     * @param objectPath path to traverse from
+     * @param objectStates all states of all objects at path  to traverse
+     * @param objectClass class of that object
+     * @param isState if it is a state rather than an object
+     * @return true if traversal should be continued, false otherwise
      * @throws ServiceException 
      */
-    protected void traverseObject(
-        Path path,
-        List objectStates,
+    protected boolean traverseObject(
+        Path reference,
+        Path objectPath,
+        List<DataproviderObject_1_0> objectStates,
         ModelElement_1_0 objectClass,
         boolean isState
     ) throws Exception {
         boolean continueTraversal = true;
-        List references = null;
+        List<Path> references = null;
         if(isState) {
             // first all states (just the attributes)            
-            continueTraversal = 
-                traverseObjectStates(path, objectStates, objectClass);            
+            continueTraversal = this.traverseObjectStates(
+                reference,
+                objectPath, 
+                objectStates, 
+                objectClass
+            );            
             // then the contained objects
             if(continueTraversal) {
-                // the same object as in the states
                 continueTraversal = this.startObject(
-                    path, 
+                    reference,
+                    objectPath, 
                     objectClass, 
                     TraversalHandler.SET_OP
                 );            
-                if (continueTraversal) {
+                if(continueTraversal) {
                     // need an empty object for featureComplete
                     DataproviderObject empty = new DataproviderObject(
-                        path
+                        objectPath
                     );
                     empty.values(SystemAttributes.OBJECT_CLASS).set(
                         0, 
                         objectClass.getValues("qualifiedName").get(0)
                     );                    
-                    completeFeatures(empty, objectClass);                    
-                    // the roles as normal reference
-                    continueTraversal = 
-                        this.traverseContainedRoles(
-                            path, 
-                            objectStates, 
-                            objectClass,
-                            null
-                       );
-                    references = this.traverseContained(
-                        path, 
-                        objectClass 
-                    );                    
-                    this.completeContent(
-                        path, 
-                        objectClass, 
-                        references
-                    );
+                    continueTraversal = this.completeFeatures(
+                        reference,
+                        empty, 
+                        objectClass
+                    );                  
+                    if(continueTraversal) {
+                        references = this.traverseContent(
+                            objectPath, 
+                            objectClass 
+                        );                    
+                        this.completeContent(
+                            objectPath, 
+                            objectClass, 
+                            references
+                        );
+                    }
+                    this.endObject(objectClass);
                 }                
-                this.endObject(objectClass);
             }
         }
         else {
             continueTraversal = this.startObject(
-                path, 
+                reference,
+                objectPath, 
                 objectClass, 
                 TraversalHandler.SET_OP
             );
             if(continueTraversal) {                
-                DataproviderObject obj = new DataproviderObject(
-                    (DataproviderObject_1_0) objectStates.get(0)
+                DataproviderObject state = new DataproviderObject(
+                    objectStates.get(0)
                 );
-                completeFeatures(obj, objectClass);
-                if (this.model.isSubtypeOf(obj, "org:openmdx:compatibility:role1:Role")) {
-                    List allStates = new ArrayList();
-                    allStates.add(obj);
-                    continueTraversal = 
-                        this.traverseContainedRoles(
-                            path, 
-                            allStates, 
-                            objectClass,
-                            null
-                        );
-                }
-                references = this.traverseContained(
-                    obj.path(), 
-                    objectClass 
+                continueTraversal = this.completeFeatures(
+                    reference,
+                    state, 
+                    objectClass
                 );
-                this.completeContent(
-                    obj.path(), 
-                    objectClass, 
-                    references
-                );
-            }
-            endObject(objectClass);
-        }
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * @param objectPath
-     * @param allStates
-     * @param objectClass
-     * @return true if the traversal should continue
-     * @throws java.lang.Exception
-     */
-    protected boolean traverseContainedRoles(
-        Path objectPath,
-        List allStates,
-        ModelElement_1_0 objectClass,
-        Filter filter
-    ) throws java.lang.Exception {
-        boolean continueTraversal = true;
-        
-        Set presentRoles = new HashSet();
-        
-        List rolePaths = new ArrayList();
-        
-        // find if there are any roles for the state treated rigth now.
-        for (Iterator s = allStates.iterator();
-            s.hasNext();
-        ) {
-            DataproviderObject state = (DataproviderObject) s.next();
-
-            // allStates contains all the states of all the contained objects, 
-            // thus the startsWith() is needed.
-            if (state.path().startsWith(objectPath)) {
-                presentRoles.addAll(state.values(RoleAttributes.HAS_ROLE));
-            }
-        }
-        
-        if (presentRoles.size() > 0) {
-            startRoleReference(objectClass);
-        }
-        
-        // iterate over the roles to get an ordering per Role
-        for (Iterator r = presentRoles.iterator(); 
-            r.hasNext() && continueTraversal; 
-        ) {
-            String roleName = (String)r.next();            
-            DataproviderObject aState = null;
-            RoleCompositeReferences roleCompositeRefs = new RoleCompositeReferences();            
-            for (Iterator s = allStates.iterator();
-                s.hasNext() && continueTraversal;
-            ) {
-                DataproviderObject state = (DataproviderObject) s.next();
-                // if it is a state of the object treated right now
-                if(
-                    state.path().startsWith(objectPath) && 
-                    state.values(RoleAttributes.HAS_ROLE)!= null && 
-                    state.values(RoleAttributes.HAS_ROLE).contains(roleName)
-                ) {
-                    // any state will do, need just one
-                    aState = state;
-                    continueTraversal = 
-                        traverseRoleWithinState(
-                            state, 
-                            roleName, 
-                            rolePaths, 
-                            roleCompositeRefs
-                        );
-                }
-            }            
-            for(
-                int i = 0; 
-                i < roleCompositeRefs.containerRoleSize() && 
-                roleCompositeRefs.getCompositeReferencesForContainerRole(i) != null && 
-                roleCompositeRefs.getCompositeReferencesForContainerRole(i).size() > 0; 
-                i++
-            ) {                
-                // String reference = roleComposite.roleCompositePath[2];
-                Path rolePath = removeStateFromPath(aState.path().getChild("role")).add(roleName);
-                continueTraversal = 
-                    startObject(
-                        rolePath,
-                        roleCompositeRefs.getContainerRole(i), 
-                        TraversalHandler.SET_OP
+                if(continueTraversal) {
+                    references = this.traverseContent(
+                        state.path(), 
+                        objectClass 
                     );
-                 
-                DataproviderObject empty = new DataproviderObject(
-                    rolePath//roleCompositeRefs.getRoleInstance(i),
-                    // false
-                );
-                // need object_class
-                empty.values(SystemAttributes.OBJECT_CLASS).set(0,  // addAll
-                    //roleCompositeRefs.getRoleInstance(i).getValues(SystemAttributes.OBJECT_CLASS)
-                    roleCompositeRefs.getContainerRole(i).getValues("qualifiedName").get(0) //.getRoleInstance(i).getValues(SystemAttributes.OBJECT_CLASS)
-                );
-                completeFeatures(empty, roleCompositeRefs.getContainerRole(i));                
-                for (Iterator rcr = roleCompositeRefs.getCompositeReferencesForContainerRole(i).iterator();
-                    rcr.hasNext();
-                ) {
-                    ModelElement_1_0 compositeReference = (ModelElement_1_0) rcr.next();                    
-                    //Collection referencedObjs =
-                    this.traverseFromReference(
-                        rolePath.add((String)compositeReference.getValues("name").get(0)),
-                        compositeReference
-                    );                
-                }                
-                endObject(roleCompositeRefs.getContainerRole(i));
+                    this.completeContent(
+                        state.path(), 
+                        objectClass, 
+                        references
+                    );
+                }
+                this.endObject(objectClass);
             }
-        }        
-        if (presentRoles.size() > 0) {
-            completeReference(objectPath.getChild("role"), rolePaths);
-            endRoleReference(objectClass);
         }
         return continueTraversal;
     }
@@ -1043,42 +788,38 @@ public class ProviderTraverser
      * @return List         list containing the referenced paths 
      * @throws Exception
      */
-    protected List traverseContained(
+    protected List<Path> traverseContent(
         Path objectPath,
         ModelElement_1_0 objectClass
     ) throws Exception {
-        List features = objectClass.getValues("feature");
-        List existingReferences = new ArrayList();
+        List<Path> features = objectClass.getValues("feature");
+        List<Path> existingReferences = new ArrayList<Path>();
         for (int roleTypesFirst = 0; roleTypesFirst < 2; roleTypesFirst++) {
             for (int j = 0; j < features.size(); j++) {
-                String featureName = ((Path) features.get(j)).getBase();
-                ModelElement_1_0 elementType = this.model.getElement(featureName);
-                if (this.model.isReferenceType(elementType)) {
+                String featureName = features.get(j).getBase();
+                ModelElement_1_0 featureDef = this.model.getElement(featureName);
+                if (this.model.isReferenceType(featureDef)) {
                     // Navigate composite references only in case there is no reference filter specified
                     if(
-                        (this.isCompositeReference(elementType) || (this.isSharedReference(elementType) && (this.referenceFilters != null))) && 
-                        ((roleTypesFirst == 0 && this.isReferencedEndARoleType(elementType)) || (roleTypesFirst == 1 && !isReferencedEndARoleType(elementType))) && 
-                        !isViewReference(elementType)
+                        (this.isCompositeReference(featureDef) || (this.isSharedReference(featureDef) && (this.referenceFilter != null))) && 
+                        ((roleTypesFirst == 0 && this.isReferencedEndARoleType(featureDef)) || (roleTypesFirst == 1 && !isReferencedEndARoleType(featureDef))) && 
+                        !isViewReference(featureDef)
                     ) {
-                        String referenceName = (String) elementType.getValues("name").get(0);
+                        String referenceName = (String) featureDef.getValues("name").get(0);
                         // do not navigate object views, new
                         if(!"view".equals(referenceName)) {
-                            Path referencePath = objectPath.getChild(referenceName);
-                            boolean matches = this.referenceFilters == null;
+                            boolean matches = this.referenceFilter == null;
                             if(!matches) {
-                                for(Iterator k = this.referenceFilters.iterator(); k.hasNext(); ) {
-                                    Path referenceFilter = (Path)k.next();
-                                    if(referencePath.isLike(referenceFilter)) {
-                                        matches = true;
-                                        break;
-                                    }
-                                }
+                                String qualifiedReferenceName = (String) featureDef.getValues("qualifiedName").get(0);
+                                matches = 
+                                    this.referenceFilter.contains(referenceName) || 
+                                    this.referenceFilter.contains(qualifiedReferenceName);
                             }
                             if(matches) {
-    	                        Collection referencedObjs =
+    	                        Collection<Path> referencedObjs =
     	                            this.traverseFromReference(
     	                                objectPath.getChild(referenceName),
-    	                                elementType
+    	                                featureDef
                                     );    
     	                        if (referencedObjs.size() > 0) {
     	                            existingReferences.add(
@@ -1091,98 +832,6 @@ public class ProviderTraverser
             }
         }
         return existingReferences;
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * Search the parent classes belonging to the same role. 
-     * <p>
-     * All the parent classes up to the first which has the stereotype role
-     * belong to the same role. 
-     * 
-     * @param roleClass   roleClass to search parent role classes for
-     */
-    protected List findRoleAnchestors(
-        DataproviderObject_1_0 _roleClass
-    ) throws ServiceException {
-        DataproviderObject_1_0 roleClass = _roleClass;
-        // contains the inheritance paths to check
-        ArrayList inheritancePaths = new ArrayList();
-
-        // inheritancePath contains all the classes which are superclasses
-        // from the specified roleClass, starting at the roleClass itself.
-        ArrayList inheritancePath = new ArrayList();
-        inheritancePath.add(roleClass);
-        inheritancePaths.add(inheritancePath);
-        inheritancePath = null;
-
-        while (inheritancePath == null && inheritancePaths.size() > 0) {
-            ArrayList newInheritancePaths = new ArrayList();
-
-            // for the last class in a inheritance path check if it has the 
-            // stereotype role 
-            for (Iterator ip = inheritancePaths.iterator();
-                ip.hasNext() && inheritancePath == null;
-                ) {
-                inheritancePath = (ArrayList) ip.next();
-
-                roleClass =
-                    (DataproviderObject_1_0) inheritancePath.get(
-                        inheritancePath.size() - 1);
-
-                if (roleClass.getValues("stereotype") != null
-                    && "role".equals(roleClass.getValues("stereotype").get(0))) {
-                    // found it!
-
-                }
-                else {
-                    for (Iterator si =
-                        roleClass.getValues("supertype").iterator();
-                        si.hasNext();
-                        ) {
-                        List newInheritancePath =
-                            (List) inheritancePath.clone();
-                        newInheritancePath.add(
-                            this.model.getDereferencedType(si.next()));
-                        newInheritancePaths.add(newInheritancePath);
-                    }
-                    inheritancePath = null;
-                }
-
-            }
-            inheritancePaths = newInheritancePaths;
-        }
-        // add role class itself
-        inheritancePath.add(this.model.getDereferencedType("org:openmdx:compatibility:role1:Role"));
-        return inheritancePath;
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * Remove all the attributes which don't belong to the role itself from the 
-     * role instance. 
-     * <p>
-     * Keep some system attributes to ease handling of the role in the handler.
-     * @param role
-     * @param roleClass
-     * @throws ServiceException
-     */
-    protected void reduceToRoleAttributes(
-        DataproviderObject_1_0 role,
-        DataproviderObject_1_0 roleClass
-    ) throws ServiceException {
-        // classes which belong to the same role 
-        List roleClasses = new ArrayList();
-        roleClasses = findRoleAnchestors(roleClass);
-        for (Iterator a = role.attributeNames().iterator(); a.hasNext();) {
-            String attribute = (String) a.next();
-            if (!SystemAttributes.OBJECT_CLASS.equals(attribute)
-                && !State_1_Attributes.VALID_FROM.equals(attribute)
-                && !State_1_Attributes.VALID_TO.equals(attribute)
-                && !isContentAttribute(attribute, roleClasses)) {
-                a.remove();
-            }
-        }
     }
 
     //-----------------------------------------------------------------------
@@ -1201,19 +850,17 @@ public class ProviderTraverser
      */
     protected boolean isContentAttribute(
         String attribute, 
-        List classes
+        List<DataproviderObject_1_0> classes
     ) throws ServiceException {
         ModelElement_1_0 elementType = null;
         boolean isAttribute = false;
         boolean isNonCompositeReference = false;
-        for (Iterator classIter = classes.iterator();
+        for (
+            Iterator<DataproviderObject_1_0> classIter = classes.iterator();
             classIter.hasNext() && elementType == null;
-            ) {
-            DataproviderObject_1_0 contentClass =
-                (DataproviderObject_1_0) classIter.next();
-
-            List content = contentClass.getValues("content");
-
+        ) {
+            DataproviderObject_1_0 contentClass = classIter.next();
+            List<Object> content = contentClass.getValues("content");
             // first the attributes and referenced objects
             for (int j = 0; j < content.size() && elementType == null; j++) {
                 String contentName = ((Path) content.get(j)).getBase();
@@ -1224,7 +871,6 @@ public class ProviderTraverser
                 }
             }
         }
-
         // must check if it is an attribute or a reference
         if (elementType != null) {
             // attribute
@@ -1257,221 +903,6 @@ public class ProviderTraverser
     
     //-----------------------------------------------------------------------
     /**
-     * Find the composite references within this role class and construct the
-     * relativ paths for accessing the objects (if any).
-     * 
-     * @param roleName
-     * @param roleClass
-     * @return list of RoleComposites.
-     */
-    protected void findRoleCompositePaths(
-        ModelElement_1_0 roleClass,
-        RoleCompositeReferences roleCompositeRefs
-    ) throws ServiceException {      
-        if (!roleCompositeRefs.hasContainerRole(roleClass)) {            
-            // get classes which belong to the same role; avoid classes of the
-            // core or another role
-            List roleParents = 
-                getClosestRoleStereotypeHierarchy(
-                    roleClass,
-                    new ArrayList(),
-                    Integer.MAX_VALUE
-                );            
-            if (roleParents != null) {
-                for (Iterator rp = roleParents.iterator(); rp.hasNext();) {
-                    ModelElement_1_0 parent = (ModelElement_1_0)rp.next();                    
-                    List contents = parent.getValues("content");            
-                    for (int j = 0; j < contents.size(); j++) {
-                        String featureName = ((Path) contents.get(j)).getBase();            
-                        ModelElement_1_0 elementType = this.model.getElement(featureName);            
-                        // reference
-                        if (elementType.getValues(SystemAttributes.OBJECT_CLASS).get(0)
-                                .equals("org:omg:model1:Reference")
-                            && isCompositeReference(elementType)
-                        ) {                    
-                            int index = 
-                                roleCompositeRefs.addContainerRole(roleClass);
-                            
-                            roleCompositeRefs.addCompositeReference(index, elementType);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * Recursively searches for the nearest class with the role stereotype set, 
-     * returns the direct line of superclasses from the starting class to the 
-     * nearest class with the role stereotype.
-     * <p>
-     * Searches starting from current; hierarchy contains the list of direct
-     * ancestors of the starting class to the current class. 
-     * ClosestRoleStereotype is the number of ancestors in the shortest line 
-     * of superclasses found so far. It is used to shortcut the search if the 
-     * hierarchy gets longer.
-     * <p>
-     * The algorithm always checks all parents to find the shortest hierarchy. 
-     * 
-     * @param current     current class to start from
-     * @param hierarchy   hierarchy from the starting element to current
-     * @param closestRoleStereotype  
-     * @throws ServiceException
-     */
-    protected List getClosestRoleStereotypeHierarchy(
-        ModelElement_1_0 current,
-        List hierarchy,
-        int _closestRoleStereotype
-    ) throws ServiceException {
-        int closestRoleStereotype = _closestRoleStereotype;
-        List bestRoleHierarchy = null;
-        
-        // if the current hierarchy is farther away then the closest 
-        // role stereotype found so far, there is no use in searching on
-        if (hierarchy.size() < closestRoleStereotype) {             
-            hierarchy.add(current);        
-            if (current.getValues("stereotype") != null 
-                && current.getValues("stereotype").contains("role")
-            ) {
-                // this is a class with stereotype role
-                bestRoleHierarchy = new ArrayList();
-                bestRoleHierarchy.addAll(hierarchy);
-            }
-            else if (current.getValues("supertype") == null) {
-                // nothing to do 
-            }
-            else {
-                for (Iterator s = current.getValues("supertype").populationIterator();
-                    s.hasNext();
-                ) {
-                    ModelElement_1_0 currentsSuper = this.model.getDereferencedType(
-                        s.next()
-                    );                    
-                    List roleHierarchy = getClosestRoleStereotypeHierarchy(
-                        currentsSuper, 
-                        hierarchy, 
-                        closestRoleStereotype
-                    );                  
-                    if (roleHierarchy != null 
-                        && 
-                        ( bestRoleHierarchy == null 
-                          || 
-                          roleHierarchy.size() < bestRoleHierarchy.size()
-                        )
-                    ) {
-                        bestRoleHierarchy = roleHierarchy;
-                        closestRoleStereotype = bestRoleHierarchy.size();
-                    }
-                }
-            }
-        
-            hierarchy.remove(current);
-        }
-        return bestRoleHierarchy;
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * Traverse the roles that the object has in object_hasRole.
-     * 
-     * @param object           object to traverse for roles
-     * @param objectClass      class of the object
-     * @param roleName         role to treat            
-     * @param roleComposite    objects contained in roles (out)
-     * @throws ServiceException
-     * @return continue with traversal
-     */
-    protected boolean traverseRoleWithinState(
-        DataproviderObject object,
-        String roleName,
-        List rolePaths,
-        RoleCompositeReferences roleCompositeReferences
-    ) throws ServiceException {
-        boolean continueTraversal = true;
-        
-        if (object.values(RoleAttributes.HAS_ROLE)!= null 
-            && object.values(RoleAttributes.HAS_ROLE).contains(roleName)
-        ) {
-            Path rolePath = removeStateFromPath(new Path(object.path())).add("role").add(roleName);
-            String validFrom =
-                object.getValues(State_1_Attributes.VALID_FROM) == null
-                    ? null
-                    : (String) object.getValues(
-                        State_1_Attributes.VALID_FROM).get(0);
-            String validTo =
-                object.getValues(State_1_Attributes.VALID_TO) == null
-                    ? null
-                    : (String) object.getValues(State_1_Attributes.VALID_TO).get(0);
-
-            DataproviderObject role = new DataproviderObject(
-                this.retrieveRole(rolePath, validFrom, validTo)
-            );
-            rolePaths.add(rolePath);
-            ModelElement_1_0 roleClass =
-                this.model.getDereferencedType(
-                    role.getValues(SystemAttributes.OBJECT_CLASS).get(0));
-            continueTraversal = 
-                startObject(rolePath, roleClass, TraversalHandler.SET_OP);           
-            if (continueTraversal) {  
-                reduceToRoleAttributes(role, roleClass);
-                continueTraversal = this.completeFeatures(role, roleClass);
-                findRoleCompositePaths( roleClass, roleCompositeReferences);
-            }
-            endObject(roleClass);
-        }        
-        return continueTraversal;
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * Retrieve the role instance from the source provider.
-     * <p>
-     * Each start or stop of a role leads to a new state of the core object. 
-     * Thus within a state, we can be sure that a is either present or missing
-     * at all. It does not change within the period of a state.
-     * 
-     * @param  rolePath                path to role
-     * @param  validFrom               start of search period
-     * @param  validTo                 end of search period
-     * @return DataproviderObject_1_0  role instance found
-     * @throws ServiceException
-     */
-    protected DataproviderObject_1_0 retrieveRole(
-        Path rolePath,
-        String validFrom,
-        String validTo
-    ) throws ServiceException {
-        DataproviderObject_1_0 role = null;
-        // to get the role of the correct state, adjust the header requestedFor.
-        ServiceHeader statedHeader =
-            new ServiceHeader(
-                (String[]) this.header.getPrincipalChain().toArray(new String[0]),
-                this.header.getCorrelationId(),
-                false,
-                this.header.getQualityOfService(),
-                null,
-                validFrom != null ? validFrom : validTo);
-        RequestCollection statedReader = this.reader.createRequestCollection(statedHeader);
-        try {
-            role = statedReader.addGetRequest(rolePath);
-        }
-        catch (ServiceException se) {
-            // roles indicated by object_hasRole must be found!
-            if (se.getExceptionStack().getExceptionCode() == BasicException.Code.NOT_FOUND) {
-                throw new ServiceException(
-                    se,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                    new Parameter[] { new Parameter("objectPath", rolePath)},
-                    "Role contained in object_hasRole must be found!");
-            }
-        }
-        return role;
-    }
-
-    //-----------------------------------------------------------------------
-    /**
      * Log with indentation to better follow the single objects.
      * 
      * @param deltaIndent  -1 to outdent, 1 to indent, 0 to stay at current level
@@ -1481,17 +912,17 @@ public class ProviderTraverser
         int deltaIndent, 
         String message
     ) {
-        CharSequence indentBuf = StringBuilders.newStringBuilder();
+        StringBuilder indentBuf = new StringBuilder();
         if (deltaIndent > 0) {
             indent += deltaIndent;
         }
         for (int i = 0; i < indent; i++) {
-            StringBuilders.asStringBuilder(indentBuf).append(" ");
+            indentBuf.append(" ");
         }
         if (deltaIndent < 0) {
             indent += deltaIndent;
         }
-        StringBuilders.asStringBuilder(indentBuf).append(message);
+        indentBuf.append(message);
         SysLog.detail(indentBuf.toString());
     }
 
@@ -1505,22 +936,16 @@ public class ProviderTraverser
      * @throws ServiceException
      */
     protected boolean startObject(
-        Path path,
+        Path reference,
+        Path objectPath,
         DataproviderObject_1_0 objectClass,
         short operation
-    ) throws ServiceException {
-        
-        logIndent(
-            1,
-            "startObject:"
-                + (String) objectClass.getValues("qualifiedName").get(0)
-                + " "
-                + path.getBase());
-                
+    ) throws ServiceException {        
         boolean result = this.getTraversalHandler().startObject(
+            reference,
             (String) objectClass.getValues("qualifiedName").get(0),
             getQualifierLeadingToClass(objectClass),
-            path.getBase(),
+            objectPath.getBase(),
             operation
         );
         return result;
@@ -1551,23 +976,19 @@ public class ProviderTraverser
     /**
      * Call the featureComplete of the handler.
      * 
-     * @param outObject    prepared out object
+     * @param object    prepared out object
      * @param objectClass  class of the object
      * @return boolean     return value from the handler
      */
     protected boolean completeFeatures(
-        DataproviderObject outObject,
+        Path reference,
+        DataproviderObject_1_0 object,
         ModelElement_1_0 objectClass
     ) throws ServiceException {
-        logIndent(
-            0,
-            "featureComplete: "
-                + (String) objectClass.getValues("qualifiedName").get(0)
-                + " "
-                + outObject.path().getBase()
+        boolean fcResult =  getTraversalHandler().featureComplete(
+            reference,
+            object
         );
-        boolean fcResult =  getTraversalHandler().featureComplete(outObject);
-
         return fcResult;
     }
 
@@ -1583,15 +1004,8 @@ public class ProviderTraverser
     protected void completeContent(
         Path objectPath,
         DataproviderObject_1_0 objectClass,
-        List containedReferences
+        List<Path> containedReferences
     ) throws ServiceException {
-        logIndent(
-            0,
-            "contentComplete: "
-                + (String) objectClass.getValues("qualifiedName").get(0)
-                + " "
-                + objectPath.getBase()
-        );
         getTraversalHandler().contentComplete(
             objectPath,
             (String) objectClass.getValues("qualifiedName").get(0),
@@ -1608,50 +1022,10 @@ public class ProviderTraverser
      */
     protected void completeReference(
         Path reference, 
-        Collection objectIds
+        Collection<Path> objectIds
     ) throws ServiceException {
         logIndent(0, "referenceComplete: " + reference + " ids: " + objectIds);
-        getTraversalHandler().referenceComplete(reference, objectIds);
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * Roles are treated as references of the class itself, not of Role.
-     * 
-     * @param exposedEnd         the objectClass containing a role reference
-     * @return boolean           continue traversal
-     * @throws ServiceException
-     */
-    protected boolean startRoleReference(
-        DataproviderObject_1_0 exposedEnd
-    ) throws ServiceException {
-        logIndent(
-            1,
-            "startRoleReference: "
-                + ((String) exposedEnd.getValues("qualifiedName").get(0))
-                + ":role");
-        return getTraversalHandler().startReference(
-            ((String) exposedEnd.getValues("qualifiedName").get(0)) + ":role");
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * Roles are treated as references of the class itself, not of Role.
-     * 
-     * @param exposedEnd            the objectClass containing the role
-     * reference
-     * @throws ServiceException
-     */
-    protected void endRoleReference(
-        DataproviderObject_1_0 exposedEnd
-    ) throws ServiceException {
-        logIndent(
-            -1,
-            "endReference: "
-                + ((String) exposedEnd.getValues("qualifiedName").get(0))
-                + ":role");
-        getTraversalHandler().endReference(
-            ((String) exposedEnd.getValues("qualifiedName").get(0)) + ":role");
+        this.getTraversalHandler().referenceComplete(reference, objectIds);
     }
 
     //-----------------------------------------------------------------------
@@ -1712,48 +1086,14 @@ public class ProviderTraverser
    protected Path getStatelessPath(Path statefullPath) throws ServiceException {
       int pos = statefullPath.getBase().indexOf(";state=");
       if(pos < 0 ) { // TODO
-//        if (inNoStateModus())
-        return statefullPath;
-//        else
-//      new ServiceException(
-//         BasicException.Code.DEFAULT_DOMAIN,
-//         BasicException.Code.ASSERTION_FAILURE,
-//         new Parameter[] {
-//            new Parameter("statefullPath", statefullPath)
-//         },
-//         "path not statefull.");
-   }
-      
-      Path stateless = statefullPath.getPrefix(statefullPath.size() - 1);
-      
-      stateless.add(statefullPath.getBase().substring(0,pos));      
-      
+          return statefullPath;
+      }      
+      Path stateless = statefullPath.getPrefix(statefullPath.size() - 1);      
+      stateless.add(statefullPath.getBase().substring(0,pos));            
       return stateless;
    }
-/**
-   protectedPath getStatelessPath(Path statefullPath) throwsServiceException {
-      intpos = statefullPath.getBase().indexOf(";state=");
-      if(pos < 0 ) {
-//           if (inNoStateModus())
-           return statefullPath;
-//           else
-//         new ServiceException(
-//            BasicException.Code.DEFAULT_DOMAIN,
-//            BasicException.Code.ASSERTION_FAILURE,
-//            new Parameter[] {
-//               new Parameter("statefullPath", statefullPath)
-//            },
-//            "path not statefull.");
-      }
 
-      Path stateless = statefullPath.getPrefix(statefullPath.size() - 1);
-
-      stateless.add(statefullPath.getBase().substring(0,pos));
-
-      returnstateless;
-   }
- */
-    //-----------------------------------------------------------------------
+   //-----------------------------------------------------------------------
     /**
      * Get the model classes which correspond to the path's element. 
      * The path must be full qualified.
@@ -1761,10 +1101,10 @@ public class ProviderTraverser
      * @param path
      * @return List
      */
-    protected List getClassesForPath(
+    protected List<ModelElement_1_0> getClassesForPath(
         Path path
     ) throws ServiceException {
-        ArrayList classes = new ArrayList();
+        ArrayList<ModelElement_1_0> classes = new ArrayList<ModelElement_1_0>();
         DataproviderObject_1_0 objectClass =
             this.model.getDereferencedType(AUTHORITY);
 
@@ -1774,16 +1114,17 @@ public class ProviderTraverser
             String referenceName = path.get(i);
             String fullReferenceName = null;
             // the feature may also be in one of the subclasses:
-            for (Iterator subIter = objectClass.getValues("allSubtype").iterator();
+            for (Iterator<Object> subIter = objectClass.getValues("allSubtype").iterator();
                   subIter.hasNext() && fullReferenceName == null;
             ) {
-                DataproviderObject_1_0 subClass =
-                    this.model.getDereferencedType(
-                        ((Path) subIter.next()).getBase());
-                for (Iterator refIter = subClass.getValues("feature").iterator();
+                ModelElement_1_0 subClass = this.model.getDereferencedType(
+                    subIter.next()
+                );
+                for (
+                    Iterator<Path> refIter = subClass.getValues("feature").iterator(); 
                     refIter.hasNext() && fullReferenceName == null;
                 ) {
-                    String feature = ((Path) refIter.next()).getBase();
+                    String feature = (refIter.next()).getBase();
                     if (feature.endsWith(
                             PathComponent.FIELD_DELIMITER + referenceName)
                     ) {
@@ -1804,13 +1145,10 @@ public class ProviderTraverser
                     "Reference not found in objectClass or its children.");
             }
             ModelElement_1_0 assocEnd = this.model.getElement(fullReferenceName);
-
             classes.add(assocEnd);
-
             objectClass =
                 this.model.getDereferencedType(assocEnd.getValues("type").get(0));
         }
-
         return classes;
     }
 
@@ -1833,35 +1171,36 @@ public class ProviderTraverser
         Path path, 
         int startFrom
     ) throws ServiceException {
-        List classes = this.getClassesForPath(path);
+        List<ModelElement_1_0> classes = this.getClassesForPath(path);
         int pos = startFrom;
         if (pos % 2 == 1 && pos < path.size() - 1) {
-            DataproviderObject clazz = (DataproviderObject) classes.get(pos++);
-            this.startReference(clazz);
+            ModelElement_1_0 classDef = classes.get(pos++);
+            this.startReference(classDef);
         }
         while (pos < path.size() - 1 && pos >= 0) {
+            DataproviderObject object = new DataproviderObject(path.getPrefix(pos + 1));
+            object.values(SystemAttributes.OBJECT_CLASS).set(
+                0,
+                classes.get(pos).getValues("qualifiedName").get(0)
+            );
             this.startObject(
+                object.path().getParent(),
                 path.getPrefix(pos + 1),
-                (DataproviderObject) classes.get(pos),
+                classes.get(pos),
                 TraversalHandler.NULL_OP
             );
-            DataproviderObject obj = new DataproviderObject(path.getPrefix(pos + 1));
-            // Dummy object for Authority, Provider, etc.
-            obj.values("qualifiedName").set(
-                0,
-                ((DataproviderObject) classes.get(pos))
-                    .getValues("qualifiedName").get(0)
+            this.completeFeatures(
+                object.path().getParent(),
+                object, 
+                classes.get(pos)
             );
-            obj.values("attribute");
-            this.completeFeatures(obj, (ModelElement_1_0) classes.get(pos));
             pos++;
             if (pos < path.size() - 1) {
-                DataproviderObject clazz =
-                    (DataproviderObject) classes.get(pos++);
-                this.startReference(clazz);
+                ModelElement_1_0 classDef = classes.get(pos++);
+                this.startReference(classDef);
             }
         }
-        return (ModelElement_1_0)classes.get(classes.size() - 1);
+        return classes.get(classes.size() - 1);
     }
 
     //-----------------------------------------------------------------------
@@ -1880,42 +1219,36 @@ public class ProviderTraverser
         int upTo
     ) throws ServiceException {
         SysLog.trace("upTo: " + upTo + " end path:", path);
-        boolean isReferencePath = false;
-        
+        boolean isReferencePath = false;        
         Path classesPath = path;
         /// if the last element is a reference, remove it (because getClassesForPath()
         /// accepts only full qualified paths)
         if (classesPath.size() % 2 == 0) {
             isReferencePath = true;
             /// classesPath = path.getParent();
-        }
-        
-        List classes = getClassesForPath(classesPath);
+        }        
+        List<ModelElement_1_0> classes = this.getClassesForPath(classesPath);
         int pos = classes.size() - 1;
         if (isReferencePath) {
             // getClassesForPath returns all the classes up to the last reference
-            // contained in path. It always ends in a reference.
-          
+            // contained in path. It always ends in a reference.          
             // ignore the last entry, because this is already ended. 
             // if it is a reference path, the last part of the path has already 
             // been removed above.
-            pos--;
-            
+            pos--;            
             // end the first object
             if (pos >= upTo) {
-              endObject((DataproviderObject)classes.get(pos--)); // end the first object
+                this.endObject(classes.get(pos--)); // end the first object
             }
         }
         // else the last object is not contained in classes, because it 
         // always ends with the last reference, thus it must not be removed
-        // or anything
-        
+        // or anything        
         while (pos >= 0 && pos >= upTo) {
-            DataproviderObject clazz = (DataproviderObject) classes.get(pos--);
-            endReference(clazz);
-
+            ModelElement_1_0 classDef = classes.get(pos--);
+            this.endReference(classDef);
             if (pos >= upTo) {
-                endObject((DataproviderObject) classes.get(pos--));
+                this.endObject(classes.get(pos--));
             }
         }
     }
@@ -1966,10 +1299,8 @@ public class ProviderTraverser
     private boolean isReferencedEndARoleType(
         ModelElement_1_0 reference
     ) throws ServiceException {
-        ModelElement_1_0 referencedEnd = this.model.getElement(reference.getValues("referencedEnd").get(0));
-        
-        ModelElement_1_0 type = this.model.getElement(referencedEnd.getValues("type").get(0));
-        
+        ModelElement_1_0 referencedEnd = this.model.getElement(reference.getValues("referencedEnd").get(0));        
+        ModelElement_1_0 type = this.model.getElement(referencedEnd.getValues("type").get(0));        
         return  this.model.isSubtypeOf(type, "org:openmdx:compatibility:role1:RoleType");
     }
 
@@ -1985,8 +1316,7 @@ public class ProviderTraverser
        ModelElement_1_0 referenceType
    ) throws ServiceException {
        String qualifiedName = 
-           (String) referenceType.getValues("qualifiedName").get(0);
-       
+           (String) referenceType.getValues("qualifiedName").get(0);       
        return qualifiedName.equals("org:openmdx:compatibility:view1:ViewCapable:view");
    }
 
@@ -2007,25 +1337,25 @@ public class ProviderTraverser
     }
     
     //-----------------------------------------------------------------------
-    /**
-     * Removes the state parts from the path supplied. 
-     * 
-     * @param path path to remove state part from
-     * @return the path without the state part
-     */
-    private Path removeStateFromPath(Path path) {
-        for (int i = 0; i < path.size(); i++) {
-            if (path.get(i).equals("state") 
-                && path.size() > i
-                && path.get(i+1).charAt(0) >= '0'  // is it a number
-                && path.get(i+1).charAt(0) <= '9'
-            ) {
-                path.remove(i);  // state
-                path.remove(i);  // number
-            }
-        }
-        return path;
-    }
+//  /**
+//   * Removes the state parts from the path supplied. 
+//   * 
+//   * @param path path to remove state part from
+//   * @return the path without the state part
+//   */
+//  private Path removeStateFromPath(Path path) {
+//      for (int i = 0; i < path.size(); i++) {
+//          if (path.get(i).equals("state") 
+//              && path.size() > i
+//              && path.get(i+1).charAt(0) >= '0'  // is it a number
+//              && path.get(i+1).charAt(0) <= '9'
+//          ) {
+//              path.remove(i);  // state
+//              path.remove(i);  // number
+//          }
+//      }
+//      return path;
+//  }
 
     //-----------------------------------------------------------------------
     /** 
@@ -2110,15 +1440,14 @@ public class ProviderTraverser
 
     private TraversalHandler traversalHandler = null;
     private ErrorHandler errorHandler = null;
-    private ServiceHeader header = null;
     private RequestCollection reader = null;
     private Model_1_0 model = null;
-    private final List startPoints;
-    private final List referenceFilters;
-    private final Map attributeFilters;
+    private final List<Path> startPoints;
+    private final Set<String> referenceFilter;
+    private final Map<String,Filter> attributeFilter;
 
     /** The source paths which have already been traversed */
-    private List traversedPaths = new ArrayList();
+    private List<Path> traversedPaths = new ArrayList<Path>();
 
     // some constants to ease reading
     private final static boolean IS_STATE = true;

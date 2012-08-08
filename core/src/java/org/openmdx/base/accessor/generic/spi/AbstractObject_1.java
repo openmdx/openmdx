@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractObject_1.java,v 1.13 2007/10/10 16:05:50 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AbstractObject_1.java,v 1.17 2008/06/27 16:59:27 hburger Exp $
  * Description: SPICE Object Layer: Abstract Object_1_0 Implementation
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:50 $
+ * Date:        $Date: 2008/06/27 16:59:27 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,12 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
- */
- 
-/**
- * @author hburger
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.accessor.generic.spi;
 
@@ -78,11 +73,11 @@ import org.openmdx.base.accessor.generic.cci.LargeObject_1_0;
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.accessor.generic.cci.Structure_1_0;
 import org.openmdx.base.collection.FilterableMap;
-import org.openmdx.base.event.InstanceCallbackEvent;
-import org.openmdx.base.event.InstanceCallbackListener;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.compatibility.base.event.InstanceCallbackEvent;
+import org.openmdx.compatibility.base.event.InstanceCallbackListener;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
@@ -91,6 +86,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
 /**
  * Abstract Object_1_0 implementation
  */
+@SuppressWarnings("unchecked")
 public class AbstractObject_1 implements 
     Object_1_0 
 {
@@ -109,11 +105,6 @@ public class AbstractObject_1 implements
     protected String objectClass;
     protected final Set dirty = new HashSet();
     
-    /**
-     * @deprecated
-     */
-    private Object synchronization = null;
-
     private Map listeners = new WeakHashMap();
     
     //------------------------------------------------------------------------
@@ -125,7 +116,7 @@ public class AbstractObject_1 implements
      * <p>
      * While in general an Object implementing Object_1_0 is allowed to throw 
      * a ServiceException for status requests, the AbstractObject_1 does
-     * not include them in its statsu method declarations.
+     * not include them in its status method declarations.
      */
     public Path objGetPath(
     ){
@@ -751,68 +742,35 @@ public class AbstractObject_1 implements
             null,
             InstanceCallbackListener.class
         );
-        if(listeners.length == 0) return;
-        InstanceCallbackEvent event = new InstanceCallbackEvent(
-            type,
-            this,
-            null
-        );
-        for(
-            int i = 0;
-            i < listeners.length;
-            i++
-        ) {
-            switch (type) {
-                case InstanceCallbackEvent.POST_LOAD :
-                case InstanceCallbackEvent.POST_RELOAD :
-                    listeners[i].postLoad(event);
-                    break;
-                case InstanceCallbackEvent.PRE_CLEAR :
-                    listeners[i].preClear(event);
-                    break;
-                case InstanceCallbackEvent.PRE_DELETE :
-                    listeners[i].preDelete(event);
-                    break;
-                case InstanceCallbackEvent.PRE_STORE :
-                    listeners[i].preStore(event);
-                    break;
+        if(listeners.length != 0) {
+            InstanceCallbackEvent event = new InstanceCallbackEvent(
+                type,
+                this,
+                null
+            );
+            for(InstanceCallbackListener listener : listeners) {
+                switch (type) {
+                    case InstanceCallbackEvent.POST_LOAD :
+                    case InstanceCallbackEvent.POST_RELOAD :
+                        listener.postLoad(event);
+                        break;
+                    case InstanceCallbackEvent.PRE_CLEAR :
+                        listener.preClear(event);
+                        break;
+                    case InstanceCallbackEvent.PRE_DELETE :
+                        listener.preDelete(event);
+                        break;
+                    case InstanceCallbackEvent.PRE_STORE :
+                        listener.preStore(event);
+                        break;
+                    case InstanceCallbackEvent.POST_CREATE :
+                        listener.postCreate(event);
+                        break;
+                }
             }
         }
     }
     
-    /**
-     * Register a synchronization object for upward delegation.
-     *
-     * @param   synchronization
-     *          The synchronization object to be registered
-     *
-     * @exception ServiceException TOO_MANY_EVENT_LISTENERS
-     *            if an attempt is made to register more than one 
-     *            synchronization object.
-     * 
-     * @deprecated  use addEventListener(String,EventListener) instead
-     */
-    public void objRegisterSynchronization(
-        org.openmdx.compatibility.base.accessor.object.cci.InstanceCallbacks_1_0 synchronization
-    ) throws ServiceException {
-        if((this.synchronization != null) && (this.synchronization != synchronization)) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TOO_MANY_EVENT_LISTENERS,
-            getExceptionParameters(
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("old",this.synchronization.getClass().getName()), 
-                    new BasicException.Parameter("new",synchronization.getClass().getName())
-                }
-            ),
-            "Attempt to register more than one synchronization object"
-        );
-        objAddEventListener(
-            null, 
-            new org.openmdx.compatibility.base.accessor.object.spi.InstanceCallbackAdapter(synchronization)
-        );
-        this.synchronization = synchronization;
-    }
-
 
     //------------------------------------------------------------------------
     // Implements java.beans.PropertyChangeListener
@@ -945,7 +903,7 @@ public class AbstractObject_1 implements
     
     /* (non-Javadoc)
      */
-    private static class ContextFree 
+    static class ContextFree 
         extends AbstractMap 
         implements FilterableMap, Serializable 
     {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DecimalMarshaller.java,v 1.8 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: DecimalMarshaller.java,v 1.9 2008/04/09 12:34:01 hburger Exp $
  * Description: DecimalMarshaller class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/04/09 12:34:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -45,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.accessor.jmi.spi;
 
@@ -54,6 +54,7 @@ import java.math.BigDecimal;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
 
 
@@ -63,7 +64,8 @@ import org.openmdx.kernel.exception.BasicException;
  * Number to the specific type BigDecimal.
  */
 public class DecimalMarshaller
-  implements Marshaller {
+  implements Marshaller, ReluctantUnmarshalling 
+{
 
   //-------------------------------------------------------------------------
   private DecimalMarshaller(
@@ -84,11 +86,11 @@ public class DecimalMarshaller
     Object source
   ) throws ServiceException {
     try {
-        if(source == null) return null;
-      if(source instanceof BigDecimal) return source;
-      return new BigDecimal(((Number)source).toString());
-    } 
-    catch (RuntimeException e) {
+        return 
+            source == null ? null :
+            source instanceof BigDecimal ? source :
+            new BigDecimal(((Number)source).toString());
+    } catch (RuntimeException e) {
         throw new ServiceException(
             e,
             BasicException.Code.DEFAULT_DOMAIN, 
@@ -129,7 +131,7 @@ public class DecimalMarshaller
   //-------------------------------------------------------------------------
   // Variables
   //-------------------------------------------------------------------------
-  static private DecimalMarshaller instance = new DecimalMarshaller();
+  static private final DecimalMarshaller instance = new DecimalMarshaller();
 
 }
   

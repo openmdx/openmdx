@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: RoleMapper_1_0.java,v 1.6 2007/01/21 20:45:43 wfro Exp $
+ * Name:        $Id: RoleMapper_1_0.java,v 1.8 2008/04/11 23:09:19 wfro Exp $
  * Description: RoleMapper_1_0 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:45:43 $
+ * Date:        $Date: 2008/04/11 23:09:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,7 +60,7 @@ package org.openmdx.portal.servlet;
 
 import java.util.List;
 
-import javax.jmi.reflect.RefObject;
+import javax.jdo.PersistenceManager;
 
 public interface RoleMapper_1_0 {
 
@@ -71,18 +71,20 @@ public interface RoleMapper_1_0 {
      * @param principalName
      * @return the checked principal if it exists and is not disabled
      */
-    public RefObject checkPrincipal(
-        RefObject realm,
-        String principalName
+    public org.openmdx.security.realm1.cci2.Principal checkPrincipal(
+        org.openmdx.security.realm1.cci2.Realm realm,
+        String principalName,
+        PersistenceManager pm
     );
     
     /**
      * Get all roles for the given principal. All realms should be
      * checked for roles except the login realm.
      */    
-    public List getUserInRoles(
-        RefObject loginRealm,
-        String principalName
+    public List<String> getUserInRoles(
+        org.openmdx.security.realm1.cci2.Realm loginRealm,
+        String principalName,
+        PersistenceManager pm
     );
     
     /**

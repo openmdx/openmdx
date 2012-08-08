@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RoleObject_1.java,v 1.6 2007/10/10 16:05:51 hburger Exp $
+ * Name:        $Id: RoleObject_1.java,v 1.7 2008/03/19 17:18:51 hburger Exp $
  * Description: Embedded Role Object
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:51 $
+ * Date:        $Date: 2008/03/19 17:18:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,6 +67,7 @@ import org.openmdx.compatibility.base.naming.Path;
 /**
  * Embedded Role Object
  */
+@SuppressWarnings("unchecked")
 class RoleObject_1 extends EmbeddedObject_1 {
 
     /**

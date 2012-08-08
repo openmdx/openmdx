@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceManagerFactory_1.java,v 1.11 2008/02/29 18:02:03 hburger Exp $
+ * Name:        $Id: PersistenceManagerFactory_1.java,v 1.23 2008/07/01 08:29:44 hburger Exp $
  * Description: Persistence Manager Factory 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:02:03 $
+ * Date:        $Date: 2008/07/01 08:29:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,24 +50,21 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import javax.jdo.JDOFatalInternalException;
 import javax.jdo.JDOFatalUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.jdo.datastore.JDOConnection;
+import javax.security.auth.Subject;
 
 import org.openmdx.base.accessor.generic.view.Manager_1;
-import org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_2;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.object.spi.AbstractPersistenceManagerFactory;
-import org.openmdx.base.object.spi.InstanceLifecycleNotifier;
+import org.openmdx.base.persistence.spi.AbstractManagerFactory;
+import org.openmdx.base.persistence.spi.OptimisticTransaction_2_0;
 import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.LateBindingConnection_1;
-import org.openmdx.compatibility.base.dataprovider.cci.QualityOfService;
 import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.transport.adapter.Provider_1;
@@ -75,6 +72,7 @@ import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1C
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.compatibility.base.dataprovider.transport.delegation.Connection_1;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 
 /**
  * Persistence Manager Factory
@@ -82,8 +80,7 @@ import org.openmdx.kernel.exception.BasicException;
  * @since openMDX 1.13
  */
 public class PersistenceManagerFactory_1 
-    extends AbstractPersistenceManagerFactory 
-    implements JDOConnection
+    extends AbstractManagerFactory 
 {
 
     /**
@@ -101,6 +98,9 @@ public class PersistenceManagerFactory_1
     ) {
         super(configuration);
         this.refPackageFactory = null;
+        this.optimisticTransaction = (OptimisticTransaction_2_0) configuration.get(
+            OptimisticTransaction_2_0.class.getName()
+        );
     }
 
     /**
@@ -109,10 +109,11 @@ public class PersistenceManagerFactory_1
      * @param refPackageFactory
      */
     PersistenceManagerFactory_1(
-        RefPackageFactory_1_0 refPackageFactory        
+        RefPackageFactory_1_2 refPackageFactory        
     ) {
         super(EMPTY_CONFIGURATION);
         this.refPackageFactory = refPackageFactory;
+        this.optimisticTransaction = refPackageFactory.getOptimisticTransaction();
         freeze();
     }
 
@@ -124,8 +125,13 @@ public class PersistenceManagerFactory_1
     /**
      * 
      */
-    private RefPackageFactory_1_0 refPackageFactory;
+    private final RefPackageFactory_1_2 refPackageFactory;
 
+    /**
+     * 
+     */
+    private final OptimisticTransaction_2_0 optimisticTransaction;
+    
     /**
      * 
      */
@@ -144,7 +150,18 @@ public class PersistenceManagerFactory_1
         PersistenceManagerFactory_1 persistenceManagerFactory = new PersistenceManagerFactory_1(
            properties
         );
-        if(properties.containsKey(Dataprovider_1ConnectionFactory.class.getName())) {
+        if (properties.containsKey(ConfigurableProperty.ConnectionFactory.qualifiedName())) {
+            //
+            // Standard Property
+            //
+            Dataprovider_1ConnectionFactory connectionFactory = (Dataprovider_1ConnectionFactory)properties.get(
+                ConfigurableProperty.ConnectionFactory.qualifiedName()
+            );
+            persistenceManagerFactory.setConnectionFactory(connectionFactory);
+        } else if(properties.containsKey(Dataprovider_1ConnectionFactory.class.getName())) {
+            //
+            // Compatibility Mode
+            //
             Dataprovider_1ConnectionFactory connectionFactory = (Dataprovider_1ConnectionFactory)properties.get(
                 Dataprovider_1ConnectionFactory.class.getName()
             );
@@ -156,28 +173,48 @@ public class PersistenceManagerFactory_1
 
     
     //------------------------------------------------------------------------
-    // Implements JDOConnection
-    //------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.object.spi.AbstractPersistenceManagerFactory#close()
-     */
-    public synchronized void close() {
-        if(this.connection != null) this.connection.close();
-        super.close();
-    }
-
-    /* (non-Javadoc)
-     * @see javax.jdo.datastore.JDOConnection#getNativeConnection()
-     */
-    public Object getNativeConnection() {
-        return this.connection;
-    }
-    
-    
-    //------------------------------------------------------------------------
     // Extends AbstractPersistenceManagerFactory
     //------------------------------------------------------------------------
+
+    /**
+     * Create a service header populated with a principal list encoded as 
+     * user name.
+     * 
+     * @param connectionUsername a principal or the stringified principal list 
+     * 
+     * @return a principal array
+     * @deprecated Use {@link #newServiceHeader(String,String)} instead
+     */
+    public static ServiceHeader newServiceHeader(
+        String connectionUsername
+    ){
+        return newServiceHeader(connectionUsername, null);
+    }
+
+    /**
+     * Create a service header populated with a principal list encoded as 
+     * user name.
+     * 
+     * @param connectionUsername a principal or the stringified principal list 
+     * @param connectionPassword the correlation id
+     * 
+     * @return a principal array
+     * @deprecated Use {@link #toServiceHeader(String,String)} instead
+     */
+    public static ServiceHeader newServiceHeader(
+        String connectionUsername, 
+        String connectionPassword
+    ){
+        return toServiceHeader(connectionUsername, connectionPassword);
+    }
+
+    
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManagerFactory#getPersistenceManagerProxy()
+     */
+    public PersistenceManager getPersistenceManagerProxy() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * 
@@ -203,6 +240,45 @@ public class PersistenceManagerFactory_1
         }
         return this.connection;
     }
+
+    /**
+     * 
+     * @param serviceHeader
+     * @return
+     */
+    protected PersistenceManager newPersistenceManager(
+        ServiceHeader serviceHeader
+    ){
+        try {
+            boolean containerManaged = isContainerManaged();
+            boolean transactionPolicyIsNew = !containerManaged;
+            return new RefRootPackage_1(
+                new Manager_1(
+                    new Connection_1(
+                        new Provider_1(
+                            new RequestCollection(
+                                serviceHeader,
+                                getConnection()
+                            ),
+                            transactionPolicyIsNew
+                        ),
+                        null, // userTransaction
+                        containerManaged,
+                        getOptimistic(),
+                        "UUID" // defaultQualifierType
+                    )
+                ),
+                this,
+                getBindingPackageSuffix(), 
+                this.optimisticTransaction
+            ).refPersistenceManager();  
+        } catch (ServiceException exception) {
+            throw new JDOFatalUserException(
+                "Persistence manager establishment failed",
+                exception
+            );
+        }
+    }
     
     /**
      * Create a new persistence manager
@@ -215,35 +291,13 @@ public class PersistenceManagerFactory_1
      * 
      * @return a new persistence manager
      */
-    protected synchronized PersistenceManager newPersistenceManager(
-        InstanceLifecycleNotifier notifier
+    @Override 
+    protected synchronized PersistenceManager newManager(
     ){
         if(this.refPackageFactory == null) {
-            try {
-                boolean containerManagedUnitOfWork = !this.getOptimistic();
-                boolean transactionPolicyIsNew = !containerManagedUnitOfWork;
-                return new RefRootPackage_1(
-                    new Manager_1(
-                        new Connection_1(
-                            new Provider_1(
-                                new RequestCollection(
-                                    new ServiceHeader(),
-                                    getConnection()
-                                ),
-                                transactionPolicyIsNew
-                              ),
-                              containerManagedUnitOfWork
-                          )
-                      ),
-                      this,
-                      this.getDefaultImplPackageSuffix()
-                 ).refPersistenceManager();  
-            } catch (ServiceException exception) {
-                throw new JDOFatalUserException(
-                    "Persistence manager establishment failed",
-                    exception
-                );
-            }
+            return newPersistenceManager(
+                new ServiceHeader()
+            );
         } else {
             try {
                 return this.refPackageFactory.createRefPackage().refPersistenceManager();
@@ -261,111 +315,29 @@ public class PersistenceManagerFactory_1
      * <p>
      * The parameters may be kept by the instance.
      * 
-     * @param notifier
-     * @param connectionUsername the principal chain
-     * @param connectionPassword the correlation id
+     * @param subject a subject with a single PasswordCredential
      * 
      * @return a new persistence manager
      */
-    protected synchronized PersistenceManager newPersistenceManager(
-        InstanceLifecycleNotifier notifier,
-        String connectionUsername,
-        String connectionPassword
+    @Override 
+    protected synchronized PersistenceManager newManager(
+        Subject subject
     ){
         if(this.refPackageFactory == null) {
-            try {
-                boolean containerManagedUnitOfWork = !this.getOptimistic();
-                boolean transactionPolicyIsNew = !containerManagedUnitOfWork;
-                return new RefRootPackage_1(
-                    new Manager_1(
-                        new Connection_1(
-                            new Provider_1(
-                                new RequestCollection(
-                                    new ServiceHeader(
-                                        getPrincipalChain(connectionUsername),
-                                        connectionPassword, // correlationId,
-                                        false, // traceRequest
-                                        new QualityOfService(),
-                                        null, // requestedAt,
-                                        null // requestedFor
-                                    ),
-                                    getConnection()
-                                ),
-                                transactionPolicyIsNew
-                              ),
-                              containerManagedUnitOfWork
-                          )
-                      ),
-                      this,
-                      this.getDefaultImplPackageSuffix()
-                 ).refPersistenceManager();  
-            } catch (ServiceException exception) {
-                throw new JDOFatalUserException(
-                    "Persistence manager establishment failed",
-                    exception
-                );
-            }
+            return newPersistenceManager(
+                toServiceHeader(subject)
+            );
         } else throw new JDOFatalUserException(
             "This factory does not support service header replacement"
         );
     }
 
-    /**
-     * Create a service header populated with a principal list encoded as 
-     * user name.
-     * 
-     * @param connectionUsername a principal or the stringified principal list 
-     * 
-     * @return a principal array
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory#initialize(javax.jdo.PersistenceManager)
      */
-    public static ServiceHeader newServiceHeader(
-        String connectionUsername
-    ){
-        return  new ServiceHeader(
-            getPrincipalChain(connectionUsername),
-            null, // correlationId,
-            false, // traceRequest
-            new QualityOfService(),
-            null, // requestedAt,
-            null // requestedFor
-        );
-    }
-    
-    /**
-     * Convert the stringified principal chain into an array
-     * 
-     * @param connectionUsername a principal or the stringified principal list 
-     * 
-     * @return a principal array
-     */
-    public static String[] getPrincipalChain(
-        String connectionUsername
-    ){
-        if(
-            connectionUsername == null || 
-            "".equals(connectionUsername)
-        ) {
-            return new String[]{};
-        } else if (
-            connectionUsername.startsWith("[") &&
-            connectionUsername.endsWith("]")
-        ) {
-            List<String> principalChain = new ArrayList<String>();
-            for(
-                int j = 0, i = 1, iLimit = connectionUsername.length() - 1;
-                i < iLimit;
-                i = j + 2
-            ){
-                j = connectionUsername.indexOf(", ", i);
-                if(j < 0) j = iLimit;
-                principalChain.add(connectionUsername.substring(i, j));
-            }
-            return principalChain.toArray(
-                new String[principalChain.size()]
-            );
-        } else {
-            return new String[]{connectionUsername};
-        }
+    @Override
+    protected void initialize(PersistenceManager persistenceManager) {
+        initialize(persistenceManager, false);
     }
 
 }

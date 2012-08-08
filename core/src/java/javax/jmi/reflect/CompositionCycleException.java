@@ -2,6 +2,7 @@ package javax.jmi.reflect;
 
 /** Exception thrown when an instance object is a component of itself.
  */
+@SuppressWarnings("serial")
 public class CompositionCycleException extends JmiException {
     
     /**

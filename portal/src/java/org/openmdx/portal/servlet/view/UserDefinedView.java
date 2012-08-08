@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UserDefinedView.java,v 1.9 2007/12/13 18:58:09 wfro Exp $
+ * Name:        $Id: UserDefinedView.java,v 1.10 2008/04/04 11:48:24 hburger Exp $
  * Description: UserDefinedView 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:58:09 $
+ * Date:        $Date: 2008/04/04 11:48:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -86,7 +86,7 @@ public class UserDefinedView
             application,
             parentView.getControlFactory()
         );
-        this.attributes = new HashMap();
+        this.attributes = new HashMap<String,Attribute>();
         this.requestId = parentView.getRequestId();
     }
 
@@ -210,7 +210,7 @@ public class UserDefinedView
     public Map getAsFieldMap(
         Attribute[] attributes
     ) {
-        Map fieldMap = new HashMap();
+        Map<String,Attribute> fieldMap = new HashMap<String,Attribute>();
         for(
             int i = 0; i < attributes.length; 
             i++
@@ -224,11 +224,11 @@ public class UserDefinedView
     }
     
     //-------------------------------------------------------------------------
-    public Map getAsParameterMap(
-        Map allParameters,
+    public Map<String,?> getAsParameterMap(
+        Map<String,?> allParameters,
         String[] requiredParameters
     ) {
-        Map parameterMap = new HashMap();
+        Map<String,Object> parameterMap = new HashMap<String,Object>();
         for(
             int i = 0; i < requiredParameters.length; 
             i++
@@ -248,6 +248,6 @@ public class UserDefinedView
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = -8074193422830498288L;
     
-    protected final Map attributes;
+    protected final Map<String,Attribute> attributes;
 
 }

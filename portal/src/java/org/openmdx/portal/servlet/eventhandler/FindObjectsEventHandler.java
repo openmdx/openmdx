@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsEventHandler.java,v 1.8 2007/04/21 09:10:06 wfro Exp $
- * Description: ShowObjectView 
- * Revision:    $Revision: 1.8 $
+ * Name:        $Id: FindObjectsEventHandler.java,v 1.16 2008/05/31 23:40:07 wfro Exp $
+ * Description: FindObjectsEventHandler 
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/04/21 09:10:06 $
+ * Date:        $Date: 2008/05/31 23:40:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -69,13 +69,14 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.openmdx.base.accessor.jmi.cci.RefContainer_1_0;
+import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.compatibility.base.dataprovider.cci.Orders;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.query.FilterOperators;
 import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.base.query.Quantors;
@@ -87,14 +88,15 @@ import org.openmdx.portal.servlet.ApplicationContext;
 public class FindObjectsEventHandler {
     
     //-----------------------------------------------------------------------
-    public static void handleRequest(
+    @SuppressWarnings("unchecked")
+    public static HandleEventResult handleRequest(
         HttpServletRequest request,
         HttpServletResponse response,
         ApplicationContext application,
         String parameter,
         String[] filterValues
     ) throws IOException {
-        String refMofId = Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI);
+        String objectXri = Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI);
         String referenceName = Action.getParameter(parameter, Action.PARAMETER_REFERENCE_NAME);
         String filterByType = Action.getParameter(parameter, Action.PARAMETER_FILTER_BY_TYPE);
         String filterByFeature = Action.getParameter(parameter, Action.PARAMETER_FILTER_BY_FEATURE);
@@ -122,7 +124,8 @@ public class FindObjectsEventHandler {
             response
         );
         try {
-            RefObject_1_0 parent = (RefObject_1_0)application.getDataPackage().refObject(refMofId);
+            Path objectIdentity = new Path(objectXri);
+            RefObject_1_0 parent = (RefObject_1_0)application.getPmData().getObjectById(objectIdentity);
             List filterProperties = new ArrayList();
             filterProperties.addAll(
                 application.getPortalExtension().getFindObjectsBaseFilter(
@@ -188,21 +191,20 @@ public class FindObjectsEventHandler {
             Collection allObjects = (Collection)parent.refGetValue(referenceName);
             List filteredObjects = null;
             try {
-                filteredObjects = ((RefContainer_1_0)allObjects).subSet(
-                    filterProperties == null
-                        ? null
-                        : (FilterProperty[])filterProperties.toArray(new FilterProperty[filterProperties.size()])
-                ).toList(
-                    s == null
-                        ? null
-                        : new AttributeSpecifier[]{s}
+                filteredObjects = ((RefContainer)allObjects).refGetAll(
+                    new org.openmdx.base.query.Filter(
+                        filterProperties == null
+                            ? null
+                            : (FilterProperty[])filterProperties.toArray(new FilterProperty[filterProperties.size()]),
+                        s == null
+                            ? null
+                            : new AttributeSpecifier[]{s}
+                    )
                 );
             }
             catch(UnsupportedOperationException e) {
                 filteredObjects = new ArrayList(
-                    ((RefContainer_1_0)allObjects).subSet(
-                        null
-                    )
+                    ((RefContainer)allObjects).refGetAll(null)
                 );
             }
             pw.print("<ul class=\"autocomplete\" >\n");
@@ -241,7 +243,10 @@ public class FindObjectsEventHandler {
         catch(Exception e) {
             new ServiceException(e).log();
         }
-        pw.close();        
+        pw.close();  
+        return new HandleEventResult(
+            HandleEventResult.StatusCode.DONE
+        );
     }
 
     //-------------------------------------------------------------------------

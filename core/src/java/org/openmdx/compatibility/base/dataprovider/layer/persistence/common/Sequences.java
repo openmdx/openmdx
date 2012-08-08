@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Sequences.java,v 1.3 2007/01/17 18:05:04 hburger Exp $
+ * Name:        $Id: Sequences.java,v 1.4 2008/03/21 18:46:49 hburger Exp $
  * Description: Sequences
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/17 18:05:04 $
+ * Date:        $Date: 2008/03/21 18:46:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
 /**
  * Sequences
  */
+@SuppressWarnings("unchecked")
 public class Sequences implements MultiLineStringRepresentation{
 
     /**

@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -36,17 +37,18 @@ import java.util.Collection;
  * <b>Note that this implementation is not synchronized.</b>
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:19 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:18 $
  * 
  * @author Jeff Varszegi
  * @author Rich Dougherty
  * @author Phil Steitz
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class NodeCachingLinkedList extends AbstractLinkedList implements Serializable {
 
     /** Serialization version */
-    static final long serialVersionUID = 6897789178562232073L;
+    private static final long serialVersionUID = 6897789178562232073L;
 
     /**
      * The default value for {@link #maximumCacheSize}.

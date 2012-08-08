@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Deployment.java,v 1.2 2005/06/06 14:07:54 hburger Exp $
+ * Name:        $Id: Dataprovider_1Deployment.java,v 1.6 2008/06/30 15:41:09 hburger Exp $
  * Description: In-Process Dataprovider Connection Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/06 14:07:54 $
+ * Date:        $Date: 2008/06/30 15:41:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,16 +51,23 @@
  */
 package org.openmdx.compatibility.base.application.cci;
 
+import javax.jdo.PersistenceManager;
 import javax.naming.Context;
+import javax.resource.ResourceException;
+import javax.security.auth.Subject;
+import javax.transaction.Synchronization;
 
 import org.openmdx.base.application.deploy.Deployment;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.persistence.spi.ManagerFactory_2_0;
+import org.openmdx.base.persistence.spi.OptimisticTransaction_2_0;
 import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1ConnectionFactoryImpl;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
+import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_3Connection;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -117,7 +124,7 @@ public class Dataprovider_1Deployment
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory#createConnection()
      */
-    public synchronized Dataprovider_1_1Connection createConnection(
+    public synchronized Dataprovider_1_3Connection createConnection(
     ) throws ServiceException {
         try {
             if(this.modelDeployment != null) this.modelDeployment.context();
@@ -163,7 +170,7 @@ public class Dataprovider_1Deployment
     /**
      * Dataprovider_1Connection allows destruction of unreferenced deployments.
      */
-    class Dataprovider_1Connection implements Dataprovider_1_1Connection {
+    class Dataprovider_1Connection implements Dataprovider_1_3Connection {
         
         /**
          * Constructor
@@ -207,6 +214,67 @@ public class Dataprovider_1Deployment
             UnitOfWorkRequest[] unitsOfWork
         ) {
             return this.delegate.process(header, unitsOfWork);
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.kernel.persistence.spi.EntityManagerFactory_2_0#createEntityManager(javax.security.auth.Subject)
+         */
+        public PersistenceManager createManager(
+            Subject subject
+        ) throws ResourceException {
+            if(this.delegate instanceof ManagerFactory_2_0) {
+                return ((ManagerFactory_2_0)this.delegate).createManager(subject); 
+            } else throw new ResourceException(
+                new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    new BasicException.Parameter[]{
+                        new BasicException.Parameter("required", ManagerFactory_2_0.class.getName()),
+                        new BasicException.Parameter("actual", this.delegate.getClass().getName())
+                    },
+                    "The managed connection does not implement the required interface"
+                )
+            );
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.kernel.persistence.spi.EntityManagerFactory_2_0#createEntityManager()
+         */
+        public PersistenceManager createManager(
+        ) throws ResourceException {
+            if(this.delegate instanceof ManagerFactory_2_0) {
+                return ((ManagerFactory_2_0)this.delegate).createManager(); 
+            } else throw new ResourceException(
+                new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    new BasicException.Parameter[]{
+                        new BasicException.Parameter("required", ManagerFactory_2_0.class.getName()),
+                        new BasicException.Parameter("actual", this.delegate.getClass().getName())
+                    },
+                    "The managed connection does not implement the required interface"
+                )
+            );
+        }
+
+        
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.OptimisticTransaction_2_0#commit(javax.transaction.Synchronization)
+         */
+        public void commit(
+            Synchronization synchronization
+        )throws ServiceException {
+            if(this.delegate instanceof OptimisticTransaction_2_0) {
+                ((OptimisticTransaction_2_0)this.delegate).commit(synchronization);
+            } else throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                new BasicException.Parameter[]{
+                    new BasicException.Parameter("required", OptimisticTransaction_2_0.class.getName()),
+                    new BasicException.Parameter("actual", this.delegate.getClass().getName())
+                },
+                "The managed connection does not implement the reqired interface"
+            );
         }
 
     }

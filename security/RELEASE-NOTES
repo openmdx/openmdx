@@ -1,7 +1,7 @@
 Distribution Name: openMDX/Security
-Release Date: 2008-02-20
-Specification Version: 2.0
-Implementation Version: 2.0.0
+Release Date: 2008-07-10
+Specification Version: 2.1
+Implementation Version: 2.1.0
 
 ---------------------------------------------------------------------
 Notes:
@@ -49,46 +49,19 @@ Notes:
 ---------------------------------------------------------------------
 
 0.    SUMMARY
-
-      * Bugs fixed
+      none
       
 1.    NEW FEATURES
-      
-      CR20006395
-      SecurID support added to openMDX/Security
-
-      SFSF1010664
-      Eclipse projects
-      
-      Versioned Eclipse projects are now included in the binary distribution.      
+      none
 
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
-
-      CR20006412
-      RadiusException mapping
-      
-      RadiusExceptions should be mapped to BasicExceptions.
-      This change will eliminate the need to include openmdx-radius.jar into 
-      the client's class path. 
+      none
 
 2.1.  FIXED BUGS
+      none
       
-      CR20007210
-      LDAP connections should have a close() method 
-      
-      The lack of a close() method leads to the following log entry in case of 
-      Weblogic 9:
-      * <03.12.2007 18.02 Uhr CET> <Error> <Connector> <BEA-190100> <A close() 
-        method was not found on the connection handle while testing for the 
-        viability for connection proxies : ...>
-
-      CR20006225
-      Illegal openmdx-kernel.jar Class-Path entry       
-      openmdx-security.jar refers explicitely to openmdx-kernel.jar.	
-      
-
 2.2.  DEPRECATED FEATURES
       none
             

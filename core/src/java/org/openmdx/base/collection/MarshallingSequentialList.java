@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSequentialList.java,v 1.17 2008/02/18 14:11:33 hburger Exp $
+ * Name:        $Id: MarshallingSequentialList.java,v 1.18 2008/03/06 19:03:26 hburger Exp $
  * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/03/06 19:03:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -93,7 +93,7 @@ public class MarshallingSequentialList<E>
      */    
     @SuppressWarnings("unchecked")
     public MarshallingSequentialList(
-        org.openmdx.base.object.spi.Marshaller marshaller,
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
         List<?> list 
     ) {
         this.marshaller = marshaller;
@@ -287,7 +287,7 @@ public class MarshallingSequentialList<E>
     /**
      * @serial
      */
-    protected org.openmdx.base.object.spi.Marshaller marshaller;
+    protected org.openmdx.base.persistence.spi.Marshaller marshaller;
 
 
     //------------------------------------------------------------------------

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DateFormat.java,v 1.7 2007/01/22 16:05:58 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: DateFormat.java,v 1.8 2008/03/06 19:03:24 hburger Exp $
  * Description: infrastructure: date format
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/22 16:05:58 $
+ * Date:        $Date: 2008/03/06 19:03:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -60,10 +60,10 @@ import java.util.TimeZone;
 /**
  * This class provides thread-safe DateFormatters
  */
-public class DateFormat extends ThreadLocal {
+public class DateFormat extends ThreadLocal<SimpleDateFormat> {
 
     /**
-     * Creates a DateFormat object for the spiecified pattern.
+     * Creates a DateFormat object for the specified pattern.
      * 
      * @deprecated use DateFormat.getInstance(String)
      */
@@ -107,7 +107,7 @@ public class DateFormat extends ThreadLocal {
     public static synchronized DateFormat getInstance(
         String pattern
     ){
-        DateFormat instance = (DateFormat)patternMap.get(pattern);
+        DateFormat instance = patternMap.get(pattern);
         if(instance == null) patternMap.put(
             pattern,
             instance = new DateFormat(pattern)
@@ -118,7 +118,7 @@ public class DateFormat extends ThreadLocal {
     /* (non-Javadoc)
      * @see java.lang.ThreadLocal#initialValue()
      */
-    protected Object initialValue() {
+    protected SimpleDateFormat initialValue() {
     	SimpleDateFormat formatter = new SimpleDateFormat(pattern);
     	formatter.setLenient(false);
     	formatter.setTimeZone(UTC);
@@ -135,7 +135,7 @@ public class DateFormat extends ThreadLocal {
     public String format(
     	Date date
     ){
-    	return getFormat().format(date);
+    	return get().format(date);
     }
     
     /**
@@ -158,19 +158,9 @@ public class DateFormat extends ThreadLocal {
                 e            
             );
         }
-    	return getFormat().parse(text);
+    	return get().parse(text);
     }
     
-    /**
-     * Get the thread local <code>SimpleDateFormat</code>er
-     * 
-     * @return a thread local <code>SimpleDateFormat</code>er
-     */
-    private final SimpleDateFormat getFormat(
-    ){
-        return (SimpleDateFormat)get();
-    }
-		
     
     //------------------------------------------------------------------------
     // Instance members
@@ -194,7 +184,7 @@ public class DateFormat extends ThreadLocal {
     /**
      * Associates patterns with thread maps
      */
-    final static private Map patternMap = new HashMap();
+    final static private Map<String, DateFormat> patternMap = new HashMap<String, DateFormat>();
     
     /**
      * An instance with the default format "yyyyMMdd'T'HHmmss.SSS'Z'"

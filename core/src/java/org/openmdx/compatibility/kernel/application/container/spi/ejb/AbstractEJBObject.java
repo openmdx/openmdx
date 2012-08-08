@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractEJBObject.java,v 1.1 2008/01/25 00:58:52 hburger Exp $
+ * Name:        $Id: AbstractEJBObject.java,v 1.2 2008/03/27 19:16:29 hburger Exp $
  * Description: Abstract EJBObject implementation
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:52 $
+ * Date:        $Date: 2008/03/27 19:16:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import javax.ejb.RemoveException;
 
 import org.openmdx.kernel.application.container.spi.ejb.RemoteTransactionContext;
 import org.openmdx.kernel.application.container.spi.ejb.TransactionAttribute;
+import org.openmdx.kernel.exception.BasicException;
 
 
 /**
@@ -260,7 +261,7 @@ public abstract class AbstractEJBObject
                         throw throwable;
                     }
                 } catch (Throwable throwable) {
-                    throw transactionContext.end(throwable);
+                    throw transactionContext.end(BasicException.toStackedException(throwable));
                 }
             } finally {
                 this.home.setCallerContext(callerContext);

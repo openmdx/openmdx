@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -25,14 +26,15 @@ import org.openmdx.uses.org.apache.commons.collections.Predicate;
  * based on a predicate.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:14 $
+ * @version $Revision: 1.3 $ $Date: 2008/04/25 14:32:20 $
  *
  * @author Stephen Colebourne
+ * @author Matt Benson
  */
 public class IfClosure implements Closure, Serializable {
 
     /** Serial version UID */
-    static final long serialVersionUID = 3518477308466486130L;
+    private static final long serialVersionUID = 3518477308466486130L;
 
     /** The test */
     private final Predicate iPredicate;
@@ -40,6 +42,22 @@ public class IfClosure implements Closure, Serializable {
     private final Closure iTrueClosure;
     /** The closure to use if false */
     private final Closure iFalseClosure;
+
+    /**
+     * Factory method that performs validation.
+     * <p>
+     * This factory creates a closure that performs no action when
+     * the predicate is false.
+     * 
+     * @param predicate  predicate to switch on
+     * @param trueClosure  closure used if true
+     * @return the <code>if</code> closure
+     * @throws IllegalArgumentException if either argument is null
+     * @since Commons Collections 3.2
+     */
+    public static Closure getInstance(Predicate predicate, Closure trueClosure) {
+        return getInstance(predicate, trueClosure, NOPClosure.INSTANCE);
+    }
 
     /**
      * Factory method that performs validation.
@@ -58,6 +76,21 @@ public class IfClosure implements Closure, Serializable {
             throw new IllegalArgumentException("Closures must not be null");
         }
         return new IfClosure(predicate, trueClosure, falseClosure);
+    }
+
+    /**
+     * Constructor that performs no validation.
+     * Use <code>getInstance</code> if you want that.
+     * <p>
+     * This constructor creates a closure that performs no action when
+     * the predicate is false.
+     * 
+     * @param predicate  predicate to switch on, not null
+     * @param trueClosure  closure used if true, not null
+     * @since Commons Collections 3.2
+     */
+    public IfClosure(Predicate predicate, Closure trueClosure) {
+        this(predicate, trueClosure, NOPClosure.INSTANCE);
     }
 
     /**

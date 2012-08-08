@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -37,21 +38,23 @@ import org.openmdx.uses.org.apache.commons.collections.set.UnmodifiableSet;
  * the number of occurrences of that element in the bag.
  *
  * @since Commons Collections 3.0 (previously DefaultMapBag v2.0)
- * @version $Revision: 1.5 $ $Date: 2005/04/07 14:14:18 $
+ * @version $Revision: 1.8 $ $Date: 2008/06/28 00:21:23 $
  * 
  * @author Chuck Burdick
  * @author Michael A. Smith
  * @author Stephen Colebourne
  * @author Janek Bogucki
+ * @author Steve Clark
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractMapBag implements Bag {
     
     /** The map to use to store the data */
     transient Map map;
     /** The current total size of the bag */
-    int size;
+    private int size;
     /** The modification count for fail fast iterators */
-    transient int modCount;
+    private transient int modCount;
     /** The modification count for fail fast iterators */
     private transient Set uniqueSet;
 
@@ -188,6 +191,7 @@ public abstract class AbstractMapBag implements Bag {
          * 
          * @param parent  the parent bag
          */
+        @SuppressWarnings("synthetic-access")
         public BagIterator(AbstractMapBag parent) {
             this.parent = parent;
             this.entryIterator = parent.map.entrySet().iterator();
@@ -200,6 +204,7 @@ public abstract class AbstractMapBag implements Bag {
             return (itemCount > 0 || entryIterator.hasNext());
         }
 
+        @SuppressWarnings("synthetic-access")
         public Object next() {
             if (parent.modCount != mods) {
                 throw new ConcurrentModificationException();
@@ -213,6 +218,7 @@ public abstract class AbstractMapBag implements Bag {
             return current.getKey();
         }
 
+        @SuppressWarnings("synthetic-access")
         public void remove() {
             if (parent.modCount != mods) {
                 throw new ConcurrentModificationException();
@@ -221,12 +227,12 @@ public abstract class AbstractMapBag implements Bag {
                 throw new IllegalStateException();
             }
             MutableInteger mut = (MutableInteger) current.getValue();
-            if (mut.value > 0) {
+            if (mut.value > 1) {
                 mut.value--;
-                parent.size--;
             } else {
                 entryIterator.remove();
             }
+            parent.size--;
             canRemove = false;
         }
     }

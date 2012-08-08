@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObject.jsp,v 1.8 2006/05/18 20:42:03 wfro Exp $
+ * Name:        $Id: EditObject.jsp,v 1.9 2008/06/11 21:12:58 wfro Exp $
  * Description: EditObject.jsp
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/05/18 20:42:03 $
+ * Date:        $Date: 2008/06/11 21:12:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,7 +60,8 @@ org.openmdx.portal.servlet.view.*
 " %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%
-    EditObjectView view = (EditObjectView)session.getValue(WebKeys.CURRENT_VIEW_KEY);
+	ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_EDIT);
+	EditObjectView view = (EditObjectView)viewsCache.getView(request.getParameter(Action.PARAMETER_REQUEST_ID));
     ServletContext sc = getServletConfig().getServletContext();
     RequestDispatcher rd = sc.getRequestDispatcher(view.getLayout(true));
     rd.forward(request, response);      

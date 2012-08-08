@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CommandArguments_1.java,v 1.2 2007/10/10 16:05:56 hburger Exp $
+ * Name:        $Id: CommandArguments_1.java,v 1.3 2008/03/21 18:45:21 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:56 $
+ * Date:        $Date: 2008/03/21 18:45:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -101,7 +101,7 @@ public class CommandArguments_1
 	 * @return        Raw arguments
 	 */
 	public String [] getRawValues () {
-		return (String []) rawArguments.clone ();
+		return rawArguments.clone ();
 	}
 	
 	/**
@@ -111,7 +111,7 @@ public class CommandArguments_1
 	 * @return        All arguments
 	 */
 	public String [] getValues () {
-		return (String []) arguments.clone ();
+		return arguments.clone ();
 	}
 
 	
@@ -129,7 +129,7 @@ public class CommandArguments_1
 	 */
 	public void activate(
 	) throws Exception, ServiceException {
-		ArrayList arguments = new ArrayList (rawArguments.length);
+		ArrayList<String> arguments = new ArrayList<String> (rawArguments.length);
 		boolean modified = false;
 		for (int index = 0; index < rawArguments.length; index++) {
 			final String argument = rawArguments [index];

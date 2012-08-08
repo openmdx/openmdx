@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodesLoader.java,v 1.6 2007/01/21 20:46:43 wfro Exp $
+ * Name:        $Id: CodesLoader.java,v 1.10 2008/05/05 22:28:25 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:46:43 $
+ * Date:        $Date: 2008/05/05 22:28:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,16 +68,20 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
+import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
+import javax.jmi.reflect.RefObject;
 import javax.servlet.ServletContext;
 
+import org.oasisopen.cci2.QualifierType;
+import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.log.AppLog;
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.jmi1.Authority;
+import org.openmdx.compatibility.base.accessor.jmi.JmiHelper;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.QualityOfService;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
+import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
@@ -90,17 +94,18 @@ public class CodesLoader
   public CodesLoader(      
       ServletContext context,
       RoleMapper_1_0 roleMapper,      
-      Dataprovider_1_0 connection
+      PersistenceManagerFactory pmf
   ) {
       super(
           context,
           roleMapper
       );
-      this.connection = connection;
+      this.pmf = pmf;
       
   }
     
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     synchronized public void loadCodes(
         String[] locale
     ) throws ServiceException {
@@ -220,73 +225,94 @@ public class CodesLoader
             
             // Store merged codes
             System.out.println("Storing " + mergedCodes.size() + " code entries");
-            RequestCollection store = new RequestCollection(
-                new ServiceHeader(this.getAdminPrincipal(dir), null, false, new QualityOfService()),
-                this.connection
+            PersistenceManager store = this.pmf.getPersistenceManager(
+                this.getAdminPrincipal(dir),
+                null
             );
             Set codeSegmentIdentities = new HashSet();
-            for(
-              Iterator j = mergedCodes.values().iterator(); 
-              j.hasNext(); 
-            ) {
-              DataproviderObject codeEntry = (DataproviderObject)j.next();
-              codeSegmentIdentities.add(
-                  codeEntry.path().getPrefix(5)
-              );
-              // create new entries, replace existing
-              try {
-                DataproviderObject existing = null;
-                try {
-                  existing = new DataproviderObject(
-                    store.addGetRequest(
-                      codeEntry.path()
-                    )
+            // Load objects in multiple runs in order to resolve object dependencies.
+            Map<Path,RefObject> loadedObjects = new HashMap<Path,RefObject>(); 
+            for(int runs = 0; runs < 5; runs++) {
+                boolean hasNewObjects = false;
+                store.currentTransaction().begin();
+                for(
+                    Iterator j = mergedCodes.values().iterator(); 
+                    j.hasNext(); 
+                ) {
+                  DataproviderObject entry = (DataproviderObject)j.next();
+                  codeSegmentIdentities.add(
+                      entry.path().getPrefix(5)
                   );
-                }
-                catch(ServiceException e) {}
-                if(existing != null) {
-                  // update CodeValueEntry|CodeValueContainer only if attribute value has changed
-                  if(
-                    !existing.values("shortText").equals(codeEntry.values("shortText")) ||
-                    !existing.values("longText").equals(codeEntry.values("longText")) ||
-                    !existing.values("validFrom").equals(codeEntry.values("validFrom")) ||
-                    !existing.values("validTo").equals(codeEntry.values("validTo")) ||
-                    !existing.values("iconKey").equals(codeEntry.values("iconKey")) ||
-                    !existing.values("color").equals(codeEntry.values("color")) ||
-                    !existing.values("backColor").equals(codeEntry.values("backColor")) ||
-                    !existing.values("name").equals(codeEntry.values("name"))
-                  ) {
-                    existing.addClones(codeEntry, true);
-                    this.removeTrailingEmptyStrings(existing);
-                    store.addReplaceRequest(existing);
+                  // create new entries, update existing
+                  try {
+                    RefObject_1_0 existing = null;
+                    try {
+                      existing = (RefObject_1_0)store.getObjectById(
+                          entry.path()
+                      );
+                    }
+                    catch(Exception e) {}
+                    if(existing != null) {
+                        loadedObjects.put(
+                            entry.path(), 
+                            existing
+                        );
+                        JmiHelper.toRefObject(
+                            entry,
+                            existing,
+                            loadedObjects, // object cache
+                            store,
+                            true, // replace values
+                            true // remove trailing empty string
+                        );
+                    }
+                    else {
+                        String qualifiedClassName = (String)entry.values(SystemAttributes.OBJECT_CLASS).get(0);
+                        String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
+                        RefObject_1_0 newEntry = (RefObject_1_0)((org.openmdx.base.jmi1.Authority)store.getObjectById(
+                            Authority.class,
+                            "xri://@openmdx*" + packageName.replace(":", ".")
+                        )).refImmediatePackage().refClass(qualifiedClassName).refCreateInstance(null);
+                        newEntry.refInitialize(false, false);
+                        JmiHelper.toRefObject(
+                            entry,
+                            newEntry,
+                            loadedObjects, // object cache
+                            store,
+                            true, // replace values
+                            true // remove trailing empty string
+                        );
+                        Path parentIdentity = entry.path().getParent().getParent();
+                        RefObject_1_0 parent = null;
+                        try {
+                            parent = loadedObjects.containsKey(parentIdentity)
+                                ? (RefObject_1_0)loadedObjects.get(parentIdentity)
+                                : (RefObject_1_0)store.getObjectById(parentIdentity);
+                        } catch(Exception e) {}
+                        if(parent != null) {
+                            RefContainer container = (RefContainer)parent.refGetValue(
+                                entry.path().get(entry.path().size() - 2)
+                            );
+                            container.refAdd(
+                                QualifierType.REASSIGNABLE,
+                                entry.path().get(entry.path().size() - 1),
+                                newEntry
+                            );
+                        }
+                        loadedObjects.put(
+                            entry.path(), 
+                            newEntry
+                        );
+                        hasNewObjects = true;
+                    }
+                  }
+                  catch(Exception e) {
+                    new ServiceException(e).log();
+                    System.out.println("STATUS: " + e.getMessage() + " (for more info see log)");
                   }
                 }
-                else {
-                  this.removeTrailingEmptyStrings(codeEntry);
-                  store.addCreateRequest(
-                    codeEntry
-                  );            
-                }
-              }
-              catch(ServiceException e) {
-                e.log();
-                System.out.println("STATUS: " + e.getMessage() + " (for more info see log)");
-              }
-            }
-            // Update code segments. This serves as refresh hint for components which cache code values
-            for(
-                Iterator j = codeSegmentIdentities.iterator();
-                j.hasNext();
-            ) {
-                try {
-                    DataproviderObject_1_0 codeSegment = store.addGetRequest(
-                        (Path)j.next()
-                    );
-                    store.addReplaceRequest(
-                        new DataproviderObject(codeSegment)
-                    );
-                }
-                catch(ServiceException e) {}
+                store.currentTransaction().commit();
+                if(!hasNewObjects) break;
             }
         }
         System.out.println("Done");
@@ -295,7 +321,7 @@ public class CodesLoader
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
-    private final Dataprovider_1_0 connection;
+    private final PersistenceManagerFactory pmf;
   
 }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TreeStopWatch.java,v 1.8 2007/10/10 17:16:07 hburger Exp $
+ * Name:        $Id: TreeStopWatch.java,v 1.9 2008/03/21 20:14:51 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 17:16:07 $
+ * Date:        $Date: 2008/03/21 20:14:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.Stack;
 
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.compatibility.base.dataprovider.layer.model.StopWatch_1_0;
 
 
@@ -75,6 +74,7 @@ import org.openmdx.compatibility.base.dataprovider.layer.model.StopWatch_1_0;
  * 
  * @author anyff
  */
+@SuppressWarnings("unchecked")
 public class TreeStopWatch implements StopWatch_1_0 {
   
     static private class TimerDesc {
@@ -495,9 +495,9 @@ public class TreeStopWatch implements StopWatch_1_0 {
             String symbol,
             int wide
         ) {
-            CharSequence buffer = StringBuilders.newStringBuilder(wide+1);
+            StringBuilder buffer = new StringBuilder(wide+1);
             for (int i = 0; i < wide; i++) {
-                StringBuilders.asStringBuilder(buffer).append(symbol);
+                buffer.append(symbol);
             }
             return buffer.toString();
         }

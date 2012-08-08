@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractIdentity.java,v 1.5 2008/02/08 16:50:50 hburger Exp $
+ * Name:        $Id: AbstractIdentity.java,v 1.6 2008/04/04 01:11:49 hburger Exp $
  * Description: Abstract Identity 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:50:50 $
+ * Date:        $Date: 2008/04/04 01:11:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.ietf.jgss.Oid;
+import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.cci2.Identity;
 import org.oasisopen.spi2.XRISegments;
 
@@ -74,11 +75,11 @@ public abstract class AbstractIdentity
      * @param objectClass
      */
     protected AbstractIdentity(
-        List<Boolean> persistentQualifier,
+        List<QualifierType> persistentQualifier,
         List<?> qualifier, 
         List<String> objectClass
     ){
-        this.persistentQualifier = persistentQualifier;
+        this.identifierType = persistentQualifier;
         this.qualifier = qualifier;
         this.objectClass = getObjectClass(persistentQualifier, objectClass);
     }
@@ -99,11 +100,11 @@ public abstract class AbstractIdentity
      * <code>null</code> otherwise.
      */
     private final static List<String> getObjectClass(
-        List<Boolean> persistentQualifier,
+        List<QualifierType> persistentQualifier,
         List<String> objectClass
     ){
-        for(boolean pq : persistentQualifier){
-            if(!pq) {
+        for(QualifierType identifierType : persistentQualifier){
+            if(identifierType != QualifierType.PERSISTENT) {
                 return null;
             }
         }
@@ -145,7 +146,7 @@ public abstract class AbstractIdentity
             i++
         ){
             Object q = this.qualifier.get(i); 
-            boolean p = this.persistentQualifier.get(i);
+            boolean p = QualifierType.PERSISTENT == this.identifierType.get(i);
             XRISegments.append(
                 xri, // target
                 i > 0 || referenceName == null, // optionalDelimiterRequired
@@ -189,10 +190,10 @@ public abstract class AbstractIdentity
      * 
      * @return <code>true</code> if the corresponding qualifier is persistent
      */
-    protected boolean persistentQualifier(
+    protected QualifierType identifierType(
         int index
     ){
-        return this.persistentQualifier.get(index);
+        return this.identifierType.get(index);
     }
 
     /**
@@ -207,7 +208,7 @@ public abstract class AbstractIdentity
         Class<Q> qualifierClass,
         int index
     ){
-        return (Q) this.persistentQualifier.get(index);
+        return (Q) this.qualifier.get(index);
     }
     
     /* (non-Javadoc)
@@ -231,7 +232,7 @@ public abstract class AbstractIdentity
             AbstractIdentity that = (AbstractIdentity) obj;
             return 
                 equal(this.parent(), that.parent()) && 
-                this.persistentQualifier.equals(that.persistentQualifier) && 
+                this.identifierType.equals(that.identifierType) && 
                 this.qualifier.equals(that.qualifier);
         } else {
             return false;
@@ -280,7 +281,7 @@ public abstract class AbstractIdentity
     /**
      * 
      */
-    private final List<Boolean> persistentQualifier;
+    private final List<QualifierType> identifierType;
 
     /**
      * 

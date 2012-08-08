@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ViewObject_1.java,v 1.41 2008/02/29 18:01:22 hburger Exp $
+ * Name:        $Id: ViewObject_1.java,v 1.44 2008/06/24 16:17:21 hburger Exp $
  * Description: View Object
- * Revision:    $Revision: 1.41 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:01:22 $
+ * Date:        $Date: 2008/06/24 16:17:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -86,7 +86,7 @@ import org.openmdx.model1.code.AggregationKind;
 
 
 /**
- * An abstract delegating object
+ * View Object
  */
 @SuppressWarnings("unchecked")
 public class ViewObject_1
@@ -758,11 +758,16 @@ public class ViewObject_1
                     Map.Entry objectEntry = (Map.Entry) j.next();
                     ViewObject_1 object = (ViewObject_1)objectEntry.getValue(); 
                     String qualifier = (String)objectEntry.getKey();
-                    if(qualifier == null) {
-                        System.err.println("Wait a moment");
-                    } else {
-                        object.objMove(container, qualifier);
-                    }
+                    if(qualifier == null) throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        new BasicException.Parameter[]{
+                            new BasicException.Parameter("qualifier", qualifier),
+                            new BasicException.Parameter("path", path)
+                        },
+                        "Missing qualifier"
+                    );
+                    object.objMove(container, qualifier);
                 }
             }
         }
@@ -1441,34 +1446,6 @@ public class ViewObject_1
 
 
     //--------------------------------------------------------------------------
-    // Synchronization
-    //--------------------------------------------------------------------------
-
-    /**
-     * Register a synchronization object for upward delegation.
-     *
-     * @param   synchronization
-     *          The synchronization object to be registered
-     *
-     * @exception ServiceException TOO_MANY_EVENT_LISTENERS
-     *            if an attempt is made to register more than one 
-     *            synchronization object.
-     * 
-     * @deprecated
-     */
-    public void objRegisterSynchronization(
-    org.openmdx.compatibility.base.accessor.object.cci.InstanceCallbacks_1_0 synchronization
-    ) throws ServiceException {
-        throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED,
-            null,
-            "Registration of synchronization objects is not supported for views"
-        );
-    }
-
-    
-    //--------------------------------------------------------------------------
     // Implements Delegating_1_0
     //--------------------------------------------------------------------------
 
@@ -1629,6 +1606,16 @@ public class ViewObject_1
             }
         }
 
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#contains(java.lang.Object)
+         */
+        public boolean contains(Object o) {
+            try {
+                return getSourceDelegate().objGetSet(this.feature).contains(toSinkValue(o));
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(exception);
+            }
+        }
         
     }
 
@@ -1812,6 +1799,28 @@ public class ViewObject_1
         }
 
         /* (non-Javadoc)
+         * @see java.util.AbstractCollection#remove(java.lang.Object)
+         */
+        public boolean remove(Object o) {
+            try {
+                boolean reply = false;
+                Object value = toSinkValue(o);
+                Collection delegates = getSinkDelegates();
+                for(
+                     Iterator i = delegates.iterator();
+                     i.hasNext();
+                ){
+                    Object_1_0 delegate = (Object_1_0) i.next();
+                    reply |= delegate.objGetList(this.feature).remove(value);
+                }
+                return reply;
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(exception);
+            }
+        }
+
+        
+        /* (non-Javadoc)
          * @see java.util.AbstractList#set(int, java.lang.Object)
          */
         public Object set(
@@ -1850,6 +1859,56 @@ public class ViewObject_1
                     }
                 }
                 return reply;
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#indexOf(java.lang.Object)
+         */
+        public int indexOf(Object o) {
+            try {
+                return getSourceDelegate().objGetList(this.feature).indexOf(toSinkValue(o));
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#lastIndexOf(java.lang.Object)
+         */
+        public int lastIndexOf(Object o) {
+            try {
+                return getSourceDelegate().objGetList(this.feature).lastIndexOf(toSinkValue(o));
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#contains(java.lang.Object)
+         */
+        public boolean contains(Object o) {
+            try {
+                return getSourceDelegate().objGetList(this.feature).contains(toSinkValue(o));
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#removeRange(int, int)
+         */
+        protected void removeRange(int fromIndex, int toIndex) {
+            try {
+                for(
+                     Iterator i = getSinkDelegates().iterator();
+                     i.hasNext();
+                ){
+                    Object_1_0 delegate = (Object_1_0) i.next();
+                    delegate.objGetList(this.feature).subList(fromIndex, toIndex).clear();
+                }
             } catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
             }

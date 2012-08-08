@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReplyParser.java,v 1.11 2006/08/11 09:24:11 hburger Exp $
+ * Name:        $Id: ReplyParser.java,v 1.12 2008/03/19 17:10:05 hburger Exp $
  * Description: ClientParser class
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:11 $
+ * Date:        $Date: 2008/03/19 17:10:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,8 +66,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 
-import org.openmdx.kernel.text.StringBuilders;
-
+@SuppressWarnings("unchecked")
 public class ReplyParser
   extends AbstractParser {
 
@@ -90,14 +89,14 @@ public class ReplyParser
     int offset,
     int length
   ) throws ServiceException {
-    StringBuilders.asStringBuilder(this.tagBuffer).append(ch, offset, length);
+    this.tagBuffer.append(ch, offset, length);
   }
 
   //-------------------------------------------------------------------------
   void startElement(
     String rawname
   ) throws ServiceException {
-      StringBuilders.asStringBuilder(this.tagBuffer).setLength(0);
+      this.tagBuffer.setLength(0);
   }
 
   //-------------------------------------------------------------------------
@@ -332,7 +331,7 @@ public class ReplyParser
   //----------------------------------------------------------------------------------
   // Member variables
   //----------------------------------------------------------------------------------
-  private CharSequence tagBuffer = StringBuilders.newStringBuilder();
+  private StringBuilder tagBuffer = new StringBuilder();
   private String tagValue = null;
 
   private ArrayList stringValues = new ArrayList();

@@ -4,6 +4,74 @@
                     =====================================
                     
 ==============================================================================
+Version 2.1.0                                                       2008-07-10
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20007105
+      Gateway as PersistenceManagerFactory
+
+      The PersistenceManagerConnectionFactory is formally declared as an EJB 
+      reference in the web.xml:
+      
+        <ejb-local-ref id="ejb_gateway">
+            <ejb-ref-name>ejb/gateway</ejb-ref-name>
+            <ejb-ref-type>Session</ejb-ref-type>
+            <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+            <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_1Local</local>
+            <ejb-link>test-gateway.jar#gateway-Managing</ejb-link>
+        </ejb-local-ref>
+
+      The PersistenceManagerFactory is formally declared as resource environment
+      reference in the web.xml:
+      
+        <resource-env-ref id="jdo_gateway">
+          <description>JDO Reference to the application's persistence manager factory</description>
+          <resource-env-ref-name>persistence/gateway</resource-env-ref-name>
+          <resource-env-ref-type>javax.jdo.PersistenceManagerFactory</resource-env-ref-type>
+        </resource-env-ref>
+
+      It is resolved in the Tomcat's context XML
+      
+        <Resource
+          name="persistence/gateway"
+          auth="Container"
+          type="javax.jdo.PersistenceManagerFactory"
+          factory="org.openmdx.base.persistence.tomcat.PersistenceManagerFactoryBuilder"
+          ConnectionFactoryName="java:comp/env/ejb/gateway"
+          NontransactionalRead="true"
+          Optimistic="true"
+        />
+       
+      The persistence manager factory is then acquired like that:
+      
+        public void init(
+        ) throws ServletException {
+          this.persistenceManagerFactory = JDOHelper.getPersistenceManagerFactory(
+            "java:comp/env/persistence/gateway",
+            (Context)null
+          );
+        }
+                                    
+2.    CHANGES
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      none
+
+                  
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3   REMOVED FEATURES
+      
+      Tomcat 5 support removed.
+      
+      
+==============================================================================
 Version 1.14.4                                                      2007-02-23
 ==============================================================================
 

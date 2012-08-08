@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeUtility.java,v 1.3 2007/01/21 20:47:37 wfro Exp $
+ * Name:        $Id: CodeUtility.java,v 1.4 2008/04/04 11:57:21 hburger Exp $
  * Description: CodeUtility
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2007/01/21 20:47:37 $
+ * Date:        $Date: 2008/04/04 11:57:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -102,6 +102,7 @@ import org.xml.sax.SAXException;
  * </ul>
  * <p>
  */
+@SuppressWarnings("unchecked")
 public class CodeUtility
   extends Application
   implements ExceptionListener {
@@ -681,7 +682,7 @@ public class CodeUtility
   //-------------------------------------------------------------------------    
 
   // The version gets set by CVS
-  private static final String VERSION = "$Revision: 1.3 $";
+  private static final String VERSION = "$Revision: 1.4 $";
   
   // The application name
   private static final String APP_NAME = "CodeMapper";

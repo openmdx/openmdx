@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractMapper.java,v 1.10 2004/07/11 19:15:26 hburger Exp $
+ * Name:        $Id: AbstractMapper.java,v 1.11 2008/03/19 17:09:41 hburger Exp $
  * Description: AbstractSoapMapper class
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/07/11 19:15:26 $
+ * Date:        $Date: 2008/03/19 17:09:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,6 +73,7 @@ import org.openmdx.kernel.exception.BasicException;
  * 
  * @author wfro
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractMapper {
   
   protected Writer writer;

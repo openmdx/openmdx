@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection_1.java,v 1.25 2008/02/29 18:06:06 hburger Exp $
+ * Name:        $Id: Connection_1.java,v 1.27 2008/03/27 19:16:28 hburger Exp $
  * Description: SPICE Object Layer: Manager implementation
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:06:06 $
+ * Date:        $Date: 2008/03/27 19:16:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -131,6 +131,39 @@ public class Connection_1
      *           the provider connected to this router
      * @param    containerManagedUnitOfWork
      *               defines whether the unit of work is container managed
+     * @param    transactionalUnitOfWork
+     *               defines whether the unit of work is transactional
+     * @param    optimisticUnitOfWork
+     *               defines whether the unit of work is optimistic
+     * 
+     * @throws ServiceException
+     */
+    public Connection_1(
+        Provider_1_0 provider,
+        boolean containerManagedUnitOfWork,
+        boolean transactionalUnitOfWork,
+        boolean optimisticUnitOfWork,
+        UserTransaction userTransaction
+    ) throws ServiceException{
+        this("UUID", containerManagedUnitOfWork);
+        this.provider = provider;
+        this.unitOfWork = new UnitOfWork_1(
+            provider,
+            transactionalUnitOfWork,
+            containerManagedUnitOfWork,
+            optimisticUnitOfWork,
+            userTransaction
+        );
+    }
+
+    /**
+     * Constructs a Manager.
+     *
+     * @param   providers
+     *           the provider connected to this router
+     * @param    containerManagedUnitOfWork
+     *               defines whether the unit of work is container managed
+     * @param defaultQualifierType UID, UUID, URN, SEQUENCE
      * 
      * @throws ServiceException
      */
@@ -149,7 +182,7 @@ public class Connection_1
             null
         );
     }
-
+    
     /**
      * Constructor 
      *
@@ -159,6 +192,7 @@ public class Connection_1
      * @param defaultQualifierType UID, UUID, URN, SEQUENCE
      * 
      * @throws ServiceException
+     * @deprecated Use {@link #Connection_1(Provider_1_0,UserTransaction,boolean,boolean,String)} instead
      */
     public Connection_1(
         Provider_1_0 provider,
@@ -166,19 +200,40 @@ public class Connection_1
         boolean optimistic, 
         String defaultQualifierType
     ) throws ServiceException{
+        this(provider, transaction, false, optimistic, defaultQualifierType);
+    }
+
+    /**
+     * Constructor 
+     *
+     * @param provider
+     * @param transaction
+     * @param containerManaged TODO
+     * @param optimistic
+     * @param defaultQualifierType UID, UUID, URN, SEQUENCE
+     * @throws ServiceException
+     */
+    public Connection_1(
+        Provider_1_0 provider,
+        UserTransaction transaction,
+        boolean containerManaged, 
+        boolean optimistic, 
+        String defaultQualifierType
+    ) throws ServiceException{
         this(
             defaultQualifierType, 
-            false // containerManagedUnitOfWork
+            containerManaged
         );
         this.provider = provider;
         this.unitOfWork = new UnitOfWork_1(
             provider,
             provider.isTransactionPolicyIsNew(),
-            this.hasContainerManagedUnitOfWork(),
+            containerManaged,
             optimistic,
             transaction
         );
     }
+
     
     /**
      * Constructs a Manager.
@@ -211,7 +266,13 @@ public class Connection_1
         UserTransaction transaction,
         boolean optimistic
     ) throws ServiceException{
-        this(provider, transaction, optimistic, "UUID");
+        this(
+            provider, 
+            transaction, 
+            false, // containerManaged
+            optimistic, 
+            "UUID" // defaultQualifierType
+       );
     }
     
     /**

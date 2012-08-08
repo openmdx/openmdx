@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings("unused")
 public interface Import extends ModelElement {
     public VisibilityKind getVisibility();
     public void setVisibility(VisibilityKind newValue);

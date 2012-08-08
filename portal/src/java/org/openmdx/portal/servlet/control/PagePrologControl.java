@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PagePrologControl.java,v 1.24 2007/02/13 16:59:49 wfro Exp $
+ * Name:        $Id: PagePrologControl.java,v 1.25 2008/05/01 21:43:57 wfro Exp $
  * Description: PagePrologControl
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/02/13 16:59:49 $
+ * Date:        $Date: 2008/05/01 21:43:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -87,6 +87,7 @@ public class PagePrologControl
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,

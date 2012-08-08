@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportsLoader.java,v 1.10 2007/08/07 22:23:38 wfro Exp $
+ * Name:        $Id: ReportsLoader.java,v 1.12 2008/04/04 17:01:12 hburger Exp $
  * Description: ReportsLoader
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/07 22:23:38 $
+ * Date:        $Date: 2008/04/04 17:01:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -93,6 +93,7 @@ public class ReportsLoader
     /**
      * Loads report configuration.
      */
+    @SuppressWarnings("unchecked")
     synchronized public ReportDefinitionFactory loadReportDefinitions(
         ServletContext context,
         String[] locale,
@@ -139,7 +140,7 @@ public class ReportsLoader
                             catch(Exception e) {
                                 System.out.println("Error loading report definition (for more information see log): " + e.getMessage());
                                 ServiceException e0 = new ServiceException(e);
-                                SysLog.error(e0.getMessage(), e0.getCause(), 1);
+                                SysLog.error(e0.getMessage(), e0.getCause());
                             }
                             if(def != null) {
                                 System.out.println("Loaded report " + path + " (forClass=" + def.getForClass() + ")");

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SimpleTypeOrder_1.java,v 1.4 2006/10/19 17:07:10 hburger Exp $
+ * Name:        $Id: SimpleTypeOrder_1.java,v 1.5 2008/06/28 00:21:33 hburger Exp $
  * Description: SimpleTypeOrder_1 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/19 17:07:10 $
+ * Date:        $Date: 2008/06/28 00:21:33 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,7 +53,7 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
-import org.openmdx.compatibility.base.dataprovider.cci.Orders;
+import org.openmdx.compatibility.base.dataprovider.cci.Directions;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.w3c.cci2.SimpleTypeOrder;
 
@@ -84,7 +84,7 @@ class SimpleTypeOrder_1
     public void ascending() {
         refAddValue(
             0,
-            Orders.ASCENDING
+            Directions.ASCENDING
         );
     }
 
@@ -94,7 +94,7 @@ class SimpleTypeOrder_1
     public void descending() {
         refAddValue(
             0,
-            Orders.DESCENDING
+            Directions.DESCENDING
         );
     }
 

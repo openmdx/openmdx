@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PropertyPreferences.java,v 1.5 2007/10/10 16:05:52 hburger Exp $
+ * Name:        $Id: PropertyPreferences.java,v 1.6 2008/03/21 18:29:18 hburger Exp $
  * Description: Property Preferences 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:52 $
+ * Date:        $Date: 2008/03/21 18:29:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,6 +68,7 @@ import org.openmdx.compatibility.base.naming.PathComponent;
 /**
  * Property Preferences
  */
+@SuppressWarnings("unchecked")
 class PropertyPreferences
     extends AbstractPreferences
 {

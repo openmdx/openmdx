@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DefaultDataBinding.java,v 1.2 2007/04/11 16:42:54 wfro Exp $
+ * Project:     openMDX/Portal, http://www.openmdx.org/
+ * Name:        $Id: DefaultDataBinding.java,v 1.3 2008/04/13 11:39:31 wfro Exp $
  * Description: DefaultDataBinding 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/04/11 16:42:54 $
+ * Date:        $Date: 2008/04/13 11:39:31 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,6 +52,8 @@
 
 package org.openmdx.portal.servlet;
 
+import java.util.Collection;
+
 import javax.jmi.reflect.RefObject;
 
 /**
@@ -68,10 +70,16 @@ public class DefaultDataBinding
         RefObject object, 
         String qualifiedFeatureName
     ) {
-        Object value = object.refGetValue(
-            qualifiedFeatureName
-        );
-        return value;
+        try {
+            Object value = object.refGetValue(
+                qualifiedFeatureName
+            );
+            return value;
+        }
+        // Return null in case of a NullPointer
+        catch(NullPointerException e) {
+            return null;
+        }
     }
 
     /* (non-Javadoc)
@@ -82,10 +90,20 @@ public class DefaultDataBinding
         String qualifiedFeatureName, 
         Object newValue
     ) {
-        object.refSetValue(
-            qualifiedFeatureName,
-            newValue
-        );        
+        if(newValue instanceof Collection) {
+            Collection newValues = (Collection)newValue;
+            Collection values = (Collection)object.refGetValue(
+                qualifiedFeatureName
+            );
+            values.clear();
+            values.addAll(newValues);
+        }
+        else {
+            object.refSetValue(
+                qualifiedFeatureName,
+                newValue
+            );
+        }
     }
     
 }

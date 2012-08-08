@@ -665,6 +665,7 @@ CREATE TABLE [dbo].[app1_MessageTemplate] (
 	[modified_at] [varchar] (20) NULL ,
 	[created_by] [varchar] (100) NULL ,
 	[modified_by] [varchar] (100) NULL ,
+	[text] [nvarchar] (200) NULL ,
 	CONSTRAINT PK_app1_MessageTemplate PRIMARY KEY (object_rid, object_oid, object_idx)	
 ) ON [PRIMARY]
 GO
@@ -788,5 +789,41 @@ CREATE TABLE [dbo].[EXTENSION_NATIVE] (
 	[p$$object_parent__rid] nvarchar(100) NULL, 
 	[p$$object_parent__oid] nvarchar(200) COLLATE SQL_Latin1_General_CP1_CS_AS NULL,
 	CONSTRAINT PK_EXTENSION_NATIVE PRIMARY KEY (object_rid, object_oid, object_idx)
+) ON [PRIMARY]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[generic1_Property]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[generic1_Property]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[generic1_Property_N]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[generic1_Property_N]
+GO
+
+CREATE TABLE [dbo].[generic1_Property] (
+	[object_rid] nvarchar(100) NOT NULL,
+	[object_oid] nvarchar(200) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL,
+	[p$$object_parent__rid] nvarchar(100) NULL, 
+	[p$$object_parent__oid] nvarchar(200) COLLATE SQL_Latin1_General_CP1_CS_AS NULL,
+	[object__class] [nvarchar] (200) NULL ,
+	[description] [nvarchar] (200) NULL ,
+	[created_at] [varchar] (20) NULL ,
+	[modified_at] [varchar] (20) NULL ,
+	CONSTRAINT PK_PREFS_generic1_Property PRIMARY KEY (object_rid, object_oid)
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [dbo].[generic1_Property_N] (
+	[object_rid] nvarchar(100) NOT NULL,
+	[object_oid] nvarchar(200) COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL,
+	[object_idx] [int] NOT NULL ,
+	[modified_by] [varchar] (50) NULL ,
+	[created_by] [varchar] (50) NULL,
+	[boolean_value] [varchar] (10) NULL ,
+	[uri_value] [varchar] (200) NULL ,
+	[decimal_value] [numeric](18, 6) NULL ,
+	[string_value] [varchar] (200) NULL ,
+	[integer_value] [numeric](10, 0) NULL ,
+	CONSTRAINT PK_PREFS_generic1_Property_N PRIMARY KEY (object_rid, object_oid, object_idx)
 ) ON [PRIMARY]
 GO

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.175 2008/02/14 17:54:15 wfro Exp $
+= Name:        $Id: build.xml,v 1.188 2008/07/02 23:29:12 hburger Exp $
 = Description: openMDX/Core Build File
-= Revision:    $Revision: 1.175 $
-= Date:        $Date: 2008/02/14 17:54:15 $
+= Revision:    $Revision: 1.188 $
+= Date:        $Date: 2008/07/02 23:29:12 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -88,6 +88,9 @@
 		<include name="org/slf4j/helpers/*"/>
 		<include name="org/slf4j/spi/*"/>
 	</patternset>
+	<patternset id="jdo-api.content">
+		<include name="javax/jdo/**"/>
+	</patternset>
 	<patternset id="openmdx-base.jaxp-1.4">
 		<include name="javax/xml/*"/>
 		<include name="javax/xml/datatype/*"/>
@@ -102,21 +105,17 @@
 	</patternset>
 	<patternset id="openmdx-kernel.jre-1.5">
 		<patternset refid="slf4j-api.content"/>
-		<include name="javax/jmi/reflect/**"/>
+		<patternset refid="jdo-api.content"/>
+		<include name="javax/jmi/**"/>
 		<include name="org/openmdx/kernel/**"/>
 		<include name="org/openmdx/compatibility/kernel/**"/>
 		<include name="org/openmdx/uses/gnu/**"/>
+		<include name="org/openmdx/uses/org/apache/commons/beanutils/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/collections/**"/>
+		<include name="org/openmdx/uses/org/apache/commons/logging/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/pool/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/transaction/**"/>
 		<include name="org/openmdx/uses/org/apache/regexp/**"/>
-		<include name="org/openmdx/uses/org/apache/xml/**"/>
-	</patternset>
-	<patternset id="openmdx-kernel.jre-1.4">
-		<patternset refid="openmdx-kernel.jre-1.5"/>
-		<include name="org/openmdx/uses/java/**"/>
-		<include name="org/openmdx/uses/javax/**"/>
-		<exclude name="org/openmdx/uses/javax/xml/**"/>
 	</patternset>
 	<patternset id="openmdx-kernel.jre-1.6">
 		<patternset refid="openmdx-kernel.jre-1.5"/>
@@ -124,12 +123,9 @@
 	<patternset id="openmdx-kernel.jar.content">
 		<patternset refid="openmdx-kernel.${build.java.platform}"/>
 	</patternset>
-	<patternset id="tomcat-juli.jar.content">
+	<patternset id="openmdx-system.content">
 		<include name="org/openmdx/compatibility/kernel/url/protocol/**"/>
 		<include name="org/openmdx/kernel/url/protocol/**"/>
-	</patternset>
-	<patternset id="slf4j-jdk14.content">
-		<include name="org/slf4j/impl/*"/>
 	</patternset>
 	<patternset id="tomcat-juli.content">
 		<include name="org/apache/juli/*"/>
@@ -137,27 +133,32 @@
 	</patternset>
 	<patternset id="openmdx-base.jre-1.5">
 		<patternset refid="openmdx-base.openxri-syntax"/>
-		<include name="javax/jdo/**"/>
-		<include name="net/**"/>
-		<include name="org/cci/*"/>
-		<include name="org/iso/**"/>
+		<include name="net/*/netPackage*"/>
+		<include name="net/*/NetPackage*"/>
+		<include name="net/rfc/*/rfcPackage*"/>
+		<include name="net/rfc/*/RfcPackage*"/>
+		<include name="org/*/orgPackage*"/>
+		<include name="org/*/OrgPackage*"/>
+		<include name="org/ietf/*/ietfPackage*"/>
+		<include name="org/ietf/*/IetfPackage*"/>
+		<include name="org/iso/*/isoPackage*"/>
+		<include name="org/iso/*/IsoPackage*"/>
 		<include name="org/oasisopen/**"/>
+		<include name="org/oasis_open/**"/>
 		<include name="org/omg/**"/>
+		<include name="org/openmdx/*/openmdxPackage*"/>
+		<include name="org/openmdx/*/OpenmdxPackage*"/>
 		<include name="org/openmdx/base/**"/>
 		<include name="org/openmdx/compatibility/base/**"/>
+		<include name="org/openmdx/compatibility/*/compatibilityPackage*"/>
+		<include name="org/openmdx/compatibility/*/CompatibilityPackage*"/>
 		<include name="org/openmdx/*1/**"/>
 		<include name="org/openmdx/compatibility/*1/**"/>
 		<include name="org/openmdx/oracle/base/**"/>
-		<include name="org/un/**"/>
+		<include name="org/un/*/unPackage*"/>
+		<include name="org/un/*/UnPackage*"/>
 		<include name="org/w3c/**"/>
 		<include name="org/xmi/*"/>
-		<include name="org/openmdx/uses/javax/xml/**"/>
-		<include name="org/openmdx/uses/org/apache/xerces/**"/>
-	</patternset>
-	<patternset id="openmdx-base.jre-1.4">
-		<patternset refid="openmdx-base.jre-1.5"/>
-		<patternset refid="openmdx-base.jaxp-1.4"/>
-		<include name="org/oasis_open/**"/>
 	</patternset>
 	<patternset id="openmdx-base.jre-1.6">
 		<patternset refid="openmdx-base.jre-1.5"/>
@@ -172,9 +173,6 @@
 	</patternset>
 	<patternset id="openmdx-connector.jar.content">
 		<include name="org/openmdx/base/security/pki/*Connection*"/>
-	</patternset>
-	<patternset id="slf4j-openmdx1.jar.content">
-		<include name="org/slf4j/impl/*"/>
 	</patternset>
 	
 	<!-- ******************************************************************* -->
@@ -227,8 +225,9 @@
 			<exclude name="org/openmdx/kernel/application/**/*.java"/>
 			<exclude name="org/openmdx/base/gui/**/*.java"/>
 			<exclude name="org/openmdx/base/accessor/jmi/**/*.java"/>
-			<exclude name="org/openmdx/uses/javax/xml/**/*.java"/>
-			<exclude name="org/openmdx/uses/org/apache/xerces/internal/**/*.java"/>
+			<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
+			<exclude name="org/openmdx/base/persistence/**/*.java"/>
+			<exclude name="org/openmdx/base/aop2/standard/**/*.java"/>
 			<patternset refid="build.exclude"/>
 			<patternset refid="openmdx-base.openxri-syntax"/>
 		</javac>
@@ -338,6 +337,9 @@
 			<openmdx:archivefileset src="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
 				<patternset refid="openmdx-kernel.jar.content"/>
 			</openmdx:archivefileset>
+			<openmdx:archivefileset src="${openmdx.home}/java2/${build.target.platform}/extension/lib/jdo2-api.jar">
+				<patternset refid="jdo-api.content"/>
+			</openmdx:archivefileset>
 		</openmdx:archive>
 	    <openmdx:archive
 			destfile="${deliver.dir}/lib/tomcat-juli.jar"
@@ -349,13 +351,7 @@
 				<attribute name="Implementation-Title" value="tomcat-juli for ${build.target.platform}"/>
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="tomcat-juli.jar.content"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${openmdx.home}/apache/${build.java.platform}/tomcat/lib/slf4j-api.jar">
-				<patternset refid="slf4j-api.content"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${openmdx.home}/apache/${build.java.platform}/tomcat/lib/slf4j-jdk14.jar">
-				<patternset refid="slf4j-jdk14.content"/>
+				<patternset refid="openmdx-system.content"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset src="${openmdx.home}/apache/${build.java.platform}/tomcat/lib/tomcat-juli.jar">
 				<patternset refid="tomcat-juli.content"/>
@@ -380,9 +376,6 @@
 				<patternset refid="openmdx-base.jar.content"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset src="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
-				<patternset refid="openmdx-base.jar.content"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${openmdx.home}/java2/${build.target.platform}/extension/lib/jdo2-api.jar">
 				<patternset refid="openmdx-base.jar.content"/>
 			</openmdx:archivefileset>
 		</openmdx:archive>
@@ -424,20 +417,6 @@
 			</openmdx:archivefileset>
 		</openmdx:archive>
 		
-		<openmdx:archive
-			destfile="${deliver.dir}/lib/slf4j-openmdx1.jar"
-			format="jar"
-		>
-			<openmdx:archivemanifest refid="project.manifest"/>
-			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="SLF4J Implementation Logging to openMDX Log"/>
-				<attribute name="Implementation-Title" value="slf4j-openmdx1 for ${build.target.platform}"/>
-			</openmdx:archivemanifest>
-			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="slf4j-openmdx1.jar.content"/>
-			</openmdx:archivefileset>
-		</openmdx:archive>
-
 	</target>
 	
 	<!-- ******************************************************************* -->
@@ -445,40 +424,6 @@
 	<!-- ******************************************************************* -->
 	<target name="web-archives" depends="deliverables-init,java-archives">
 		<mkdir dir="${deliver.dir}/deployment-unit"/>
-		<openmdx:archive
-			format="war" 
-			destfile="${deliver.dir}/deployment-unit/openmdx-log-console.war"
-		>
-			<openmdx:archivemanifest refid="project.manifest"/>
-			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="${project.specification.title} WebAplication Log Console"/>
-				<attribute name="Implementation-Title" value="openmdx-log-console for ${build.target.platform}"/>
-			</openmdx:archivemanifest>
-			<openmdx:archivefileset dir="src/war/openmdx-log-console.war" />
-		</openmdx:archive>
-		<openmdx:archive
-			format="war" 
-			destfile="${deliver.dir}/deployment-unit/openmdx-log-sink.war"
-		>
-			<openmdx:archivemanifest refid="project.manifest"/>
-			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="${project.specification.title} WebAplication Log Sink"/>
-				<attribute name="Implementation-Title" value="openmdx-log-sink for ${build.target.platform}"/>
-			</openmdx:archivemanifest>
-			<openmdx:archivefileset dir="src/war/openmdx-log-sink.war"/>
-			<openmdx:archivefileset 
-				prefix="WEB-INF/lib"
-				dir="${deliver.dir}/lib"
-			>
-				<include name="openmdx-application.jar"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset 
-				prefix="WEB-INF/classes"
-				dir="build/${build.target.platform}/bin"
-			>
-				<include name="org/openmdx/application/servlet/log/**"/>
-			</openmdx:archivefileset>
-		</openmdx:archive>
 		<openmdx:archive
 			format="war" 
 			destfile="${deliver.dir}/deployment-unit/openmdx-junit.war"
@@ -569,9 +514,7 @@
 				<include name="apache/jre-1.2/contribution/lib/*"/>
 				<include name="java2/${build.target.platform}/**"/>
 				<exclude name="java2/${build.target.platform}/**/.settings/*"/>
-				<include name="java2/jre-1.3/extension/lib/**"/>
-				<include name="java2/jre-1.3/extension/.classpath"/>
-				<include name="java2/jre-1.3/extension/.project"/>
+				<include name="apache/${build.target.platform}/tomcat/**"/>
 				<include name="eclipse/${build.target.platform}/${base.dir.name}/**"/>				
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 

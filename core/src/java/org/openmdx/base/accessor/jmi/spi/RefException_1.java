@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefException_1.java,v 1.2 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: RefException_1.java,v 1.3 2008/03/24 20:14:20 hburger Exp $
  * Description: RefException_1 class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/03/24 20:14:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -142,7 +142,7 @@ public class RefException_1
   //-------------------------------------------------------------------------
     public RefException_1 log()
     {
-    SysLog.warning(getMessage(), getCause(), 1);
+    SysLog.warning(this);
     return this;
   }
 

@@ -3,11 +3,11 @@
  *
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: build.xml,v 1.101 2007/09/27 09:52:12 hburger Exp $
+ * Name:        $Id: build.xml,v 1.103 2008/03/13 18:52:36 hburger Exp $
  * Description: Ant master build file for openMDX
- * Revision:    $Revision: 1.101 $
+ * Revision:    $Revision: 1.103 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/09/27 09:52:12 $
+ * Date:        $Date: 2008/03/13 18:52:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,8 +53,8 @@
 	<target name="all" depends="-all,prolog,platforms,extensions,plugins,examples,documentation,epilog" description="Cleans, builds and makes distributions for all projects"/>	
 	<target name="generate" depends="-generate,platforms,extensions,plugins,examples" description="Generates the projects for their default platform"/>	
 	<target name="prolog" depends="-ant" description="Create the Ant environment"/>	
-	<target name="platforms" depends="-core,-weblogic,-websphere,-tomcat,-test-core" description="Create the JRE and application server platforms"/>
-	<target name="extensions" depends="-security,-document" description="Create the security and document extensions"/>
+	<target name="platforms" depends="-core,-weblogic,-websphere,-tomcat,-jboss,-test-core" description="Create the JRE and application server platforms"/>
+	<target name="extensions" depends="-log,-security,-document" description="Create the security and document extensions"/>
 	<target name="plugins" depends="-poseidon,-together" description="Create the model tool plugins"/>
 	<target name="examples" depends="-example-lab,-example-petstore" description="Create the lab and pestore examples"/>
 	<target name="documentation" depends="-doc" description="Create the openMDX documentation"/>
@@ -99,6 +99,9 @@
 		<condition property="include.example-petstore">
 			<available file="build.xml" filepath="example-petstore"/>
 		</condition>
+		<condition property="include.log">
+			<available file="build.xml" filepath="log"/>
+		</condition>
 		<condition property="include.poseidon">
 			<available file="build.xml" filepath="poseidon"/>
 		</condition>
@@ -113,6 +116,9 @@
 		</condition>
 		<condition property="include.tomcat">
 			<available file="build.xml" filepath="tomcat"/>
+		</condition>
+		<condition property="include.jboss">
+			<available file="build.xml" filepath="jboss"/>
 		</condition>
 		<condition property="include.weblogic">
 			<available file="build.xml" filepath="weblogic"/>
@@ -155,6 +161,9 @@
 	<target name="-security" depends="-init" if="include.security">
 		<ant inheritAll="false" dir="security" target="${ant.target}"/>
 	</target>
+	<target name="-log" depends="-init" if="include.log">
+		<ant inheritAll="false" dir="log" target="${ant.target}"/>
+	</target>
 	<target name="-test-core" depends="-init" if="include.test-core">
 		<ant inheritAll="false" dir="test-core">
 			<target name="clean"/>
@@ -166,6 +175,9 @@
 	</target>
 	<target name="-tomcat" depends="-init" if="include.tomcat">
 		<ant inheritAll="false" dir="tomcat" target="${ant.target}"/>
+	</target>
+	<target name="-jboss" depends="-init" if="include.jboss">
+		<ant inheritAll="false" dir="jboss" target="${ant.target}"/>
 	</target>
 	<target name="-weblogic" depends="-init" if="include.weblogic">
 		<ant inheritAll="false" dir="weblogic" target="${ant.target}"/>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: VariableSizeMappedRecord.java,v 1.8 2006/08/11 09:24:07 hburger Exp $
+ * Name:        $Id: VariableSizeMappedRecord.java,v 1.10 2008/06/28 00:21:57 hburger Exp $
  * Description: JCA: variable-size MappedRecord implementation
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:07 $
+ * Date:        $Date: 2008/06/28 00:21:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,13 +62,13 @@ import java.util.Set;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 
 /**
  * Java Connector Architecture:
  * An variable-size MappedRecord implementation.
  */
+@SuppressWarnings("unchecked")
 class VariableSizeMappedRecord 
     extends AbstractMap
     implements MappedRecord, MultiLineStringRepresentation
@@ -276,7 +276,7 @@ class VariableSizeMappedRecord
 	// Class EntrySet
 	//--------------------------------------------------------------------------
 
-    private class EntrySet extends AbstractSet{
+    class EntrySet extends AbstractSet{
     
         public Iterator iterator(
         ){
@@ -295,7 +295,7 @@ class VariableSizeMappedRecord
 	// Class EntryIterator
 	//--------------------------------------------------------------------------
 
-    private final class EntryIterator implements Iterator{
+    final class EntryIterator implements Iterator{
     
         public boolean hasNext(
         ){
@@ -525,24 +525,20 @@ class VariableSizeMappedRecord
     static String toString(
         MappedRecord source
     ){
-        CharSequence result = StringBuilders.newStringBuilder(
+        StringBuilder result = new StringBuilder(
             source.getRecordName()
         );
         String recordShortDescription=source.getRecordShortDescription();
         if(
             recordShortDescription!=null
-        ) StringBuilders.asStringBuilder(
-            result
-        ).append(
+        ) result.append(
             " ("
         ).append(
             recordShortDescription
         ).append(
             ')'
         );
-        StringBuilders.asStringBuilder(
-            result
-        ).append(
+        result.append(
             ": {"
         );
         boolean empty=true;
@@ -551,14 +547,10 @@ class VariableSizeMappedRecord
             i.hasNext();
         ){
             Map.Entry e=(Map.Entry)i.next();
-            int j=StringBuilders.asStringBuilder(
-                result
-            ).append(
+            int j= result.append(
                 "\n\t"
             ).length();
-            StringBuilders.asStringBuilder(
-                result
-            ).append(
+            result.append(
                 e.getKey()
             ).append(
                 '='
@@ -569,17 +561,13 @@ class VariableSizeMappedRecord
                 j<result.length()
             )if(
                 result.charAt(j++)=='\n'
-            )StringBuilders.asStringBuilder(
-                result
-            ).insert(
+            ) result.insert(
                 j++,
                 '\t'
             );
             empty=false;
         }
-        return StringBuilders.asStringBuilder(
-            result
-        ).append(
+        return result.append(
             empty?"}":"\n}"
         ).toString();
     }

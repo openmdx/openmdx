@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Delegation_1.java,v 1.6 2007/10/10 16:06:00 hburger Exp $
+ * Name:        $Id: Delegation_1.java,v 1.7 2008/03/21 18:47:12 hburger Exp $
  * Description: Delegation_1 plugin
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:00 $
+ * Date:        $Date: 2008/03/21 18:47:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,6 +73,7 @@ import org.openmdx.kernel.log.SysLog;
 /**
  * A layer which maps Layer_1_0 to Dataprovider_1_0 requests.
  */
+@SuppressWarnings("unchecked")
 public class Delegation_1
   implements Layer_1_0 {
 

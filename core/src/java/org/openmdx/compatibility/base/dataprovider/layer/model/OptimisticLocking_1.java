@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OptimisticLocking_1.java,v 1.10 2006/10/03 13:08:31 hburger Exp $
+ * Name:        $Id: OptimisticLocking_1.java,v 1.11 2008/03/21 18:46:21 hburger Exp $
  * Description: OptimisticLocking_1 plugin
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/03 13:08:31 $
+ * Date:        $Date: 2008/03/21 18:46:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,6 +70,7 @@ import org.openmdx.kernel.exception.BasicException;
  * This implementation compares the modification timestamp with its
  * counterpart in the object digest.
  */
+@SuppressWarnings("unchecked")
 public class OptimisticLocking_1
     extends SystemAttributes_1 
 {

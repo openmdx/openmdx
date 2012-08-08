@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AttributeSpecifier.java,v 1.13 2008/01/25 17:18:46 wfro Exp $
+ * Name:        $Id: AttributeSpecifier.java,v 1.15 2008/06/28 00:21:28 hburger Exp $
  * Description: openMDX Compatibility Mode: Attribute specifier
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 17:18:46 $
+ * Date:        $Date: 2008/06/28 00:21:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,6 +65,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Specifies an attribute to be retrieved
  */
+@SuppressWarnings("unchecked")
 public final class AttributeSpecifier
     implements Serializable
 {
@@ -118,8 +119,8 @@ public final class AttributeSpecifier
 
         if(
             order != Orders.ANY &&
-            order != Orders.ASCENDING &&
-            order != Orders.DESCENDING
+            order != Directions.ASCENDING &&
+            order != Directions.DESCENDING
         ) invalid.add("order");
         this.order = order;
 

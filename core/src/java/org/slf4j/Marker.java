@@ -20,8 +20,13 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * ______________________________________________________________________
+ *
+ * Copyright (c) 2008, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * JAVA 5 support added
  */
-
 package org.slf4j;
 
 import java.io.Serializable;
@@ -38,7 +43,7 @@ import java.util.Iterator;
  *
  * @author Ceki G&uuml;lc&uuml;
  */
-public interface Marker extends Serializable {
+public interface Marker extends Iterable<Marker>, Serializable {
  
   /**
    * This constant represents any marker, including a null marker.
@@ -83,7 +88,7 @@ public interface Marker extends Serializable {
    * 
    * @return Iterator over the children of this marker
    */
-  public Iterator iterator();
+  public Iterator<Marker> iterator();
   
   /**
    * Does this marker contain the 'other' marker? Marker A is defined to 

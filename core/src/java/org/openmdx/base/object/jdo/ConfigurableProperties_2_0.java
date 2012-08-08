@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ConfigurableProperties_2_0.java,v 1.2 2006/05/12 20:08:53 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ConfigurableProperties_2_0.java,v 1.6 2008/03/25 23:16:18 hburger Exp $
  * Description: JDO 2.0 Configurable Properties
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/05/12 20:08:53 $
+ * Date:        $Date: 2008/03/25 23:16:18 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,13 +48,14 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.object.jdo;
+
+import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 
 /**
  * JDO 2.0 Configurable Properties
  *
- * @since openMDX 1.13
+ * @deprecated use ConfigurableProperty
  */
 public class ConfigurableProperties_2_0 
     extends Options_2_0
@@ -68,16 +68,16 @@ public class ConfigurableProperties_2_0
     /**
      * The name of the implementation class
      */
-    public static final String FACTORY_CLASS = "javax.jdo.PersistenceManagerFactoryClass";
+    public static final String FACTORY_CLASS = ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName();  // "javax.jdo.PersistenceManagerFactoryClass"
 
     /**
      * 
      */
-    public static final String MAPPING_CATALOG = "javax.jdo.mapping.Catalog";
+    public static final String MAPPING_CATALOG = ConfigurableProperty.MappingCatalog.qualifiedName(); // "javax.jdo.mapping.Catalog";
     
     /**
      * 
      */
-    public static final String MAPPING_SCHEMA = "javax.jdo.mapping.Schema";
+    public static final String MAPPING_SCHEMA = ConfigurableProperty.MappingSchema.qualifiedName(); // "javax.jdo.mapping.Schema";
 
 }

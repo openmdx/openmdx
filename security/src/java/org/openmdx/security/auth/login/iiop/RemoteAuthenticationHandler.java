@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RemoteAuthenticationHandler.java,v 1.2 2006/05/22 08:54:28 hburger Exp $
+ * Name:        $Id: RemoteAuthenticationHandler.java,v 1.3 2008/04/04 17:55:32 hburger Exp $
  * Description: Remote Authentication Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/05/22 08:54:28 $
+ * Date:        $Date: 2008/04/04 17:55:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -100,7 +100,7 @@ public class RemoteAuthenticationHandler extends AbstractRemoteAuthenticationHan
         // 
         // Connection Factory
         //
-        Hashtable environment = new Hashtable();
+        Hashtable<String,Object> environment = new Hashtable<String,Object>();
         if(contextFactory != null) environment.put(
             Context.INITIAL_CONTEXT_FACTORY, 
             contextFactory
@@ -119,7 +119,7 @@ public class RemoteAuthenticationHandler extends AbstractRemoteAuthenticationHan
         // Log in case of debug
         //
         if(isDebug()) {
-            log("$Id: RemoteAuthenticationHandler.java,v 1.2 2006/05/22 08:54:28 hburger Exp $");
+            log("$Id: RemoteAuthenticationHandler.java,v 1.3 2008/04/04 17:55:32 hburger Exp $");
             log("realm-provider-url: " + providerURL);
             log("realm-jndi-name: " + jndiName);
             log("realm-initial-context-factory: " + contextFactory);

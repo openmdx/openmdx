@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/memory/OptimisticMapWrapper.java,v 1.1 2005/03/24 13:43:56 hburger Exp $
- * $Revision: 1.1 $
- * $Date: 2005/03/24 13:43:56 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/memory/OptimisticMapWrapper.java,v 1.2 2008/03/21 18:42:17 hburger Exp $
+ * $Revision: 1.2 $
+ * $Date: 2008/03/21 18:42:17 $
  *
  * ====================================================================
  *
@@ -46,10 +46,11 @@ import java.util.Collections;
  * <br>
  * <em>Caution:</em> This implementation might be slow when large amounts of data is changed in a transaction as much references will need to be copied around.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see TransactionalMapWrapper
  * @see PessimisticMapWrapper
  */
+@SuppressWarnings("unchecked")
 public class OptimisticMapWrapper extends TransactionalMapWrapper {
 
     protected Set activeTransactions;

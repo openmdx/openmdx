@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FeedbackHandler.java,v 1.7 2006/08/11 09:24:09 hburger Exp $
+ * Name:        $Id: FeedbackHandler.java,v 1.9 2008/05/12 10:45:51 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:09 $
+ * Date:        $Date: 2008/05/12 10:45:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,13 +59,13 @@ import java.util.List;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * Provide feedback to a user during long processings. 
  *  
  * @author anyff
  */
+@SuppressWarnings("unchecked")
 public class FeedbackHandler extends DelegatingHandler {
 
   /**
@@ -113,6 +113,7 @@ public class FeedbackHandler extends DelegatingHandler {
      * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#featureComplete(org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0)
      */
     public boolean featureComplete(
+        Path reference,
         DataproviderObject_1_0 object
     ) throws ServiceException {
         
@@ -151,6 +152,7 @@ public class FeedbackHandler extends DelegatingHandler {
         }
         
         return super.featureComplete(
+            reference,
             object
         );
     }
@@ -161,15 +163,20 @@ public class FeedbackHandler extends DelegatingHandler {
      * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#startObject(java.lang.String, java.lang.String, java.lang.String, short)
      */
     public boolean startObject(
+        Path reference,
         String qualifiedName,
         String qualifierName,
         String id,
         short operation
-    ) throws ServiceException {
-        
+    ) throws ServiceException {        
         this.indentation++;
-        
-        return super.startObject(qualifiedName, qualifierName, id, operation);
+        return super.startObject(
+            reference,
+            qualifiedName, 
+            qualifierName, 
+            id, 
+            operation
+        );
     }
 
     /**
@@ -279,12 +286,12 @@ public class FeedbackHandler extends DelegatingHandler {
     protected void printIndented(
         String message
     ) {  
-        CharSequence buffer = StringBuilders.newStringBuilder();
+        StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < this.indentation; i++) {
-             StringBuilders.asStringBuilder(buffer).append(' ');
+             buffer.append(' ');
         }
         
-        StringBuilders.asStringBuilder(buffer).append(message);
+        buffer.append(message);
         
         this.feedbackStream.println(buffer.toString());
         this.feedbackStream.flush();

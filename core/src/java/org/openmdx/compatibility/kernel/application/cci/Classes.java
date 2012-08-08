@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Classes.java,v 1.10 2008/02/19 13:44:37 hburger Exp $
+ * Name:        $Id: Classes.java,v 1.15 2008/07/04 13:39:40 hburger Exp $
  * Description: Application Framework: Classes 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/19 13:44:37 $
+ * Date:        $Date: 2008/07/04 13:39:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,10 +50,15 @@
  */
 package org.openmdx.compatibility.kernel.application.cci;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Generic class loader access
@@ -265,6 +270,11 @@ public class Classes
         return resource == null ? getKernelResource(name) : resource;
     }
 
+    
+    //------------------------------------------------------------------------
+    // Proxy Factory
+    //------------------------------------------------------------------------
+    
     /**
      * Create a new proxy instance
      * 
@@ -319,6 +329,87 @@ public class Classes
             interfaces.toArray(new Class<?>[interfaces.size()]),
             invocationHandler
         );
+    }
+
+    /**
+     * Retrieve the interfaces implemented by a given object instance
+     * 
+     * @param object the instance
+     * 
+     * @return the interfaces implemented by the given object instance
+     */
+    public static Set<Class<?>> combineInterfaces(
+        Object object,
+        Class<?>... prepend
+    ){
+        Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>(
+            Arrays.asList(prepend)
+        );
+        for(
+            Class<?> currentClass = object.getClass();
+            currentClass != null;
+            currentClass = currentClass.getSuperclass()
+        ){
+            for(Class<?> currentInterface : currentClass.getInterfaces()) {
+                interfaces.add(currentInterface);
+            }
+        }
+        return interfaces;
+    }
+
+    //------------------------------------------------------------------------
+    // Instance Factory
+    //------------------------------------------------------------------------
+    
+    /**
+     * Create a new application class instance 
+     * 
+     * @param interfaceClass
+     * @param className
+     * @param arguments
+     * 
+     * @return a new Instance
+     * 
+     * @throws ClassNotFoundException
+     * @throws IllegalArgumentException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T newApplicationInstance(
+        Class<T> interfaceClass,
+        String className,
+        Object... arguments
+    ) throws ClassNotFoundException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        Class<?> instanceClass = getApplicationClass(className);
+        if(interfaceClass.isAssignableFrom(instanceClass)) { 
+            int argumentCount = arguments == null ? 0 : arguments.length;
+            Constructors: for(Constructor<?> constructor: instanceClass.getConstructors()) {
+                Class<?>[] parameters = constructor.getParameterTypes();
+                int parameterCount = parameters == null ? 0 : parameters.length;
+                if(argumentCount == parameterCount) {
+                    for(
+                        int i = 0;
+                        i < argumentCount;
+                        i++
+                    ){
+                        if(
+                            arguments[i] != null && 
+                            !parameters[i].isInstance(arguments[i]) 
+                        ) continue Constructors;
+                    }
+                    return (T) constructor.newInstance(arguments);
+                }
+            }
+            throw new IllegalArgumentException(
+                className + " has no constructor for the given arguments"
+            );
+        } else {
+            throw new ClassCastException (
+                className + " is not an instance of " + interfaceClass.getName()
+            );
+        }
     }
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Subprocess.java,v 1.7 2005/04/20 21:08:36 hburger Exp $
+ * Name:        $Id: Subprocess.java,v 1.8 2008/03/21 18:38:44 hburger Exp $
  * Description: SubProcess
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/20 21:08:36 $
+ * Date:        $Date: 2008/03/21 18:38:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,6 +67,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
 /**
  * Subprocess
  */
+@SuppressWarnings("unchecked")
 public class Subprocess extends Thread {
 
     /**

@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -27,14 +28,21 @@ import org.openmdx.uses.org.apache.commons.collections.functors.InstanceofPredic
  * a specified <code>Class</code>. If an object cannot be added to the
  * collection, an IllegalArgumentException is thrown.
  * <p>
+ * <strong>Note that TypedMap is not synchronized and is not thread-safe.</strong>
+ * If you wish to use this map from multiple threads concurrently, you must use
+ * appropriate synchronization. The simplest approach is to wrap this map
+ * using {@link java.util.Collections#synchronizedMap(Map)}. This class may throw 
+ * exceptions when accessed by concurrent threads without synchronization.
+ * <p>
  * The returned implementation is Serializable from Commons Collections 3.1.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.3 $ $Date: 2007/10/10 16:06:13 $
+ * @version $Revision: 1.5 $ $Date: 2008/04/25 14:32:16 $
  * 
  * @author Stephen Colebourne
  * @author Matthew Hawthorne
  */
+@SuppressWarnings("unchecked")
 public class TypedMap {
 
     /**
@@ -61,7 +69,6 @@ public class TypedMap {
      * Restrictive constructor.
      */
     protected TypedMap() {
-        super();
     }
 
 }

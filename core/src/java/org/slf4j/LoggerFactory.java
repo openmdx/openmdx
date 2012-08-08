@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LoggerFactory.java,v 1.7 2007/12/19 15:48:12 hburger Exp $
+ * Name:        $Id: LoggerFactory.java,v 1.9 2008/03/13 17:16:15 hburger Exp $
  * Description: Dynamic Logger Binder
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/19 15:48:12 $
+ * Date:        $Date: 2008/03/13 17:16:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -47,8 +47,7 @@
  * 
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
- * 
- * ------------------
+ * ______________________________________________________________________
  * 
  * The original file was provided by SLF4J (http://www.slf4j.org)
  * under the following terms:
@@ -77,8 +76,8 @@
  */
 package org.slf4j;
 
-import org.slf4j.helpers.Util;
-import org.slf4j.lenient.DynamicLoggerBinder;
+import org.slf4j.helpers.FallbackLoggerFactory;
+import org.slf4j.helpers.LenientBinder;
 import org.slf4j.spi.LoggerFactoryBinder;
 
 /**
@@ -99,10 +98,6 @@ import org.slf4j.spi.LoggerFactoryBinder;
  */
 public final class LoggerFactory {
 
-    static ILoggerFactory loggerFactory;
-    static final String NULL_LF_URL = "http://www.slf4j.org/codes.html#null_LF";
-    private static final String STATIC_BINDER = "org.slf4j.impl.StaticLoggerBinder";
-
     /**
      * Constructor 
      */
@@ -110,20 +105,10 @@ public final class LoggerFactory {
         // private constructor prevents instantiation
     }
 
-    static {
-        LoggerFactoryBinder binder = getBinder();
-        try {
-            loggerFactory = binder.getLoggerFactory();
-        } catch (Exception exception) {
-            //
-            // we should never get here
-            //
-            Util.reportFailure(
-                "Failed to instantiate logger [" + binder.getLoggerFactoryClassStr() + "]", 
-                exception
-            );
-        }
-    }
+    /**
+     * The logger factory singleton
+     */
+    private static final ILoggerFactory loggerFactory = new LenientFactory().narrow();
 
     /**
      * Return a logger named according to the name parameter using the statically
@@ -134,13 +119,7 @@ public final class LoggerFactory {
      * @return logger
      */
     public static Logger getLogger(String name) {
-        if(loggerFactory == null) {
-            throw new IllegalStateException(
-                "Logging factory implementation cannot be null. See also " + 
-                NULL_LF_URL
-            );
-        }
-        return loggerFactory.getLogger(name);
+        return LoggerFactory.loggerFactory.getLogger(name);
     }
 
     /**
@@ -151,14 +130,8 @@ public final class LoggerFactory {
      *          the returned logger will be named after clazz
      * @return logger
      */
-    public static Logger getLogger(Class clazz) {
-        if(loggerFactory == null) {
-            throw new IllegalStateException(
-                "Logging factory implementation cannot be null. See also " + 
-                NULL_LF_URL
-            );
-        }
-        return loggerFactory.getLogger(clazz.getName());
+    public static Logger getLogger(Class<?> clazz) {
+        return LoggerFactory.loggerFactory.getLogger(clazz.getName());
     }
 
     /**
@@ -170,38 +143,57 @@ public final class LoggerFactory {
      * @return the ILoggerFactory instance in use
      */
     public static ILoggerFactory getILoggerFactory() {
-        return loggerFactory;
+        return LoggerFactory.loggerFactory;
     }
 
+
+    //------------------------------------------------------------------------
+    // Class LenientFactory
+    //------------------------------------------------------------------------
+    
     /**
-     * Retrieve the static binder if already available to this class loader,
-     * or the dynamic binder otherwise.
-     * 
-     * @return the appropriate binder
+     * Lenient Logger Factory
+     * <p>
+     * This implementation uses<ul>
+     * <li>a StaticLoggerBinder if available in the current classloader
+     * <li>a JDK 1.4 Logger Factory otherwise
+     * </ul>
      */
-    private static LoggerFactoryBinder getBinder(
-    ){
-        try {
-            return (LoggerFactoryBinder) Class.forName(
-                STATIC_BINDER,
-                true,
-                LoggerFactory.class.getClassLoader()
-            ).getField(
-                "SINGLETON"
-            ).get(
-                null // static
-            );
-        } catch (Exception exception) {
-            try {
-                return DynamicLoggerBinder.SINGLETON;
-            } catch(NoClassDefFoundError error) {
-                Util.reportFailure(
-                    "Failed to load class \"org.slf4j.lenient.DynamicLoggerBinder\".",
-                    error
-                );
-                throw error;
-            }
+    static class LenientFactory
+        extends LenientBinder<ILoggerFactory,LoggerFactoryBinder>
+        implements ILoggerFactory
+    {
+        
+        /**
+         * Constructor 
+         */
+        LenientFactory() {
+            super("org.slf4j.impl.StaticLoggerBinder");
         }
-    }
 
+        /* (non-Javadoc)
+         * @see org.slf4j.helpers.LenientBinder#getFallbackDelegate()
+         */
+        protected ILoggerFactory getFallbackDelegate() {
+            return new FallbackLoggerFactory();
+        }
+
+        /* (non-Javadoc)
+         * @see org.slf4j.helpers.LenientBinder#getStandardDelegate(java.lang.Object)
+         */
+        protected ILoggerFactory getStandardDelegate(
+            LoggerFactoryBinder binderInstance
+        ) {
+            return binderInstance.getLoggerFactory();
+        }
+
+        /* (non-Javadoc)
+         * @see org.slf4j.ILoggerFactory#getLogger(java.lang.String)
+         */
+        public Logger getLogger(String name) {
+            return getDelegate().getLogger(name);
+        }
+
+    }
+    
 }

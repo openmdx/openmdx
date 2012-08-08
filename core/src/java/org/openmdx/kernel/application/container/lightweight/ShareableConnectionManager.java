@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ShareableConnectionManager.java,v 1.7 2006/08/04 12:35:47 hburger Exp $
+ * Name:        $Id: ShareableConnectionManager.java,v 1.8 2008/03/21 18:38:39 hburger Exp $
  * Description: Shareable Connection Manager
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/04 12:35:47 $
+ * Date:        $Date: 2008/03/21 18:38:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import javax.resource.ResourceException;
 /**
  * Shareable Connection Manager
  */
+@SuppressWarnings("unchecked")
 public class ShareableConnectionManager extends AbstractConnectionManager {
 
     /**

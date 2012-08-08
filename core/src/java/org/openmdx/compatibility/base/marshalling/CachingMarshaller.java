@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CachingMarshaller.java,v 1.5 2008/02/29 17:58:49 hburger Exp $
+ * Name:        $Id: CachingMarshaller.java,v 1.7 2008/06/13 09:34:19 hburger Exp $
  * Description: Caching Marshaller 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 17:58:49 $
+ * Date:        $Date: 2008/06/13 09:34:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,7 @@ package org.openmdx.compatibility.base.marshalling;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.openmdx.base.exception.ServiceException;
 
@@ -79,9 +80,27 @@ public abstract class CachingMarshaller
      */
     protected CachingMarshaller(
     ){
-        this.mapping = new HashMap<Object,Object>();
+        this(
+            false // multithreaded
+        );
     }
 
+    /**
+     * Constructs a new, empty caching marshaller with the default initial
+     * cache size. 
+     */
+    protected CachingMarshaller(
+        boolean multithreaded
+    ){
+        this.multithreaded = multithreaded;
+        initialize();
+    }
+    
+    /**
+     * 
+     */
+    private final boolean multithreaded;
+    
     /**
      * The unmarshalled objects
      */ 
@@ -95,7 +114,14 @@ public abstract class CachingMarshaller
         this.mapping.clear();
     }
 
-
+    private void initialize(
+    ){
+        this.mapping = this.multithreaded ? 
+            new ConcurrentHashMap<Object,Object>() : 
+            new HashMap<Object,Object>();
+    }
+    
+    
     //--------------------------------------------------------------------------
     // Implements Marshaller
     //--------------------------------------------------------------------------
@@ -206,7 +232,7 @@ public abstract class CachingMarshaller
      * stream (that is, serialize it).
      *
      * @serialData  The cache itself is not serialized, i.e. the deserialized 
-     *              members have to register themeslves.
+     *              members have to register themselves.
      */
     private synchronized void writeObject(
         java.io.ObjectOutputStream stream
@@ -215,17 +241,14 @@ public abstract class CachingMarshaller
     }
 
     /**
-     * Reconstitute the <tt>Path</tt> instance from a stream (that is,
-     * deserialize it).
-     * <p>
      * The cache itself has not been serialized, i.e. the deserialized 
-     * members have to register themeslves.
+     * members have to register themselves.
      */
     private synchronized void readObject(
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        this.mapping = new HashMap<Object,Object>();
+        initialize();
     }
 
 }

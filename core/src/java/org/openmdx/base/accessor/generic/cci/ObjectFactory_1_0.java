@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectFactory_1_0.java,v 1.7 2008/02/08 16:50:58 hburger Exp $
+ * Name:        $Id: ObjectFactory_1_0.java,v 1.8 2008/04/10 18:13:53 hburger Exp $
  * Description: openMDX Object Layer: Object Factory Interface
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:50:58 $
+ * Date:        $Date: 2008/04/10 18:13:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,6 @@
  */
 package org.openmdx.base.accessor.generic.cci;
 
-import java.util.List;
-
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.transaction.UnitOfWork_1_0;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
@@ -63,7 +61,7 @@ import org.openmdx.compatibility.base.marshalling.Marshaller;
  * as it is not garbage collected.
  */
 public interface ObjectFactory_1_0 
-    extends Marshaller
+    extends StructureFactory_1_0, Marshaller
 {
 
     //------------------------------------------------------------------------
@@ -134,37 +132,12 @@ public interface ObjectFactory_1_0
         String objectClass
     ) throws ServiceException;
 
-  /**
-   * Creates a new object with the initial values.
-   */
-  Object_1_0 createObject(
-    String objectClass,
-    Object_1_0 initialValues
-  ) throws ServiceException;
-
-    //--------------------------------------------------------------------------
-    // Structure management
-    //--------------------------------------------------------------------------
-
     /**
-     * Create an object
-     *
-     * @param       type
-     *              The type of the structure to be created
-     * @param       fieldNames
-     *              The names of the structure's fields
-     * @param       fieldValues
-     *              The structure's field values
-     *
-     * @return      a structure
-     *
-     * @exception   ServiceException    ILLEGAL_STATE
-     *              if the object factory is closed
+     * Creates a new object with the initial values.
      */
-    Structure_1_0 createStructure(
-        String type,
-        List<String> fieldNames,
-        List<?> fieldValues
+    Object_1_0 createObject(
+      String objectClass,
+      Object_1_0 initialValues
     ) throws ServiceException;
 
 }

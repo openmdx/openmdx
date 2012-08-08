@@ -1,9 +1,10 @@
 /*
- *  Copyright 2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -50,11 +51,12 @@ import org.openmdx.uses.org.apache.commons.collections.OrderedIterator;
  * does use sligtly more memory.
  * 
  * @since Commons Collections 3.1
- * @version $Revision: 1.2 $ $Date: 2005/04/07 14:15:24 $
+ * @version $Revision: 1.5 $ $Date: 2008/06/28 00:21:22 $
  *
  * @author Joerg Schmuecker
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class TreeList extends AbstractList {
 //    add; toArray; iterator; insert; get; indexOf; remove
 //    TreeList = 1260;7360;3080;  160;   170;3400;  170;
@@ -524,9 +526,15 @@ public class TreeList extends AbstractList {
             return balance();
         }
 
+        /**
+         * Removes this node from the tree.
+         *
+         * @return the node that replaces this one in the parent
+         */
         private AVLNode removeSelf() {
-            if (getRightSubTree() == null && getLeftSubTree() == null)
+            if (getRightSubTree() == null && getLeftSubTree() == null) {
                 return null;
+            }
             if (getRightSubTree() == null) {
                 if (relativePosition > 0) {
                     left.relativePosition += relativePosition + (relativePosition > 0 ? 0 : 1);
@@ -541,6 +549,7 @@ public class TreeList extends AbstractList {
             }
 
             if (heightRightMinusLeft() > 0) {
+                // more on the right, so delete from the right
                 AVLNode rightMin = right.min();
                 value = rightMin.value;
                 if (leftIsPrevious) {
@@ -551,12 +560,20 @@ public class TreeList extends AbstractList {
                     relativePosition++;
                 }
             } else {
+                // more on the left or equal, so delete from the left
                 AVLNode leftMax = left.max();
                 value = leftMax.value;
                 if (rightIsNext) {
                     right = leftMax.right;
                 }
+                AVLNode leftPrevious = left.left;
                 left = left.removeMax();
+                if (left == null) {
+                    // special case where left that was deleted was a double link
+                    // only occurs when height difference is equal
+                    left = leftPrevious;
+                    leftIsPrevious = true;
+                }
                 if (relativePosition > 0) {
                     relativePosition--;
                 }
@@ -669,12 +686,24 @@ public class TreeList extends AbstractList {
             return newTop;
         }
 
+        /**
+         * Sets the left field to the node, or the previous node if that is null
+         *
+         * @param node  the new left subtree node
+         * @param previous  the previous node in the linked list
+         */
         private void setLeft(AVLNode node, AVLNode previous) {
             leftIsPrevious = (node == null);
             left = (leftIsPrevious ? previous : node);
             recalcHeight();
         }
 
+        /**
+         * Sets the right field to the node, or the next node if that is null
+         *
+         * @param node  the new left subtree node
+         * @param next  the next node in the linked list
+         */
         private void setRight(AVLNode node, AVLNode next) {
             rightIsNext = (node == null);
             right = (rightIsNext ? next : node);
@@ -749,25 +778,20 @@ public class TreeList extends AbstractList {
         /** The parent list */
         protected final TreeList parent;
         /**
-         * The node that will be returned by {@link #next()}. If this is equal
-         * to {@link AbstractLinkedList#header} then there are no more values to return.
+         * Cache of the next node that will be returned by {@link #next()}.
          */
         protected AVLNode next;
         /**
-         * The index of {@link #next}.
+         * The index of the next node to be returned.
          */
         protected int nextIndex;
         /**
-         * The last node that was returned by {@link #next()} or {@link
-         * #previous()}. Set to <code>null</code> if {@link #next()} or {@link
-         * #previous()} haven't been called, or if the node has been removed
-         * with {@link #remove()} or a new node added with {@link #add(Object)}.
-         * Should be accessed through {@link #getLastNodeReturned()} to enforce
-         * this behaviour.
+         * Cache of the last node that was returned by {@link #next()}
+         * or {@link #previous()}.
          */
         protected AVLNode current;
         /**
-         * The index of {@link #current}.
+         * The index of the last node that was returned.
          */
         protected int currentIndex;
         /**
@@ -784,12 +808,14 @@ public class TreeList extends AbstractList {
          * @param parent  the parent list
          * @param fromIndex  the index to start at
          */
+        @SuppressWarnings("synthetic-access")
         protected TreeListIterator(TreeList parent, int fromIndex) throws IndexOutOfBoundsException {
             super();
             this.parent = parent;
             this.expectedModCount = parent.modCount;
             this.next = (parent.root == null ? null : parent.root.get(fromIndex));
             this.nextIndex = fromIndex;
+            this.currentIndex = -1;
         }
 
         /**
@@ -799,6 +825,7 @@ public class TreeList extends AbstractList {
          * @throws ConcurrentModificationException If the list's modification
          * count isn't the value that was expected.
          */
+        @SuppressWarnings("synthetic-access")
         protected void checkModCount() {
             if (parent.modCount != expectedModCount) {
                 throw new ConcurrentModificationException();
@@ -854,13 +881,20 @@ public class TreeList extends AbstractList {
 
         public void remove() {
             checkModCount();
-            if (current == null) {
+            if (currentIndex == -1) {
                 throw new IllegalStateException();
             }
-            parent.remove(currentIndex);
+            if (nextIndex == currentIndex) {
+                // remove() following previous()
+                next = next.next();
+                parent.remove(currentIndex);
+            } else {
+                // remove() following next()
+                parent.remove(currentIndex);
+                nextIndex--;
+            }
             current = null;
             currentIndex = -1;
-            nextIndex--;
             expectedModCount++;
         }
 

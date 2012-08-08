@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DurationMarshaller.java,v 1.6 2007/01/22 15:18:04 hburger Exp $
+ * Name:        $Id: DurationMarshaller.java,v 1.7 2008/03/21 18:47:36 hburger Exp $
  * Description: DurationMarshaller 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/22 15:18:04 $
+ * Date:        $Date: 2008/03/21 18:47:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,7 +66,6 @@ import javax.xml.datatype.Duration;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * DurationMarshaller
@@ -154,7 +153,7 @@ public class DurationMarshaller
      * @see LayerConfigurationEntries#DURATION_TYPE_NUMERIC
      */
     private final String durationType;  
-    private static final List DURATION_TYPES = Arrays.asList(
+    private static final List<String> DURATION_TYPES = Arrays.asList(
         new String[]{
             LayerConfigurationEntries.DURATION_TYPE_INTERVAL,
             LayerConfigurationEntries.DURATION_TYPE_CHARACTER,
@@ -272,7 +271,7 @@ public class DurationMarshaller
             String value = source.toString();
             Matcher matcher;
             if((matcher = DAY_TO_SECOND.matcher(value)).matches()) {
-                CharSequence duration = StringBuilders.newStringBuilder(
+                StringBuilder duration = new StringBuilder(
                 ).append(
                     matcher.group(1)
                 ).append(
@@ -286,23 +285,19 @@ public class DurationMarshaller
                 ).append(
                     "H"
                 );
-                if(matcher.group(4) != null) StringBuilders.asStringBuilder(
-                    duration
-                ).append(
+                if(matcher.group(4) != null) duration.append(
                     matcher.group(4)
                 ).append(
                     "M"
                 );
-                if(matcher.group(5) != null) StringBuilders.asStringBuilder(
-                    duration
-                ).append(
+                if(matcher.group(5) != null) duration.append(
                     matcher.group(5)
                 ).append(
                     "S"
                 );
                 return toDuration(duration);                
             } else if ((matcher = YEAR_TO_MONTH.matcher(value)).matches()) {
-                CharSequence duration = StringBuilders.newStringBuilder(
+                StringBuilder duration = new StringBuilder(
                 ).append(
                     matcher.group(1)
                 ).append(

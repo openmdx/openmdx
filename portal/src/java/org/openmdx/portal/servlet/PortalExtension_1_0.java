@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalExtension_1_0.java,v 1.14 2008/01/16 23:03:45 wfro Exp $
+ * Name:        $Id: PortalExtension_1_0.java,v 1.16 2008/03/18 19:07:57 wfro Exp $
  * Description: Evaluator_1_0
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/16 23:03:45 $
+ * Date:        $Date: 2008/03/18 19:07:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,10 +61,10 @@ package org.openmdx.portal.servlet;
 import java.util.List;
 import java.util.Map;
 
+import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefStruct;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.portal.servlet.control.ControlFactory;
@@ -211,7 +211,7 @@ public interface PortalExtension_1_0 {
         Map parameterMap,
         Map fieldMap,
         ApplicationContext application,
-        RefPackage_1_0 rootPkg
+        PersistenceManager pm
     );
     
     /**
@@ -220,7 +220,8 @@ public interface PortalExtension_1_0 {
     public RefObject_1_0 getLookupObject(
         ModelElement_1_0 lookupType,
         RefObject_1_0 startFrom,
-        ApplicationContext application
+        ApplicationContext application,
+        PersistenceManager pm
     ) throws ServiceException;
 
     /**

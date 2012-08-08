@@ -16,6 +16,7 @@
 package org.openxri;
 
 import com.ibm.icu.lang.UCharacter;
+import com.ibm.icu.lang.UCharacterEnums.ECharacterCategory;
 import com.ibm.icu.text.UTF16;
 
 
@@ -127,7 +128,7 @@ public class XRIQuery
             //
             // private
             //
-            if (UCharacter.getType(c) == UCharacter.PRIVATE_USE)
+            if (UCharacter.getType(c) == ECharacterCategory.PRIVATE_USE)
             	continue;
             
             //

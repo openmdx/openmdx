@@ -1,9 +1,10 @@
 /*
- *  Copyright 1999-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -32,7 +33,7 @@ import org.openmdx.uses.org.apache.commons.collections.ResettableIterator;
  * the iterator back to the start if required.
  *
  * @since Commons Collections 1.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:21 $
+ * @version $Revision: 1.3 $ $Date: 2008/04/25 14:32:10 $
  *
  * @author James Strachan
  * @author Mauricio S. Moura
@@ -47,9 +48,9 @@ public class ArrayIterator implements ResettableIterator {
     /** The start index to loop from */
     protected int startIndex = 0;
     /** The end index to loop to */
-	protected int endIndex = 0;
+    protected int endIndex = 0;
     /** The current iterator index */
-	protected int index = 0;
+    protected int index = 0;
     
     // Constructors
     // ----------------------------------------------------------------------

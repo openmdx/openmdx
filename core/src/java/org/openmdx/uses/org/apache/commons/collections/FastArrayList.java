@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -57,20 +58,18 @@ import java.util.ListIterator;
  * Double-Checked Locking Idiom Is Broken Declaration</a>.</p>
  *
  * @since Commons Collections 1.0
- * @version $Revision: 1.4 $ $Date: 2005/04/07 14:13:58 $
+ * @version $Revision: 1.7 $ $Date: 2008/06/28 00:21:32 $
  * 
  * @author Craig R. McClanahan
+ * @author Stephen Colebourne
  */
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class FastArrayList extends ArrayList {
 
 
     // ----------------------------------------------------------- Constructors
-
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3833750971141732662L;
 
 
     /**
@@ -492,12 +491,20 @@ public class FastArrayList extends ArrayList {
 
     /**
      * Return an iterator over the elements in this list in proper sequence.
-     * <br><br>
-     * <strong>IMPLEMENTATION NOTE</strong> - If the list is operating in fast
-     * mode, an Iterator is returned, and a structural modification to the
-     * list is made, then the Iterator will continue over the previous contents
-     * of the list (at the time that the Iterator was created), rather than
-     * failing due to concurrent modifications.
+     * <p>
+     * <b>Thread safety</b><br />
+     * The iterator returned is thread-safe ONLY in FAST mode.
+     * In slow mode there is no way to synchronize, or make the iterator thread-safe.
+     * <p>
+     * In fast mode iteration and modification may occur in parallel on different threads,
+     * however there is a restriction. Modification must be EITHER via the Iterator
+     * interface methods OR the List interface. If a mixture of modification
+     * methods is used a ConcurrentModificationException is thrown from the iterator
+     * modification method. If the List modification methods are used the changes are
+     * NOT visible in the iterator (it shows the list contents at the time the iterator
+     * was created).
+     * 
+     * @return the iterator
      */
     public Iterator iterator() {
         if (fast) {
@@ -530,7 +537,20 @@ public class FastArrayList extends ArrayList {
 
     /**
      * Return an iterator of the elements of this list, in proper sequence.
-     * See the implementation note on <code>iterator()</code>.
+     * <p>
+     * <b>Thread safety</b><br />
+     * The iterator returned is thread-safe ONLY in FAST mode.
+     * In slow mode there is no way to synchronize, or make the iterator thread-safe.
+     * <p>
+     * In fast mode iteration and modification may occur in parallel on different threads,
+     * however there is a restriction. Modification must be EITHER via the Iterator
+     * interface methods OR the List interface. If a mixture of modification
+     * methods is used a ConcurrentModificationException is thrown from the iterator
+     * modification method. If the List modification methods are used the changes are
+     * NOT visible in the iterator (it shows the list contents at the time the iterator
+     * was created).
+     * 
+     * @return the list iterator
      */
     public ListIterator listIterator() {
         if (fast) {
@@ -544,10 +564,21 @@ public class FastArrayList extends ArrayList {
     /**
      * Return an iterator of the elements of this list, in proper sequence,
      * starting at the specified position.
-     * See the implementation note on <code>iterator()</code>.
+     * <p>
+     * <b>Thread safety</b><br />
+     * The iterator returned is thread-safe ONLY in FAST mode.
+     * In slow mode there is no way to synchronize, or make the iterator thread-safe.
+     * <p>
+     * In fast mode iteration and modification may occur in parallel on different threads,
+     * however there is a restriction. Modification must be EITHER via the Iterator
+     * interface methods OR the List interface. If a mixture of modification
+     * methods is used a ConcurrentModificationException is thrown from the iterator
+     * modification method. If the List modification methods are used the changes are
+     * NOT visible in the iterator (it shows the list contents at the time the iterator
+     * was created).
      *
      * @param index The starting position of the iterator to return
-     *
+     * @return the list iterator
      * @exception IndexOutOfBoundsException if the index is out of range
      */
     public ListIterator listIterator(int index) {
@@ -1192,7 +1223,7 @@ public class FastArrayList extends ArrayList {
             get().remove(lastReturnedIndex);
             last--;
             expected = list;
-            iter = get().listIterator(previousIndex());
+            iter = get().listIterator(lastReturnedIndex);
             lastReturnedIndex = -1;
         }
 
@@ -1211,8 +1242,9 @@ public class FastArrayList extends ArrayList {
             int i = nextIndex();
             get().add(i, o);
             last++;
+            expected = list;
             iter = get().listIterator(i + 1);
-            lastReturnedIndex = 1;
+            lastReturnedIndex = -1;
         }
 
    }
@@ -1245,34 +1277,28 @@ public class FastArrayList extends ArrayList {
         }
 
         public boolean hasNext() {
-            checkMod();
             return iter.hasNext();     
         }
 
         public Object next() {
-            checkMod();
             lastReturnedIndex = iter.nextIndex();
             return iter.next();
         }
 
         public boolean hasPrevious() {
-            checkMod();
             return iter.hasPrevious();
         }
 
         public Object previous() {
-            checkMod();
             lastReturnedIndex = iter.previousIndex();
             return iter.previous();
         }
 
         public int previousIndex() {
-            checkMod();
             return iter.previousIndex();
         }
 
         public int nextIndex() {
-            checkMod();
             return iter.nextIndex();
         }
 
@@ -1283,7 +1309,7 @@ public class FastArrayList extends ArrayList {
             }
             get().remove(lastReturnedIndex);
             expected = list;
-            iter = get().listIterator(previousIndex());
+            iter = get().listIterator(lastReturnedIndex);
             lastReturnedIndex = -1;
         }
 
@@ -1301,6 +1327,7 @@ public class FastArrayList extends ArrayList {
             checkMod();
             int i = nextIndex();
             get().add(i, o);
+            expected = list;
             iter = get().listIterator(i + 1);
             lastReturnedIndex = -1;
         }

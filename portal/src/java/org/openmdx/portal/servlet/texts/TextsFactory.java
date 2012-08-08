@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextsFactory.java,v 1.3 2007/01/21 20:47:00 wfro Exp $
+ * Name:        $Id: TextsFactory.java,v 1.4 2008/04/04 11:48:39 hburger Exp $
  * Description: TextsFactory
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:47:00 $
+ * Date:        $Date: 2008/04/04 11:48:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,11 +71,12 @@ public class TextsFactory
   implements Serializable {
   
   //-------------------------------------------------------------------------
-  public TextsFactory(
+  @SuppressWarnings("unchecked")
+public TextsFactory(
       String[] locales,
       List[] textsStreams
   ) {
-      this.texts = MapUtils.orderedMap(new HashMap());
+      this.texts = MapUtils.orderedMap(new HashMap<String,Texts_1_0>());
       for(int i = 0; i < locales.length; i++) {
           if(locales[i] != null) {
 	          try {
@@ -131,7 +132,7 @@ public class TextsFactory
   //-------------------------------------------------------------------------
   private static final long serialVersionUID = 3760559780497798706L;
 
-  private final Map texts;
+  private final Map<String,Texts_1_0> texts;
   
 }
 

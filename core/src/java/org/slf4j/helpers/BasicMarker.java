@@ -20,8 +20,13 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * ______________________________________________________________________
+ *
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * JAVA 5 support added
  */
-
 package org.slf4j.helpers;
 
 import java.util.Collections;
@@ -31,26 +36,34 @@ import java.util.Vector;
 
 import org.slf4j.Marker;
 
-
 /**
- * An almost trivial implementation of the {@link Marker} interface. 
- *
- * <p><code>BasicMarker</code> lets users specify marker
- * information. However, it does not offer any useful operations on
- * that information. 
- *
- * <p>Simple logging systems which ignore marker data, just return
- * instances of this class in order to conform to the SLF4J API.
- *
+ * An almost trivial implementation of the {@link Marker} interface.
+ * 
+ * <p>
+ * <code>BasicMarker</code> lets users specify marker information. However, it
+ * does not offer any useful operations on that information.
+ * 
+ * <p>
+ * Simple logging systems which ignore marker data, just return instances of
+ * this class in order to conform to the SLF4J API.
+ * 
  * @author Ceki G&uuml;lc&uuml;
+ * @author Joern Huxhorn
+ * ______________________________________________________________________
+ *
+ * Copyright (c) 2007, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * JAVA 5 support added
  */
 public class BasicMarker implements Marker {
 
   private static final long serialVersionUID = 1803952589649545191L;
 
   final String name;
-  List children;
-  
+  List<Marker> children;
+  final static private List<Marker> NO_CHILDREN = Collections.emptyList();
+
   BasicMarker(String name) {
     this.name = name;
   }
@@ -62,24 +75,30 @@ public class BasicMarker implements Marker {
   public synchronized void add(Marker child) {
     if (child == null) {
       throw new NullPointerException(
-        "Null children cannot be added to a Marker.");
+          "Null children cannot be added to a Marker.");
     }
     if (children == null) {
-      children = new Vector();
+      children = new Vector<Marker>();
     }
-    children.add(child);
+
+    // no point in adding the child multiple times
+    if (children.contains(child)) {
+      return;
+    } else {
+      // add the child
+      children.add(child);
+    }
+
   }
 
   public synchronized boolean hasChildren() {
     return ((children != null) && (children.size() > 0));
   }
 
-  public synchronized Iterator iterator() {
-    if (children != null) {
-      return children.iterator();
-    } else {
-      return Collections.EMPTY_LIST.iterator();
-    }
+  public synchronized Iterator<Marker> iterator() {
+      return (
+         children == null ? NO_CHILDREN : children
+      ).iterator();
   }
 
   public synchronized boolean remove(Marker markerToRemove) {
@@ -89,54 +108,55 @@ public class BasicMarker implements Marker {
 
     int size = children.size();
     for (int i = 0; i < size; i++) {
-      Marker m = (Marker) children.get(i);
-      if( m == markerToRemove) {
-          return false;
+      Marker m = children.get(i);
+      if (m == markerToRemove) {
+        children.remove(i);
+        return true;
       }
     }
     // could not find markerToRemove
     return false;
   }
-  
+
   public boolean contains(Marker other) {
-    if(other == null) {
+    if (other == null) {
       throw new IllegalArgumentException("Other cannot be null");
     }
-    
-    if(this == other) {
+
+    if (this == other) {
       return true;
     }
-    
+
     if (hasChildren()) {
-      for(int i = 0; i < children.size(); i++) {
-        Marker child = (Marker) children.get(i);
-        if(child.contains(other)) {
+      for (int i = 0; i < children.size(); i++) {
+        Marker child = children.get(i);
+        if (child.contains(other)) {
           return true;
         }
       }
     }
     return false;
   }
-  
+
   /**
    * This method is mainly used with Expression Evaluators.
    */
   public boolean contains(String name) {
-    if(name == null) {
+    if (name == null) {
       throw new IllegalArgumentException("Other cannot be null");
     }
-    
+
     if (this.name.equals(name)) {
       return true;
     }
-    
+
     if (hasChildren()) {
-      for(int i = 0; i < children.size(); i++) {
-        Marker child = (Marker) children.get(i);
-        if(child.contains(name)) {
+      for (int i = 0; i < children.size(); i++) {
+        Marker child = children.get(i);
+        if (child.contains(name)) {
           return true;
         }
-      }     
+      }
     }
     return false;
   }
@@ -146,24 +166,24 @@ public class BasicMarker implements Marker {
   private static String SEP = ", ";
 
   public String toString() {
-      
+
     if (!this.hasChildren()) {
       return this.getName();
     }
-    
-    Iterator it = this.iterator();
+
+    Iterator<Marker> it = this.iterator();
     Marker child;
     StringBuffer sb = new StringBuffer(this.getName());
     sb.append(' ').append(OPEN);
-    while(it.hasNext()) {
-      child = (Marker)it.next();
+    while (it.hasNext()) {
+      child = it.next();
       sb.append(child.getName());
       if (it.hasNext()) {
         sb.append(SEP);
       }
     }
     sb.append(CLOSE);
-      
-    return sb.toString();  
+
+    return sb.toString();
   }
 }

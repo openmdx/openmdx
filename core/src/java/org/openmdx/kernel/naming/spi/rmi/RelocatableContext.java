@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RelocatableContext.java,v 1.3 2008/01/09 15:55:07 hburger Exp $
+ * Name:        $Id: RelocatableContext.java,v 1.4 2008/06/28 00:21:50 hburger Exp $
  * Description: Relocatable Context
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/09 15:55:07 $
+ * Date:        $Date: 2008/06/28 00:21:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,6 +62,7 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.ServiceUnavailableException;
 
+import org.openmdx.kernel.naming.spi.AbstractContext;
 import org.openmdx.kernel.naming.spi.StringBasedContext;
 
 /**
@@ -235,7 +236,7 @@ public class RelocatableContext extends StringBasedContext implements Serializab
 	 * @see javax.naming.Context#getNameParser(java.lang.String)
 	 */
 	public NameParser getNameParser(String name) throws NamingException {
-		return RelocatableContext.nameParser;
+		return AbstractContext.nameParser;
 	}
 
 	/* (non-Javadoc)

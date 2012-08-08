@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractMapper_1.java,v 1.7 2008/02/15 17:24:06 hburger Exp $
+ * Name:        $Id: AbstractMapper_1.java,v 1.8 2008/04/02 17:38:40 wfro Exp $
  * Description: PackageExternalizer_1
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/15 17:24:06 $
+ * Date:        $Date: 2008/04/02 17:38:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,7 @@ import java.util.zip.ZipOutputStream;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 
 //---------------------------------------------------------------------------
 
@@ -238,7 +238,7 @@ protected List<ModelElement_1_0> getMatchingPackages(
   /**
    * 
    */
-  protected Model_1_0 model = null;
+  protected Model_1_3 model = null;
   
   /**
    * 

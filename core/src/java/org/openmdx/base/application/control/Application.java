@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Application.java,v 1.6 2007/10/10 16:05:52 hburger Exp $
+ * Name:        $Id: Application.java,v 1.7 2008/03/21 18:28:05 hburger Exp $
  * Description: Base Application
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:52 $
+ * Date:        $Date: 2008/03/21 18:28:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -221,6 +221,7 @@ import org.openmdx.kernel.log.SysLog;
  *      }
  * </pre>
  */
+@SuppressWarnings("unchecked")
 public class Application
 	extends Manageable
 {

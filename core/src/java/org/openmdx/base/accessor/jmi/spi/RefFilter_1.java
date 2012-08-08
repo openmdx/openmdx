@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefFilter_1.java,v 1.21 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: RefFilter_1.java,v 1.23 2008/05/13 08:54:06 wfro Exp $
  * Description: RefFilter_1 class
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/05/13 08:54:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,6 +59,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.jdo.JDOHelper;
 import javax.jmi.reflect.JmiException;
@@ -82,6 +84,7 @@ import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.query.FilterOperators;
 import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.base.query.Quantors;
+import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
@@ -91,6 +94,8 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.code.ModelAttributes;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
+import org.openmdx.model1.mapping.Names;
+import org.openmdx.model1.mapping.java.Identifier;
 
 /**
  * RefFilter_1_0 implementation
@@ -656,18 +661,50 @@ public class RefFilter_1
             : RefFilter_1.uuidGenerator;
     }
   
+    //------------------------------------------------------------------------
+    public FeatureMapper getFeatureMapper(
+    ) {
+        try {
+            ModelElement_1_0 classDef = this.refPackage.refModel().getElement(this.filterType);   
+            String qualifiedClassName = (String)classDef.values("qualifiedName").get(0);
+            FeatureMapper featureMapper = featureMappers.get(qualifiedClassName);
+            if(featureMapper == null) {
+                String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
+                String className = Identifier.CLASS_PROXY_NAME.toIdentifier(
+                    (String)classDef.values("name").get(0)
+                );
+                Class<?> queryIntf = Classes.getApplicationClass(
+                    packageName.replace(':', '.') + "." + Names.CCI2_PACKAGE_SUFFIX + "." + className + "Query"
+                );
+                featureMappers.putIfAbsent(
+                    qualifiedClassName,
+                    featureMapper = new FeatureMapper(
+                        classDef,
+                        queryIntf
+                    )
+                );
+            }
+            return featureMapper;
+        }
+        catch(Exception e) {
+            throw new JmiServiceException(e);
+        }
+    }
+      
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 5901724265321809315L;
+    private static UUIDGenerator uuidGenerator = null;
+    protected final static ConcurrentMap<String,FeatureMapper> featureMappers = 
+        new ConcurrentHashMap<String,FeatureMapper>();
 
     private final String filterType;
     private final FilterProperty filterTypeProperty;
     private final List<FilterProperty> filterProperties;
     private final List<AttributeSpecifier> attributeSpecifiers;
     private final RefPackage_1_0 refPackage;
-
-    private static UUIDGenerator uuidGenerator = null;
     
 }
+
 //--- End of File -----------------------------------------------------------

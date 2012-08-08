@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ContainerTransactionDeploymentDescriptor.java,v 1.1 2005/04/04 09:31:11 hburger Exp $
+ * Name:        $Id: ContainerTransactionDeploymentDescriptor.java,v 1.2 2008/03/21 18:38:43 hburger Exp $
  * Description: ContainerTransactionDeploymentDescriptor
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/04 09:31:11 $
+ * Date:        $Date: 2008/03/21 18:38:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,7 @@ import org.openmdx.kernel.application.deploy.spi.Deployment.ContainerTransaction
 /**
  * ContainerTransactionDeploymentDescriptor
  */
+@SuppressWarnings("unchecked")
 public class ContainerTransactionDeploymentDescriptor
         implements ContainerTransaction {
 

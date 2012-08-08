@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XriProtocols.java,v 1.8 2007/10/10 16:06:08 hburger Exp $
+ * Name:        $Id: XriProtocols.java,v 1.9 2008/03/13 17:16:15 hburger Exp $
  * Description: XRI Protocol Constants
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:08 $
+ * Date:        $Date: 2008/03/13 17:16:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -48,6 +48,9 @@
  * 
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
+ * ___________________________________________________________________________ 
+ *
+ * This class should log as it has to be loaded by the system class loader. 
  */
 package org.openmdx.kernel.url.protocol;
 

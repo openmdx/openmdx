@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LinkingObjectFactory.java,v 1.3 2008/01/25 00:58:55 hburger Exp $
+ * Name:        $Id: LinkingObjectFactory.java,v 1.4 2008/03/06 19:03:26 hburger Exp $
  * Description: LinkFactory 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:55 $
+ * Date:        $Date: 2008/03/06 19:03:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,6 +81,8 @@ public class LinkingObjectFactory
         this.context = new InitialContext(environment);
     }
 
+    public static final String LINK_ADDRESS = "linkName";
+    
     private final Context context;
     
     /* (non-Javadoc)
@@ -93,16 +95,16 @@ public class LinkingObjectFactory
         Hashtable<?, ?> environment
     ) throws NamingException {
         // Customize the bean properties from our attributes
-        RefAddr linkAddr = ((Reference) obj).get("linkName");
+        RefAddr linkAddr = ((Reference) obj).get(LINK_ADDRESS);
         if(linkAddr == null) throw new NamingException(
-            "Missing 'linkName' attribute"
+            "Missing '" + LINK_ADDRESS + "' attribute"
         );
         String linkName = (String) linkAddr.getContent();
         if(
             linkName == null ||
             linkName.length() == 0
         ) throw new NamingException(
-            "Empty 'linkName' attribute"
+            "Empty '" + LINK_ADDRESS + "' attribute"
         );    
         return this.context.lookup(linkName);
     }

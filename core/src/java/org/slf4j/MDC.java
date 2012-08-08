@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MDC.java,v 1.4 2008/02/08 16:52:22 hburger Exp $
+ * Name:        $Id: MDC.java,v 1.6 2008/03/13 18:46:14 hburger Exp $
  * Description: Lenient Mapped Diagnostic Context
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:52:22 $
+ * Date:        $Date: 2008/03/13 18:46:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -47,8 +47,7 @@
  * 
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
- * 
- * ------------------
+ * ______________________________________________________________________
  * 
  * The original file was provided by SLF4J (http://www.slf4j.org)
  * under the following terms:
@@ -77,8 +76,8 @@
  */
 package org.slf4j;
 
-import org.slf4j.helpers.Util;
-import org.slf4j.lenient.DynamicMDCBinder;
+import org.slf4j.helpers.BasicMDCAdapter;
+import org.slf4j.helpers.LenientBinder;
 import org.slf4j.spi.MDCAdapter;
 
 /**
@@ -110,29 +109,17 @@ import org.slf4j.spi.MDCAdapter;
  */
 public class MDC {
 
-    static final String NULL_MDCA_URL = "http://www.slf4j.org/codes.html#null_MDCA";
-    static MDCAdapter mdcAdapter;
-
     /**
-     * The binder shall be loaded dynamically
+     * Constructor 
      */
-    private static final String STATIC_BINDER = "org.slf4j.impl.StaticMDCBinder";
-
     private MDC() {
         // Avoid instantiation
     }
 
-    static {
-        try {
-            mdcAdapter = getAdapter();
-        } catch (Exception exception) {
-            // we should never get here
-            Util.reportFailure(
-                "Could not bind with an instance of MDC adapter class", 
-                exception
-            );
-        }
-    }
+    /**
+     * The MDC adapter singleton
+     */
+    private static final MDCAdapter mdcAdapter = new LenientAdapter().narrow();
 
     /**
      * Put a context value (the <code>val</code> parameter) as identified with
@@ -149,11 +136,7 @@ public class MDC {
         if (key == null) {
             throw new IllegalArgumentException("key parameter cannot be null");
         }
-        if (mdcAdapter == null) {
-            throw new IllegalStateException("MDCAdapter cannot be null. See also "
-                + NULL_MDCA_URL);
-        }
-        mdcAdapter.put(key, val);
+        MDC.mdcAdapter.put(key, val);
     }
 
     /**
@@ -169,12 +152,7 @@ public class MDC {
         if (key == null) {
             throw new IllegalArgumentException("key parameter cannot be null");
         }
-
-        if (mdcAdapter == null) {
-            throw new IllegalStateException("MDCAdapter cannot be null. See also "
-                + NULL_MDCA_URL);
-        }
-        return mdcAdapter.get(key);
+        return MDC.mdcAdapter.get(key);
     }
 
     /**
@@ -189,23 +167,14 @@ public class MDC {
         if (key == null) {
             throw new IllegalArgumentException("key parameter cannot be null");
         }
-
-        if (mdcAdapter == null) {
-            throw new IllegalStateException("MDCAdapter cannot be null. See also "
-                + NULL_MDCA_URL);
-        }
-        mdcAdapter.remove(key);
+        MDC.mdcAdapter.remove(key);
     }
 
     /**
      * Clear all entries in the MDC of the underlying implementation.
      */
     public static void clear() {
-        if (mdcAdapter == null) {
-            throw new IllegalStateException("MDCAdapter cannot be null. See also "
-                + NULL_MDCA_URL);
-        }
-        mdcAdapter.clear();
+        MDC.mdcAdapter.clear();
     }
 
     /**
@@ -215,46 +184,82 @@ public class MDC {
      * @since 1.4.2
      */
     public static MDCAdapter getMDCAdapter() {
-        return mdcAdapter;
+        return MDC.mdcAdapter;
     }
 
+    
+    //------------------------------------------------------------------------
+    // Class LenientAdapter
+    //------------------------------------------------------------------------
+    
     /**
-     * Retrieve the adapter via static binder if already available to this class 
-     * loader, or via dynamic binder otherwise.
-     * 
-     * @return the appropriate adapter
+     * Lenient MDC Adapter
+     * <p>
+     * This implementation uses<ul>
+     * <li>a StaticMDCBinder if available in the current classloader
+     * <li>a BasicMDCAdapter otherwise
+     * </ul>
      */
-    private static MDCAdapter getAdapter(
-    ){
-        try {
-            Class<?> binderClass = Class.forName(
-                STATIC_BINDER, // name
-                true, // initialize, 
-                MDC.class.getClassLoader()
-            );
-            Object binderInstance = binderClass.getField(
-                "SINGLETON"
-            ).get(
-                null // static
-            );
-            return (MDCAdapter) binderClass.getMethod(
-                "getMDCA",
-                new Class[]{}
-            ).invoke(
-                binderInstance,
-                new Object[]{}
-            );
-        } catch (Exception exception) {
-            try {
-                return DynamicMDCBinder.SINGLETON.getMDCA();
-            } catch(NoClassDefFoundError error) {
-                Util.reportFailure(
-                    "Failed to load class \"org.slf4j.lenient.DynamicMDCBinder\".",
-                    error
-                );
-                throw error;
-            }
+    static class LenientAdapter
+        extends LenientBinder<MDCAdapter,Object>
+        implements MDCAdapter
+    {
+    
+        /**
+         * Constructor 
+         */
+        LenientAdapter() {
+            super("org.slf4j.impl.StaticMDCBinder");
         }
+    
+        /* (non-Javadoc)
+         * @see org.slf4j.helpers.LenientBinder#getFallbackDelegate()
+         */
+        protected MDCAdapter getFallbackDelegate() {
+            return new BasicMDCAdapter();
+        }
+    
+        /* (non-Javadoc)
+         * @see org.slf4j.helpers.LenientBinder#getStandardDelegate(java.lang.Object)
+         */
+        protected MDCAdapter getStandardDelegate(
+            Object binderInstance
+        ) throws Exception {
+            return (MDCAdapter) binderInstance.getClass().getMethod(
+                "getMDCA"
+            ).invoke(
+                binderInstance
+            );
+        }
+    
+        /* (non-Javadoc)
+         * @see org.slf4j.spi.MDCAdapter#clear()
+         */
+        public void clear() {
+            getDelegate().clear();
+        }
+    
+        /* (non-Javadoc)
+         * @see org.slf4j.spi.MDCAdapter#get(java.lang.String)
+         */
+        public String get(String key) {
+            return getDelegate().get(key);
+        }
+    
+        /* (non-Javadoc)
+         * @see org.slf4j.spi.MDCAdapter#put(java.lang.String, java.lang.String)
+         */
+        public void put(String key, String val) {
+            getDelegate().put(key, val);
+        }
+    
+        /* (non-Javadoc)
+         * @see org.slf4j.spi.MDCAdapter#remove(java.lang.String)
+         */
+        public void remove(String key) {
+            getDelegate().remove(key);
+        }
+    
     }
-
+    
 }

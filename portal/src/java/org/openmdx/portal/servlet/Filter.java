@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.6 2007/09/28 14:32:55 wfro Exp $
+ * Name:        $Id: Filter.java,v 1.7 2008/04/04 11:56:25 hburger Exp $
  * Description: Filter
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/09/28 14:32:55 $
+ * Date:        $Date: 2008/04/04 11:56:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -109,8 +109,8 @@ implements Serializable {
         Object[] context
     ) {
         if(orderSpecifier == null) return null;
-        List features = new ArrayList();
-        List specifiers = new ArrayList();
+        List<String> features = new ArrayList<String>();
+        List<OrderSpecifier> specifiers = new ArrayList<OrderSpecifier>();
         boolean hasDuplicates = false;
         for(int i = 0; i < orderSpecifier.length; i++) {
             if(!features.contains(orderSpecifier[i].getFeature())) {

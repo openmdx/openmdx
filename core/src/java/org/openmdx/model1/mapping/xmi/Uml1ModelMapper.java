@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Uml1ModelMapper.java,v 1.1 2007/07/30 15:28:45 wfro Exp $
+ * Name:        $Id: Uml1ModelMapper.java,v 1.3 2008/06/16 13:30:44 hburger Exp $
  * Description: write XML schema (XSD)
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/07/30 15:28:45 $
+ * Date:        $Date: 2008/06/16 13:30:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,6 +73,7 @@ import org.openmdx.model1.code.Stereotypes;
  * mapping and follows the UML Profile for MOF as closely as possible for the
  * openMDX project. 
  */
+@SuppressWarnings("unchecked")
 public class Uml1ModelMapper {
   
   //---------------------------------------------------------------------------
@@ -1032,7 +1033,7 @@ public class Uml1ModelMapper {
         {
         	// ignore non UTF-8 character because this character can cause 
         	// Poseidon to crash when importing an XMI file
-        	SysLog.warning("ignoring non UTF-8 character '" + ch + "' in string '" + input + "'");
+        	SysLog.warning("ignoring non UTF-8 character &#" + (long)ch + "; in string \"" + input + "\"");
         }
         else { sb.append(ch); }
       }

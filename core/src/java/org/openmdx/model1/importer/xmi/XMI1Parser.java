@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI1Parser.java,v 1.12 2007/10/10 16:06:09 hburger Exp $
+ * Name:        $Id: XMI1Parser.java,v 1.14 2008/04/03 09:49:25 wfro Exp $
  * Description: XMI1 Parser
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:09 $
+ * Date:        $Date: 2008/04/03 09:49:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -83,8 +83,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.XMLReader;
 
-import org.openmdx.kernel.text.StringBuilders;
-
+@SuppressWarnings("unchecked")
 public class XMI1Parser
   implements XMIParser {
 
@@ -794,7 +793,7 @@ public class XMI1Parser
         String ref = (String)this.referenceStack.peek();
         if (XMI1Constants.MODELELEMENT_COMMENT.equals(ref))
         {
-          ((UML1ModelElement)classStack.peek()).getComment().add(tmp);
+          ((UML1ModelElement)classStack.peek()).getComment().add((String)tmp);
         }
       }
       else if (XMI1Constants.DATATYPE.equals(qName))
@@ -951,7 +950,7 @@ public class XMI1Parser
           // Because the characters callback may be called more than once between
           // calls to startElement and endElement, the incoming buffer must be
           // appended to an already existing value. 
-          CharSequence sb = StringBuilders.newStringBuilder(
+          StringBuilder sb = new StringBuilder(
               taggedValue.getDataValue()
           ).append(
               String.copyValueOf(ch, start, length)
@@ -1007,19 +1006,17 @@ public class XMI1Parser
     List scope,
     String name
   ) {
-    CharSequence sb = StringBuilders.newStringBuilder();
+    StringBuilder sb = new StringBuilder();
     for (
       int i = 0;
       i < scope.size();
       i++
-    ) StringBuilders.asStringBuilder(
-        sb
-    ).append(
+    ) sb.append(
         scope.get(i)
     ).append(
         "::"
     );
-    return StringBuilders.asStringBuilder(sb).append(name).toString();
+    return sb.append(name).toString();
   }
 
   //---------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RemoteExceptions.java,v 1.4 2005/07/11 23:35:55 hburger Exp $
+ * Name:        $Id: RemoteExceptions.java,v 1.5 2008/03/21 18:30:07 hburger Exp $
  * Description: Remote Exception Categorization
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/07/11 23:35:55 $
+ * Date:        $Date: 2008/03/21 18:30:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -121,7 +121,7 @@ public class RemoteExceptions {
         if(
             object != null
         ) for(
-            Class type = object.getClass();
+            Class<?> type = object.getClass();
             type != null;
             type = type.getSuperclass()
         ) if (
@@ -185,7 +185,7 @@ public class RemoteExceptions {
             retriableDetailThrowables = new String[s];
             int i = 0;
             for(
-                Enumeration e = properties.propertyNames();
+                Enumeration<?> e = properties.propertyNames();
                 e.hasMoreElements();
                 i++
             ){

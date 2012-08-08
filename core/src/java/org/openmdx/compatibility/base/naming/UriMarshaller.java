@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UriMarshaller.java,v 1.16 2007/10/10 16:06:03 hburger Exp $
+ * Name:        $Id: UriMarshaller.java,v 1.17 2008/03/21 18:48:02 hburger Exp $
  * Description: Marshaller 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:03 $
+ * Date:        $Date: 2008/03/21 18:48:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,13 +57,13 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.kernel.uri.scheme.OpenMDXSchemes;
 
 
 /**
  * Converts Path to an international resource identifier
  */
+@SuppressWarnings("unchecked")
 public final class UriMarshaller
     implements Marshaller
 {
@@ -104,13 +104,13 @@ public final class UriMarshaller
     ) throws ServiceException {
         if (charSequences == null) return null;
         Object[]source = (Object[])charSequences;
-        CharSequence target = StringBuilders.newStringBuilder(URI_PREFIX);
+        StringBuilder target = new StringBuilder(URI_PREFIX);
         for(
           int i=0;
           i < source.length;
         )encode(
             source[i],
-            StringBuilders.asStringBuilder(target).append(COMPONENT_DELIMITER),
+            target.append(COMPONENT_DELIMITER),
             ++i == source.length
         );
         return target;
@@ -183,7 +183,7 @@ public final class UriMarshaller
      */
     final static private void encode(
         Object charSequence,
-        CharSequence target,
+        StringBuilder target,
         boolean terminal
     ) throws ServiceException {
         String string = charSequence.toString();
@@ -193,7 +193,7 @@ public final class UriMarshaller
                 target,
                 false
             );
-            StringBuilders.asStringBuilder(target).append("%");
+            target.append("%");
         } else try {
             byte[]source=UnicodeTransformation.toByteArray(string);
             for (
@@ -223,15 +223,15 @@ public final class UriMarshaller
                         )
                     )
                 ){ 
-                    StringBuilders.asStringBuilder(target).append((char) octet);
+                    target.append((char) octet);
                 } else { // Characters to be escaped
-                    StringBuilders.asStringBuilder(target).append(ESCAPE);
+                    target.append(ESCAPE);
                     if (octet < 0) {
-                        StringBuilders.asStringBuilder(target).append(
+                        target.append(
                             Integer.toHexString(octet).substring(6)
                         );
                     } else {
-                        StringBuilders.asStringBuilder(target).append(
+                        target.append(
                             Character.forDigit(octet / RADIX, RADIX)
                         ).append(
                             Character.forDigit(octet % RADIX, RADIX)

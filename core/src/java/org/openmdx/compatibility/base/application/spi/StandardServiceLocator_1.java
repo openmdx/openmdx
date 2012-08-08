@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StandardServiceLocator_1.java,v 1.4 2007/12/13 18:19:20 hburger Exp $
+ * Name:        $Id: StandardServiceLocator_1.java,v 1.5 2008/03/21 18:45:22 hburger Exp $
  * Description: Service Locator Implementaion
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:19:20 $
+ * Date:        $Date: 2008/03/21 18:45:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -140,6 +140,7 @@ public class StandardServiceLocator_1
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.kernel.application.cci.ServiceLocator_1_0#listBindings(java.lang.String)
      */
+    @SuppressWarnings("unchecked")
     public Enumeration listBindings(
     	String registrationId
     ) throws ServiceException {

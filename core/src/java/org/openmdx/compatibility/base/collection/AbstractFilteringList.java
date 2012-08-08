@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractFilteringList.java,v 1.1 2008/02/18 13:34:05 hburger Exp $
+ * Name:        $Id: AbstractFilteringList.java,v 1.2 2008/03/21 18:45:23 hburger Exp $
  * Description: SPICE Collections: Chaining Lists
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 13:34:05 $
+ * Date:        $Date: 2008/03/21 18:45:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import java.util.NoSuchElementException;
  * To change the template for this generated type comment go to
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
+@SuppressWarnings("unchecked")
 abstract public class AbstractFilteringList extends AbstractSequentialList {
 
     protected AbstractFilteringList(

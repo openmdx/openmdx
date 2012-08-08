@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StreamSynchronization_1.java,v 1.6 2007/10/10 16:06:01 hburger Exp $
+ * Name:        $Id: StreamSynchronization_1.java,v 1.7 2008/03/19 17:08:16 hburger Exp $
  * Description: Synchronization_1 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:01 $
+ * Date:        $Date: 2008/03/19 17:08:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,6 +80,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Synchronization_1
  */
+@SuppressWarnings("unchecked")
 class StreamSynchronization_1 
     implements StreamSynchronization_1_1 
 {

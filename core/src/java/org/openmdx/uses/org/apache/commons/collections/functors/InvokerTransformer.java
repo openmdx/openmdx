@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -26,14 +27,15 @@ import org.openmdx.uses.org.apache.commons.collections.Transformer;
  * Transformer implementation that creates a new object instance by reflection.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:13 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:20 $
  *
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class InvokerTransformer implements Transformer, Serializable {
 
     /** The serial version */
-    static final long serialVersionUID = -8653385846894047688L;
+    private static final long serialVersionUID = -8653385846894047688L;
     
     /** The method name to call */
     private final String iMethodName;
@@ -76,8 +78,8 @@ public class InvokerTransformer implements Transformer, Serializable {
         if (paramTypes == null || paramTypes.length == 0) {
             return new InvokerTransformer(methodName);
         } else {
-            paramTypes = (Class[]) paramTypes.clone();
-            args = (Object[]) args.clone();
+            paramTypes = paramTypes.clone();
+            args = args.clone();
             return new InvokerTransformer(methodName, paramTypes, args);
         }
     }

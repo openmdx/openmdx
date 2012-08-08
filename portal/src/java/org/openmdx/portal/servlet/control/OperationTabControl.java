@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationTabControl.java,v 1.21 2007/12/13 18:58:09 wfro Exp $
+ * Name:        $Id: OperationTabControl.java,v 1.26 2008/05/27 15:56:47 wfro Exp $
  * Description: OperationTabControl
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:58:09 $
+ * Date:        $Date: 2008/05/27 15:56:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -83,6 +83,7 @@ import org.openmdx.portal.servlet.view.FieldGroup;
 import org.openmdx.portal.servlet.view.OperationPane;
 import org.openmdx.portal.servlet.view.OperationTab;
 import org.openmdx.portal.servlet.view.ShowObjectView;
+import org.openmdx.portal.servlet.view.ViewMode;
 import org.openmdx.ui1.layer.application.Ui_1;
 
 public class OperationTabControl
@@ -149,7 +150,7 @@ public class OperationTabControl
     ) {
         // build-in operations
         if(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(this.getOperationName())) {
-            return view.getObjectReference().getEditObjectAction();
+            return view.getObjectReference().getEditObjectAction(ViewMode.EMBEDDED);
         }
         else if(Ui_1.DELETE_OBJECT_OPERATION_NAME.equals(this.getOperationName())) { 
             return view.getObjectReference().getDeleteObjectAction();
@@ -226,6 +227,7 @@ public class OperationTabControl
     }
     
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,
@@ -248,7 +250,12 @@ public class OperationTabControl
             if(invokeOperationAction.isEnabled()) {
                 // no input parameters so don't generate dialog
                 if((this.getFieldGroupControl().length == 0) && !this.confirmExecution(application)) {
-                    p.write("    <li><a href=\"#\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(invokeOperationAction), ";"), " id=\"opTab", operationId, "\" >", this.getName(), "</a></li>");
+                    if(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(this.getOperationName())) {
+                        p.write("    <li><a href=\"#\"", p.getOnClick("javascript:new Ajax.Updater('aPanel', ", p.getEvalHRef(invokeOperationAction),", {asynchronous:true, evalScripts: true, onComplete: function(){}});return false;"), " id=\"opTab", operationId, "\" >", this.getName(), "</a></li>");                        
+                    }
+                    else {
+                        p.write("    <li><a href=\"#\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(invokeOperationAction), ";"), " id=\"opTab", operationId, "\" >", this.getName(), "</a></li>");
+                    }
                 }
                 // standard operation with input parameters
                 else {
@@ -331,7 +338,7 @@ public class OperationTabControl
                                 for(int u = 0; u < nCols; u++) {
                                     Attribute attribute = attributes[u][v];
                                     String rowSpanModifier = attribute == null
-                                    ? ""
+                                        ? ""
                                         : attribute.getSpanRow() > 1 ? "rowspan=\"" + attribute.getSpanRow() + "\"" : "";
                                         if(attribute == null) {
                                             p.write("<td class=\"label\"></td>");
@@ -354,7 +361,7 @@ public class OperationTabControl
                                             } 
                                             catch (Exception e) {
                                                 ServiceException e0 = new ServiceException(e);
-                                                AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                                                AppLog.warning(e0.getMessage(), e0.getCause());
                                             }
                                             String field = valueHolder.getName();                       
                                             p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
@@ -454,8 +461,8 @@ public class OperationTabControl
                                                     );
                                                     p.write("<td class=\"addon\">");
                                                     if(
-                                                            (autocompleter == null) || 
-                                                            !autocompleter.hasFixedSelectableValues()
+                                                        (autocompleter == null) || 
+                                                        !autocompleter.hasFixedSelectableValues()
                                                     ) {
                                                         p.write("  ", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\"", p.getOnClick("javascript:OF.findObject(" + p.getEvalHRef(findObjectAction), ", document.forms['", formId, "'].elements['", field, "[" + tabIndex, "]", ".Title'], document.forms['", formId, "'].elements['", field, "[", Integer.toString(tabIndex), "]", "'], '", lookupId, "');")));
                                                     }
@@ -477,16 +484,39 @@ public class OperationTabControl
                                                         p.write("<textarea id=\"T", Integer.toString(htmlId), "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" class=\"string\" name=\"", field, "[", Integer.toString(tabIndex), "]", "\" tabindex=\"", Integer.toString(tabIndex), "\" style=\"width:100%;\" >", stringifiedValue, "</textarea>");
                                                     }
                                                     else {
-                                                        String inputType = valueHolder instanceof TextValue
-                                                        ? ((TextValue)valueHolder).isPassword() ? "password" : "text"
-                                                            : "text";                                     
-                                                        int maxLength = valueHolder instanceof TextValue
-                                                        ? ((TextValue)valueHolder).getMaxLength()
-                                                            : Integer.MAX_VALUE;
-                                                        String maxLengthModifier = (maxLength == Integer.MAX_VALUE)
-                                                        ? ""
-                                                            : "maxlength=\"" + maxLength + "\"";
-                                                        p.write("<input type=\"", inputType, "\" class=\"valueL\" tabindex=\"" + tabIndex, "\" name=\"", field, "[" + tabIndex, "]", "\" ", maxLengthModifier, " value=\"", stringifiedValue, "\">");
+                                                        Autocompleter_1_0 autocompleter = application.getPortalExtension().getAutocompleter(
+                                                            application, 
+                                                            view.getLookupObject(), 
+                                                            field
+                                                        );
+                                                        // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
+                                                        // Show drop-down instead of input field
+                                                        if(autocompleter != null) {
+                                                            autocompleter.paint(
+                                                                p,
+                                                                null,
+                                                                tabIndex,
+                                                                field,
+                                                                valueHolder,
+                                                                false,
+                                                                null,
+                                                                "class=\"autocompleterInput\"",
+                                                                "class=\"valueL valueAC\"",
+                                                                null
+                                                            );
+                                                        }
+                                                        else {                                                        
+                                                            String inputType = valueHolder instanceof TextValue
+                                                            ? ((TextValue)valueHolder).isPassword() ? "password" : "text"
+                                                                : "text";                                     
+                                                            int maxLength = valueHolder instanceof TextValue
+                                                            ? ((TextValue)valueHolder).getMaxLength()
+                                                                : Integer.MAX_VALUE;
+                                                            String maxLengthModifier = (maxLength == Integer.MAX_VALUE)
+                                                            ? ""
+                                                                : "maxlength=\"" + maxLength + "\"";
+                                                            p.write("<input type=\"", inputType, "\" class=\"valueL\" tabindex=\"" + tabIndex, "\" name=\"", field, "[" + tabIndex, "]", "\" ", maxLengthModifier, " value=\"", stringifiedValue, "\">");
+                                                        }
                                                     }
                                                     p.write("</td>");
                                                     p.write("<td class=\"addon\"></td>");

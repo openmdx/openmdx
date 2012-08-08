@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ClassInvocationHandler.java,v 1.7 2008/02/15 14:02:30 wfro Exp $
+ * Name:        $Id: Jmi1ClassInvocationHandler.java,v 1.10 2008/05/06 14:53:48 wfro Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/15 14:02:30 $
+ * Date:        $Date: 2008/05/06 14:53:48 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,12 +48,12 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.accessor.jmi.spi;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.List;
 
 import javax.jmi.reflect.JmiException;
@@ -81,13 +80,42 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
             this.qualifiedClassName = qualifiedClassName;
         }
         
+        private static final long serialVersionUID = -1410998279197958164L;
+        private final String qualifiedClassName;
+
         public String refMofId(
         ) throws JmiException {
             return this.qualifiedClassName;
         }
 
-        private static final long serialVersionUID = -1410998279197958164L;
-        private final String qualifiedClassName;
+        /* (non-Javadoc)
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            return 
+                obj instanceof RefClass_1Proxy && 
+                this.qualifiedClassName.equals(
+                    ((RefClass_1Proxy)obj).qualifiedClassName
+                );
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            return this.qualifiedClassName.hashCode();
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return "RefClass " + this.qualifiedClassName;
+        }
+    
     }
     
     //-----------------------------------------------------------------------
@@ -110,33 +138,58 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
         Method method, 
         Object[] args
     ) throws Throwable {
-        if("refCreateInstance".equals(method.getName()) && (args.length == 1)) {
+        Class<?> declaringClass = method.getDeclaringClass();
+        String methodName = method.getName().intern();
+        if(Object.class == declaringClass) {
+            //
+            // Object methods
+            //
+            if("toString" == methodName) {
+                return proxy.getClass().getName() + " delegating to " + this.delegation;
+            } else if ("hashCode" == methodName) {
+                return this.delegation.hashCode();
+            } else if ("equals" == methodName) {
+                if(Proxy.isProxyClass(args[0].getClass())) {
+                    InvocationHandler invocationHandler = Proxy.getInvocationHandler(args[0]);
+                    if(invocationHandler instanceof Jmi1ClassInvocationHandler) {
+                        return this.delegation.equals(
+                            ((Jmi1ClassInvocationHandler)invocationHandler).delegation
+                        );
+                    }
+                }
+                return false;
+            }
+        } else if("refCreateInstance" == methodName && args.length == 1) {
             return this.delegation.refCreateInstance(
                 (List<?>)args[0], // arguments
                 (RefClass_1_0)proxy
             );
-        }
-        // RefObject API
-        else if(
-            method.getName().startsWith("ref") && 
-            (method.getName().length() > 3) &&
-            Character.isUpperCase(method.getName().charAt(3))
+        } else if(
+            declaringClass == Jmi1Class.class || (    
+                methodName.startsWith("ref") && 
+                methodName.length() > 3 &&
+                Character.isUpperCase(method.getName().charAt(3))
+            )
         ) {
+            //
+            // RefObject API
+            //
             try {
                 return method.invoke(
                     this.delegation, 
                     args
                 );
-            }
-            catch(InvocationTargetException e) {
+            } catch(InvocationTargetException e) {
                 throw e.getTargetException();
             }
-        }
-        // Creators
-        else if(
-            ((args == null) || (args.length == 0)) ||
-            method.getName().startsWith("create")
+        } else if(
+            args == null || 
+            args.length == 0 ||
+            methodName.startsWith("create")
         ) {
+            //
+            // Creators
+            //
             return this.delegation.refCreateInstance(
                 null, // arguments
                 (RefClass_1_0)proxy

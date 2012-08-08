@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingContainer.java,v 1.11 2005/02/21 13:10:12 hburger Exp $
- * Description: 
- * Revision:    $Revision: 1.11 $
+ * Name:        $Id: DelegatingContainer.java,v 1.16 2008/04/21 16:53:28 hburger Exp $
+ * Description: Delegating Container
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:10:12 $
+ * Date:        $Date: 2008/04/21 16:53:28 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.transport.delegation;
 
@@ -62,7 +61,7 @@ import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.collection.FetchSize;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.collection.MarshallingSet;
-import org.openmdx.base.exception.BadParameterException;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.collection.Container;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
@@ -71,6 +70,7 @@ import org.openmdx.compatibility.base.naming.Path;
 /**
  * Delegating Container
  */
+@SuppressWarnings("unchecked")
 public class DelegatingContainer
     extends AbstractMap  
     implements Serializable, FilterableMap, FetchSize
@@ -140,7 +140,7 @@ public class DelegatingContainer
             ((Object_1)value).objMove(this, (String)key);
             return null;
         } catch (ServiceException e) {
-           throw new BadParameterException(e);
+           throw new RuntimeServiceException(e);
         }
     }
 

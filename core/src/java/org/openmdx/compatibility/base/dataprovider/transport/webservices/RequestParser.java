@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RequestParser.java,v 1.14 2007/10/10 16:06:02 hburger Exp $
+ * Name:        $Id: RequestParser.java,v 1.15 2008/03/19 17:10:05 hburger Exp $
  * Description: RequestParser
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:02 $
+ * Date:        $Date: 2008/03/19 17:10:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -81,8 +81,7 @@ import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
-import org.openmdx.kernel.text.StringBuilders;
-
+@SuppressWarnings("unchecked")
 public class RequestParser
   extends AbstractParser {
 
@@ -105,7 +104,7 @@ public class RequestParser
     int offset,
     int length
   ) throws ServiceException {
-      StringBuilders.asStringBuilder(this.tagBuffer).append(
+      this.tagBuffer.append(
       ch,
       offset,
       length
@@ -116,7 +115,7 @@ public class RequestParser
   void startElement(
     String rawname
   ) throws ServiceException {
-      StringBuilders.asStringBuilder(this.tagBuffer).setLength(0);
+      this.tagBuffer.setLength(0);
   }
 
   //-------------------------------------------------------------------------   
@@ -471,7 +470,7 @@ public class RequestParser
   // Member variables
   //----------------------------------------------------------------------------------
 
-  private CharSequence tagBuffer = StringBuilders.newStringBuilder();
+  private StringBuilder tagBuffer = new StringBuilder();
   private String tagValue = null;
 
   private ArrayList stringValues = new ArrayList();

@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -18,18 +19,20 @@ package org.openmdx.uses.org.apache.commons.collections.keyvalue;
 import java.util.Map;
 
 /**
- * Abstract Pair class to assist with creating correct Map Entry implementations.
+ * Abstract Pair class to assist with creating correct
+ * {@link java.util.Map.Entry Map.Entry} implementations.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:20 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:16 $
  * 
  * @author James Strachan
  * @author Michael A. Smith
  * @author Neil O'Toole
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractMapEntry extends AbstractKeyValue implements Map.Entry {
-    
+
     /**
      * Constructs a new entry with the given key and given value.
      *
@@ -43,9 +46,10 @@ public abstract class AbstractMapEntry extends AbstractKeyValue implements Map.E
     // Map.Entry interface
     //-------------------------------------------------------------------------
     /** 
-     * Sets the value stored in this Map Entry.
+     * Sets the value stored in this <code>Map.Entry</code>.
      * <p>
-     * This Map Entry is not connected to a Map, so only the local data is changed.
+     * This <code>Map.Entry</code> is not connected to a Map, so only the
+     * local data is changed.
      *
      * @param value  the new value
      * @return the previous value
@@ -57,7 +61,7 @@ public abstract class AbstractMapEntry extends AbstractKeyValue implements Map.E
     }
 
     /**
-     * Compares this Map Entry with another Map Entry.
+     * Compares this <code>Map.Entry</code> with another <code>Map.Entry</code>.
      * <p>
      * Implemented per API documentation of {@link java.util.Map.Entry#equals(Object)}
      * 
@@ -76,7 +80,7 @@ public abstract class AbstractMapEntry extends AbstractKeyValue implements Map.E
             (getKey() == null ? other.getKey() == null : getKey().equals(other.getKey())) &&
             (getValue() == null ? other.getValue() == null : getValue().equals(other.getValue()));
     }
-     
+
     /**
      * Gets a hashCode compatible with the equals method.
      * <p>

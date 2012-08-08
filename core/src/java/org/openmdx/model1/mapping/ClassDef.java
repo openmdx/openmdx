@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClassDef.java,v 1.12 2007/12/18 13:10:01 hburger Exp $
+ * Name:        $Id: ClassDef.java,v 1.13 2008/03/21 18:40:15 hburger Exp $
  * Description: VelocityClassDef class
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/18 13:10:01 $
+ * Date:        $Date: 2008/03/21 18:40:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,7 @@ import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.code.Stereotypes;
 
+@SuppressWarnings("unchecked")
 public class ClassDef
   extends ClassifierDef {
   

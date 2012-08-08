@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SessionBean_1.java,v 1.10 2008/02/08 16:52:21 hburger Exp $
+ * Name:        $Id: SessionBean_1.java,v 1.14 2008/06/27 16:27:27 wfro Exp $
  * Description: SessionBean_1 class 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:52:21 $
+ * Date:        $Date: 2008/06/27 16:27:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.ejb.CreateException;
+import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.Context;
@@ -64,16 +65,16 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.application.cci.ApplicationContext_1_0;
 import org.openmdx.compatibility.base.application.cci.CommandOptions_1_0;
 import org.openmdx.compatibility.base.application.cci.ConfigurationProvider_1_0;
+import org.openmdx.compatibility.base.application.cci.ConfigurationSpecifier;
 import org.openmdx.compatibility.base.application.cci.Manageable_1_0;
 import org.openmdx.compatibility.base.application.configuration.Configuration;
 import org.openmdx.compatibility.base.application.spi.AbstractApplicationContext_1;
-import org.openmdx.compatibility.base.dataprovider.cci.QualityOfService;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
-import org.openmdx.kernel.log.SysLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Bean_1 is a SessionBean according to EJB 1.1 specification.
@@ -108,16 +109,6 @@ abstract public class SessionBean_1
         return this.applicationContext;
     }
 
-    protected ServiceHeader newServiceHeader(
-    ){
-        return new ServiceHeader(
-            getSessionContext().getCallerPrincipal().toString(),
-            "", // session
-            false, // trace
-            new QualityOfService()      
-        );  
-    }
-     
     protected Context getConfigurationContext(){
         return this.configurationContext;
     }
@@ -131,6 +122,11 @@ abstract public class SessionBean_1
     ){
         return this.uuidGenerator.next().toString();
     }
+
+    /**
+     * 
+     */
+    protected Logger logger;
 
     
     //------------------------------------------------------------------------
@@ -147,6 +143,7 @@ abstract public class SessionBean_1
      *                          a problem creating the bean
      */
     public void ejbCreate() throws CreateException {
+        this.logger = LoggerFactory.getLogger(getClass());
         try {
             try {
                 Context initialContext = new InitialContext(); 
@@ -169,15 +166,9 @@ abstract public class SessionBean_1
                 );
             }
             try {
-                SysLog.trace (
-                    "Creating session bean " + this.instanceId,
-                    this.options
-                );
+                this.logger.trace("Creating session bean {}: {}", this.instanceId, this.options);
                 activate();
-                SysLog.detail (
-                    "Session bean " + this.instanceId + " created",
-                    this.options
-                );
+                this.logger.info("Session bean {} created: {}", this.instanceId, this.options);
             } catch (Exception exception) {
                 throw (CreateException) Throwables.initCause(
                     new CreateException("Creation of session bean " + this.instanceId + " failed"),
@@ -189,8 +180,8 @@ abstract public class SessionBean_1
                 );
             }
         } catch (CreateException exception) {
-            SysLog.criticalError (
-                exception.getMessage(),
+            this.logger.error(
+                exception.getMessage(), 
                 exception.getCause()
             );
             throw exception;
@@ -202,7 +193,7 @@ abstract public class SessionBean_1
                 null,
                 "Creation of session bean " + this.instanceId + " failed"
             );
-            SysLog.error(
+            this.logger.error(
                 assertionFailure.getMessage(), 
                 assertionFailure.getCause()
             );
@@ -295,14 +286,16 @@ abstract public class SessionBean_1
      */
     public void ejbRemove() {
         try {
-            SysLog.trace (
-                "Removing session bean " + this.instanceId,
+            this.logger.trace(
+                "Removing session bean {}: {}",
+                this.instanceId,
                 this.options
             );
             deactivate();
             this.configurationContext.close();
-            SysLog.detail (
-                "Session bean " + this.instanceId + " removed",
+            this.logger.info(
+                "Session bean {} removed: {}",
+                this.instanceId,
                 this.options
             );
         } catch (Exception exception) {
@@ -430,7 +423,7 @@ abstract public class SessionBean_1
     @SuppressWarnings("unchecked")
     public Configuration getConfiguration(
         String[] section,
-        Map specification
+        Map<String,ConfigurationSpecifier> specification
     ) throws ServiceException {
         return new EjbConfiguration(
             getConfigurationContext(),
@@ -444,8 +437,8 @@ abstract public class SessionBean_1
      *
      * @return      a map of id/ConfigurationSpecifier entries
      */
-    protected Map<?, ?> configurationSpecification() {
-        return new HashMap<Object,Object>();
+    protected Map<String,ConfigurationSpecifier> configurationSpecification() {
+        return new HashMap<String,ConfigurationSpecifier>();
     }
     
     

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TogetherMapper_1.java,v 1.8 2007/03/26 23:57:33 hburger Exp $
+ * Name:        $Id: TogetherMapper_1.java,v 1.11 2008/04/04 01:12:22 hburger Exp $
  * Description: TogetherCppExternalizer_1
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/26 23:57:33 $
+ * Date:        $Date: 2008/04/04 01:12:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.AggregationKind;
 import org.openmdx.model1.code.ModelAttributes;
@@ -77,6 +76,7 @@ import org.openmdx.model1.mapping.OperationDef;
 import org.openmdx.model1.mapping.StructDef;
 import org.openmdx.model1.mapping.StructuralFeatureDef;
 
+@SuppressWarnings("unchecked")
 public class TogetherMapper_1 
   extends AbstractMapper_1 {
 
@@ -117,7 +117,7 @@ public class TogetherMapper_1
   ) throws ServiceException {
       AttributeDef mAttributeDef = new AttributeDef(
           attributeDef, 
-          (Model_1_3)this.model, 
+          this.model, 
           true
       );
       umlMapper.mapClassAttribute(
@@ -309,7 +309,7 @@ public class TogetherMapper_1
   ) throws ServiceException {
       StructuralFeatureDef mFieldDef = new AttributeDef(
           fieldDef,
-          (Model_1_3)this.model, 
+          this.model, 
           true
       );
       umlMapper.mapStructField(
@@ -369,7 +369,7 @@ public class TogetherMapper_1
   //-------------------------------------------------------------------------
   public void externalize(
     String qualifiedPackageName,
-    Model_1_0 model, 
+    Model_1_3 model, 
     ZipOutputStream jar
   ) throws ServiceException {
   

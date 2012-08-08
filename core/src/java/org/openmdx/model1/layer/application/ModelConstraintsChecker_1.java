@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelConstraintsChecker_1.java,v 1.17 2008/02/14 12:41:06 wfro Exp $
+ * Name:        $Id: ModelConstraintsChecker_1.java,v 1.18 2008/03/21 18:40:14 hburger Exp $
  * Description: check MOF Model Constraints
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/14 12:41:06 $
+ * Date:        $Date: 2008/03/21 18:40:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,8 +51,6 @@
  */
 package org.openmdx.model1.layer.application;
 
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -90,6 +88,7 @@ import org.openmdx.model1.code.Multiplicities;
  * For details on MOF Model Constraints please refer to the MOF Specification 
  * which can be obtained from the OMG (http://www.omg.org)
  */
+@SuppressWarnings("unchecked")
 public class ModelConstraintsChecker_1 {
   
   /**

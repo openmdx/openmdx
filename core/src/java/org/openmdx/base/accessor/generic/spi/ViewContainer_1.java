@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewContainer_1.java,v 1.34 2008/02/04 15:31:44 hburger Exp $
+ * Name:        $Id: ViewContainer_1.java,v 1.36 2008/06/28 00:21:44 hburger Exp $
  * Description: ViewContainer_1 
- * Revision:    $Revision: 1.34 $
+ * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/04 15:31:44 $
+ * Date:        $Date: 2008/06/28 00:21:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -85,11 +85,11 @@ import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.compatibility.state1.view.DateStateContext;
 import org.openmdx.compatibility.state1.view.DateStateContexts;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * ViewContainer_1
  */
+@SuppressWarnings("unchecked")
 class ViewContainer_1
     extends AbstractMap
     implements ViewContainer_1_0, FilterableMap
@@ -145,17 +145,17 @@ class ViewContainer_1
         this.transientObjects = transientObjects;
     }
 
-    private final ViewConnection_1 marshaller;
+    final ViewConnection_1 marshaller;
 
-    private final ViewObject_1 parent;
+    final ViewObject_1 parent;
     
     private final String feature;
     
-    private final FilterProperty[] attributeFilter;
+    final FilterProperty[] attributeFilter;
 
     private final boolean dateStateRequest;
     
-    private Map transientObjects;
+    Map transientObjects;
     
     private Boolean dateStateContainer;
 
@@ -215,7 +215,7 @@ class ViewContainer_1
      * @return
      * @throws ServiceException
      */
-    private boolean isInvolved (
+    boolean isInvolved (
         SinkObject_1 sinkObject, 
         boolean defaultValue
     ) throws ServiceException {
@@ -254,7 +254,7 @@ class ViewContainer_1
         return this.parent;
     }
 
-    private Collection getSinkObjects(
+    Collection getSinkObjects(
         boolean fetch
     ){
         try {
@@ -361,7 +361,7 @@ class ViewContainer_1
      * 
      * @return <code>true</code> if the attribute specifier requires ordering
      */
-    private boolean order (
+    boolean order (
         AttributeSpecifier[] attributeSpecifiers
     ) {
         if(attributeSpecifiers != null) {
@@ -603,7 +603,7 @@ class ViewContainer_1
         );
     }
     
-    private AbstractFilter getFilter(
+    AbstractFilter getFilter(
     ){
         if(this.filter == null) {
             this.filter = new ObjectFilter_1(
@@ -629,13 +629,11 @@ class ViewContainer_1
      */
     public String toString(
     ){
-        CharSequence text = StringBuilders.newStringBuilder(
+        StringBuilder text = new StringBuilder(
             getClass().getName()
         );
         try {
-            StringBuilders.asStringBuilder(
-                text
-            ).append(
+            text.append(
                 ": ("
             ).append(
                 this.isPersistent() ? getPath().toXri() : "transient" 
@@ -649,26 +647,20 @@ class ViewContainer_1
                 this.dateStateRequest ? "states" : "objects"
             );
         } catch (Exception exception) {
-            StringBuilders.asStringBuilder(
-                text
-            ).append(
+            text.append(
                 "// "
             ).append(
                 exception.getClass().getName()
             );
             if(exception.getMessage() != null){
-                StringBuilders.asStringBuilder(
-                    text
-                ).append(
+                text.append(
                     ": "
                 ).append(
                     exception.getMessage()
                 );
             }
         }
-        return StringBuilders.asStringBuilder(
-            text
-        ).append(
+        return text.append(
             ')'
         ).toString();
     }
@@ -681,7 +673,7 @@ class ViewContainer_1
     /**
      * Persistent Date State Entries
      */
-    private class EntrySet extends AbstractSet {
+    class EntrySet extends AbstractSet {
                   
         /* (non-Javadoc)
          * @see java.util.AbstractCollection#iterator()
@@ -836,8 +828,8 @@ class ViewContainer_1
                     if (involved)  {
                         Object_1_0 viewObject = parent.toViewValue(
                             path, 
-                            true // dateStateInstance
-, false
+                            true, // dateStateInstance
+                            false
                         ); 
                         if(
                             this.filter.accept(viewObject)

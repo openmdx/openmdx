@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InstanceCallbackAdapter_1.java,v 1.1 2006/06/28 12:00:39 hburger Exp $
+ * Name:        $Id: InstanceCallbackAdapter_1.java,v 1.2 2008/04/29 14:54:55 hburger Exp $
  * Description: Instance Callback Adapter
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/06/28 12:00:39 $
+ * Date:        $Date: 2008/04/29 14:54:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,9 +56,9 @@ import javax.jdo.listener.DeleteCallback;
 import javax.jdo.listener.LoadCallback;
 import javax.jdo.listener.StoreCallback;
 
-import org.openmdx.base.event.InstanceCallbackEvent;
-import org.openmdx.base.event.InstanceCallbackListener;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.compatibility.base.event.InstanceCallbackEvent;
+import org.openmdx.compatibility.base.event.InstanceCallbackListener;
 
 /**
  * Instance Callback Adapter
@@ -120,6 +120,15 @@ class InstanceCallbackAdapter_1 implements InstanceCallbackListener {
      */
     public void preDelete(InstanceCallbackEvent instanceCallback) throws ServiceException {
         if(instance instanceof DeleteCallback)((DeleteCallback)this.instance).jdoPreDelete();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.event.InstanceCallbackListener#postCreate(org.openmdx.base.event.InstanceCallbackEvent)
+     */
+    public void postCreate(
+        InstanceCallbackEvent event
+    ) throws ServiceException {
+        // There is no CreateCallback
     }
 
 }

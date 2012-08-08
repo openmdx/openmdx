@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefStruct_1.java,v 1.2 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: RefStruct_1.java,v 1.4 2008/04/25 00:53:11 hburger Exp $
  * Description: RefStruct_1 class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/04/25 00:53:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,10 +66,12 @@ import java.util.TreeMap;
 
 import javax.jmi.reflect.RefObject;
 
+import org.openmdx.base.accessor.generic.cci.StructureFactory_1_0;
 import org.openmdx.base.accessor.generic.cci.Structure_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefPackage_1_4;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
@@ -197,11 +199,11 @@ public abstract class RefStruct_1
 
   //-------------------------------------------------------------------------
   @SuppressWarnings("unchecked")
-private Structure_1_0 newStructure(
-    String typeName,
-    RefPackage_1_0 refPackage,
-    List<?> structValues
-  ) {
+    private Structure_1_0 newStructure(
+        String typeName,
+        RefPackage_1_0 refPackage,
+        List<?> structValues
+      ) {
     try {
       Model_1_0 model = refPackage.refModel();
       ModelElement_1_0 structDef = model.getElement(typeName);
@@ -565,7 +567,10 @@ private Structure_1_0 newStructure(
           );
         }
       }
-      return refPackage.refObjectFactory().createStructure(
+      StructureFactory_1_0 structureFactory = hasLegacyDelegate() ?
+          this.refPackage.refObjectFactory() :
+          (StructureFactory_1_0) ((RefPackage_1_4)this.refPackage).getDelegate();
+      return structureFactory.createStructure(
         typeName,
         fieldNames,
         marshalledValues
@@ -575,6 +580,13 @@ private Structure_1_0 newStructure(
     }
   }
 
+  protected boolean hasLegacyDelegate(
+  ){
+      return 
+          !(this.refPackage instanceof RefPackage_1_4) ||
+          ((RefPackage_1_4)this.refPackage).hasLegacyDelegate();
+  }
+  
   //-------------------------------------------------------------------------
   protected String refQualifiedTypeName(
   ) {
@@ -1061,6 +1073,12 @@ public Object refGetValue(
         source;
   }
 
+  protected RefObject toRefObject(
+      String refMofId
+  ){
+      return this.refPackage.refObject(refMofId);
+  }
+  
   //-------------------------------------------------------------------------
   // Variables
   //-------------------------------------------------------------------------

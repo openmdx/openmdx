@@ -1,9 +1,10 @@
 /*
- *  Copyright 2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -44,12 +45,19 @@ import java.util.Map;
  * <code>map.get(null)</code> returns <code>"Three"</code> and <code>map.get("ONE")</code>
  * returns <code>"Four".</code>  The <code>Set</code> returned by <code>keySet()</code>
  * equals <code>{"one", "two", null}.</code>
- * 
+ * <p>
+ * <strong>Note that CaseInsensitiveMap is not synchronized and is not thread-safe.</strong>
+ * If you wish to use this map from multiple threads concurrently, you must use
+ * appropriate synchronization. The simplest approach is to wrap this map
+ * using {@link java.util.Collections#synchronizedMap(Map)}. This class may throw 
+ * exceptions when accessed by concurrent threads without synchronization.
+ *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:15 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:15 $
  *
  * @author Commons-Collections team
  */
+@SuppressWarnings("unchecked")
 public class CaseInsensitiveMap extends AbstractHashedMap implements Serializable, Cloneable {
 
     /** Serialisation version */

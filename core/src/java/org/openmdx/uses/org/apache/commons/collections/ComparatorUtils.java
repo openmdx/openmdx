@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -35,18 +36,18 @@ import org.openmdx.uses.org.apache.commons.collections.comparators.TransformingC
  * in the <code>comparators</code> subpackage.
  *
  * @since Commons Collections 2.1
- * @version $Revision: 1.3 $ $Date: 2007/10/10 16:06:12 $
+ * @version $Revision: 1.5 $ $Date: 2008/04/25 14:32:25 $
  * 
  * @author Paul Jack
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class ComparatorUtils {
 
     /**
      * ComparatorUtils should not normally be instantiated.
      */
     public ComparatorUtils() {
-        super();
     }
 
     /**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSparseArray.java,v 1.2 2008/02/18 14:11:33 hburger Exp $
+ * Name:        $Id: MarshallingSparseArray.java,v 1.4 2008/04/09 12:33:16 hburger Exp $
  * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/04/09 12:33:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,6 +54,7 @@ import java.io.Serializable;
 import java.util.SortedMap;
 
 import org.openmdx.base.collection.MarshallingSortedMap;
+import org.openmdx.base.collection.Unmarshalling;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 
 /**
@@ -74,9 +75,28 @@ public class MarshallingSparseArray<E>
      * 
      * @param marshaller
      * @param sparseArray
+     * @param unmarshalling 
      */  
     public MarshallingSparseArray(
-        org.openmdx.base.object.spi.Marshaller marshaller,
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
+        SparseArray<?> sparseArray, 
+        Unmarshalling unmarshalling
+    ) {
+        this.populationMap = new MarshallingSortedMap<Integer,E>(
+            marshaller,
+            sparseArray.populationMap(),
+            unmarshalling
+        );
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param marshaller
+     * @param sparseArray
+     */  
+    public MarshallingSparseArray(
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
         SparseArray<?> sparseArray
     ) {
         this.populationMap = new MarshallingSortedMap<Integer,E>(

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestManager.java,v 1.4 2006/03/07 16:14:35 hburger Exp $
+ * Name:        $Id: TestManager.java,v 1.7 2008/06/27 15:31:14 hburger Exp $
  * Description: Test Manager
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/03/07 16:14:35 $
+ * Date:        $Date: 2008/06/27 15:31:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,7 +63,6 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.openmdx.base.Version;
-import org.openmdx.base.object.PersistenceManagerFactory_2;
 
 /**
  * Test Manager
@@ -102,8 +101,8 @@ public class TestManager
      * @throws Exception
      */
     public void testAcquisition() throws Exception {
-        Map properties = new HashMap();
-        properties.put("javax.jdo.PersistenceManagerFactoryClass", PersistenceManagerFactory_2.class.getName());
+        Map<String,Object> properties = new HashMap<String,Object>();
+// TODO        properties.put("javax.jdo.PersistenceManagerFactoryClass", EntityManagerFactory_2.class.getName());
         PersistenceManagerFactory factory = JDOHelper.getPersistenceManagerFactory(properties);
         assertNotNull("Persistence Manager Factory", factory);
         Properties factoryProperties = factory.getProperties();

@@ -3,6 +3,7 @@ package javax.jmi.reflect;
 /** Exception thrown when an object operation detects
  * a non-existing (i.e. deleted) object.
  */
+@SuppressWarnings("serial")
 public class InvalidObjectException extends JmiException {
     
     /**

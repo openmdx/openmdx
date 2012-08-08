@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: AbstractState_1.java,v 1.27 2008/02/29 15:22:51 hburger Exp $
+ * Name:        $Id: AbstractState_1.java,v 1.29 2008/06/28 00:21:27 hburger Exp $
  * Description: State_1 plug-in
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 15:22:51 $
+ * Date:        $Date: 2008/06/28 00:21:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -77,10 +77,10 @@ import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReplyContexts
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequestContexts;
 import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.Orders;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractIterator;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.naming.PathComponent;
@@ -2029,9 +2029,9 @@ public abstract class AbstractState_1
      * 
      */
     protected void setIdentity(
-        DataproviderObject replyObject
+        DataproviderRequest request, DataproviderObject replyObject
     ) throws ServiceException {
-        super.setIdentity(replyObject);
+        super.setIdentity(request, replyObject);
         // in case object contains feature "identity" replace it
         if (replyObject.containsAttributeName(SystemAttributes.OBJECT_IDENTITY)) {
             
@@ -2077,6 +2077,11 @@ public abstract class AbstractState_1
             replyObject.clearValues(SystemAttributes.OBJECT_IDENTITY).add(
                 idPath.toUri()
             );
+            if(isStateRequest(request)) {
+                replyObject.clearValues(State_1_Attributes.STATED_OBJECT).add(
+                    idPath
+                );
+            }
         }
 
     }
@@ -4935,7 +4940,7 @@ public abstract class AbstractState_1
                         new AttributeSpecifier(
                             SystemAttributes.MODIFIED_AT, 
                             0, 
-                            Orders.ASCENDING
+                            Directions.ASCENDING
                         )
                     }
                 );
@@ -4965,7 +4970,7 @@ public abstract class AbstractState_1
                         new AttributeSpecifier(
                             validFromAttribute(), 
                             0, 
-                            Orders.ASCENDING
+                            Directions.ASCENDING
                         )
                     }                   
                 );                
@@ -4994,13 +4999,13 @@ public abstract class AbstractState_1
                         new AttributeSpecifier(
                             SystemAttributes.MODIFIED_AT, 
                             0, 
-                            Orders.ASCENDING
+                            Directions.ASCENDING
                         ),
                         new AttributeSpecifier(
 
                             validFromAttribute(), 
                             0, 
-                            Orders.ASCENDING
+                            Directions.ASCENDING
                         )
                     }                   
                 );                
@@ -5026,13 +5031,13 @@ public abstract class AbstractState_1
                         new AttributeSpecifier(
                             SystemAttributes.MODIFIED_AT, 
                             0, 
-                            Orders.ASCENDING
+                            Directions.ASCENDING
                         ),
                         new AttributeSpecifier(
 
                             validFromAttribute(), 
                             0, 
-                            Orders.ASCENDING
+                            Directions.ASCENDING
                         )
                     }                   
                 );                
@@ -5061,18 +5066,18 @@ public abstract class AbstractState_1
                         new AttributeSpecifier(
                             ID_ATTRIBUTE_NAME, 
                             0, 
-                            Orders.ASCENDING
+                            Directions.ASCENDING
                         ),
                         new AttributeSpecifier(
                             SystemAttributes.MODIFIED_AT, 
                             0, 
-                            Orders.ASCENDING
+                            Directions.ASCENDING
                         ),
                         new AttributeSpecifier(
 
                             validFromAttribute(), 
                             0, 
-                            Orders.ASCENDING
+                            Directions.ASCENDING
                         )
                     }
                 );
@@ -5087,7 +5092,7 @@ public abstract class AbstractState_1
             if (request.operation() == DataproviderOperations.ITERATION_CONTINUATION) {
                 originalRequestPath = new Path(request.path());
                 
-                State_1Iterator iterator = (State_1Iterator) State_1Iterator.deserialize(
+                State_1Iterator iterator = (State_1Iterator) AbstractIterator.deserialize(
                     (byte[])request.context(DataproviderReplyContexts.ITERATOR).get(0)
                 );
                 // replace my context by the old one
@@ -5104,7 +5109,7 @@ public abstract class AbstractState_1
         
         // add my context containing the old one
         reply.context(DataproviderReplyContexts.ITERATOR).set(0,
-            State_1Iterator.serialize(
+            AbstractIterator.serialize(
                 new State_1Iterator(
                     isStateful, 
                     idCompletion,

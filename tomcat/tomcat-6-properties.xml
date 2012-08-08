@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: tomcat-6-properties.xml,v 1.2 2008/01/13 21:38:20 hburger Exp $
+= Name:        $Id: tomcat-6-properties.xml,v 1.3 2008/03/13 17:09:48 hburger Exp $
 = Description: openMDX Tomcat 6.0 Platform Properties
-= Revision:    $Revision: 1.2 $
-= Date:        $Date: 2008/01/13 21:38:20 $
+= Revision:    $Revision: 1.3 $
+= Date:        $Date: 2008/03/13 17:09:48 $
 = Copyright:   (c) 2003-2004 OMEX AG
 =======================================================================
 =
@@ -49,6 +49,7 @@
 	<property name="build.ignore.jdo" value="true"/>	
 	<property name="build.java.platform" value="jre-1.5"/>
 	<path id="apache.tomcat.lib">
+		<pathelement location="${openmdx.home}/apache/${build.java.platform}/tomcat/lib/tomcat-juli.jar"/>
 		<pathelement location="${openmdx.home}/apache/${build.java.platform}/tomcat/lib/catalina.jar"/>
 		<pathelement location="${openmdx.home}/apache/${build.java.platform}/tomcat/lib/tomcat-coyote.jar"/>
 	</path>

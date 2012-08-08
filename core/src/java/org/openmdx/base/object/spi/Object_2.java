@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Object_2.java,v 1.4 2005/08/14 16:49:39 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Object_2.java,v 1.6 2008/03/07 23:46:51 hburger Exp $
  * Description: Object_2 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/08/14 16:49:39 $
+ * Date:        $Date: 2008/03/07 23:46:51 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,7 +48,6 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-
 package org.openmdx.base.object.spi;
 
 import javax.jdo.JDOFatalException;

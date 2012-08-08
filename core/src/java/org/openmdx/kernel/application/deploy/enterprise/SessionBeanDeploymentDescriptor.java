@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SessionBeanDeploymentDescriptor.java,v 1.5 2005/04/05 11:23:23 hburger Exp $
+ * Name:        $Id: SessionBeanDeploymentDescriptor.java,v 1.6 2008/03/21 18:38:44 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/05 11:23:23 $
+ * Date:        $Date: 2008/03/21 18:38:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,6 +58,7 @@ import org.openmdx.kernel.application.configuration.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.SessionBean;
 import org.w3c.dom.Element;
 
+@SuppressWarnings("unchecked")
 public class SessionBeanDeploymentDescriptor
   extends BeanDeploymentDescriptor
   implements SessionBean

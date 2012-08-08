@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ApplicationClientDeploymentDescriptor.java,v 1.14 2008/01/09 15:55:06 hburger Exp $
+ * Name:        $Id: ApplicationClientDeploymentDescriptor.java,v 1.15 2008/03/21 18:38:41 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/09 15:55:06 $
+ * Date:        $Date: 2008/03/21 18:38:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,6 +69,7 @@ import org.openmdx.kernel.application.deploy.spi.Deployment.ApplicationClient;
 import org.openmdx.kernel.naming.Contexts;
 import org.w3c.dom.Element;
 
+@SuppressWarnings("unchecked")
 public class ApplicationClientDeploymentDescriptor
   extends ModuleDeploymentDescriptor
   implements ApplicationClient

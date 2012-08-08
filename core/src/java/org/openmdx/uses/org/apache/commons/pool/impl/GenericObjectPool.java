@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/GenericObjectPool.java,v $
- * $Revision: 1.10 $
- * $Date: 2006/01/12 00:05:40 $
+ * $Revision: 1.11 $
+ * $Date: 2008/03/21 18:42:14 $
  *
  * ====================================================================
  *
@@ -164,8 +164,9 @@ import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
  * @see GenericKeyedObjectPool
  * @author Rodney Waldhoff
  * @author Dirk Verbeeck
- * @version $Revision: 1.10 $ $Date: 2006/01/12 00:05:40 $
+ * @version $Revision: 1.11 $ $Date: 2008/03/21 18:42:14 $
  */
+@SuppressWarnings("unchecked")
 public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
 
     //--- public constants -------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingContainer.java,v 1.16 2008/02/18 14:11:33 hburger Exp $
+ * Name:        $Id: MarshallingContainer.java,v 1.18 2008/04/21 16:58:25 hburger Exp $
  * Description: Marshalling Container
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/04/21 16:58:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,27 +52,25 @@ package org.openmdx.compatibility.base.collection;
 
 import java.io.Serializable;
 import java.util.AbstractCollection;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+
+import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.collection.FetchSize;
-import org.openmdx.base.collection.MarshallingSequentialList;
-import org.openmdx.base.exception.BadParameterException;
+import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.w3c.cci2.Container;
 
 /**
  * A Marshalling Container
  */
 public class MarshallingContainer<E>
     extends AbstractCollection<E>
-    implements Container<E>, Serializable, FetchSize
+    implements RefContainer, Serializable, FetchSize
 {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3616445717720610871L;
-
 
     /**
      * Constructor
@@ -83,11 +81,11 @@ public class MarshallingContainer<E>
      */
     @SuppressWarnings("unchecked")
     public MarshallingContainer(
-        org.openmdx.base.object.spi.Marshaller marshaller,
-        Container<?> container
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
+        Collection<?> container
     ) {
         this.marshaller = marshaller;
-        this.container = (Container<Object>) container;
+        this.container = container;
     }
 
     /**
@@ -105,6 +103,16 @@ public class MarshallingContainer<E>
     }
 
     /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3616445717720610871L;
+
+    
+    //------------------------------------------------------------------------
+    // Implements Collection
+    //------------------------------------------------------------------------
+
+    /**
      * Add an object to the collection.
      *
      * @param     element
@@ -117,11 +125,12 @@ public class MarshallingContainer<E>
      *            if some aspect of the specified criteria or element prevents 
      *            it from being added to this container.
      */
+    @SuppressWarnings("unchecked")
     public boolean add(
         E element
     ){
         return this.container.add(
-            unmarshal(element)
+            this.marshaller.unmarshal(element)
         );
     }
 
@@ -152,38 +161,6 @@ public class MarshallingContainer<E>
     ){
         return this.container.contains(
             this.marshaller.unmarshal(element)
-        );
-    }
-
-
-    /**
-     * Select an object matching the filter.
-     * <p>
-     * The acceptable filter object classes must be specified by the 
-     * Container implementation.
-     *
-     * @param     filter
-     *            The filter to be applied to objects of this container
-     *
-     * @return    the object matching the filter;
-     *            or null if no object matches the filter.
-     * 
-     * @exception ClassCastException
-     *            if the class of the specified filter prevents it from
-     *            being applied to this container.
-     * @exception IllegalArgumentException
-     *            if some aspect of this filter prevents it from being
-     *            applied to this container. 
-     * @exception InvalidCardinalityException
-     *            if more than one object matches the filter. 
-     */
-
-    @SuppressWarnings("unchecked")
-    public E get(
-        Object filter
-    ){
-        return (E) this.marshaller.marshal(
-            this.container.get(unmarshal(filter))
         );
     }
 
@@ -231,10 +208,6 @@ public class MarshallingContainer<E>
     }
 
 
-    //------------------------------------------------------------------------
-    // Implements Collection
-    //------------------------------------------------------------------------
-
     /**
      * Returns the number of elements in this container. If the container 
      * contains more than Integer.MAX_VALUE elements or the number of elements
@@ -280,106 +253,72 @@ public class MarshallingContainer<E>
 
 
     //------------------------------------------------------------------------
-    // Implements Container
+    // Implements RefContainer
     //------------------------------------------------------------------------
 
-    /**
-     * Selects objects matching the filter.
-     * <p>
-     * The semantics of the container returned by this method become
-     * undefined if the backing container (i.e., this list) is structurally
-     * modified in any way other than via the returned container. (Structural
-     * modifications are those that change the size of this list, or otherwise
-     * perturb it in such a fashion that iterations in progress may yield
-     * incorrect results.) 
-     * <p>
-     * This method returns a Collection as opposed to a Set because it 
-     * behaves as set in respect to object id equality, not element equality.
-     * <p>
-     * The acceptable filter object classes must be specified by the 
-     * Container implementation.
-     *
-     * @param     filter
-     *            The filter to be applied to objects of this container
-     *
-     * @return    A subset of this container containing the objects
-     *            matching the filter.
-     * 
-     * @exception ClassCastException
-     *            if the class of the specified filter prevents it from
-     *            being applied to this container.
-     * @exception IllegalArgumentException
-     *            if some aspect of this filter prevents it from being
-     *            applied to this container. 
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refAdd(java.lang.Object[])
      */
-    public Container<E> subSet(
-        Object filter
-    ){
-        return new MarshallingContainer<E>(
+    public void refAdd(Object... arguments) {
+        Object[] marshalled = new Object[arguments.length];
+        int o = arguments.length - 1;
+        System.arraycopy(arguments, 0, marshalled, 0, o);
+        marshalled[o] = this.marshaller.unmarshal(arguments[o]);
+    }
+
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refGet(java.lang.Object[])
+     */
+    public Object refGet(Object... arguments) {
+        return this.marshaller.marshal(
+            ((RefContainer)this.container).refGet(arguments)
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refGetAll(java.lang.Object)
+     */
+    public List<?> refGetAll(Object query) {
+        return new MarshallingList<E>(
             this.marshaller,
-            this.container.subSet(unmarshal(filter))
+            ((RefContainer)this.container).refGetAll(
+                this.marshaller.unmarshal(query)
+            )
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refRemove(java.lang.Object[])
+     */
+    public void refRemove(Object... arguments) {
+        ((RefContainer)this.container).refRemove(arguments);
+    }
+
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refRemoveAll(java.lang.Object)
+     */
+    public void refRemoveAll(Object query) {
+        ((RefContainer)this.container).refRemoveAll(
+            this.marshaller.unmarshal(query)
         );
     }
 
     /**
-     * Returns a list based on the underlaying container.
-     * <p>
-     * The acceptable order object classes must be specified by the container 
-     * implementation.
      *
-     * @param     order
-     *            The order to be applied to objects of this container;
-     *            or null for the container's default order.
-     *
-     * @return    A list containing the objects of this container
-     *            sorted according to the given order.
-     * 
-     * @exception ClassCastException
-     *            if the class of the specified order prevents it from
-     *            being applied to this container.
-     * @exception IllegalArgumentException
-     *            if some aspect of this order prevents it from being
-     *            applied to this container. 
      */
-    public List<E> toList(
-        Object order
-    ){
-        return new MarshallingSequentialList<E>(
-            this.marshaller,
-            this.container.toList(unmarshal(order))
-        );
-    }
-
-    /**
-     * Unmarshals an argument
-     *
-     * @param     argument
-     *            The argument to be unmarshalled
-     *
-     * @return    the unmarshalled argument
-     * 
-     * @exception BadParameterException
-     *            if some aspect of argument prevents it from being
-     *            unmarshalled 
-     */
-    private Object unmarshal(
-        Object argument
-    ){
-        return this.marshaller.unmarshal(argument);
-    }
-
+    @SuppressWarnings("unchecked")
+    protected Collection container;
 
     /**
      *
      */
+    protected org.openmdx.base.persistence.spi.Marshaller marshaller;
 
-    protected Container<Object> container;
-
-    /**
-     *
-     */
-    protected org.openmdx.base.object.spi.Marshaller marshaller;
-
+    
+    //------------------------------------------------------------------------
+    // Class MarshallingIterator
+    //------------------------------------------------------------------------
+    
     /**
      * Marshalling Iterator
      */
@@ -420,7 +359,7 @@ public class MarshallingContainer<E>
         /**
          *
          */
-        private final Iterator<Object> iterator = MarshallingContainer.this.container.iterator();
+        private final Iterator<?> iterator = MarshallingContainer.this.container.iterator();
 
     }
 

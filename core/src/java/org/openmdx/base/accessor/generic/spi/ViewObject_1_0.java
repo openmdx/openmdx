@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewObject_1_0.java,v 1.7 2007/11/20 12:14:24 hburger Exp $
+ * Name:        $Id: ViewObject_1_0.java,v 1.8 2008/03/19 17:11:42 hburger Exp $
  * Description: Readable_1_0 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/20 12:14:24 $
+ * Date:        $Date: 2008/03/19 17:11:42 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,7 +48,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.accessor.generic.spi;
 
 import java.util.Collection;
@@ -104,7 +102,7 @@ public interface ViewObject_1_0 {
      * 
      * @throws ServiceException 
      */
-    Collection allStates(
+    Collection<Object_1_0> allStates(
         Boolean invalidated, 
         Boolean deleted
     ) throws ServiceException;

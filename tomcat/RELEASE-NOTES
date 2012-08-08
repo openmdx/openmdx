@@ -1,7 +1,7 @@
 ﻿Distribution Name: openMDX/Tomcat
-Release Date: 2008-02-20
-Specification Version: 2.0
-Implementation Version: 2.0.0
+Release Date: 2008-07-10
+Specification Version: 2.1
+Implementation Version: 2.1.0
 
 ---------------------------------------------------------------------
 Notes:
@@ -50,10 +50,7 @@ Notes:
 ---------------------------------------------------------------------
 
 0.    SUMMARY
-
-      Changes since 1.10.0:
-      * Support for Tomcat 6.0
-      * Bug fixes
+      none
       
 1.    NEW FEATURES
       none
@@ -64,22 +61,12 @@ Notes:
       none
       
 2.1.  FIXED BUGS
-
-      CR0003839
-      ClassLoader problem
-      
-      java.lang.NoClassDefFoundError: org/openmdx/base/text/conversion/Base64 
+      none
       
 2.2.  DEPRECATED FEATURES
       none
 
 2.3   REMOVED FEATURES
-
-      CR0002539
-      Removal of deprecated classes
-      
-      The following deprecated classes have been removed:
-      * org.openmdx.tomcat.security.auth.IdentityAssertionValve.TokenAuthenticator
-      * org.openmdx.tomcat.security.realm.TokenRealm 
+      none
      
 ---------------------------------------------------------------------

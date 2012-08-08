@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: EnumMapping.java,v 1.5 2008/01/08 16:16:32 hburger Exp $
+ * Name:        $Id: EnumMapping.java,v 1.6 2008/03/21 18:38:44 hburger Exp $
  * Description: Enumeration Mappping
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:32 $
+ * Date:        $Date: 2008/03/21 18:38:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import java.util.EnumMap;
 /**
  * Enumeration Mapping
  */
+@SuppressWarnings("unchecked")
 public class EnumMapping extends EnumMap {
 
     /**

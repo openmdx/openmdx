@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: OperationInteractionSpec.java,v 1.10 2007/03/07 09:26:37 wfro Exp $
+ * Name:        $Id: OperationInteractionSpec.java,v 1.11 2008/03/21 18:32:57 hburger Exp $
  * Description: OperationInteractionSpec
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/07 09:26:37 $
+ * Date:        $Date: 2008/03/21 18:32:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,6 +62,11 @@ package org.openmdx.base.transport.jca;
 public class OperationInteractionSpec 
     extends OpenMdxInteractionSpec {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -2601271265822461993L;
+
     public OperationInteractionSpec(
         String operationName
     ) {

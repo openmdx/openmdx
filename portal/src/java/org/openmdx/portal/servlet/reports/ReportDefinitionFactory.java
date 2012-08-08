@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportDefinitionFactory.java,v 1.14 2007/08/18 10:22:49 wfro Exp $
+ * Name:        $Id: ReportDefinitionFactory.java,v 1.15 2008/04/04 17:01:11 hburger Exp $
  * Description: TextsFactory
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/18 10:22:49 $
+ * Date:        $Date: 2008/04/04 17:01:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -117,7 +117,7 @@ public class ReportDefinitionFactory
         Model_1_0 model
     ) {
         this.reportDefinitions = reports;
-        this.customizedDefinitions = new HashMap();
+        this.customizedDefinitions = new HashMap<String,Set<String>>();
         this.model = model;
         AppLog.info("loaded reports=" + this.reportDefinitions.keySet());
     }
@@ -140,14 +140,14 @@ public class ReportDefinitionFactory
         List reportDefinitions = this.getReportDefinitions(locale);
         // Get set of already matched definitions
         String id = forClass + ":" + locale;
-        Set customizedDefinitions = (Set)this.customizedDefinitions.get(id);
+        Set<String> customizedDefinitions = this.customizedDefinitions.get(id);
         if(customizedDefinitions == null) {
             this.customizedDefinitions.put(
                 id, 
-                customizedDefinitions = new HashSet()
+                customizedDefinitions = new HashSet<String>()
             );
         }
-        Map matchingReportDefinitions = new TreeMap();
+        Map<String,ReportDefinition> matchingReportDefinitions = new TreeMap<String,ReportDefinition>();
 
         int ii = 0;
         for(
@@ -209,7 +209,7 @@ public class ReportDefinitionFactory
      * forClass and locale. This allows to put all non or wrong customized 
      * report definitions in the default reports menu.
      */ 
-    private final Map customizedDefinitions;
+    private final Map<String,Set<String>> customizedDefinitions;
     private final Model_1_0 model;
 }
 

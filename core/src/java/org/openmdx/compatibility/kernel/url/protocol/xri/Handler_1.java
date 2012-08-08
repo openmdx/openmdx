@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Handler_1.java,v 1.3 2007/12/06 10:00:36 hburger Exp $
+ * Name:        $Id: Handler_1.java,v 1.4 2008/06/28 00:21:33 hburger Exp $
  * Description: XRI protocol handler
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/06 10:00:36 $
+ * Date:        $Date: 2008/06/28 00:21:33 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +57,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.openmdx.kernel.url.protocol.XriProtocols;
+import org.openmdx.kernel.url.protocol.XriAuthorities;
 
 /**
  * To handle version 1 XRIs.
@@ -105,11 +105,11 @@ public abstract class Handler_1
     /**
 	 *
 	 */
-	private final static String ZIP_PREFIX = XriProtocols.ZIP_AUTHORITY + ".(";
+	private final static String ZIP_PREFIX = XriAuthorities.ZIP_AUTHORITY + ".(";
 
     /**
      * 
      */
-    private final static String RESOURCE_PREFIX = XriProtocols.RESOURCE_AUTHORITY + '/';
+    private final static String RESOURCE_PREFIX = XriAuthorities.RESOURCE_AUTHORITY + '/';
     
 }

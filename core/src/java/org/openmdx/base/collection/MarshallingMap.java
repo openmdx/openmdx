@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingMap.java,v 1.15 2008/02/18 14:11:33 hburger Exp $
+ * Name:        $Id: MarshallingMap.java,v 1.17 2008/04/09 12:33:43 hburger Exp $
  * Description: Marshalling Map
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/04/09 12:33:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,7 @@ import java.util.Set;
 
 import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
 
 /**
  * A Marshalling Map
@@ -68,13 +69,25 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
   extends AbstractMap<K,V>
   implements Serializable 
 {
-    
+
     /**
+     * Constructor
      * 
+     * @param marshaller
+     * @param map
+     * @param unmarshalling 
      */
-    private static final long serialVersionUID = 3834309540194956341L;
-
-
+    @SuppressWarnings("unchecked")
+    public MarshallingMap(
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
+        M map, 
+        Unmarshalling unmarshalling 
+    ) {
+        this.marshaller = marshaller;
+        this.map = (Map<K, Object>) map;
+        this.unmarshalling = unmarshalling;
+    }
+  
     /**
      * Constructor
      * 
@@ -83,13 +96,12 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
      */
     @SuppressWarnings("unchecked")
     public MarshallingMap(
-        org.openmdx.base.object.spi.Marshaller marshaller,
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
         M map 
     ) {
-        this.marshaller = marshaller;
-        this.map = (Map<K, Object>) map;
+        this(marshaller, map, Unmarshalling.EAGER);
     }
-  
+
     /**
      * Constructor
      * 
@@ -100,13 +112,44 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
         Marshaller marshaller,
         M map 
     ) {
-        this(new CollectionMarshallerAdapter(marshaller), map);
+        this(
+            new CollectionMarshallerAdapter(marshaller), 
+            map, 
+            marshaller instanceof ReluctantUnmarshalling ? Unmarshalling.RELUCTANT : Unmarshalling.EAGER
+        );
     }
+    
+        
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3834309540194956341L;
 
+    /**
+     * 
+     */
+    protected final Unmarshalling unmarshalling;    
+
+    /**
+     * 
+     */    
+    private final Map<K,Object> map;
+
+    /**
+     * 
+     */
+    protected final org.openmdx.base.persistence.spi.Marshaller marshaller;
+    
+    
     @SuppressWarnings("unchecked")
     protected final M getDelegate(){
         return (M) this.map;
     }
+    
+    
+    //------------------------------------------------------------------------
+    // Implements Map
+    //------------------------------------------------------------------------
     
     /* (non-Javadoc)
      * @see java.util.Map#clear()
@@ -126,9 +169,14 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
      * @see java.util.Map#containsValue(java.lang.Object)
      */
     public boolean containsValue(Object value) {
-        return this.map.containsValue(
-            this.marshaller.unmarshal(value)
-        );
+        switch(this.unmarshalling) {
+            case RELUCTANT:
+                return super.containsValue(value);
+            case EAGER: default: 
+                return this.map.containsValue(
+                    this.marshaller.unmarshal(value)
+                );
+        }
     }
 
     /**
@@ -138,7 +186,8 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
     ) {
         return new MarshallingSet<Map.Entry<K, V>>(
             new MapEntryMarshaller<K,V>(this.marshaller),
-            this.map.entrySet()
+            this.map.entrySet(),
+            this.unmarshalling
         );
     }
 
@@ -204,26 +253,21 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
     public Collection<V> values() {
         return new MarshallingCollection<V>(
             this.marshaller,
-            this.map.values()
+            this.map.values(), 
+            this.unmarshalling
         );
     }
 
-
-    /**
-     * 
-     */    
-    private final Map<K,Object> map;
-
-    /**
-     * 
-     */
-    protected final org.openmdx.base.object.spi.Marshaller marshaller;
     
+    //------------------------------------------------------------------------
+    // Class MapEntryMarshaller
+    //------------------------------------------------------------------------
+
     /**
      * Map Entry Marshaller
      */
     static class MapEntryMarshaller<K,V>
-        implements Marshaller 
+        implements org.openmdx.base.persistence.spi.Marshaller 
      {
 
         /**
@@ -231,7 +275,7 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
          * @param marshaller
          */      
         public MapEntryMarshaller(
-            org.openmdx.base.object.spi.Marshaller marshaller
+            org.openmdx.base.persistence.spi.Marshaller marshaller
         ) {
             this.marshaller = marshaller;
         }
@@ -264,10 +308,14 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
         /**
          * 
          */
-        private final org.openmdx.base.object.spi.Marshaller marshaller;
+        private final org.openmdx.base.persistence.spi.Marshaller marshaller;
   
     }
 
+
+    //------------------------------------------------------------------------
+    // Class MarshallingMapEntry
+    //------------------------------------------------------------------------
 
     /**
      * Marshalling Map Entry
@@ -284,7 +332,7 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
          */
         @SuppressWarnings("unchecked")
         public MarshallingMapEntry(
-            org.openmdx.base.object.spi.Marshaller marshaller,
+            org.openmdx.base.persistence.spi.Marshaller marshaller,
             Object entry
         ) {
             this.marshaller = marshaller;
@@ -340,7 +388,7 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
         /**
          * 
          */    
-        private final org.openmdx.base.object.spi.Marshaller marshaller;
+        private final org.openmdx.base.persistence.spi.Marshaller marshaller;
 
     }
 

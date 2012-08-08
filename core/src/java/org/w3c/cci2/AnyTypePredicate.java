@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AnyTypePredicate.java,v 1.3 2008/01/08 16:16:33 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AnyTypePredicate.java,v 1.4 2008/05/06 09:24:27 hburger Exp $
  * Description: Any Type Predicate
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:33 $
+ * Date:        $Date: 2008/05/06 09:24:27 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2007, OMEX AG, Switzerland
+ * Copyright (c) 2006-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -77,11 +76,7 @@ public interface AnyTypePredicate {
      * @param operands the operands the attribute value is compared to
      */
     void elementOf(
-
         Object... operands
-
-
-
     );
 
     /**
@@ -92,11 +87,7 @@ public interface AnyTypePredicate {
      * @param operands the operand the attribute value is compared to
      */
     void elementOf(
-
         Collection<?> operands
-
-
-
     );
 
     /**
@@ -118,11 +109,7 @@ public interface AnyTypePredicate {
      * @param operands the operand the attribute value is compared to
      */
     void notAnElementOf(
-
         Object... operands
-
-
-
     );
 
     /**
@@ -133,11 +120,18 @@ public interface AnyTypePredicate {
      * @param operands the operand the attribute value is compared to
      */
     void notAnElementOf(
-
         Collection<?> operands
-
-
-
     );
+
+    /**
+     * This method is deprecated to avoid its erroneous use as in lieu of
+     * equalTo().
+     * 
+     * @deprecated to avoid erroneous use 
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     * @see AnyTypePredicate#equalTo(Object);
+     */
+    public boolean equals(Object obj);
 
 }

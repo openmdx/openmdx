@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractComparator.java,v 1.4 2007/11/07 18:17:46 hburger Exp $
+ * Name:        $Id: AbstractComparator.java,v 1.6 2008/06/28 00:21:19 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/07 18:17:46 $
+ * Date:        $Date: 2008/06/28 00:21:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import javax.resource.ResourceException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.compatibility.base.dataprovider.cci.Directions;
 import org.openmdx.compatibility.base.dataprovider.cci.Orders;
 
 
@@ -68,6 +69,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.Orders;
  * To change the template for this generated type comment go to
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractComparator implements Comparator {
 
     /**
@@ -108,10 +110,10 @@ public abstract class AbstractComparator implements Comparator {
             switch (specifier.order()){
                 case Orders.ANY : 
                     continue specifications;
-                case Orders.ASCENDING : 
+                case Directions.ASCENDING : 
                     greaterThanResult = +1;
                     break;
-                case Orders.DESCENDING : 
+                case Directions.DESCENDING : 
                     greaterThanResult = -1;
                     break;
             }

@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -32,7 +33,7 @@ import org.openmdx.uses.org.apache.commons.collections.BufferUnderflowException;
 
 /**
  * The BoundedFifoBuffer is a very efficient implementation of
- * Buffer that does not alter the size of the buffer at runtime.
+ * <code>Buffer</code> that is of a fixed size.
  * <p>
  * The removal order of a <code>BoundedFifoBuffer</code> is based on the 
  * insertion order; elements are removed in the same order in which they
@@ -53,7 +54,7 @@ import org.openmdx.uses.org.apache.commons.collections.BufferUnderflowException;
  * This class is Serializable from Commons Collections 3.1.
  *
  * @since Commons Collections 3.0 (previously in main package v2.1)
- * @version $Revision: 1.4 $ $Date: 2005/04/07 14:15:04 $
+ * @version $Revision: 1.7 $ $Date: 2008/06/28 00:21:30 $
  * 
  * @author Avalon
  * @author Berin Loritsch
@@ -61,16 +62,32 @@ import org.openmdx.uses.org.apache.commons.collections.BufferUnderflowException;
  * @author Stephen Colebourne
  * @author Herve Quiroz
  */
+@SuppressWarnings("unchecked")
 public class BoundedFifoBuffer extends AbstractCollection
         implements Buffer, BoundedCollection, Serializable {
 
     /** Serialization version */
     private static final long serialVersionUID = 5603722811189451017L;
 
+    /** Underlying storage array */
     transient Object[] elements;
+    
+    /** Array index of first (oldest) buffer element */
     transient int start = 0;
+    
+    /** 
+     * Index mod maxElements of the array position following the last buffer
+     * element.  Buffer elements start at elements[start] and "wrap around"
+     * elements[maxElements-1], ending at elements[decrement(end)].  
+     * For example, elements = {c,a,b}, start=1, end=1 corresponds to 
+     * the buffer [a,b,c].
+     */
     transient int end = 0;
+    
+    /** Flag to indicate if the buffer is currently full. */
     transient boolean full = false;
+    
+    /** Capacity of the buffer */
     final int maxElements;
 
     /**
@@ -139,8 +156,12 @@ public class BoundedFifoBuffer extends AbstractCollection
             elements[i] = in.readObject();
         }
         start = 0;
-        end = size;
         full = (size == maxElements);
+        if (full) {
+            end = 0;
+        } else {
+            end = size;
+        }
     }
 
     //-----------------------------------------------------------------------
@@ -337,15 +358,21 @@ public class BoundedFifoBuffer extends AbstractCollection
                     return;
                 }
 
-                // Other elements require us to shift the subsequent elements
-                int i = lastReturnedIndex + 1;
-                while (i != end) {
-                    if (i >= maxElements) {
-                        elements[i - 1] = elements[0];
-                        i = 0;
-                    } else {
-                        elements[i - 1] = elements[i];
-                        i++;
+                int pos = lastReturnedIndex + 1;
+                if (start < lastReturnedIndex && pos < end) {
+                    // shift in one part
+                    System.arraycopy(elements, pos, elements,
+                            lastReturnedIndex, end - pos);
+                } else {
+                    // Other elements require us to shift the subsequent elements
+                    while (pos != end) {
+                        if (pos >= maxElements) {
+                            elements[pos - 1] = elements[0];
+                            pos = 0;
+                        } else {
+                            elements[decrement(pos)] = elements[pos];
+                            pos = increment(pos);
+                        }
                     }
                 }
 

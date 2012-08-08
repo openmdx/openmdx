@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ByteArrayFormatter.java,v 1.10 2006/08/11 09:24:14 hburger Exp $
+ * Name:        $Id: ByteArrayFormatter.java,v 1.11 2008/03/21 18:37:13 hburger Exp $
  * Description: Byte array data formatter
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:14 $
+ * Date:        $Date: 2008/03/21 18:37:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,8 +52,6 @@
 package org.openmdx.kernel.text.format;
 
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
-
-import org.openmdx.kernel.text.StringBuilders;
 
 public class ByteArrayFormatter
         implements MultiLineStringRepresentation
@@ -146,9 +144,9 @@ public class ByteArrayFormatter
             return (this.header == null) ? new String() : this.header;
         }
 
-                final CharSequence hexBuf = StringBuilders.newStringBuilder(this.length * 5);
-                final CharSequence hex = StringBuilders.newStringBuilder();
-                final CharSequence ascii = StringBuilders.newStringBuilder();
+                final StringBuilder hexBuf = new StringBuilder(this.length * 5);
+                final StringBuilder hex = new StringBuilder();
+                final StringBuilder ascii = new StringBuilder();
 
                 int lineBytes = 0;
                 int idx = 0;
@@ -156,53 +154,47 @@ public class ByteArrayFormatter
         int line = 0; // line number [0...N]
 
 
-        if (this.header != null) StringBuilders.asStringBuilder(hexBuf).append(this.header).append('\n');
+        if (this.header != null) hexBuf.append(this.header).append('\n');
 
                 while(idx < this.length) {
                         // process next line with 16 bytes or the remaining bytes
                         lineBytes = (this.length-idx) >= 16 ? 16 : this.length-idx;
 
                         // reuse string buffers
-                        StringBuilders.asStringBuilder(hex).setLength(0);
-                        StringBuilders.asStringBuilder(ascii).setLength(0);
+                        hex.setLength(0);
+                        ascii.setLength(0);
 
                         // hexify
                         for(int ii=0; ii<lineBytes; ii++) {
                                 value = this.buf[this.offset + idx];
 
-                                StringBuilders.asStringBuilder(
-                                    hex
-                                ).append(
+                                hex.append(
                                     new HexadecimalFormatter(value>=0?value:256+value, 2)
                                 ).append(
                                     ' '
                                 );
 
-                                if (ii==7) StringBuilders.asStringBuilder(hex).append(' '); // make two coloumns
+                                if (ii==7) hex.append(' '); // make two coloumns
 
-                                StringBuilders.asStringBuilder(ascii).append(((value>=0x20)&&(value<=0x7E)) ? (char)value : '.');
+                                ascii.append(((value>=0x20)&&(value<=0x7E)) ? (char)value : '.');
                                 idx++;
                         }
 
                         // fill up with blanks
-                        if (lineBytes <= 7) StringBuilders.asStringBuilder(hex).append(' ');
-                        for(int ii=0; ii<(16-lineBytes)*3; ii++) StringBuilders.asStringBuilder(hex).append(' ');
+                        if (lineBytes <= 7) hex.append(' ');
+                        for(int ii=0; ii<(16-lineBytes)*3; ii++) hex.append(' ');
                         // for(int ii=lineBytes; ii<16; ii++) ascii.append(' ');
 
                         // fill the buffer
-                        if (line > 0) StringBuilders.asStringBuilder(hexBuf).append('\n');
-                        StringBuilders.asStringBuilder(
-                            hexBuf
-                        ).append(
+                        if (line > 0) hexBuf.append('\n');
+                        hexBuf.append(
                             new HexadecimalFormatter(line*16, 6)
                         ).append(
                             "  "
                         ).append(
                             hex
                         );
-                        StringBuilders.asStringBuilder(
-                            hexBuf
-                       ).append(
+                        hexBuf.append(
                            ' '
                        ).append(
                            ascii

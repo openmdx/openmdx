@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UML1ModelElement.java,v 1.1 2005/06/14 21:27:36 wfro Exp $
+ * Name:        $Id: UML1ModelElement.java,v 1.3 2008/04/03 09:49:25 wfro Exp $
  * Description: lab client
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/14 21:27:36 $
+ * Date:        $Date: 2008/04/03 09:49:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +57,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
+@SuppressWarnings("unchecked")
 public abstract class UML1ModelElement {
 
   public UML1ModelElement(
@@ -74,7 +74,7 @@ public abstract class UML1ModelElement {
       this.setSpecification(isSpecification);
       this.taggedValues = new HashSet();
       this.stereotypes = new HashSet();
-      this.comment = new ArrayList();
+      this.comment = new ArrayList<String>();
   }
   
   public Set getStereotypes() {
@@ -93,7 +93,7 @@ public abstract class UML1ModelElement {
     name = string;
   }
 
-  public List getComment() {
+  public List<String> getComment() {
     return this.comment;
   }
 
@@ -134,5 +134,5 @@ public abstract class UML1ModelElement {
   private UML1VisibilityKind visiblity = null;
   private boolean isSpecification = false;
   private Set taggedValues = null;
-  private List comment = null;
+  private List<String> comment = null;
 }

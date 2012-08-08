@@ -1,9 +1,9 @@
 /*
  * ====================================================================
  * Description: Date State Contexts
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/14 18:27:54 $
+ * Date:        $Date: 2008/06/28 00:21:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -49,6 +49,7 @@
 package org.openmdx.compatibility.state1.view;
 
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -287,9 +288,9 @@ public class DateStateContexts {
         } else {
             GregorianCalendar calendar = new GregorianCalendar();
             return DateStateContexts.datatypeFactory.newXMLGregorianCalendarDate(
-                calendar.get(GregorianCalendar.YEAR), 
-                calendar.get(GregorianCalendar.MONTH) + 1, 
-                calendar.get(GregorianCalendar.DAY_OF_MONTH),
+                calendar.get(Calendar.YEAR), 
+                calendar.get(Calendar.MONTH) + 1, 
+                calendar.get(Calendar.DAY_OF_MONTH),
                 DatatypeConstants.FIELD_UNDEFINED
             );
         }

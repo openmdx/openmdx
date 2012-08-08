@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StringExpression.java,v 1.7 2007/10/10 16:05:54 hburger Exp $
+ * Name:        $Id: StringExpression.java,v 1.8 2008/03/21 18:32:18 hburger Exp $
  * Description: openMDX String Pattern implementation
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:54 $
+ * Date:        $Date: 2008/03/21 18:32:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,8 +53,6 @@ package org.openmdx.base.text.pattern;
 
 import org.openmdx.base.text.pattern.cci.Matcher_1_0;
 import org.openmdx.base.text.pattern.cci.Pattern_1_0;
-
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * openMDX String pattern implementation
@@ -187,17 +185,17 @@ public class StringExpression {
          * @see org.openmdx.base.text.pattern.cci.Matcher_1_0#replaceAll(java.lang.String)
          */
         public String replaceAll(String replacement) {
-            CharSequence target = StringBuilders.newStringBuilder();
+            StringBuilder target = new StringBuilder();
             int position = 0;
             while(find(position)){
-                StringBuilders.asStringBuilder(target).append(
+                target.append(
                     this.input.substring(position, start())
                 ).append(
                     replacement
                 );
                 position = end();
             }
-            return StringBuilders.asStringBuilder(target).append(
+            return target.append(
                 this.input.substring(position)
             ).toString();
         }

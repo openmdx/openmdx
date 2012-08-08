@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClassifierDef.java,v 1.2 2007/03/21 11:31:39 hburger Exp $
+ * Name:        $Id: ClassifierDef.java,v 1.3 2008/03/21 18:40:15 hburger Exp $
  * Description: VelocityClassifierDef class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/21 11:31:39 $
+ * Date:        $Date: 2008/03/21 18:40:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,6 +54,7 @@ package org.openmdx.model1.mapping;
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings("unchecked")
 public abstract class ClassifierDef 
   extends ElementDef {
 

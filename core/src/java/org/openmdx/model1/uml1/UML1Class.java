@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UML1Class.java,v 1.1 2005/06/14 21:27:36 wfro Exp $
+ * Name:        $Id: UML1Class.java,v 1.2 2008/03/21 18:40:22 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/14 21:27:36 $
+ * Date:        $Date: 2008/03/21 18:40:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,7 +58,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-
+@SuppressWarnings("unchecked")
 public class UML1Class
   extends UML1Classifier
 {

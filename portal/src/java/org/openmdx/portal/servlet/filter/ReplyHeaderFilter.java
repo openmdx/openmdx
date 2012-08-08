@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReplyHeaderFilter.java,v 1.1 2007/02/04 23:56:25 wfro Exp $
+ * Name:        $Id: ReplyHeaderFilter.java,v 1.2 2008/04/04 17:01:13 hburger Exp $
  * Description: ReplyHeaderFilter
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/02/04 23:56:25 $
+ * Date:        $Date: 2008/04/04 17:01:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -100,7 +100,7 @@ public class ReplyHeaderFilter implements Filter
        FilterConfig config
    ) {
       Enumeration names = config.getInitParameterNames();
-      List headers = new ArrayList();
+      List<String[]> headers = new ArrayList<String[]>();
       while( names.hasMoreElements()) {
          String name = (String) names.nextElement();
          String value = config.getInitParameter(name);

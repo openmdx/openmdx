@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Layer_1_2.java,v 1.1 2007/09/28 13:55:58 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Layer_1_2.java,v 1.2 2008/06/24 16:17:21 hburger Exp $
  * Description: Layer_1_2 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/09/28 13:55:58 $
+ * Date:        $Date: 2008/06/24 16:17:21 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,6 +50,7 @@
  */
 package org.openmdx.compatibility.base.dataprovider.spi;
 
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
@@ -72,7 +72,7 @@ public interface Layer_1_2
     void prolog(
         ServiceHeader header, 
         UnitOfWorkRequest request
-    );
+    ) throws ServiceException;
     
     /**
      * This method is called by the INTERCEPTION layer after <code>procss()</code>ing
@@ -85,6 +85,6 @@ public interface Layer_1_2
         ServiceHeader header, 
         UnitOfWorkRequest request,
         UnitOfWorkReply reply
-    );
+    ) throws ServiceException;
 
 }

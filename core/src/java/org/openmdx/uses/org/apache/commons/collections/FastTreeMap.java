@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -59,17 +60,15 @@ import java.util.TreeMap;
  * Double-Checked Locking Idiom Is Broken Declaration</a>.</p>
  *
  * @since Commons Collections 1.0
- * @version $Revision: 1.4 $ $Date: 2007/10/10 16:06:13 $
+ * @version $Revision: 1.7 $ $Date: 2008/06/27 16:59:28 $
  * 
  * @author Craig R. McClanahan
  * @author Stephen Colebourne
  */
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class FastTreeMap extends TreeMap {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3978420313010746937L;
 
     /**
      * The underlying map we are managing.
@@ -163,11 +162,11 @@ public class FastTreeMap extends TreeMap {
      * @return the value mapped to that key, or null
      */
     public Object get(Object key) {
-        if (fast) {
-            return (map.get(key));
+        if (this.fast) {
+            return (this.map.get(key));
         } else {
-            synchronized (map) {
-                return (map.get(key));
+            synchronized (this.map) {
+                return (this.map.get(key));
             }
         }
     }
@@ -178,11 +177,11 @@ public class FastTreeMap extends TreeMap {
      * @return the current size of the map
      */
     public int size() {
-        if (fast) {
-            return (map.size());
+        if (this.fast) {
+            return (this.map.size());
         } else {
-            synchronized (map) {
-                return (map.size());
+            synchronized (this.map) {
+                return (this.map.size());
             }
         }
     }
@@ -193,11 +192,11 @@ public class FastTreeMap extends TreeMap {
      * @return is the map currently empty
      */
     public boolean isEmpty() {
-        if (fast) {
-            return (map.isEmpty());
+        if (this.fast) {
+            return (this.map.isEmpty());
         } else {
-            synchronized (map) {
-                return (map.isEmpty());
+            synchronized (this.map) {
+                return (this.map.isEmpty());
             }
         }
     }
@@ -210,11 +209,11 @@ public class FastTreeMap extends TreeMap {
      * @return true if the map contains the key
      */
     public boolean containsKey(Object key) {
-        if (fast) {
-            return (map.containsKey(key));
+        if (this.fast) {
+            return (this.map.containsKey(key));
         } else {
-            synchronized (map) {
-                return (map.containsKey(key));
+            synchronized (this.map) {
+                return (this.map.containsKey(key));
             }
         }
     }
@@ -227,11 +226,11 @@ public class FastTreeMap extends TreeMap {
      * @return true if the map contains the value
      */
     public boolean containsValue(Object value) {
-        if (fast) {
-            return (map.containsValue(value));
+        if (this.fast) {
+            return (this.map.containsValue(value));
         } else {
-            synchronized (map) {
-                return (map.containsValue(value));
+            synchronized (this.map) {
+                return (this.map.containsValue(value));
             }
         }
     }
@@ -243,11 +242,11 @@ public class FastTreeMap extends TreeMap {
      * @return the comparator used to order the map, or null if natural order
      */
     public Comparator comparator() {
-        if (fast) {
-            return (map.comparator());
+        if (this.fast) {
+            return (this.map.comparator());
         } else {
-            synchronized (map) {
-                return (map.comparator());
+            synchronized (this.map) {
+                return (this.map.comparator());
             }
         }
     }
@@ -258,11 +257,11 @@ public class FastTreeMap extends TreeMap {
      * @return the first key in the map
      */
     public Object firstKey() {
-        if (fast) {
-            return (map.firstKey());
+        if (this.fast) {
+            return (this.map.firstKey());
         } else {
-            synchronized (map) {
-                return (map.firstKey());
+            synchronized (this.map) {
+                return (this.map.firstKey());
             }
         }
     }
@@ -273,11 +272,11 @@ public class FastTreeMap extends TreeMap {
      * @return the last key in the map
      */
     public Object lastKey() {
-        if (fast) {
-            return (map.lastKey());
+        if (this.fast) {
+            return (this.map.lastKey());
         } else {
-            synchronized (map) {
-                return (map.lastKey());
+            synchronized (this.map) {
+                return (this.map.lastKey());
             }
         }
     }
@@ -299,16 +298,16 @@ public class FastTreeMap extends TreeMap {
      * @return the value previously mapped to the key, or null
      */
     public Object put(Object key, Object value) {
-        if (fast) {
+        if (this.fast) {
             synchronized (this) {
-                TreeMap temp = (TreeMap) map.clone();
+                TreeMap temp = (TreeMap) this.map.clone();
                 Object result = temp.put(key, value);
-                map = temp;
+                this.map = temp;
                 return (result);
             }
         } else {
-            synchronized (map) {
-                return (map.put(key, value));
+            synchronized (this.map) {
+                return (this.map.put(key, value));
             }
         }
     }
@@ -320,15 +319,15 @@ public class FastTreeMap extends TreeMap {
      * @param in  the map whose mappings are to be copied
      */
     public void putAll(Map in) {
-        if (fast) {
+        if (this.fast) {
             synchronized (this) {
-                TreeMap temp = (TreeMap) map.clone();
+                TreeMap temp = (TreeMap) this.map.clone();
                 temp.putAll(in);
-                map = temp;
+                this.map = temp;
             }
         } else {
-            synchronized (map) {
-                map.putAll(in);
+            synchronized (this.map) {
+                this.map.putAll(in);
             }
         }
     }
@@ -341,16 +340,16 @@ public class FastTreeMap extends TreeMap {
      * @return the value removed, or null
      */
     public Object remove(Object key) {
-        if (fast) {
+        if (this.fast) {
             synchronized (this) {
-                TreeMap temp = (TreeMap) map.clone();
+                TreeMap temp = (TreeMap) this.map.clone();
                 Object result = temp.remove(key);
-                map = temp;
+                this.map = temp;
                 return (result);
             }
         } else {
-            synchronized (map) {
-                return (map.remove(key));
+            synchronized (this.map) {
+                return (this.map.remove(key));
             }
         }
     }
@@ -359,13 +358,13 @@ public class FastTreeMap extends TreeMap {
      * Remove all mappings from this map.
      */
     public void clear() {
-        if (fast) {
+        if (this.fast) {
             synchronized (this) {
-                map = new TreeMap();
+                this.map = new TreeMap();
             }
         } else {
-            synchronized (map) {
-                map.clear();
+            synchronized (this.map) {
+                this.map.clear();
             }
         }
     }
@@ -393,11 +392,11 @@ public class FastTreeMap extends TreeMap {
         Map mo = (Map) o;
 
         // Compare the two maps for equality
-        if (fast) {
-            if (mo.size() != map.size()) {
+        if (this.fast) {
+            if (mo.size() != this.map.size()) {
                 return (false);
             }
-            Iterator i = map.entrySet().iterator();
+            Iterator i = this.map.entrySet().iterator();
             while (i.hasNext()) {
                 Map.Entry e = (Map.Entry) i.next();
                 Object key = e.getKey();
@@ -414,11 +413,11 @@ public class FastTreeMap extends TreeMap {
             }
             return (true);
         } else {
-            synchronized (map) {
-                if (mo.size() != map.size()) {
+            synchronized (this.map) {
+                if (mo.size() != this.map.size()) {
                     return (false);
                 }
-                Iterator i = map.entrySet().iterator();
+                Iterator i = this.map.entrySet().iterator();
                 while (i.hasNext()) {
                     Map.Entry e = (Map.Entry) i.next();
                     Object key = e.getKey();
@@ -446,17 +445,17 @@ public class FastTreeMap extends TreeMap {
      * @return a suitable integer hash code
      */
     public int hashCode() {
-        if (fast) {
+        if (this.fast) {
             int h = 0;
-            Iterator i = map.entrySet().iterator();
+            Iterator i = this.map.entrySet().iterator();
             while (i.hasNext()) {
                 h += i.next().hashCode();
             }
             return (h);
         } else {
-            synchronized (map) {
+            synchronized (this.map) {
                 int h = 0;
-                Iterator i = map.entrySet().iterator();
+                Iterator i = this.map.entrySet().iterator();
                 while (i.hasNext()) {
                     h += i.next().hashCode();
                 }
@@ -473,11 +472,11 @@ public class FastTreeMap extends TreeMap {
      */
     public Object clone() {
         FastTreeMap results = null;
-        if (fast) {
-            results = new FastTreeMap(map);
+        if (this.fast) {
+            results = new FastTreeMap(this.map);
         } else {
-            synchronized (map) {
-                results = new FastTreeMap(map);
+            synchronized (this.map) {
+                results = new FastTreeMap(this.map);
             }
         }
         results.setFast(getFast());
@@ -496,11 +495,11 @@ public class FastTreeMap extends TreeMap {
      * @return a head map
      */
     public SortedMap headMap(Object key) {
-        if (fast) {
-            return (map.headMap(key));
+        if (this.fast) {
+            return (this.map.headMap(key));
         } else {
-            synchronized (map) {
-                return (map.headMap(key));
+            synchronized (this.map) {
+                return (this.map.headMap(key));
             }
         }
     }
@@ -514,11 +513,11 @@ public class FastTreeMap extends TreeMap {
      * @return a sub map
      */
     public SortedMap subMap(Object fromKey, Object toKey) {
-        if (fast) {
-            return (map.subMap(fromKey, toKey));
+        if (this.fast) {
+            return (this.map.subMap(fromKey, toKey));
         } else {
-            synchronized (map) {
-                return (map.subMap(fromKey, toKey));
+            synchronized (this.map) {
+                return (this.map.subMap(fromKey, toKey));
             }
         }
     }
@@ -531,11 +530,11 @@ public class FastTreeMap extends TreeMap {
      * @return a tail map
      */
     public SortedMap tailMap(Object key) {
-        if (fast) {
-            return (map.tailMap(key));
+        if (this.fast) {
+            return (this.map.tailMap(key));
         } else {
-            synchronized (map) {
-                return (map.tailMap(key));
+            synchronized (this.map) {
+                return (this.map.tailMap(key));
             }
         }
     }
@@ -575,7 +574,6 @@ public class FastTreeMap extends TreeMap {
     private abstract class CollectionView implements Collection {
 
         public CollectionView() {
-            super();
         }
 
         protected abstract Collection get(Map map);
@@ -583,119 +581,119 @@ public class FastTreeMap extends TreeMap {
 
 
         public void clear() {
-            if (fast) {
+            if (FastTreeMap.this.fast) {
                 synchronized (FastTreeMap.this) {
-                    map = new TreeMap();
+                    FastTreeMap.this.map = new TreeMap();
                 }
             } else {
-                synchronized (map) {
-                    get(map).clear();
+                synchronized (FastTreeMap.this.map) {
+                    get(FastTreeMap.this.map).clear();
                 }
             }
         }
 
         public boolean remove(Object o) {
-            if (fast) {
+            if (FastTreeMap.this.fast) {
                 synchronized (FastTreeMap.this) {
-                    TreeMap temp = (TreeMap) map.clone();
+                    TreeMap temp = (TreeMap) FastTreeMap.this.map.clone();
                     boolean r = get(temp).remove(o);
-                    map = temp;
+                    FastTreeMap.this.map = temp;
                     return r;
                 }
             } else {
-                synchronized (map) {
-                    return get(map).remove(o);
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).remove(o);
                 }
             }
         }
 
         public boolean removeAll(Collection o) {
-            if (fast) {
+            if (FastTreeMap.this.fast) {
                 synchronized (FastTreeMap.this) {
-                    TreeMap temp = (TreeMap) map.clone();
+                    TreeMap temp = (TreeMap) FastTreeMap.this.map.clone();
                     boolean r = get(temp).removeAll(o);
-                    map = temp;
+                    FastTreeMap.this.map = temp;
                     return r;
                 }
             } else {
-                synchronized (map) {
-                    return get(map).removeAll(o);
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).removeAll(o);
                 }
             }
         }
 
         public boolean retainAll(Collection o) {
-            if (fast) {
+            if (FastTreeMap.this.fast) {
                 synchronized (FastTreeMap.this) {
-                    TreeMap temp = (TreeMap) map.clone();
+                    TreeMap temp = (TreeMap) FastTreeMap.this.map.clone();
                     boolean r = get(temp).retainAll(o);
-                    map = temp;
+                    FastTreeMap.this.map = temp;
                     return r;
                 }
             } else {
-                synchronized (map) {
-                    return get(map).retainAll(o);
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).retainAll(o);
                 }
             }
         }
 
         public int size() {
-            if (fast) {
-                return get(map).size();
+            if (FastTreeMap.this.fast) {
+                return get(FastTreeMap.this.map).size();
             } else {
-                synchronized (map) {
-                    return get(map).size();
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).size();
                 }
             }
         }
 
 
         public boolean isEmpty() {
-            if (fast) {
-                return get(map).isEmpty();
+            if (FastTreeMap.this.fast) {
+                return get(FastTreeMap.this.map).isEmpty();
             } else {
-                synchronized (map) {
-                    return get(map).isEmpty();
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).isEmpty();
                 }
             }
         }
 
         public boolean contains(Object o) {
-            if (fast) {
-                return get(map).contains(o);
+            if (FastTreeMap.this.fast) {
+                return get(FastTreeMap.this.map).contains(o);
             } else {
-                synchronized (map) {
-                    return get(map).contains(o);
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).contains(o);
                 }
             }
         }
 
         public boolean containsAll(Collection o) {
-            if (fast) {
-                return get(map).containsAll(o);
+            if (FastTreeMap.this.fast) {
+                return get(FastTreeMap.this.map).containsAll(o);
             } else {
-                synchronized (map) {
-                    return get(map).containsAll(o);
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).containsAll(o);
                 }
             }
         }
 
         public Object[] toArray(Object[] o) {
-            if (fast) {
-                return get(map).toArray(o);
+            if (FastTreeMap.this.fast) {
+                return get(FastTreeMap.this.map).toArray(o);
             } else {
-                synchronized (map) {
-                    return get(map).toArray(o);
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).toArray(o);
                 }
             }
         }
 
         public Object[] toArray() {
-            if (fast) {
-                return get(map).toArray();
+            if (FastTreeMap.this.fast) {
+                return get(FastTreeMap.this.map).toArray();
             } else {
-                synchronized (map) {
-                    return get(map).toArray();
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).toArray();
                 }
             }
         }
@@ -703,21 +701,21 @@ public class FastTreeMap extends TreeMap {
 
         public boolean equals(Object o) {
             if (o == this) return true;
-            if (fast) {
-                return get(map).equals(o);
+            if (FastTreeMap.this.fast) {
+                return get(FastTreeMap.this.map).equals(o);
             } else {
-                synchronized (map) {
-                    return get(map).equals(o);
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).equals(o);
                 }
             }
         }
 
         public int hashCode() {
-            if (fast) {
-                return get(map).hashCode();
+            if (FastTreeMap.this.fast) {
+                return get(FastTreeMap.this.map).hashCode();
             } else {
-                synchronized (map) {
-                    return get(map).hashCode();
+                synchronized (FastTreeMap.this.map) {
+                    return get(FastTreeMap.this.map).hashCode();
                 }
             }
         }
@@ -741,41 +739,41 @@ public class FastTreeMap extends TreeMap {
             private Iterator iterator;
 
             public CollectionViewIterator() {
-                this.expected = map;
-                this.iterator = expected.entrySet().iterator();
+                this.expected = FastTreeMap.this.map;
+                this.iterator = this.expected.entrySet().iterator();
             }
  
             public boolean hasNext() {
-                if (expected != map) {
+                if (this.expected != FastTreeMap.this.map) {
                     throw new ConcurrentModificationException();
                 }
-                return iterator.hasNext();
+                return this.iterator.hasNext();
             }
 
             public Object next() {
-                if (expected != map) {
+                if (this.expected != FastTreeMap.this.map) {
                     throw new ConcurrentModificationException();
                 }
-                lastReturned = (Map.Entry)iterator.next();
-                return iteratorNext(lastReturned);
+                this.lastReturned = (Map.Entry)this.iterator.next();
+                return iteratorNext(this.lastReturned);
             }
 
             public void remove() {
-                if (lastReturned == null) {
+                if (this.lastReturned == null) {
                     throw new IllegalStateException();
                 }
-                if (fast) {
+                if (FastTreeMap.this.fast) {
                     synchronized (FastTreeMap.this) {
-                        if (expected != map) {
+                        if (this.expected != FastTreeMap.this.map) {
                             throw new ConcurrentModificationException();
                         }
-                        FastTreeMap.this.remove(lastReturned.getKey());
-                        lastReturned = null;
-                        expected = map;
+                        FastTreeMap.this.remove(this.lastReturned.getKey());
+                        this.lastReturned = null;
+                        this.expected = FastTreeMap.this.map;
                     }
                 } else {
-                    iterator.remove();
-                    lastReturned = null;
+                    this.iterator.remove();
+                    this.lastReturned = null;
                 }
             }
         }
@@ -784,7 +782,7 @@ public class FastTreeMap extends TreeMap {
    /**
     * Set implementation over the keys of the FastTreeMap
     */
-   private class KeySet extends CollectionView implements Set {
+   class KeySet extends CollectionView implements Set {
 
        protected Collection get(Map map) {
            return map.keySet();
@@ -799,7 +797,7 @@ public class FastTreeMap extends TreeMap {
    /**
     * Collection implementation over the values of the FastTreeMap
     */
-   private class Values extends CollectionView {
+   class Values extends CollectionView {
 
        protected Collection get(Map map) {
            return map.values();
@@ -813,7 +811,7 @@ public class FastTreeMap extends TreeMap {
    /**
     * Set implementation over the entries of the FastTreeMap
     */
-   private class EntrySet extends CollectionView implements Set {
+   class EntrySet extends CollectionView implements Set {
 
        protected Collection get(Map map) {
            return map.entrySet();

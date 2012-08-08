@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/memory/TransactionalMapWrapper.java,v 1.1 2005/03/24 13:43:56 hburger Exp $
- * $Revision: 1.1 $
- * $Date: 2005/03/24 13:43:56 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/memory/TransactionalMapWrapper.java,v 1.2 2008/03/21 18:42:18 hburger Exp $
+ * $Revision: 1.2 $
+ * $Date: 2008/03/21 18:42:18 $
  *
  * ====================================================================
  *
@@ -48,10 +48,11 @@ import javax.transaction.Status;
  * <em>Note:</em> This wrapper guarantees isolation level <code>READ COMMITTED</code> only. I.e. as soon a value
  * is committed in one transaction it will be immediately visible in all other concurrent transactions.
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see OptimisticMapWrapper
  * @see PessimisticMapWrapper
  */
+@SuppressWarnings("unchecked")
 public class TransactionalMapWrapper implements Map, Status {
 
     /** The map wrapped. */

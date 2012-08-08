@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Runtime_1.java,v 1.11 2008/02/29 15:23:04 hburger Exp $
+ * Name:        $Id: Runtime_1.java,v 1.12 2008/06/28 00:21:45 hburger Exp $
  * Description: Standard Transport Layer Plug-In
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 15:23:04 $
+ * Date:        $Date: 2008/06/28 00:21:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
+import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.compatibility.base.naming.Path;
@@ -198,7 +199,7 @@ public class Runtime_1
                     DataproviderObject result = new DataproviderObject(
                         request.path().getChild(
                             (String)getConfiguration().values(
-                                LayerConfigurationEntries.NAMESPACE_ID
+                                SharedConfigurationEntries.NAMESPACE_ID
                             ).get(0)
                         )
                     );
@@ -214,7 +215,7 @@ public class Runtime_1
                     SparseList exposedPaths = result.values("exposedPath");
                     for(
                         Iterator i = getConfiguration().values(
-                            LayerConfigurationEntries.EXPOSED_PATH
+                            SharedConfigurationEntries.EXPOSED_PATH
                         ).populationIterator();
                         i.hasNext();
                     ) if(LayerConfigurationEntries.EXPOSED_PATH_IS_MODELLED_AS_URI) {

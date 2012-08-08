@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: XMLGregorianCalendarMarshaller.java,v 1.17 2007/06/19 12:27:00 hburger Exp $
+ * Name:        $Id: XMLGregorianCalendarMarshaller.java,v 1.18 2008/03/21 18:47:38 hburger Exp $
  * Description: XMLGregorianCalendarMarshaller 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/06/19 12:27:00 $
+ * Date:        $Date: 2008/03/21 18:47:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -74,6 +74,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * XMLGregorianCalendarMarshaller
  */
+@SuppressWarnings("unchecked")
 public class XMLGregorianCalendarMarshaller {
 
     /**

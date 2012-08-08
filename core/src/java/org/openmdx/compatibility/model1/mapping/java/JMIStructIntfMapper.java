@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JMIStructIntfMapper.java,v 1.5 2008/02/16 19:39:55 hburger Exp $
+ * Name:        $Id: JMIStructIntfMapper.java,v 1.6 2008/04/02 17:39:09 wfro Exp $
  * Description: JMIStructureTemplate 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/16 19:39:55 $
+ * Date:        $Date: 2008/04/02 17:39:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,7 +56,7 @@ import java.io.Writer;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.PrimitiveTypes;
 import org.openmdx.model1.mapping.MapperUtils;
 import org.openmdx.model1.mapping.StructDef;
@@ -69,7 +69,7 @@ public class JMIStructIntfMapper
     public JMIStructIntfMapper(
         ModelElement_1_0 structDef,
         Writer writer,
-        Model_1_0 model,
+        Model_1_3 model,
         String format, 
         String packageSuffix
     ) throws ServiceException {
@@ -90,7 +90,7 @@ public class JMIStructIntfMapper
      * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
      */
     protected String mapperId() {
-        return "$Id: JMIStructIntfMapper.java,v 1.5 2008/02/16 19:39:55 hburger Exp $";
+        return "$Id: JMIStructIntfMapper.java,v 1.6 2008/04/02 17:39:09 wfro Exp $";
     }
 
     //-----------------------------------------------------------------------

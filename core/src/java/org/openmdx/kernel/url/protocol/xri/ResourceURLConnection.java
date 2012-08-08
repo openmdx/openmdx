@@ -1,15 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ResourceURLConnection.java,v 1.4 2006/08/30 10:03:55 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ResourceURLConnection.java,v 1.5 2008/03/13 17:16:15 hburger Exp $
  * Description: Resource URL Connection
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/30 10:03:55 $
+ * Date:        $Date: 2008/03/13 17:16:15 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2004, OMEX AG, Switzerland
  * All rights reserved.
@@ -48,6 +47,9 @@
  * 
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
+ * ___________________________________________________________________________ 
+ *
+ * This class should log as it has to be loaded by the system class loader. 
  */
 package org.openmdx.kernel.url.protocol.xri;
 

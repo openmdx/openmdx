@@ -1,15 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Handler.java,v 1.7 2006/02/19 21:49:02 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Handler.java,v 1.9 2008/06/28 00:21:33 hburger Exp $
  * Description: XRI Protocol Handler
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/02/19 21:49:02 $
+ * Date:        $Date: 2008/06/28 00:21:33 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2004, OMEX AG, Switzerland
  * All rights reserved.
@@ -48,6 +47,9 @@
  * 
  * This product includes or is based on software developed by other
  * organizations as listed in the NOTICE file.
+ * ___________________________________________________________________________ 
+ *
+ * This class should log as it has to be loaded by the system class loader. 
  */
 package org.openmdx.kernel.url.protocol.xri;
 
@@ -57,7 +59,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.openmdx.compatibility.kernel.url.protocol.xri.Handler_1;
-import org.openmdx.kernel.url.protocol.XriProtocols;
+import org.openmdx.kernel.url.protocol.XriAuthorities;
 
 /**
  * A protocol handler for the 'xri' protocol. 
@@ -71,7 +73,7 @@ public class Handler
    		String authority = url.getAuthority();
         if(authority == null) {
             return super.openConnection(url);
-        } else if(XriProtocols.RESOURCE_AUTHORITY.equals(authority)) {
+        } else if(XriAuthorities.RESOURCE_AUTHORITY.equals(authority)) {
 	   		return new ResourceURLConnection(url);
    		} else if(authority.startsWith(ZIP_PREFIX)){
    			return new ZipURLConnection(url);
@@ -93,14 +95,14 @@ public class Handler
         return new MalformedURLException(
             getClass().getName() + 
             " supports only XRI authorities starting with " + 
-            XriProtocols.RESOURCE_AUTHORITY + " or " + 
-            XriProtocols.ZIP_AUTHORITY + ": " + url
+            XriAuthorities.RESOURCE_AUTHORITY + " or " + 
+            XriAuthorities.ZIP_AUTHORITY + ": " + url
         );
     }
     
     /**
 	 *
 	 */
-	private final static String ZIP_PREFIX = XriProtocols.ZIP_AUTHORITY + "*(";
+	private final static String ZIP_PREFIX = XriAuthorities.ZIP_AUTHORITY + "*(";
     
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: ReferenceGrid.java,v 1.6 2007/06/07 20:46:01 hburger Exp $
+ * Name:        $Id: ReferenceGrid.java,v 1.7 2008/04/04 11:53:28 hburger Exp $
  * Description: ReferenceGridControl
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/06/07 20:46:01 $
+ * Date:        $Date: 2008/04/04 11:53:28 $
  * ====================================================================
  *
  *
@@ -102,13 +102,13 @@ public class ReferenceGrid
     protected List getFilteredObjects(
         Filter filter
     ) {
-        Collection allObjects = this.getAllObjects();
-        List filteredObjects = null;
+        Collection<?> allObjects = this.getAllObjects();
+        List<?> filteredObjects = null;
         if(allObjects == null) {
-            filteredObjects = new ArrayList();
+            filteredObjects = new ArrayList<Object>();
         }
         else {
-            filteredObjects = new ArrayList(allObjects);
+            filteredObjects = new ArrayList<Object>(allObjects);
         }
         for(Iterator i = filteredObjects.iterator(); i.hasNext(); ) {
             Object obj = i.next();

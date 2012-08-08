@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CmdLineArgs.java,v 1.6 2007/10/10 16:05:52 hburger Exp $
+ * Name:        $Id: CmdLineArgs.java,v 1.7 2008/03/21 18:28:06 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:52 $
+ * Date:        $Date: 2008/03/21 18:28:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,14 +64,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 
 
 /**
  * CmdLineArgs holds the parsed command line arguments.
  */
-	
+@SuppressWarnings("unchecked")
 public class CmdLineArgs 
 {
 	public CmdLineArgs()
@@ -261,7 +259,7 @@ public class CmdLineArgs
 		int           ii;
 		String        endl = System.getProperty("line.separator");		
 		CmdLineArg    arg; 
-        CharSequence  buf  = StringBuilders.newStringBuilder(
+		StringBuilder  buf  = new StringBuilder(
             2048
 		// Long options
 		).append(
@@ -273,9 +271,7 @@ public class CmdLineArgs
 			for (ii = 0; ii<m_args.size(); ii++) {
 				arg = (CmdLineArg)m_args.get(ii);
 				if (arg.getName().length() > 1) {
-					StringBuilders.asStringBuilder(
-                        buf
-                    ).append(
+					buf.append(
                         "     --"
                     ).append(
                         arg.toString()
@@ -287,9 +283,7 @@ public class CmdLineArgs
 		}
 		
 		// Short options
-        StringBuilders.asStringBuilder(
-            buf
-        ).append(
+        buf.append(
             "Short options: "
         ).append(
             endl
@@ -298,9 +292,7 @@ public class CmdLineArgs
 			for (ii = 0; ii<m_args.size(); ii++) {
 				arg = (CmdLineArg)m_args.get(ii);
 				if (arg.getName().length() == 1) {
-                    StringBuilders.asStringBuilder(
-                        buf
-                    ).append(
+                    buf.append(
                         "     -"
                     ).append(
                         arg.toString()
@@ -312,18 +304,14 @@ public class CmdLineArgs
 		}
 					
 		// Free args
-        StringBuilders.asStringBuilder(
-            buf
-        ).append(
+        buf.append(
             "Non option args: "
         ).append(
             endl
         );
 		if (m_freeArgs != null) {
 			for(ii=0; ii<m_freeArgs.size(); ii++) {
-                StringBuilders.asStringBuilder(
-                    buf
-                ).append(
+                buf.append(
                     "     "
                 ).append(
                     m_freeArgs.get(ii)

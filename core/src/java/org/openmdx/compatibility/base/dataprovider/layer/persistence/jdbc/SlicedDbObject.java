@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObject.java,v 1.46 2007/11/29 11:26:20 hburger Exp $
+ * Name:        $Id: SlicedDbObject.java,v 1.49 2008/05/08 10:20:39 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.46 $
+ * Revision:    $Revision: 1.49 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/29 11:26:20 $
+ * Date:        $Date: 2008/05/08 10:20:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,6 +75,7 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.code.Multiplicities;
 
+@SuppressWarnings("unchecked")
 public class SlicedDbObject 
   extends StandardDbObject {
 
@@ -286,7 +287,13 @@ public class SlicedDbObject
                         if(dbObjectColumns.contains(columnName)) {
                             if(!columnName.equals(this.database.OBJECT_IDX)) {
                                 if(k > 0) statement += ", ";
-                                statement += columnName;
+                                statement += this.database.getColumnName(
+                                    this.conn, 
+                                    attributeName, 
+                                    valIndex, 
+                                    false, 
+                                    false // escape reserved words
+                                );
                                 statementParameters.add(
                                     this.database.externalizeStringValue(columnName, value)
                                 );
@@ -339,8 +346,9 @@ public class SlicedDbObject
                         );
                         String sequenceName = this.database.namespaceId + "_" + autonumColumnName;
                         String autonumValue = this.database.getAutonumValue(
-                            conn,
+                            this.conn,
                             sequenceName,
+                            dbObject,
                             posAs > 0 
                                 ? autonumColumn.substring(posAs)
                                 : null
@@ -348,7 +356,7 @@ public class SlicedDbObject
                         // Emulate SQL sequence
                         if(autonumValue == null) {
                             ps = this.database.prepareStatement(
-                                conn,
+                                this.conn,
                                 currentStatement = "SELECT nextval FROM " + sequenceName + "_SEQ"
                             );
                             rs = ps.executeQuery();
@@ -357,7 +365,7 @@ public class SlicedDbObject
                                 rs.close();
                                 ps.close();
                                 ps = this.database.prepareStatement(
-                                    conn,
+                                    this.conn,
                                     currentStatement = "UPDATE " + sequenceName + "_SEQ SET nextval = nextval + 1"
                                 );
                                 ps.executeUpdate();
@@ -366,7 +374,7 @@ public class SlicedDbObject
                             else {
                                 autonumValue = "0";
                                 ps = this.database.prepareStatement(
-                                    conn,
+                                    this.conn,
                                     currentStatement = "INSERT INTO " + sequenceName + "_SEQ (nextval) VALUES (0)"
                                 );                          
                                 ps.executeUpdate();
@@ -667,7 +675,7 @@ public class SlicedDbObject
                         if(dbObjectColumns.contains(columnName)) {
                             if(!columnName.equals(this.database.OBJECT_IDX)) {
                                 statement += hasParameters ? ", " : "";
-                                statement += columnName + " = ";
+                                statement += this.database.getColumnName(conn, attributeName, valIndex, false, false) + " = ";
                                 statement += this.database.getPlaceHolder(conn, value); 
                                 statementColumns.add(columnName);
                                 statementParameters.add(
@@ -870,11 +878,7 @@ public class SlicedDbObject
             ModelElement_1_0 classDef = this.database.model.getElement(
                 object.values(SystemAttributes.OBJECT_CLASS).get(0)
             );
-            for(
-                Iterator i = this.database.model.getAttributeDefs(classDef, false, false).values().iterator();
-                i.hasNext();
-            ) {
-                ModelElement_1_0 feature = (ModelElement_1_0)i.next();
+            for(ModelElement_1_0 feature : this.database.model.getAttributeDefs(classDef, false, false).values()) {
                 String featureName = (String)feature.values("name").get(0);                
                 String featureQualifiedName = (String)feature.values("qualifiedName").get(0);
                 if(

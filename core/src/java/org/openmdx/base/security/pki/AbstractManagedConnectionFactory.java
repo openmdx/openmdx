@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.3 2006/08/21 17:04:19 hburger Exp $
+ * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.4 2008/03/21 18:31:45 hburger Exp $
  * Description: Abstract Managed Connection Factory
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/21 17:04:19 $
+ * Date:        $Date: 2008/03/21 18:31:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,11 +69,11 @@ import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
 import org.openmdx.kernel.application.container.lightweight.ShareableConnectionManager;
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * Abstract Managed Connection Factory
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractManagedConnectionFactory
     implements ManagedConnectionFactory
 {
@@ -411,7 +411,7 @@ public abstract class AbstractManagedConnectionFactory
             new Object() :
         this.userName == null && this.password == null ?
             this.connectionURL :
-            StringBuilders.newStringBuilder(
+            new StringBuilder(
                 this.connectionURL
             ).append(
                 '|'

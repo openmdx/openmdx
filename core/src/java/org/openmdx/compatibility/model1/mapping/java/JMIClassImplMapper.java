@@ -1,10 +1,10 @@
 /*
  * ==================================================================== 
  * Project: openmdx, http://www.openmdx.org
- * Name: $Id: JMIClassImplMapper.java,v 1.4 2008/02/18 09:18:21 hburger Exp $ 
- * Description: JMIClassLevelTemplate Revision: $Revision: 1.4 $ 
+ * Name: $Id: JMIClassImplMapper.java,v 1.5 2008/04/02 17:39:09 wfro Exp $ 
+ * Description: JMIClassLevelTemplate Revision: $Revision: 1.5 $ 
  * Owner: OMEX AG, Switzerland, http://www.omex.ch 
- * Date: $Date: 2008/02/18 09:18:21 $
+ * Date: $Date: 2008/04/02 17:39:09 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -47,7 +47,7 @@ import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.mapping.AttributeDef;
 import org.openmdx.model1.mapping.ClassDef;
 import org.openmdx.model1.mapping.MapperUtils;
@@ -60,14 +60,14 @@ public class JMIClassImplMapper
      * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
      */
     protected String mapperId() {
-        return "$Id: JMIClassImplMapper.java,v 1.4 2008/02/18 09:18:21 hburger Exp $";
+        return "$Id: JMIClassImplMapper.java,v 1.5 2008/04/02 17:39:09 wfro Exp $";
     }
 
     //-----------------------------------------------------------------------
     public JMIClassImplMapper(
         ModelElement_1_0 classDef,        
         Writer writer, 
-        Model_1_0 model,
+        Model_1_3 model,
         String format, 
         String packageSuffix
     ) throws ServiceException {

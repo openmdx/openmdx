@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiContext.java,v 1.12 2007/12/28 10:41:32 wfro Exp $
+ * Name:        $Id: UiContext.java,v 1.16 2008/04/18 11:10:54 wfro Exp $
  * Description: UiContext 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/28 10:41:32 $
+ * Date:        $Date: 2008/04/18 11:10:54 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.jdo.PersistenceManager;
+import javax.jmi.reflect.RefObject;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
@@ -84,13 +85,27 @@ public class UiContext
     ) throws ServiceException {
         this.uiSegmentPath = uiSegmentPath;
         this.pm = pm;
-        this.uiPackage = (org.openmdx.ui1.jmi1.Ui1Package)((Authority)pm.getObjectById(
-            Authority.class,
-            org.openmdx.ui1.jmi1.Ui1Package.AUTHORITY_XRI
-        )).refImmediatePackage();
+        this.uiPackage = getUiPackage(pm);
         this.reset();
     }
     
+    //-------------------------------------------------------------------------
+    protected static org.openmdx.ui1.jmi1.Ui1Package getUiPackage(
+        PersistenceManager pm
+    ) {
+        org.openmdx.ui1.jmi1.Ui1Package uiPkg = null;
+        try {
+            uiPkg = (org.openmdx.ui1.jmi1.Ui1Package)((RefObject)pm.newInstance(org.openmdx.ui1.jmi1.Segment.class)).refImmediatePackage();
+        }
+        catch(UnsupportedOperationException e) {        
+            uiPkg = (org.openmdx.ui1.jmi1.Ui1Package)((Authority)pm.getObjectById(
+                Authority.class,
+                org.openmdx.ui1.jmi1.Ui1Package.AUTHORITY_XRI
+            )).refImmediatePackage();
+        }
+        return uiPkg;
+    }
+        
     //-------------------------------------------------------------------------
     public void reset(
     ) {
@@ -102,7 +117,7 @@ public class UiContext
     public synchronized Map getAssertableInspectors(
     ) throws ServiceException {
         if(this.assertableInspectors == null) {
-            this.assertableInspectors = new HashMap();
+            this.assertableInspectors = new HashMap<String,org.openmdx.ui1.jmi1.AssertableInspector>();
             Collection assertableInspectors = this.getUiSegment().getAssertableInspector();
             for(Iterator i = assertableInspectors.iterator(); i.hasNext(); ) {
               org.openmdx.ui1.jmi1.AssertableInspector assertableInspector = (org.openmdx.ui1.jmi1.AssertableInspector)i.next();
@@ -133,7 +148,7 @@ public class UiContext
             inspector = this.getAssertableInspector(forClass);
         }
         catch(ServiceException e) {
-            AppLog.warning(e.getMessage(), e.getCause(), 1);
+            AppLog.warning(e.getMessage(), e.getCause());
         }
         if(inspector == null) {
             AppLog.warning("can not get inspector for", forClass);
@@ -194,7 +209,7 @@ public class UiContext
     ) throws ServiceException {
         if(this.uiSegment == null) {
             org.openmdx.base.jmi1.Provider provider = (org.openmdx.base.jmi1.Provider)pm.getObjectById(
-                this.uiSegmentPath.getParent().getParent().toXri()
+                this.uiSegmentPath.getParent().getParent()
             );
             this.uiSegment = (org.openmdx.ui1.jmi1.Segment)provider.getSegment(
                 this.uiSegmentPath.getBase()
@@ -209,7 +224,7 @@ public class UiContext
     ) {    
         // lazy init
         if(this.assertedInspectors == null) {
-            this.assertedInspectors = new HashSet();
+            this.assertedInspectors = new HashSet<String>();
         }
         // try to get inspector without asserting
         if(this.assertedInspectors.contains(forClass)) {
@@ -233,7 +248,7 @@ public class UiContext
             // can not assert it
             ServiceException s0 = new ServiceException(e0);
             AppLog.warning("can not assert inspector", s0.getMessage());
-            AppLog.warning(s0.getMessage(), s0.getCause(), 1);
+            AppLog.warning(s0.getMessage(), s0.getCause());
             return null;
         }
         // try again
@@ -269,8 +284,8 @@ public class UiContext
     private static final long serialVersionUID = 4051043086039789875L;
 
     private transient org.openmdx.ui1.jmi1.Segment uiSegment = null;
-    private transient Map assertableInspectors = null;  
-    private transient Set assertedInspectors = null;
+    private transient Map<String,org.openmdx.ui1.jmi1.AssertableInspector> assertableInspectors = null;  
+    private transient Set<String> assertedInspectors = null;
     private final org.openmdx.ui1.jmi1.Ui1Package uiPackage;    
     private final PersistenceManager pm;
     

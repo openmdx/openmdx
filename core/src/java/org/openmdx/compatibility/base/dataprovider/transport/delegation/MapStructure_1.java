@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapStructure_1.java,v 1.8 2005/02/21 13:10:12 hburger Exp $
+ * Name:        $Id: MapStructure_1.java,v 1.9 2008/03/19 17:06:09 hburger Exp $
  * Description: SPICE Structure_1_0 standard implementation
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:10:12 $
+ * Date:        $Date: 2008/03/19 17:06:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,6 +62,7 @@ import org.openmdx.base.accessor.generic.cci.Structure_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 
+@SuppressWarnings("unchecked")
 class MapStructure_1
     implements Serializable, Structure_1_0 
 {

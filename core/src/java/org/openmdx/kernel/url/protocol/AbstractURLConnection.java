@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractURLConnection.java,v 1.3 2007/12/13 18:19:18 hburger Exp $
- * Description: Dekegating URL connection
- * Revision:    $Revision: 1.3 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AbstractURLConnection.java,v 1.4 2008/03/13 17:16:15 hburger Exp $
+ * Description: Delegating URL connection
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:19:18 $
+ * Date:        $Date: 2008/03/13 17:16:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -47,6 +47,9 @@
  * 
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
+ * ___________________________________________________________________________ 
+ *
+ * This class should log as it has to be loaded by the system class loader. 
  */
 package org.openmdx.kernel.url.protocol;
 
@@ -57,13 +60,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
+import java.util.List;
 import java.util.Map;
 
 /**
  * An delegating URLConnection support class.
- *
- * @version <tt>$Revision: 1.3 $</tt>
- * @author  <a href="mailto:jason@planet57.com">Jason Dillon</a>
  */
 public abstract class AbstractURLConnection
     extends URLConnection
@@ -180,6 +181,7 @@ public abstract class AbstractURLConnection
      * @throws IOException
      * @see java.net.URLConnection#getContent(java.lang.Class[])
      */
+    @SuppressWarnings("unchecked")
     public Object getContent(Class[] classes)
         throws IOException {
         return this.delegate.getContent(classes);
@@ -300,7 +302,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getHeaderFields()
      */
-    public Map getHeaderFields() {
+    public Map<String,List<String>> getHeaderFields() {
         return this.delegate.getHeaderFields();
     }
     
@@ -354,7 +356,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getRequestProperties()
      */
-    public Map getRequestProperties() {
+    public Map<String,List<String>> getRequestProperties() {
         return this.delegate.getRequestProperties();
     }
     

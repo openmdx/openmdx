@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ServletTestCase.java,v 1.14 2007/03/24 21:59:48 hburger Exp $
+ * Name:        $Id: ServletTestCase.java,v 1.15 2008/04/04 17:55:31 hburger Exp $
  * Description: ServletTestCase
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/24 21:59:48 $
+ * Date:        $Date: 2008/04/04 17:55:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -91,6 +91,7 @@ import org.openmdx.kernel.id.cci.UUIDGenerator;
 /**
  * 
  */
+@SuppressWarnings("unchecked")
 public class ServletTestCase extends TestCase {
 
     protected ServletTestCase() {
@@ -112,7 +113,7 @@ public class ServletTestCase extends TestCase {
             this(Collections.EMPTY_MAP);
         }
         
-        public TestConfig(
+		public TestConfig(
             Map initParameters
         ){
             this.servletContext = new TestContext(initParameters);

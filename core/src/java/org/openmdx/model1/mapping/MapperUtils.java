@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapperUtils.java,v 1.4 2008/02/15 17:24:06 hburger Exp $
+ * Name:        $Id: MapperUtils.java,v 1.7 2008/04/04 01:12:18 hburger Exp $
  * Description: GMIUtils
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/15 17:24:06 $
+ * Date:        $Date: 2008/04/04 01:12:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -141,36 +141,28 @@ public class MapperUtils {
   }
 
   //--------------------------------------------------------------------------------
-  /**
-   * Word wraps a given text and returns it as a string.
-   * @param indent The indentation to be used for text output.
-   * @param inText The input text to be word wrapped.
-   * @return The word wrapped output text.
-   */
-  public static String wrapText(
-    String indent,
-    String inText
-  ) {
-    StringBuffer currentLine = new StringBuffer();
-    StringBuffer outText = new StringBuffer();
-    StringTokenizer tokenizer = new StringTokenizer(inText);
-    while (tokenizer.hasMoreTokens()) {
-      String nextToken = tokenizer.nextToken();
-      if (
-        indent.length() + currentLine.length() + nextToken.length() + 1 >= WRAP_AT_POSITION
-      ) {
-        outText.append(indent);
-        outText.append(currentLine);
-        outText.append(System.getProperty("line.separator"));
-        currentLine = new StringBuffer();
-      }
-      currentLine.append(nextToken);
-      currentLine.append(' ');
+    /**
+     * Word wraps a given text and returns it as a string.
+     * @param indent The indentation to be used for text output.
+     * @param inText The input text to be word wrapped.
+     * @return The word wrapped output text.
+     */
+    public static String wrapText(
+        String indent,
+        String inText
+    ) {
+        StringBuilder text = new StringBuilder();
+        StringTokenizer tokenizer = new StringTokenizer(inText, "\n\r\f");
+        String separator = "";
+        while (tokenizer.hasMoreTokens()) {
+            String nextToken = tokenizer.nextToken();
+            text.append(separator);
+            text.append(indent);
+            text.append(nextToken);
+            separator = System.getProperty("line.separator");
+        }
+        return text.toString();
     }
-    outText.append(indent);
-    outText.append(currentLine);
-    return outText.toString();
-  }
 
   //--------------------------------------------------------------------------------
 
@@ -194,8 +186,5 @@ public class MapperUtils {
     ) id.append(delimiter).append(i.next());
     return id.toString();
   }
-
-  //--------------------------------------------------------------------------------
-  private final static int WRAP_AT_POSITION = 78;
 
 }

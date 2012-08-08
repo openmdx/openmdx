@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectIdBuilder.java,v 1.5 2008/02/08 16:50:51 hburger Exp $
+ * Name:        $Id: ObjectIdBuilder.java,v 1.7 2008/05/15 18:07:25 hburger Exp $
  * Description: Application Identity Builder
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:50:51 $
+ * Date:        $Date: 2008/05/15 18:07:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -110,7 +110,7 @@ public interface ObjectIdBuilder {
      * @throws IllegalArgumentException in case of an unsupported qualifier 
      * class
      */
-    public String newObjectId(
+    String newObjectId(
         Boolean mixinParent, String parentObjectId,
         String referenceName, 
         List<Boolean> qualifierIsPersistent, List<?> qualifier, 
@@ -152,21 +152,16 @@ public interface ObjectIdBuilder {
      * @throws IllegalArgumentException in case of an unsupported qualifier 
      * class
      */
-    public <T> String newObjectId(
+    <T> String newObjectId(
         Boolean mixinParent, String parentObjectId,
         String referenceName,
-        List<Class<T>> qualifierClass, List<String> objectClass
+        List<Class<T>> qualifierClass, 
+        List<String> baseClass, List<String>objectClass
     );
 
-    /**
-     * Create an object id parser
-     * 
-     * @param objectId the object id to be parsed
-     * 
-     * @return a new object id parser based on the given argument
-     */
-    public ObjectId toObjectId(
-        String objectId
+    ObjectIdParser parseObjectId(
+        String objectId,
+        List<String> baseClass
     );
-    
+
 }

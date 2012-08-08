@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ExportXml.java,v 1.18 2007/12/06 16:30:52 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ExportXml.java,v 1.19 2008/03/21 20:17:17 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/06 16:30:52 $
+ * Date:        $Date: 2008/03/21 20:17:17 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
  * distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.replication;
 
@@ -63,8 +62,6 @@ import org.openmdx.base.application.control.ApplicationController;
 import org.openmdx.base.application.control.CmdLineArgs;
 import org.openmdx.base.application.control.CmdLineOption;
 import org.openmdx.base.application.deploy.InProcessDeployment;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1ConnectionFactoryImpl;
 import org.openmdx.compatibility.base.application.cci.Dataprovider_1Deployment;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
@@ -72,7 +69,6 @@ import org.openmdx.compatibility.base.dataprovider.exporter.FeedbackHandler;
 import org.openmdx.compatibility.base.dataprovider.exporter.ProviderTraverser;
 import org.openmdx.compatibility.base.dataprovider.exporter.XMLExportHandler;
 import org.openmdx.compatibility.base.dataprovider.exporter.XmlContentHandler;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.accessor.basic.spi.Model_1;
@@ -84,6 +80,7 @@ import org.openmdx.model1.accessor.basic.spi.Model_1;
  * 
  * @author anyff
  */
+@SuppressWarnings("unchecked")
 public class ExportXml
     extends Application
     implements ExceptionListener
@@ -408,7 +405,7 @@ public class ExportXml
     private static final String EOL = System.getProperty("line.separator");
 
     /** The version gets set by CVS */
-    private static final String VERSION = "$Revision: 1.18 $";
+    private static final String VERSION = "$Revision: 1.19 $";
 
     /** The application name */
     private static final String APP_NAME = "ExportXml";

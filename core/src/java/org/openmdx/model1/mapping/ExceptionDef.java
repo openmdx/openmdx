@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ExceptionDef.java,v 1.6 2008/02/15 17:24:06 hburger Exp $
+ * Name:        $Id: ExceptionDef.java,v 1.7 2008/03/21 18:40:15 hburger Exp $
  * Description: VelocityExceptionDef class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/15 17:24:06 $
+ * Date:        $Date: 2008/03/21 18:40:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,7 @@ import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 
+@SuppressWarnings("unchecked")
 public class ExceptionDef 
   extends FeatureDef {
 

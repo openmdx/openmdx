@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -21,16 +22,17 @@ import java.util.Map;
 import org.openmdx.uses.org.apache.commons.collections.KeyValue;
 
 /**
- * A Map Entry tied to a map underneath.
+ * A {@link java.util.Map.Entry Map.Entry} tied to a map underneath.
  * <p>
  * This can be used to enable a map entry to make changes on the underlying
  * map, however this will probably mess up any iterators.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:20 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:17 $
  * 
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class TiedMapEntry implements Map.Entry, KeyValue, Serializable {
 
     /** Serialization version */    
@@ -40,7 +42,7 @@ public class TiedMapEntry implements Map.Entry, KeyValue, Serializable {
     private final Map map;
     /** The key */
     private final Object key;
-    
+
     /**
      * Constructs a new entry with the given Map and key.
      *
@@ -88,7 +90,7 @@ public class TiedMapEntry implements Map.Entry, KeyValue, Serializable {
     }
 
     /**
-     * Compares this Map Entry with another Map Entry.
+     * Compares this <code>Map.Entry</code> with another <code>Map.Entry</code>.
      * <p>
      * Implemented per API documentation of {@link java.util.Map.Entry#equals(Object)}
      * 
@@ -108,7 +110,7 @@ public class TiedMapEntry implements Map.Entry, KeyValue, Serializable {
             (key == null ? other.getKey() == null : key.equals(other.getKey())) &&
             (value == null ? other.getValue() == null : value.equals(other.getValue()));
     }
-     
+
     /**
      * Gets a hashCode compatible with the equals method.
      * <p>
@@ -121,7 +123,7 @@ public class TiedMapEntry implements Map.Entry, KeyValue, Serializable {
         return (getKey() == null ? 0 : getKey().hashCode()) ^
                (value == null ? 0 : value.hashCode()); 
     }
-    
+
     /**
      * Gets a string version of the entry.
      * 

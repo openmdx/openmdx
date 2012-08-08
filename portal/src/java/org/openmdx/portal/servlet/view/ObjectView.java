@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectView.java,v 1.6 2007/08/12 21:57:43 wfro Exp $
+ * Name:        $Id: ObjectView.java,v 1.12 2008/05/27 23:18:51 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/12 21:57:43 $
+ * Date:        $Date: 2008/05/27 23:18:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,11 +72,13 @@ import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ObjectReference;
+import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.control.ControlFactory;
 import org.openmdx.portal.servlet.control.InspectorControl;
 import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
 //---------------------------------------------------------------------------
+@SuppressWarnings("unchecked")
 public abstract class ObjectView
     extends View
     implements Serializable {
@@ -87,9 +89,9 @@ public abstract class ObjectView
         String containerElementId,
         RefObject_1_0 object,
         ApplicationContext application,
-        Map historyActions,
+        Map<Path,Action> historyActions,
         String lookupType,
-        Map restrictToElements,       
+        Map restrictToElements,
         ControlFactory controlFactory
     ) {
         super(
@@ -99,14 +101,13 @@ public abstract class ObjectView
             application,
             controlFactory
         );
-        this.object = object;
         this.objectReference = new ObjectReference(
             object,
             application
         );      
         this.historyActions = historyActions;
         this.lookupType = lookupType;
-        this.restrictToElements = restrictToElements;     
+        this.restrictToElements = restrictToElements;   
     }
 
     // -------------------------------------------------------------------------
@@ -142,7 +143,7 @@ public abstract class ObjectView
                     // the data package would result in roundtrips because each view gets a new 
                     // data package and therefore parent selectors would be never cached 
                     ObjectReference reference = new ObjectReference(
-                        (RefObject_1_0)this.application.getControlPackage().refObject(p.getPrefix(i).toXri()),
+                        (RefObject_1_0)this.application.getPmControl().getObjectById(p.getPrefix(i)),
                         this.application
                     );
                     if(parentReference != null) {
@@ -198,7 +199,7 @@ public abstract class ObjectView
     }
   
     //-------------------------------------------------------------------------  
-    public Map getHistoryActions(
+    public Map<Path,Action> getHistoryActions(
     ) {
         return this.historyActions;
     }
@@ -212,11 +213,12 @@ public abstract class ObjectView
         boolean refreshData
     ) throws ServiceException {
         if(refreshData) {
-            this.application.refreshDataPkg();
+            this.application.resetPmData();
+            this.pm = this.application.getPmData();
             RefObject_1_0 object = this.getRefObject();
             if(this.object != null) {
-                this.object = this.application.getDataPackage().refObject(
-                    object.refMofId()
+                this.object = this.getPersistenceManager().getObjectById(
+                    object.refGetPath()
                 );
                 this.objectReference = new ObjectReference(
                     object,
@@ -228,38 +230,43 @@ public abstract class ObjectView
   
     //-------------------------------------------------------------------------
     public ObjectView getPreviousView(
+        ViewsCache showViewsCache
     ) {
       if(this.historyActions != null) {
-          Map historyActions = MapUtils.orderedMap(new HashMap());
+          Map<Path,Action> historyActions = MapUtils.orderedMap(new HashMap());
           historyActions.putAll(this.historyActions);
-          while(historyActions.size() > 0) {          
+          while(!historyActions.isEmpty()) {          
     
               // Remove last history action
-              Iterator i = null;
-              String previousRefMofId = null;
+              Iterator<Action> i = null;
+              Action previousAction = null;
               for(
-                  i = historyActions.keySet().iterator(); 
+                  i = historyActions.values().iterator(); 
                   i.hasNext(); 
               ) {
-                  previousRefMofId = (String)i.next();                  
+                  previousAction = i.next();                  
               }
-              i.remove();
-              
+              i.remove();              
               // Try to get and refresh view. If an exception occurs go back
               // the history.
               try {
-                  ObjectView previousView = 
-                      new ShowObjectView(
+                  String previousRequestId = previousAction.getParameter(Action.PARAMETER_REQUEST_ID);
+                  if((showViewsCache != null) && (showViewsCache.getView(previousRequestId) != null)) {
+                      return showViewsCache.getView(previousRequestId);
+                  }
+                  else {
+                      Path previousObjectIdentity = new Path(previousAction.getParameter(Action.PARAMETER_OBJECTXRI));
+                      return  new ShowObjectView(
                           this.id,
                           this.containerElementId,
-                          previousRefMofId,
+                          previousObjectIdentity,
                           this.application,
                           historyActions,
                           null,
                           null,
                           this.controlFactory
-                      );              
-                  return previousView;
+                      );
+                  }
               } catch(Exception e) {}          
           }
       }
@@ -267,7 +274,7 @@ public abstract class ObjectView
           return new ShowObjectView(
               this.id,
               this.containerElementId,
-              this.application.getRootObject()[0].refMofId(),
+              this.application.getRootObject()[0].refGetPath(),
               this.application,
               MapUtils.orderedMap(new HashMap()),
               null,
@@ -314,7 +321,7 @@ public abstract class ObjectView
     protected String lookupType = null;
     protected Map restrictToElements = null;
   
-    protected Map historyActions = null;
+    protected Map<Path,Action> historyActions = null;
     protected Action[] favoriteActions = null;
     protected Action[] rootObjectActions = null;
   

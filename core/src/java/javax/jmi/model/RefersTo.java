@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings("unchecked")
 public interface RefersTo extends RefAssociation {
     public boolean exists(Reference referent, AssociationEnd referencedEnd);
     public java.util.Collection getReferent(AssociationEnd referencedEnd);

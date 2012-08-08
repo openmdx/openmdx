@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FlushInteractionSpec.java,v 1.6 2007/03/07 09:26:37 wfro Exp $
+ * Name:        $Id: FlushInteractionSpec.java,v 1.7 2008/03/21 18:32:57 hburger Exp $
  * Description: CreateResult
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/07 09:26:37 $
+ * Date:        $Date: 2008/03/21 18:32:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,11 @@ package org.openmdx.base.transport.jca;
 public class FlushInteractionSpec 
     extends OpenMdxInteractionSpec {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -6383581630526257280L;
+
     public FlushInteractionSpec(
     ) {
         this.setFunctionName(

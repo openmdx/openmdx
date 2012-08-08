@@ -1,10 +1,10 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SessionInfoControl.java,v 1.33 2007/08/10 12:41:52 wfro Exp $
+ * Name:        $Id: SessionInfoControl.java,v 1.36 2008/05/01 21:43:55 wfro Exp $
  * Description: SessionInfoControl
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/10 12:41:52 $
+ * Date:        $Date: 2008/05/01 21:43:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,13 +58,15 @@
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.view.View;
 
@@ -88,114 +90,176 @@ public class SessionInfoControl
     }
     
     //---------------------------------------------------------------------------------
-    public void paint(
-        HtmlPage p,
-        String frame,
-        boolean forEditing        
-    ) throws ServiceException {
-        AppLog.detail("> paint");
-       
-        View view = p.getView();
-        ApplicationContext app = view.getApplicationContext();
-        Action saveSettingsAction = view.getSaveSettingsAction();
-        Action logoffAction = view.getLogoffAction();
-        
-        p.write("<table id=\"headerlayout\" style=\"position:relative;\">");
-        p.write("  <tr id=\"headRow\">");
-        p.write("    <td id=\"head\" colspan=\"2\">");
-        p.write("      <table id=\"info\">");
-        p.write("        <tr>");
-        p.write("          <td id=\"headerCellLeft\"><img id=\"logoLeft\" src=\"", p.getResourcePath("images/"), "logoLeft.gif\" alt=\"", app.getApplicationName(), "\" title=\"\" /></td>");
-        p.write("          <td id=\"headerCellSpacerLeft\"></td>");
-        p.write("          <td id=\"headerCellMiddle\">");
-        p.write("            <table id=\"headerMiddleLayout\">");
-        p.write("              <tr>");
-        p.write("                <td><span>", app.getLoginPrincipalId(), "</span></td>");
-        // Locales
-        if(forEditing) {
-            p.write("                <td><span>", app.getCurrentLocaleAsString(), "</span></td>");            
+    public static void paintLoginPrincipal(
+        HtmlPage p
+    ) {
+        try {
+            ApplicationContext app = p.getApplicationContext();
+            p.write("<span>", app.getLoginPrincipalId(), "</span>");
         }
-        else {
-            p.write("                <td>");
-            p.write("                  <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
-            p.write("                    <li><a href=\"#\" onclick=\"javascript:return false;\">", app.getCurrentLocaleAsString(), "&nbsp;<img src=\"", p.getResourcePath("images/"), WebKeys.ICON_PANEL_DOWN, "\" alt=\"\" /></a>");
-            p.write("                      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-            Action[] selectLocaleAction = ((ShowObjectView)view).getSelectLocaleAction();
-            for(int i = 0; i < selectLocaleAction.length; i++) {
-                Action action = selectLocaleAction[i];
-                p.write("                        <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getParameter(Action.PARAMETER_LOCALE), " - ", action.getTitle(), "</a></li>");
-            }
-            p.write("                      </ul>");
-            p.write("                    </li>");
-            p.write("                  </ul>");
-            p.write("                </td>");
+        catch(Exception e) {
+            new ServiceException(e).log();
         }
-        if(!forEditing) {
-            p.write("                <td><a class=\"abutton\" href=\"#\"", p.getOnClick("javascript:", p.getButtonEffectPulsate(), "window.location.href=", p.getEvalHRef(logoffAction), ";"), ">", logoffAction.getTitle(), "</a></td>");            
-        }
-        p.write("              </tr>");
-        p.write("              <tr>");            
-        // Roles
-        Action[] setRoleAction = view.getSetRoleActions();
-        if(forEditing || (setRoleAction.length < 2)) {
-            p.write("                <td><span>", app.getCurrentUserRole(), "</span></td>");            
-        }
-        else {
-            p.write("                <td>");
-            p.write("                  <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
-            p.write("                    <li><a href=\"#\" onclick=\"javascript:return false;\">", app.getCurrentUserRole(), "&nbsp;<img src=\"", p.getResourcePath("images/"), WebKeys.ICON_PANEL_DOWN, "\" alt=\"\" /></a>");
-            p.write("                      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-            for(int i = 0; i < setRoleAction.length; i++) {
-                Action action = setRoleAction[i];
-                p.write("                          <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getParameter(Action.PARAMETER_NAME), "</a></li>");
-            }
-            p.write("                      </ul>");
-            p.write("                    </li>");
-            p.write("                  </ul>");
-            p.write("                </td>");
-        }
-        // GUI modes
-        Action[] setGuiModeAction = view.getSetGuiModeActions();
-        String currentGuiMode = "0";
-        for(int i = 0; i < setGuiModeAction.length; i++) {
-            if(setGuiModeAction[i].getParameter(Action.PARAMETER_NAME).equals(app.getCurrentGuiMode())) {
-                currentGuiMode = setGuiModeAction[i].getTitle();
-                break;
-            }
-        }
-        if(forEditing) {
-            p.write("                <td><span>", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_UI_MODE, currentGuiMode, p.getImgType(), "\" alt=\"\""), "&nbsp;</span></td>");            
-        }
-        else {
-            p.write("                <td>");
-            p.write("                  <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
-            p.write("                    <li><a href=\"#\" onclick=\"javascript:return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_UI_MODE, currentGuiMode, p.getImgType(), "\" alt=\"\""), "&nbsp;", p.getImg("src=\"images/", WebKeys.ICON_PANEL_DOWN, "\" alt=\"\""), "</a>");
-            p.write("                      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-            for(int i = 0; i < setGuiModeAction.length; i++) {
-                Action action = setGuiModeAction[i];
-                p.write("                        <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_UI_MODE, action.getTitle(), p.getImgType(), "\" alt=\"\""), "</a></li>");
-            }
-            p.write("                      </ul>");
-            p.write("                    </li>");        
-            p.write("                  </ul>");
-            p.write("                </td>");
-        }
-        if(!forEditing) {
-            p.write("                <td><a class=\"abutton\" href=\"#\"", p.getOnClick("javascript:", p.getButtonEffectPulsate(), ";new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});"), ">", saveSettingsAction.getTitle(), "</a></td>");            
-        }
-        p.write("              </tr>");
-        p.write("            </table>");
-        p.write("          </td>");
-        p.write("          <td id=\"headerCellRight\"><img id=\"logoRight\" src=\"", p.getResourcePath("images/"), "logoRight.gif\" alt=\"\" title=\"\" /></td>");
-        p.write("        </tr>");
-        p.write("      </table>");
-        p.write("    </td>");
-        p.write("  </tr>");
-        p.write("</table>");
-                
-        AppLog.detail("< paint");
     }
-
+    
+    //---------------------------------------------------------------------------------
+    public static void paintLocalesMenu(
+        HtmlPage p,
+        boolean forEditing
+    ) {
+        try {
+            ApplicationContext app = p.getApplicationContext();
+            View view = p.getView();        
+            if(forEditing) {
+                p.write("<span>", app.getCurrentLocaleAsString(), "</span>");            
+            }
+            else {
+                p.write("<ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
+                p.write("  <li><a href=\"#\" onclick=\"javascript:return false;\">", app.getCurrentLocaleAsString(), "&nbsp;<img src=\"", p.getResourcePath("images/"), WebKeys.ICON_PANEL_DOWN, "\" alt=\"\" /></a>");
+                p.write("    <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
+                Action[] selectLocaleAction = ((ShowObjectView)view).getSelectLocaleAction();
+                for(int i = 0; i < selectLocaleAction.length; i++) {
+                    Action action = selectLocaleAction[i];
+                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getParameter(Action.PARAMETER_LOCALE), " - ", action.getTitle(), "</a></li>");
+                }
+                p.write("    </ul>");
+                p.write("  </li>");
+                p.write("</ul>");
+            }
+        }
+        catch(Exception e) {
+            new ServiceException(e).log();
+        }
+    }
+    
+    //---------------------------------------------------------------------------------
+    public static void paintLogoffButton(
+        HtmlPage p,
+        boolean forEditing,
+        String buttonClass
+    ) {
+        try {
+            View view = p.getView();        
+            Action logoffAction = view.getLogoffAction();        
+            if(!forEditing) {
+                p.write("<a class=\"", buttonClass, "\" href=\"#\"", p.getOnClick("javascript:", p.getButtonEffectPulsate(), "window.location.href=", p.getEvalHRef(logoffAction), ";"), ">", logoffAction.getTitle(), "</a>");            
+            }
+        }
+        catch(Exception e) {
+            new ServiceException(e).log();
+        }
+    }
+    
+    //---------------------------------------------------------------------------------
+    public static void paintRolesMenu(
+        HtmlPage p,
+        boolean forEditing
+    ) {
+        try {
+            ApplicationContext app = p.getApplicationContext();
+            View view = p.getView();        
+            Action[] setRoleAction = view.getSetRoleActions();
+            if(forEditing || (setRoleAction.length < 2)) {
+                p.write("<span>", app.getCurrentUserRole(), "</span>");            
+            }
+            else {
+                p.write("<ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
+                p.write("  <li><a href=\"#\" onclick=\"javascript:return false;\">", app.getCurrentUserRole(), "&nbsp;<img src=\"", p.getResourcePath("images/"), WebKeys.ICON_PANEL_DOWN, "\" alt=\"\" /></a>");
+                p.write("    <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
+                for(int i = 0; i < setRoleAction.length; i++) {
+                    Action action = setRoleAction[i];
+                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getParameter(Action.PARAMETER_NAME), "</a></li>");
+                }
+                p.write("    </ul>");
+                p.write("  </li>");
+                p.write("</ul>");
+            }
+        }
+        catch(Exception e) {
+            new ServiceException(e).log();
+        }
+        
+    }
+    
+    //---------------------------------------------------------------------------------
+    public static void paintGuiModesMenu(
+        HtmlPage p,
+        boolean forEditing
+    ) {
+        try {
+            ApplicationContext app = p.getApplicationContext();
+            View view = p.getView();        
+            Action[] setGuiModeAction = view.getSetGuiModeActions();
+            String currentGuiMode = "0";
+            for(int i = 0; i < setGuiModeAction.length; i++) {
+                if(setGuiModeAction[i].getParameter(Action.PARAMETER_NAME).equals(app.getCurrentGuiMode())) {
+                    currentGuiMode = setGuiModeAction[i].getTitle();
+                    break;
+                }
+            }
+            if(forEditing) {
+                p.write("<span>", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_UI_MODE, currentGuiMode, p.getImgType(), "\" alt=\"\""), "&nbsp;</span>");            
+            }
+            else {
+                p.write("<ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
+                p.write("  <li><a href=\"#\" onclick=\"javascript:return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_UI_MODE, currentGuiMode, p.getImgType(), "\" alt=\"\""), "&nbsp;", p.getImg("src=\"images/", WebKeys.ICON_PANEL_DOWN, "\" alt=\"\""), "</a>");
+                p.write("    <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
+                for(int i = 0; i < setGuiModeAction.length; i++) {
+                    Action action = setGuiModeAction[i];
+                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_UI_MODE, action.getTitle(), p.getImgType(), "\" alt=\"\""), "</a></li>");
+                }
+                p.write("    </ul>");
+                p.write("  </li>");        
+                p.write("</ul>");
+            }
+        }
+        catch(Exception e) {
+            new ServiceException(e).log();
+        }
+    }
+    
+    //---------------------------------------------------------------------------------
+    public static void paintCurrentDateTime(
+        HtmlPage p,
+        String separator
+    ) {
+        try {
+            ApplicationContext app = p.getApplicationContext();
+            SimpleDateFormat dateTimeFormat = DateValue.getLocalizedDateTimeFormatter(
+                null, 
+                true, 
+                app
+            );
+            String formattedDateTime = dateTimeFormat.format(new Date());
+            p.write(
+                formattedDateTime.replace(" ", separator), 
+                separator, 
+                dateTimeFormat.getTimeZone().getID()
+            );
+        }
+        catch(Exception e) {
+            new ServiceException(e).log();
+        }
+    }
+    
+    //---------------------------------------------------------------------------------
+    public static void paintSaveSettingsButton(
+        HtmlPage p,
+        boolean forEditing,
+        String buttonClass
+    ) {
+        try {
+            View view = p.getView();        
+            Action saveSettingsAction = view.getSaveSettingsAction();
+            if(!forEditing) {
+                p.write("<a class=\"", buttonClass, "\" href=\"#\"", p.getOnClick("javascript:", p.getButtonEffectPulsate(), ";new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});"), ">", saveSettingsAction.getTitle(), "</a>");            
+            }
+        }
+        catch(Exception e) {
+            new ServiceException(e).log();
+        }        
+    }
+    
     //---------------------------------------------------------------------------------
     // Members
     //---------------------------------------------------------------------------------

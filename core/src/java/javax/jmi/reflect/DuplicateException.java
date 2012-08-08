@@ -3,6 +3,7 @@ package javax.jmi.reflect;
 /** Exception thrown when a collection passed to an operation parameter with <CODE>isUnique</CODE> set to true
  * contains duplicate values.
  */
+@SuppressWarnings("serial")
 public class DuplicateException extends JmiException {
 
     /**

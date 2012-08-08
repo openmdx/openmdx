@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LayoutLoader.java,v 1.3 2007/01/21 20:46:42 wfro Exp $
+ * Name:        $Id: LayoutLoader.java,v 1.4 2008/04/04 17:01:12 hburger Exp $
  * Description: LayoutLoader
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:46:42 $
+ * Date:        $Date: 2008/04/04 17:01:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -87,7 +87,8 @@ public class LayoutLoader
   }
   
   //-------------------------------------------------------------------------
-  synchronized public LayoutFactory loadLayouts(
+  @SuppressWarnings("unchecked")
+synchronized public LayoutFactory loadLayouts(
       String[] locale,
       Model_1_0 model
   ) throws ServiceException {

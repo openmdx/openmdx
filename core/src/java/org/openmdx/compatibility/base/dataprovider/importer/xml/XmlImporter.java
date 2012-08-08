@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XmlImporter.java,v 1.33 2007/10/31 19:32:10 hburger Exp $
+ * Name:        $Id: XmlImporter.java,v 1.34 2008/03/21 18:44:27 hburger Exp $
  * Description: Generic XML Importer
- * Revision:    $Revision: 1.33 $
+ * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/31 19:32:10 $
+ * Date:        $Date: 2008/03/21 18:44:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -92,7 +92,6 @@ import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.mapping.xmi.XMINames;
 import org.xml.sax.Attributes;
@@ -114,6 +113,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * and stores them in target. If objects are already present in target they are 
  * replaced, if they are new they are created.
  */
+@SuppressWarnings("unchecked")
 public class XmlImporter
   extends DefaultHandler
   implements ContentHandler, DTDHandler, ErrorHandler, DeclHandler, LexicalHandler, EntityResolver {
@@ -632,7 +632,7 @@ public class XmlImporter
       
 //  this.currentLocalpart = localpart;
     this.previousElementEnded = false;
-    this.currentAttributeValue = StringBuilders.newStringBuilder();
+    this.currentAttributeValue = new StringBuilder();
 
     //SysLog.trace("<uri=" + uri + ", localpart=" + localpart + ", rawname=" + rawname + ">");
     // check whether to load schema
@@ -830,11 +830,9 @@ public class XmlImporter
   ) throws SAXException {
     
     if(this.currentAttributeValue == null) {
-      this.currentAttributeValue = StringBuilders.newStringBuilder();
+      this.currentAttributeValue = new StringBuilder();
     }
-    StringBuilders.asStringBuilder(
-        this.currentAttributeValue
-    ).append(
+    this.currentAttributeValue.append(
       ch, 
       offset, 
       length
@@ -1430,7 +1428,7 @@ public class XmlImporter
                             ){
                                 DataproviderObject state = (DataproviderObject)this.states.get(i);
                                 state.path().add(
-                                    StringBuilders.newStringBuilder(
+                                    new StringBuilder(
                                         state.path().remove(state.path().size() - 1)
                                     ).append(
                                         ";validFrom="
@@ -1729,17 +1727,15 @@ public class XmlImporter
   protected String getLocationString(
     SAXParseException ex
   ) {
-    CharSequence str = StringBuilders.newStringBuilder();
+      StringBuilder str = new StringBuilder();
     String systemId = ex.getSystemId();
     if(systemId != null) {
       int index = systemId.lastIndexOf('/');
       if(index != -1) 
         systemId = systemId.substring(index + 1);
-      StringBuilders.asStringBuilder(str).append(systemId);
+      str.append(systemId);
     }
-    StringBuilders.asStringBuilder(
-        str
-    ).append(
+    str.append(
         ':'
     ).append(
         ex.getLineNumber()
@@ -1774,13 +1770,13 @@ public class XmlImporter
     if(nameElements.size() == 0) {
       return "";
     }
-    CharSequence nameComponent = StringBuilders.newStringBuilder((String)nameElements.get(0));
+    StringBuilder nameComponent = new StringBuilder((String)nameElements.get(0));
     for(
       int i = 1;
       i < nameElements.size();
       i++
     ) {
-      StringBuilders.asStringBuilder(nameComponent).append(":" + nameElements.get(i));
+      nameComponent.append(":" + nameElements.get(i));
     }
     return nameComponent.toString();
   }
@@ -2183,7 +2179,7 @@ public class XmlImporter
   // state/context of current object
   private DataproviderObject currentObject = null;
   private Path currentPath = null;
-  private CharSequence currentAttributeValue = null;
+  private StringBuilder currentAttributeValue = null;
   private String currentAttributeName = null;
   private String currentLocalpartObject = null;
   private int nextTemporaryId = -1;

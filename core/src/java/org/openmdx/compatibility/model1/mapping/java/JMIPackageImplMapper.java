@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JMIPackageImplMapper.java,v 1.7 2008/02/18 09:18:21 hburger Exp $
+ * Name:        $Id: JMIPackageImplMapper.java,v 1.9 2008/06/28 00:21:36 hburger Exp $
  * Description: JMIPackageTemplate 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 09:18:21 $
+ * Date:        $Date: 2008/06/28 00:21:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,9 +57,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
+import org.openmdx.model1.mapping.AbstractNames;
 import org.openmdx.model1.mapping.ClassDef;
 import org.openmdx.model1.mapping.ClassifierDef;
 import org.openmdx.model1.mapping.MapperUtils;
@@ -73,7 +74,7 @@ public class JMIPackageImplMapper
     //-----------------------------------------------------------------------
     public JMIPackageImplMapper(
         Writer writer,
-        Model_1_0 model,
+        Model_1_3 model,
         String format, 
         String packageSuffix
     ) {
@@ -89,7 +90,7 @@ public class JMIPackageImplMapper
      * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
      */
     protected String mapperId() {
-        return "$Id: JMIPackageImplMapper.java,v 1.7 2008/02/18 09:18:21 hburger Exp $";
+        return "$Id: JMIPackageImplMapper.java,v 1.9 2008/06/28 00:21:36 hburger Exp $";
     }
 
     //-----------------------------------------------------------------------
@@ -240,7 +241,7 @@ public class JMIPackageImplMapper
         String packageIntfName = buffer.toString();
         String packageImplName = buffer.append("Impl").toString();
         buffer.setLength(0);
-        String packageCompatibilityName = Names.openmdx2PackageName(
+        String packageCompatibilityName = AbstractNames.openmdx2PackageName(
             buffer,
             MapperUtils.getElementName(qualifiedPackageName)
         ).toString();

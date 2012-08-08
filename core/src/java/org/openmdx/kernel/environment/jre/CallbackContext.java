@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CallbackContext.java,v 1.3 2007/10/10 16:06:06 hburger Exp $
+ * Name:        $Id: CallbackContext.java,v 1.4 2008/03/21 18:36:29 hburger Exp $
  * Description: Callback Context
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:06 $
+ * Date:        $Date: 2008/03/21 18:36:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,6 +80,7 @@ public class CallbackContext
     /* (non-Javadoc)
      * @see org.openmdx.kernel.security.ExecutionContext#execute(java.security.PrivilegedAction)
      */
+    @SuppressWarnings("unchecked")
     public Object execute(PrivilegedAction action) {
         return action.run();
     }
@@ -87,6 +88,7 @@ public class CallbackContext
     /* (non-Javadoc)
      * @see org.openmdx.kernel.security.ExecutionContext#execute(java.security.PrivilegedExceptionAction)
      */
+    @SuppressWarnings("unchecked")
     public Object execute(
         PrivilegedExceptionAction action
     ) throws PrivilegedActionException {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     opencrx, http://www.opencrx.org/
- * Name:        $Id: HtmlEncoder.java,v 1.12 2007/10/10 16:05:53 hburger Exp $
+ * Name:        $Id: HtmlEncoder.java,v 1.13 2008/03/21 18:32:18 hburger Exp $
  * Description: HttpEncoder class
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2007/10/10 16:05:53 $
+ * Date:        $Date: 2008/03/21 18:32:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,8 +55,6 @@
  */
 package org.openmdx.base.text.conversion;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 public class HtmlEncoder {
 
     //-----------------------------------------------------------------------
@@ -79,7 +77,7 @@ public class HtmlEncoder {
         if(len < 1) {
             return s;
         }
-        CharSequence target = StringBuilders.newStringBuilder();
+        StringBuilder target = new StringBuilder();
         boolean containsTag = false;
         int i = 0;
         while(i < len) {
@@ -97,7 +95,7 @@ public class HtmlEncoder {
                             pos = s.indexOf('>', i);
                         }
                         if(pos > i) {
-                            StringBuilders.asStringBuilder(target).append(s.substring(i, pos+1));
+                            target.append(s.substring(i, pos+1));
                             i = pos + 1;
                             isKnownTag = true;
                             containsTag = true;
@@ -115,16 +113,16 @@ public class HtmlEncoder {
                     (XSS_CHARS[k] != null) && 
                     !s.startsWith("&#", i)
                 ) {
-                    StringBuilders.asStringBuilder(target).append(XSS_CHARS[k]);
+                    target.append(XSS_CHARS[k]);
                 } 
                 else if(c >= 128) {            
-                    StringBuilders.asStringBuilder(target)
+                    target
                     .append("&#")
                     .append(Integer.toString(c))
                     .append(";");                                
                 }
                 else {
-                    StringBuilders.asStringBuilder(target).append(c);
+                    target.append(c);
                 }
                 i++;
             }

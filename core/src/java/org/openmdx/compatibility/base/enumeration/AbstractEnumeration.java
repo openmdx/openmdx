@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractEnumeration.java,v 1.3 2004/04/02 16:59:02 wfro Exp $
+ * Name:        $Id: AbstractEnumeration.java,v 1.4 2008/03/21 20:15:39 hburger Exp $
  * Description: SPICE Collections: Abstract Enumeration 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:02 $
+ * Date:        $Date: 2008/03/21 20:15:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,7 @@ import java.util.Map;
 /**
  * The unit of work status interface.
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractEnumeration 
     implements Cloneable
 {

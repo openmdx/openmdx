@@ -1,5 +1,6 @@
 package javax.jmi.xmi;
 
+@SuppressWarnings("serial")
 public class MalformedXMIException extends Exception {
     
     /**

@@ -30,6 +30,7 @@ import java.util.Vector;
 *
 * @author =chetan
 */
+@SuppressWarnings("unchecked")
 public abstract class XRIPath
     extends Parsable
 {

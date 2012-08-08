@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIParser.java,v 1.5 2005/06/15 01:09:48 wfro Exp $
+ * Name:        $Id: XMIParser.java,v 1.6 2008/03/21 18:40:13 hburger Exp $
  * Description: XMI Parser Interface
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/15 01:09:48 $
+ * Date:        $Date: 2008/03/21 18:40:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,6 +58,7 @@ import org.xml.sax.ContentHandler;
 public interface XMIParser
     extends ContentHandler {
 
+    @SuppressWarnings("unchecked")
     public void parse(
         String uri,
         XMIImporter_1 importer,

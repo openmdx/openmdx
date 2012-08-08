@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JMIFilterImplMapper.java,v 1.10 2008/02/18 09:18:20 hburger Exp $
+ * Name:        $Id: JMIFilterImplMapper.java,v 1.11 2008/04/02 17:39:09 wfro Exp $
  * Description: JMIFilterTemplate 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 09:18:20 $
+ * Date:        $Date: 2008/04/02 17:39:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,7 +56,7 @@ import java.io.Writer;
 import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.mapping.AttributeDef;
 import org.openmdx.model1.mapping.ClassifierDef;
@@ -70,7 +70,7 @@ public class JMIFilterImplMapper
     //-----------------------------------------------------------------------
     public JMIFilterImplMapper(
         Writer writer,
-        Model_1_0 model,
+        Model_1_3 model,
         String format, 
         String packageSuffix
     ) {
@@ -86,7 +86,7 @@ public class JMIFilterImplMapper
      * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
      */
     protected String mapperId() {
-        return "$Id: JMIFilterImplMapper.java,v 1.10 2008/02/18 09:18:20 hburger Exp $";
+        return "$Id: JMIFilterImplMapper.java,v 1.11 2008/04/02 17:39:09 wfro Exp $";
     }
 
     //-----------------------------------------------------------------------

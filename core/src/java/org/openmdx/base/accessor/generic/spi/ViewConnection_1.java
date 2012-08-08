@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewConnection_1.java,v 1.15 2007/12/20 02:56:12 hburger Exp $
+ * Name:        $Id: ViewConnection_1.java,v 1.16 2008/03/19 17:13:11 hburger Exp $
  * Description: StateConnection_1 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/20 02:56:12 $
+ * Date:        $Date: 2008/03/19 17:13:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -77,6 +77,7 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 /**
  * StateConnection_1
  */
+@SuppressWarnings("unchecked")
 public class ViewConnection_1
     extends CachingMarshaller
     implements ObjectFactory_1_3

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VerboseSubjectHandler.java,v 1.2 2005/07/09 19:53:32 hburger Exp $
+ * Name:        $Id: VerboseSubjectHandler.java,v 1.3 2008/04/04 17:55:33 hburger Exp $
  * Description: SimpleSubjectHandler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/07/09 19:53:32 $
+ * Date:        $Date: 2008/04/04 17:55:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,6 @@ package org.openmdx.security.auth.servlet.simple;
 import java.io.IOException;
 import java.io.Writer;
 import java.security.Principal;
-import java.util.Iterator;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
@@ -94,7 +93,7 @@ public class VerboseSubjectHandler extends SimpleSubjectHandler {
             "openMDX - Logged In"
         );
         if(isDebug()) {
-            log("$Id: VerboseSubjectHandler.java,v 1.2 2005/07/09 19:53:32 hburger Exp $");
+            log("$Id: VerboseSubjectHandler.java,v 1.3 2008/04/04 17:55:33 hburger Exp $");
             log("title: " + this.title);
         }
     }
@@ -156,11 +155,7 @@ public class VerboseSubjectHandler extends SimpleSubjectHandler {
         endHead(html);
         startBody(html);
         html.write("<FIELDSET><LEGEND>Principals</LEGEND><UL>");
-        for(
-            Iterator i = subject.getPrincipals().iterator();
-            i.hasNext();
-        ){
-            Principal p = (Principal) i.next();
+        for(Principal p : subject.getPrincipals()){
             html.write("<li>Name = ");
             writeEncoded(html, p.getName());
             if(p instanceof GenericPrincipal) {

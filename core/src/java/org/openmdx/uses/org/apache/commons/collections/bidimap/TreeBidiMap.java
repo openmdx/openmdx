@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -67,11 +68,12 @@ import org.openmdx.uses.org.apache.commons.collections.keyvalue.UnmodifiableMapE
  * UnsupportedOperationException on attempts to call that method.
  *
  * @since Commons Collections 3.0 (previously DoubleOrderedMap v2.0)
- * @version $Revision: 1.5 $ $Date: 2005/04/07 14:14:49 $
+ * @version $Revision: 1.8 $ $Date: 2008/06/28 00:21:53 $
  * 
  * @author Marc Johnson
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class TreeBidiMap implements OrderedBidiMap {
 
     private static final int KEY = 0;
@@ -1376,7 +1378,7 @@ public class TreeBidiMap implements OrderedBidiMap {
      * Compares for equals as per the API.
      *
      * @param obj  the object to compare to
-     * @param index  the KEY or VALUE int
+     * @param type  the KEY or VALUE int
      * @return true if equal
      */
     boolean doEquals(Object obj, final int type) {
@@ -1412,7 +1414,7 @@ public class TreeBidiMap implements OrderedBidiMap {
     /**
      * Gets the hash code value for this map as per the API.
      *
-     * @param index  the KEY or VALUE int
+     * @param type  the KEY or VALUE int
      * @return the hash code value for this map
      */
     int doHashCode(final int type) {
@@ -1430,7 +1432,7 @@ public class TreeBidiMap implements OrderedBidiMap {
     /**
      * Gets the string form of this map as per AbstractMap.
      *
-     * @param index  the KEY or VALUE int
+     * @param type  the KEY or VALUE int
      * @return the string form of this map
      */
     String doToString(final int type) {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StateIncapable_1.java,v 1.1 2007/11/20 18:13:10 hburger Exp $
+ * Name:        $Id: StateIncapable_1.java,v 1.2 2008/03/21 18:46:24 hburger Exp $
  * Description: StateIncapable_1 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/20 18:13:10 $
+ * Date:        $Date: 2008/03/21 18:46:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 /**
  * StateIncapable_1
  */
+@SuppressWarnings("unchecked")
 public class StateIncapable_1
     extends Standard_1
 {

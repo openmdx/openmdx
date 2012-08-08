@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MessageDrivenBeanDeploymentDescriptor.java,v 1.4 2005/04/04 12:38:21 hburger Exp $
+ * Name:        $Id: MessageDrivenBeanDeploymentDescriptor.java,v 1.5 2008/03/21 18:38:43 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/04 12:38:21 $
+ * Date:        $Date: 2008/03/21 18:38:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,6 +58,7 @@ import org.openmdx.kernel.application.configuration.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.MessageDrivenBean;
 import org.w3c.dom.Element;
 
+@SuppressWarnings("unchecked")
 public class MessageDrivenBeanDeploymentDescriptor
   extends BeanDeploymentDescriptor
   implements MessageDrivenBean

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportDefinition.java,v 1.11 2007/08/18 10:22:49 wfro Exp $
+ * Name:        $Id: ReportDefinition.java,v 1.12 2008/04/04 17:01:11 hburger Exp $
  * Description: Reports
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/18 10:22:49 $
+ * Date:        $Date: 2008/04/04 17:01:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -138,7 +138,7 @@ public abstract class ReportDefinition
         // Extract the type from the name
         String s = name.substring(name.lastIndexOf("/") + 1);
         // As default take file name as forClass
-        this.forClass = new ArrayList();
+        this.forClass = new ArrayList<String>();
         this.forClass.add(
             s.indexOf("-") > 0
                 ? s.substring(0, s.indexOf("-")).replace('.', ':')
@@ -149,7 +149,7 @@ public abstract class ReportDefinition
         this.type = s.substring(0, s.indexOf("-")).replace('.', ':');        
         this.label = s;
         this.toolTip = s;
-        this.order = new ArrayList();
+        this.order = new ArrayList<String>();
         this.order.add("0");    
         
     }
@@ -222,11 +222,11 @@ public abstract class ReportDefinition
     protected final String locale;
     protected final short index;
     protected final String name;
-    protected List forClass;
+    protected List<String> forClass;
     protected final String type;
     protected String label;
     protected String toolTip;
-    protected List order;    
+    protected List<String> order;    
     protected Parameter[] parameters = new Parameter[0];
     
 }

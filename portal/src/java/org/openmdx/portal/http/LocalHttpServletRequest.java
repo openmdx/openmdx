@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LocalHttpServletRequest.java,v 1.3 2007/01/21 20:45:28 wfro Exp $
+ * Name:        $Id: LocalHttpServletRequest.java,v 1.4 2008/04/04 11:54:59 hburger Exp $
  * Description: BirtReportServlet
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:45:28 $
+ * Date:        $Date: 2008/04/04 11:54:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -142,6 +142,7 @@ public class LocalHttpServletRequest
         return this.parameters;
     }
 
+    @SuppressWarnings("unchecked")
     public Enumeration getParameterNames() {
         return new Hashtable(this.parameters).keys();
     }
@@ -159,6 +160,9 @@ public class LocalHttpServletRequest
         return null;
     }
 
+    /**
+     * @deprecated
+     */
     public String getRealPath(String arg0) {
         return this.request.getRealPath(arg0);
     }

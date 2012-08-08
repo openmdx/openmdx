@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -27,14 +28,15 @@ import org.openmdx.uses.org.apache.commons.collections.Transformer;
  * like a switch statement.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:13 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:21 $
  *
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class SwitchTransformer implements Transformer, Serializable {
 
     /** Serial version UID */
-    static final long serialVersionUID = -6404460890903469332L;
+    private static final long serialVersionUID = -6404460890903469332L;
 
     /** The tests to consider */
     private final Predicate[] iPredicates;
@@ -48,7 +50,7 @@ public class SwitchTransformer implements Transformer, Serializable {
      * 
      * @param predicates  array of predicates, cloned, no nulls
      * @param transformers  matching array of transformers, cloned, no nulls
-     * @param defaultTransformer  the transformer to use if no match, null means nop
+     * @param defaultTransformer  the transformer to use if no match, null means return null
      * @return the <code>chained</code> transformer
      * @throws IllegalArgumentException if array is null
      * @throws IllegalArgumentException if any element in the array is null
@@ -117,7 +119,7 @@ public class SwitchTransformer implements Transformer, Serializable {
      * 
      * @param predicates  array of predicates, not cloned, no nulls
      * @param transformers  matching array of transformers, not cloned, no nulls
-     * @param defaultTransformer  the transformer to use if no match, null means nop
+     * @param defaultTransformer  the transformer to use if no match, null means return null
      */
     public SwitchTransformer(Predicate[] predicates, Transformer[] transformers, Transformer defaultTransformer) {
         super();

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Ui_1.java,v 1.25 2008/01/09 14:38:33 wfro Exp $
+ * Name:        $Id: Ui_1.java,v 1.27 2008/04/04 11:47:15 hburger Exp $
  * Description: Ui_1 plugin
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/09 14:38:33 $
+ * Date:        $Date: 2008/04/04 11:47:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -107,6 +107,7 @@ import org.openmdx.model1.code.PrimitiveTypes;
  * Plugin implementation of the model org:openmdx:ui1. The plugin maps
  * ElementDefinitions to Elements.
  */
+@SuppressWarnings("unchecked")
 public class Ui_1
 extends Layer_1 {
 
@@ -732,7 +733,7 @@ extends Layer_1 {
                 return elementDefinition;
             }
         }
-        SysLog.warning("no configured definition found. creating default", elementName);
+        SysLog.info("no configured definition found. creating default", elementName);
         elementDefinition = new DataproviderObject(
             this.segmentIdentity.getDescendant(new String[]{"elementDefinition", elementName})
         );
@@ -2850,7 +2851,7 @@ extends Layer_1 {
     private static final String PANE_TYPE_ATTRIBUTE = "org:openmdx:ui1:AttributePane";
     private static final String PANE_TYPE_REFERENCE = "org:openmdx:ui1:ReferencePane";
 
-    private static final String TAB_TYPE_TAB = "org:openmdx:ui1:Tab";
+//  private static final String TAB_TYPE_TAB = "org:openmdx:ui1:Tab";
     private static final String TAB_TYPE_OPERATION = "org:openmdx:ui1:OperationTab";
 
     private static final List REFERENCES_TO_EXCLUDE = Arrays.asList(

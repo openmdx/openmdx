@@ -17,7 +17,7 @@
    ---------------------
 
    First you need to get the distribution of openMDX
-   (e.g. openmdx-2.0.0-core.jre-1.5.zip) from 
+   (e.g. openmdx-2.1.0-core.jre-1.5.zip) from 
    http://www.openmdx.org/downloads.htm. You can get distributions 
    for jre-1.5.
    
@@ -35,7 +35,7 @@
    The top level structure of the unzipped folder should look 
    something like:
    
-   openmdx-2.0.0
+   openmdx-2.1.0
      ant
      core
        build.xml
@@ -53,7 +53,7 @@
      source-archive
        core
    
-   Now open a shell and cd to the directory openmdx-2.0.0/core. Verify
+   Now open a shell and cd to the directory openmdx-2.1.0/core. Verify
    the environment settings with
    
    > ant config
@@ -93,7 +93,7 @@
      [echo] project.vendor.id              = ch.omex
      [echo] project.specification.title    = openMDX/Core
      [echo] project.specification.version  = 2.0
-     [echo] project.implementation.version = 2.0.0
+     [echo] project.implementation.version = 2.1.0
      [echo] project.implementation.prefix  = openmdx
      [echo] project.platform.list          = jre-1.4/jre-1.6/jre-1.5
      [echo]
@@ -119,7 +119,7 @@
    > ant install-src
    
    This expands the source-archive and creates the directory 
-   openmdx-2.0.0/core/src. 
+   openmdx-2.1.0/core/src. 
    
    You are now ready to build openMDX/Core:
    
@@ -127,10 +127,10 @@
    
    Builds all deliverables and distributions.
 
-   > ant -Dproject.platform.list="jre-1.5" distribution
+   > ant distribution
    
    Builds the distribution for jre-1.5. The distributions are located in
-   openmdx-2.0.0\distribution.
+   openmdx-2.1.0\distribution.
        
 
 4/ Setting up for Eclipse

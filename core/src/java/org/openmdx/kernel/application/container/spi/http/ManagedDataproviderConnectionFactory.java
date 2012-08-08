@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ManagedDataproviderConnectionFactory.java,v 1.5 2006/01/09 13:15:20 hburger Exp $
+ * Name:        $Id: ManagedDataproviderConnectionFactory.java,v 1.6 2008/03/21 18:38:39 hburger Exp $
  * Description: ManagedDataproviderConnectionFactory
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/01/09 13:15:20 $
+ * Date:        $Date: 2008/03/21 18:38:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,6 +71,7 @@ import org.openmdx.compatibility.kernel.application.cci.Classes;
 /**
  * ManagedDataproviderConnectionFactory
  */
+@SuppressWarnings("unchecked")
 public class ManagedDataproviderConnectionFactory 
     implements ManagedConnectionFactory 
 {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewManager_1.java,v 1.11 2008/02/29 14:43:44 hburger Exp $
+ * Name:        $Id: ViewManager_1.java,v 1.12 2008/03/25 23:16:26 hburger Exp $
  * Description: View Manager
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 14:43:44 $
+ * Date:        $Date: 2008/03/25 23:16:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,6 @@ import java.util.Map;
 
 import javax.resource.cci.InteractionSpec;
 
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
 import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_3;
 import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_4;
 import org.openmdx.base.accessor.generic.spi.SinkConnection_1;
@@ -142,8 +141,8 @@ class ViewManager_1
         boolean committed
     ){
         super.afterCompletion(committed);
-        for(RefPackage_1_2 view :this.views.values()) {
-            ObjectFactory_1_0 cache = view.refObjectFactory();
+        for(RefPackage_1_2 view : this.views.values()) {
+            Object cache = view.refObjectFactory();
             if(cache instanceof ObjectFactory_1_3) {
                 ((ObjectFactory_1_3)cache).evict();
             }

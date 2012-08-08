@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectFilter_1.java,v 1.6 2007/12/02 01:47:21 hburger Exp $
+ * Name:        $Id: ObjectFilter_1.java,v 1.7 2008/03/19 17:13:11 hburger Exp $
  * Description: Object Filter
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/02 01:47:21 $
+ * Date:        $Date: 2008/03/19 17:13:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,6 +66,9 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 /**
  * Object Filter
  */
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class ObjectFilter_1 extends ModelAwareFilter {
 
     /**

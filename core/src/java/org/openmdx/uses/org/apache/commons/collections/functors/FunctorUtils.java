@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -26,10 +27,12 @@ import org.openmdx.uses.org.apache.commons.collections.Transformer;
  * Internal utilities for functors.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:14 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:20 $
  *
  * @author Stephen Colebourne
+ * @author Matt Benson
  */
+@SuppressWarnings("unchecked")
 class FunctorUtils {
     
     /**
@@ -49,7 +52,7 @@ class FunctorUtils {
         if (predicates == null) {
             return null;
         }
-        return (Predicate[]) predicates.clone();
+        return predicates.clone();
     }
     
     /**
@@ -72,35 +75,11 @@ class FunctorUtils {
      * Validate the predicates to ensure that all is well.
      * 
      * @param predicates  the predicates to validate
-     */
-    static void validateMin2(Predicate[] predicates) {
-        if (predicates == null) {
-            throw new IllegalArgumentException("The predicate array must not be null");
-        }
-        if (predicates.length < 2) {
-            throw new IllegalArgumentException(
-                "At least 2 predicates must be specified in the predicate array, size was " + predicates.length);
-        }
-        for (int i = 0; i < predicates.length; i++) {
-            if (predicates[i] == null) {
-                throw new IllegalArgumentException("The predicate array must not contain a null predicate, index " + i + " was null");
-            }
-        }
-    }
-
-    /**
-     * Validate the predicates to ensure that all is well.
-     * 
-     * @param predicates  the predicates to validate
      * @return predicate array
      */
     static Predicate[] validate(Collection predicates) {
         if (predicates == null) {
             throw new IllegalArgumentException("The predicate collection must not be null");
-        }
-        if (predicates.size() < 2) {
-            throw new IllegalArgumentException(
-                "At least 2 predicates must be specified in the predicate collection, size was " + predicates.size());
         }
         // convert to array like this to guarantee iterator() ordering
         Predicate[] preds = new Predicate[predicates.size()];
@@ -125,7 +104,7 @@ class FunctorUtils {
         if (closures == null) {
             return null;
         }
-        return (Closure[]) closures.clone();
+        return closures.clone();
     }
     
     /**
@@ -154,7 +133,7 @@ class FunctorUtils {
         if (transformers == null) {
             return null;
         }
-        return (Transformer[]) transformers.clone();
+        return transformers.clone();
     }
     
     /**

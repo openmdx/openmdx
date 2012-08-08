@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LocalTransactionContext.java,v 1.2 2005/04/14 19:16:47 hburger Exp $
+ * Name:        $Id: LocalTransactionContext.java,v 1.3 2008/03/27 19:16:28 hburger Exp $
  * Description: LocalTransactionContext
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/14 19:16:47 $
+ * Date:        $Date: 2008/03/27 19:16:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -84,7 +84,7 @@ class LocalTransactionContext
     LocalTransactionContext(
         TransactionManager transactionManager,
         TransactionAttribute transactionAttribute
-     ) throws EJBException {
+     ){
         super(transactionManager);
         try {
             super.start(transactionAttribute);
@@ -102,7 +102,7 @@ class LocalTransactionContext
     /**
      * Abort an EJB business method invocation
      * 
-     * @param cause thethrowable causing the abort
+     * @param cause the throwable causing the abort
      * 
      * @return the exception to be thrown
      * 
@@ -119,9 +119,7 @@ class LocalTransactionContext
         SysLog.warning("Caught non-application exception", cause);
         return new TransactionRolledbackLocalException(
              "Caught non-application exception",
-             cause instanceof Exception ?
-                 (Exception)cause :
-                 new UndeclaredThrowableException(cause)
+             cause instanceof Exception ? (Exception)cause : new UndeclaredThrowableException(cause)
         );
     }
 
@@ -131,7 +129,7 @@ class LocalTransactionContext
      * @throws EJBException
      */
     void end(
-    ) throws EJBException {
+    ){
         try {
             super.endSuccess();
         } catch (InvalidTransactionException exception) {

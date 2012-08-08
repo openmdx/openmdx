@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings({"serial","unchecked"})
 public class NameNotResolvedException extends RefException {
     private final String explanation;
     private final java.util.List restOfName;

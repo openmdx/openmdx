@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InstanceLifecycleNotifier.java,v 1.5 2008/02/19 13:53:10 hburger Exp $
- * Description: InstanceLifecycleNotifier 
- * Revision:    $Revision: 1.5 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: InstanceLifecycleNotifier.java,v 1.6 2008/03/04 14:21:11 hburger Exp $
+ * Description: Instance Lifecycle Notifier
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/19 13:53:10 $
+ * Date:        $Date: 2008/03/04 14:21:11 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,7 +48,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.object.spi;
 
 import java.util.ArrayList;
@@ -57,11 +55,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import javax.jdo.listener.AttachCallback;
 import javax.jdo.listener.AttachLifecycleListener;
@@ -81,7 +77,7 @@ import javax.jdo.listener.StoreCallback;
 import javax.jdo.listener.StoreLifecycleListener;
 
 /**
- * InstanceLifecycleNotifier
+ * Instance Lifecycle Notifier
  *
  * @since openMDX 2.0
  */
@@ -91,7 +87,7 @@ public final class InstanceLifecycleNotifier {
      * Constructor 
      */
     public InstanceLifecycleNotifier() {
-        this.registry = new HashMap();
+        this.registry = new HashMap<InstanceLifecycleListener,Class<?>[]>();
     }
     
     /**
@@ -102,15 +98,15 @@ public final class InstanceLifecycleNotifier {
     public InstanceLifecycleNotifier(
         InstanceLifecycleNotifier that
     ) {
-        this.registry = new HashMap(that.registry);
+        this.registry = new HashMap<InstanceLifecycleListener,Class<?>[]>(that.registry);
     }
     
     /**
      * <code>InstanceLifecycleListener</code> registry
      */
-    private final Map registry;
+    private final Map<InstanceLifecycleListener,Class<?>[]> registry;
     
-    private final static Class[] ALL = new Class[]{
+    private final static Class<?>[] ALL = new Class[]{
         Object.class
     };
     
@@ -135,14 +131,14 @@ public final class InstanceLifecycleNotifier {
      */
     public synchronized void addInstanceLifecycleListener (
         InstanceLifecycleListener listener,
-        Class[] classes
+        Class<?>[] classes
     ){
         if(classes == null) {
             this.registry.put(listener, ALL);
         } else {
-            Class[] former = (Class[]) this.registry.put(listener, classes);
+            Class<?>[] former = this.registry.put(listener, classes);
             if(former != null) {
-                Set combined = new HashSet();
+                Set<Class<?>> combined = new HashSet<Class<?>>();
                 combined.addAll(Arrays.asList(former));
                 combined.addAll(Arrays.asList(classes));
                 this.registry.put(
@@ -171,20 +167,16 @@ public final class InstanceLifecycleNotifier {
      * 
      * @return the set of matching listeners
      */
-    Collection getListeners(
-        Class listenerClass,
+    <T extends InstanceLifecycleListener> Collection<T> getListeners(
+        Class<T> listenerClass,
         Object source
     ){
         if(this.registry.isEmpty()) return null;
-        List listeners = new ArrayList();
-        for(
-            Iterator i = this.registry.entrySet().iterator();
-            i.hasNext();
-        ){
-            Map.Entry e = (Entry) i.next();
-            Object l = e.getKey();
+        List<T> listeners = new ArrayList<T>();
+        for(Map.Entry<InstanceLifecycleListener,Class<?>[]> e : this.registry.entrySet()) {
+            InstanceLifecycleListener l = e.getKey();
             if(listenerClass.isInstance(l)) {
-                Class[] c = (Class[]) e.getValue();
+                Class<?>[] c = e.getValue();
                 for(
                     int j = 0;
                     j < c.length;
@@ -192,7 +184,7 @@ public final class InstanceLifecycleNotifier {
                 ) if(
                     c[j].isInstance(source)
                 ) {
-                    listeners.add(l);    
+                    listeners.add(listenerClass.cast(l));    
                     break;
                 }
             }
@@ -233,12 +225,12 @@ public final class InstanceLifecycleNotifier {
          * @param detached
          */
         AttachNotifier (
-            Collection listeners,
+            Collection<AttachLifecycleListener> listeners,
             Object detached
         ){
             this.detached = detached;
             if(listeners != null) {
-                this.listeners = (AttachLifecycleListener[]) listeners.toArray(
+                this.listeners = listeners.toArray(
                     new AttachLifecycleListener[listeners.size()]
                  );
             } else {
@@ -343,12 +335,12 @@ public final class InstanceLifecycleNotifier {
          * @param persistent
          */
         ClearNotifier (
-            Collection listeners,
+            Collection<ClearLifecycleListener> listeners,
             Object persistent
         ){
             this.persistent = persistent;
             if(listeners != null) {
-                this.listeners = (ClearLifecycleListener[]) listeners.toArray(
+                this.listeners = listeners.toArray(
                     new ClearLifecycleListener[listeners.size()]
                  );
                 this.event = new InstanceLifecycleEvent(
@@ -447,12 +439,12 @@ public final class InstanceLifecycleNotifier {
          * @param persistent
          */
         CreateNotifier (
-            Collection listeners,
+            Collection<CreateLifecycleListener> listeners,
             Object persistent
         ){
             this.persistent = persistent;
             if(listeners != null) {
-                this.listeners = (CreateLifecycleListener[]) listeners.toArray(
+                this.listeners = listeners.toArray(
                     new CreateLifecycleListener[listeners.size()]
                  );
                 this.event = new InstanceLifecycleEvent(
@@ -537,12 +529,12 @@ public final class InstanceLifecycleNotifier {
          * @param persistent
          */
         DeleteNotifier (
-            Collection listeners,
+            Collection<DeleteLifecycleListener> listeners,
             Object persistent
         ){
             this.persistent = persistent;
             if(listeners != null) {
-                this.listeners = (DeleteLifecycleListener[]) listeners.toArray(
+                this.listeners = listeners.toArray(
                     new DeleteLifecycleListener[listeners.size()]
                  );
                 this.event = new InstanceLifecycleEvent(
@@ -641,12 +633,12 @@ public final class InstanceLifecycleNotifier {
          * @param persistent
          */
         DetachNotifier (
-            Collection listeners,
+            Collection<DetachLifecycleListener> listeners,
             Object persistent
         ){
             this.persistent = persistent;
             if(listeners != null) {
-                this.listeners = (DetachLifecycleListener[]) listeners.toArray(
+                this.listeners = listeners.toArray(
                     new DetachLifecycleListener[listeners.size()]
                  );
             } else {
@@ -751,12 +743,12 @@ public final class InstanceLifecycleNotifier {
          * @param persistent
          */
         DirtyNotifier (
-            Collection listeners,
+            Collection<DirtyLifecycleListener> listeners,
             Object persistent
         ){
             this.persistent = persistent;
             if(listeners != null) {
-                this.listeners = (DirtyLifecycleListener[]) listeners.toArray(
+                this.listeners = listeners.toArray(
                     new DirtyLifecycleListener[listeners.size()]
                  );
                 this.event = new InstanceLifecycleEvent(
@@ -852,12 +844,12 @@ public final class InstanceLifecycleNotifier {
          * @param persistent
          */
         LoadNotifier (
-            Collection listeners,
+            Collection<LoadLifecycleListener> listeners,
             Object persistent
         ){
             this.persistent = persistent;
             if(listeners != null) {
-                this.listeners = (LoadLifecycleListener[]) listeners.toArray(
+                this.listeners = listeners.toArray(
                     new LoadLifecycleListener[listeners.size()]
                  );
                 this.event = new InstanceLifecycleEvent(
@@ -945,12 +937,12 @@ public final class InstanceLifecycleNotifier {
          * @param persistent
          */
         StoreNotifier (
-            Collection listeners,
+            Collection<StoreLifecycleListener> listeners,
             Object persistent
         ){
             this.persistent = persistent;
             if(listeners != null) {
-                this.listeners = (StoreLifecycleListener[]) listeners.toArray(
+                this.listeners = listeners.toArray(
                     new StoreLifecycleListener[listeners.size()]
                  );
                 this.event = new InstanceLifecycleEvent(

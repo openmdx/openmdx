@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Mapper_1.java,v 1.49 2008/02/15 23:18:32 wfro Exp $
+ * Name:        $Id: Mapper_1.java,v 1.55 2008/06/28 00:21:25 hburger Exp $
  * Description: Mapper_1
- * Revision:    $Revision: 1.49 $
+ * Revision:    $Revision: 1.55 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/15 23:18:32 $
+ * Date:        $Date: 2008/06/28 00:21:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,18 +66,21 @@ import org.omg.model1.code.VisibilityKind;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_3;
+import org.openmdx.model1.accessor.basic.cci.Model_1_5;
 import org.openmdx.model1.accessor.basic.spi.ModelElement_1;
 import org.openmdx.model1.code.ModelAttributes;
 import org.openmdx.model1.code.Multiplicities;
+import org.openmdx.model1.code.PrimitiveTypes;
 import org.openmdx.model1.code.Stereotypes;
 import org.openmdx.model1.importer.jdo2.MetaData_2;
 import org.openmdx.model1.importer.metadata.FieldMetaData;
 import org.openmdx.model1.mapping.AbstractMapper_1;
+import org.openmdx.model1.mapping.AbstractNames;
 import org.openmdx.model1.mapping.AttributeDef;
 import org.openmdx.model1.mapping.ClassDef;
 import org.openmdx.model1.mapping.ClassifierDef;
@@ -180,7 +183,7 @@ public class Mapper_1
             ) {    
                 AttributeDef mAttributeDef = new AttributeDef(
                     attributeDef,
-                    (Model_1_3)this.model,
+                    this.model,
                     false // openmdx1
                 );       
                 ClassDef mClassDef = new ClassDef(
@@ -363,6 +366,7 @@ public class Mapper_1
         DataproviderObject association = (DataproviderObject)this.model.getElement(
             referencedEnd.values("container").get(0)
         );
+        
         SysLog.trace("referencedEnd", referencedEnd);
         SysLog.trace("association", association);
         
@@ -392,10 +396,17 @@ public class Mapper_1
                 referenceAsAttribute = new ModelElement_1(referenceDef)
             );
             if(!qualifierNames.isEmpty()) {
+                SysLog.trace(qualifierNames.toString(), qualifierTypes);
+                String newMultiplicity = 
+                    qualifierTypes.size() == 1 && 
+                    PrimitiveTypes.STRING.equals(((Path)qualifierTypes.get(0)).getBase()) ? 
+                    Multiplicities.MAP : 
+                    Multiplicities.MULTI_VALUE;
+                SysLog.trace("Adjust multiplicity to " + Multiplicities.MULTI_VALUE, newMultiplicity);
                 // 0..n association        
                 // set multiplicity to 0..n, this ensures that the instance creator uses
                 // a multivalued parameter for this reference attribute
-                referenceAsAttribute.clearValues("multiplicity").add(Multiplicities.MULTI_VALUE);
+                referenceAsAttribute.clearValues("multiplicity").add(newMultiplicity);
             }
             referenceAsAttribute.values("isDerived").add(
                 association.values("isDerived").get(0)
@@ -408,7 +419,6 @@ public class Mapper_1
                     this.model, 
                     false // openmdx1
                 );
-                if(excludeReference(mReferenceDef.getQualifiedName())) return;
                 ClassDef mClassDef = new ClassDef(
                     classDef,
                     this.model,
@@ -670,6 +680,22 @@ public class Mapper_1
     }
 
     //---------------------------------------------------------------------------    
+    boolean mapAssociation(
+        ModelElement_1_0 associationDef,
+        AssociationMapper associationMapper
+    ) throws ServiceException {
+
+        SysLog.trace("association", associationDef.path());
+        if(VisibilityKind.PUBLIC_VIS.equals(associationDef.values("visibility").get(0))) try {
+            return associationMapper.mapAssociation();
+        } catch(Exception exception) {
+            throw new ServiceException(exception).log();
+        } else {
+            return false;
+        }
+    }
+
+    //---------------------------------------------------------------------------    
     void mapBeginClass(
         ModelElement_1_0 classDef,
         ClassMapper classMapper,
@@ -734,7 +760,7 @@ public class Mapper_1
             ) {
                 AttributeDef att = new AttributeDef(
                     attributeDef,
-                    (Model_1_3)this.model,
+                    this.model,
                     false // openmdx1
                 );
                 allAttributes.add(att);
@@ -811,7 +837,7 @@ public class Mapper_1
                         structuralFeatures.add(
                             new AttributeDef(
                                 feature, 
-                                (Model_1_3)this.model,
+                                this.model,
                                 false // openmdx1
                             )
                         );
@@ -871,7 +897,7 @@ public class Mapper_1
                     Iterator<?> i = classDef.values("allSupertype").iterator();
                     i.hasNext();
                 ) {
-                    ModelElement_1_0 supertype = ((Model_1_3)this.model).getDereferencedType(
+                    ModelElement_1_0 supertype = this.model.getDereferencedType(
                         i.next(),
                         false // openmdx1
                     );
@@ -970,7 +996,7 @@ public class Mapper_1
         try {
             AttributeDef mStructureFieldDef = new AttributeDef(
                 structureFieldDef,
-                (Model_1_3)this.model,
+                this.model,
                 false // openmdx1
             );
             StructDef mStructDef = new StructDef(
@@ -1111,8 +1137,8 @@ public class Mapper_1
     }
 
     //---------------------------------------------------------------------------    
-    protected Model_1_3 getModel(){
-        return (Model_1_3) super.model;
+    protected Model_1_5 getModel(){
+        return (Model_1_5) super.model;
     }
 
     //---------------------------------------------------------------------------    
@@ -1132,7 +1158,7 @@ public class Mapper_1
      */
     public void externalize(
       String qualifiedPackageName,
-      org.openmdx.model1.accessor.basic.cci.Model_1_0 model,
+      org.openmdx.model1.accessor.basic.cci.Model_1_3 model,
       ZipOutputStream os
     ) throws ServiceException {
         externalize(
@@ -1161,7 +1187,7 @@ public class Mapper_1
     @SuppressWarnings("unchecked")
     public void externalize(
         String qualifiedPackageName,
-        org.openmdx.model1.accessor.basic.cci.Model_1_0 model,
+        org.openmdx.model1.accessor.basic.cci.Model_1_3 model,
         ZipOutputStream zip,
         String openmdxjdoMetadataDirectory
     ) throws ServiceException {
@@ -1189,6 +1215,7 @@ public class Mapper_1
             ByteArrayOutputStream structFile = jdo2 ? null : new ByteArrayOutputStream();
             ByteArrayOutputStream queryFile = cci2 ? new ByteArrayOutputStream() : null;
             ByteArrayOutputStream exceptionFile = jdo2 ? null : new ByteArrayOutputStream();
+            ByteArrayOutputStream associationFile = cci2 ? new ByteArrayOutputStream() : null;
 
             Writer packageWriter = jdo2 ? null : new OutputStreamWriter(pkgFile); 
             Writer classWriter = jmi1 ? new OutputStreamWriter(classFile) : null;
@@ -1203,8 +1230,8 @@ public class Mapper_1
 
             // export matching packages
             for(
-                Iterator<ModelElement_1_0> pkgs = packagesToExport.iterator(); 
-                pkgs.hasNext();
+                    Iterator<ModelElement_1_0> pkgs = packagesToExport.iterator(); 
+                    pkgs.hasNext();
             ) {
                 ModelElement_1_0 currentPackage = pkgs.next();
                 String currentPackageName = (String)currentPackage.values("qualifiedName").get(0);
@@ -1228,258 +1255,259 @@ public class Mapper_1
                     }    
                     // process packageContent
                     for(
-                        Iterator<ModelElement_1_0> i = getModel().getContent().iterator(); 
-                        i.hasNext();
+                            Iterator<ModelElement_1_0> i = getModel().getContent().iterator(); 
+                            i.hasNext();
                     ) {  
                         ModelElement_1_0 element = i.next();
-                        SysLog.trace("processing package element", element.path());
-    
-                        // org:omg:model1:Class
-                        if(
-                            getModel().isClassType(element) &&
-                            this.model.isLocal(element, currentPackageName) && (
-                                this.format != Format.JDO2 || 
-                                !element.values("stereotype").contains(Stereotypes.ROOT)
-                            )            
-                        ) {
-                            boolean isAbstract = ((Boolean)element.values("isAbstract").get(0)).booleanValue();      
-                            // object marshaller for non-abstract and abstract classes (JMI plugins)
-                            // generate create query operations for the current class in package
-                            ClassDef mClassDef = new ClassDef(
-                                element,
-                                this.model,
-                                this.metaData
-                            );
-                            if(!excludeClass(mClassDef.getQualifiedName())) {
-                                SysLog.detail("Processing class", mClassDef.getQualifiedName());
-                                if(
-                                    this.format != Format.JDO2 ||
-                                    !isAbstract ||
-                                    mClassDef.getSuperClassDef(true) == null
-                                ) {
-                                    if(jmi1) {
-                                        if(!isAbstract) {
-                                            this.mapObjectMarshaller(
-                                                element,
-                                                packageMapper
-                                            );
-                                        }
-                                        this.mapQueryCreator(
-                                            mClassDef,
-                                            packageMapper
-                                        );
-                                        classFile.reset();
-                                    }
-                                    if(cci2) {
-                                        queryFile.reset();
-                                    }
-                                    instanceFile.reset();
-                                    if(jdo2) {
-                                        jdoMetaDataFile.reset();
-                                        ormMetaDataFile.reset();
-                                        jdoSliceMetaDataWriter.reset();
-                                        ormSliceMetaDataWriter.reset();
-                                    }
-        
-                                    ClassMapper classMapper = jmi1 ? new ClassMapper(
-                                        element, 
-                                        classWriter, 
-                                        getModel(), 
-                                        this.format, 
-                                        this.packageSuffix,
-                                        this.metaData
-                                    ) : null;
-                                    InstanceMapper instanceMapper = new InstanceMapper(
-                                        element, 
-                                        instanceWriter, 
-                                        getModel(), 
-                                        this.format, 
-                                        this.packageSuffix,
-                                        this.metaData
-                                    );
-                                    InterfaceMapper interfaceMapper = jdo2 && instanceMapper.hasSPI() ? new InterfaceMapper(
-                                        element, 
-                                        interfaceWriter, 
-                                        getModel(), 
-                                        Format.SPI2,
-                                        Names.SPI2_PACKAGE_SUFFIX,
-                                        this.metaData
-                                    ) : null;
-                                    MetaDataMapper jdoMetaDataMapper = jdo2 ? new MetaDataMapper(
-                                        element, 
-                                        jdoMetaDataWriter, 
-                                        getModel(), 
-                                        this.format, 
-                                        this.packageSuffix,
-                                        null, // innerClass
-                                        false, // orm
-                                        this.metaData, new StandardObjectRepositoryMetadataPlugin()
-                                    ) : null;
-                                    MetaDataMapper jdoSliceMetaDataMapper = jdo2 ? new MetaDataMapper(
-                                        element, 
-                                        jdoSliceMetaDataWriter, 
-                                        getModel(), 
-                                        this.format, 
-                                        this.packageSuffix,
-                                        InstanceMapper.SLICE_CLASS_NAME, 
-                                        false, // orm
-                                        this.metaData, new StandardObjectRepositoryMetadataPlugin()
-                                    ) : null;
-                                    MetaDataMapper ormMetaDataMapper = jdo2 ? new MetaDataMapper(
-                                        element, 
-                                        ormMetaDataWriter, 
-                                        getModel(), 
-                                        this.format, 
-                                        this.packageSuffix,
-                                        null, // innerClass
-                                        true, // orm
-                                        this.metaData, new StandardObjectRepositoryMetadataPlugin()
-                                    ) : null;
-                                    MetaDataMapper ormSliceMetaDataMapper = jdo2 ? new MetaDataMapper(
-                                        element, 
-                                        ormSliceMetaDataWriter, 
-                                        getModel(), 
-                                        this.format, 
-                                        this.packageSuffix,
-                                        InstanceMapper.SLICE_CLASS_NAME, 
-                                        true, // orm
-                                        this.metaData, new StandardObjectRepositoryMetadataPlugin()
-                                    ) : null;
-                                    QueryMapper queryMapper = cci2 ? new QueryMapper(
-                                        queryWriter, 
-                                        getModel(), 
-                                        this.format, 
-                                        this.packageSuffix, this.metaData
-                                    ) : null;
-                                    this.mapBeginClass(
-                                        element,
-                                        classMapper,
-                                        instanceMapper, 
-                                        interfaceMapper,
-                                        jdoMetaDataMapper, 
-                                        jdoSliceMetaDataMapper, 
-                                        ormMetaDataMapper, 
-                                        ormSliceMetaDataMapper
-                                    );                
-                                    this.mapBeginQuery(
-                                        mClassDef,
-                                        queryMapper
-                                    );                
-                                    // get class features
-                                    for(Object f : getFeatures(element, instanceMapper, false)) {
-                                        ModelElement_1_0 feature = f instanceof ModelElement_1_0 ? 
-                                            (ModelElement_1_0) f :
-                                                getModel().getElement(f);  
-                                            SysLog.trace("processing class feature", feature.path());
-                
-                                            if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)) {
-                                                this.mapAttribute(
+                        if(getModel().isLocal(element, currentPackageName)) {
+                            //
+                            // only generate elements which are content of the modelPackage. 
+                            // Do not generate for imported model elements
+                            //
+                            SysLog.trace("processing package element", element.path());
+
+                            // org:omg:model1:Class
+                            if(
+                                    getModel().isClassType(element) && (
+                                            this.format != Format.JDO2 || 
+                                            !element.values("stereotype").contains(Stereotypes.ROOT)
+                                    )            
+                            ) {
+                                boolean isAbstract = ((Boolean)element.values("isAbstract").get(0)).booleanValue();      
+                                // object marshaller for non-abstract and abstract classes (JMI plugins)
+                                // generate create query operations for the current class in package
+                                ClassDef mClassDef = new ClassDef(
+                                    element,
+                                    this.model,
+                                    this.metaData
+                                );
+                                if(!excludeClass(mClassDef.getQualifiedName())) {
+                                    SysLog.detail("Processing class", mClassDef.getQualifiedName());
+                                    if(
+                                            this.format != Format.JDO2 ||
+                                            !isAbstract ||
+                                            mClassDef.getSuperClassDef(true) == null
+                                    ) {
+                                        if(jmi1) {
+                                            if(!isAbstract) {
+                                                this.mapObjectMarshaller(
                                                     element,
-                                                    feature,
-                                                    queryMapper,
-                                                    instanceMapper, 
-                                                    jdoMetaDataMapper, 
-                                                    jdoSliceMetaDataMapper, 
-                                                    ormMetaDataMapper, 
-                                                    ormSliceMetaDataMapper
-                                                );
-                                            } else if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
-                                                this.mapReference(
-                                                    element,
-                                                    feature,
-                                                    queryMapper,
-                                                    instanceMapper, 
-                                                    jdoMetaDataMapper, 
-                                                    jdoSliceMetaDataMapper, 
-                                                    ormMetaDataMapper, 
-                                                    ormSliceMetaDataMapper, 
-                                                    false // inherited
-                                                );
-                                            } else if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)) {
-                                                this.mapOperation(
-                                                    element,
-                                                    feature,
-                                                    instanceMapper, 
-                                                    jdoMetaDataMapper, 
-                                                    jdoMetaDataMapper, 
-                                                    jdoSliceMetaDataMapper
+                                                    packageMapper
                                                 );
                                             }
-                                    }                
-                                    this.mapEndQuery(
-                                        queryMapper
-                                    );                
-                                    this.mapEndClass(
-                                        element,
-                                        classMapper,
-                                        instanceMapper, 
-                                        interfaceMapper,
-                                        jdoMetaDataMapper, 
-                                        jdoSliceMetaDataMapper, 
-                                        ormMetaDataMapper, 
-                                        ormSliceMetaDataMapper
-                                    );                
-                                    instanceWriter.flush();
-                                    String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier(
-                                        (String)element.values("name").get(0)
-                                    );
-                                    this.addToZip(zip, instanceFile, element, elementName, "." + this.fileExtension);                
-                                    if(jdo2){
-                                        jdoMetaDataWriter.flush();
-                                        this.addToZip(zip, jdoMetaDataFile, element, elementName, ".jdo");
-                                        ormMetaDataWriter.flush();
-                                        this.addToZip(zip, ormMetaDataFile, element, elementName, "-" + this.objectRepositoryMetadataPlugin.getMappingName() + ".orm");
-                                        if(interfaceMapper != null ){
-                                            interfaceWriter.flush();
-                                            this.addToZip(
-                                                zip,
-                                                interfaceFile,
-                                                element,
-                                                elementName,
-                                                "." + this.fileExtension,
-                                                true, 
-                                                Names.SPI2_PACKAGE_SUFFIX
+                                            this.mapQueryCreator(
+                                                mClassDef,
+                                                packageMapper
                                             );
+                                            classFile.reset();
                                         }
-                                    }                
-                                    if(cci2) {
-                                        queryWriter.flush();
-                                        this.addToZip(zip, queryFile, element, elementName, "Query." + this.fileExtension);
+                                        if(cci2) {
+                                            queryFile.reset();
+                                        }
+                                        instanceFile.reset();
+                                        if(jdo2) {
+                                            jdoMetaDataFile.reset();
+                                            ormMetaDataFile.reset();
+                                            jdoSliceMetaDataWriter.reset();
+                                            ormSliceMetaDataWriter.reset();
+                                        }
+
+                                        ClassMapper classMapper = jmi1 ? new ClassMapper(
+                                            element, 
+                                            classWriter, 
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix,
+                                            this.metaData
+                                        ) : null;
+                                        InstanceMapper instanceMapper = new InstanceMapper(
+                                            element, 
+                                            instanceWriter, 
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix,
+                                            this.metaData
+                                        );
+                                        InterfaceMapper interfaceMapper = jdo2 && instanceMapper.hasSPI() ? new InterfaceMapper(
+                                            element, 
+                                            interfaceWriter, 
+                                            getModel(), 
+                                            Format.SPI2,
+                                            Names.SPI2_PACKAGE_SUFFIX,
+                                            this.metaData
+                                        ) : null;
+                                        MetaDataMapper jdoMetaDataMapper = jdo2 ? new MetaDataMapper(
+                                            element, 
+                                            jdoMetaDataWriter, 
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix,
+                                            null, // innerClass
+                                            false, // orm
+                                            this.metaData, new StandardObjectRepositoryMetadataPlugin()
+                                        ) : null;
+                                        MetaDataMapper jdoSliceMetaDataMapper = jdo2 ? new MetaDataMapper(
+                                            element, 
+                                            jdoSliceMetaDataWriter, 
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix,
+                                            InstanceMapper.SLICE_CLASS_NAME, 
+                                            false, // orm
+                                            this.metaData, new StandardObjectRepositoryMetadataPlugin()
+                                        ) : null;
+                                        MetaDataMapper ormMetaDataMapper = jdo2 ? new MetaDataMapper(
+                                            element, 
+                                            ormMetaDataWriter, 
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix,
+                                            null, // innerClass
+                                            true, // orm
+                                            this.metaData, new StandardObjectRepositoryMetadataPlugin()
+                                        ) : null;
+                                        MetaDataMapper ormSliceMetaDataMapper = jdo2 ? new MetaDataMapper(
+                                            element, 
+                                            ormSliceMetaDataWriter, 
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix,
+                                            InstanceMapper.SLICE_CLASS_NAME, 
+                                            true, // orm
+                                            this.metaData, new StandardObjectRepositoryMetadataPlugin()
+                                        ) : null;
+                                        QueryMapper queryMapper = cci2 ? new QueryMapper(
+                                            queryWriter, 
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix, this.metaData
+                                        ) : null;
+                                        this.mapBeginClass(
+                                            element,
+                                            classMapper,
+                                            instanceMapper, 
+                                            interfaceMapper,
+                                            jdoMetaDataMapper, 
+                                            jdoSliceMetaDataMapper, 
+                                            ormMetaDataMapper, 
+                                            ormSliceMetaDataMapper
+                                        );                
+                                        this.mapBeginQuery(
+                                            mClassDef,
+                                            queryMapper
+                                        );                
+                                        // get class features
+                                        for(Object f : getFeatures(element, instanceMapper, false)) {
+                                            ModelElement_1_0 feature = f instanceof ModelElement_1_0 ? 
+                                                (ModelElement_1_0) f :
+                                                    getModel().getElement(f);  
+                                                SysLog.trace("processing class feature", feature.path());
+
+                                                if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)) {
+                                                    this.mapAttribute(
+                                                        element,
+                                                        feature,
+                                                        queryMapper,
+                                                        instanceMapper, 
+                                                        jdoMetaDataMapper, 
+                                                        jdoSliceMetaDataMapper, 
+                                                        ormMetaDataMapper, 
+                                                        ormSliceMetaDataMapper
+                                                    );
+                                                } else if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
+                                                    this.mapReference(
+                                                        element,
+                                                        feature,
+                                                        queryMapper,
+                                                        instanceMapper, 
+                                                        jdoMetaDataMapper, 
+                                                        jdoSliceMetaDataMapper, 
+                                                        ormMetaDataMapper, 
+                                                        ormSliceMetaDataMapper, 
+                                                        false // inherited
+                                                    );
+                                                } else if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)) {
+                                                    this.mapOperation(
+                                                        element,
+                                                        feature,
+                                                        instanceMapper, 
+                                                        jdoMetaDataMapper, 
+                                                        jdoMetaDataMapper, 
+                                                        jdoSliceMetaDataMapper
+                                                    );
+                                                }
+                                        }                
+                                        this.mapEndQuery(
+                                            queryMapper
+                                        );                
+                                        this.mapEndClass(
+                                            element,
+                                            classMapper,
+                                            instanceMapper, 
+                                            interfaceMapper,
+                                            jdoMetaDataMapper, 
+                                            jdoSliceMetaDataMapper, 
+                                            ormMetaDataMapper, 
+                                            ormSliceMetaDataMapper
+                                        );                
+                                        instanceWriter.flush();
+                                        String elementName = instanceMapper.getClassName();
+                                        //                                    Identifier.CLASS_PROXY_NAME.toIdentifier(
+                                        //                                        (String)element.values("name").get(0)
+                                        //                                    );
+                                        this.addToZip(zip, instanceFile, element, elementName, "." + this.fileExtension);                
+                                        if(jdo2){
+                                            jdoMetaDataWriter.flush();
+                                            this.addToZip(zip, jdoMetaDataFile, element, elementName, ".jdo");
+                                            ormMetaDataWriter.flush();
+                                            this.addToZip(zip, ormMetaDataFile, element, elementName, "-" + this.objectRepositoryMetadataPlugin.getMappingName() + ".orm");
+                                            if(interfaceMapper != null ){
+                                                interfaceWriter.flush();
+                                                this.addToZip(
+                                                    zip,
+                                                    interfaceFile,
+                                                    element,
+                                                    elementName,
+                                                    "." + this.fileExtension,
+                                                    true, 
+                                                    Names.SPI2_PACKAGE_SUFFIX
+                                                );
+                                            }
+                                        }                
+                                        if(cci2) {
+                                            queryWriter.flush();
+                                            this.addToZip(zip, queryFile, element, elementName, "Query." + this.fileExtension);
+                                        }
+
+                                        if(jmi1 && !isAbstract) {
+                                            classWriter.flush();
+                                            this.addToZip(zip, classFile, element, elementName, "Class." + this.fileExtension);
+                                        } 
                                     }
-                
-                                    if(jmi1 && !isAbstract) {
-                                        classWriter.flush();
-                                        this.addToZip(zip, classFile, element, elementName, "Class." + this.fileExtension);
-                                    } 
                                 }
                             }
-                        }
-                        // org:omg:model1:StructureType
-                        else if(
-                            getModel().isStructureType(element) &&
-                            getModel().isLocal(element, currentPackageName)
-                        ) {
-                            SysLog.trace("processing structure type", element.path());
-                            StructDef mStructDef = new StructDef(
-                                element,
-                                getModel(), 
-                                false // openmdx1
-                            );
-                            if(jmi1) {
-                                this.mapStructureCreator(
+                            // org:omg:model1:StructureType
+                            else if(
+                                    getModel().isStructureType(element)
+                            ) {
+                                SysLog.trace("processing structure type", element.path());
+                                StructDef mStructDef = new StructDef(
                                     element,
-                                    packageMapper
+                                    getModel(), 
+                                    false // openmdx1
                                 );
-                            }
-                            // only generate for structs which are content of the modelPackage. 
-                            // Do not generate for imported model elements
-                            if(getModel().isLocal(element, currentPackageName)) {
+                                if(jmi1) {
+                                    this.mapStructureCreator(
+                                        element,
+                                        packageMapper
+                                    );
+                                }
                                 if(structFile != null) {
                                     structFile.reset();
                                 }
                                 if(cci2) queryFile.reset();    
                                 StructureMapper structureMapper = jdo2 
-                                    ? null 
+                                ? null 
                                     : new StructureMapper(
                                         element, 
                                         structWriter, 
@@ -1489,101 +1517,123 @@ public class Mapper_1
                                         this.metaData
                                     );
                                 QueryMapper queryMapper = cci2 
-                                    ? new QueryMapper(
-                                        queryWriter, 
+                                ? new QueryMapper(
+                                    queryWriter, 
+                                    getModel(), 
+                                    this.format, 
+                                    this.packageSuffix, this.metaData
+                                ) 
+                                : null;                                            
+                                    if(structureMapper != null) {
+                                        this.mapBeginStructure(
+                                            element,
+                                            structureMapper
+                                        );
+                                    }            
+                                    this.mapBeginQuery(
+                                        mStructDef,
+                                        queryMapper
+                                    );
+                                    // StructureFields
+                                    for(
+                                            Iterator<?> j = element.values("content").iterator();
+                                            j.hasNext();
+                                    ) {
+                                        ModelElement_1_0 feature = getModel().getElement(j.next());    
+                                        SysLog.trace("processing structure field", feature.path());   
+                                        if(
+                                                structureMapper != null &&
+                                                feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_FIELD)
+                                        ) {
+                                            this.mapStructureField(
+                                                element,
+                                                feature,
+                                                queryMapper,
+                                                structureMapper, 
+                                                jmi1
+                                            );
+                                        }
+                                    }    
+                                    this.mapEndQuery(
+                                        queryMapper
+                                    );
+                                    String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier(
+                                        (String)element.values("name").get(0)
+                                    );    
+                                    if(structureMapper != null) {
+                                        this.mapEndStructure(
+                                            structureMapper
+                                        );
+                                        structWriter.flush();
+                                        this.addToZip(zip, structFile, element, elementName, "." + this.fileExtension);
+                                    }    
+                                    if (cci2) {
+                                        queryWriter.flush();
+                                        this.addToZip(zip, queryFile, element, elementName, "Query." + this.fileExtension);
+                                    }
+                            }
+                            // org:omg:model1:Exception
+                            else if(
+                                    element.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.EXCEPTION)
+                            ) {   
+                                SysLog.trace("processing exception", element.path());
+                                if(!jdo2) {  
+                                    exceptionFile.reset();
+                                    Writer exceptionWriter = new OutputStreamWriter(exceptionFile);
+                                    ExceptionMapper exceptionMapper = new ExceptionMapper(
+                                        element,
+                                        exceptionWriter,
+                                        getModel(),
+                                        this.format, 
+                                        packageSuffix, 
+                                        this.metaData
+                                    );
+                                    this.mapException(
+                                        element,
+                                        exceptionMapper
+                                    );
+                                    exceptionWriter.flush();
+                                    String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier(
+                                        (String)element.values("name").get(0),
+                                        null, // removablePrefix
+                                        null, // prependablePrefix
+                                        ExceptionDef.STANDARD_COMPLIANT ? "exception" : null, // removableSuffix
+                                        ExceptionDef.STANDARD_COMPLIANT ? "exception" : null //appendableSuffix
+                                    );
+                                    this.addToZip(zip, exceptionFile, element, elementName, "." + this.fileExtension);
+                                }
+                            } else if(getModel().isAssociationType(element)) {
+                                //
+                                // org:omg:model1:AssociationType
+                                // 
+                                SysLog.trace("processing association", element.path());
+                                if(cci2) {
+                                    associationFile.reset();
+                                    Writer associationWriter = new OutputStreamWriter(associationFile);                                    
+                                    AssociationMapper associationMapper = new AssociationMapper(
+                                        element, 
+                                        associationWriter, 
                                         getModel(), 
                                         this.format, 
-                                        this.packageSuffix, this.metaData
-                                      ) 
-                                    : null;                                            
-                                if(structureMapper != null) {
-                                    this.mapBeginStructure(
-                                        element,
-                                        structureMapper
+                                        this.packageSuffix,
+                                        this.metaData
                                     );
-                                }            
-                                this.mapBeginQuery(
-                                    mStructDef,
-                                    queryMapper
-                                );
-                                // StructureFields
-                                for(
-                                    Iterator<?> j = element.values("content").iterator();
-                                    j.hasNext();
-                                ) {
-                                    ModelElement_1_0 feature = getModel().getElement(j.next());    
-                                    SysLog.trace("processing structure field", feature.path());   
-                                    if(
-                                        structureMapper != null &&
-                                        feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_FIELD)
-                                    ) {
-                                        this.mapStructureField(
-                                            element,
-                                            feature,
-                                            queryMapper,
-                                            structureMapper, 
-                                            jmi1
+                                    if(mapAssociation(element, associationMapper)){
+                                        associationWriter.flush();
+                                        this.addToZip(
+                                            zip, 
+                                            associationFile, 
+                                            element, 
+                                            associationMapper.associationName, 
+                                            "." + this.fileExtension
                                         );
                                     }
-                                }    
-                                this.mapEndQuery(
-                                    queryMapper
-                                );
-                                String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier(
-                                    (String)element.values("name").get(0)
-                                );    
-                                if(structureMapper != null) {
-                                    this.mapEndStructure(
-                                        structureMapper
-                                    );
-                                    structWriter.flush();
-                                    this.addToZip(zip, structFile, element, elementName, "." + this.fileExtension);
-                                }    
-                                if (cci2) {
-                                    queryWriter.flush();
-                                    this.addToZip(zip, queryFile, element, elementName, "Query." + this.fileExtension);
                                 }
+                            } else {
+                                SysLog.trace("Ignoring element", element.path());
                             }
-                        }
-                        // org:omg:model1:Exception
-                        else if(
-                            element.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.EXCEPTION) &&
-                            getModel().isLocal(element, currentPackageName)
-                        ) {   
-                            SysLog.trace("processing exception", element.path());
-                            // only generate for structs which are content of the modelPackage. 
-                            // Do not generate for imported model elements
-                            if(!jdo2 && getModel().isLocal(element, currentPackageName)) {  
-                                exceptionFile.reset();
-                                Writer exceptionWriter = new OutputStreamWriter(exceptionFile);
-                                ExceptionMapper exceptionMapper = new ExceptionMapper(
-                                    element,
-                                    exceptionWriter,
-                                    getModel(),
-                                    this.format, 
-                                    packageSuffix, 
-                                    this.metaData
-                                );
-                                this.mapException(
-                                    element,
-                                    exceptionMapper
-                                );
-                                exceptionWriter.flush();
-                                String elementName = ExceptionDef.STANDARD_COMPLIANT ? Identifier.CLASS_PROXY_NAME.toIdentifier(
-                                    (String)element.values("name").get(0),
-                                    null, // removablePrefix
-                                    null, // prependablePrefix
-                                    "exception", // removableSuffix
-                                    "exception" //appendableSuffix
-                                ) : Identifier.CLASS_PROXY_NAME.toIdentifier(
-                                    (String)element.values("name").get(0),
-                                    null, // removablePrefix
-                                    null, // prependablePrefix
-                                    null, // removableSuffix
-                                    null //appendableSuffix
-                                );
-                                this.addToZip(zip, exceptionFile, element, elementName, "." + this.fileExtension);
-                            }            
+                        } else {
+                            SysLog.trace("Skipping non-package element", element.path());
                         }
                     }    
                     if(jmi1) {
@@ -1597,7 +1647,7 @@ public class Mapper_1
                             zip, 
                             pkgFile, 
                             currentPackage, 
-                            Names.openmdx2PackageName(
+                            AbstractNames.openmdx2PackageName(
                                 new StringBuffer(),
                                 (String)currentPackage.values("name").get(0)
                             ).toString(),
@@ -1631,22 +1681,6 @@ public class Mapper_1
                 classDef.values("feature");
     }
 
-    /**
-     * Test whether the given reference should be excluded
-     * 
-     * @param referenceName the qualified reference name
-     * 
-     * @return <code>true</code> if the reference should be excluded
-     */
-    private boolean excludeReference(
-        String referenceName
-    ){
-        switch(this.format) {
-            case JMI1: return false;
-            default: return "org:openmdx:base:Segment:extent".equals(referenceName);
-        }
-    }
-    
     /**
      * Test whether the given model is in an archive
      * 

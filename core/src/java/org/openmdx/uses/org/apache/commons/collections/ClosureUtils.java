@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -48,10 +49,12 @@ import org.openmdx.uses.org.apache.commons.collections.functors.WhileClosure;
  * All the supplied closures are Serializable.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:11 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:25 $
  *
  * @author Stephen Colebourne
+ * @author Matt Benson
  */
+@SuppressWarnings("unchecked")
 public class ClosureUtils {
 
     /**
@@ -224,6 +227,23 @@ public class ClosureUtils {
      */
     public static Closure chainedClosure(Collection closures) {
         return ChainedClosure.getInstance(closures);
+    }
+
+    /**
+     * Create a new Closure that calls another closure based on the
+     * result of the specified predicate.
+     * 
+     * @see org.openmdx.uses.org.apache.commons.collections.functors.IfClosure
+     * 
+     * @param predicate  the validating predicate
+     * @param trueClosure  the closure called if the predicate is true
+     * @return the <code>if</code> closure
+     * @throws IllegalArgumentException if the predicate is null
+     * @throws IllegalArgumentException if the closure is null
+     * @since Commons Collections 3.2
+     */
+    public static Closure ifClosure(Predicate predicate, Closure trueClosure) {
+        return IfClosure.getInstance(predicate, trueClosure);
     }
 
     /**

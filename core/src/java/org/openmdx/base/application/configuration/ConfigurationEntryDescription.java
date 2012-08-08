@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ConfigurationEntryDescription.java,v 1.3 2004/04/02 16:59:00 wfro Exp $
+ * Name:        $Id: ConfigurationEntryDescription.java,v 1.4 2008/03/21 18:28:05 hburger Exp $
  * Description: Configuration entry meta data
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:00 $
+ * Date:        $Date: 2008/03/21 18:28:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import java.util.Set;
  *
  * @see <a href="AbstractConfiguration">AbstractConfiguration</a>
  */
+@SuppressWarnings("unchecked")
 public final class ConfigurationEntryDescription
 {
 

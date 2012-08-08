@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewComparator_1.java,v 1.2 2007/11/13 11:54:21 hburger Exp $
+ * Name:        $Id: ViewComparator_1.java,v 1.3 2008/03/19 17:13:11 hburger Exp $
  * Description: ViewComparator_1 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/13 11:54:21 $
+ * Date:        $Date: 2008/03/19 17:13:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,6 +65,7 @@ import org.openmdx.compatibility.state1.view.DateStateContexts;
 /**
  * ViewComparator_1
  */
+@SuppressWarnings("unchecked")
 public class ViewComparator_1
     extends AbstractComparator
 {

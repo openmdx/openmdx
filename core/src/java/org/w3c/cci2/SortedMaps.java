@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SortedMaps.java,v 1.3 2008/02/22 17:55:49 hburger Exp $
+ * Name:        $Id: SortedMaps.java,v 1.4 2008/06/28 00:21:51 hburger Exp $
  * Description: Sorted Maps 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/22 17:55:49 $
+ * Date:        $Date: 2008/06/28 00:21:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -164,7 +164,7 @@ public class SortedMaps {
         /**
          * The sorted map by which the sparse array will is backed
          */
-        private final SortedMap<Integer,E> delegate;
+        final SortedMap<Integer,E> delegate;
 
         /**
          * The key of the element in the sorted map backing the first element
@@ -195,7 +195,7 @@ public class SortedMaps {
                 public Iterator<Map.Entry<Integer, E>> iterator() {
                     return new Iterator<Map.Entry<Integer, E>>() {
 
-                        private final Iterator<Map.Entry<Integer, E>> iterator =
+                        final Iterator<Map.Entry<Integer, E>> iterator =
                             AsSparseArray.this.delegate.entrySet().iterator();
 
                         public boolean hasNext(

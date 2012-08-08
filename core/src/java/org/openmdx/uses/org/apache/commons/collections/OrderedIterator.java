@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -18,19 +19,20 @@ package org.openmdx.uses.org.apache.commons.collections;
 import java.util.Iterator;
 
 /**
- * Defines an iterator that operates over a ordered collections.
+ * Defines an iterator that operates over an ordered collection.
  * <p>
  * This iterator allows both forward and reverse iteration through the collection.
  *  
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:11 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:26 $
  *
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public interface OrderedIterator extends Iterator {
-    
+
     /**
-     * Checks to see if there is a previous entry that can be iterated to.
+     * Checks to see if there is a previous element that can be iterated to.
      *
      * @return <code>true</code> if the iterator has a previous element
      */
@@ -39,7 +41,7 @@ public interface OrderedIterator extends Iterator {
     /**
      * Gets the previous element from the collection.
      *
-     * @return the previous key in the iteration
+     * @return the previous element in the iteration
      * @throws java.util.NoSuchElementException if the iteration is finished
      */
     Object previous();

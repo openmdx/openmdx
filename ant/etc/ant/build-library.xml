@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-library.xml,v 1.131 2008/02/15 23:28:01 wfro Exp $
+= Name:        $Id: build-library.xml,v 1.132 2008/03/21 18:22:25 hburger Exp $
 = Description: openMDX Build Library
-= Revision:    $Revision: 1.131 $
-= Date:        $Date: 2008/02/15 23:28:01 $
+= Revision:    $Revision: 1.132 $
+= Date:        $Date: 2008/03/21 18:22:25 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -535,18 +535,18 @@
 		<echo>Transforming Poseidon models ${basedir}/src/model/poseidon/models.xmi to ${build.dir}/model/models.zip...</echo>
 		<antcontrib:if>
 			<not>
-				<available file="archive-model.log.properties" filepath="${log.dir}/model"/>
+				<available file="logging.properties" filepath="${log.dir}/model"/>
 			</not>
 			<antcontrib:then>
 				<mkdir dir="${log.dir}/model"/>
-				<echo>Creating ${log.dir}/model/archive-model.log.properties</echo>
-				<echo file="${log.dir}/model/archive-model.log.properties" append="false"># Model Externalization Log Properties
-	ApplicationId         = openMDX-model
-	LogFileExtension      = log
-	LogFilePath           = build/${build.target.platform}/log/model
-	LogLevel              = ${model.transformation.log.level}
-	LogFormat             = ${openmdx.log.format}
-	java.LoggingMechanism = SharedDatedFileLoggingMechanism
+				<echo>Creating ${log.dir}/model/logging.properties</echo>
+				<echo file="${log.dir}/model/logging.properties" append="false"># Model Externalization Log Properties
+handlers= java.util.logging.FileHandler, java.util.logging.ConsoleHandler
+java.util.logging.FileHandler.level = ${model.transformation.log.level}
+java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/model/transformation.%u.log
+java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+java.util.logging.ConsoleHandler.level = SEVERE
+java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
 			    </echo>
 			</antcontrib:then>
 		</antcontrib:if>
@@ -561,7 +561,7 @@
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
-			<sysproperty key="org.openmdx.log.config.filename" value="build/${build.target.platform}/log/model/archive-model.log.properties"/>
+			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
 			<arg value="--url=file:src/model/poseidon/models.xmi"/>
 			<arg value="--xmi=poseidon"/>
 			<arg value="--out=${build.dir}/model/models.zip"/>
@@ -574,18 +574,18 @@
 		<echo>Transforming Magicdraw models ${basedir}/src/model/magicdraw/models.xmi to ${build.dir}/model/models.zip...</echo>
 		<antcontrib:if>
 			<not>
-				<available file="archive-model.log.properties" filepath="${log.dir}/model"/>
+				<available file="logging.properties" filepath="${log.dir}/model"/>
 			</not>
 			<antcontrib:then>
 				<mkdir dir="${log.dir}/model"/>
-				<echo>Creating ${log.dir}/model/archive-model.log.properties</echo>
-				<echo file="${log.dir}/model/archive-model.log.properties" append="false"># Model Externalization Log Properties
-	ApplicationId         = openMDX-model
-	LogFileExtension      = log
-	LogFilePath           = build/${build.target.platform}/log/model
-	LogLevel              = ${model.transformation.log.level}
-	LogFormat             = ${openmdx.log.format}
-	java.LoggingMechanism = SharedDatedFileLoggingMechanism
+				<echo>Creating ${log.dir}/model/logging.properties</echo>
+				<echo file="${log.dir}/model/logging.properties" append="false"># Model Externalization Log Properties
+handlers= java.util.logging.FileHandler, java.util.logging.ConsoleHandler
+java.util.logging.FileHandler.level = ${model.transformation.log.level}
+java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/model/transformation.%u.log
+java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+java.util.logging.ConsoleHandler.level = SEVERE
+java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
 			    </echo>
 			</antcontrib:then>
 		</antcontrib:if>
@@ -600,7 +600,7 @@
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
-			<sysproperty key="org.openmdx.log.config.filename" value="build/${build.target.platform}/log/model/archive-model.log.properties"/>
+			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
 			<arg value="--url=file:src/model/magicdraw/models.xmi"/>
 			<arg value="--xmi=magicdraw"/>
 			<arg value="--out=${build.dir}/model/models.zip"/>
@@ -613,18 +613,18 @@
 		<echo>Transforming Rose models ${basedir}/src/model/rose/models.mdl to ${build.dir}/model/models.zip...</echo>
 		<antcontrib:if>
 			<not>
-				<available file="archive-model.log.properties" filepath="${log.dir}/model"/>
+				<available file="logging.properties" filepath="${log.dir}/model"/>
 			</not>
 			<antcontrib:then>
 				<mkdir dir="${log.dir}/model"/>
-				<echo>Creating ${log.dir}/model/archive-model.log.properties</echo>
-				<echo file="${log.dir}/model/archive-model.log.properties" append="false"># Model Externalization Log Properties
-	ApplicationId         = openMDX-model
-	LogFileExtension      = log
-	LogFilePath           = build/${build.target.platform}/log/model
-	LogLevel              = ${model.transformation.log.level}
-	LogFormat             = ${openmdx.log.format}
-	java.LoggingMechanism = SharedDatedFileLoggingMechanism
+				<echo>Creating ${log.dir}/model/logging.properties</echo>
+				<echo file="${log.dir}/model/logging.properties" append="false"># Model Externalization Log Properties
+handlers= java.util.logging.FileHandler, java.util.logging.ConsoleHandler
+java.util.logging.FileHandler.level = ${model.transformation.log.level}
+java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/model/transformation.%u.log
+java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+java.util.logging.ConsoleHandler.level = SEVERE
+java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
 			    </echo>
 			</antcontrib:then>
 		</antcontrib:if>
@@ -642,7 +642,7 @@
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
-			<sysproperty key="org.openmdx.log.config.filename" value="build/${build.target.platform}/log/model/archive-model.log.properties"/>
+			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
 			<arg value="--pathMapSymbol=$$curdir"/>
 			<arg value="--pathMapPath=&amp;"/>
 			<arg value="--pathMapSymbol=$$${project.implementation.prefix}_opt_openmdx"/>
@@ -659,18 +659,18 @@
 		<echo>Transforming RSM models ${basedir}/src/model/rsm/models.emx to ${build.dir}/model/models.zip...</echo>
 		<antcontrib:if>
 			<not>
-				<available file="archive-model.log.properties" filepath="${log.dir}/model"/>
+				<available file="logging.properties" filepath="${log.dir}/model"/>
 			</not>
 			<antcontrib:then>
 				<mkdir dir="${log.dir}/model"/>
-				<echo>Creating ${log.dir}/model/archive-model.log.properties</echo>
-				<echo file="${log.dir}/model/archive-model.log.properties" append="false"># Model Externalization Log Properties
-	ApplicationId         = openMDX-model
-	LogFileExtension      = log
-	LogFilePath           = build/${build.target.platform}/log/model
-	LogLevel              = ${model.transformation.log.level}
-	LogFormat             = ${openmdx.log.format}
-	java.LoggingMechanism = SharedDatedFileLoggingMechanism
+				<echo>Creating ${log.dir}/model/logging.properties</echo>
+				<echo file="${log.dir}/model/logging.properties" append="false"># Model Externalization Log Properties
+handlers= java.util.logging.FileHandler, java.util.logging.ConsoleHandler
+java.util.logging.FileHandler.level = ${model.transformation.log.level}
+java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/model/transformation.%u.log
+java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+java.util.logging.ConsoleHandler.level = SEVERE
+java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
 			    </echo>
 			</antcontrib:then>
 		</antcontrib:if>
@@ -688,7 +688,7 @@
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
-			<sysproperty key="org.openmdx.log.config.filename" value="build/${build.target.platform}/log/model/archive-model.log.properties"/>
+			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
 			<arg value="--pathMapSymbol=openMDX 2 ~ Core (RSM)"/>
 			<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/rsm/"/>
 			<arg value="--pathMapSymbol=openMDX 2 ~ Security (RSM)"/>
@@ -722,7 +722,7 @@
 		<condition property="model.transformation.source.is-rsm">
 			<equals arg1="${model.transformation.source}" arg2="rsm"/>
 		</condition>
-		<mkdir dir="${log.dir}/model"/>
+		<mkdir dir="build/${build.target.platform}/log/model"/>
 		<mkdir dir="${build.dir}/model"/>
 		<mkdir dir="${build.dir}/src/java"/>
 		<mkdir dir="${build.dir}/src/jsl"/>
@@ -777,18 +777,18 @@
 			</classpath>
 			<formatter type="xml"/>
 			<sysproperty key="org.openmdx.log.debug" value="${junit.test.log.debug}"/>
-			<sysproperty key="org.openmdx.log.path" value="${log.dir}/junit"/>
-			<sysproperty key="org.openmdx.log.config.filename" value="${log.dir}/junit/test.log.properties"/>
+			<sysproperty key="org.openmdx.log.path" value="build/${build.target.platform}/log/junit"/>
+			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/junit/logging.properties"/>
 			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
 			<sysproperty key="build.java.platform" value="${build.java.platform}"/>
 			<sysproperty key="build.target.platform" value="${build.target.platform}"/>
 			<sysproperty key="junit.test.tmp" value="${tmp.dir}"/>
-			<batchtest todir="${log.dir}/junit/xml" unless="junit.test.case">
+			<batchtest todir="build/${build.target.platform}/log/junit/xml" unless="junit.test.case">
 				<fileset dir="${basedir}/src/java">
 					<patternset refid="project.junit.test.case"/>
 				</fileset>
 			</batchtest>
-			<batchtest todir="${log.dir}/junit/xml" if="junit.test.case">
+			<batchtest todir="build/${build.target.platform}/log/junit/xml" if="junit.test.case">
 				<fileset dir="${basedir}/src/java">
 					<patternset>
 						<include name="**/${junit.test.case}.java"/>
@@ -800,18 +800,18 @@
 		<antcontrib:if>
 			<istrue value="${junit.test.report}"/>
 			<antcontrib:then>
-				<junitreport todir="${log.dir}/junit/xml">
-					<fileset dir="${log.dir}/junit/xml">
+				<junitreport todir="build/${build.target.platform}/log/junit/xml">
+					<fileset dir="build/${build.target.platform}/log/junit/xml">
 						<include name="TEST-*.xml"/>
 					</fileset>
-					<report format="frames" todir="${log.dir}/junit/html"/>
+					<report format="frames" todir="build/${build.target.platform}/log/junit/html"/>
 				</junitreport>
 				<echo>
 	------------------------------------------------------------------------------------------------
 	* The JUnit test report for ${ant.project.name} has been generated at 
-	  ${log.dir}/junit/html/index.html
+	  build/${build.target.platform}/log/junit/html/index.html
 	* The JUnit log file for ${ant.project.name} can be found at 
-	  ${log.dir}/junit/JUnit.shared.log
+	  build/${build.target.platform}/log/junit/JUnit.shared.log
 	------------------------------------------------------------------------------------------------
 			    </echo>
 			</antcontrib:then>
@@ -819,9 +819,9 @@
 	</target>
 
 	<target name="-junit-test-init">
-		<mkdir dir="${log.dir}/junit/xml"/>
+		<mkdir dir="build/${build.target.platform}/log/junit/xml"/>
 		<condition property="junit.test.has.log.properties">
-			<available file="test.log.properties" filepath="${log.dir}/junit"/>
+			<available file="logging.properties" filepath="build/${build.target.platform}/log/junit"/>
 		</condition>
 		<condition property="junit.has.test.case">
 			<or>
@@ -858,16 +858,14 @@ Now you may restart Ant.
 		unless="junit.test.has.log.properties" 
 		if="junit.has.test.case"
 	>
-		<echo>Setting JUnit Test Log Properties: ${log.dir}/junit/test.log.properties</echo>
+		<echo>Setting JUnit Test Log Properties: build/${build.target.platform}/log/junit/logging.properties</echo>
 		<mkdir dir="${tmp.dir}"/>
-		<mkdir dir="${log.dir}/junit"/>
-		<echo file="${log.dir}/junit/test.log.properties" append="false"># Log properties
-	ApplicationId         = JUnit
-	LogFileExtension      = log
-	LogFilePath           = ${log.dir}/junit
-	LogLevel              = ${junit.test.log.level}
-	LogFormat             = ${openmdx.log.format}
-	java.LoggingMechanism = SharedFileLoggingMechanism
+		<mkdir dir="build/${build.target.platform}/log/junit"/>
+		<echo file="build/${build.target.platform}/log/junit/logging.properties" append="false"># Log properties
+handlers= java.util.logging.FileHandler
+java.util.logging.FileHandler.level = {junit.test.log.level}
+java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/junit/junit.%u.log
+java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
 	    </echo>
 	</target>
 	<!--*******************************************************************

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditInspectorControl.java,v 1.5 2007/12/13 01:04:33 wfro Exp $
+ * Name:        $Id: EditInspectorControl.java,v 1.6 2008/05/01 21:43:56 wfro Exp $
  * Description: EditObjectView
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:04:33 $
+ * Date:        $Date: 2008/05/01 21:43:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -85,6 +85,7 @@ public class EditInspectorControl
     }
   
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p, 
         String frame,

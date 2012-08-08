@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Manager_1.java,v 1.24 2008/02/29 18:01:40 hburger Exp $
+ * Name:        $Id: Manager_1.java,v 1.25 2008/04/29 14:54:19 hburger Exp $
  * Description: SPICE Object Layer: Manager implementation
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:01:40 $
+ * Date:        $Date: 2008/04/29 14:54:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,14 +58,14 @@ import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.accessor.generic.cci.Object_1_2;
 import org.openmdx.base.accessor.generic.cci.Structure_1_0;
 import org.openmdx.base.accessor.generic.spi.MarshallingStructure_1;
-import org.openmdx.base.event.InstanceCallbackEvent;
-import org.openmdx.base.event.InstanceCallbackListener;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.transaction.UnitOfWork_1_0;
 import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1Factory;
 import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_2;
 import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_4;
+import org.openmdx.compatibility.base.event.InstanceCallbackEvent;
+import org.openmdx.compatibility.base.event.InstanceCallbackListener;
 import org.openmdx.compatibility.base.marshalling.CachingMarshaller;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.resource.cci.Connection_1_0;
@@ -483,6 +483,15 @@ public class Manager_1
     //------------------------------------------------------------------------
 
     /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.event.InstanceCallbackListener#postCreate(org.openmdx.compatibility.base.event.InstanceCallbackEvent)
+     */
+    public void postCreate(
+        InstanceCallbackEvent event
+    ) throws ServiceException {
+        //
+    }
+
+    /* (non-Javadoc)
      * @see org.openmdx.base.event.InstanceCallbackListener#postLoad(org.openmdx.base.event.InstanceCallbackEvent)
      */
     public void postLoad(
@@ -532,5 +541,6 @@ public class Manager_1
     ){
         super.mapping.remove(path);
     }
+
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LongMarshaller.java,v 1.8 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: LongMarshaller.java,v 1.9 2008/04/09 12:34:01 hburger Exp $
  * Description: LongMarshaller class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/04/09 12:34:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,7 @@ package org.openmdx.base.accessor.jmi.spi;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
 
 
@@ -61,7 +62,8 @@ import org.openmdx.kernel.exception.BasicException;
  * Number to the specific type Long (which is also a Number).
  */
 public class LongMarshaller
-  implements Marshaller {
+  implements Marshaller, ReluctantUnmarshalling 
+{
 
   //-------------------------------------------------------------------------
   private LongMarshaller(
@@ -85,8 +87,7 @@ public class LongMarshaller
         return source == null
           ? null
           : new Long(((Number)source).longValue());
-    } 
-    catch (RuntimeException e) {
+    } catch (RuntimeException e) {
         throw new ServiceException(
             e,
             BasicException.Code.DEFAULT_DOMAIN, 
@@ -109,8 +110,7 @@ public class LongMarshaller
         return source == null
           ? null
           : new Long(((Number)source).longValue());
-    } 
-    catch (RuntimeException e) {
+    } catch (RuntimeException e) {
         throw new ServiceException(
             e,
             BasicException.Code.DEFAULT_DOMAIN, 
@@ -127,7 +127,7 @@ public class LongMarshaller
   //-------------------------------------------------------------------------
   // Variables
   //-------------------------------------------------------------------------
-  static private LongMarshaller instance = new LongMarshaller();
+  static private final LongMarshaller instance = new LongMarshaller();
 
 }
   

@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -90,7 +91,7 @@ import org.openmdx.uses.org.apache.commons.collections.KeyValue;
  * operations will affect the map.<p>
  *
  * @since Commons Collections 3.0 (previously in main package v2.1)
- * @version $Revision: 1.4 $ $Date: 2005/04/07 14:15:24 $
+ * @version $Revision: 1.7 $ $Date: 2008/06/28 00:21:22 $
  * 
  * @author Berin Loritsch
  * @author Gerhard Froehlich
@@ -98,7 +99,9 @@ import org.openmdx.uses.org.apache.commons.collections.KeyValue;
  * @author Paul Jack
  * @author Leo Sutic
  * @author Janek Bogucki
+ * @author Kazuya Ujihara
  */
+@SuppressWarnings("unchecked")
 public final class StaticBucketMap implements Map {
 
     /** The default number of buckets to use */
@@ -230,7 +233,7 @@ public final class StaticBucketMap implements Map {
             Node n = buckets[hash];
 
             while (n != null) {
-                if (n.key == null || (n.key != null && n.key.equals(key))) {
+                if (n.key == key || (n.key != null && n.key.equals(key))) {
                     return true;
                 }
 
@@ -443,7 +446,7 @@ public final class StaticBucketMap implements Map {
     /**
      * The Map.Entry for the StaticBucketMap.
      */
-    private static final class Node implements Map.Entry, KeyValue {
+    static final class Node implements Map.Entry, KeyValue {
         protected Object key;
         protected Object value;
         protected Node next;
@@ -486,13 +489,13 @@ public final class StaticBucketMap implements Map {
     /**
      * The lock object, which also includes a count of the nodes in this lock.
      */
-    private final static class Lock {
+    final static class Lock {
         public int size;
     }
 
 
     //-----------------------------------------------------------------------
-    private class EntryIterator implements Iterator {
+    class EntryIterator implements Iterator {
 
         private ArrayList current = new ArrayList();
         private int bucket;
@@ -533,7 +536,7 @@ public final class StaticBucketMap implements Map {
 
     }
 
-    private class ValueIterator extends EntryIterator {
+    class ValueIterator extends EntryIterator {
 
         public Object next() {
             return nextEntry().getValue();
@@ -541,7 +544,7 @@ public final class StaticBucketMap implements Map {
 
     }
 
-    private class KeyIterator extends EntryIterator {
+    class KeyIterator extends EntryIterator {
 
         public Object next() {
             return nextEntry().getKey();
@@ -549,7 +552,7 @@ public final class StaticBucketMap implements Map {
 
     }
 
-    private class EntrySet extends AbstractSet {
+    class EntrySet extends AbstractSet {
 
         public int size() {
             return StaticBucketMap.this.size();
@@ -594,7 +597,7 @@ public final class StaticBucketMap implements Map {
     }
 
 
-    private class KeySet extends AbstractSet {
+    class KeySet extends AbstractSet {
 
         public int size() {
             return StaticBucketMap.this.size();
@@ -630,7 +633,7 @@ public final class StaticBucketMap implements Map {
     }
 
 
-    private class Values extends AbstractCollection {
+    class Values extends AbstractCollection {
 
         public int size() {
             return StaticBucketMap.this.size();

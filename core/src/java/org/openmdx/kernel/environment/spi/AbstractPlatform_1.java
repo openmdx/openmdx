@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractPlatform_1.java,v 1.7 2004/07/26 23:32:12 hburger Exp $
+ * Name:        $Id: AbstractPlatform_1.java,v 1.8 2008/03/21 18:36:29 hburger Exp $
  * Description: openMDX Platform Description Interface 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/07/26 23:32:12 $
+ * Date:        $Date: 2008/03/21 18:36:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -223,7 +223,7 @@ public abstract class AbstractPlatform_1
     public String toString(
     ) {
         if(description == null){
-        	Map properties = new HashMap();
+        	Map<String,String> properties = new HashMap<String,String>();
         	properties.put("name",getName());
         	properties.put("specificationTitle",getSpecificationTitle());
         	properties.put("specificationVersion",getSpecificationVersion());

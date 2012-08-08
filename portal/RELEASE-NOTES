@@ -1,5 +1,5 @@
-Release Name: openMDX/Portal 2.0.0
-Release Date: 2008-02-20
+Release Name: openMDX/Portal 2.1.0
+Release Date: 2008-07-10
 
 ---------------------------------------------------------------------
 Notes:
@@ -50,129 +50,38 @@ Changes:
 
 0.    SUMMARY
       * Script-based customizing
-      * Data bindings for shared associations
-      * Queries in XML filters
+      * Ajax-based, in-place editing
+      * Migrate to openMDX 2 PersistenceManager
       * Bugs fixed
                         
 1.    NEW FEATURES
 
-      CR20006379
-      Portal: data bindings for shared associations.	In addition to attributes 
-      and references, shared associations should be supported. This allows to 
-      add non-modeled reference panes to inspectors by customizing. In order
-      to mark a structural feature definition as reference, the tag isReference
-      must be set to true. Example:
-      
-			<featureDefinition>
-				<org.openmdx.ui1.StructuralFeatureDefinition qualifiedName="org:openmdx:portal:Segment:myReference">
-					<type>org:openmdx:base:BasicObject</type>
-					<multiplicity>0..n</multiplicity>
-					<changeable>false</changeable>
-					<isReference>true</isReference>
-				</org.openmdx.ui1.StructuralFeatureDefinition>
-			</featureDefinition>
-      
-      CR20006389
-      Portal: role switch. Perform an automatic role switch if the segment of 
-      the requested object does not match the currently selected role.
-      
-      CR20006375
-      Portal: TimeZone as user setting. The time zone is a user setting.
-      
-      CR20006363
-      Portal: script-based customizing of RootMenuControl. The RootMenuControl is 
-      now groovy based. The root menu can now be customized as groovy script. The 
-      default implementation looks as follows:
-
-				import org.openmdx.portal.servlet.*;
-				import org.openmdx.portal.servlet.texts.*;
-				import org.openmdx.portal.servlet.view.*;
-				import org.openmdx.portal.servlet.control.*;
-				ObjectView view = (ObjectView)p.getView();
-				ApplicationContext app = view.getApplicationContext();
-				Texts_1_0 texts = app.getTexts();
-				        
-				RootMenuControl.paintQuickAccessors(p);
-				RootMenuControl.paintRootObjects(p);
-				RootMenuControl.paintHistory(p);
-				
-		  The scripts are loaded dynamically from ./WEB-INF/config/control/rootmenu.
-		  The name of the default layout is Default.groovy. A groovy script can be
-		  configured for each model package, i.e. org.openmdx.ui1.groovy configures
-		  the root menu for the root menu entry org:openmdx:ui1.
-		  
-      CR10006511
-      Portal: queries in XML filters. Queries can be defined in XML filters
-      with the PiggyBackCondition. Here is an example:
-      
-			<object class="org.openmdx.base.query.PiggyBackCondition">
-				<void property="quantor">
-					<short>1</short>
-				</void>
-				<void property="feature">
-					<string>context:BP96MI-GEdu0Lr3K4tC9bQ:object_class</string>
-				</void>
-				<void property="fulfil">
-					<boolean>true</boolean>
-				</void>
-				<void property="value">
-					<array class="java.lang.String" length="1">
-						<void index="0">
-							<string>org:openmdx:compatibility:datastore1:QueryFilter</string>
-						</void>
-					</array>
-				</void>
-			</object>
-			<object class="org.openmdx.base.query.PiggyBackCondition">
-				<void property="quantor">
-					<short>1</short>
-				</void>
-				<void property="feature">
-					<string>context:BP96MI-GEdu0Lr3K4tC9bQ:clause</string>
-				</void>
-				<void property="fulfil">
-					<boolean>true</boolean>
-				</void>
-				<void property="value">
-					<array class="java.lang.String" length="1">
-						<void index="0">
-							<string>EXISTS (SELECT 0 FROM OOCKE1_ACCOUNT a WHERE v.sales_rep = a.object_id AND UPPER(a.full_name) LIKE '%MEIER%'</string>
-						</void>
-					</array>
-				</void>
-			</object>
-      
-      * The feature name 'context:$uuid:object_class' corresponds to the feature name
-        'object_class' with the context prefix context:$uuid. The value of the feature
-        must be 'org:openmdx:compatibility:datastore1:QueryFilter'. The value is
-        used by the database plugin and is used to trigger query filters.
-      * The feature 'context:$uuid:clause' allows to specify the filter clause as
-        SQL clause. The clause should be in ANSI SQL. This way the filter is database
-        independent. E.g. use the ANSI SQL function CURRENT_TIMESTAMP to get the current
-        date and not any DB-specific function.
-      * $uuid must be replaced by any UUID, e.g. BP96MI-GEdu0Lr3K4tC9bQ.
-
+      CR10007738
+      Portal: all controls are script enabled. All controls are script enabled, 
+      i.e. if a control does not implement the method 
+      paint(HtmlPage p, String frame, boolean forEditing) the default 
+      implementation executes a Groovy-script located in 
+      ./config/control/{control-id}
       
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
 
-      CR20006359
-      Portal: Deprecate BIRT. BIRT should not be part of portal. A reporting 
-      engine should be added at application-level. 
+      CR10007629
+      Redesign edit mode. The edit mode is Ajax-based now. Ajax.Updaters switch
+      the attribute pane between show and edit mode. Painting the full view in
+      show and edit mode is not required anymore.
+       
+      CR20010100
+      Portal: migrate to PersistenceManager. Migrate from openMDX 1 cci RefPackage
+      and openMDX 1 compatibility RequestCollection to openMDX 2 PersistenceManager.
       
 2.1.  FIXED BUGS
 
-      CR10006546
-      hasThousandsSeparator ignored. regardless of the setting of 
-      hasThousandsSeparator (i.e. true or false) there are no separators ever 
-      in the standard GUI.
-      
-      CR20006370
-      Non-filterable features must not appear in additional search fields menu.
-      
-      CR10006440
-      Missing tooltips for QuickAccessors.
+      CR10007763
+      Multi-valued code tables with '. In edit mode, multi-valued code tables with 
+      code values containing single quotes (') do not work (pop-up does not appear) 
+      because the single quotes are not escaped.
 
       
 2.2.  DEPRECATED FEATURES

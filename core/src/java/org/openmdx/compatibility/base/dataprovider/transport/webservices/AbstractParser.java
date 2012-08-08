@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractParser.java,v 1.14 2006/08/11 09:24:10 hburger Exp $
+ * Name:        $Id: AbstractParser.java,v 1.15 2008/03/19 17:09:57 hburger Exp $
  * Description: AbstractParser.java
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:10 $
+ * Date:        $Date: 2008/03/19 17:09:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,14 +59,13 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * @author wfro
  *
  * Abstract class for parsing SOAP request and replies.
  * NOTE: this class does not use xerces to ensure .NET portability
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractParser {
 
   /**
@@ -92,8 +91,8 @@ public abstract class AbstractParser {
       BufferedReader bufferedReader =
         new BufferedReader((Reader)reader);
       int c = bufferedReader.read();
-      CharSequence chars = StringBuilders.newStringBuilder(4096);
-      CharSequence rawname = StringBuilders.newStringBuilder(512);
+      StringBuilder chars = new StringBuilder(4096);
+      StringBuilder rawname = new StringBuilder(512);
       while(c != -1) {
         if(c == '<') {
           c = bufferedReader.read();
@@ -105,12 +104,12 @@ public abstract class AbstractParser {
           }
           // begin tag
           else if(c != '/') {
-            StringBuilders.asStringBuilder(rawname).setLength(0);
+            rawname.setLength(0);
             boolean append = true;
             while((c != -1) && (c != '>')) {
               append &= c != ' ';
               if(append) {
-                  StringBuilders.asStringBuilder(rawname).append((char)c);
+                  rawname.append((char)c);
               }
               c = bufferedReader.read();
             }
@@ -123,13 +122,13 @@ public abstract class AbstractParser {
             this.characters(
               chars.toString().toCharArray(),
               0,
-              StringBuilders.asStringBuilder(chars).length()
+              chars.length()
             );
-            StringBuilders.asStringBuilder(chars).setLength(0);
+            chars.setLength(0);
             c = bufferedReader.read();
-            StringBuilders.asStringBuilder(rawname).setLength(0);
+            rawname.setLength(0);
             while((c != -1) && (c != '>')) {
-                StringBuilders.asStringBuilder(rawname).append((char)c);
+                rawname.append((char)c);
               c = bufferedReader.read();
             }
             this.endElement(
@@ -138,7 +137,7 @@ public abstract class AbstractParser {
           }
         }
         else {
-            StringBuilders.asStringBuilder(chars).append((char)c);
+            chars.append((char)c);
         }
         c = bufferedReader.read();
       }

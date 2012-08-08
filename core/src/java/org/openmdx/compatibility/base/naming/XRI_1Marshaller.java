@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XRI_1Marshaller.java,v 1.2 2007/10/10 16:06:03 hburger Exp $
+ * Name:        $Id: XRI_1Marshaller.java,v 1.3 2008/03/21 18:48:02 hburger Exp $
  * Description: Path/XRI Marshaller 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:03 $
+ * Date:        $Date: 2008/03/21 18:48:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,12 +56,12 @@ import java.util.ArrayList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.kernel.url.protocol.XriAuthorities;
 
 /**
  * Path/XRI Marshaller
  */
+@SuppressWarnings("unchecked")
 public final class XRI_1Marshaller
     implements Marshaller
 {
@@ -102,7 +102,7 @@ public final class XRI_1Marshaller
     ) throws ServiceException {
         if (charSequences == null) return null;
         Object[]source = (Object[])charSequences;
-        CharSequence xri = StringBuilders.newStringBuilder(OPENMDX_XRI_PREFIX);
+        StringBuilder xri = new StringBuilder(OPENMDX_XRI_PREFIX);
         char delimiter = ':';
         for(
           int i=0;
@@ -110,7 +110,7 @@ public final class XRI_1Marshaller
         ){
             encode(
                     source[i],
-                    StringBuilders.asStringBuilder(xri).append(delimiter),
+                    xri.append(delimiter),
                     i == 0,
                     ++i == source.length
                 );
@@ -133,7 +133,7 @@ public final class XRI_1Marshaller
 
     static void encode(
         Object charSequence,
-        CharSequence xri,
+        StringBuilder xri,
         boolean authority,
         boolean terminal
     ){
@@ -144,7 +144,7 @@ public final class XRI_1Marshaller
         ) {
             encode(
                 source.substring(XRI_XREF_PREFIX.length()),
-                StringBuilders.asStringBuilder(xri).append(XREF_BEGIN),
+                xri.append(XREF_BEGIN),
                 authority,
                 terminal
             );
@@ -159,7 +159,7 @@ public final class XRI_1Marshaller
                 terminal
             );
         } else {
-            StringBuilders.asStringBuilder(xri).append(
+            xri.append(
                '('
             ).append(
                new Path(source).toXri().substring(4)
@@ -184,16 +184,16 @@ public final class XRI_1Marshaller
      */
     static void encode(
         String source,
-        CharSequence xri,
+        StringBuilder xri,
         boolean authority,
         boolean terminal
     ){
         if(terminal && "%".equals(source)) {
-            StringBuilders.asStringBuilder(xri).append("***");
+            xri.append("***");
         } else if(terminal && source.endsWith("%")) {
-            StringBuilders.asStringBuilder(xri).append(source.substring(0, source.length() - 1)).append("***");
+            xri.append(source.substring(0, source.length() - 1)).append("***");
         } else if(authority && ":*".equals(source)){
-            StringBuilders.asStringBuilder(xri).append("**");
+            xri.append("**");
         } else if(source.startsWith(":") && source.endsWith("*")) {
             encode(
                 source.substring(1, source.length() - 1),
@@ -201,7 +201,7 @@ public final class XRI_1Marshaller
                 false,
                 false
             );
-            StringBuilders.asStringBuilder(xri).append("**");
+            xri.append("**");
         } else {
                 int crossReference = 0;
                 boolean unbalanced = false;
@@ -229,10 +229,10 @@ public final class XRI_1Marshaller
                     char character = source.charAt(i);
                     switch (character) {
                         case ':':
-                            StringBuilders.asStringBuilder(xri).append(authority ? '.' : ':');
+                            xri.append(authority ? '.' : ':');
                             break;
                         case '%':
-                            StringBuilders.asStringBuilder(xri).append("%25");
+                            xri.append("%25");
                                 break;
                         case '{': case '}':case '<': case '>': case '[' : case ']':
                         case ' ': case '"': case '\\': case '^': case '`': case '|':
@@ -242,11 +242,11 @@ public final class XRI_1Marshaller
                         case '#': case '?': case '/':
                         case ';': case '@': case '&': case '=': case '+': case '$': case ',': // remaining reserved
                         case '-': case '_': case '.': case '!': case '~': case '*': case '\'': // remaining mark
-                            StringBuilders.asStringBuilder(xri).append(character);
+                            xri.append(character);
                             break;
                         default:
                             if(Character.isLetterOrDigit(character)){
-                                StringBuilders.asStringBuilder(xri).append(character);
+                                xri.append(character);
                             } else {
                                 appendTo(xri, character, "%25");
                                 }
@@ -284,7 +284,7 @@ public final class XRI_1Marshaller
         } else if (":**".equals(source.substring(OPENMDX_XRI_PREFIX.length()))) {
             target.add(":*");
         } else try {
-            CharSequence segment = StringBuilders.newStringBuilder();
+            StringBuilder segment = new StringBuilder();
             int crossReference = 0;
             boolean authority = true;
             for(
@@ -301,9 +301,9 @@ public final class XRI_1Marshaller
                             !source.substring(i).startsWith(XREF_BEGIN + XriAuthorities.OPENMDX_AUTHORITY) &&
                             XRI_GCS.indexOf(source.charAt(i + 1)) > 0
                         ) {
-                            StringBuilders.asStringBuilder(segment).append(XRI_XREF_PREFIX);
+                            segment.append(XRI_XREF_PREFIX);
                         } else {
-                            StringBuilders.asStringBuilder(segment).append(character);
+                            segment.append(character);
                         }
                         break;
                     case ')':
@@ -316,11 +316,11 @@ public final class XRI_1Marshaller
                             },
                             "More closing than opening parenthesis"
                         );
-                        StringBuilders.asStringBuilder(segment).append(character);
+                        segment.append(character);
                         break;
                     case '/':
                         if(crossReference > 0){
-                            StringBuilders.asStringBuilder(segment).append(character);
+                            segment.append(character);
                         } else {
                             target.add(
                                 decode(
@@ -330,16 +330,16 @@ public final class XRI_1Marshaller
                                 )
                             );
                             authority = false;
-                            StringBuilders.asStringBuilder(segment).setLength(0);
+                            segment.setLength(0);
                         }
                         break;
                     case '.':
-                        StringBuilders.asStringBuilder(segment).append(
+                        segment.append(
                             target.isEmpty() ? ':' : '.'
                         );
                         break;
                     default:
-                        StringBuilders.asStringBuilder(segment).append(character);
+                        segment.append(character);
                 }
             }
             if(crossReference > 0) throw new ServiceException (
@@ -387,7 +387,7 @@ public final class XRI_1Marshaller
         boolean terminal
     ) throws ServiceException{
         if(source.startsWith(OPENMDX_XREF_PREFIX) && source.endsWith(XREF_END)) {
-            CharSequence target = StringBuilders.newStringBuilder();
+            StringBuilder target = new StringBuilder();
             boolean xrefAuthority = true;
             for(
                 int i = OPENMDX_XREF_PREFIX.length(), limit = source.length() - XREF_END.length();
@@ -397,19 +397,19 @@ public final class XRI_1Marshaller
                 char character = source.charAt(i);
                 switch (character) {
                     case '%' :
-                        StringBuilders.asStringBuilder(target).append(
+                        target.append(
                             i + 2 < limit ? (char) Integer.parseInt(source.substring(++i, ++i+1), 0x10) : character
                         );
                         break;
                     case '.':
-                        StringBuilders.asStringBuilder(target).append(
+                        target.append(
                             xrefAuthority ? "::" : "."
                         );
                         break;
                     case '/':
                         xrefAuthority = false;
                     default:
-                        StringBuilders.asStringBuilder(target).append(character);
+                        target.append(character);
                 }
             }
             return new Path(target.toString()).toString();
@@ -427,14 +427,14 @@ public final class XRI_1Marshaller
         } else if (source.indexOf('%') < 0){
             return source;
         } else {
-                CharSequence target = StringBuilders.newStringBuilder(source.length());
+                StringBuilder target = new StringBuilder(source.length());
                 for(
                     int i = 0, limit = source.length();
                     i < limit;
                     i++
                 ){
                     char character = source.charAt(i);
-                    StringBuilders.asStringBuilder(target).append(
+                    target.append(
                         character == '%' && i + 2 < limit ?
                             (char) Integer.parseInt(source.substring(++i, ++i+1), 0x10) :
                             character
@@ -452,14 +452,14 @@ public final class XRI_1Marshaller
      * @param escaped
      */
     private static void appendTo(
-        CharSequence target,
+        StringBuilder target,
         char character,
         boolean escaped
     ){
         if(escaped){
             appendTo(target, character, "%");
         } else {
-            StringBuilders.asStringBuilder(target).append(character);
+            target.append(character);
         }
     }
 
@@ -471,13 +471,11 @@ public final class XRI_1Marshaller
      * @param escape
      */
     private static void appendTo(
-        CharSequence target,
+        StringBuilder target,
         char character,
         String escape
     ){
-        StringBuilders.asStringBuilder(
-            target
-        ).append(
+        target.append(
             escape
         ).append(
             Character.toUpperCase(Character.forDigit(character / 0x10, 0x10))

@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -27,7 +28,8 @@ import org.openmdx.uses.org.apache.commons.collections.Buffer;
 import org.openmdx.uses.org.apache.commons.collections.BufferUnderflowException;
 
 /**
- * UnboundedFifoBuffer is a very efficient buffer implementation.
+ * UnboundedFifoBuffer is a very efficient implementation of
+ * <code>Buffer</code> that can grow to any size.
  * According to performance testing, it exhibits a constant access time, but it
  * also outperforms ArrayList when used for the same purpose.
  * <p>
@@ -50,15 +52,21 @@ import org.openmdx.uses.org.apache.commons.collections.BufferUnderflowException;
  * This class is Serializable from Commons Collections 3.1.
  * 
  * @since Commons Collections 3.0 (previously in main package v2.1)
- * @version $Revision: 1.4 $ $Date: 2005/04/07 14:15:04 $
+ * @version $Revision: 1.7 $ $Date: 2008/06/28 00:21:30 $
  *
  * @author Avalon
  * @author Federico Barbieri
  * @author Berin Loritsch
  * @author Paul Jack
  * @author Stephen Colebourne
+ * @author Andreas Schlosser
+ * @author Thomas Knych
+ * @author Jordan Krey
  */
+@SuppressWarnings("unchecked")
 public class UnboundedFifoBuffer extends AbstractCollection implements Buffer, Serializable {
+    // invariant: buffer.length > size()
+    //   ie.buffer always has at least one empty entry
 
     /** Serialization vesrion */
     private static final long serialVersionUID = -3482960336579541419L;
@@ -123,7 +131,7 @@ public class UnboundedFifoBuffer extends AbstractCollection implements Buffer, S
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         int size = in.readInt();
-        buffer = new Object[size];
+        buffer = new Object[size + 1];
         for (int i = 0; i < size; i++) {
             buffer[i] = in.readObject();
         }
@@ -171,30 +179,24 @@ public class UnboundedFifoBuffer extends AbstractCollection implements Buffer, S
         }
 
         if (size() + 1 >= buffer.length) {
+            // copy contents to a new buffer array
             Object[] tmp = new Object[((buffer.length - 1) * 2) + 1];
-
             int j = 0;
+            // move head to element zero in the new array
             for (int i = head; i != tail;) {
                 tmp[j] = buffer[i];
                 buffer[i] = null;
 
                 j++;
-                i++;
-                if (i == buffer.length) {
-                    i = 0;
-                }
+                i = increment(i);
             }
-
             buffer = tmp;
             head = 0;
             tail = j;
         }
 
         buffer[tail] = obj;
-        tail++;
-        if (tail >= buffer.length) {
-            tail = 0;
-        }
+        tail = increment(tail);
         return true;
     }
 
@@ -224,16 +226,10 @@ public class UnboundedFifoBuffer extends AbstractCollection implements Buffer, S
         }
 
         Object element = buffer[head];
-
-        if (null != element) {
+        if (element != null) {
             buffer[head] = null;
-
-            head++;
-            if (head >= buffer.length) {
-                head = 0;
-            }
+            head = increment(head);
         }
-
         return element;
     }
 
@@ -303,15 +299,10 @@ public class UnboundedFifoBuffer extends AbstractCollection implements Buffer, S
                 }
 
                 // Other elements require us to shift the subsequent elements
-                int i = lastReturnedIndex + 1;
+                int i = increment(lastReturnedIndex);
                 while (i != tail) {
-                    if (i >= buffer.length) {
-                        buffer[i - 1] = buffer[0];
-                        i = 0;
-                    } else {
-                        buffer[i - 1] = buffer[i];
-                        i++;
-                    }
+                    buffer[decrement(i)] = buffer[i];
+                    i = increment(i);
                 }
 
                 lastReturnedIndex = -1;
@@ -322,5 +313,5 @@ public class UnboundedFifoBuffer extends AbstractCollection implements Buffer, S
 
         };
     }
-    
+
 }

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/memory/HashSetFactory.java,v 1.2 2007/10/10 16:06:14 hburger Exp $
- * $Revision: 1.2 $
- * $Date: 2007/10/10 16:06:14 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/memory/HashSetFactory.java,v 1.3 2008/03/21 18:42:16 hburger Exp $
+ * $Revision: 1.3 $
+ * $Date: 2008/03/21 18:42:16 $
  *
  * ====================================================================
  *
@@ -29,8 +29,9 @@ import java.util.Set;
 /**
  * Default set factory implementation creating {@link HashSet}s.
  * 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
+@SuppressWarnings("unchecked")
 public class HashSetFactory implements SetFactory {
 
     public Set createSet() {

@@ -1,9 +1,10 @@
 /*
- *  Copyright 1999-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -21,18 +22,17 @@ import java.util.NoSuchElementException;
 import org.openmdx.uses.org.apache.commons.collections.Predicate;
 
 /** 
- * A proxy {@link ListIterator ListIterator} which 
- * takes a {@link Predicate Predicate} instance to filter
- * out objects from an underlying <code>ListIterator</code> 
- * instance. Only objects for which the specified 
- * <code>Predicate</code> evaluates to <code>true</code> are
- * returned by the iterator.
- * 
+ * Decorates another {@link ListIterator} using a predicate to filter elements.
+ * <p>
+ * This iterator decorates the underlying iterator, only allowing through
+ * those elements that match the specified {@link Predicate Predicate}.
+ *
  * @since Commons Collections 2.0
- * @version $Revision: 1.3 $ $Date: 2005/08/04 18:46:55 $
+ * @version $Revision: 1.5 $ $Date: 2008/04/25 14:32:11 $
  * 
  * @author Rodney Waldhoff
  */
+@SuppressWarnings("unchecked")
 public class FilterListIterator implements ListIterator {
 
     /** The iterator being used */
@@ -72,9 +72,9 @@ public class FilterListIterator implements ListIterator {
     
     //-----------------------------------------------------------------------
     /**
-     *  Constructs a new <code>FilterListIterator</code> that will not 
-     *  function until setListIterator}
-     *  and {@link #setPredicate(Predicate) setPredicate} are invoked.
+     * Constructs a new <code>FilterListIterator</code> that will not function
+     * until {@link #setListIterator(ListIterator) setListIterator}
+     * and {@link #setPredicate(Predicate) setPredicate} are invoked.
      */
     public FilterListIterator() {
         super();
@@ -104,9 +104,8 @@ public class FilterListIterator implements ListIterator {
     }
 
     /**
-     * Constructs a new <code>FilterListIterator</code> that will not 
-     * function until setListIterator}
-     * is invoked.
+     * Constructs a new <code>FilterListIterator</code> that will not function
+     * until {@link #setListIterator(ListIterator) setListIterator} is invoked.
      *
      * @param predicate  the predicate to use.
      */

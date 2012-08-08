@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RoseImporter_1.java,v 1.13 2006/11/22 09:31:40 hburger Exp $
+ * Name:        $Id: RoseImporter_1.java,v 1.14 2008/03/21 18:40:08 hburger Exp $
  * Description: model.importer.RoseImporter
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/11/22 09:31:40 $
+ * Date:        $Date: 2008/03/21 18:40:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -91,6 +91,7 @@ import org.openmdx.model1.importer.spi.ModelImporter_1;
  * and associations.
  *
  */
+@SuppressWarnings("unchecked")
 public class RoseImporter_1
   extends ModelImporter_1 {
 

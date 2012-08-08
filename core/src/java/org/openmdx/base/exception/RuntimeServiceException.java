@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RuntimeServiceException.java,v 1.9 2005/02/21 13:08:00 hburger Exp $
+ * Name:        $Id: RuntimeServiceException.java,v 1.10 2008/03/21 18:30:08 hburger Exp $
  * Description: Exception Framework 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:08:00 $
+ * Date:        $Date: 2008/03/21 18:30:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -188,7 +188,7 @@ public final class RuntimeServiceException
      */
     public RuntimeServiceException log()
     {
-        SysLog.warning(getMessage(), getCause(), 1);
+        SysLog.warning(this);
         return this;
     }
 

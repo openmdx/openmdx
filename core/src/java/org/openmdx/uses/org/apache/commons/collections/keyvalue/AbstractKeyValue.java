@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -18,10 +19,11 @@ package org.openmdx.uses.org.apache.commons.collections.keyvalue;
 import org.openmdx.uses.org.apache.commons.collections.KeyValue;
 
 /**
- * Abstract pair class to assist with creating KeyValue and MapEntry implementations.
+ * Abstract pair class to assist with creating <code>KeyValue</code>
+ * and {@link java.util.Map.Entry Map.Entry} implementations.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:20 $
+ * @version $Revision: 1.3 $ $Date: 2008/04/25 14:32:16 $
  * 
  * @author James Strachan
  * @author Michael A. Smith
@@ -29,12 +31,12 @@ import org.openmdx.uses.org.apache.commons.collections.KeyValue;
  * @author Stephen Colebourne
  */
 public abstract class AbstractKeyValue implements KeyValue {
-    
+
     /** The key */
     protected Object key;
     /** The value */
     protected Object value;
-    
+
     /**
      * Constructs a new pair with the specified key and given value.
      *

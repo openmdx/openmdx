@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CmdLineProcessor.java,v 1.6 2007/10/10 17:16:04 hburger Exp $
+ * Name:        $Id: CmdLineProcessor.java,v 1.7 2008/03/21 18:28:06 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 17:16:04 $
+ * Date:        $Date: 2008/03/21 18:28:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,7 +56,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.uses.gnu.getopt.Getopt;
 import org.openmdx.uses.gnu.getopt.LongOpt;
 
@@ -118,7 +117,7 @@ import org.openmdx.uses.gnu.getopt.LongOpt;
  * </pre>
  *
  */
-
+@SuppressWarnings("unchecked")
 public class CmdLineProcessor 
 {
 
@@ -375,13 +374,11 @@ public class CmdLineProcessor
 	 */
 	public String  getHelp()
 	{
-		CharSequence	help = StringBuilders.newStringBuilder();
+	    StringBuilder	help = new StringBuilder();
         ArrayList  		overview = formatText(m_pgmHelpOverview, OVERVIEW_TEXT_WIDTH);
 		
 		for(int ii=0; ii<overview.size(); ii++) {
-			StringBuilders.asStringBuilder(
-                help
-            ).append(
+			help.append(
                 "  "
             ).append(
                 overview.get(ii)
@@ -473,9 +470,9 @@ public class CmdLineProcessor
 		}
 	}
 	
-	private void parseAnalyze()
+    private void parseAnalyze()
 	{
-		CharSequence    shortopts = StringBuilders.newStringBuilder();
+        StringBuilder    shortopts = new StringBuilder();
 		ArrayList   	longopts  = new ArrayList();
 		LongOpt   		gnu_longopts[];
 		CmdLineOption 	opt;
@@ -492,8 +489,8 @@ public class CmdLineProcessor
 			
 			if (opt.getId().length() == 1) {
 				// Short option
-                StringBuilders.asStringBuilder(shortopts).append(opt.getId());
-				if (!opt.isSwitch()) StringBuilders.asStringBuilder(shortopts).append(":");
+                shortopts.append(opt.getId());
+				if (!opt.isSwitch()) shortopts.append(":");
 			}else{
 				// Long option
 				if (opt.isSwitch()) {
@@ -601,30 +598,24 @@ public class CmdLineProcessor
 				int  count = m_args.getValues(opt.getId()).size();
 	
 				if (count<opt.getMinimum() || count>opt.getMaximum()) {
-					CharSequence  tmp = StringBuilders.newStringBuilder(
+				    StringBuilder  tmp = new StringBuilder(
                         "[error] Bad number of occurrences ("
                     );
 					if (count<opt.getMinimum()) {
-						StringBuilders.asStringBuilder(
-                            tmp
-                        ).append(
+						tmp.append(
                             "min = "
                         ).append(
                             opt.getMinimum()
                         );
 					}
 					if (count>opt.getMaximum()) {
-                        StringBuilders.asStringBuilder(
-                            tmp
-                        ).append(
+                        tmp.append(
                             " max = "
                         ).append(
                             opt.getMaximum()
                         );
 					}
-                    StringBuilders.asStringBuilder(
-                        tmp
-                    ).append(
+                    tmp.append(
                         ") for option '"
                     ).append(
                         opt.getId().length() == 1 ? "-" : "--"
@@ -696,14 +687,12 @@ public class CmdLineProcessor
 		boolean addHelpOptions)
 	{
 		int           ii;
-		CharSequence  usage = StringBuilders.newStringBuilder();
+		StringBuilder  usage = new StringBuilder();
 	
 		
 		// The application's options
 		for(ii=0; ii<m_optionList.size(); ii++) {
-			StringBuilders.asStringBuilder(
-                usage
-            ).append(
+			usage.append(
                 getUsage((CmdLineOption)m_optionList.get(ii))
             ).append(
                 EOL
@@ -711,15 +700,11 @@ public class CmdLineProcessor
 		}
 	
 		// Add the additional options
-        StringBuilders.asStringBuilder(
-            usage
-        ).append(
+        usage.append(
             EOL
         );
 		for(ii=0; ii<m_additionalOptions.size(); ii++) {
-            StringBuilders.asStringBuilder(
-                usage
-            ).append(
+            usage.append(
                 getUsage((CmdLineOption)m_additionalOptions.get(ii))
             ).append(
                 EOL
@@ -728,9 +713,7 @@ public class CmdLineProcessor
 		
 		// free args
 		if (m_freeArgOption == null) {
-            StringBuilders.asStringBuilder(
-                usage
-            ).append(
+            usage.append(
                 EOL
             ).append(
                 getArgPrefix()
@@ -740,12 +723,10 @@ public class CmdLineProcessor
                 EOL
             );
 		}else{
-			CharSequence  arg      = StringBuilders.newStringBuilder();
-			CharSequence  modifier = StringBuilders.newStringBuilder();
+		    StringBuilder  arg      = new StringBuilder();
+		    StringBuilder  modifier = new StringBuilder();
 			if (m_freeArgOption.getMaximum() == Integer.MAX_VALUE) {
-				StringBuilders.asStringBuilder(
-                    modifier
-                ).append(
+				modifier.append(
                     "["
                 ).append(
                     m_freeArgOption.getMinimum()
@@ -753,9 +734,7 @@ public class CmdLineProcessor
                     "..]"
                 );  
 			}else{
-                StringBuilders.asStringBuilder(
-                    modifier
-                ).append(
+                modifier.append(
                     "["
                 ).append(
                     m_freeArgOption.getMinimum()
@@ -767,9 +746,7 @@ public class CmdLineProcessor
                     "]"
                 );  
 			}
-            StringBuilders.asStringBuilder(
-               arg
-            ).append(
+            arg.append(
                 "Free args "
             ).append(
                 modifier
@@ -778,23 +755,17 @@ public class CmdLineProcessor
 			int padding = LEN_ARG_DESCR - arg.length();
 			padding = (padding < 0) ? 0 : padding;
 	
-            StringBuilders.asStringBuilder(
-                usage
-            ).append(
+            usage.append(
                 EOL
             ).append(
                 getArgPrefix()
             ).append(
                 arg
             );
-			for(int kk=0; kk<padding; kk++) StringBuilders.asStringBuilder(
-                usage
-            ).append(
+			for(int kk=0; kk<padding; kk++) usage.append(
                 ' '
             );
-            StringBuilders.asStringBuilder(
-                usage
-            ).append(
+            usage.append(
                 USAGE_DELIM
             ).append(
                 m_freeArgOption.getUsage()
@@ -817,9 +788,9 @@ public class CmdLineProcessor
 	{
 		int            ii;
 		String      	endl     = System.getProperty("line.separator");		
-		CharSequence	usage    = StringBuilders.newStringBuilder();
-        CharSequence	arg      = StringBuilders.newStringBuilder();
-        CharSequence	modifier = StringBuilders.newStringBuilder();
+		StringBuilder	usage    = new StringBuilder();
+		StringBuilder	arg      = new StringBuilder();
+		StringBuilder	modifier = new StringBuilder();
 		ArrayList		argUsage;
 		int				padding;
 		
@@ -828,23 +799,17 @@ public class CmdLineProcessor
 		if (argUsage.size() == 0) return "";
 		
 		if (option.isSwitch()) {
-			StringBuilders.asStringBuilder(
-                arg
-            ).append(
+		    arg.append(
                 option.getId().length() == 1 ? "-" : "--"
             ).append(
                 option.getId()
             );
 		}else{
-		    StringBuilders.asStringBuilder(
-                modifier
-            ).append(
+		    modifier.append(
                 " arg  "
             );
 			if (option.getMaximum() == Integer.MAX_VALUE) {
-                StringBuilders.asStringBuilder(
-                    modifier
-                ).append(
+                modifier.append(
                     "["
                 ).append(
                     option.getMinimum()
@@ -852,9 +817,7 @@ public class CmdLineProcessor
                     "..]"
                 );  
 			}else{
-                StringBuilders.asStringBuilder(
-                    modifier
-                ).append(
+                modifier.append(
                     "["
                 ).append(
                     option.getMinimum()
@@ -866,9 +829,7 @@ public class CmdLineProcessor
                     "]"
                 );  
 			}
-            StringBuilders.asStringBuilder(
-                arg
-            ).append(
+            arg.append(
                 option.getId().length() == 1 ? "-" : "--"
             ).append(
                 option.getId()
@@ -879,41 +840,29 @@ public class CmdLineProcessor
 		
 		padding = LEN_ARG_DESCR - arg.length();
 		padding = (padding < 0) ? 0 : padding;
-        StringBuilders.asStringBuilder(
-            usage
-        ).append(
+        usage.append(
             getArgPrefix()
         ).append(
             arg
         );
-		for(ii=0; ii<padding; ii++) StringBuilders.asStringBuilder(
-            usage
-        ).append(
+		for(ii=0; ii<padding; ii++) usage.append(
             ' '
         );
-        StringBuilders.asStringBuilder(
-            usage
-        ).append(
+        usage.append(
             USAGE_DELIM
         ).append(
             argUsage.get(0)
         );
 		
 		for(ii=1; ii<argUsage.size(); ii++) {
-            StringBuilders.asStringBuilder(
-                usage
-            ).append(
+            usage.append(
                 endl
             );
 			padding = LEN_ARG_PREFIX + LEN_ARG_DESCR + USAGE_DELIM.length();
-			for(int kk=0; kk<padding; kk++) StringBuilders.asStringBuilder(
-                usage
-            ).append(
+			for(int kk=0; kk<padding; kk++) usage.append(
                 ' '
             );
-            StringBuilders.asStringBuilder(
-                usage
-            ).append(
+            usage.append(
                 argUsage.get(ii)
             );
 		}
@@ -1030,7 +979,7 @@ public class CmdLineProcessor
 			int 		lineWidth)
 	{
 		ArrayList	    paragraph   = new ArrayList();
-		CharSequence	lineBuf     = StringBuilders.newStringBuilder(lineWidth);
+		StringBuilder	lineBuf     = new StringBuilder(lineWidth);
 		String          line, token;
 
 		
@@ -1044,18 +993,18 @@ public class CmdLineProcessor
 			if (token.equals("\n")) {
 				line = lineBuf.toString().trim();
 				paragraph.add(line);
-				lineBuf = StringBuilders.newStringBuilder(token);			
+				lineBuf = new StringBuilder(token);			
 			}else if (token.equals(" ")) {
-				if (lineBuf.length() > 0) StringBuilders.asStringBuilder(lineBuf).append(" "); // no leading ' '
+				if (lineBuf.length() > 0) lineBuf.append(" "); // no leading ' '
 			}else{
 				if ((lineBuf.length() + token.length()) >= lineWidth) {
 					line = lineBuf.toString().trim();
 					if (line.length() > 0) {
 						paragraph.add(line); // no empty line
-						lineBuf = StringBuilders.newStringBuilder(token);			
+						lineBuf = new StringBuilder(token);			
 					}
 				}else{
-                    StringBuilders.asStringBuilder(lineBuf).append(token);
+                    lineBuf.append(token);
 				}
 			}
 		}
@@ -1074,9 +1023,9 @@ public class CmdLineProcessor
 	 */
 	private String getArgPrefix()
 	{
-		CharSequence    buf = StringBuilders.newStringBuilder();
+	    StringBuilder    buf = new StringBuilder();
 		
-		for (int ii=0; ii<LEN_ARG_PREFIX; ii++) StringBuilders.asStringBuilder(buf).append(' ');	
+		for (int ii=0; ii<LEN_ARG_PREFIX; ii++) buf.append(' ');	
 		
 		return buf.toString();
 	}

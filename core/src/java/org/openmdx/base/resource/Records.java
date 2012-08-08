@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Records.java,v 1.7 2007/10/10 16:05:53 hburger Exp $
+ * Name:        $Id: Records.java,v 1.8 2008/03/21 18:31:20 hburger Exp $
  * Description: JCA: Utility methods for records
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:53 $
+ * Date:        $Date: 2008/03/21 18:31:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -178,7 +178,7 @@ public class Records
 		}
 
 		// Handle lists of objects recursively
-		Class elementClass=null;
+		Class<?> elementClass=null;
 		for(
 			int i=0;
 			i<genericArray.length;

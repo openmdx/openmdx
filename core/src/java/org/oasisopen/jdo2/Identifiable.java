@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Identifiable.java,v 1.13 2008/02/19 13:52:46 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Identifiable.java,v 1.15 2008/05/15 18:07:25 hburger Exp $
  * Description: Identifiable 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/19 13:52:46 $
+ * Date:        $Date: 2008/05/15 18:07:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2007, OMEX AG, Switzerland
+ * Copyright (c) 2006-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -63,12 +63,17 @@ import org.oasisopen.cci2.Identity;
 import org.oasisopen.spi2.DataObjectIdBuilder;
 import org.oasisopen.spi2.ObjectId;
 import org.oasisopen.spi2.ObjectIdBuilder;
-import org.openmdx.model1.mapping.java.Identifier;
+import org.openmdx.compatibility.kernel.application.cci.Classes;
 
 /**
  * Identifiable
  */
 public abstract class Identifiable {
+
+    /**
+     * The last component of <code>Identifiable.class.getPackage().getName()</code>.
+     */
+    private final static String JDO_PACKAGE_SUFFIX = "jdo2";
 
     /**
      * Retrieve the <code>openmdxjdoIdentity</code> field value
@@ -197,12 +202,15 @@ public abstract class Identifiable {
         Boolean mixinParent, Object parent,
         String referenceName,
         List<Class<T>> qualifierClass, 
+// TODO List<String> baseClass,
         List<String> objectClass
     ){
         return openmdxjdoObjectIdBuilder(parent).newObjectId(
             mixinParent, openmdxjdoGetObjectId(parent),
             referenceName,
-            qualifierClass, objectClass
+            qualifierClass,
+            null, // TODO baseClass 
+            objectClass
         );
     }
     
@@ -263,6 +271,7 @@ public abstract class Identifiable {
     ) {
         return (T) openmdxjdoGetObjectById(
             JDOHelper.getPersistenceManager(this),
+            objectClass, 
             objectId
         );
     }
@@ -293,8 +302,8 @@ public abstract class Identifiable {
      * Retrieve an object
      * 
      * @param persistenceManager the persistence manager to retrieve the object from
+     * @param objectClass 
      * @param objectId the object id as String
-     * 
      * @return the corresponding object instance
      * 
      * @throws InstantiationException
@@ -303,70 +312,109 @@ public abstract class Identifiable {
      */
     public static Object openmdxjdoGetObjectById(
         PersistenceManager persistenceManager,
+        Class<?> objectClass, 
         String objectId
     ) {
         if(objectId == null || persistenceManager == null) {
             return null;
         } else {
-            String className = jdoClassName(
-                openmdxjdoObjectIdBuilder(
-                    persistenceManager
-                ).toObjectId(
-                    objectId
-                ).getTargetClass(
-                )
-            ); 
             try {
                 return persistenceManager.getObjectById(
-                    Class.forName(className),
+                    jdoClass(objectClass),
                     objectId                
                 );
             } catch (ClassNotFoundException exception) {
                 throw new JDOFatalUserException(
-                    "Object id '" + objectId + "' refers to unavailable class '" + className + "'",
+                    "Could not find the data object class corresponding to '" + objectClass.getName() + "'",
                     exception
                 );
             } catch (NoClassDefFoundError exception) {
                 throw new JDOFatalUserException(
-                    "Object id '" + objectId + "' refers to unavailable class '" + className + "'",
+                    "The data object class corresponding to '" + objectClass.getName() + "' is unavailable",
                     exception
                 );
             }
         }
     }
     
+//  /**
+//   * Convert a model class name to the corresponding jdo class name
+//   * 
+//   * @param modelClass a model class
+//   * @return the corresponding jdo class name
+//   */
+//  private static String jdoClassName (
+//      List<String> modelClass
+//  ){
+//      StringBuilder javaClass = new StringBuilder();
+//      int iLimit = modelClass.size() - 1;
+//      for(
+//          int i = 0;
+//          i < iLimit;
+//          i++
+//      ){
+//          javaClass.append(
+//              Identifier.PACKAGE_NAME.toIdentifier(modelClass.get(i))
+//          ).append(
+//              '.'
+//          );
+//      }
+//      return javaClass.append(
+//          JDO_PACKAGE_SUFFIX
+//      ).append(
+//          '.'
+//      ).append(
+//          Identifier.CLASS_PROXY_NAME.toIdentifier(modelClass.get(iLimit))
+//      ).toString(
+//      );
+//  }
+
     /**
-     * Convert a model class name to the corresponding jdo class name
+     * Retrieve the generated model classes
      * 
-     * @param modelClass a model class
-     * @return the corresponding jdo class name
+     * @param javaClass
+     * 
+     * @return {modelClass, modelBaseClass}; or
+     * {null, null} in case of failure
+     * @throws ClassNotFoundException 
      */
-    private static String jdoClassName (
-        List<String> modelClass
-    ){
-        StringBuilder javaClass = new StringBuilder();
-        int iLimit = modelClass.size() - 1;
-        for(
-            int i = 0;
-            i < iLimit;
-            i++
-        ){
-            javaClass.append(
-                Identifier.PACKAGE_NAME.toIdentifier(modelClass.get(i))
-            ).append(
-                '.'
-            );
+    protected static Class<?> jdoClass(
+        Class<?> javaClass
+    ) throws ClassNotFoundException{
+        if(javaClass == null) {
+            return null;
+        } else {
+            String javaClassName = javaClass.getName();
+            int c = javaClassName.lastIndexOf('.');
+            int p = javaClassName.lastIndexOf('.', c - 1);
+            String jdoClassName = javaClassName.substring(0, p + 1) + JDO_PACKAGE_SUFFIX + javaClassName.substring(c);
+            return Classes.getApplicationClass(jdoClassName);
         }
-        return javaClass.append(
-            JDO_PACKAGE_SUFFIX
-        ).append(
-            '.'
-        ).append(
-            Identifier.CLASS_PROXY_NAME.toIdentifier(modelClass.get(iLimit))
-        ).toString(
-        );
     }
 
+    /**
+     * Retrieve the generated model classes
+     * 
+     * @param javaClass
+     * 
+     * @return {modelClass, modelBaseClass}; or
+     * {null, null} in case of failure
+     */
+    @SuppressWarnings("unchecked")
+    protected static List<String>[] modelClasses(
+        Class<?> javaClass
+    ){
+        List<String>[] modelClasses = new List[2];
+        try {
+            Class jdoClass = jdoClass(javaClass);
+            modelClasses[0] = (List<String>) jdoClass.getField("BASE_CLASS").get(null);
+            modelClasses[1] = (List<String>) jdoClass.getField("CLASS").get(null);
+        } catch (Exception exception) {
+            // Return array with null values
+        }    
+        return modelClasses;
+    }
+        
     
 //    /**
 //     * Retrieve an object
@@ -521,9 +569,4 @@ public abstract class Identifiable {
         
     }
 
-    /**
-     * The last component of <code>Identifiable.class.getPackage().getName()</code>.
-     */
-    private final static String JDO_PACKAGE_SUFFIX = "jdo2";
-    
 }

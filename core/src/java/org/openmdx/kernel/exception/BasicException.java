@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: BasicException.java,v 1.14 2008/01/08 16:16:32 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: BasicException.java,v 1.16 2008/06/27 16:59:28 hburger Exp $
  * Description: Basic Exception
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:32 $
+ * Date:        $Date: 2008/06/27 16:59:28 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -76,11 +75,7 @@ import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.enumeration.IntegerEnumeration;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 
-
 import java.util.concurrent.TimeUnit;
-
-
-
 
 
 /**
@@ -139,6 +134,7 @@ import java.util.concurrent.TimeUnit;
  * Do not make subclasses: BasicException will be final as soon as the
  * deprecated package org.openmdx.compatibility.base.exception has been removed!
  */
+@SuppressWarnings("unchecked")
 public class BasicException
     extends java.lang.Exception
         implements MultiLineStringRepresentation
@@ -2526,7 +2522,7 @@ public class BasicException
     /**
      * The default exception mapper
      */
-    private static class DefaultMapper
+    static class DefaultMapper
         implements Mapper
     {
         public BasicException map(Throwable throwable)

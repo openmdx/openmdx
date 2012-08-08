@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RoseExporterMain.java,v 1.8 2007/04/27 12:00:35 hburger Exp $
+ * Name:        $Id: RoseExporterMain.java,v 1.9 2008/03/21 18:40:08 hburger Exp $
  * Description: RoseExporterMain command-line tool
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/04/27 12:00:35 $
+ * Date:        $Date: 2008/03/21 18:40:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import org.openmdx.model1.exporter.spi.Model_1Accessor;
 import org.openmdx.model1.importer.rose.RoseImporter_1;
 
 //---------------------------------------------------------------------------  
+@SuppressWarnings("unchecked")
 public class RoseExporterMain {
 
   //-------------------------------------------------------------------------  

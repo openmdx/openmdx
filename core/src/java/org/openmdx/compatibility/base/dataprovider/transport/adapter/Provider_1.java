@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Provider_1.java,v 1.23 2008/02/29 18:07:10 hburger Exp $
+ * Name:        $Id: Provider_1.java,v 1.24 2008/03/28 01:24:12 hburger Exp $
  * Description: Dataprovider Adapter: Provider
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:07:10 $
+ * Date:        $Date: 2008/03/28 01:24:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -717,7 +717,7 @@ public class Provider_1
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ABORT,
                     null,
-                    "Non-transactional unit of work aborted"
+                    "Non-transactional or container-managed unit of work aborted"
                 );
             } finally {
                 this.completing = false;

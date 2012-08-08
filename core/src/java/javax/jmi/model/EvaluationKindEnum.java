@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings({"unchecked","serial"})
 public final class EvaluationKindEnum implements EvaluationKind {
     public static final EvaluationKindEnum IMMEDIATE = new EvaluationKindEnum("immediate");
     public static final EvaluationKindEnum DEFERRED = new EvaluationKindEnum("deferred");

@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.58 2008/02/29 18:04:32 hburger Exp $
+ * Name:        $Id: Model_1.java,v 1.64 2008/07/03 23:02:25 wfro Exp $
  * Description: Model_1 basic accessor
- * Revision:    $Revision: 1.58 $
+ * Revision:    $Revision: 1.64 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:04:32 $
+ * Date:        $Date: 2008/07/03 23:02:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -96,8 +97,9 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.url.protocol.XriProtocols;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.model1.accessor.basic.cci.ModelElement_1_1;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_4;
+import org.openmdx.model1.accessor.basic.cci.Model_1_5;
 import org.openmdx.model1.code.AggregationKind;
 import org.openmdx.model1.code.ModelAttributes;
 import org.openmdx.model1.code.ModelConstraints;
@@ -105,8 +107,10 @@ import org.openmdx.model1.code.ModelExceptions;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
 import org.openmdx.model1.code.Stereotypes;
+import org.openmdx.model1.mapping.AbstractNames;
 import org.openmdx.model1.mapping.Names;
 import org.openmdx.model1.mapping.xmi.XMINames;
+import org.w3c.cci2.LargeObject;
 
 /**
  * MOF repository basic accessor. This accessor is an added-value API to the
@@ -115,7 +119,7 @@ import org.openmdx.model1.mapping.xmi.XMINames;
 //---------------------------------------------------------------------------
 @SuppressWarnings("unchecked")
 public class Model_1
-  implements Model_1_4 {
+  implements Model_1_5 {
 
   //-------------------------------------------------------------------------
   public Model_1(
@@ -390,7 +394,8 @@ public class Model_1
             qualifiedPackageName.lastIndexOf(':') + 1
           );
           // test whether package already loaded
-          if(Model_1.cache.get(qualifiedPackageName + ":" + modelName) == null) {
+          String qualifiedModelName = (qualifiedPackageName + ":" + modelName).intern();
+          if(Model_1.cache.get(qualifiedModelName) == null) {
             if(!importing) {
               // beginImport
               DataproviderObject params = new DataproviderObject(
@@ -828,23 +833,7 @@ public class Model_1
         (value instanceof String) && 
         (PrimitiveTypes.STRING.equals(typeName) || PrimitiveTypes.ANYURI.equals(typeName))
       ) {
-        // validate maxLength
-        int maxLength = typeDef.values("maxLength").get(0) != null
-          ? ((Number)typeDef.values("maxLength").get(0)).intValue()
-          : Integer.MAX_VALUE;
-        if(((String)value).length() > maxLength) {
-          throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE, 
-            new BasicException.Parameter[]{
-              new BasicException.Parameter("length", ((String)value).length()),
-              new BasicException.Parameter("maxLength", maxLength),
-              new BasicException.Parameter("type name", typeName),
-              new BasicException.Parameter("context", validationContext)
-            },
-            "value of length exceeds maxLength"
-          );
-        }
+        return;
       }
       else if(
         (value instanceof Number) && 
@@ -881,7 +870,7 @@ public class Model_1
           return;
       }
       else if(
-        (value instanceof byte[]) && 
+        (value instanceof byte[] || value instanceof LargeObject) && 
         PrimitiveTypes.BINARY.equals(typeName)
       ) {
         return;
@@ -894,7 +883,7 @@ public class Model_1
         return;
       }
       else if(
-        (value instanceof InputStream || value instanceof Long) && 
+        (value instanceof InputStream || value instanceof LargeObject || value instanceof Long) && 
         PrimitiveTypes.BINARY.equals(typeName) &&
         Multiplicities.STREAM.equals(multiplicity)
       ) {
@@ -1275,7 +1264,7 @@ public class Model_1
 
     SysLog.trace("refreshing cache...");   
 
-    Map cache = new HashMap();
+    Map<String,ModelElement_1_0> cache = new IdentityHashMap<String,ModelElement_1_0>();
     
     // get exclusive access to repository. synchronize
     // with possibly concurrent loaders
@@ -1303,7 +1292,7 @@ public class Model_1
         ) {
           DataproviderObject elementDef = (DataproviderObject)j.next();
           cache.put(
-            elementDef.path().getBase(),
+            elementDef.path().getBase().intern(),
             new ModelElement_1(elementDef, this)
           ); 
         }
@@ -1341,7 +1330,7 @@ public class Model_1
           j.hasNext();
         ) {
           Path contentElementPath = (Path)j.next();
-          if(!cache.containsKey(contentElementPath.getBase())) {
+          if(!cache.containsKey(contentElementPath.getBase().intern())) {
             throw new ServiceException (
               BasicException.Code.DEFAULT_DOMAIN, 
               BasicException.Code.NOT_FOUND, 
@@ -1352,8 +1341,8 @@ public class Model_1
               "element is member of container but was not found in model. Probably the model is inconsistent."
             );
           }
-          ModelElement_1_0 contentElement = (ModelElement_1_0)cache.get(
-            contentElementPath.getBase()
+          ModelElement_1_0 contentElement = cache.get(
+            contentElementPath.getBase().intern()
           );
           if(contentElement.values(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ATTRIBUTE)) {
             attributes.put(
@@ -1469,171 +1458,174 @@ public class Model_1
     SysLog.trace("done refreshing cache");
   }
 
-  //-------------------------------------------------------------------------
-  public void addModels(
-    Collection qualifiedPackageNames
-  ) throws ServiceException {
-    this.loadModels(
-      qualifiedPackageNames
-    );
-  }
+    //-------------------------------------------------------------------------
+    public void addModels(
+        Collection qualifiedPackageNames
+    ) throws ServiceException {
+        this.loadModels(
+          qualifiedPackageNames
+        );
+    }
   
-  //-------------------------------------------------------------------------
-  private ModelElement_1_0 getElement(
-    java.lang.Object element,
-    Map elements
-  ) {
-    ModelElement_1_0 e = null;
-    if(element instanceof Path) {
-       e = (ModelElement_1_0)elements.get(((Path)element).getBase());
-    }
-    else if(element instanceof DataproviderObject_1_0) {
-      e = (ModelElement_1_0)elements.get(((DataproviderObject_1_0)element).path().getBase());
-    }
-    else if(element instanceof List) {
-        String qualifiedElementName = "";
-        int ii = 0;
-        for(Iterator i = ((List)element).iterator(); i.hasNext(); ii++) {
-            qualifiedElementName += (ii == 0 ? "" : ":") + i.next();
+    //-------------------------------------------------------------------------
+    protected ModelElement_1_0 getElement(
+        java.lang.Object element,
+        Map elements
+    ) {
+        ModelElement_1_0 e = null;
+        if(element instanceof Path) {
+            e = (ModelElement_1_0)elements.get(((Path)element).getBase().intern());
         }
-        e = (ModelElement_1_0)elements.get(qualifiedElementName);
-    }
-    else {
-      e = (ModelElement_1_0)elements.get(element); 
-    }
-    return e;
-  }  
-
-  //-------------------------------------------------------------------------
-  public ModelElement_1_0 getElement(
-    java.lang.Object element
-  ) throws ServiceException {
-    ModelElement_1_0 e = this.getElement(
-      element,
-      Model_1.cache
-    ); 
-    if(e == null) {
-      throw new ServiceException (
-        BasicException.Code.DEFAULT_DOMAIN, 
-        BasicException.Code.NOT_FOUND, 
-        new BasicException.Parameter [] {
-          new BasicException.Parameter("element", element)
-        },
-        "element not found in model package"
-      );
-    }
-    return e;
-  }
-  
-  //-------------------------------------------------------------------------
-  public ModelElement_1_0 findElement(
-    Object element
-  ) {
-    return this.getElement(
-      element,
-      Model_1.cache
-    );
-  }
-  
-  //-------------------------------------------------------------------------
-  public Collection getContent(
-  ) throws ServiceException {
-    return Model_1.cache.values();
-  }  
-  
-  //-------------------------------------------------------------------------
-  public boolean isLocal(
-    Object type,
-    Object modelPackage
-  ) throws ServiceException {
-    String packageNamePackage = this.toJavaPackageName(modelPackage, "-");
-    String packageNameType = this.toJavaPackageName(type, "-");
-    return packageNamePackage.equals(packageNameType);
-  }
-
-  //---------------------------------------------------------------------------
-  public ModelElement_1_0 getFeatureDef(
-    ModelElement_1_0 classifierDef,
-    String feature,
-    boolean includeSubtypes
-  ) throws ServiceException {
-
-    ModelElement_1_0 featureDef = null;
-    
-    // Structure
-    if(this.isStructureType(classifierDef)) {
-      if((featureDef = (ModelElement_1_0)((Map)classifierDef.values("field").get(0)).get(feature)) != null) {
-          return featureDef;
-      }
-    }
-    
-    // Class
-    else {
-      if(includeSubtypes) {
-        // references stored as attributes are in maps allReference and allAttribute. 
-        // give allReference prioritiy in case feature is a reference
-        if((featureDef = (ModelElement_1_0)((Map)classifierDef.values("allFeatureWithSubtype").get(0)).get(feature)) != null) {
-          return featureDef;
+        else if(element instanceof DataproviderObject_1_0) {
+            e = (ModelElement_1_0)elements.get(((DataproviderObject_1_0)element).path().getBase().intern());
         }
-      }
-      else {
-        // references stored as attributes are in maps allReference and allAttribute. 
-        // give allReference priority in case feature is a reference
-        if((featureDef = (ModelElement_1_0)((Map)classifierDef.values("allFeature").get(0)).get(feature)) != null) {
-          return featureDef;
+        else if(element instanceof List) {
+            String qualifiedElementName = "";
+            int ii = 0;
+            for(Iterator i = ((List)element).iterator(); i.hasNext(); ii++) {
+                qualifiedElementName += (ii == 0 ? "" : ":") + i.next();
+            }
+            e = (ModelElement_1_0)elements.get(qualifiedElementName.intern());
         }
-      }
+        else if(element instanceof String) {
+            e = (ModelElement_1_0)elements.get(((String)element).intern());
+        }
+        else {
+            e = (ModelElement_1_0)elements.get(element); 
+        }
+        return e;
+    }  
+
+    //-------------------------------------------------------------------------
+    public ModelElement_1_0 getElement(
+        java.lang.Object element
+    ) throws ServiceException {
+        ModelElement_1_0 e = this.getElement(
+          element,
+          Model_1.cache
+        ); 
+        if(e == null) {
+          throw new ServiceException (
+            BasicException.Code.DEFAULT_DOMAIN, 
+            BasicException.Code.NOT_FOUND, 
+            new BasicException.Parameter [] {
+              new BasicException.Parameter("element", element)
+            },
+            "element not found in model package"
+          );
+        }
+        return e;
     }
-    return null;
-  }
+  
+    //-------------------------------------------------------------------------
+    public ModelElement_1_0 findElement(
+        Object element
+    ) {
+        return this.getElement(
+          element,
+          Model_1.cache
+        );
+    }
+  
+    //-------------------------------------------------------------------------
+    public Collection<ModelElement_1_0> getContent(
+    ) throws ServiceException {
+        return Model_1.cache.values();
+    }  
+  
+    //-------------------------------------------------------------------------
+    public boolean isLocal(
+        Object type,
+        Object modelPackage
+    ) throws ServiceException {
+        String packageNamePackage = this.toJavaPackageName(modelPackage, "-");
+        String packageNameType = this.toJavaPackageName(type, "-");
+        return packageNamePackage.equals(packageNameType);
+    }
 
-  //---------------------------------------------------------------------------
-  /**
-   * Return the set of attributes and references of the specified class, 
-   * and if specified its subtypes.
-   *  
-   * @param classDef class to get feature of.  
-   * @param includeSubtypes if true, in addition returns the features
-   *         of the subtypes of class.
-   * @param includeDerived if false, only non-derived attributes are returned.
-   *         if true, derived and non-derived attributes are returned.
-   * @return Map map of features of class, its supertypes and subtypes. The
-   *          map contains an entry of the form (featureName, featureDef).
-   */
-  public Map getAttributeDefs(
-    ModelElement_1_0 classDef,
-    boolean includeSubtypes,
-    boolean includeDerived
-  ) throws ServiceException {
-      return getStructuralFeatureDefs(
-        classDef, 
-        includeSubtypes, 
-        includeDerived, 
-        true // attributesOnly
-      );
-  }
+    //---------------------------------------------------------------------------
+    public ModelElement_1_0 getFeatureDef(
+        ModelElement_1_0 classifierDef,
+        String feature,
+        boolean includeSubtypes
+    ) throws ServiceException {
 
-  /**
-   * Return the set of attributes and references of the specified class, 
-   * and if specified its subtypes.
-   *  
-   * @param classDef class to get feature of.  
-   * @param includeSubtypes if true, in addition returns the features
-   *         of the subtypes of class.
-   * @param includeDerived if false, only non-derived attributes are returned.
-   *         if true, derived and non-derived attributes are returned.
-   * @param attributesOnly 
-   *         if true return the same result as getAttributeDefs;
-   *         if false include references not stored as attributes
-   * @return Map map of features of class, its supertypes and subtypes. The
-   *          map contains an entry of the form (featureName, featureDef).
-   */
-  public Map getStructuralFeatureDefs(
-    ModelElement_1_0 classDef,
-    boolean includeSubtypes,
-    boolean includeDerived,
-    boolean attributesOnly
-  ) throws ServiceException {
+        ModelElement_1_0 featureDef = null;
+        
+        // Structure
+        if(this.isStructureType(classifierDef)) {
+          if((featureDef = (ModelElement_1_0)((Map)classifierDef.values("field").get(0)).get(feature)) != null) {
+              return featureDef;
+          }
+        }
+        
+        // Class
+        else {
+          if(includeSubtypes) {
+            // references stored as attributes are in maps allReference and allAttribute. 
+            // give allReference prioritiy in case feature is a reference
+            if((featureDef = (ModelElement_1_0)((Map)classifierDef.values("allFeatureWithSubtype").get(0)).get(feature)) != null) {
+              return featureDef;
+            }
+          }
+          else {
+            // references stored as attributes are in maps allReference and allAttribute. 
+            // give allReference priority in case feature is a reference
+            if((featureDef = (ModelElement_1_0)((Map)classifierDef.values("allFeature").get(0)).get(feature)) != null) {
+              return featureDef;
+            }
+          }
+        }
+        return null;
+    }
+
+    //---------------------------------------------------------------------------
+    /**
+     * Return the set of attributes and references of the specified class, 
+     * and if specified its subtypes.
+     *  
+     * @param classDef class to get feature of.  
+     * @param includeSubtypes if true, in addition returns the features
+     *         of the subtypes of class.
+     * @param includeDerived if false, only non-derived attributes are returned.
+     *         if true, derived and non-derived attributes are returned.
+     * @return Map map of features of class, its supertypes and subtypes. The
+     *          map contains an entry of the form (featureName, featureDef).
+     */
+    public Map getAttributeDefs(
+        ModelElement_1_0 classDef,
+        boolean includeSubtypes,
+        boolean includeDerived
+    ) throws ServiceException {
+        return getStructuralFeatureDefs(
+            classDef, 
+            includeSubtypes, 
+            includeDerived, 
+            true // attributesOnly
+        );
+    }
+
+    /**
+     * Return the set of attributes and references of the specified class, 
+     * and if specified its subtypes.
+     *  
+     * @param classDef class to get feature of.  
+     * @param includeSubtypes if true, in addition returns the features
+     *         of the subtypes of class.
+     * @param includeDerived if false, only non-derived attributes are returned.
+     *         if true, derived and non-derived attributes are returned.
+     * @param attributesOnly 
+     *         if true return the same result as getAttributeDefs;
+     *         if false include references not stored as attributes
+     * @return Map map of features of class, its supertypes and subtypes. The
+     *          map contains an entry of the form (featureName, featureDef).
+     */
+    public Map getStructuralFeatureDefs(
+        ModelElement_1_0 classDef,
+        boolean includeSubtypes,
+        boolean includeDerived,
+        boolean attributesOnly
+    ) throws ServiceException {
       Map allStructuralFeatureDefs = (Map)structuralFeatureDefMap.get(classDef.path());
       if(allStructuralFeatureDefs == null) {
           structuralFeatureDefMap.put(
@@ -1688,264 +1680,233 @@ public class Model_1
           );
       }
       return structuralFeatureDefs;
-  }
+    }
   
-  //-------------------------------------------------------------------------
-  private boolean referenceIsStoredAsAttribute(
-    java.lang.Object referenceType,
-    Map elements
-  ) throws ServiceException {
-    ModelElement_1_0 reference = this.getElement(
-      referenceType, 
-      elements
-    );    
-    ModelElement_1_0 referencedEnd = this.getElement(
-      reference.values("referencedEnd").get(0),
-      elements
-    );
-    ModelElement_1_0 exposedEnd = this.getElement(
-      reference.values("exposedEnd").get(0),
-      elements
-    );
-    List qualifierTypes = referencedEnd.values("qualifierType");
-    return (
-      //!((Boolean)association.values("isDerived").get(0)).booleanValue() &&
-      AggregationKind.NONE.equals(referencedEnd.values("aggregation").get(0)) &&
-      AggregationKind.NONE.equals(exposedEnd.values("aggregation").get(0)) &&
-      ((qualifierTypes.size() == 0) || this.isPrimitiveType(qualifierTypes.get(0), elements))
-    );
-  }
+    //-------------------------------------------------------------------------
+    private boolean referenceIsStoredAsAttribute(
+        java.lang.Object referenceType,
+        Map elements
+    ) throws ServiceException {
+        ModelElement_1_0 reference = this.getElement(
+          referenceType, 
+          elements
+        );    
+        return reference.isReferenceStoredAsAttribute(elements);
+    }
 
-  //-------------------------------------------------------------------------
-  public boolean referenceIsStoredAsAttribute(
-    java.lang.Object referenceType
-  ) throws ServiceException {
-    return this.referenceIsStoredAsAttribute(
-      referenceType,
-      Model_1.cache
-    );
-  }
-
-  //-------------------------------------------------------------------------
-//private boolean referenceIsMultivalued(
-//    java.lang.Object referenceType,
-//    Map elements
-//  ) throws ServiceException {
-//    ModelElement_1_0 reference = this.getElement(
-//      referenceType, 
-//      elements
-//    );    
-//    ModelElement_1_0 referencedEnd = this.getElement(
-//      reference.values("referencedEnd").get(0),
-//      elements
-//    );
-//    List qualifierTypes = referencedEnd.values("qualifierType");      
-//    return !qualifierTypes.isEmpty();
-//  }
-//  
-  //-------------------------------------------------------------------------
-  private boolean referenceIsDerived(
-    java.lang.Object referenceType,
-    Map elements
-  ) throws ServiceException {
-    ModelElement_1_0 reference = this.getElement(
-      referenceType,
-      elements
-    );
-    ModelElement_1_0 referencedEnd = this.getElement(
-      reference.values("referencedEnd").get(0),
-      elements
-    );
-    ModelElement_1_0 association = this.getElement(
-      referencedEnd.values("container").get(0),
-      elements
-    );
-    if(association.values("isDerived").size() < 1) {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.ASSERTION_FAILURE, 
-          new BasicException.Parameter[]{
-            new BasicException.Parameter("association", association)
-          },
-          "missing feature isDerived"
+    //-------------------------------------------------------------------------
+    public boolean referenceIsStoredAsAttribute(
+        java.lang.Object referenceType
+    ) throws ServiceException {
+        return this.referenceIsStoredAsAttribute(
+          referenceType,
+          Model_1.cache
         );
     }
-    return ((Boolean)association.values("isDerived").get(0)).booleanValue();
-  }
 
-  //-------------------------------------------------------------------------
-  public boolean referenceIsDerived(
-    java.lang.Object referenceType
-  ) throws ServiceException {
-    return this.referenceIsDerived(
-      referenceType,
-      Model_1.cache
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("deprecation")
-private ModelElement_1_0 getDereferencedType(
-    java.lang.Object _element,
-    Map elements, 
-    boolean xriAsString
-  ) throws ServiceException {
-      java.lang.Object element = _element;
-    Set visitedElements = null;
-    Object originalElement = element;
-    while(true) {
-      ModelElement_1_0 modelElement = this.getElement(element, elements);
-      if(modelElement == null) {
-        throw new ServiceException (
-          BasicException.Code.DEFAULT_DOMAIN, 
-          BasicException.Code.NOT_FOUND, 
-          new BasicException.Parameter [] {
-            new BasicException.Parameter("element", element)
-          },
-          "element not found in repository. Can not dereference type"
-        );
-      }
-      if(ModelAttributes.ALIAS_TYPE.equals(modelElement.values(SystemAttributes.OBJECT_CLASS).get(0))) {
-        if(visitedElements == null) {
-            visitedElements = new HashSet();
-        }
-        if(visitedElements.contains(modelElement)) {
-          throw new ServiceException (
-            ModelExceptions.MODEL_DOMAIN,
-            ModelExceptions.CIRCULAR_ALIAS_TYPE_DEFINITION, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("element", originalElement)
-            },
-            ModelConstraints.CIRCULAR_TYPE_DEPENCENCY_NOT_ALLOWED
-          );
-        }
-        visitedElements.add(modelElement);
-        element = modelElement.values("type").get(0);
-        Path elementType = (Path) element;
-        if(
-            !xriAsString &&
-            PrimitiveTypes.XRI_ALIAS.equals(elementType.getBase())
-        ){
-            element = elementType.getParent().add(PrimitiveTypes.XRI);
-        }
-      }
-      else {
-        return modelElement;
-      }
-    }   
-  }
-
-  //-------------------------------------------------------------------------
-  public ModelElement_1_0 getDereferencedType(
-    java.lang.Object element
-  ) throws ServiceException {
-      return this.getDereferencedType(
-          element,
-          Model_1.cache, 
-          true // xriAsString
-      );
-  }
-  
-  //-------------------------------------------------------------------------
-  public ModelElement_1_0 getDereferencedType(
-      java.lang.Object element,
-      boolean xriAsString
+    //-------------------------------------------------------------------------
+    private boolean referenceIsDerived(
+        java.lang.Object referenceType,
+        Map elements
     ) throws ServiceException {
-      return this.getDereferencedType(
-        element,
-        Model_1.cache, 
-        xriAsString
-      );
+        ModelElement_1_0 reference = this.getElement(
+          referenceType,
+          elements
+        );
+        ModelElement_1_0 referencedEnd = this.getElement(
+          reference.values("referencedEnd").get(0),
+          elements
+        );
+        ModelElement_1_0 association = this.getElement(
+          referencedEnd.values("container").get(0),
+          elements
+        );
+        if(association.values("isDerived").size() < 1) {
+            throw new ServiceException(
+              BasicException.Code.DEFAULT_DOMAIN,
+              BasicException.Code.ASSERTION_FAILURE, 
+              new BasicException.Parameter[]{
+                new BasicException.Parameter("association", association)
+              },
+              "missing feature isDerived"
+            );
+        }
+        return ((Boolean)association.values("isDerived").get(0)).booleanValue();
+    }
+
+    //-------------------------------------------------------------------------
+    public boolean referenceIsDerived(
+        java.lang.Object referenceType
+    ) throws ServiceException {
+        return this.referenceIsDerived(
+          referenceType,
+          Model_1.cache
+        );
+    }
+
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("deprecation")
+    private ModelElement_1_0 getDereferencedType(
+        java.lang.Object _element,
+        Map elements, 
+        boolean xriAsString
+    ) throws ServiceException {
+        java.lang.Object element = _element;
+        Set visitedElements = null;
+        Object originalElement = element;
+        while(true) {
+            ModelElement_1_0 modelElement = this.getElement(element, elements);
+            if(modelElement == null) {
+                throw new ServiceException (
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.NOT_FOUND, 
+                    new BasicException.Parameter [] {
+                        new BasicException.Parameter("element", element)
+                    },
+                    "element not found in repository. Can not dereference type"
+                );
+            }
+            if(modelElement.isAliasType()) {
+                if(visitedElements == null) {
+                    visitedElements = new HashSet();
+                }
+                if(visitedElements.contains(modelElement)) {
+                    throw new ServiceException (
+                        ModelExceptions.MODEL_DOMAIN,
+                        ModelExceptions.CIRCULAR_ALIAS_TYPE_DEFINITION, 
+                        new BasicException.Parameter [] {
+                            new BasicException.Parameter("element", originalElement)
+                        },
+                        ModelConstraints.CIRCULAR_TYPE_DEPENCENCY_NOT_ALLOWED
+                    );
+                }
+                visitedElements.add(modelElement);
+                element = modelElement.values("type").get(0);
+                Path elementType = (Path) element;
+                if(
+                    !xriAsString &&
+                    PrimitiveTypes.XRI_ALIAS.equals(elementType.getBase())
+                ) {
+                    element = elementType.getParent().add(PrimitiveTypes.XRI);
+                }
+            }
+            else {
+                return modelElement;
+            }
+        }   
+    }
+
+    //-------------------------------------------------------------------------
+    public ModelElement_1_0 getDereferencedType(
+        java.lang.Object element
+    ) throws ServiceException {
+        return this.getDereferencedType(
+            element,
+            Model_1.cache, 
+            true // xriAsString
+        );
+    }
+  
+    //-------------------------------------------------------------------------
+    public ModelElement_1_0 getDereferencedType(
+        java.lang.Object element,
+        boolean xriAsString
+    ) throws ServiceException {
+        return this.getDereferencedType(
+            element,
+            Model_1.cache, 
+            xriAsString
+        );
     }
     
-  //-------------------------------------------------------------------------
-  public ModelElement_1_0 getReferenceType(
-    Path path
-  ) throws ServiceException {
-    AssociationDef[] assocDefs = this.getAssociationDefs(path);
-    return assocDefs[1].getReference();
-  }
-
-  //-------------------------------------------------------------------------
-  private boolean isPrimitiveType(
-    java.lang.Object type,
-    Map elements
-  ) throws ServiceException {   
-    return this.getDereferencedType(type, elements, false).values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE);
-  }
-
-  //-------------------------------------------------------------------------
-  public boolean isPrimitiveType(
-    java.lang.Object type
-  ) throws ServiceException {   
-    return this.isPrimitiveType(
-      type,
-      Model_1.cache
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  private boolean isNumericType(
-    java.lang.Object type,
-    Map elements
-  ) throws ServiceException {   
-    ModelElement_1_0 typeDef = this.getDereferencedType(type, elements, false);
-    if(typeDef.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE)) {
-      String typeName = (String)typeDef.values("qualifiedName").get(0);
-      return 
-        PrimitiveTypes.DECIMAL.equals(typeName) ||
-        PrimitiveTypes.INTEGER.equals(typeName) ||
-        PrimitiveTypes.LONG.equals(typeName) ||
-        PrimitiveTypes.SHORT.equals(typeName);
+    //-------------------------------------------------------------------------
+    public ModelElement_1_0 getReferenceType(
+        Path path
+    ) throws ServiceException {
+        AssociationDef[] assocDefs = this.getAssociationDefs(path);
+        return assocDefs[1].getReference();
     }
-    return false;
-  }
 
-  //-------------------------------------------------------------------------
-  public boolean isNumericType(
-    java.lang.Object type
-  ) throws ServiceException {
-    return this.isNumericType(
-      type,
-      Model_1.cache
-    );
-  }
+    //-------------------------------------------------------------------------
+    protected boolean isPrimitiveType(
+        java.lang.Object type,
+        Map elements
+    ) throws ServiceException {   
+        return this.getDereferencedType(type, elements, false).isPrimitiveType();
+    }
 
-  //-------------------------------------------------------------------------
-  public boolean isStructureType(
-    java.lang.Object type
-  ) throws ServiceException {
-    return this.getDereferencedType(type).values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_TYPE);
-  }
+    //-------------------------------------------------------------------------
+    public boolean isPrimitiveType(
+        java.lang.Object type
+    ) throws ServiceException {   
+        return this.isPrimitiveType(
+          type,
+          Model_1.cache
+        );
+    }
 
-  //-------------------------------------------------------------------------
-  public boolean isStructureFieldType(
-    java.lang.Object type
-  ) throws ServiceException {
-    return this.getDereferencedType(type).values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_FIELD);
-  }
+    //-------------------------------------------------------------------------
+    private boolean isNumericType(
+        java.lang.Object type,
+        Map elements
+    ) throws ServiceException {   
+        ModelElement_1_0 typeDef = this.getDereferencedType(type, elements, false);
+        if(typeDef.isPrimitiveType()) {
+            String typeName = (String)typeDef.values("qualifiedName").get(0);
+            return 
+                PrimitiveTypes.DECIMAL.equals(typeName) ||
+                PrimitiveTypes.INTEGER.equals(typeName) ||
+                PrimitiveTypes.LONG.equals(typeName) ||
+                PrimitiveTypes.SHORT.equals(typeName);
+          }
+          return false;
+    }
+
+    //-------------------------------------------------------------------------
+    public boolean isNumericType(
+        java.lang.Object type
+    ) throws ServiceException {
+        return this.isNumericType(
+          type,
+          Model_1.cache
+        );
+    }
+
+    //-------------------------------------------------------------------------
+    public boolean isStructureType(
+        java.lang.Object type
+    ) throws ServiceException {
+        return this.getDereferencedType(type).isStructureType();
+    }
+
+    //-------------------------------------------------------------------------
+    public boolean isStructureFieldType(
+        java.lang.Object type
+    ) throws ServiceException {
+        return this.getDereferencedType(type).isStructureFieldType();
+    }
   
-  //---------------------------------------------------------------------------
-  public void verifyObjectCollection(
-    Object values,
-    Object type,
-    String multiplicity,
-    boolean includeRequired
-  ) throws ServiceException {
-    Stack validationContext = new Stack();
-    validationContext.push(
-      Arrays.asList(new Object[]{"values", values})
-    );
-    this.verifyObjectCollection(
-      values,
-      type,
-      multiplicity,
-      includeRequired,
-      validationContext, 
-      true, // attributesOnly
-      true // verifyDerived
-    );
-  }
+    //---------------------------------------------------------------------------
+    public void verifyObjectCollection(
+        Object values,
+        Object type,
+        String multiplicity,
+        boolean includeRequired
+    ) throws ServiceException {
+        Stack validationContext = new Stack();
+        validationContext.push(
+          Arrays.asList(new Object[]{"values", values})
+        );
+        this.verifyObjectCollection(
+          values,
+          type,
+          multiplicity,
+          includeRequired,
+          validationContext, 
+          true, // attributesOnly
+          true // verifyDerived
+        );
+    }
   
   //-------------------------------------------------------------------------
   /**
@@ -2109,102 +2070,92 @@ private ModelElement_1_0 getDereferencedType(
         );
     }
   
-  //-------------------------------------------------------------------------
-  public boolean isClassType(
-    java.lang.Object type
-  ) throws ServiceException {
-    return this.getDereferencedType(type).values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.CLASS);
-  }
-
-  //-------------------------------------------------------------------------
-  public boolean isStructuralFeatureType(
-    java.lang.Object type
-  ) throws ServiceException {
-    ModelElement_1_0 typeDef = this.getDereferencedType(type);
-    return
-      typeDef.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE) ||
-      typeDef.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE);
-  }
-
-  //-------------------------------------------------------------------------
-  public boolean isReferenceType(
-    java.lang.Object type,
-    Map elements
-  ) throws ServiceException {
-    return this.getDereferencedType(
-        type,
-        elements, 
-        true // xriAsString
-    ).values(
-        SystemAttributes.OBJECT_CLASS
-    ).contains(
-        ModelAttributes.REFERENCE
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  public boolean isReferenceType(
-      java.lang.Object type
+    //-------------------------------------------------------------------------
+    public boolean isClassType(
+        java.lang.Object type
     ) throws ServiceException {
-      return isReferenceType(
-          type,
-          Model_1.cache
-      );
+        return this.getDereferencedType(type).isClassType();
     }
 
-  //-------------------------------------------------------------------------
-  public boolean isAttributeType(
-    java.lang.Object type
-  ) throws ServiceException {
-    return this.getDereferencedType(type).values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE);
-  }
-
-  //-------------------------------------------------------------------------
-  public boolean isOperationType(
-    java.lang.Object type
-  ) throws ServiceException {
-    return this.getDereferencedType(type).values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION);
-  }
-
-  //-------------------------------------------------------------------------
-  public boolean isPackageType(
-    java.lang.Object type
-  ) throws ServiceException {
-    return this.getDereferencedType(type).values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PACKAGE);
-  }
-
-  //-------------------------------------------------------------------------
-  public boolean isRoled(
-    ModelElement_1_0 classDef
-  ) throws ServiceException {
-    ModelElement_1_0 superClass = null;
-    boolean isRole = false;
-    for(
-      Iterator i = classDef.getValues("allSupertype").iterator();
-      i.hasNext() && !isRole;
-    ) {
-      superClass = this.getDereferencedType(i.next());
-      isRole = superClass.values("stereotype").contains(Stereotypes.ROLE);
+    //-------------------------------------------------------------------------
+    public boolean isStructuralFeatureType(
+        java.lang.Object type
+    ) throws ServiceException {
+        ModelElement_1_0 typeDef = this.getDereferencedType(type);
+        return typeDef.isReferenceType() || typeDef.isAttributeType();
     }
-    return isRole;
-  }  
+
+    //-------------------------------------------------------------------------
+    public boolean isReferenceType(
+        java.lang.Object type,
+        Map elements
+    ) throws ServiceException {
+        return this.getDereferencedType(type, elements, true).isReferenceType();
+    }
+
+    //-------------------------------------------------------------------------
+    public boolean isReferenceType(
+        java.lang.Object type
+    ) throws ServiceException {
+        return this.isReferenceType(
+            type,
+            Model_1.cache
+        );
+    }
+
+    //-------------------------------------------------------------------------
+    public boolean isAttributeType(
+        java.lang.Object type
+    ) throws ServiceException {
+        return this.getDereferencedType(type).isAttributeType();
+    }
+
+    //-------------------------------------------------------------------------
+    public boolean isOperationType(
+        java.lang.Object type
+    ) throws ServiceException {
+        return this.getDereferencedType(type).isOperationType();
+    }
+
+    //-------------------------------------------------------------------------
+    public boolean isPackageType(
+        java.lang.Object type
+    ) throws ServiceException {
+        return this.getDereferencedType(type).isPackageType();
+    }
+
+    //-------------------------------------------------------------------------
+    public boolean isRoled(
+        ModelElement_1_0 classDef
+    ) throws ServiceException {
+        ModelElement_1_0 superClass = null;
+        boolean isRole = false;
+        for(
+          Iterator i = classDef.getValues("allSupertype").iterator();
+          i.hasNext() && !isRole;
+        ) {
+          superClass = this.getDereferencedType(i.next());
+          isRole = superClass.values("stereotype").contains(Stereotypes.ROLE);
+        }
+        return isRole;
+    }  
   
-  //-------------------------------------------------------------------------
-  public boolean isSubtypeOf(
-    DataproviderObject object,
-    Object type
-  ) throws ServiceException {
-    String typeName = (String)this.getElement(type).values("qualifiedName").get(0);
-    for(
-      Iterator i = this.getElement(object.values(SystemAttributes.OBJECT_CLASS).get(0)).values("allSupertype").iterator();
-      i.hasNext();
-    ) {
-      if(typeName.equals(((Path)i.next()).getBase())) {
-        return true;
-      }
+    //-------------------------------------------------------------------------
+    public boolean isSubtypeOf(
+        DataproviderObject object,
+        Object type
+    ) throws ServiceException {
+        String typeName = (String)this.getElement(type).values("qualifiedName").get(0);
+        for(
+          Iterator i = this.getElement(object.values(SystemAttributes.OBJECT_CLASS).get(0)).values("allSupertype").iterator();
+          i.hasNext();
+        ) {
+          if(typeName.equals(((Path)i.next()).getBase())) {
+            return true;
+          }
+        }
+      return false;
     }
-    return false;
-  }
 
   //-------------------------------------------------------------------------
   public boolean isInstanceof(
@@ -2286,7 +2237,7 @@ private ModelElement_1_0 getDereferencedType(
         if(openmdx1) {
             Names.openmdx1NamespaceElement(target, source);
         } else {
-            Names.openmdx2NamespaceElement(target, source);
+            AbstractNames.openmdx2NamespaceElement(target, source);
         }
     }
     return javaPackageName.append(
@@ -2404,6 +2355,22 @@ private ModelElement_1_0 getDereferencedType(
         };
     }
 
+    
+    //------------------------------------------------------------------------
+    // Implements Model_1_5
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.model1.accessor.basic.cci.Model_1_5#isAssociationType(java.lang.Object)
+     */
+    public boolean isAssociationType(
+        Object type
+    ) throws ServiceException {
+        ModelElement_1_1 typeDef = (ModelElement_1_1) this.getDereferencedType(type);
+        return typeDef.isAssociationType();
+    }
+    
+    
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
@@ -2418,7 +2385,7 @@ private ModelElement_1_0 getDereferencedType(
     private static volatile Map structuralFeatureDefMap = new HashMap();
   
     // Cache contains (qualifiedName, ModelElement_1_0)
-    private static volatile Map cache = new HashMap();
+    private static volatile Map<String,ModelElement_1_0> cache = new IdentityHashMap<String,ModelElement_1_0>();
    
     /**
      * <em>Sorted</em> array of deprecated model package names.

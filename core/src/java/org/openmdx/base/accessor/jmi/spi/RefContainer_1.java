@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefContainer_1.java,v 1.6 2008/02/11 17:23:41 hburger Exp $
+ * Name:        $Id: RefContainer_1.java,v 1.14 2008/04/21 17:06:27 hburger Exp $
  * Description: RefContainer_1 class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/11 17:23:41 $
+ * Date:        $Date: 2008/04/21 17:06:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,9 +58,9 @@ import java.util.List;
 
 import javax.jmi.reflect.RefPackage;
 
+import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
-import org.openmdx.base.accessor.jmi.cci.RefContainer_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.collection.FilterableMap;
@@ -82,9 +82,11 @@ import org.openmdx.compatibility.base.query.FilterProperty;
 //---------------------------------------------------------------------------
 // RefContainer_1
 //---------------------------------------------------------------------------
+@SuppressWarnings("deprecation")
 public class RefContainer_1
   extends AbstractCollection<RefObject_1_0>
-  implements Serializable, RefContainer_1_0 {
+  implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.RefContainer_1_0, RefContainer
+{
 
   /**
    * Implements <code>Serializable</code>
@@ -104,7 +106,7 @@ public class RefContainer_1
    * @param   The delegate contains unmarshalled elements
    */
   @SuppressWarnings("unchecked")
-public RefContainer_1(
+  public RefContainer_1(
     Marshaller marshaller,
     FilterableMap<String,Object_1_0> container
   ) {
@@ -171,35 +173,68 @@ public RefContainer_1(
     );
   }
 
-  //-------------------------------------------------------------------------
-  public List<RefObject_1_0> toList(
-    Object _criteria
-  ) {
-    Object criteria = _criteria;
-    FilterableMap<String, ?> source = this.container;
-    if(criteria instanceof RefFilter_1_0) {
-      RefFilter_1_0 filter=(RefFilter_1_0)criteria;
-      Collection<?> filterProperties = filter.refGetFilterProperties();
-      Collection<?> attributeSpecifiers = filter.refGetAttributeSpecifiers();
-      source = this.container.subMap(
-      filterProperties.toArray(new FilterProperty[filterProperties.size()])
-      );
-      criteria = attributeSpecifiers.toArray(new AttributeSpecifier[attributeSpecifiers.size()]);
+    //-------------------------------------------------------------------------
+    public List<RefObject_1_0> toList(
+        Object _criteria
+    ) {
+        Object criteria = _criteria;
+        FilterableMap<String, ?> source = this.container;
+        if(criteria instanceof Object[]) {
+            Object[] args = (Object[]) criteria;
+            if(args.length == 1 && args[0] instanceof RefFilter_1_0) {
+                criteria = args[0];
+            }
+        }
+        if(criteria instanceof FilterProperty[]) {
+            source = this.container.subMap(criteria);
+            criteria = null;            
+        }
+        else if(criteria instanceof AttributeSpecifier[]) {
+            source = this.container.subMap(null);
+        }
+        else if(
+            (criteria instanceof Object[]) && 
+            (((Object[])criteria).length == 2) &&
+            (((Object[])criteria)[0] instanceof FilterProperty[]) && 
+            (((Object[])criteria)[1] instanceof AttributeSpecifier[]) 
+        ) {
+            source = this.container.subMap(((Object[])criteria)[0]);
+            criteria = ((Object[])criteria)[1];
+        }
+        else if(criteria instanceof RefFilter_1_0) {
+            RefFilter_1_0 filter=(RefFilter_1_0)criteria;
+            Collection<?> filterProperties = filter.refGetFilterProperties();
+            Collection<?> attributeSpecifiers = filter.refGetAttributeSpecifiers();
+            source = this.container.subMap(
+                filterProperties.toArray(new FilterProperty[filterProperties.size()])
+            );
+            criteria = attributeSpecifiers.toArray(new AttributeSpecifier[attributeSpecifiers.size()]);
+        }
+        else if(criteria instanceof Filter) {  
+            FilterProperty[] conditions = new FilterProperty[((Filter)criteria).getCondition().length];
+            for(int i = 0; i < conditions.length; i++) {
+                Condition condition = ((Filter)criteria).getCondition()[i];
+                conditions[i] = new FilterProperty(
+                    condition.getQuantor(),
+                    condition.getFeature(),
+                    (short)FilterOperators.fromString(condition.getName()),
+                    condition.getValue()
+                );
+            }
+            source = this.container.subMap(conditions);
+            AttributeSpecifier[] orderSpecifiers = new AttributeSpecifier[((Filter)criteria).getOrderSpecifier().length];
+            for(int i = 0; i < orderSpecifiers.length; i++) {
+                OrderSpecifier specifier = ((Filter)criteria).getOrderSpecifier()[i];
+                orderSpecifiers[i] = new AttributeSpecifier(
+                    specifier.getFeature(),
+                    0,
+                    specifier.getOrder()
+                );
+            }
+            criteria = orderSpecifiers;
+        }
+        return new MarshallingSequentialList<RefObject_1_0>(this.marshaller, source.values(criteria));
     }
-    else if(criteria instanceof Filter) {
-      AttributeSpecifier[] mapped = new AttributeSpecifier[((Filter)criteria).getOrderSpecifier().length];
-      for(int i = 0; i < mapped.length; i++) {
-        OrderSpecifier specifier = ((Filter)criteria).getOrderSpecifier()[i];
-        mapped[i] = new AttributeSpecifier(
-          specifier.getFeature(),
-          0,
-          specifier.getOrder()
-        );
-      }
-      criteria = mapped;
-    }
-    return new MarshallingSequentialList<RefObject_1_0>(this.marshaller, source.values(criteria));
-  }
 
   /* (non-Javadoc)
    * @see java.util.AbstractCollection#iterator()
@@ -247,6 +282,92 @@ public RefContainer_1(
         return true;
     }
 
-}
+    
+    //------------------------------------------------------------------------
+    // Implements RefContainer
+    //------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refAdd(java.lang.Object[])
+     */
+    public void refAdd(Object... arguments) {
+        int objectIndex = arguments.length - 1;
+        refAddValue(
+            RefContainer_1.toQualifier(objectIndex, arguments),
+            (RefObject_1_0) arguments[objectIndex]
+        );
+    }
 
-//--- End of File -----------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refGet(java.lang.Object[])
+     */
+    public Object refGet(Object... arguments) {
+        return get(
+            RefContainer_1.toQualifier(arguments.length, arguments)
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refGetAll(java.lang.Object)
+     */
+    public List<?> refGetAll(Object query) {
+        return this.toList(query);
+    }
+
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refRemove(java.lang.Object[])
+     */
+    public void refRemove(Object... arguments) {
+        get(RefContainer_1.toQualifier(arguments.length, arguments)).refDelete();
+    }
+
+    /* (non-Javadoc)
+     * @see org.oasisopen.jmi1.RefContainer#refRemoveAll(java.lang.Object)
+     */
+    public void refRemoveAll(Object query) {
+        for(RefObject_1_0 refObject : toList(query)) {
+            refObject.refDelete();
+        }
+    }
+
+    /**
+     * Create a qualifier from its sub-segment specification array
+     * 
+     * @param size
+     * @param arguments
+     * 
+     * @return the corresponding qualifier
+     */
+    static String toQualifier(
+        int size,
+        Object[] arguments
+    ){
+        switch(size) {
+            case 0: return null;
+            case 1: return String.valueOf(arguments[0]);
+            default:
+                if(size % 2 == 1) throw new IllegalArgumentException(
+                    "The ref-method was invoked with an odd number of arguments greater than one: " + arguments.length
+                );
+                StringBuilder qualifier = new StringBuilder(
+                    arguments[0] == PERSISTENT ? "!" : ""
+                ).append(
+                    arguments[1]
+                );
+                for(
+                    int i = 2;
+                    i < size;
+                    i++
+                ){
+                    qualifier.append(
+                        arguments[i] == PERSISTENT ? '!' : '*'
+                    ).append(
+                        arguments[++i]
+                    );
+                }
+                return qualifier.toString();
+        }        
+     }
+
+        
+}

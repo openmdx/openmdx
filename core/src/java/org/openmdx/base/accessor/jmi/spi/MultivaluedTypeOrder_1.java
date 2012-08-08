@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MultivaluedTypeOrder_1.java,v 1.3 2006/10/19 17:07:10 hburger Exp $
+ * Name:        $Id: MultivaluedTypeOrder_1.java,v 1.4 2008/06/28 00:21:32 hburger Exp $
  * Description: MultivaluedTypeOrder_1 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/19 17:07:10 $
+ * Date:        $Date: 2008/06/28 00:21:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,7 +53,7 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
-import org.openmdx.compatibility.base.dataprovider.cci.Orders;
+import org.openmdx.compatibility.base.dataprovider.cci.Directions;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.w3c.cci2.MultivaluedTypeOrder;
 
@@ -85,7 +85,7 @@ class MultivaluedTypeOrder_1
     public void ascending(int index) {
         refAddValue(
             index,
-            Orders.ASCENDING
+            Directions.ASCENDING
         );
     }
 
@@ -95,7 +95,7 @@ class MultivaluedTypeOrder_1
     public void descending(int index) {
         refAddValue(
             index,
-            Orders.DESCENDING
+            Directions.DESCENDING
         );
     }
 

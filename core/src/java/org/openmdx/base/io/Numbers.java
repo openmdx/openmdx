@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Numbers.java,v 1.3 2008/01/05 20:22:11 wfro Exp $
+ * Name:        $Id: Numbers.java,v 1.4 2008/03/21 18:30:27 hburger Exp $
  * Description: Numbers 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/05 20:22:11 $
+ * Date:        $Date: 2008/03/21 18:30:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -95,7 +95,7 @@ public class Numbers {
         if(value == null) {
             sink.writeByte(TC_NULL);
         } else {
-            Class c = value.getClass();
+            Class<?> c = value.getClass();
             if(c == Byte.class) {
                 sink.writeByte(TC_BYTE);
                 sink.writeByte(value.byteValue());

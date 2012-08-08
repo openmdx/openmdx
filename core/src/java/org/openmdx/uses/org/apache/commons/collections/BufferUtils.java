@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -16,6 +17,7 @@
 package org.openmdx.uses.org.apache.commons.collections;
 
 import org.openmdx.uses.org.apache.commons.collections.buffer.BlockingBuffer;
+import org.openmdx.uses.org.apache.commons.collections.buffer.BoundedBuffer;
 import org.openmdx.uses.org.apache.commons.collections.buffer.PredicatedBuffer;
 import org.openmdx.uses.org.apache.commons.collections.buffer.SynchronizedBuffer;
 import org.openmdx.uses.org.apache.commons.collections.buffer.TransformedBuffer;
@@ -26,32 +28,32 @@ import org.openmdx.uses.org.apache.commons.collections.buffer.UnmodifiableBuffer
  * Provides utility methods and decorators for {@link Buffer} instances.
  *
  * @since Commons Collections 2.1
- * @version $Revision: 1.3 $ $Date: 2007/10/10 16:06:12 $
- * 
+ * @version $Revision: 1.5 $ $Date: 2008/04/25 14:32:23 $
+ *
  * @author Paul Jack
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class BufferUtils {
 
     /**
      * An empty unmodifiable buffer.
      */
     public static final Buffer EMPTY_BUFFER = UnmodifiableBuffer.decorate(new ArrayStack(1));
-    
+
     /**
      * <code>BufferUtils</code> should not normally be instantiated.
      */
     public BufferUtils() {
-        super();
     }
 
     //-----------------------------------------------------------------------
     /**
      * Returns a synchronized buffer backed by the given buffer.
-     * Much like the synchronized collections returned by 
-     * {@link java.util.Collections}, you must manually synchronize on 
+     * Much like the synchronized collections returned by
+     * {@link java.util.Collections}, you must manually synchronize on
      * the returned buffer's iterator to avoid non-deterministic behavior:
-     *  
+     *
      * <pre>
      * Buffer b = BufferUtils.synchronizedBuffer(myBuffer);
      * synchronized (b) {
@@ -73,9 +75,9 @@ public class BufferUtils {
     /**
      * Returns a synchronized buffer backed by the given buffer that will
      * block on {@link Buffer#get()} and {@link Buffer#remove()} operations.
-     * If the buffer is empty, then the {@link Buffer#get()} and 
+     * If the buffer is empty, then the {@link Buffer#get()} and
      * {@link Buffer#remove()} operations will block until new elements
-     * are added to the buffer, rather than immediately throwing a 
+     * are added to the buffer, rather than immediately throwing a
      * <code>BufferUnderflowException</code>.
      *
      * @param buffer  the buffer to synchronize, must not be null
@@ -84,6 +86,59 @@ public class BufferUtils {
      */
     public static Buffer blockingBuffer(Buffer buffer) {
         return BlockingBuffer.decorate(buffer);
+    }
+
+    /**
+     * Returns a synchronized buffer backed by the given buffer that will
+     * block on {@link Buffer#get()} and {@link Buffer#remove()} operations
+     * until <code>timeout</code> expires.  If the buffer is empty, then the
+     * {@link Buffer#get()} and {@link Buffer#remove()} operations will block
+     * until new elements are added to the buffer, rather than immediately
+     * throwing a <code>BufferUnderflowException</code>.
+     *
+     * @param buffer  the buffer to synchronize, must not be null
+     * @param timeoutMillis  the timeout value in milliseconds, zero or less for no timeout
+     * @return a blocking buffer backed by that buffer
+     * @throws IllegalArgumentException  if the Buffer is null
+     * @since Commons Collections 3.2
+     */
+    public static Buffer blockingBuffer(Buffer buffer, long timeoutMillis) {
+        return BlockingBuffer.decorate(buffer, timeoutMillis);
+    }
+
+    /**
+     * Returns a synchronized buffer backed by the given buffer that will
+     * block on {@link Buffer#add(Object)} and
+     * {@link Buffer#addAll(java.util.Collection)} until enough object(s) are
+     * removed from the buffer to allow the object(s) to be added and still
+     * maintain the maximum size.
+     *
+     * @param buffer  the buffer to make bounded,  must not be null
+     * @param maximumSize  the maximum size
+     * @return a bounded buffer backed by the given buffer
+     * @throws IllegalArgumentException if the given buffer is null
+     * @since Commons Collections 3.2
+     */
+    public static Buffer boundedBuffer(Buffer buffer, int maximumSize) {
+        return BoundedBuffer.decorate(buffer, maximumSize);
+    }
+
+    /**
+     * Returns a synchronized buffer backed by the given buffer that will
+     * block on {@link Buffer#add(Object)} and
+     * {@link Buffer#addAll(java.util.Collection)} until enough object(s) are
+     * removed from the buffer to allow the object(s) to be added and still
+     * maintain the maximum size or the timeout expires.
+     *
+     * @param buffer the buffer to make bounded, must not be null
+     * @param maximumSize the maximum size
+     * @param timeoutMillis  the timeout value in milliseconds, zero or less for no timeout
+     * @return a bounded buffer backed by the given buffer
+     * @throws IllegalArgumentException if the given buffer is null
+     * @since Commons Collections 3.2
+     */
+    public static Buffer boundedBuffer(Buffer buffer, int maximumSize, long timeoutMillis) {
+        return BoundedBuffer.decorate(buffer, maximumSize, timeoutMillis);
     }
 
     /**
@@ -143,5 +198,5 @@ public class BufferUtils {
     public static Buffer transformedBuffer(Buffer buffer, Transformer transformer) {
         return TransformedBuffer.decorate(buffer, transformer);
     }
-    
+
 }

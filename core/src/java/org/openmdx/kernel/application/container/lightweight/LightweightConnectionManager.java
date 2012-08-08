@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightConnectionManager.java,v 1.8 2007/10/10 16:06:04 hburger Exp $
+ * Name:        $Id: LightweightConnectionManager.java,v 1.9 2008/03/21 18:38:38 hburger Exp $
  * Description: LightweightConnectionManager
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:04 $
+ * Date:        $Date: 2008/03/21 18:38:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -81,6 +81,7 @@ import org.openmdx.uses.org.apache.commons.pool.impl.GenericObjectPool;
  * This implementation uses one connection manager per managed connection
  * factory.
  */
+@SuppressWarnings("unchecked")
 public class LightweightConnectionManager
     extends AbstractConnectionManager
 {

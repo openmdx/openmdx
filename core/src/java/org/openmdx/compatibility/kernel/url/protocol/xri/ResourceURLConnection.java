@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ResourceURLConnection.java,v 1.2 2006/08/30 10:03:55 hburger Exp $
+ * Name:        $Id: ResourceURLConnection.java,v 1.3 2008/06/28 00:21:33 hburger Exp $
  * Description: Resource URL Connection
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/30 10:03:55 $
+ * Date:        $Date: 2008/06/28 00:21:33 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +57,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.openmdx.kernel.url.protocol.AbstractURLConnection;
-import org.openmdx.kernel.url.protocol.XriProtocols;
+import org.openmdx.kernel.url.protocol.XriAuthorities;
 
 /**
  * Provides access to system resources as an URLConnection.
@@ -89,7 +89,7 @@ public class ResourceURLConnection
     ) throws IOException {     
         String path = url.getPath();
         if(!path.startsWith(PREFIX)) throw new MalformedURLException(
-            "Only the XRI authority '" + XriProtocols.RESOURCE_AUTHORITY + "' can be handled: " + url
+            "Only the XRI authority '" + XriAuthorities.RESOURCE_AUTHORITY + "' can be handled: " + url
         );
         String name = path.substring(PREFIX.length());
         //
@@ -107,6 +107,6 @@ public class ResourceURLConnection
    /**
     * 
     */
-   final private static String PREFIX = XriProtocols.RESOURCE_AUTHORITY + '/';
+   final private static String PREFIX = XriAuthorities.RESOURCE_AUTHORITY + '/';
    
 }

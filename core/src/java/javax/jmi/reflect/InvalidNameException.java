@@ -2,6 +2,7 @@ package javax.jmi.reflect;
 
 /** Thrown when a user pases an invalid feature name to a reflective method.
  */
+@SuppressWarnings("serial")
 public class InvalidNameException extends JmiException {
     
     private final String invalidName;

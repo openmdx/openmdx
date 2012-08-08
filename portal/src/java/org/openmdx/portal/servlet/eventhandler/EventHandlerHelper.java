@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     opencrx, http://www.opencrx.org/
- * Name:        $Id: EventHandlerHelper.java,v 1.6 2008/01/27 00:37:48 wfro Exp $
- * Description: openCRX application plugin
- * Revision:    $Revision: 1.6 $
+ * Project:     openMDX/Portal, http://www.opencrx.org/
+ * Name:        $Id: EventHandlerHelper.java,v 1.8 2008/05/05 23:06:13 wfro Exp $
+ * Description: EventHandlerHelper
+ * Revision:    $Revision: 1.8 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/01/27 00:37:48 $
+ * Date:        $Date: 2008/05/05 23:06:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004, CRIXP Corp., Switzerland
+ * Copyright (c) 20042-2008, CRIXP Corp., Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.jmi.reflect.RefPackage;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -94,7 +95,7 @@ public class EventHandlerHelper {
     ) {
         // Update current views. (Re)load the created / edited object in 
         // object managers of cached views
-        List processedPackages = new ArrayList();
+        List<RefPackage> processedPackages = new ArrayList<RefPackage>();
         processedPackages.add(
             modifiedObject.refOutermostPackage()
         );

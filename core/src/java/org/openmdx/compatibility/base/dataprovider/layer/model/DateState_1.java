@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DateState_1.java,v 1.5 2007/11/22 14:41:13 hburger Exp $
+ * Name:        $Id: DateState_1.java,v 1.6 2008/03/21 18:46:21 hburger Exp $
  * Description: DateStateExcludingEnd_1 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/22 14:41:13 $
+ * Date:        $Date: 2008/03/21 18:46:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -202,6 +202,7 @@ public class DateState_1
         );
     }
 
+    @SuppressWarnings("unchecked")
     protected String getRequestedAt(
         ServiceHeader header,
         DataproviderRequest request

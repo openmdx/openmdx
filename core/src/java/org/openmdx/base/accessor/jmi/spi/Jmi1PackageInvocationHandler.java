@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1PackageInvocationHandler.java,v 1.11 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: Jmi1PackageInvocationHandler.java,v 1.13 2008/04/09 23:52:18 hburger Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/04/09 23:52:18 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,11 +48,11 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.accessor.jmi.spi;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefPackage_1_4;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -96,13 +96,42 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
             this.qualifiedPackageName = qualifiedPackageName;
         }
 
+        private static final long serialVersionUID = 5484412877112463153L;
+        private final String qualifiedPackageName;
+        
         public String refMofId(
         ) {
             return this.qualifiedPackageName; 
         }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            return 
+                obj instanceof RefPackage_1Proxy && 
+                this.qualifiedPackageName.equals(
+                    ((RefPackage_1Proxy)obj).qualifiedPackageName
+                );
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            return this.qualifiedPackageName.hashCode();
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#toString()
+         */
+        @Override
+        public String toString() {
+            return "RefPackage " + this.qualifiedPackageName;
+        }
         
-        private static final long serialVersionUID = 5484412877112463153L;
-        private final String qualifiedPackageName;
     }
     
     //-----------------------------------------------------------------------
@@ -170,24 +199,48 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
         Method method, 
         Object[] args
     ) throws Throwable {
-        // RefObject
-        if("refClass".equals(method.getName()) && (args.length == 1)) {
+        Class<?> declaringClass = method.getDeclaringClass();
+        String methodName = method.getName().intern();
+        if(Object.class == declaringClass) {
+            //
+            // Object methods
+            //
+            if("toString" == methodName) {
+                return proxy.getClass().getName() + " delegating to " + this.delegation;
+            } else if ("hashCode" == methodName) {
+                return this.delegation.hashCode();
+            } else if ("equals" == methodName) {
+                if(Proxy.isProxyClass(args[0].getClass())) {
+                    InvocationHandler invocationHandler = Proxy.getInvocationHandler(args[0]);
+                    if(invocationHandler instanceof Jmi1PackageInvocationHandler) {
+                        return this.delegation.equals(
+                            ((Jmi1PackageInvocationHandler)invocationHandler).delegation
+                        );
+                    }
+                }
+                return false;
+            }
+        } else if("refClass" == methodName && args.length == 1) {
+            //
+            // RefClass
+            //
             return this.delegation.refClass(
                 (String)args[0], // qualifiedClassName
                 (RefPackage_1_0)proxy
             );
-        }
-        else if(
-            method.getName().startsWith("ref") && 
+        } else if(
+            declaringClass == RefPackage_1_4.class ||    
+            methodName.startsWith("ref") && 
             (method.getName().length() > 3) &&
             Character.isUpperCase(method.getName().charAt(3))
         ) {
-            return "refOutermostPackage".equals(method.getName())
+            return "refOutermostPackage" == methodName
                 ? this.delegation.refOutermostPackage()
                 : method.invoke(this.delegation, args);
-        }
-        // Getters
-        else if(method.getName().startsWith("get")) {
+        } else if(method.getName().startsWith("get")) {
+            //
+            // Getters
+            //
             String cciName = method.getName().substring(3);
             String qualifiedPackageName = this.delegation.refMofId();
             return this.delegation.refClass(
@@ -197,14 +250,17 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                 ),
                 (RefPackage_1_0)proxy
             );            
-        }        
-        // Creators
-        else if(method.getName().startsWith("create")) {
+        } else if(method.getName().startsWith("create")) {
+            // 
+            // Creators
+            //
             Class<?> returnType = method.getReturnType();
             String cciName = method.getName().substring(6);
-            String qualifiedPackageName = this.delegation.refMofId();            
-            // Structs
+            String qualifiedPackageName = this.delegation.refMofId();   
             if(RefStruct_1_0.class.isAssignableFrom(returnType)) {
+                //
+                // Structs
+                //
                 List<Object> iargs = new ArrayList<Object>();
                 if(args != null) {
                     for(int i = 0; i < args.length; i++) {
@@ -218,9 +274,10 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                     ), 
                     iargs
                 );
-            }        
-            // Queries
-            else if(
+            } else if(
+                //
+                // Queries
+                //
                 AnyTypePredicate.class.isAssignableFrom(returnType) ||
                 ComparableTypePredicate.class.isAssignableFrom(returnType) ||
                 MatchableTypePredicate.class.isAssignableFrom(returnType) ||
@@ -241,7 +298,7 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                 );
             }
         }        
-        throw new UnsupportedOperationException(method.getName());
+        throw new UnsupportedOperationException(methodName);
     }
     
     //-----------------------------------------------------------------------

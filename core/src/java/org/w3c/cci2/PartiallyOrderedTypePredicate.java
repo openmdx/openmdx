@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PartiallyOrderedTypePredicate.java,v 1.1 2008/01/08 16:16:33 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: PartiallyOrderedTypePredicate.java,v 1.2 2008/05/06 09:24:27 hburger Exp $
  * Description: Partially Ordered Type Predicate
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:33 $
+ * Date:        $Date: 2008/05/06 09:24:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,11 +53,7 @@ package org.w3c.cci2;
 /**
  * Partially Ordered Type Predicate
  */
-
 public interface PartiallyOrderedTypePredicate<V>
-
-
-
     extends AnyTypePredicate
 {
 
@@ -70,13 +66,8 @@ public interface PartiallyOrderedTypePredicate<V>
      * @param upperBound
      */
     void between(
-
         V lowerBound,
         V upperBound
-
-
-
-
     );
 
     /**
@@ -87,13 +78,8 @@ public interface PartiallyOrderedTypePredicate<V>
      * @param upperBound
      */
     void outside(
-
         V lowerBound,
         V upperBound
-
-
-
-
     );
 
     /**
@@ -103,11 +89,7 @@ public interface PartiallyOrderedTypePredicate<V>
      * @param operand
      */
     void lessThan(
-
         V operand
-
-
-
     );
 
     /**
@@ -117,11 +99,7 @@ public interface PartiallyOrderedTypePredicate<V>
      * @param operand
      */
     void lessThanOrEqualTo(
-
         V operand
-
-
-
     );
 
     /**
@@ -131,11 +109,7 @@ public interface PartiallyOrderedTypePredicate<V>
      * @param operand
      */
     void greaterThanOrEqualTo(
-
         V operand
-
-
-
     );
 
     /**
@@ -145,11 +119,7 @@ public interface PartiallyOrderedTypePredicate<V>
      * @param operand
      */
     void greaterThan(
-
         V operand
-
-
-
     );
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SystemProperties.java,v 1.2 2007/10/10 16:06:06 hburger Exp $
+ * Name:        $Id: SystemProperties.java,v 1.3 2008/03/21 18:38:44 hburger Exp $
  * Description: System Properties 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:06 $
+ * Date:        $Date: 2008/03/21 18:38:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,8 +51,6 @@
  */
 
 package org.openmdx.kernel.environment;
-
-import org.openmdx.kernel.text.StringBuilders;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -111,7 +109,7 @@ public class SystemProperties {
         if(source == null) {
             return source;
         } else {
-            CharSequence target = StringBuilders.newStringBuilder();
+            StringBuilder target = new StringBuilder();
 
             int tail = 0;
             for(
@@ -121,20 +119,18 @@ public class SystemProperties {
             ){
                 String propertyValue = getProperty(matcher.group(1));
                 if(propertyValue == null) {
-                    StringBuilders.asStringBuilder(target).append(
+                    target.append(
                         source.substring(tail, matcher.end())
                     );
                 } else {
-                    StringBuilders.asStringBuilder(target).append(
+                    target.append(
                         source.substring(tail, matcher.start())
                     ).append(
                         propertyValue
                     );
                 }
             }
-            return StringBuilders.asStringBuilder(
-                target
-            ).append(
+            return target.append(
                 source.substring(tail)
             ).toString();
         }

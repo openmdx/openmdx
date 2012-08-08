@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -29,7 +30,7 @@ package org.openmdx.uses.org.apache.commons.collections;
  * cloning and returning the string value.
  * 
  * @since Commons Collections 1.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:07 $
+ * @version $Revision: 1.3 $ $Date: 2008/04/25 14:32:27 $
  * 
  * @author James Strachan
  * @author Stephen Colebourne

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SimpleServiceLocator_1.java,v 1.4 2007/12/13 18:19:20 hburger Exp $
+ * Name:        $Id: SimpleServiceLocator_1.java,v 1.5 2008/03/21 18:45:22 hburger Exp $
  * Description: SimpleServiceLocator_1 class 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:19:20 $
+ * Date:        $Date: 2008/03/21 18:45:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,10 +60,8 @@ import javax.naming.NamingException;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.naming.initial.ContextFactory;
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * SimpleServiceLocator_1
@@ -71,6 +69,7 @@ import org.openmdx.kernel.text.StringBuilders;
  * @deprecated in favour of {@linkplain javax.naming.InitialContext
  * Standard JNDI access}
  */
+@SuppressWarnings("unchecked")
 public class SimpleServiceLocator_1 
     extends JndiServiceLocator_1 
 {
@@ -170,12 +169,12 @@ public class SimpleServiceLocator_1
         String pattern,
         String replacement
     ){
-        CharSequence target = StringBuilders.newStringBuilder(source);
+        StringBuilder target = new StringBuilder(source);
         for (
             int i = source.length();
             (i = source.lastIndexOf(pattern,i-1)) >= 0;
         ){
-            StringBuilders.asStringBuilder(target).replace(i, i+pattern.length(), replacement);
+            target.replace(i, i+pattern.length(), replacement);
         }
         return target.toString();
     }

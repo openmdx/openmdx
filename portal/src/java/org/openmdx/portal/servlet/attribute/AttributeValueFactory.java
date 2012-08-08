@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValueFactory.java,v 1.19 2008/01/16 23:03:55 wfro Exp $
+ * Name:        $Id: AttributeValueFactory.java,v 1.21 2008/04/04 17:01:10 hburger Exp $
  * Description: AttributeMapper
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/16 23:03:55 $
+ * Date:        $Date: 2008/04/04 17:01:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -130,7 +130,7 @@ public final class AttributeValueFactory
     }
     // Map: object must be class name
     else if(object instanceof Map) {
-        model = ((RefPackage_1)application.getDataPackage().refOutermostPackage()).refModel();
+        model = application.getModel();
         try {
             classDef = model.getElement(((Map)object).get(SystemAttributes.OBJECT_CLASS));
         } catch(Exception e) {}
@@ -327,7 +327,7 @@ public final class AttributeValueFactory
   //-------------------------------------------------------------------------
   private static final long serialVersionUID = 3256728385526182196L;
 
-  private final Map fieldDefs = new HashMap();
+  private final Map<Path,FieldDef> fieldDefs = new HashMap<Path,FieldDef>();
 
 }
 

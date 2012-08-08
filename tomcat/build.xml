@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.24 2008/02/12 18:04:41 wfro Exp $
+= Name:        $Id: build.xml,v 1.28 2008/06/09 23:57:28 hburger Exp $
 = Description: openMDX/Tomcat
-= Revision:    $Revision: 1.24 $
-= Date:        $Date: 2008/02/12 18:04:41 $
+= Revision:    $Revision: 1.28 $
+= Date:        $Date: 2008/06/09 23:57:28 $
 = Copyright:   (c) 2003-2007 OMEX AG
 =======================================================================
  *
@@ -81,9 +81,11 @@
 	<!-- * generate -->
 	<!-- ******************************************************************* -->
 	<target name="generate" description="Generate version, jt and model dependend files" depends="build-init">
+<!--	
 		<antcall target="-preprocess-jt-files-">
 			<param name="preprocess-jt.target" value="java"/>
 		</antcall>
+-->		
 	</target>
 
 	<!-- ******************************************************************* -->
@@ -113,6 +115,19 @@
 			</openmdx:archivefileset>
 		</openmdx:archive>
 		<openmdx:archive
+			destfile="${deliver.dir}/lib/openmdx-tomcat.test-launch.jar"
+			format="jar"
+		>
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<openmdx:archivemanifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Test Launch Library"/>
+				<attribute name="Implementation-Title" value="openmdx-tomcat.test-launch for ${build.target.platform}"/>
+			</openmdx:archivemanifest>
+			<openmdx:archivefileset dir="${build.dir}/bin">
+				<include name="org/openmdx/test/launch/**"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+		<openmdx:archive
 			destfile="${deliver.dir}/lib/openmdx-tomcat.jar"
 			format="jar"
 		>
@@ -131,7 +146,6 @@
 					<exclude name="META-INF/MANIFEST.MF"/>
 					<exclude name="org/openmdx/compatibility/kernel/url/protocol/**"/>
 					<exclude name="org/openmdx/kernel/url/protocol/**"/>
-					<exclude name="org/slf4j/**"/>
 				</patternset>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset src="${openmdx.home}/java2/${build.java.platform}/enterprise/lib/javaee.jar">
@@ -210,6 +224,24 @@
 			</openmdx:archivefilterchain>						
 		</openmdx:archive>
 	</target>
-		
+
+	<target name="test" depends="deliverables">
+		<java
+			classname="org.openmdx.test.launch.TestClassLoader"
+			fork="true"
+		>
+			<classpath>
+				 <pathelement location="${openmdx.home}/${build.java.platform}/core/lib/tomcat-juli.jar"/>
+				 <pathelement location="${deliver.dir}/lib/openmdx-tomcat.test-launch.jar"/>
+			</classpath>
+			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
+			<sysproperty key="core.lib" path="${openmdx.home}/${build.java.platform}/core/lib"/>
+			<sysproperty key="tomcat.lib" path="${env.TOMCAT_6}/lib"/>
+			<sysproperty key="j2ee.lib" path="${openmdx.home}/java2/${build.java.platform}/enterprise/lib"/>
+			<sysproperty key="project.lib" path="${deliver.dir}/lib"/>
+			<sysproperty key="project.bin" path="${build.dir}/bin"/>
+		</java>
+	</target>
+	
 </project>
 

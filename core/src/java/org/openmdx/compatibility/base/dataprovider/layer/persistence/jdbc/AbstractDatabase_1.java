@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractDatabase_1.java,v 1.235 2007/11/29 11:26:20 hburger Exp $
+ * Name:        $Id: AbstractDatabase_1.java,v 1.248 2008/07/09 00:42:31 wfro Exp $
  * Description: AbstractDatabase_1 plugin
- * Revision:    $Revision: 1.235 $
+ * Revision:    $Revision: 1.248 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/29 11:26:20 $
+ * Date:        $Date: 2008/07/09 00:42:31 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -113,8 +113,10 @@ import org.openmdx.compatibility.base.dataprovider.cci.Directions;
 import org.openmdx.compatibility.base.dataprovider.cci.Orders;
 import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
+import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
+import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractIterator;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractPersistence_1;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.compatibility.base.exception.StackedException;
@@ -134,6 +136,7 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.code.ModelAttributes;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
+import org.w3c.cci2.BinaryLargeObject;
 
 //---------------------------------------------------------------------------
 /**
@@ -146,7 +149,7 @@ import org.openmdx.model1.code.PrimitiveTypes;
  * Insert the following line at the location in your code where you want to
  * start logging JDBC calls: DriverManager.setLogStream(System.out);
  */
-
+@SuppressWarnings("unchecked")
 abstract public class AbstractDatabase_1 extends AbstractPersistence_1 
     implements DataTypes 
 {
@@ -197,7 +200,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
   ) throws ServiceException, SQLException;
 
   //---------------------------------------------------------------------------
-  public void activate(
+  @SuppressWarnings("deprecation")
+public void activate(
     short id, 
     Configuration configuration,
     Layer_1_0 delegation
@@ -205,7 +209,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
 
     SysLog.detail(
         "activating", 
-        "$Id: AbstractDatabase_1.java,v 1.235 2007/11/29 11:26:20 hburger Exp $"
+        "$Id: AbstractDatabase_1.java,v 1.248 2008/07/09 00:42:31 wfro Exp $"
     );
     
     super.activate( 
@@ -235,7 +239,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
     // XML Datatype Usgae
     //
     boolean xmlDatatypes = configuration.isOn(
-        LayerConfigurationEntries.XML_DATATYPES
+        SharedConfigurationEntries.XML_DATATYPES
     );
     
     // durationType
@@ -272,7 +276,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
     
     // namespaceId
     this.namespaceId = configuration.getFirstValue(
-      LayerConfigurationEntries.NAMESPACE_ID
+      SharedConfigurationEntries.NAMESPACE_ID
     );
 
     // objectIdAttributesSuffix
@@ -303,7 +307,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
     
     // batchSize
     this.batchSize = getConfigurationValue(
-        LayerConfigurationEntries.BATCH_SIZE,
+        SharedConfigurationEntries.BATCH_SIZE,
         DEFAULT_BATCH_SIZE // LayerConfigurationEntries.BATCH_SIZE configuration was mandatory before
     );
 
@@ -324,8 +328,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
     }
     
     // load model if modelDriven is active
-    if(!configuration.values(LayerConfigurationEntries.MODEL).isEmpty()) {
-      this.model = (Model_1_0)configuration.values(LayerConfigurationEntries.MODEL).get(0);
+    if(!configuration.values(SharedConfigurationEntries.MODEL).isEmpty()) {
+      this.model = (Model_1_0)configuration.values(SharedConfigurationEntries.MODEL).get(0);
     }
     else {
       throw new ServiceException(
@@ -470,7 +474,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
     
     // connection
     this.connectionManagers = configuration.values(
-        LayerConfigurationEntries.DATABASE_CONNECTION_FACTORY
+        SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY
     );
 
     // driver properties
@@ -764,7 +768,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
     SysLog.detail("parameters", statementParameters);
     long startTime = System.currentTimeMillis();
     ResultSet rs = ps.executeQuery();
-    SysLog.detail("execution time", new Long(System.currentTimeMillis() - startTime));
+    long duration = System.currentTimeMillis() - startTime;
+    SysLog.detail("execution time", new Long(duration));
     return rs;
   }
 
@@ -1141,11 +1146,16 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
               referencePattern,
               false
           ); 
-          if((rid instanceof String) && ((String)rid).endsWith("%")) {
-              statementParameters.add(rid);
-              return "LIKE ? " + getEscapeClause(conn);               
-          }
-          else {
+          if(rid instanceof String) {
+              String srid = (String) rid;
+              if(srid.endsWith("%")) {
+                  statementParameters.add(srid);
+                  return "LIKE ? " + getEscapeClause(conn);               
+              } else {
+                  statementParameters.add(unescape(srid));
+                  return "IN (?)";
+              }
+          } else {
               statementParameters.add(rid);
               return "IN (?)";
           }
@@ -1401,6 +1411,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
   public String getAutonumValue(
       Connection conn,
       String sequenceName,
+      String dbObject,
       String asFormat
   ) throws ServiceException, SQLException {
 
@@ -1416,6 +1427,9 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
               ? "CAST(NEXTVAL FOR " + sequenceName + "_SEQ " + asFormat + ")"
               : "NEXTVAL FOR " + sequenceName + "_SEQ";
       }
+      else if(AUTOINC_FORMAT_NEXT_VALUE_FOR.equals(autonumFormat)) {          
+          return "(SELECT NEXT VALUE FOR " + sequenceName + "_SEQ FROM (SELECT DISTINCT 1 FROM INFORMATION_SCHEMA.SYSTEM_VIEWS))";
+      }
       else if(AUTOINC_FORMAT_AUTO.equals(autonumFormat)) {
           return null;
       }
@@ -1429,7 +1443,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
               new BasicException.Parameter[]{
                   new BasicException.Parameter("sequenceName", sequenceName),
               },
-              "AUTONUM format not supported. Use [NEXTVAL|NEXTVALFOR|AUTO|SEQUENCE]"
+              "AUTONUM format not supported. Use [NEXTVAL|NEXTVALFOR|NEXTVALUEFOR|AUTO|SEQUENCE]"
           );
       }      
   }
@@ -1466,13 +1480,15 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
             columnNamesPathComponents += ", " + this.getColumnName(conn, "c", i, true, true);
           }        
           // SQL sequences
+          String dbObjectRef = this.namespaceId + "_" + T_REF;
           String autonumValue = this.getAutonumValue(
               conn,
-              this.namespaceId + "_" + T_REF,
+              dbObjectRef,
+              dbObjectRef,
               null
           );
           currentStatement =
-              "INSERT INTO " + this.namespaceId + "_" + T_REF +
+              "INSERT INTO " + dbObjectRef +
               " (" + (autonumValue == null ? "" : (OBJECT_RID + ", ")) + "n" + columnNamesPathComponents + ")" +
               " VALUES (" + (autonumValue == null ? "" : autonumValue + ", ") + "?";
             
@@ -1749,7 +1765,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
       String attributeName,
       int index,
       boolean indexSuffixIfZero,
-      boolean forPreparedStatement
+      boolean ignoreReservedWords
   ) throws ServiceException {
       String columnName = (String)this.columnNames.get(attributeName);
       if(columnName == null) {
@@ -1806,6 +1822,20 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
           }
           else {
               columnName = columnName + "$" + String.valueOf(index);
+          }
+      }
+      else {
+          // DB-specific handling
+          String databaseProductName = null;
+          try {
+              databaseProductName = conn.getMetaData().getDatabaseProductName();
+          } catch(Exception e) {}
+          if(
+              !ignoreReservedWords &&
+              "HSQL Database Engine".equals(databaseProductName) &&
+              RESERVED_WORDS_HSQLDB.contains(columnName)
+          ) {
+              columnName = "\"" + columnName.toUpperCase() + "\"";
           }
       }
       return columnName;
@@ -1939,6 +1969,12 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
 	          this.externalizePathValue(conn, (Path)value)
 	      );
       }
+      else if(value instanceof java.util.Date) {
+          ps.setTimestamp(
+              position,
+              new Timestamp(((java.util.Date)value).getTime())
+          );
+      }
       else if(value instanceof Boolean) {
           Object sqlValue = this.booleanMarshaller.marshal(value, conn); 
           if(sqlValue instanceof Boolean) {
@@ -2062,7 +2098,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
       }
       else if(
 	      (value instanceof byte[]) ||
-	      (value instanceof InputStream)
+	      (value instanceof InputStream) ||
+	      (value instanceof BinaryLargeObject)
       ) {
 	      this.setBlobColumnValue(
 	          ps,
@@ -2291,7 +2328,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
             new BasicException.Parameter[]{
               new BasicException.Parameter("path", objectPath)
             },
-            "Result set contains non consecutive object ids"
+            "Result set contains duplicates or non consecutive object ids"
           );
         }
       
@@ -2419,7 +2456,10 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
                                 String ref = (String)frs.getObject(
                                     this.getColumnName(
                                         conn, 
-                                        featureName, 0, false, false
+                                        featureName, 
+                                        0, 
+                                        false, 
+                                        true
                                     )
                                 );
                                 String rid = ref.substring(0, ref.lastIndexOf("/"));
@@ -3441,6 +3481,16 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
           isQuery
         );
     }
+    else if(LayerConfigurationEntries.DB_OBJECT_FORMAT_SLICED_WITH_PARENT_AND_ID_AS_KEY.equals(dbObjectConfiguration.getDbObjectFormat())) {
+        return new DBOSlicedWithParentAndIdAsKey(
+          this,
+          conn,
+          dbObjectConfiguration,
+          accessPath,
+          isExtent,
+          isQuery
+        );
+    }
     else {
       DbObject dbObject = null;
       try {
@@ -3649,7 +3699,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
                     statement += 
                         " WHERE ";
                     statement +=
-                        "(" + objectIdClause + ")";                
+                        "(" +  (useReferenceClause ? referenceClause + " AND " : "") + objectIdClause + ")";
                     prefix = "vm.";
                 }
             }
@@ -3671,7 +3721,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
             );
             List statementParameters = new ArrayList();
             int pos = 1;
-            // Reference clause only on primary columns
             if(useReferenceClause) {
                 List referenceValues = dbObject.getReferenceValues();
                 statementParameters.addAll(referenceValues);
@@ -3860,7 +3909,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
             // Continue
             if(request.operation() == DataproviderOperations.ITERATION_CONTINUATION) {
                 SysLog.trace(DataproviderOperations.toString(DataproviderOperations.ITERATION_CONTINUATION));
-                JdbcIterator jdbcIterator = (JdbcIterator)JdbcIterator.deserialize(
+                JdbcIterator jdbcIterator = (JdbcIterator)AbstractIterator.deserialize(
                     (byte[])request.context(DataproviderReplyContexts.ITERATOR).get(0)
                 );
                 referencedType = jdbcIterator.getReferencedType();
@@ -3916,8 +3965,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
                             )
                         )
                     );
-                    SysLog.detail(e.getMessage(), e.getCause(), 1);
-
+                    e.log();
                     reply = new DataproviderReply(Collections.EMPTY_LIST);
                     // HAS_MORE
                     reply.context(
@@ -4267,7 +4315,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
                         boolean viewIsIndexed = dbObject.getIndexColumn() != null;              
                         statement += hasOrderBy ? ", " : " ";
                         // order on mixin view (vm.) in case of indexed slices, otherwise on primary view (v.)
-                        statement += (viewIsIndexed ? "vm." : "v.") + getColumnName(conn, specifier.name(), 0, false, true) + (specifier.order() == Orders.DESCENDING ? " DESC" : " ASC");
+                        statement += (viewIsIndexed ? "vm." : "v.") + getColumnName(conn, specifier.name(), 0, false, true) + (specifier.order() == Directions.DESCENDING ? " DESC" : " ASC");
                         hasOrderBy = true;
                     }
                 }
@@ -4455,7 +4503,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
             // context.ITERATOR
             reply.context(DataproviderReplyContexts.ITERATOR).set(
                 0,
-                JdbcIterator.serialize(
+                AbstractIterator.serialize(
                     new JdbcIterator(
                         referencedType,
                         statement, 
@@ -4914,7 +4962,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
   }
 
   //---------------------------------------------------------------------------
-  public DataproviderReply replace(
+  @SuppressWarnings("deprecation")
+public DataproviderReply replace(
       ServiceHeader header,
       DataproviderRequest request
   ) throws ServiceException {
@@ -5206,6 +5255,22 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
   }
   
   /**
+   * Remove the escape character '\\' from a like value
+   * 
+   * @param likeValue
+   * 
+   * @return the corresponding equals value
+   */
+  public static String unescape(
+      String likeValue
+  ){
+      return likeValue.indexOf('\\') < 0 ? likeValue : likeValue.replaceAll(
+          "\\\\([_%\\\\])", 
+          "$1"
+      );
+  }
+    
+  /**
    * Retrieves the configured date type
    * 
    * @param connection
@@ -5314,6 +5379,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
   // AUTOINC_FORMAT
   protected static final String AUTOINC_FORMAT_NEXTVAL = "NEXTVAL";
   protected static final String AUTOINC_FORMAT_NEXTVAL_FOR = "NEXTVALFOR";
+  protected static final String AUTOINC_FORMAT_NEXT_VALUE_FOR = "NEXTVALUEFOR";
   protected static final String AUTOINC_FORMAT_AUTO = "AUTO";
   protected static final String AUTOINC_FORMAT_SEQUENCE = "SEQUENCE";
   
@@ -5343,6 +5409,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1
   protected String privateAttributesPrefix;
   protected String objectIdAttributesSuffix;
   protected String referenceIdAttributesSuffix;
+  
+  // Reserved words
+  protected static final Set<String> RESERVED_WORDS_HSQLDB = new HashSet<String>(
+      Arrays.asList(   
+          "position", 
+          "POSITION"
+      )
+  );
   
   // JDO case insensitive flag
   protected static final String JDO_CASE_INSENSITIVE_FLAG = "(?i)";

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Object_1.java,v 1.43 2008/01/08 16:16:31 hburger Exp $
+ * Name:        $Id: Object_1.java,v 1.51 2008/06/28 00:21:46 hburger Exp $
  * Description: Object_1 class
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.51 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2008/06/28 00:21:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,6 +52,8 @@ package org.openmdx.compatibility.base.dataprovider.transport.delegation;
 
 import java.beans.PropertyChangeListener;
 import java.beans.VetoableChangeListener;
+import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -75,6 +77,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.Map.Entry;
 
@@ -90,8 +93,6 @@ import org.openmdx.base.accessor.generic.spi.AbstractObject_1;
 import org.openmdx.base.accessor.generic.spi.MarshallingStructure_1;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.collection.MarshallingSequentialList;
-import org.openmdx.base.event.InstanceCallbackEvent;
-import org.openmdx.base.event.InstanceCallbackListener;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.Records;
@@ -104,7 +105,11 @@ import org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attribute
 import org.openmdx.compatibility.base.dataprovider.spi.SystemOperations;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Provider_1_0;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Provider_1_1;
+import org.openmdx.compatibility.base.dataprovider.transport.rmi.inprocess.StreamMarshaller.BinaryHolder;
+import org.openmdx.compatibility.base.dataprovider.transport.rmi.inprocess.StreamMarshaller.CharacterHolder;
 import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_3;
+import org.openmdx.compatibility.base.event.InstanceCallbackEvent;
+import org.openmdx.compatibility.base.event.InstanceCallbackListener;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.naming.PathComponent;
 import org.openmdx.kernel.exception.BasicException;
@@ -113,15 +118,10 @@ import org.openmdx.kernel.id.cci.UUIDGenerator;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 
-
-import java.util.UUID;
-
-
-
-
 /**
  * Object_1_0 implementation
  */
+@SuppressWarnings({"unchecked", "deprecation"})
 public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable {
 
     /**
@@ -181,14 +181,63 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         }
         this.deleted = that.deleted;
         this.digest = that.digest;
-        putAll(
-            this.transactionalValues,
-            that.transactionalValues
-        );
-        putAll(
-            this.persistentValues,
-            that.persistentValues
-        );
+
+        if(that.persistentValues != null) {
+            for(
+                Iterator i = that.persistentValues.entrySet().iterator();
+                i.hasNext();
+            ){
+                Map.Entry e = (Entry) i.next();
+                Object feature = e.getKey();
+                Object candidate = e.getValue();
+                if(
+                    candidate instanceof Container ||
+                    candidate instanceof FilterableMap
+                ) {
+                    // ignore containments
+                } else {
+                    this.persistentValues.put(feature, candidate);
+                }
+            }
+         }
+
+        if(that.transactionalValues != null) {
+            for(
+                Iterator i = that.transactionalValues.entrySet().iterator();
+                i.hasNext();
+            ){
+                Map.Entry e = (Entry) i.next();
+                String feature = (String) e.getKey();
+                Object candidate = e.getValue();
+                if(
+                    candidate instanceof Container ||
+                    candidate instanceof FilterableMap
+                ) {
+                    // ignore containments
+                } else if (candidate instanceof ManagedSet) {
+                    if(completelyDirty || that.dirty.contains(feature)) {
+                        Set target = this.objGetSet(feature);
+                        target.clear();
+                        target.addAll((Set)candidate);
+                    }
+                } else if (candidate instanceof ManagedList) {
+                    if(completelyDirty || that.dirty.contains(feature)) {
+                        List target = this.objGetList(feature);
+                        target.clear();
+                        target.addAll((List)candidate);
+                    }
+                } else if (candidate instanceof ManagedSparseArray) {
+                    if(completelyDirty || that.dirty.contains(feature)) {
+                        SortedMap target = this.objGetSparseArray(feature);
+                        target.clear();
+                        target.putAll((SortedMap)candidate);
+                    }
+                } else {
+                    this.transactionalValues.put(feature, candidate);
+                }
+            }
+         }
+
         if(completelyDirty) {
             this.dirty.addAll(this.transactionalValues.keySet());
             if(that.persistentValues != null) {
@@ -251,16 +300,42 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
            );
       }
         this.persistentValues=Object_1.createMappedRecord(objectClass);
-        if(initialValues.transactionalValues != null) {
-            this.transactionalValues.putAll( // was this.persistentValues.putAll
-                initialValues.transactionalValues
-            );
-        }
         if(initialValues.persistentValues != null) {
             this.persistentValues.putAll(
                 initialValues.persistentValues
             );
         }
+        if(initialValues.transactionalValues != null) {
+            for(
+                Iterator i = initialValues.transactionalValues.entrySet().iterator();
+                i.hasNext();
+            ){
+                Map.Entry e = (Entry) i.next();
+                String feature = (String) e.getKey();
+                Object candidate = e.getValue();
+                if (candidate instanceof ManagedSet) {
+                    if(initialValues.dirty.contains(feature)) {
+                        Set target = this.objGetSet(feature);
+                        target.clear();
+                        target.addAll((Set)candidate);
+                    }
+                } if (candidate instanceof ManagedList) {
+                    if(initialValues.dirty.contains(feature)) {
+                        List target = this.objGetList(feature);
+                        target.clear();
+                        target.addAll((List)candidate);
+                    }
+                } if (candidate instanceof ManagedSparseArray) {
+                    if(initialValues.dirty.contains(feature)) {
+                        SortedMap target = this.objGetSparseArray(feature);
+                        target.clear();
+                        target.putAll((SortedMap)candidate);
+                    }
+                } else {
+                    this.transactionalValues.put(feature, candidate);
+                }
+            }
+         }
 //      SysLog.trace("Object cloned", this);
     }
 
@@ -790,6 +865,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             }
             this.manager.getObject(containerPath.getParent()).objAddToUnitOfWork();
             this.manager.cache(this.identity,this);
+            this.fireInstanceCallback(InstanceCallbackEvent.POST_CREATE);
             objAddToUnitOfWork();
             for(
                 Iterator i=this.transactionalValues.entrySet().iterator();
@@ -1025,13 +1101,11 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
 
     void prepare(
     ) throws ServiceException {
-        if(
-            objIsDirty() && !objIsDeleted()
-        ) {
-         fireInstanceCallback(
-               InstanceCallbackEvent.PRE_STORE
-           );
-      }
+        if(objIsDirty() && !objIsDeleted()) {
+            fireInstanceCallback(
+                InstanceCallbackEvent.PRE_STORE
+            );
+        }
         this.prepared = true;
     }
 
@@ -1564,66 +1638,34 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             null,
             InstanceCallbackListener.class
         );
-        if(listeners.length == 0) {
-         return;
-      }
-        InstanceCallbackEvent event = new InstanceCallbackEvent(
-            type,
-            this, null
-        );
-        for(
-            int i = 0;
-            i < listeners.length;
-            i++
-        ) {
-            switch (type) {
-                case InstanceCallbackEvent.POST_LOAD :
-                case InstanceCallbackEvent.POST_RELOAD :
-                    listeners[i].postLoad(event);
-                    break;
-                case InstanceCallbackEvent.PRE_CLEAR :
-                    listeners[i].preClear(event);
-                    break;
-                case InstanceCallbackEvent.PRE_DELETE :
-                    listeners[i].preDelete(event);
-                    break;
-                case InstanceCallbackEvent.PRE_STORE :
-                    listeners[i].preStore(event);
-                    break;
+        if(listeners.length != 0) {
+            InstanceCallbackEvent event = new InstanceCallbackEvent(
+                type,
+                this, 
+                null
+            );
+            for(InstanceCallbackListener listener : listeners) {
+                switch (type) {
+                    case InstanceCallbackEvent.POST_LOAD :
+                    case InstanceCallbackEvent.POST_RELOAD :
+                        listener.postLoad(event);
+                        break;
+                    case InstanceCallbackEvent.PRE_CLEAR :
+                        listener.preClear(event);
+                        break;
+                    case InstanceCallbackEvent.PRE_DELETE :
+                        listener.preDelete(event);
+                        break;
+                    case InstanceCallbackEvent.PRE_STORE :
+                        listener.preStore(event);
+                        break;
+                    case InstanceCallbackEvent.POST_CREATE :
+                        listener.postCreate(event);
+                        break;
+                }
             }
         }
     }
-
-    /**
-     * Register a synchronization object for upward delegation.
-     *
-     * @param   synchronization
-     *          The synchronization object to be registered
-     *
-     * @exception ServiceException TOO_MANY_EVENT_LISTENERS
-     *            if an attempt is made to register more than one
-     *            synchronization object.
-     *
-     * @deprecated  use addEventListener(String,EventListener) instead
-     */
-    public void objRegisterSynchronization(
-        org.openmdx.compatibility.base.accessor.object.cci.InstanceCallbacks_1_0 synchronization
-    ) throws ServiceException {
-        if((this.synchronization != null) && (this.synchronization != synchronization)) {
-         throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.TOO_MANY_EVENT_LISTENERS,
-               new BasicException.Parameter[] {
-                   new BasicException.Parameter("old",this.synchronization.getClass().getName()),
-                   new BasicException.Parameter("new",synchronization.getClass().getName())
-               },
-               "Attempt to register more than one synchronization object"
-           );
-      }
-        objAddEventListener(null, new InstanceCallbackAdapter(synchronization));
-        this.synchronization = synchronization;
-    }
-
 
     boolean isPrepared(
     ){
@@ -2402,29 +2444,6 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         }
     }
 
-    private static void putAll(
-        Map target,
-        Map source
-   ){
-        if(source != null) {
-           for(
-               Iterator i = source.entrySet().iterator();
-               i.hasNext();
-           ){
-               Map.Entry e = (Entry) i.next();
-               Object candidate = e.getValue();
-               if(
-                   candidate instanceof Container ||
-                   candidate instanceof FilterableMap
-               ) {
-                   // ignore containments
-               } else {
-                   target.put(e.getKey(), e.getValue());
-               }
-           }
-        }
-   }
-
     //------------------------------------------------------------------------
     // Instance Members
     //------------------------------------------------------------------------
@@ -2543,11 +2562,6 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
      * @serial
      */
     private List operationQueue = new ArrayList();
-
-    /**
-     * @deprecated
-     */
-    private transient Object synchronization = null;
 
     /**
      *
@@ -2689,57 +2703,6 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
 
 
     //------------------------------------------------------------------------
-    // Class InstanceCallbackAdapter
-    //------------------------------------------------------------------------
-
-    /**
-     * @deprecated
-     */
-    static final class InstanceCallbackAdapter implements InstanceCallbackListener {
-
-        /**
-         *
-         * @param synchronization
-         */
-        InstanceCallbackAdapter(
-            org.openmdx.compatibility.base.accessor.object.cci.InstanceCallbacks_1_0 synchronization
-        ){
-            this.synchronization = synchronization;
-        }
-
-        /**
-         *
-         */
-        private final org.openmdx.compatibility.base.accessor.object.cci.InstanceCallbacks_1_0 synchronization;
-
-        /* (non-Javadoc)
-         */
-        public void postLoad(InstanceCallbackEvent instanceCallback) throws ServiceException {
-            this.synchronization.objPostLoad();
-        }
-
-        /* (non-Javadoc)
-         */
-        public void preStore(InstanceCallbackEvent instanceCallback) throws ServiceException {
-            this.synchronization.objPreStore();
-        }
-
-        /* (non-Javadoc)
-         */
-        public void preClear(InstanceCallbackEvent instanceCallback) throws ServiceException {
-            this.synchronization.objPreClear();
-        }
-
-        /* (non-Javadoc)
-         */
-        public void preDelete(InstanceCallbackEvent instanceCallback) throws ServiceException {
-            this.synchronization.objPreDelete();
-        }
-
-    }
-
-
-    //------------------------------------------------------------------------
     // Class ManagedLargeObject
     //------------------------------------------------------------------------
 
@@ -2873,7 +2836,10 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         /* (non-Javadoc)
          */
         public InputStream getBinaryStream() throws ServiceException {
-            return (InputStream)getStream();
+            Object stream = getStream();
+            return stream instanceof BinaryHolder ? 
+                new ByteArrayInputStream(((BinaryHolder)stream).getBytes()) : 
+                (InputStream)stream;
         }
 
         /* (non-Javadoc)
@@ -2920,7 +2886,10 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
         /* (non-Javadoc)
          */
         public Reader getCharacterStream() throws ServiceException {
-            return (Reader)getStream();
+            Object stream = getStream();
+            return stream instanceof CharacterHolder ? 
+                new CharArrayReader(((CharacterHolder)stream).getChars()) : 
+                (Reader)stream;
         }
 
         /* (non-Javadoc)
@@ -3254,7 +3223,7 @@ public class Object_1 implements Serializable, Object_1_2, Object_1_3, Evictable
             this.fetched = false;
         }
 
-        private class ManagedIterator implements Iterator {
+        class ManagedIterator implements Iterator {
 
             public boolean hasNext(
             ){

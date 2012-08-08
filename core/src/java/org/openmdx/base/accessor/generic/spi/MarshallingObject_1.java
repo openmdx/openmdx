@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MarshallingObject_1.java,v 1.9 2007/10/10 16:05:50 hburger Exp $
+ * Name:        $Id: MarshallingObject_1.java,v 1.11 2008/04/21 17:04:25 hburger Exp $
  * Description: MarshallingObject_1 class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:50 $
+ * Date:        $Date: 2008/04/21 17:04:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,10 +60,12 @@ import java.util.SortedMap;
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.accessor.generic.cci.Structure_1_0;
 import org.openmdx.base.collection.FilterableMap;
+import org.openmdx.base.collection.MarshallingFilterableMap;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -72,10 +74,74 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * An abstract delegating object
  */
+@SuppressWarnings("unchecked")
 public class MarshallingObject_1
     extends DelegatingObject_1 
     implements Serializable
 {
+
+    /**
+     * Marshalling Container
+     */
+    static class MarshallingContainer<K,V,M extends FilterableMap<K,?>> 
+        extends MarshallingFilterableMap<K,V,M>
+    {
+    
+        /**
+         * Constructor
+         * 
+         * @param marshaller
+         * @param container
+         */
+        public MarshallingContainer(
+            Marshaller marshaller,
+            M container
+        ) throws ServiceException {
+            super(marshaller, container);
+        }
+    
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = 3257009873437996080L;
+    
+        /**
+         * Get the delegate and verifies the marshaller
+         * 
+         * @param marshaller
+         * 
+         * @return the delegate map
+         * 
+         * @exception ServiceException BAD_PARAMETER
+         *            If the request specifies a different marshaller
+         *            
+         */
+        M getDelegate(
+            Marshaller marshaller
+        ) throws ServiceException{
+            if(!(super.marshaller instanceof CollectionMarshallerAdapter)) throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                new BasicException.Parameter[]{
+                    new BasicException.Parameter("expected",CollectionMarshallerAdapter.class.getName()),
+                    new BasicException.Parameter("actual",super.marshaller.getClass().getName())
+                },
+                "Unexpected marshaller"
+            );
+    		Marshaller delegate = ((CollectionMarshallerAdapter)super.marshaller).getDelegate();
+            if(delegate != marshaller) throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                new BasicException.Parameter[]{
+                    new BasicException.Parameter("expected",marshaller.getClass().getName()),
+                    new BasicException.Parameter("actual",delegate.getClass().getName())
+                },
+                "Delegate marshaller mismatch"
+            );
+            return super.getDelegate();
+        }
+        
+    }
 
     /**
      * 
@@ -259,7 +325,7 @@ public class MarshallingObject_1
         if(getDelegate() == null) {
             return null;
         }
-        return new MarshallingContainer_1(
+        return new MarshallingContainer(
             this.marshaller,
             getDelegate().objGetContainer(feature)
         );
@@ -330,7 +396,7 @@ public class MarshallingObject_1
         String criteria
     ) throws ServiceException {        
         getDelegate().objMove(
-            there == null ? null : ((MarshallingContainer_1)there).getDelegate(this.marshaller),
+            there == null ? null : ((MarshallingContainer)there).getDelegate(this.marshaller),
             criteria
         );
     } 

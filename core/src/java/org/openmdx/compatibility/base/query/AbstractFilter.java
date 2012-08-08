@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractFilter.java,v 1.19 2007/12/02 01:47:21 hburger Exp $
+ * Name:        $Id: AbstractFilter.java,v 1.20 2008/03/21 20:14:50 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/02 01:47:21 $
+ * Date:        $Date: 2008/03/21 20:14:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,12 +62,12 @@ import org.openmdx.base.text.pattern.SQLExpression;
 import org.openmdx.base.text.pattern.cci.Pattern_1_0;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 
 
 /**
  * FilterProperty based Filter
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractFilter implements Selector, Serializable {
 
     protected AbstractFilter(
@@ -494,7 +494,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
         if (LengthInt < 0) //if NO_MAX
           max = wordLength; //wordLength was the max possible size.
         int code = 0; 
-        CharSequence buf = StringBuilders.newStringBuilder(
+        StringBuilder buf = new StringBuilder(
             max
         ).append(
             Character.toLowerCase(word.charAt(0))
@@ -502,13 +502,13 @@ public abstract class AbstractFilter implements Selector, Serializable {
         for (int i = 1;(i < wordLength) && (sofar < max); i++) {
           code = getCode(word.charAt(i));
           if (code > 0) {
-            StringBuilders.asStringBuilder(buf).append(code);
+            buf.append(code);
             sofar++;
             }
           }
         if (PadBoolean && (LengthInt > 0)) {
           for (;sofar < max; sofar++)
-              StringBuilders.asStringBuilder(buf).append('0');
+              buf.append('0');
           }
         return buf.toString();
       }
@@ -651,16 +651,16 @@ public abstract class AbstractFilter implements Selector, Serializable {
         String word
       ) {
         int len = word.length();
-        CharSequence buf = StringBuilders.newStringBuilder(len);
+        StringBuilder buf = new StringBuilder(len);
         char ch = word.charAt(0);
         int currentCode = getCode(ch);
-        StringBuilders.asStringBuilder(buf).append(ch);
+        buf.append(ch);
         int lastCode = currentCode;
         for (int i = 1; i < len; i++) {
           ch = word.charAt(i);
           currentCode = getCode(ch);
           if ((currentCode != lastCode) && (currentCode >= 0)) {
-              StringBuilders.asStringBuilder(buf).append(ch);
+              buf.append(ch);
             lastCode = currentCode;
             }
           }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: GridControl.java,v 1.35 2007/12/13 23:42:20 wfro Exp $
+ * Name:        $Id: GridControl.java,v 1.37 2008/05/01 21:43:56 wfro Exp $
  * Description: GridControlDef
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.37 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 23:42:20 $
+ * Date:        $Date: 2008/05/01 21:43:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -107,9 +107,9 @@ public class GridControl
         this.objectContainer = objectContainer;
         
         // column filters
-        List columnFilterSetActions = new ArrayList();
-        List columnFilterAddActions = new ArrayList();
-        List columnTypes = new ArrayList();
+        List<Action> columnFilterSetActions = new ArrayList<Action>();
+        List<Action> columnFilterAddActions = new ArrayList<Action>();
+        List<Integer> columnTypes = new ArrayList<Integer>();
     
         // first column contains object icon
         columnFilterSetActions.add(
@@ -133,7 +133,7 @@ public class GridControl
         );
     
         // column filter actions and initial sort orders
-        this.initialColumnSortOrders = new HashMap();
+        this.initialColumnSortOrders = new HashMap<String,Short>();
         for(
             int i = 0; 
             (i < objectContainer.getMember().size()) && (i < Grid.MAX_COLUMNS); 
@@ -214,6 +214,7 @@ public class GridControl
     }
     
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public static boolean getShowRowSelectors(
         String lookupType,
         ModelElement_1_0 referencedType,
@@ -330,6 +331,7 @@ public class GridControl
     }
     
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,
@@ -346,7 +348,7 @@ public class GridControl
     private final org.openmdx.ui1.jmi1.ObjectContainer objectContainer;
     private final Action[] columnFilterSetActions;
     private final Action[] columnFilterAddActions;
-    private final Map initialColumnSortOrders;
+    private final Map<String,Short> initialColumnSortOrders;
     private final int[] columnTypes;
     private final String containerClass;
     private final String containerId;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClockClient_1.jt,v 1.4 2007/06/04 13:05:48 hburger Exp $
+ * Name:        $Id: ClockClient_1.jt,v 1.6 2008/03/07 22:22:07 hburger Exp $
  * Description: Clock Client 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/06/04 13:05:48 $
+ * Date:        $Date: 2008/03/07 22:22:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -162,7 +162,7 @@ public class ClockClient_1 {
 	){
 	    try {
             return DateFormat.getInstance().format(
-            	getInstance().segment.getTime().getUtc()
+            	getInstance().segment.currentDateAndTime().getUtc()
             );
         } catch (Exception e) {
             return StackedException.toStackedException(e).toString();

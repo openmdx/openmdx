@@ -1,9 +1,10 @@
 /*
- *  Copyright 2003-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -20,19 +21,21 @@ import java.util.Map;
 import org.openmdx.uses.org.apache.commons.collections.KeyValue;
 
 /**
- * A mutable KeyValue pair that does not implement MapEntry.
+ * A mutable <code>KeyValue</code> pair that does not implement
+ * {@link java.util.Map.Entry Map.Entry}.
  * <p>
  * Note that a <code>DefaultKeyValue</code> instance may not contain
  * itself as a key or value.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2004/10/24 12:17:20 $
+ * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:16 $
  * 
  * @author James Strachan
  * @author Michael A. Smith
  * @author Neil O'Toole
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class DefaultKeyValue extends AbstractKeyValue {
 
     /**
@@ -53,7 +56,7 @@ public class DefaultKeyValue extends AbstractKeyValue {
     }
 
     /**
-     * Constructs a new pair from the specified KeyValue.
+     * Constructs a new pair from the specified <code>KeyValue</code>.
      *
      * @param pair  the pair to copy, must not be null
      * @throws NullPointerException if the entry is null
@@ -63,7 +66,7 @@ public class DefaultKeyValue extends AbstractKeyValue {
     }
 
     /**
-     * Constructs a new pair from the specified MapEntry.
+     * Constructs a new pair from the specified <code>Map.Entry</code>.
      *
      * @param entry  the entry to copy, must not be null
      * @throws NullPointerException if the entry is null
@@ -119,7 +122,7 @@ public class DefaultKeyValue extends AbstractKeyValue {
 
     //-----------------------------------------------------------------------
     /**
-     * Compares this Map Entry with another Map Entry.
+     * Compares this <code>Map.Entry</code> with another <code>Map.Entry</code>.
      * <p>
      * Returns true if the compared object is also a <code>DefaultKeyValue</code>,
      * and its key and value are equal to this object's key and value.

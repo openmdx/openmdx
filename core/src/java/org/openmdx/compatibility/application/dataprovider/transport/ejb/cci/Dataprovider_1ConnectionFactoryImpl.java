@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1ConnectionFactoryImpl.java,v 1.10 2008/02/08 16:51:56 hburger Exp $
+ * Name:        $Id: Dataprovider_1ConnectionFactoryImpl.java,v 1.13 2008/07/01 20:47:17 hburger Exp $
  * Description: sDataprovider_1ConnectionFactoryImpl class
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:56 $
+ * Date:        $Date: 2008/07/01 20:47:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ejb.CreateException;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
@@ -62,6 +63,7 @@ import javax.rmi.PortableRemoteObject;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
+import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_3Connection;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -203,25 +205,27 @@ public class Dataprovider_1ConnectionFactoryImpl
     /**
      * Creates a local dataprovider connection
      *
-     * @param       ejbLocalHome
+     * @param       home
      *              The dataprovider EJB's local home interface
      *
      * @return      a new dataprovider connection
+     * 
+     * @throws CreateException 
+     * @throws ServiceException 
      */
-    public static Dataprovider_1_1Connection createLocalConnection(
-        Object ejbLocalHome
-    ) throws Exception {
-        return new Dataprovider_1LocalConnection<Dataprovider_1_0Local>(
-            ((Dataprovider_1LocalHome)
-                ejbLocalHome
-            ).create()
-        );
+    public static Dataprovider_1_3Connection createLocalConnection(
+        Object home
+    ) throws ServiceException, CreateException {
+        Dataprovider_1_0Local dataprovider = home instanceof EntityManagerFactory_2LocalHome ?
+            ((EntityManagerFactory_2LocalHome)home).create() :
+            ((Dataprovider_1LocalHome)home).create();
+        return new Dataprovider_1LocalConnection(dataprovider);
     }
 
     /**
      * Creates a local or remote dataprovider connection
      *
-     * @param       ejbGenericHome
+     * @param       home
      *              The dataprovider EJB's home or local home interface
      *
      * @return      a new dataprovider connection
@@ -231,7 +235,8 @@ public class Dataprovider_1ConnectionFactoryImpl
     ) throws Exception {
         return home instanceof Dataprovider_1ConnectionFactory ?
             createStandardConnection(home) :
-        home instanceof Dataprovider_1LocalHome ?
+        home instanceof Dataprovider_1LocalHome || 
+        home instanceof  EntityManagerFactory_2LocalHome?
             createLocalConnection(home) :
             createRemoteConnection(home);
     }

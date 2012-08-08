@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StrictDatatypeComparator.java,v 1.1 2006/07/03 13:54:20 hburger Exp $
+ * Name:        $Id: StrictDatatypeComparator.java,v 1.2 2008/03/21 18:30:56 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/07/03 13:54:20 $
+ * Date:        $Date: 2008/03/21 18:30:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,6 +65,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Allows comparison of XML Datatype classes
  */
+@SuppressWarnings("unchecked")
 public class StrictDatatypeComparator extends LenientNumberComparator {
 
     /**

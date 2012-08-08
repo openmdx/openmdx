@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingCollection.java,v 1.8 2008/02/18 14:11:33 hburger Exp $
+ * Name:        $Id: MarshallingCollection.java,v 1.10 2008/04/09 12:33:43 hburger Exp $
  * Description: Marshalling Collection
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/04/09 12:33:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,6 +57,7 @@ import java.util.Iterator;
 
 import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
 
 /**
  * Marshalling Collection
@@ -67,9 +68,22 @@ public class MarshallingCollection<E>
 {
     
     /**
+     * Constructor
      * 
+     * @param marshaller
+     * @param collection
+     * @param unmarshalling
      */
-    private static final long serialVersionUID = 3977579212402079801L;
+    @SuppressWarnings("unchecked")
+    public MarshallingCollection(
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
+        Collection<?> collection, 
+        Unmarshalling unmarshalling
+    ) {
+        this.marshaller = marshaller;
+        this.collection = (Collection<Object>) collection;
+        this.unmarshalling = unmarshalling;
+    }
 
     /**
      * Constructor
@@ -79,11 +93,14 @@ public class MarshallingCollection<E>
      */
     @SuppressWarnings("unchecked")
     public MarshallingCollection(
-        org.openmdx.base.object.spi.Marshaller marshaller,
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
         Collection<?> collection
     ) {
-        this.marshaller = marshaller;
-        this.collection = (Collection<Object>) collection;
+        this(
+            marshaller,
+            collection,
+            Unmarshalling.EAGER
+        );
     }
 
     /**
@@ -96,8 +113,37 @@ public class MarshallingCollection<E>
         Marshaller marshaller,
         Collection<?> collection
     ) {
-        this(new CollectionMarshallerAdapter(marshaller), collection);
+        this(
+            new CollectionMarshallerAdapter(marshaller), 
+            collection, 
+            marshaller instanceof ReluctantUnmarshalling ? Unmarshalling.RELUCTANT : Unmarshalling.EAGER
+        );
     }
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3977579212402079801L;
+
+    /**
+     * 
+     */
+    protected Collection<Object> collection;
+
+    /**
+     * 
+     */    
+    protected org.openmdx.base.persistence.spi.Marshaller marshaller;
+
+    /**
+     * The unmarshal preference
+     */
+    protected final Unmarshalling unmarshalling;
+    
+    
+    //------------------------------------------------------------------------
+    // Implements Collection
+    //------------------------------------------------------------------------
 
     /* (non-Javadoc)
      * @see java.util.Collection#clear()
@@ -119,9 +165,16 @@ public class MarshallingCollection<E>
      * @see java.util.Collection#contains(java.lang.Object)
      */
     public boolean contains(Object element) {
-        return this.collection.contains(
-            this.marshaller.unmarshal(element)
-        );
+        switch(this.unmarshalling) {
+            case RELUCTANT: 
+                return super.contains(
+                    element
+                );
+            case EAGER: default: 
+                return this.collection.contains(
+                    this.marshaller.unmarshal(element)
+                );  
+        }
     }
 
     /* (non-Javadoc)
@@ -134,7 +187,7 @@ public class MarshallingCollection<E>
     public Iterator<E> iterator(
     ) {
         return new MarshallingIterator(
-          this.collection.iterator()
+            this.collection.iterator()
         );
     }
 
@@ -142,27 +195,28 @@ public class MarshallingCollection<E>
      * @see java.util.Collection#remove(java.lang.Object)
      */
     public boolean remove(Object element) {
-        return this.collection.remove(
-            this.marshaller.unmarshal(element)
-         );
+        switch(this.unmarshalling) {
+            case RELUCTANT: 
+                return super.remove(
+                    element
+                );
+            case EAGER: default: 
+                return this.collection.remove(
+                    this.marshaller.unmarshal(element)
+                 );
+        }
     }
 
-  
     public int size(
     ) {
         return this.collection.size();
     }
 
-    /**
-     * 
-     */
-    protected Collection<Object> collection;
-
-    /**
-     * 
-     */    
-    protected org.openmdx.base.object.spi.Marshaller marshaller;
-
+    
+    //------------------------------------------------------------------------
+    // Class MarshallingIterator
+    //------------------------------------------------------------------------
+    
     /**
      * Marshalling Iterator
      * @author hburger
@@ -199,7 +253,9 @@ public class MarshallingCollection<E>
         @SuppressWarnings("unchecked")
         public E next(
         ) {
-            return (E) MarshallingCollection.this.marshaller.marshal(iterator.next());
+            return (E) MarshallingCollection.this.marshaller.marshal(
+                iterator.next()
+            );
         }
 
         /**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org
- * Name:        $Id: PrincipalCallback.java,v 1.1 2005/07/09 19:45:26 hburger Exp $
+ * Name:        $Id: PrincipalCallback.java,v 1.2 2008/03/21 18:37:13 hburger Exp $
  * Description: Principal Callback
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/07/09 19:45:26 $
+ * Date:        $Date: 2008/03/21 18:37:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,6 +65,7 @@ import org.openmdx.kernel.security.authentication.spi.GenericPrincipal;
 /**
  * Principal Callback
  */
+@SuppressWarnings("unchecked")
 public class PrincipalCallback 
 	implements Callback, Serializable 
 {

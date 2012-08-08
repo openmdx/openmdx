@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -42,6 +43,7 @@ import org.openmdx.uses.org.apache.commons.collections.iterators.IteratorChain;
 import org.openmdx.uses.org.apache.commons.collections.iterators.IteratorEnumeration;
 import org.openmdx.uses.org.apache.commons.collections.iterators.ListIteratorWrapper;
 import org.openmdx.uses.org.apache.commons.collections.iterators.LoopingIterator;
+import org.openmdx.uses.org.apache.commons.collections.iterators.LoopingListIterator;
 import org.openmdx.uses.org.apache.commons.collections.iterators.ObjectArrayIterator;
 import org.openmdx.uses.org.apache.commons.collections.iterators.ObjectArrayListIterator;
 import org.openmdx.uses.org.apache.commons.collections.iterators.ObjectGraphIterator;
@@ -64,11 +66,12 @@ import org.openmdx.uses.org.apache.commons.collections.iterators.UnmodifiableMap
  * against versions 2.1.1 and 3.1.
  *
  * @since Commons Collections 2.1
- * @version $Revision: 1.4 $ $Date: 2007/10/10 16:06:13 $
+ * @version $Revision: 1.6 $ $Date: 2008/04/25 14:32:26 $
  * 
  * @author Stephen Colebourne
  * @author Phil Steitz
  */
+@SuppressWarnings("unchecked")
 public class IteratorUtils {
     // validation is done in this class in certain cases because the
     // public classes allow invalid states
@@ -104,7 +107,6 @@ public class IteratorUtils {
      * IteratorUtils is not normally instantiated.
      */
     public IteratorUtils() {
-        //
     }
 
     // Empty
@@ -686,6 +688,24 @@ public class IteratorUtils {
         return new LoopingIterator(coll);
     }
     
+    /**
+     * Gets an iterator that loops continuously over the supplied list.
+     * <p>
+     * The iterator will only stop looping if the remove method is called
+     * enough times to empty the list, or if the list is empty to start with.
+     *
+     * @param list  the list to iterate over, not null
+     * @return a new looping iterator
+     * @throws NullPointerException if the list is null
+     * @since Commons Collections 3.2
+     */
+    public static ResettableListIterator loopingListIterator(List list) {
+        if (list == null) {
+            throw new NullPointerException("List must not be null");
+        }
+        return new LoopingListIterator(list);
+    }
+    
     // Views
     //-----------------------------------------------------------------------
     /**
@@ -878,9 +898,9 @@ public class IteratorUtils {
             
         } else {
             try {
-                Method method = obj.getClass().getMethod("iterator", (Class[])null);
+                Method method = obj.getClass().getMethod("iterator", (Class[]) null);
                 if (Iterator.class.isAssignableFrom(method.getReturnType())) {
-                    Iterator it = (Iterator) method.invoke(obj, (Object[])null);
+                    Iterator it = (Iterator) method.invoke(obj, (Object[]) null);
                     if (it != null) {
                         return it;
                     }

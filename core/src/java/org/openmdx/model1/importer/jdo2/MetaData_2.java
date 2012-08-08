@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MetaData_2.java,v 1.12 2007/12/12 00:10:03 wfro Exp $
+ * Name:        $Id: MetaData_2.java,v 1.13 2008/06/28 00:21:36 hburger Exp $
  * Description: Meta Data Provider
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/12 00:10:03 $
+ * Date:        $Date: 2008/06/28 00:21:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -473,12 +473,12 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
         /**
          * The package directory
          */
-        private final File directory;
+        final File directory;
 
         /**
          * The package name
          */
-        private final String name;
+        final String name;
         
         /**
          * The package's table prefix
@@ -689,7 +689,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
             /**
              * 
              */
-            private final String name;
+            final String name;
                 
             /**
              * Join
@@ -818,7 +818,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                 
                 private final ColumnMetaData column;
                 
-                private final String name;
+                final String name;
         
                 private final Integer embedded;
 
@@ -974,7 +974,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
     /**
      * The base file
      */
-    private final File baseDirectory;
+    final File baseDirectory;
 
     /**
      * The package cache
@@ -984,7 +984,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
     /**
      * The logger instance
      */
-    private final Logger logger = LoggerFactory.getLogger(MetaData_2.class);
+    final Logger logger = LoggerFactory.getLogger(MetaData_2.class);
 
     /**
      * The SAX error handler

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BinaryValue.java,v 1.24 2007/11/23 00:21:02 wfro Exp $
+ * Name:        $Id: BinaryValue.java,v 1.29 2008/06/18 22:42:30 wfro Exp $
  * Description: BinaryValue
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/23 00:21:02 $
+ * Date:        $Date: 2008/06/18 22:42:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -197,11 +197,11 @@ public class BinaryValue
 
     ModelElement_1_0 featureDef = null;
     try {
-        featureDef = application.getDataPackage().refModel().getElement(this.fieldDef.qualifiedFeatureName);
+        featureDef = application.getModel().getElement(this.fieldDef.qualifiedFeatureName);
     }
     catch(ServiceException e) {
         AppLog.warning("can not get feature definition");
-        AppLog.warning(e.getMessage(), e.getCause(), 1);
+        AppLog.warning(e.getMessage(), e.getCause());
     }
     // For features for type <<stream> binary the binary value 
     // is retrieved on-demand on EVENT_DOWNLOAD
@@ -271,7 +271,7 @@ public class BinaryValue
             }
             catch(Exception e) {
                 ServiceException e0 = new ServiceException(e);
-                AppLog.warning(e0.getMessage(), e0.getCause(), 1);
+                AppLog.warning(e0.getMessage(), e0.getCause());
             }
         }
         if(!this.isNull) {
@@ -374,7 +374,7 @@ public class BinaryValue
   //-------------------------------------------------------------------------
   protected Map getMimeTypeParams(
   ) {
-      Map params = new HashMap();
+      Map<String,String> params = new HashMap<String,String>();
       int pos = 0;
       if((pos = this.mimeType.indexOf(";")) >= 0) {
           StringTokenizer tokenizer = new StringTokenizer(this.mimeType.substring(pos+1), ";");
@@ -396,7 +396,7 @@ public class BinaryValue
       HttpServletRequest request
   ) {
       // get accepted mime types. Required for rendering binaries  
-      Set acceptedMimeTypes = new HashSet();
+      Set<String> acceptedMimeTypes = new HashSet<String>();
       StringTokenizer mimeTypeTokenizer = new StringTokenizer(request.getHeader("accept"), ", ");
       while(mimeTypeTokenizer.hasMoreTokens()) {
         String mimeType = mimeTypeTokenizer.nextToken();
@@ -412,6 +412,7 @@ public class BinaryValue
   }
   
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public void paint(
         Attribute attribute,
         HtmlPage p,
@@ -440,12 +441,12 @@ public class BinaryValue
             String idTag = id == null
                 ? ""
                 : "id=\"" + id + "\"";                                                                        
-            p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false) + "</span></td>");            
+            p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             String feature = this.getName();
-            p.write("<td " + rowSpanModifier + ">");
-            p.write("  <input ", idTag, " type=\"file\" class=\"valueL" + lockedModifier + "\" name=\"" + feature + "[" + tabIndex + "]" + "\" " + readonlyModifier + " " + disabledModifier + " tabindex=\"" + tabIndex + "\" title=\"" + texts.getEnterNullToDeleteText() + "\">");
+            p.write("<td ", rowSpanModifier, ">");
+            p.write("  <input ", idTag, " type=\"file\" class=\"valueL", lockedModifier, "\" name=\"", feature, "[", Integer.toString(tabIndex), "]\" ", readonlyModifier, " ", disabledModifier, " tabindex=\"", Integer.toString(tabIndex), "\" title=\"", texts.getEnterNullToDeleteText(), "\">");
             p.write("</td>");
-            p.write("<td class=\"addon\" " + rowSpanModifier + ">");            
+            p.write("<td class=\"addon\" ", rowSpanModifier, ">");            
         }
         else {
             if(stringifiedValue.length() == 0) {
@@ -492,7 +493,9 @@ public class BinaryValue
                 ) {
                     String imageId = org.openmdx.kernel.id.UUIDs.getGenerator().next().toString();
                     CharSequence imageSrc = p.getEncodedHRef(binaryValueAction);
-                    popupImages.put(imageId, imageSrc);
+                    if(popupImages != null) {
+                        popupImages.put(imageId, imageSrc);
+                    }
         
                     // single-valued BinaryValue in place
                     result += gapModifier; 

@@ -6,6 +6,7 @@ package javax.jmi.reflect;
  * from the create method without throwing this exception. This behaviour is
  * more common for singletons.</B>
  */
+@SuppressWarnings("serial")
 public class AlreadyExistsException extends JmiException {
     
     private final RefObject existing;

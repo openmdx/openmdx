@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BinaryLargeObject.java,v 1.2 2007/12/13 09:17:04 hburger Exp $
+ * Name:        $Id: BinaryLargeObject.java,v 1.3 2008/04/16 13:34:53 hburger Exp $
  * Description: Binary Large Object 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 09:17:04 $
+ * Date:        $Date: 2008/04/16 13:34:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,7 @@ package org.w3c.cci2;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Binary Large Object
@@ -61,11 +62,24 @@ public interface BinaryLargeObject
 {
     
     /**
-     * Retrive the large object's value
+     * Retrieve the large object's value
      * 
      * @return the large object's value
      */
     InputStream getContent(
     ) throws IOException;
     
+    /**
+     * Set an output stream to retrieves a large object's content.
+     * 
+     * @param       stream
+     *              an output stream receiving the object's content
+     * @param       position
+     *              index into the large object's content
+     */
+    void getContent(
+        OutputStream stream,
+        long position
+    ) throws IOException;
+
 }

@@ -151,7 +151,7 @@
       <generalization xmi:id="_3C7B8A60016D40F55F2E02A1">
         <general xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.base.emx#_3C7B8A60016D3FC487C80099?base/base/Segment"/>
       </generalization>
-      <ownedOperation xmi:id="_3C7B8A60016D40F560180207" name="getTime" type="_3C7B8A60016D40F560B70043" isQuery="true">
+      <ownedOperation xmi:id="_3C7B8A60016D40F560180207" name="currentDateAndTime" type="_3C7B8A60016D40F560B70043" isQuery="true">
         <eAnnotations xmi:id="_q8mhh97CEdmkJO73lqONhA" source="appliedStereotypes">
           <contents xmi:type="openMDX_0:openMDX__default__Operation" xmi:id="_q8mhiN7CEdmkJO73lqONhA" isQuery="true"/>
         </eAnnotations>

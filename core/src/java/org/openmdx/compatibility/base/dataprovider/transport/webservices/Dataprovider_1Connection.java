@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Connection.java,v 1.5 2006/08/11 09:24:10 hburger Exp $
+ * Name:        $Id: Dataprovider_1Connection.java,v 1.6 2008/03/19 17:10:05 hburger Exp $
  * Description: Dataprovider WebService connection
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:10 $
+ * Date:        $Date: 2008/03/19 17:10:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,8 +74,6 @@ import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * Dataprovider WebService connection
@@ -175,7 +173,7 @@ public class Dataprovider_1Connection
     UnitOfWorkRequest[] workingUnits
   ) {
     try {
-      CharSequence request = StringBuilders.newStringBuilder(4096);
+      StringBuilder request = new StringBuilder(4096);
       if(target instanceof URL) {
         if (req == null) {
           SysLog.detail("Open Connection for SOAP Transport, " + target);
@@ -202,9 +200,7 @@ public class Dataprovider_1Connection
       }
 
       // envelope header
-      StringBuilders.asStringBuilder(
-          request
-      ).append(
+      request.append(
           "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>"
       ).append(
           "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" "
@@ -274,10 +270,10 @@ public class Dataprovider_1Connection
         soapReplyReader = new StringReader(writer.toString());
       }
       if(SysLog.isTraceOn()) {
-        CharSequence soapReplyAsString = StringBuilders.newStringBuilder(4096);
+        StringBuilder soapReplyAsString = new StringBuilder(4096);
         int c;
         while((c = soapReplyReader.read()) != -1) {
-          StringBuilders.asStringBuilder(soapReplyAsString).append((char)c);
+          soapReplyAsString.append((char)c);
         }
         SysLog.trace("Reply", soapReplyAsString);
         soapReplyReader = new StringReader(

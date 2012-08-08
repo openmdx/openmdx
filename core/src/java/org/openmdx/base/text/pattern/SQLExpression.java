@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SQLExpression.java,v 1.11 2007/10/10 17:16:05 hburger Exp $
+ * Name:        $Id: SQLExpression.java,v 1.12 2008/03/21 18:32:18 hburger Exp $
  * Description: openMDX SQL LIKE Pattern implementation
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 17:16:05 $
+ * Date:        $Date: 2008/03/21 18:32:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,7 +55,6 @@ import org.openmdx.base.exception.BadParameterException;
 import org.openmdx.base.text.pattern.cci.Matcher_1_0;
 import org.openmdx.base.text.pattern.cci.Pattern_1_0;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * SQL Like pattern implementation
@@ -99,16 +98,14 @@ public class SQLExpression {
     ){
         String sqlPattern = _sqlPattern;
         try {
-            CharSequence regexpPattern = StringBuilders.newStringBuilder();
+            StringBuilder regexpPattern = new StringBuilder();
             if(
                 SQLExpression.ACCEPT_GLOBAL_REGULAR_EXPRESSION_FLAGS &&
                 sqlPattern.startsWith("(?")
             ){
                 int i = sqlPattern.indexOf(')') + 1;
                 if(i > 0) {
-                    StringBuilders.asStringBuilder(
-                        regexpPattern
-                    ).append(
+                    regexpPattern.append(
                         sqlPattern.substring(0, i)
                     );
                     sqlPattern = sqlPattern.substring(i);
@@ -126,9 +123,7 @@ public class SQLExpression {
                     	MISSING_DELIMITER_ALLOWS_ANY_MATCH && 
                     	candidate == STRING_PLACEHOLDER
                     ) continue;
-                    StringBuilders.asStringBuilder(
-                        regexpPattern
-                    ).append(
+                    regexpPattern.append(
                         '^'
                     );
                 }
@@ -137,14 +132,10 @@ public class SQLExpression {
                     if(
                         escaped != STRING_PLACEHOLDER && 
                         escaped != CHARACTER_PLACEHOLDER
-                    ) StringBuilders.asStringBuilder(
-                        regexpPattern
-                    ).append(
+                    ) regexpPattern.append(
                         candidate
                     );
-                    StringBuilders.asStringBuilder(
-                        regexpPattern
-                    ).append(
+                    regexpPattern.append(
                         escaped
                     );
                 } else if (candidate == STRING_PLACEHOLDER) {
@@ -154,16 +145,12 @@ public class SQLExpression {
                     ){
                         terminator = "";
                     } else {
-                        StringBuilders.asStringBuilder(
-                            regexpPattern
-                        ).append(
+                        regexpPattern.append(
                             ".*?"
                         );
                     }
                 } else if (candidate == CHARACTER_PLACEHOLDER) {
-                    StringBuilders.asStringBuilder(
-                        regexpPattern
-                    ).append(
+                    regexpPattern.append(
                         '.'
                     );
                 } else if (
@@ -172,15 +159,11 @@ public class SQLExpression {
                     (candidate >= '`' && candidate <= 'z') ||
                     candidate > '~'    
                 ) {
-                    StringBuilders.asStringBuilder(
-                        regexpPattern
-                    ).append(
+                    regexpPattern.append(
                         candidate
                     );
                 } else {
-                    StringBuilders.asStringBuilder(
-                        regexpPattern
-                    ).append(
+                    regexpPattern.append(
                         "\\u"
                     ).append(
                         Integer.toHexString(1 + Character.MAX_VALUE + candidate).substring(1)
@@ -189,9 +172,7 @@ public class SQLExpression {
             }
             return new Pattern_1(
                 RegularExpression.compile(
-                    StringBuilders.asStringBuilder(
-                        regexpPattern
-                    ).append(
+                    regexpPattern.append(
                         terminator
                     ).toString()
                 ),

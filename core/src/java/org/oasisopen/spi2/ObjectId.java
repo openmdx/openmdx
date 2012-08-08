@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ObjectId.java,v 1.3 2008/02/08 16:50:51 hburger Exp $
- * Description: ApplicationIdentity 
- * Revision:    $Revision: 1.3 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ObjectId.java,v 1.4 2008/05/15 18:07:25 hburger Exp $
+ * Description: ObjectId 
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:50:51 $
+ * Date:        $Date: 2008/05/15 18:07:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,9 +54,13 @@ package org.oasisopen.spi2;
 import java.util.List;
 
 /**
- * ApplicationIdentity
+ * ObjectId 
+ * <p><em>
+ * Note:<br>
+ * This class is <b>DEPRECATED</b> and will be removed soon! 
+ * </em>
  */
-public interface ObjectId {
+public interface ObjectId extends ObjectIdParser {
 
     /**
      * Retrieve the parent object's application identity.
@@ -69,10 +73,10 @@ public interface ObjectId {
      * <li>if the application identity is not hierarchical
      * </ul>
      */
-    public ObjectId getParentObjectId(
+    ObjectId getParentObjectId(
         List<String> baseClass
     );
-    
+
     /**
      * Retrieve the object's class or base-class.
      * 
@@ -80,38 +84,7 @@ public interface ObjectId {
      * unknown 
      * 
      */
-    public List<String> getTargetClass(
+    List<String> getTargetClass(
     );
 
-    /**
-     * Tells how many qualifiers this application identity consists of.
-     * 
-     * @return the number of qualifiers this application identity consists of
-     */
-    public int getQualifierCount(
-    );
-        
-    /**
-     * Tells whether a given qualifier has a persistent sub-segement
-     * 
-     * @param index the index of the requested sub-segment
-     * 
-     * @return <code>true</code> if the requested sub-segment is persistent
-     */
-    public boolean isQualifierPersistent(
-        int index
-    );
-
-    /**
-     * Retrieves a given qualifier value
-     * 
-     * @param index the index of the requested sub-segment
-     * 
-     * @return the requested sub-segment value
-     */
-    public <E> E getQualifier(
-        Class<E> qualifierClass,
-        int index
-    );
-
-}
+}    

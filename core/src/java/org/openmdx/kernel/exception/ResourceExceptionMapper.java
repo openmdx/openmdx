@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ResourceExceptionMapper.java,v 1.4 2006/01/12 00:05:40 hburger Exp $
+ * Name:        $Id: ResourceExceptionMapper.java,v 1.5 2008/03/21 18:35:32 hburger Exp $
  * Description: Resource Exception Mapper
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/01/12 00:05:40 $
+ * Date:        $Date: 2008/03/21 18:35:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import javax.resource.ResourceException;
 /**
  * Resource Exception Mapper
  */
+@SuppressWarnings("unchecked")
 final class ResourceExceptionMapper 
     implements BasicException.Mapper
 {
@@ -66,6 +67,7 @@ final class ResourceExceptionMapper
     /* (non-Javadoc)
      * @see org.openmdx.kernel.exception.BasicException.Mapper#map(java.lang.Throwable)
      */
+    @SuppressWarnings("deprecation")
     public BasicException map(Throwable throwable) {
         ResourceException exception = (ResourceException) throwable;
         List parameters = new ArrayList();

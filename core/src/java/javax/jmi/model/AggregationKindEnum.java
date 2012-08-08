@@ -2,6 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
+@SuppressWarnings({"unchecked", "serial"})
 public final class AggregationKindEnum implements AggregationKind {
     public static final AggregationKindEnum NONE = new AggregationKindEnum("none");
     public static final AggregationKindEnum SHARED = new AggregationKindEnum("shared");

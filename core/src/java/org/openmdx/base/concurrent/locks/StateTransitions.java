@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateTransitions.java,v 1.9 2008/01/08 16:16:31 hburger Exp $
+ * Name:        $Id: StateTransitions.java,v 1.10 2008/03/21 18:28:47 hburger Exp $
  * Description: State Transitions
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2008/03/21 18:28:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -45,20 +45,20 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
-
 package org.openmdx.base.concurrent.locks;
 
 
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
+
 /**
  * State Transitions
  */
-public class StateTransitions {
+public class StateTransitions <S extends Enum<S>>{
 
     /**
      * Constructor
@@ -66,7 +66,7 @@ public class StateTransitions {
      * @param initialState the initial state
      */
     public StateTransitions(
-        Enum initialState
+        S initialState
     ){
         this(initialState, null, false);
     }
@@ -79,7 +79,7 @@ public class StateTransitions {
      * @param debug tells whether logging is enabled
      */
     public StateTransitions(
-        Enum initial,
+        S initial,
         String id,
         boolean debug
     ){
@@ -91,7 +91,7 @@ public class StateTransitions {
     /**
      * The current state
      */
-    private Enum state;
+    private S state;
 
     /**
      * The id is used for toString() and log().
@@ -108,7 +108,7 @@ public class StateTransitions {
      * 
      * @return the <code>status</code>'s value
      */
-    public synchronized Enum getState() {
+    public synchronized S getState() {
         return this.state;
     }
 
@@ -118,7 +118,7 @@ public class StateTransitions {
      * @return <code>true</code> if the current state queals the given one.
      */
     public boolean stateMatches (
-        Enum state
+        S state
     ){
         return getState() == state;
     }
@@ -129,7 +129,7 @@ public class StateTransitions {
      * @return <code>true</code> if the current state queals the given one.
      */
     public boolean stateMatches (
-        EnumSet stati
+        EnumSet<S> stati
     ){
         return stati.contains(getState());
     }
@@ -140,7 +140,7 @@ public class StateTransitions {
      * @param state The <code>status</code>'s value
      */
     public synchronized void setState(
-        Enum state
+        S state
     ) {
         if(this.debug) log("transitions to " + state);
         this.state = state;
@@ -154,7 +154,7 @@ public class StateTransitions {
      */
     public final void setState(
         Condition event,
-        Enum state
+        S state
     ) {
         setState(state);
         if(event != null) event.signal();
@@ -169,9 +169,9 @@ public class StateTransitions {
      * not match the current one
      */
     public void assertState(
-        Enum expected
+        S expected
     ){
-        Enum current = getState();
+        S current = getState();
         if(current != expected) {
             throw new IllegalStateException(
                 this.id +
@@ -191,9 +191,9 @@ public class StateTransitions {
      * among the expected ones
      */
     public void assertState(
-        EnumSet expected
+        EnumSet<S> expected
     ){
-        Enum current = getState();
+        S current = getState();
         if(!expected.contains(current)) {
             throw new IllegalStateException(
                 this.id + ": Current status " + current +
@@ -210,9 +210,9 @@ public class StateTransitions {
      * @param to
      */
     public synchronized void transition(
-        Enum from,
+        S from,
         Condition event,
-        Enum to
+        S to
     ){
         assertState(from);
         setState(event, to);
@@ -231,7 +231,7 @@ public class StateTransitions {
      * @throws InterruptedException if the thread is interrupted
      */
     public boolean awaitState(
-        EnumSet stati,
+        EnumSet<S> stati,
         Condition event,
         long timeout
     ) throws InterruptedException {
@@ -260,7 +260,7 @@ public class StateTransitions {
      * @throws InterruptedException if the thread is interrupted
      */
     public void awaitState(
-        EnumSet stati,
+        EnumSet<S> stati,
         Condition event
     ) throws InterruptedException {
         while(!stateMatches(stati)) event.await();

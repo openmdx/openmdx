@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1_0.java,v 1.7 2006/10/30 13:28:04 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Model_1_0.java,v 1.9 2008/04/15 18:37:30 hburger Exp $
  * Description: Model_1_0 interface
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/30 13:28:04 $
+ * Date:        $Date: 2008/04/15 18:37:30 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.model1.accessor.basic.cci;
 
@@ -80,7 +79,7 @@ public interface Model_1_0 {
    * @throws ServiceException when model not found or not valid.
    */
   public void addModels(
-    Collection qualifiedModelNames
+    Collection<String> qualifiedModelNames
   ) throws ServiceException;
   
   /**
@@ -105,7 +104,7 @@ public interface Model_1_0 {
   /**
    * Returns all elements of the model package.
    */
-  public Collection getContent(
+  public Collection<ModelElement_1_0> getContent(
   ) throws ServiceException;
 
   /**
@@ -159,7 +158,7 @@ public interface Model_1_0 {
    * @return Map map of attributes of class, its supertypes and subtypes. The
    *          map contains an entry of the form (attributeName, attributeDef).
    */
-  public Map getAttributeDefs(
+  public Map<String,ModelElement_1_0> getAttributeDefs(
     ModelElement_1_0 classDef,
     boolean includeSubtypes,
     boolean includeDerived

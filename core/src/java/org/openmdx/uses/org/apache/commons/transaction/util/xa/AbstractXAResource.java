@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/util/xa/AbstractXAResource.java,v 1.1 2005/03/24 13:43:56 hburger Exp $
- * $Revision: 1.1 $
- * $Date: 2005/03/24 13:43:56 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/util/xa/AbstractXAResource.java,v 1.2 2008/03/21 18:42:19 hburger Exp $
+ * $Revision: 1.2 $
+ * $Date: 2008/03/21 18:42:19 $
  *
  * ====================================================================
  *
@@ -36,6 +36,7 @@ import org.openmdx.uses.org.apache.commons.transaction.util.LoggerFacade;
 /**
  * Abstract XAResource doing all the tedious tasks shared by many XAResouce implementations.
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractXAResource implements XAResource, Status {
 
     // there might be at least one active transaction branch per thread

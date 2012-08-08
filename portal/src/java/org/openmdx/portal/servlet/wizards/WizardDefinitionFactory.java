@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardDefinitionFactory.java,v 1.13 2007/08/18 10:22:49 wfro Exp $
+ * Name:        $Id: WizardDefinitionFactory.java,v 1.14 2008/04/04 11:51:09 hburger Exp $
  * Description: WizardDefinitionFactory 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/18 10:22:49 $
+ * Date:        $Date: 2008/04/04 11:51:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -114,7 +114,7 @@ public class WizardDefinitionFactory
         Model_1_0 model
     ) {
         this.allDefinitions = reports;
-        this.customizedDefinitions = new HashMap();
+        this.customizedDefinitions = new HashMap<String,Set<String>>();
         this.model = model;
         AppLog.info("loaded wizards=" + this.allDefinitions.keySet());
     }
@@ -135,14 +135,14 @@ public class WizardDefinitionFactory
         String orderPattern
     ) {
         List wizardDefinitions = this.getWizardDefinitions(locale);
-        Map matchingWizardDefinitions = new TreeMap();
+        Map<String,WizardDefinition> matchingWizardDefinitions = new TreeMap<String,WizardDefinition>();
         // Get set of already matched definitions
         String id = forClass + ":" + locale;
-        Set customizedDefinitions = (Set)this.customizedDefinitions.get(id);
+        Set<String> customizedDefinitions = this.customizedDefinitions.get(id);
         if(customizedDefinitions == null) {
             this.customizedDefinitions.put(
                 id, 
-                customizedDefinitions = new HashSet()
+                customizedDefinitions = new HashSet<String>()
             );
         }
         
@@ -205,7 +205,7 @@ public class WizardDefinitionFactory
      * forClass and locale. This allows to put all non or wrong customized 
      * wizard definitions in the default wizards menu.
      */ 
-    private final Map customizedDefinitions;
+    private final Map<String,Set<String>> customizedDefinitions;
     private final Model_1_0 model;
 }
 

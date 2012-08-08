@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: NumberValue.java,v 1.38 2008/01/09 13:03:49 wfro Exp $
+ * Name:        $Id: NumberValue.java,v 1.39 2008/04/04 17:01:10 hburger Exp $
  * Description: NumberValue
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/09 13:03:49 $
+ * Date:        $Date: 2008/04/04 17:01:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -183,7 +183,7 @@ public class NumberValue
           return "";
         }
         else if(value instanceof Collection) {
-          List values = new ArrayList();
+          List<String> values = new ArrayList<String>();
           for(Iterator i = ((Collection)value).iterator(); i.hasNext(); ) {
               Object number = i.next();
               if(number instanceof Number) {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: GenericBlob.java,v 1.5 2007/10/10 16:06:00 hburger Exp $
+ * Name:        $Id: GenericBlob.java,v 1.6 2008/03/21 18:47:37 hburger Exp $
  * Description: Generic Binary Large Object 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:00 $
+ * Date:        $Date: 2008/03/21 18:47:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,6 +68,7 @@ import org.openmdx.kernel.log.SysLog;
 /**
  * Generic Binary Large Object 
  */
+@SuppressWarnings("unchecked")
 class GenericBlob
     implements Blob {
 

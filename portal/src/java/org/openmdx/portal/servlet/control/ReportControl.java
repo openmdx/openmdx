@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportControl.java,v 1.27 2007/08/09 17:14:41 wfro Exp $
+ * Name:        $Id: ReportControl.java,v 1.28 2008/05/01 21:43:56 wfro Exp $
  * Description: UiBasedOperationPaneControl class
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/09 17:14:41 $
+ * Date:        $Date: 2008/05/01 21:43:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -98,6 +98,7 @@ public class ReportControl
     }
   
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         HtmlPage p,
         String frame,

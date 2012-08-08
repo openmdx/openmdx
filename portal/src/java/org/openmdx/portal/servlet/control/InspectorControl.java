@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: InspectorControl.java,v 1.8 2007/12/13 01:24:02 wfro Exp $
+ * Name:        $Id: InspectorControl.java,v 1.9 2008/04/04 17:01:07 hburger Exp $
  * Description: View 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:24:02 $
+ * Date:        $Date: 2008/04/04 17:01:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -163,6 +163,7 @@ public abstract class InspectorControl
      * key and a set of reference names as members, whereas the
      * references are composite references of the class.
      */
+    @SuppressWarnings("unchecked")
     public void createCompositionHierarchy(
         ModelElement_1_0 ofType,
         Map hierarchy
@@ -180,7 +181,7 @@ public abstract class InspectorControl
         }
     
         // get all types which are involved in composition hierarchy
-        List typesToCheck = new ArrayList();
+        List<ModelElement_1_0> typesToCheck = new ArrayList<ModelElement_1_0>();
         if(ofType.values("compositeReference").size() > 0) {
           typesToCheck.add(ofType);
         }
@@ -213,6 +214,7 @@ public abstract class InspectorControl
     }
 
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public void structToMap(
         RefStruct from,
         Map to,

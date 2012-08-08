@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: NonConfigurableProperties_2_0.java,v 1.1 2006/05/04 16:25:58 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: NonConfigurableProperties_2_0.java,v 1.2 2008/05/14 09:48:29 hburger Exp $
  * Description: JDO 2.0 Non-Configurable Properties
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/05/04 16:25:58 $
+ * Date:        $Date: 2008/05/14 09:48:29 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,13 +48,14 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.object.jdo;
 
 /**
  * JDO 2.0 Non-Configurable Properties
  *
  * @since openMDX 1.13
+ *
+ * @deprecated use NonConfigurableProperty
  */
 public class NonConfigurableProperties_2_0 {
 

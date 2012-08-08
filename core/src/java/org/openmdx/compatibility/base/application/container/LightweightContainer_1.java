@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightContainer_1.java,v 1.19 2008/01/25 00:58:54 hburger Exp $
+ * Name:        $Id: LightweightContainer_1.java,v 1.21 2008/03/26 19:29:57 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:54 $
+ * Date:        $Date: 2008/03/26 19:29:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,6 +73,7 @@ import org.openmdx.kernel.log.SysLog;
  * org.openmdx.kernel.application.container.lightweight.LightweightContainer 
  * LightweightContainer} and its implementation classes.
  */
+@SuppressWarnings("unchecked")
 public class LightweightContainer_1
 	implements Manageable_1_0
 { 
@@ -82,6 +83,7 @@ public class LightweightContainer_1
 	 * <p>
 	 * This mthod allows the lightweight container's replacement during
 	 * unit tests.
+     * @deprecated
 	 */
 	public LightweightContainer_1(
 		String id,
@@ -152,6 +154,7 @@ public class LightweightContainer_1
 	/**
 	 * Allow dynamic class loading by passing the parameters as system
 	 * property.
+	 * @deprecated
 	 */
 	public LightweightContainer_1(
 	) throws ServiceException {

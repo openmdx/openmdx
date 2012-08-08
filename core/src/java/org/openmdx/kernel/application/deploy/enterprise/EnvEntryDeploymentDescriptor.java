@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: EnvEntryDeploymentDescriptor.java,v 1.16 2008/01/13 21:37:33 hburger Exp $
+ * Name:        $Id: EnvEntryDeploymentDescriptor.java,v 1.17 2008/03/21 18:38:43 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/13 21:37:33 $
+ * Date:        $Date: 2008/03/21 18:38:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,7 @@ import org.w3c.dom.Element;
 import org.openmdx.kernel.application.configuration.Report;
 import org.openmdx.kernel.naming.Contexts;
 
+@SuppressWarnings("unchecked")
 public class EnvEntryDeploymentDescriptor
   extends AbstractConfiguration
 {

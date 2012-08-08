@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: NoState_1.java,v 1.8 2007/11/20 15:36:51 hburger Exp $
+ * Name:        $Id: NoState_1.java,v 1.9 2008/03/21 18:46:21 hburger Exp $
  * Description: NoState_1 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/20 15:36:51 $
+ * Date:        $Date: 2008/03/21 18:46:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -79,6 +79,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * NoState_1
  */
+@SuppressWarnings("unchecked")
 public class NoState_1
     extends Standard_1
 {

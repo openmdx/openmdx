@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RetrieveInteractionSpec.java,v 1.7 2007/03/07 09:26:37 wfro Exp $
+ * Name:        $Id: RetrieveInteractionSpec.java,v 1.8 2008/03/21 18:32:57 hburger Exp $
  * Description: RetrievalInteractionSpec
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/07 09:26:37 $
+ * Date:        $Date: 2008/03/21 18:32:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,11 @@ package org.openmdx.base.transport.jca;
 public class RetrieveInteractionSpec 
     extends OpenMdxInteractionSpec {
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 7887352158731601457L;
+
     public RetrieveInteractionSpec(
     ) {
         this.setFunctionName(

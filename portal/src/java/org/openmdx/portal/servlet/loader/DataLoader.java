@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DataLoader.java,v 1.6 2007/01/21 20:46:43 wfro Exp $
+ * Name:        $Id: DataLoader.java,v 1.10 2008/05/05 22:28:25 wfro Exp $
  * Description: DataLoader
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:46:43 $
+ * Date:        $Date: 2008/05/05 22:28:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,15 +66,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
+import javax.jmi.reflect.RefObject;
 import javax.servlet.ServletContext;
 
+import org.oasisopen.cci2.QualifierType;
+import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.jmi1.Authority;
+import org.openmdx.compatibility.base.accessor.jmi.JmiHelper;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.QualityOfService;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
+import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
+import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
@@ -85,16 +91,17 @@ public class DataLoader
   public DataLoader(
       ServletContext context,
       RoleMapper_1_0 roleMapper,            
-      Dataprovider_1_0 connection
+      PersistenceManagerFactory pmf
   ) {
       super(
           context,
           roleMapper
       );
-      this.connection = connection;
+      this.pmf = pmf;
   }
     
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     synchronized public void loadData(
         String location
     ) throws ServiceException {
@@ -132,56 +139,103 @@ public class DataLoader
                     }
                     // storing data
                     System.out.println("Storing " + data.size() + " objects");
-                    RequestCollection store = new RequestCollection(
-                        new ServiceHeader(this.getAdminPrincipal(dir), null, false, new QualityOfService()),
-                        this.connection
+                    PersistenceManager store = this.pmf.getPersistenceManager(
+                        this.getAdminPrincipal(dir),
+                        null
                     );
-                    int kk = 0;
-                    for(
-                        Iterator k = data.values().iterator(); 
-                        k.hasNext();
-                        kk++
-                    ) {
-                        if((kk > 0) && (kk % 100 == 0)) {
-                            System.out.println("Stored " + kk);
-                        }
-                        DataproviderObject entry = (DataproviderObject)k.next();
-                        // create new entries, replace existing
-                        try {
-                            DataproviderObject existing = null;
+                    // Load objects in multiple runs in order to resolve object dependencies.       
+                    Map<Path,RefObject> loadedObjects = new HashMap<Path,RefObject>();
+                    for(int runs = 0; runs < 5; runs++) {
+                        boolean hasNewObjects = false;
+                        store.currentTransaction().begin();
+                        int kk = 0;
+                        for(
+                            Iterator k = data.values().iterator(); 
+                            k.hasNext();
+                            kk++
+                        ) {
+                            if((kk > 0) && (kk % 100 == 0)) {
+                                System.out.println("Stored " + kk);
+                            }
+                            DataproviderObject entry = (DataproviderObject)k.next();
+                            // create new entries, update existing
                             try {
-                                existing = new DataproviderObject(
-                                    store.addGetRequest(
+                                RefObject_1_0 existing = null;
+                                try {
+                                    existing = (RefObject_1_0)store.getObjectById(
                                         entry.path()
-                                    )
-                                );
-                            }
-                            catch(ServiceException e) {}
-                            if(existing != null) {
-                                DataproviderObject existingOrig = new DataproviderObject(existing);
-                                existing.addClones(entry, true);
-                                if(!existing.equals(existingOrig)) {
-                                    this.removeTrailingEmptyStrings(existing);
-                                    if("bootstrap".equals(location)) {
-                                        System.out.println("Replacing " + existing.path());
+                                    );
+                                }
+                                catch(Exception e) {}
+                                if(existing != null) {
+                                    loadedObjects.put(
+                                        existing.refGetPath(), 
+                                        existing
+                                    );                                    
+                                    boolean modified = JmiHelper.toRefObject(
+                                        entry,
+                                        existing,
+                                        loadedObjects, // object cache
+                                        store,
+                                        true, // replace values
+                                        true // remove trailing empty string
+                                    );
+                                    if(modified) {
+                                        if("bootstrap".equals(location)) {
+                                            System.out.println("Updating " + existing.refGetPath());
+                                        }
                                     }
-                                    store.addReplaceRequest(existing);
+                                }
+                                else {
+                                    String qualifiedClassName = (String)entry.values(SystemAttributes.OBJECT_CLASS).get(0);
+                                    String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
+                                    RefObject_1_0 newEntry = (RefObject_1_0)((org.openmdx.base.jmi1.Authority)store.getObjectById(
+                                        Authority.class,
+                                        "xri://@openmdx*" + packageName.replace(":", ".")
+                                    )).refImmediatePackage().refClass(qualifiedClassName).refCreateInstance(null);
+                                    newEntry.refInitialize(false, false);
+                                    JmiHelper.toRefObject(
+                                        entry,
+                                        newEntry,
+                                        loadedObjects, // object cache
+                                        store,
+                                        true, // replace values
+                                        true // remove trailing empty string
+                                    );
+                                    Path parentIdentity = entry.path().getParent().getParent();
+                                    RefObject_1_0 parent = null;
+                                    try {
+                                        parent = loadedObjects.containsKey(parentIdentity)
+                                            ? (RefObject_1_0)loadedObjects.get(parentIdentity)
+                                            : (RefObject_1_0)store.getObjectById(parentIdentity);
+                                    } catch(Exception e) {}
+                                    if(parent != null) {
+                                        RefContainer container = (RefContainer)parent.refGetValue(
+                                            entry.path().get(entry.path().size() - 2)
+                                        );
+                                        container.refAdd(
+                                            QualifierType.REASSIGNABLE,
+                                            entry.path().get(entry.path().size() - 1), 
+                                            newEntry
+                                        );
+                                    }                                    
+                                    if("bootstrap".equals(location)) {
+                                        System.out.println("Creating " + entry.path());
+                                    }
+                                    loadedObjects.put(
+                                        entry.path(), 
+                                        newEntry
+                                    );                                    
+                                    hasNewObjects = true;
                                 }
                             }
-                            else {
-                                this.removeTrailingEmptyStrings(entry);
-                                if("bootstrap".equals(location)) {
-                                    System.out.println("Creating " + entry.path());
-                                }
-                                store.addCreateRequest(
-                                    entry
-                                );            
+                            catch(Exception e) {
+                                new ServiceException(e).log();
+                                System.out.println("STATUS: " + e.getMessage() + " (for more info see log)");
                             }
                         }
-                        catch(ServiceException e) {
-                            e.log();
-                            System.out.println("STATUS: " + e.getMessage() + " (for more info see log)");
-                        }
+                        store.currentTransaction().commit();
+                        if(!hasNewObjects) break;
                     }
                 }
             }
@@ -193,7 +247,7 @@ public class DataLoader
     }
 
     //-------------------------------------------------------------------------
-    private final Dataprovider_1_0 connection;
+    private final PersistenceManagerFactory pmf;
   
 }
 

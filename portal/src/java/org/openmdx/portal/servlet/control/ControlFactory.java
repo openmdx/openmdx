@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: ControlFactory.java,v 1.25 2007/12/13 01:24:02 wfro Exp $
+ * Name:        $Id: ControlFactory.java,v 1.26 2008/04/04 17:01:06 hburger Exp $
  * Description: ControlFactory
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 01:24:02 $
+ * Date:        $Date: 2008/04/04 17:01:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -474,8 +474,8 @@ public class ControlFactory
     private final WizardDefinitionFactory wizardFactory;
     private final ReportDefinitionFactory reportFactory;    
     private final TextsFactory textsFactory;
-    private Map gridControls = new HashMap();
-    private Map inspectorControls = new HashMap();
+    private Map<String,GridControl> gridControls = new HashMap<String,GridControl>();
+    private Map<String,InspectorControl> inspectorControls = new HashMap<String,InspectorControl>();
     private AttributeValueFactory valueFactory = new AttributeValueFactory();
     private transient UUIDGenerator uuidGenerator = UUIDs.getGenerator();
     

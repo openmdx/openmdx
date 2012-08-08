@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Database_1Jdbc2.java,v 1.24 2007/10/10 16:06:00 hburger Exp $
+ * Name:        $Id: Database_1Jdbc2.java,v 1.26 2008/07/03 23:01:57 wfro Exp $
  * Description: Database_1Jdbc2 plugin
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:00 $
+ * Date:        $Date: 2008/07/03 23:01:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,6 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.code.Multiplicities;
+import org.w3c.cci2.BinaryLargeObject;
 
 /*
  * Concrete implementation of the AbstractDatabase_1 plugin using Jdbc2 driver
@@ -309,6 +310,25 @@ public class Database_1Jdbc2
       }
     } 
     
+    // BinaryLargeObject
+    else if(val instanceof BinaryLargeObject) {
+      try {
+          BinaryLargeObject lob = (BinaryLargeObject)val;
+          Blob blob = this.createBlob(
+              lob.getContent(),
+              lob.getLength() == null ? -1L : lob.getLength()
+          );
+          ps.setBinaryStream(
+              column,
+              blob.getBinaryStream(),
+              (int)blob.length()
+          );
+      }
+      catch(IOException e) {
+          throw new ServiceException(e);
+      }
+    } 
+    
     // Blob
     else if(val instanceof Blob) {
         ps.setBlob(
@@ -331,7 +351,8 @@ public class Database_1Jdbc2
   }
 
   //---------------------------------------------------------------------------
-  FastResultSet setPosition(
+  @SuppressWarnings("unchecked")
+FastResultSet setPosition(
     ResultSet rs,
     int position,
     int lastPosition,

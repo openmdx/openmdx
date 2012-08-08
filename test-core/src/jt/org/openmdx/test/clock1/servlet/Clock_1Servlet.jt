@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Clock_1Servlet.jt,v 1.2 2007/06/04 13:05:48 hburger Exp $
+ * Name:        $Id: Clock_1Servlet.jt,v 1.4 2008/04/02 23:57:31 wfro Exp $
  * Description: Clock_1Servlet 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/06/04 13:05:48 $
+ * Date:        $Date: 2008/04/02 23:57:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,33 +53,33 @@ package org.openmdx.test.clock1.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.jmi.reflect.RefException;
+
 import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.openmdx.base.accessor.jmi.spi.PersistenceManagerFactory_1;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.object.jdo.ConfigurableProperties_2_0;
 import org.openmdx.model1.accessor.basic.spi.Model_1;
 
-#if defined(BEFORE16)
+#if defined(BEFORE15)
+
+import javax.jmi.reflect.RefException;
+
+import javax.servlet.UnavailableException;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.openmdx.base.accessor.jmi.spi.PersistenceManagerFactory_1;
 import org.openmdx.base.cci.Authority;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.object.jdo.ConfigurableProperties_2_0;
 import org.openmdx.test.clock1.cci.Segment;
 import org.openmdx.test.clock1.jmi.Clock1Package;
-#else
-import org.openmdx.base.jmi1.Authority;
-import org.openmdx.test.clock1.jmi1.Segment;
-import org.openmdx.test.clock1.jmi1.Clock1Package;
-#endif
 
 /**
  * Clock_1Servlet
@@ -166,11 +166,11 @@ public class Clock_1Servlet
             out.print(
                 "<html>" +
                     "<head>" +
-                        "<title>Clock</title>" +
+                        "<h1>openMDX/1 Clock</h1>" +
                     "</head>" +
                     "<body>" +
                         "<h1>Clock</h1>" +
-                        "<b>" + segment.getTime().getUtc() + "</b>" +
+                        "<b>" + segment.currentDateAndTime().getUtc() + "</b>" +
                     "</body>" +
                 "</html>"
             );
@@ -180,5 +180,100 @@ public class Clock_1Servlet
         out.flush();
         persistenceManager.close();
     }
-    
+
+#else
+
+import javax.naming.Context;
+
+import org.openmdx.base.jmi1.Authority;
+import org.openmdx.base.jmi1.BasePackage;
+import org.openmdx.test.clock1.jmi1.Segment;
+import org.openmdx.test.clock1.jmi1.Time;
+
+/**
+ * Clock_1Servlet
+ */
+public class Clock_1Servlet
+    extends HttpServlet
+{
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = -8959914415390068536L;
+
+    /**
+     * 
+     */
+    private PersistenceManagerFactory persistenceManagerFactory;
+
+    /* (non-Javadoc)
+     * @see javax.servlet.GenericServlet#init()
+     */
+    public void init(
+    ) throws ServletException {
+        this.persistenceManagerFactory = JDOHelper.getPersistenceManagerFactory(
+            "java:comp/env/persistence/clock",
+            (Context)null
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see javax.servlet.GenericServlet#destroy()
+     */
+    public void destroy() {
+        this.persistenceManagerFactory.close();
+    }
+
+    /* (non-Javadoc)
+     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    protected void doGet(
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) throws ServletException, IOException {
+        PrintWriter out = new PrintWriter(response.getOutputStream());
+        try {
+            new Model_1(
+            ).addModels(
+                Arrays.asList(
+                    new String[]{
+                        "org:openmdx:base",
+                        "org:w3c",
+                        "org:oasis-open",
+                        "org:openmdx:compatibility:view1",
+                        "org:openmdx:test:clock1"
+                    }
+                )
+            );
+            PersistenceManager persistenceManager = this.persistenceManagerFactory.getPersistenceManager();
+            Authority authority = (Authority) persistenceManager.getObjectById(
+                Authority.class,
+                "xri://@openmdx*org.openmdx.test.clock1"
+            );
+            BasePackage basePackage =  (BasePackage) authority.refOutermostPackage().refPackage("org:openmdx:base");
+            Segment segment = (Segment) authority.getProvider(false, "Java").getSegment(false, "Remote");
+            Time time = segment.currentDateAndTime();
+            out.print(
+                "<html>" +
+                    "<head>" +
+                        "<title>Clock</title>" +
+                    "</head>" +
+                    "<body>" +
+                        "<h1>openMDX/2 Clock</h1>" +
+                        "<b>" + time.getUtc() + "</b>" +
+                    "</body>" +
+                "</html>"
+            );
+            persistenceManager.close();
+        } catch (Exception e) {
+            out.println("<pre>");
+            e.printStackTrace(out);
+            out.println("</pre>");
+        }
+        out.flush();
+    }
+
+#endif    
+
 }

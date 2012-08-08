@@ -3,6 +3,7 @@ package javax.jmi.reflect;
 /** Exception thrown when Composition Closure or Reference Closure rules are
  * violated. (Supertype Closure rule can never be violated in JMI).
  */
+@SuppressWarnings("serial")
 public class ClosureViolationException extends JmiException {
     
     /**

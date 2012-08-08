@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JMIQueryMapper.java,v 1.11 2008/02/18 09:18:20 hburger Exp $
+ * Name:        $Id: JMIQueryMapper.java,v 1.12 2008/04/02 17:39:09 wfro Exp $
  * Description: JMI Query Mapper
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 09:18:20 $
+ * Date:        $Date: 2008/04/02 17:39:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,7 +56,7 @@ import java.io.Writer;
 import java.util.Iterator;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.mapping.ClassifierDef;
 import org.openmdx.model1.mapping.MapperUtils;
@@ -79,7 +79,7 @@ public class JMIQueryMapper
      */
     public JMIQueryMapper(
         Writer writer,
-        Model_1_0 model,
+        Model_1_3 model,
         String format, 
         String packageSuffix
     ) {
@@ -95,7 +95,7 @@ public class JMIQueryMapper
      * @see org.openmdx.compatibility.model1.mapping.java.JMIAbstractMapper#getId()
      */
     protected String mapperId() {
-        return "$Id: JMIQueryMapper.java,v 1.11 2008/02/18 09:18:20 hburger Exp $";
+        return "$Id: JMIQueryMapper.java,v 1.12 2008/04/02 17:39:09 wfro Exp $";
     }
 
     /**

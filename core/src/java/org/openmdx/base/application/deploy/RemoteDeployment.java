@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RemoteDeployment.java,v 1.8 2008/01/09 15:55:06 hburger Exp $
+ * Name:        $Id: RemoteDeployment.java,v 1.9 2008/03/21 18:28:07 hburger Exp $
  * Description: Remote Deployment
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/09 15:55:06 $
+ * Date:        $Date: 2008/03/21 18:28:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,11 +72,10 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.naming.Contexts;
 import org.openmdx.kernel.naming.initial.ContextFactory;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * Deployment in a separate virtual machine
  */
+@SuppressWarnings("unchecked")
 public class RemoteDeployment implements Deployment {
 
     /**
@@ -250,12 +249,12 @@ public class RemoteDeployment implements Deployment {
         Object[] source
     ){
         if(source == null || source.length == 0) return null;
-        CharSequence target = StringBuilders.newStringBuilder().append(source[0]);
+        StringBuilder target = new StringBuilder().append(source[0]);
         for(
             int i = 1;
             i < source.length;
             i++
-        ) StringBuilders.asStringBuilder(target).append(' ').append(source[i]);
+        ) target.append(' ').append(source[i]);
         return target.toString();
     }
 

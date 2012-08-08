@@ -2,6 +2,7 @@ package javax.jmi.reflect;
 
 import java.util.Collection;
 
+@SuppressWarnings("unchecked")
 public interface RefBaseObject {
     public RefObject refMetaObject();
     public RefPackage refImmediatePackage();

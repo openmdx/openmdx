@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: URLConfiguration.java,v 1.2 2005/07/29 16:02:11 hburger Exp $
+ * Name:        $Id: URLConfiguration.java,v 1.3 2008/04/04 17:55:34 hburger Exp $
  * Description: URL Configuration
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/07/29 16:02:11 $
+ * Date:        $Date: 2008/04/04 17:55:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -89,6 +89,7 @@ import org.openmdx.kernel.exception.BasicException;
  * 
  * @see javax.security.auth.login.LoginContext
  */
+@SuppressWarnings("unchecked")
 public class URLConfiguration extends Configuration {
 
 	/**

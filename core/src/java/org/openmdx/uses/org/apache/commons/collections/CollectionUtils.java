@@ -1,9 +1,10 @@
 /*
- *  Copyright 2001-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -38,7 +39,7 @@ import org.openmdx.uses.org.apache.commons.collections.collection.UnmodifiableCo
  * Provides utility methods and decorators for {@link Collection} instances.
  *
  * @since Commons Collections 1.0
- * @version $Revision: 1.3 $ $Date: 2007/10/10 16:06:12 $
+ * @version $Revision: 1.5 $ $Date: 2008/04/25 14:32:25 $
  * 
  * @author Rodney Waldhoff
  * @author Paul Jack
@@ -51,10 +52,13 @@ import org.openmdx.uses.org.apache.commons.collections.collection.UnmodifiableCo
  * @author Phil Steitz
  * @author Steven Melzer
  * @author Jon Schewe
+ * @author Neil O'Toole
+ * @author Stephen Smith
  */
+@SuppressWarnings("unchecked")
 public class CollectionUtils {
 
-	/** Constant to avoid repeated object creation */
+    /** Constant to avoid repeated object creation */
     private static Integer INTEGER_ONE = new Integer(1);
 
     /**
@@ -69,7 +73,6 @@ public class CollectionUtils {
      * <code>CollectionUtils</code> should not normally be instantiated.
      */
     public CollectionUtils() {
-        super();
     }
 
     /**
@@ -634,11 +637,25 @@ public class CollectionUtils {
         return outputCollection;
     }
 
+    //-----------------------------------------------------------------------
+    /**
+     * Adds an element to the collection unless the element is null.
+     * 
+     * @param collection  the collection to add to, must not be null
+     * @param object  the object to add, if null it will not be added
+     * @return true if the collection changed
+     * @throws NullPointerException if the collection is null
+     * @since Commons Collections 3.2
+     */
+    public static boolean addIgnoreNull(Collection collection, Object object) {
+        return (object == null ? false : collection.add(object));
+    }
+    
     /**
      * Adds all elements in the iteration to the given collection.
      * 
-     * @param collection  the collection to add to
-     * @param iterator  the iterator of elements to add, may not be null
+     * @param collection  the collection to add to, must not be null
+     * @param iterator  the iterator of elements to add, must not be null
      * @throws NullPointerException if the collection or iterator is null
      */
     public static void addAll(Collection collection, Iterator iterator) {
@@ -650,8 +667,8 @@ public class CollectionUtils {
     /**
      * Adds all elements in the enumeration to the given collection.
      * 
-     * @param collection  the collection to add to
-     * @param enumeration  the enumeration of elements to add, may not be null
+     * @param collection  the collection to add to, must not be null
+     * @param enumeration  the enumeration of elements to add, must not be null
      * @throws NullPointerException if the collection or enumeration is null
      */
     public static void addAll(Collection collection, Enumeration enumeration) {
@@ -663,8 +680,8 @@ public class CollectionUtils {
     /** 
      * Adds all elements in the array to the given collection.
      * 
-     * @param collection  the collection to add to, may not be null
-     * @param elements  the array of elements to add, may not be null
+     * @param collection  the collection to add to, must not be null
+     * @param elements  the array of elements to add, must not be null
      * @throws NullPointerException if the collection or array is null
      */
     public static void addAll(Collection collection, Object[] elements) {
@@ -908,6 +925,76 @@ public class CollectionUtils {
     }
     
     /**
+     * Checks if the specified collection/array/iterator is empty.
+     * <p>
+     * This method can handles objects as follows
+     * <ul>
+     * <li>Collection - via collection isEmpty
+     * <li>Map - via map isEmpty
+     * <li>Array - using array size
+     * <li>Iterator - via hasNext
+     * <li>Enumeration - via hasMoreElements
+     * </ul>
+     * <p>
+     * Note: This method is named to avoid clashing with
+     * {@link #isEmpty(Collection)}.
+     * 
+     * @param object  the object to get the size of, not null
+     * @return true if empty
+     * @throws IllegalArgumentException thrown if object is not recognised or null
+     * @since Commons Collections 3.2
+     */
+    public static boolean sizeIsEmpty(Object object) {
+        if (object instanceof Collection) {
+            return ((Collection) object).isEmpty();
+        } else if (object instanceof Map) {
+            return ((Map) object).isEmpty();
+        } else if (object instanceof Object[]) {
+            return ((Object[]) object).length == 0;
+        } else if (object instanceof Iterator) {
+            return ((Iterator) object).hasNext() == false;
+        } else if (object instanceof Enumeration) {
+            return ((Enumeration) object).hasMoreElements() == false;
+        } else if (object == null) {
+            throw new IllegalArgumentException("Unsupported object type: null");
+        } else {
+            try {
+                return Array.getLength(object) == 0;
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalArgumentException("Unsupported object type: " + object.getClass().getName());
+            }
+        }
+    }
+
+    //-----------------------------------------------------------------------
+    /**
+     * Null-safe check if the specified collection is empty.
+     * <p>
+     * Null returns true.
+     * 
+     * @param coll  the collection to check, may be null
+     * @return true if empty or null
+     * @since Commons Collections 3.2
+     */
+    public static boolean isEmpty(Collection coll) {
+        return (coll == null || coll.isEmpty());
+    }
+
+    /**
+     * Null-safe check if the specified collection is not empty.
+     * <p>
+     * Null returns false.
+     * 
+     * @param coll  the collection to check, may be null
+     * @return true if non-null and non-empty
+     * @since Commons Collections 3.2
+     */
+    public static boolean isNotEmpty(Collection coll) {
+        return !CollectionUtils.isEmpty(coll);
+    }
+
+    //-----------------------------------------------------------------------
+    /**
      * Reverses the order of the given array.
      * 
      * @param array  the array to reverse
@@ -998,6 +1085,46 @@ public class CollectionUtils {
 
     //-----------------------------------------------------------------------
     /**
+     * Returns a collection containing all the elements in <code>collection</code>
+     * that are also in <code>retain</code>. The cardinality of an element <code>e</code>
+     * in the returned collection is the same as the cardinality of <code>e</code>
+     * in <code>collection</code> unless <code>retain</code> does not contain <code>e</code>, in which
+     * case the cardinality is zero. This method is useful if you do not wish to modify
+     * the collection <code>c</code> and thus cannot call <code>c.retainAll(retain);</code>.
+     * 
+     * @param collection  the collection whose contents are the target of the #retailAll operation
+     * @param retain  the collection containing the elements to be retained in the returned collection
+     * @return a <code>Collection</code> containing all the elements of <code>collection</code>
+     * that occur at least once in <code>retain</code>.
+     * @throws NullPointerException if either parameter is null
+     * @since Commons Collections 3.2
+     */
+    public static Collection retainAll(Collection collection, Collection retain) {
+        return ListUtils.retainAll(collection, retain);
+    }
+
+    /**
+     * Removes the elements in <code>remove</code> from <code>collection</code>. That is, this
+     * method returns a collection containing all the elements in <code>c</code>
+     * that are not in <code>remove</code>. The cardinality of an element <code>e</code>
+     * in the returned collection is the same as the cardinality of <code>e</code>
+     * in <code>collection</code> unless <code>remove</code> contains <code>e</code>, in which
+     * case the cardinality is zero. This method is useful if you do not wish to modify
+     * the collection <code>c</code> and thus cannot call <code>collection.removeAll(remove);</code>.
+     * 
+     * @param collection  the collection from which items are removed (in the returned collection)
+     * @param remove  the items to be removed from the returned <code>collection</code>
+     * @return a <code>Collection</code> containing all the elements of <code>collection</code> except
+     * any elements that also occur in <code>remove</code>.
+     * @throws NullPointerException if either parameter is null
+     * @since Commons Collections 3.2
+     */
+    public static Collection removeAll(Collection collection, Collection remove) {
+        return ListUtils.retainAll(collection, remove);
+    }
+
+    //-----------------------------------------------------------------------
+    /**
      * Returns a synchronized collection backed by the given collection.
      * <p>
      * You must manually synchronize on the returned buffer's iterator to 
@@ -1081,5 +1208,5 @@ public class CollectionUtils {
     public static Collection transformedCollection(Collection collection, Transformer transformer) {
         return TransformedCollection.decorate(collection, transformer);
     }
-    
+
 }

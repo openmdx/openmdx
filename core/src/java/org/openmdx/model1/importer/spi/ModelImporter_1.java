@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelImporter_1.java,v 1.28 2007/10/10 17:16:08 hburger Exp $
+ * Name:        $Id: ModelImporter_1.java,v 1.29 2008/03/21 18:40:11 hburger Exp $
  * Description: ModelImporter_1 class
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 17:16:08 $
+ * Date:        $Date: 2008/03/21 18:40:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -79,11 +79,10 @@ import org.openmdx.model1.code.ModelExceptions;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.importer.cci.ModelImporter_1_0;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * Common functions for model importers.
  */
+@SuppressWarnings("unchecked")
 abstract public class ModelImporter_1
   implements ModelImporter_1_0 {
 
@@ -244,19 +243,19 @@ abstract public class ModelImporter_1
     if(name.length() == 0) {
       return new String();
     } else {
-      CharSequence component = StringBuilders.newStringBuilder();
+      StringBuilder component = new StringBuilder();
       int i = 0;
       while(i < name.length()-1) {
         if("::".equals(name.substring(i,i+2))) {
-            StringBuilders.asStringBuilder(component).append(":");
+            component.append(":");
           i++;
         }
         else {
-            StringBuilders.asStringBuilder(component).append(name.charAt(i));
+            component.append(name.charAt(i));
         }
         i++;
       }
-      return StringBuilders.asStringBuilder(component).append(name.charAt(i)).toString();
+      return component.append(name.charAt(i)).toString();
     }
   }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: BinarySource_1InputStream.java,v 1.4 2004/09/26 22:34:35 hburger Exp $
+ * Name:        $Id: BinarySource_1InputStream.java,v 1.5 2008/03/21 18:31:57 hburger Exp $
  * Description: Streams: Binary Source InputStream
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/09/26 22:34:35 $
+ * Date:        $Date: 2008/03/21 18:31:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -177,8 +177,8 @@ public class BinarySource_1InputStream
     ) throws IOException {
         if(this.length == NOT_FETCHED) try {
             this.callbackContext.execute(
-                new PrivilegedExceptionAction(){
-                    public Object run() throws Exception {
+                new PrivilegedExceptionAction<Void>(){
+                    public Void run() throws Exception {
                         length = in.length();
                         return null;
                     }					        
@@ -197,8 +197,8 @@ public class BinarySource_1InputStream
     	if(isOpen()) try {
 	        super.close();
             this.callbackContext.execute(
-                new PrivilegedExceptionAction(){
-                    public Object run() throws Exception {
+                new PrivilegedExceptionAction<Void>(){
+                    public Void run() throws Exception {
             	        in.close();
                         return null;
                     }					        
@@ -225,8 +225,8 @@ public class BinarySource_1InputStream
         if(this.cursor == this.buffer.length){
             try {
 	            this.callbackContext.execute(
-	                new PrivilegedExceptionAction(){
-	                    public Object run() throws Exception {
+	                new PrivilegedExceptionAction<Void>(){
+	                    public Void run() throws Exception {
 	                        buffer = in.readBytes(capacity);
 	                        return null;
 	                    }					        

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Entities.java,v 1.8 2007/10/10 16:06:02 hburger Exp $
+ * Name:        $Id: Entities.java,v 1.9 2008/03/19 17:10:05 hburger Exp $
  * Description: class Entities
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:02 $
+ * Date:        $Date: 2008/03/19 17:10:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,8 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * <p>Provides HTML and XML entity utilities.</p>
  *
@@ -66,8 +64,9 @@ import org.openmdx.kernel.text.StringBuilders;
  * @see </br><a href="http://www.w3.org/TR/html401/charset.html#h-5.3">HTML 4.01 Character References</a>
  * @see </br><a href="http://www.w3.org/TR/html401/charset.html#code-position">HTML 4.01 Code positions</a>
  *
- * @version $Id: Entities.java,v 1.8 2007/10/10 16:06:02 hburger Exp $
+ * @version $Id: Entities.java,v 1.9 2008/03/19 17:10:05 hburger Exp $
  */
+@SuppressWarnings("unchecked")
 class Entities {
 
     private static final String[][] BASIC_ARRAY = {
@@ -639,7 +638,7 @@ class Entities {
      */
     public String escape(String str) {
         //todo: rewrite to use a Writer
-        CharSequence buf = StringBuilders.newStringBuilder(str.length() * 2);
+        StringBuilder buf = new StringBuilder(str.length() * 2);
         int i;
         for (i = 0; i < str.length(); ++i) {
             char ch = str.charAt(i);
@@ -647,9 +646,7 @@ class Entities {
             if (entityName == null) {
                 if (ch > 0x7F) {
                     int intValue = ch;
-                    StringBuilders.asStringBuilder(
-                        buf
-                    ).append(
+                    buf.append(
                         "&#"
                     ).append(
                         intValue
@@ -657,16 +654,12 @@ class Entities {
                         ';'
                     );
                 } else {
-                    StringBuilders.asStringBuilder(
-                        buf
-                    ).append(
+                    buf.append(
                         ch
                     );
                 }
             } else {
-                StringBuilders.asStringBuilder(
-                    buf
-                ).append(
+                buf.append(
                     '&'
                 ).append(
                     entityName
@@ -688,14 +681,14 @@ class Entities {
      * @return A new escaped <code>String</code>.
      */
     public String unescape(String str) {
-        CharSequence buf = StringBuilders.newStringBuilder(str.length());
+        StringBuilder buf = new StringBuilder(str.length());
         int i;
         for (i = 0; i < str.length(); ++i) {
             char ch = str.charAt(i);
             if (ch == '&') {
                 int semi = str.indexOf(';', i + 1);
                 if (semi == -1) {
-                    StringBuilders.asStringBuilder(buf).append(ch);
+                    buf.append(ch);
                     continue;
                 }
                 String entityName = str.substring(i + 1, semi);
@@ -711,9 +704,7 @@ class Entities {
                     entityValue = this.entityValue(entityName);
                 }
                 if (entityValue == -1) {
-                    StringBuilders.asStringBuilder(
-                        buf
-                    ).append(
+                    buf.append(
                         '&'
                     ).append(
                         entityName
@@ -721,11 +712,11 @@ class Entities {
                         ';'
                     );
                 } else {
-                    StringBuilders.asStringBuilder(buf).append((char) (entityValue));
+                    buf.append((char) (entityValue));
                 }
                 i = semi;
             } else {
-                StringBuilders.asStringBuilder(buf).append(ch);
+                buf.append(ch);
             }
         }
         return buf.toString();

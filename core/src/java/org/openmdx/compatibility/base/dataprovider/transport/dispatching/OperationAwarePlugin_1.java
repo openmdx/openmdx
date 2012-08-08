@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: OperationAwarePlugin_1.java,v 1.3 2008/02/29 15:21:06 hburger Exp $
+ * Name:        $Id: OperationAwarePlugin_1.java,v 1.5 2008/04/29 14:53:32 hburger Exp $
  * Description: OperationAwarePlugin_1
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 15:21:06 $
+ * Date:        $Date: 2008/04/29 14:53:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,6 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.util.StringTokenizer;
 
-import org.openmdx.base.accessor.generic.cci.LargeObject_1_0;
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
@@ -120,6 +119,7 @@ abstract public class OperationAwarePlugin_1
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.OutputStream, long)
      */
+    @Override
     protected DataproviderObject getStreamOperation(
         ServiceHeader header,
         Path objectPath,
@@ -128,18 +128,14 @@ abstract public class OperationAwarePlugin_1
         long position, 
         Path replyPath
     ) throws ServiceException {
-        LargeObject_1_0 object = this.retrieveObject(objectPath).objGetLargeObject(feature); 
-        object.getBinaryStream(value, position);
-        return this.createResponse(
-            replyPath, 
-            object.length()
-        );
+        return null;
     }
 
     //---------------------------------------------------------------------------  
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.Writer, long)
      */
+    @Override
     protected DataproviderObject getStreamOperation(
         ServiceHeader header,
         Path objectPath,
@@ -148,14 +144,9 @@ abstract public class OperationAwarePlugin_1
         long position, 
         Path replyPath
     ) throws ServiceException {
-        LargeObject_1_0 object = this.retrieveObject(objectPath).objGetLargeObject(feature); 
-        object.getCharacterStream(value, position);
-        return this.createResponse(
-            replyPath, 
-            object.length()
-        );
+        return null;
     }
-    
+            
     // -------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------

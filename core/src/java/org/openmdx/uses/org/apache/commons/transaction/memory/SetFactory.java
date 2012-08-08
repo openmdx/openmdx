@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/memory/SetFactory.java,v 1.1 2005/03/24 13:43:56 hburger Exp $
- * $Revision: 1.1 $
- * $Date: 2005/03/24 13:43:56 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/transaction/memory/SetFactory.java,v 1.2 2008/03/21 18:42:18 hburger Exp $
+ * $Revision: 1.2 $
+ * $Date: 2008/03/21 18:42:18 $
  *
  * ====================================================================
  *
@@ -27,8 +27,9 @@ import java.util.Set;
 
 /**
  * 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
+@SuppressWarnings("unchecked")
 public interface SetFactory {
 	public Set createSet();
 	public void disposeSet(Set set);

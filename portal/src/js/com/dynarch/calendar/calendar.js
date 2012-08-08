@@ -1,4 +1,4 @@
-﻿/*  Copyright Mihai Bazon, 2002-2005  |  www.bazon.net/mishoo
+/*  Copyright Mihai Bazon, 2002-2005  |  www.bazon.net/mishoo
  * -----------------------------------------------------------
  *
  * The DHTML Calendar, version 1.0 "It is happening again"
@@ -12,7 +12,7 @@
  * Read the entire license text here: http://www.gnu.org/licenses/lgpl.html
  */
 
-// $Id: calendar.js,v 1.1 2007/02/19 08:17:36 cmu Exp $
+// $Id: calendar.js,v 1.2 2008/05/31 12:31:25 cmu Exp $
 
 /** The Calendar object constructor. */
 Calendar = function (firstDayOfWeek, dateStr, onSelected, onClose) {

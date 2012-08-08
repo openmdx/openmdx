@@ -1,0 +1,364 @@
+<project>
+    <shortName>openmdxTomcatLwc</shortName>
+    <fullName>openMDX Tomcat+LWC</fullName>
+    <version>2.1.0</version>
+    <installerFilename></installerFilename>
+    <readmeFile>../../image/openmdx-tomcat-lwc/README</readmeFile>
+    <licenseFile>../../image/openmdx-tomcat-lwc/LICENSE</licenseFile>
+    <logoImage>../../image/openmdx-tomcat-lwc/logo.png</logoImage>
+    <splashImage>../../image/openmdx-tomcat-lwc/splash.gif</splashImage>
+    <postInstallationScript>${installdir}/bin/postinstallation.sh</postInstallationScript>
+    <showPostInstallationScriptResult>1</showPostInstallationScriptResult>
+    <preUninstallationScript>${installdir}/bin/preuninstallation.sh</preUninstallationScript>
+    <enableRollback>1</enableRollback>
+    <uninstallerDirectory>${installdir}/openmdx-tomcat-lwc</uninstallerDirectory>
+    <componentList>
+        <component>
+            <name>default</name>
+            <description>Default Component</description>
+            <canBeEdited>1</canBeEdited>
+            <selected>1</selected>
+            <show>1</show>
+            <desktopShortcutList>
+                <shortcut>
+                    <comment>Start Tomcat LWC ${product_version} (${tomcat_http_port})</comment>
+                    <exec>${installdir}/bin/control.sh START</exec>
+                    <icon>${installdir}/openmdx-tomcat-lwc/favicon.ico</icon>
+                    <name>Start Tomcat+LWC ${product_version} (${tomcat_http_port})</name>
+                    <path>${installdir}/bin</path>
+                    <platforms>all</platforms>
+                    <runInTerminal>1</runInTerminal>
+                    <windowsExec>${installdir}/bin/control.bat</windowsExec>
+                    <windowsExecArgs>START</windowsExecArgs>
+                    <windowsIcon>${installdir}/openmdx-tomcat-lwc/favicon.ico</windowsIcon>
+                    <windowsPath>${installdir}/bin</windowsPath>
+                </shortcut>
+                <shortcut>
+                    <comment>Stop Tomcat+LWC ${product_version} (${tomcat_http_port})</comment>
+                    <exec>${installdir}/bin/control.sh STOP</exec>
+                    <icon>${installdir}/openmdx-tomcat-lwc/favicon.ico</icon>
+                    <name>Stop Tomcat+LWC ${product_version} (${tomcat_http_port})</name>
+                    <path>${installdir}/bin</path>
+                    <platforms>all</platforms>
+                    <runInTerminal>1</runInTerminal>
+                    <windowsExec>${installdir}/bin/control.bat</windowsExec>
+                    <windowsExecArgs>STOP</windowsExecArgs>
+                    <windowsIcon>${installdir}/openmdx-tomcat-lwc/favicon.ico</windowsIcon>
+                    <windowsPath>${installdir}/bin</windowsPath>
+                </shortcut>
+                <linkShortcut>
+                    <comment>Login Tomcat+LWC ${product_version} (${tomcat_http_port})</comment>
+                    <icon>${installdir}/openmdx-tomcat-lwc/favicon.ico</icon>
+                    <name>Login Tomcat+LWC ${product_version} (${tomcat_http_port})</name>
+                    <platforms>all</platforms>
+                    <runInTerminal>0</runInTerminal>
+                    <url>http://localhost:${tomcat_http_port}</url>
+                    <windowsIcon>${installdir}/openmdx-tomcat-lwc/favicon.ico</windowsIcon>
+                </linkShortcut>
+                <shortcut>
+                    <comment>Start Services for Tomcat LWC ${product_version} (${tomcat_http_port})</comment>
+                    <exec>${installdir}/bin/control.sh START-SERVICES</exec>
+                    <icon>${installdir}/openmdx-tomcat-lwc/favicon.ico</icon>
+                    <name>Start Services for Tomcat+LWC ${product_version} (${tomcat_http_port})</name>
+                    <path>${installdir}/bin</path>
+                    <platforms>all</platforms>
+                    <runInTerminal>1</runInTerminal>
+                    <windowsExec>${installdir}/bin/control.bat</windowsExec>
+                    <windowsExecArgs> START-SERVICES</windowsExecArgs>
+                    <windowsIcon>${installdir}/openmdx-tomcat-lwc/favicon.ico</windowsIcon>
+                    <windowsPath>${installdir}/bin</windowsPath>
+                </shortcut>
+            </desktopShortcutList>
+            <folderList>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfiles</name>
+                    <platforms>all</platforms>
+                    <actionList>
+                        <substitute>
+                            <files>*/*.bat; */*.sh</files>
+                            <type>regexp</type>
+                            <substitutionList>
+                                <substitution>
+                                    <pattern>@@INSTALLDIR@@</pattern>
+                                    <value>${installdir}</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>@@JAVA_HOME@@</pattern>
+                                    <value>${java_home}</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>@@VERSION@@</pattern>
+                                    <value>${product_version}</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>@@TOMCAT_HTTP_PORT@@</pattern>
+                                    <value>${tomcat_http_port}</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>@@TOMCAT_SERVER_PORT@@</pattern>
+                                    <value>${tomcat_server_port}</value>
+                                </substitution>
+                            </substitutionList>
+                        </substitute>
+                        <substitute>
+                            <files>*/server.xml</files>
+                            <type>regexp</type>
+                            <substitutionList>
+                                <substitution>
+                                    <pattern>port="8080"</pattern>
+                                    <value>port="${tomcat_http_port}"</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>port="8443"</pattern>
+                                    <value>port="${tomcat_https_port}"</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>port="8005"</pattern>
+                                    <value>port="${tomcat_server_port}"</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>port="8009"</pattern>
+                                    <value>port="${tomcat_ajp_port}"</value>
+                                </substitution>
+                            </substitutionList>
+                        </substitute>
+                        <changePermissions>
+                            <files>*/*.sh;*/*.bin</files>
+                            <permissions>755</permissions>
+                        </changePermissions>
+                    </actionList>
+                    <distributionFileList>
+                        <distributionDirectory>
+                            <origin>../../image/openmdx-tomcat-lwc/apache-tomcat-6</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>../../image/openmdx-tomcat-lwc/connectors</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>../../image/openmdx-tomcat-lwc/bin</origin>
+                        </distributionDirectory>
+                    </distributionFileList>
+                    <shortcutList>
+                        <shortcut>
+                            <comment>Uninstall</comment>
+                            <exec>${installdir}/openmdx-tomcat-lwc/${uninstallerName}</exec>
+                            <icon></icon>
+                            <name>Uninstall ${product_fullname} (${tomcat_http_port})</name>
+                            <path>${installdir}/openmdx-tomcat-lwc/</path>
+                            <platforms>all</platforms>
+                            <runInTerminal>0</runInTerminal>
+                            <windowsExec>${installdir}/openmdx-tomcat-lwc/${uninstallerName}.exe</windowsExec>
+                            <windowsExecArgs></windowsExecArgs>
+                            <windowsIcon></windowsIcon>
+                            <windowsPath>${installdir}/openmdx-tomcat-lwc/</windowsPath>
+                        </shortcut>
+                    </shortcutList>
+                </folder>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfileslinux</name>
+                    <platforms>linux</platforms>
+                </folder>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfileswindows</name>
+                    <platforms>windows</platforms>
+                </folder>
+                <folder>
+                    <description>tomcat-bin</description>
+                    <destination>${installdir}/apache-tomcat-6/bin</destination>
+                    <name>tomcat-bin</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>../../../jre-1.5/core/lib/tomcat-juli.jar</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>tomcat-lib</description>
+                    <destination>${installdir}/apache-tomcat-6/lib</destination>
+                    <name>tomcat-lib</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>../../../tomcat-6/tomcat/lib/openmdx-tomcat.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../tomcat-6/tomcat/lib/catalina.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../opt/mysql/jre-1.5/mysql-5/lib/mysql-connector-java-bin.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../opt/postgresql/jre-1.5/postgresql-8/lib/postgresql-8.1.jdbc3.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../opt/hsqldb/jre-1.5/hsqldb-1/lib/hsqldb.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../planetj/jre-1.5/compfilter/lib/pjl-comp-filter.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../java2/jre-1.5/extension/lib/jcl104-over-slf4j.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../jre-1.5/log/lib/slf4j-openmdx1.jar</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>openmdx-tomcat-lwc</description>
+                    <destination>${installdir}/openmdx-tomcat-lwc</destination>
+                    <name>openmdx-tomcat-lwc</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>../../image/openmdx-tomcat-lwc/favicon.ico</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../image/openmdx-tomcat-lwc/README</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../image/openmdx-tomcat-lwc/LICENSE</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+            </folderList>
+            <startMenuShortcutList>
+                <startMenuShortcut>
+                    <comment>Start Tomcat+LWC ${product_version} (${tomcat_http_port})</comment>
+                    <name>Start Tomcat+LWC ${product_version} (${tomcat_http_port})</name>
+                    <runInTerminal>1</runInTerminal>
+                    <windowsExec>${installdir}/bin/control.bat</windowsExec>
+                    <windowsExecArgs>START</windowsExecArgs>
+                    <windowsIcon>${installdir}/openmdx-tomcat-lwc/favicon.ico</windowsIcon>
+                    <windowsPath>${installdir}/bin</windowsPath>
+                </startMenuShortcut>
+                <startMenuShortcut>
+                    <comment>Uninstall ${product_fullname} (${tomcat_http_port})</comment>
+                    <name>Uninstall ${product_fullname} (${tomcat_http_port})</name>
+                    <runInTerminal>0</runInTerminal>
+                    <windowsExec>${installdir}/openmdx-tomcat-lwc/${uninstallerName}.exe</windowsExec>
+                    <windowsExecArgs></windowsExecArgs>
+                    <windowsIcon></windowsIcon>
+                    <windowsPath>${installdir}/openmdx-tomcat-lwc/</windowsPath>
+                </startMenuShortcut>
+                <startMenuShortcut>
+                    <comment>Stop Tomcat+LWC ${product_version} (${tomcat_http_port})</comment>
+                    <name>Stop Tomcat+LWC ${product_version} (${tomcat_http_port})</name>
+                    <runInTerminal>1</runInTerminal>
+                    <windowsExec>${installdir}/bin/control.bat</windowsExec>
+                    <windowsExecArgs>STOP</windowsExecArgs>
+                    <windowsIcon>${installdir}/openmdx-tomcat-lwc/favicon.ico</windowsIcon>
+                    <windowsPath>${installdir}/bin</windowsPath>
+                </startMenuShortcut>
+                <startMenuLinkShortcut>
+                    <comment>Launch Tomcat+LWC ${product_version} (${tomcat_http_port})</comment>
+                    <name>Login Tomcat+LWC ${product_version} (${tomcat_http_port})</name>
+                    <runInTerminal>0</runInTerminal>
+                    <url>http://localhost:${tomcat_http_port}</url>
+                    <windowsIcon>${installdir}/openmdx-tomcat-lwc/favicon.ico</windowsIcon>
+                </startMenuLinkShortcut>
+                <startMenuShortcut>
+                    <comment>Start Services for Tomcat+LWC ${product_version} (${tomcat_http_port})</comment>
+                    <name>Start Services for Tomcat+LWC ${product_version} (${tomcat_http_port})</name>
+                    <runInTerminal>0</runInTerminal>
+                    <windowsExec>${installdir}/bin/control.bat</windowsExec>
+                    <windowsExecArgs>START-SERVICES</windowsExecArgs>
+                    <windowsIcon>${installdir}/openmdx-tomcat-lwc/favicon.ico</windowsIcon>
+                    <windowsPath>${installdir}/bin</windowsPath>
+                </startMenuShortcut>
+            </startMenuShortcutList>
+        </component>
+    </componentList>
+    <parameterList>
+        <infoParameter>
+            <name>important</name>
+            <title>IMPORTANT</title>
+            <description></description>
+            <explanation>Installation instructions</explanation>
+            <value>This installer creates a Tomcat 6 instance extended by the openMDX Lightweight EJB Container. The installer does NOT include the JDK 1.5 binaries. Make sure you have these packages installed before continuing.</value>
+            <default></default>
+            <trimMarginNumChars>0</trimMarginNumChars>
+        </infoParameter>
+        <directoryParameter>
+            <name>installdir</name>
+            <description>Installer.Parameter.installdir.description</description>
+            <explanation>Installer.Parameter.installdir.explanation</explanation>
+            <value>${platform_install_prefix}/${product_shortname}-${product_version}</value>
+            <default>${platform_install_prefix}/${product_shortname}-${product_version}</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <ask>yes</ask>
+            <cliOptionName>prefix</cliOptionName>
+            <mustBeWritable>yes</mustBeWritable>
+            <mustExist>0</mustExist>
+            <width>40</width>
+        </directoryParameter>
+        <directoryParameter>
+            <name>java_home</name>
+            <description>JDK 1.5 home directory</description>
+            <explanation>Select home directory of an existing JDK 1.5, e.g. C:\pgm\Java\jdk1.5.0 on Windows or /usr/lib/jvm/jdk1.5.0 on Linux platforms.</explanation>
+            <value></value>
+            <default></default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <ask>yes</ask>
+            <cliOptionName>prefix</cliOptionName>
+            <mustBeWritable>no</mustBeWritable>
+            <mustExist>1</mustExist>
+            <width>40</width>
+        </directoryParameter>
+        <stringParameter>
+            <name>tomcat_http_port</name>
+            <description>Tomcat HTTP port</description>
+            <explanation>Please enter the port number for the Tomcat HTTP connector.</explanation>
+            <value></value>
+            <default>8080</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <width>40</width>
+        </stringParameter>
+        <stringParameter>
+            <name>tomcat_https_port</name>
+            <description>Tomcat HTTPS port</description>
+            <explanation>Please enter the port number for the Tomcat HTTPS connector.</explanation>
+            <value></value>
+            <default>8443</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <width>40</width>
+        </stringParameter>
+        <stringParameter>
+            <name>tomcat_server_port</name>
+            <description>Tomcat server port</description>
+            <explanation>Please enter the port number of the Tomcat server.</explanation>
+            <value></value>
+            <default>8005</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <width>40</width>
+        </stringParameter>
+        <stringParameter>
+            <name>tomcat_ajp_port</name>
+            <description>Tomcat AJP port</description>
+            <explanation>Please enter the port number of the Tomcat AJP connector.</explanation>
+            <value></value>
+            <default>8009</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <width>40</width>
+        </stringParameter>
+    </parameterList>
+    <platformOptionsList>
+        <platformOptions>
+            <postInstallationScript>${installdir}\bin\postinstallation.bat</postInstallationScript>
+            <postInstallationScriptArguments></postInstallationScriptArguments>
+            <preUninstallationScript>${installdir}/bin/preuninstallation.bat</preUninstallationScript>
+            <platform>windows</platform>
+        </platformOptions>
+        <platformOptions>
+            <platform>linux</platform>
+        </platformOptions>
+    </platformOptionsList>
+</project>
+

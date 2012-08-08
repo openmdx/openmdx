@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistentContainer_1.java,v 1.33 2008/02/18 14:11:33 hburger Exp $
+ * Name:        $Id: PersistentContainer_1.java,v 1.36 2008/05/30 18:20:15 hburger Exp $
  * Description: A persistent container implementation
- * Revision:    $Revision: 1.33 $
+ * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/05/30 18:20:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -72,7 +72,6 @@ import org.openmdx.base.exception.InvalidCardinalityException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.collection.AbstractListIterator;
 import org.openmdx.compatibility.base.collection.ChainingList;
-import org.openmdx.compatibility.base.collection.Container;
 import org.openmdx.compatibility.base.collection.FilteringList;
 import org.openmdx.compatibility.base.collection.MergingList;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
@@ -88,12 +87,12 @@ import org.openmdx.compatibility.base.query.AbstractFilter;
 import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.base.query.Selector;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0;
 
 /**
  * A persistent container implementation
  */
+@SuppressWarnings("unchecked")
 class PersistentContainer_1
     extends AbstractContainer
     implements Evictable 
@@ -363,7 +362,8 @@ class PersistentContainer_1
 	 *            if some aspect of this filter prevents it from being
 	 *            applied to this container. 
 	 */
-	public Container subSet(
+	@SuppressWarnings("deprecation")
+    public org.openmdx.compatibility.base.collection.Container subSet(
 	    Object filter
 	){
 	    if(filter == null) return this;
@@ -599,13 +599,11 @@ class PersistentContainer_1
      */
     public String toString(
     ){
-        CharSequence text = StringBuilders.newStringBuilder(
+        StringBuilder text = new StringBuilder(
             getClass().getName()
         );
         try {
-            StringBuilders.asStringBuilder(
-                text
-            ).append(
+            text.append(
                 ": ("
             ).append(
                 this.referenceFilter.toXri() 
@@ -617,9 +615,7 @@ class PersistentContainer_1
                 " filter properties)"
             ).toString();
         } catch (Exception exception) {
-            StringBuilders.asStringBuilder(
-                text
-            ).append(
+            text.append(
                 "// "
             ).append(
                 exception
@@ -903,7 +899,7 @@ class PersistentContainer_1
 	        FilterProperty[] filter,
 	        AttributeSpecifier[] order
 	    ) {
-	        super((org.openmdx.base.object.spi.Marshaller)null, list);
+	        super((org.openmdx.base.persistence.spi.Marshaller)null, list);
 	        super.marshaller = new CollectionMarshallerAdapter(this);
 	        this.filter = filter;
 	        this.order = order;

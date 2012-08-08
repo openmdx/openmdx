@@ -1,7 +1,7 @@
 Distribution Name: openMDX/Core
-Release Date: 2008-02-20
-Specification Version: 2.0
-Implementation Version: 2.0.0
+Release Date: 2008-07-10
+Specification Version: 2.1
+Implementation Version: 2.1.0
 
 ---------------------------------------------------------------------
 Notes:
@@ -50,611 +50,517 @@ Notes:
 
 0.    SUMMARY
 
-      * Mappings
-        - cci2
-        - jdo2
-        - jmi2
-      * Database plugin supports JDO/JPOX schemas
-      * Logging framework integrates SLF4J
-      * Support to store stated models in a non-stated way added
-      * Tomcat/Embedded Lightweight Container support added
-      * DateState view support added
-      * Bugs fixed
-      * Performance improved
-      * Model_1_4 support added
-      
-      KNOWN ISSUES
-  
-      CR20006728
-      elementName qualifiers     
-      
-      XML Export does not work correctly with qualifiers named
-      "elementName".
+      * Replace openMDX 1 Gateway by openMDX 2 EntityManager
+      * Persistence: support for HSQLDB
+      * Improved CCI2 mapping
+      * Migration to SLF4J logging API
       
 1.    NEW FEATURES
 
-      CR20007105
-      SparseArray
+      CR20012701
+      DBOSlicedWithIdAsKey: add option org.openmdx.persistence.jdbc.useLikeForOidMatching.
+      Option allows to configure whether to use LIKE or <> operators to filter oid patterns.      
       
-      * The sparse array interface org.w3c.cci2.SparseArray replaces
-        org.openmdx.base.collection.SparseArray.
-      * org.openmdx.base.collection.TreeSparseArray is a TreeMap base
-        org.w3c.cci2.SparseArray implementation.   
+      CR20012403
+      Add Plug-In Configuration To EntityManager
+      
+      The content of package
+      * org.openmdx.kernel.persistence.spi 
+      has been merged into
+      * org.openmdx.base.persistence.spi 
+            
+      An entity manager factory configuration could look like this:
+			<env-entry>
+				<env-entry-name>EntityManager/plugIn[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>App1</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/modelPackage[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org:openmdx:test:app1</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/packageImpl[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.test.app1.aop2.standard</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/modelPackage[1]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org:openmdx:base</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/packageImpl[1]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.base.aop2.standard</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/userObject[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>PriceCalculator</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/PriceCalculator/class</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.test.app1.aop2.standard.PriceCalculator</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/App1/PriceCalculator/duration</env-entry-name>
+				<env-entry-type>java.lang.Long</env-entry-type>
+				<env-entry-value>1000</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/userObject[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>SharedConfiguration</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/SharedConfiguration/class</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.test.aop2.standard.SharedConfiguration</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>EntityManager/SharedConfiguration/example</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>an entity manager scoped configuration value</env-entry-value>
+			</env-entry>
 
+      A persistence manager factory configuration supports LegacyPlugIn only at the moment:
+			<env-entry>
+				<env-entry-name>PersistenceManager/LegacyPlugIn/modelPackage[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org:openmdx:test:app1</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PersistenceManager/LegacyPlugIn/packageImpl[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.test.app1.aop2.legacy</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PersistenceManager/LegacyPlugIn/userObject[0]</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>LegacyConfiguration</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PersistenceManager/LegacyPlugIn/LegacyConfiguration/class</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>org.openmdx.test.app1.aop2.legacy.LegacyConfiguration</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>PersistenceManager/LegacyPlugIn/LegacyConfiguration/example</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>a legacy plug-in scoped configuration value</env-entry-value>
+			</env-entry>
+            
+      CR20011100
+      Optimistic_1Bean
+
+      Typical configuration entries for the gateway-Managing EJB are:
+
+        <ejb-name>gateway1-Managing</ejb-name>
+        <home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+        <remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+        <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+        <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Optimistic_1Bean</ejb-class>
+        <session-type>Stateless</session-type>
+        <transaction-type>Bean</transaction-type>
+        [...]
+        <env-entry>
+          <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.interception.Entity_1</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>KERNEL/TYPE</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Standard_1</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>KERNEL/APPLICATION</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.Layer_1</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>KERNEL/MODEL</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.Layer_1</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.delegation.Entity_1</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>APPLICATION/disableRouter</env-entry-name>
+          <env-entry-type>java.lang.Boolean</env-entry-type>
+          <env-entry-value>true</env-entry-value>
+        </env-entry>
+        <env-entry>
+          <env-entry-name>PERSISTENCE/retrievalSize</env-entry-name>
+          <env-entry-type>java.lang.Integer</env-entry-type>
+          <env-entry-value>1000</env-entry-value>
+        </env-entry>
+
+      CR20012101
+      Database: add DBOSlicedWithParentAndIdAsKey. Add DBO which supports 
+      composed primary key (parent, qualifier, type).
+      
+      CR20011800
+      Database: support added for HSQLDB 1.8.
+      
+      CR20010702 
+      CCI2 Container interface 
+      
+      public interface <associationName> {
+        public interface <referenceName> extends org.w3c.cci2.Container<E> {
+          void add(
+             org.oasisopen.cci2.QualifierType <qualifierName>Type,
+             <qualifierType> <qualifierName>,
+             E <referenceName>
+          );       
+          E get(
+            org.oasisopen.cci2.QualifierType <qualifierName>Type,
+            <qualifierType> <qualifierName>
+          );
+          void remove(
+             org.oasisopen.cci2.QualifierType <qualifierName>Type,
+            <qualifierType> <qualifierName>
+          );
+        }
+      }
+      
+      public interface Container<E> extends Collection<E> {
+        List<E> getAll(
+          AnyTypePredicate predicate
+        );
+        void removeAll(
+          AnyTypePredicate predicate
+        );
+      }
+      
+      CR20010702 
+      CCI2 Container interface 
+
+      The interface is implemented by the proxy class only:
+
+      /**
+       * RefContainer
+       */
+      public interface RefContainer {
+      
+        /**
+         * Adds an object to the container
+         * 
+         * @param arguments there is always an odd number of arguments:
+         * ((REASSIGNABLE|PERSISTENT) identifier)+ value
+         */
+        void refAdd(
+          Object... arguments 
+        );
+    
+        /**
+         * Retrieves an object from the container
+         * 
+         * @param arguments there is always an even number of arguments:
+         * ((REASSIGNABLE|PERSISTENT) identifier)+
+         * 
+         * @return the object
+         */
+        Object refGet(
+          Object... arguments 
+        );
+        
+        /**
+         * Removes an object from the container
+         * 
+         * @param arguments there is always an even number of arguments:
+         * ((REASSIGNABLE|PERSISTENT) identifier)+
+         */
+        void refRemove(
+          Object... arguments 
+        );
+        
+        /**
+         * Precedes a persistent sub-segment.
+         */
+        Object PERSISTENT = QualifierType.PERSISTENT;
+    
+        /**
+         * Precedes re-assignable sub-segment.
+         */
+        Object REASSIGABLE = QualifierType.REASSIGNABLE;
+
+        /**
+         * Executes a query 
+         * 
+         * @param query
+         * 
+         * @return the result
+         */
+        List<?> refGetAll(
+            Object query
+        );
+    
+        /**
+         * Executes a query 
+         * 
+         * @param query
+         * 
+         * @return the result
+         */
+        List<?> refRemoveAll(
+           Object query
+        );
+
+      }
+
+      
+      CR20010001
+      SLF4J logging
+      
+      openMDX 2's logging API is org.slf4j
+      
+      A configuration such as
+      
+        # Example Log Properties
+        handlers= java.util.logging.FileHandler
+        java.util.logging.FileHandler.level = INFO
+        java.util.logging.FileHandler.pattern = %t/junit.%u.log
+        java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+      
+      leads to a JDK-log file similar to openMDX/1's log files with the 
+      following main differences
+      * The initial line declaring fields missing.
+      * The date/time field is in extended ISO format, i.e. it includes the 
+        characters 'T' and 'Z'.
+      * SysLog's and AppLog's logsource field is not at openMDX/1's default 
+        place but just before the message field.
+      * The thread field contains the log thread id (a number starting with 10) 
+        as opposed to the thread's id or name
+      * The line number field is missing.
+
+      CR20009700 
+      TransactionSynchronizationRegistry 
+      
+      The LightweightContainer supports the TransactionSynchronizationRegistry
+      as defined by JTA 1.1 and Java EE 5 respectively. 
+        
       CR20007105
       CollectionMarshaller
       
-      The org.openmdx.base.object.spi.Marshaller interface with its 
+      The org.openmdx.base.persistence.spi.Marshaller interface with its 
       unmarshal() method throwing now an IllegalArgumentException in case of
       failure replaces the org.openmdx.base.collection.CollectionMarshaller 
       interface with its unmarshal() method throwing a ServiceException in 
       case of failure. 
-      
-      CR20007302
-      Tomcat/Embedded Lightweight Container
-      
-      Allow the Lightweight Container to be launched in Tomcat. 
-      This way openMDX based applications can be run in Tomcat without the
-      need of an application server.
 
-      CR20007901
-      verifyObject
-      
-      The model API should provider another verifyObject() method in order
-      to fulfil the following requirements:
-      * accept DataproviderObject_1_0 instances 
-        (as opposed to DataproviderObject instances) 
-      * allow to disable derived attribute validation 
+      CR20007105
+      Gateway as PersistenceManagerFactory
 
-      CR20007520
-      states
+      The PersistenceManagerConnectionFactory is formally declared as an EJB 
+      reference in the web.xml:
       
-      The EnableShowDB option allows the showDB() invocation when logging at
-      trace level.
-        
-      CR20006414 
-      Query on persistent-new object trees
-      
-      * Support JDO's IgnoreCache==false setting 
-      * No round-trips should be made when making queries on a persistent-new 
-        object's containers.      
-      
-      CR20006383
-      StateIncapable
-      
-      State incapable BasicState instances are marked with a StateIncapable 
-      context by the
-      org.openmdx.compatibility.base.dataprovider.layer.model.StateIncapable_1 
-      and org.openmdx.compatibility.base.dataprovider.layer.model.NoState_1 
-      plug-in. 
+        <ejb-local-ref id="ejb_gateway">
+		  <ejb-ref-name>ejb/gateway</ejb-ref-name>
+          <ejb-ref-type>Session</ejb-ref-type>
+          <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+          <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_2Local</local>
+          <ejb-link>test-gateway.jar#gateway-Mandatory</ejb-link>
+        </ejb-local-ref>
 
-      CR20006384
-      Unstated children of stated parents should be supported
+      The PersistenceManagerFactory is formally declared as resource environment
+      reference in the web.xml:
       
-      Especially the cascading delete operation has to be aware of it:
-      Unstated children of stated objects are involved to cascading deletes
-      if their parent has no more valid states.
+        <resource-env-ref id="jdo_gateway">
+          <description>JDO Reference to the application's persistence manager factory</description>
+          <resource-env-ref-name>persistence/gateway</resource-env-ref-name>
+          <resource-env-ref-type>javax.jdo.PersistenceManagerFactory</resource-env-ref-type>
+        </resource-env-ref>
 
-      CR20006376
-      Removal Propagation
+      It is resolved in the Tomcat's context XML
       
-      DateState Views are now able to propagate removal operations for a given
-      time range to their children.                       
+        <Resource
+          name="persistence/gateway"
+          auth="Container"
+          type="javax.jdo.PersistenceManagerFactory"
+          factory="org.openmdx.base.persistence.tomcat.AccessorFactoryBuilder"
+          AccessorFactoryClass="org.openmdx.base.accessor.jmi1.AccessorFactory_2"
+        />
 
-      CR20006376
-      NoState_1 detection
+      The persistence manager factory is then acquired like that:
       
-      DateState Views allow now the modification of the stateValidFrom and 
-      stateValidTo attributes of DateState instances provided by a service
-      using the NoState_1 plug-in.
+        public void init(
+        ) throws ServletException {
+          this.persistenceManagerFactory = JDOHelper.getPersistenceManagerFactory(
+            "java:comp/env/persistence/gateway",
+            (Context)null
+          );
+        }
 
-      CR20006371
-      DateState Views
+      The changes to the gateway EJB are as following:
+      
+        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_2Local</local>
+        <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Gateway_1Bean</ejb-class>
+     
+        <env-entry>
+          <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
+          <env-entry-type>java.lang.String</env-entry-type>
+          <env-entry-value>org.openmdx.compatibility.runtime1.layer.interception.EntityProviderLayer_1</env-entry-value>
+        </env-entry>
 
-      Added
-      * the ability to access provider with No_State_1-Plug-ins.
-      * the ability to retrieve objects of "other" views by another mean than
-        DateStateViews' static methods: 
-        The predicate "statedObject().isNonNull() returns different states
-        of a given object in different views with identical refMofId()s:
-        - valid states' views are time range views for the states' validity.
-        - invalidated states' views are time point views (valid for the
-          beginning of the states' validity and valid at one millisecond
-          before its invalidation).
+        <assembly-descriptor>
+          <container-transaction>
+            <method>
+              <ejb-name>gateway-Mandatory</ejb-name>
+              <method-name>process</method-name>
+            </method>
+            <trans-attribute>Required</trans-attribute>
+          </container-transaction>
+          <container-transaction>
+            <method>
+              <ejb-name>gateway-Mandatory</ejb-name>
+              <method-name>createEntityManager</method-name>
+            </method>
+            <trans-attribute>Never</trans-attribute>
+          </container-transaction>
+          <container-transaction>
+            <method>
+              <ejb-name>gateway-Mandatory</ejb-name>
+              <method-name>createEntityProvider</method-name>
+            </method>
+            <trans-attribute>Never</trans-attribute>
+          </container-transaction>
+          <container-transaction>
+            <method>
+              <ejb-name>gateway-Mandatory</ejb-name>
+              <method-name>commit</method-name>
+            </method>
+            <trans-attribute>RequiresNew</trans-attribute>
+          </container-transaction>
+        </assembly-descriptor>
 
-      #20006291 
-      DateState Views
-      
-      Date State view support allows to set the context on a RefRootPackage
-      bases as opposed to the connection based ServiceHeader apporach.
-      These RefRootPackage views share the same unit of work.
-      
-      CR20006356
-      NoState_1
-      
-      The layer configuration option "SingleStateMode" tells, whether the
-      NoState_1 plug-in holds a single state per object instead of an object 
-      which is valid forever.
-      
-      The default value is false, i.e. no state mode where each object is
-      valid forever.
-      
-      CR20006291
-      DateState Views
-      
-      The marshalling objects implement the Delegating_1_0 interface now. 
-      
-      CR20006340
-      Extend Layer interface
-      
-      The Layer_1_2 interface has two new signatures
-      
-	    /**
-	     * This method is called by the INTERCEPTION layer before procss()ing
-	     * the given request.
-	     * 
-	     * @param header
-	     * @param request
-	     */
-	    void prolog(
-	        ServiceHeader header, 
-	        UnitOfWorkRequest request
-	    );
-	    
-	    /**
-	     * This method is called by the INTERCEPTION layer after procss()ing
-	     * the given request.
-	     * 
-	     * @param header
-	     * @param request
-	     */
-	    void epilog(
-	        ServiceHeader header, 
-	        UnitOfWorkRequest request,
-	        UnitOfWorkReply reply
-	    );
-      
-      If these methods are overridden in a subclass they have to call their
-      super implementation in order to notify the other layers as well.
+      The changes to the provider EJBs are as following:
 
-      CR20006252
-      The DependencyAwareExplorer changes the request order unnecessarily. 
-      
-      The DependencyAwareExplorer changes the request order only if necessary
-      if the newly introduced RELUCTANT_REORDERING flag is on.
-        
-      CR20006291
-      org.openmdx.compatibility.state1.view package
-      
-      org::openmdx::compatibility::state1 view API added
-      
-      CR20006287
-      Make Oracle SQL conversion public
-      
-      The Oracle Datum conversion routine has been made available via the
-      org.openmdx.oracle.base.Datums class.
-
-      CR20006287 
-      Oracle Datums
-      
-      The Oracle Datum conversion routine has been made available via the
-      org.openmdx.oracle.base.Datums class.
-      
-      CR20006281
-      Database: Existence query during object creation. IGNORE_CHECK_FOR_DUPLICATES 
-      allows to ignore the check-for-duplicate test on object creation. By default, 
-      the database plugin asserts that no two objects with the same identity are 
-      created. An object is only created an object retrieval with the same identity 
-      throws NOT_FOUND. The check is not performed if the option is set to true. In 
-      this case it is strongly recommended to set primary key constraints on the 
-      object_id / idx columns.
-      
-      NOTE: if case of duplicate objects ids and IGNORE_CHECK_FOR_DUPLICATES and 
-      database constraints turned on, a ServiceException is thrown with error 
-      code MEDIA_ACCESS_FAILURE and a db-specific SQLException as cause.      
+        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_1Local</local>
+     
+        <assembly-descriptor>
+          <container-transaction>
+            <method>
+              <ejb-name>clock-1</ejb-name>
+              <method-name>process</method-name>
+            </method>
+            <trans-attribute>Required</trans-attribute>
+          </container-transaction>
+          <container-transaction>
+            <method>
+              <ejb-name>clock-1</ejb-name>
+              <method-name>createEntityProvider</method-name>
+            </method>
+            <trans-attribute>Never</trans-attribute>
+          </container-transaction>
+        </assembly-descriptor>
       
 
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
       
-      CR20007105
-      List Classes
-      
-      The following list classes have been removed from
-      org.openmdx.base.collection and added to
-      org.openmdx.compatibility.base.collection: 
-      * AbstractFilteringList
-      * AbstractListIterator
-      * ChainingList
-      * FilteringList
-      * MergingList
-
-      CR20007105
-      Sparse Array Classes
-      
-      The following org.openmdx.base.collection.SparseArray based
-      classes have been removed from org.openmdx.base.collection 
-      and added to org.openmdx.compatibility.base.collection: 
-      * org.openmdx.base.collection.SparseArray
-      * org.openmdx.base.collection.PopulationIterator
-      * org.openmdx.base.collection.AbstractSparseArray
-      * org.openmdx.base.collection.TreeSparseArray
-      * org.openmdx.base.collection.MarshallingSparseArray
-      
-      CR20007302
-      Replacement of deprecated deployment option
-      
-      The following classes use now Enterprise Application and Resource 
-      Archives instead of depoloyment configuration files:
-      * org.openmdx.compatibility.base.dataprovider.replication.ExportXml
-      * org.openmdx.compatibility.base.dataprovider.replication.ImportXml
-      * org.openmdx.compatibility.base.dataprovider.replication.Replicate 
-      
-      That's why two command line arguments "connector" and "application"
-      have been added.
-
-      CR20008200 
-      Unnecessary get requests made by state view
-      
-      State view has been optimized to avoid unecessary get request for non-
-      stated objects.
-
-      CR20007519
-      Performance Improvement
-      
-      Eliminate unnecessary state caching when iterationg over collections 
-      prefetched in a time-point view.
-
-      CR20007519
-      Performance Improvement
-      
-      Eliminate unnecessary state caching when navigating to objects prefetched
-      in a time-point view.
-
-      CR20007520
-      states
-      
-      The EnableShowDB option is false by default.
-
-      CR20007102
-      Improve ignoreCheckForDuplicates
-      
-      A unique constraint violation detected with the activated 
-      ignoreCheckForDuplicates flag return a DUPLICATE exception instead of
-      a MEDIA_ACCESS_FAILURE, provided the SQL state returned by the database 
-      driver is either 23000 or 23505.
-
-      CR20006388
-      State View HashCode
-      
-      Different state view instances referring to the same object should share 
-      the same hashCode.  
-
-      CR20006386
-      UnitOfWOrk_1_0 getDateTime() 
-      
-      It should throw an ILLEGAL_STATE exception if no unit of work is active 
-      instead of returning null.
-      
-      CR20006385
-      Dependency Aware Explorer Fallback 
-
-      Add lenient ordering in case of circular references:
-      Fall back to ordering by by states and children only as opposed to the 
-      original order.
-
-      CR20006380
-      DateState Views's "readable" predicate
-      
-      The DateState Views's "readable" predicate ignores deleted states now.
+      CR20012707
+      ManagerFactory/DataProvider
             
-      CR20006378
-      Persistence: RID lookup for PG. DBOSlicedWithIdAsKey generates rid lookup 
-      statements of the form ((v." + database.OBJECT_ID + " > ?) AND 
-      (v." + database.OBJECT_ID + " < ?)). Because string comparison does not 
-      work as expected for PG on Unix the form using LIKE should be used instead, 
-      i.e. (v." + database.OBJECT_ID + " LIKE ?).
+      EJB Interface & Bean Configuration
+      * DataProvider EJB Configuration
+          <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+	      <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+	      <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
+      * Entity Manager Factory EJB Configuration 
+          <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2LocalHome</local-home>
+	      <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2_0Local</local>
+	      <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.EntityManagerFactory_2Bean</ejb-class>
+      * Gateway EJB Configuration
+          <ejb-name>Gateway</ejb-name>
+	      <home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+	      <remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+	      <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+	      <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+	      <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Gateway_1Bean</ejb-class>                
+       
+      CR20011701 
+      The predicates' equals() methods
+       
+      Deprecate the predicates' equals() methods to avoid its erroneous use 
+      in lieu of equalTo().
+       
+      CR20010001
+      openMDX/Log
 
-      CR20006376
-      View For Initialized State
+      openMDX 1' logging API (SysLog & Applog):
+      * openMDX 1's logging API (org.openmdx.kernel.SysLog and 
+        org.openmdx.application.log.AppLog) delegates to SLF4J now.
+      * openMDX 1's logging implementation has been moved to 
+        org.openmdx.compatibility.kernel.SysLog and 
+        org.openmdx.compatibility.application.log.AppLog. 
+        It is activated by adding slf4j-openmdx1.jar to the same classloader 
+        as openmdx-kernel.jar. 
+
+      CR20009904 
+      PersistenceManager in JBoss
       
-      The DateState views for initialized states no longer ignore values 
-      provided by client side JMI plug-ins.
-
-      CR20006376
-      DateState View's Reference Container
-      
-      A DateState view's reference container no longer includes objects 
-      removed in the current unit of work, i.e. objects with their 
-      refIsDeleted() flag set are excluded.      
-
-      CR20006371
-      State Removal
-      
-      The remove operation does no longer return any former attributes.
-
-      CR20006371
-      DateState Views
-
-      API changes (in regard to request 20006291)
-      * The two static writable views (write-only time-range view and 
-        read-write mixed view) have been replace by a single dynamic one
-        (writable time-range view which is readable depending on the cache 
-        content).
-      * The null return policy has been changed from "null if object does not 
-        exist" to "null if either object does not exist or if there is no
-        valid state in the given time range".
-
-      CR20006371
-      Exporter
-
-      Added
-      * the ability to export the states of objects unavailable at
-        the time of export.
-
-
-      CR20006291 
-      DateState Views
-
-      Adding a new state is no longer optimistic but pessimistic, i.e. a
-      DUPLICATE exception is thrown immediately in case of a conflict.
-
-      CR20006291
-      DateState Views
-      
-      The marshalling object's delegate is now available through the protected
-      method getDelegate(), but no longer as field. 
+      The javax/jdo classes have been moved from openmdx-base.jar to
+      openmdx-kernel.jar.      
 
 
 2.1.  FIXED BUGS
 
-      CR20007519
-      Performance Improvement
+      CR20010802
+      StateQuery
+      
+      Un-escape attribute filter values when replacing IS_LIKE by IS_IN.       
 
-      CR20007528
-      Erroneous Object Path
+      CR20011501
+      Plugin_1's total reply leads to iteration 
       
-      Some object paths contain erroneously semicolons  
-
-      CR20007517
-      enableDisjunctStateCreation
+      Recounting must be avoided.
       
-      The state1 plug-in's EnableDisjunctStateCreation option could not be set 
-      to false, neither implicitely nor explicitely. 
-      
-      Now it's false by default.
-
-      CR20007104
-      XmExport of stated objects  
-      
-      XmlExporter fails if the startPath collection contains an instance of 
-      BasicState.
-
-      CR20007200
-      XmlExporter exception handling
-      
-      Sometimes the XmlExporter exception stack's initial cause contains an 
-      assertion failure (Detected a recursion flaw within the exception stack. 
-      The exception is fixed but some information had to be discarded...) 
-      
-      CR20007107
-      Traversal failure
-      
-      The object view's instance-of filter property evaluation did ignore
-      the sub-classes of a candidate's class.
-      
-      CR20007106
-      Erroneous object selection by TimeRange View
-      
-      A time range view's collection of children did ignore non-readable 
-      objects, which was  wrong.
-      
-      A time range view's collection of children must ignore deleted objects 
-      only, but include all others, whether readable or not.
-
-      CR20006420
-      Date or DateTime filter properties
-      
-      Date or DateTime filter properties for non-stated objects are not 
-      converted to any other DB format than String when issued via a state
-      view.
-
-      CR10006485
-      Attribute Specifiers are ignored by ITERATION_CONTINUATION 
-
-      CR20006387
-      A residual period of one day
-      
-      A residual period of one day is "swallowed" during commit by the
-      DateState_1 plug-in. 
-      
-      CR20006376
-      refSetOutermostPackage caches the wrong object with the tie approach
-      
-      The user provided instance has been cached instead of the proxy 
-      instance.
-
-      CR20006382 
-      RID/OID with dbObject2 
-      
-      The RID is not included in dbObject2's SELECT statement 
-      
-      CR20006376
-      DateState View's Reference Container
-                         
-      A DateState view's reference container did ignore the filter part of
-      a query for non-stated objects as soon as an order was specified.
-
-      CR20006376
-      DateState View's Reference Container
-                         
-      A DateState view's persistent-new reference container occasionally
-      ignored all its children.
-
-      CR20006376
-      DateState View's Reference Container
-
-      Iterator could erroneously terminate - probably due to the fact that
-      objects fetched or created or fetched during the iteration.
-
-      CR20006371
-      Multiple State Removal
-      
-      The AbstractState_1 sometimes rejected state removal requests during
-      its after completion phase.
-      
-      Sometimes identical invalidated states were written to the database in
-      a single transaction.
-
-      CR20006371
-      State queries for persistent-new objects
-      
-      State queries for persistent-new objects did ignore the cache.
-
-      CR20006371
-      DateState views for persistent-new objects
-      
-      Creating views for persistent-new objects did not work.
-      
-      CR0006371
-      Duplicate state entries created by getViewForPropagatedState 
-
-      CR20006371
-      State Views & JMI Plug-ins
-      
-      The state view supports now with client and server side JMI plug-ins.
-
-      CR20006296
-      Database_1: multiple reads on columns. ResultSet.getObject(columnName) 
-      must NOT be called more than one time on the same row (at least for numeric 
-      columns with SQL Server). The second and subsequent calls may return invalid 
-      values without throwing an exception. The class FastResultSet already handles 
-      this case, however not for indexed columns (introduced with embedded features 
-      and legacy tables). 
-
-      CR20006284
-      XMLExporter 
-      
-      startPoints.size() > 1 leads to exception
-
-      CR20006233
-      Database_1: filterPropertyToSql invalid translation of type patterns 
-      to value patterns. The translation of type patterns to filter property value 
-      patterns is invalid in some cases. Type wildcards :* are not translated to 
-      sql wildcards %.
+      CR20010003
+      DataproviderObject.values() returns null. DataproviderObject.values() 
+      must return a non-null SparseList<Object>. In case of multiple threads, 
+      the current implementation may return null. DataproviderObject must be 
+      thread-safe because it is used in the Model_1 repository. 
       
 
 2.2.  DEPRECATED FEATURES
 
-      CR20006339
-      Deprecate org::openmdx::compatibility::role1 
-
-      CR20006588
-      …jdo.Persistence_1
+      CR20008100
+      RefObjectFactory_1
       
-      The primitiveTypes packages
-      * org.omg.primitiveTypes.cci
-      * org.omg.primitiveTypes.jmi
-      are deprecated and will be removed in the near future
-
-      CR20006588
-      …jdo.Persistence_1
-      
-      The primitiveTypes packages
-      * org.omg.primitiveTypes.cci
-      * org.omg.primitiveTypes.jmi
-      are deprecated and will be removed in the near future
-
-      CR20006586
-      Alias types
-      
-      The following alias types should no longer be used
-      * org.openmdx.base.ObjectId
-      * org.openmdx.base.uuid
-      * org.oasis-open.xri
-
-      CR0006091
-      XML Datatypes
-      
-      org.openmdx.uses.javax.xml.Duration and 
-      org.openmdx.uses.javax.xml.XMLGregrianCalendar are deprecated and will 
-      be removed soon.
+      The class org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1 has been
+      deprecated as it is used by test programs only.
             
 2.3   REMOVED FEATURES
 
-      List Classes
+      CR20008100
+      Application_1_0 & ApplicationController_1_0
       
-      The following list classes have been removed from
-      org.openmdx.base.collection and added to
-      org.openmdx.compatibility.base.collection 
-      * AbstractFilteringList
-      * AbstractListIterator
-      * ChainingList
-      * FilteringList
-      * MergingList
+      The deprecated classes Application_1_0 and ApplicationController_1_0 in
+      the package org.openmdx.compatibility.base.application.control
+      have been removed.
 
-      CR20007105
-      Sparse Array Classes
+      CR20008100
+      InProcessDataproviderConnectionFactory
       
-      The following org.openmdx.base.collection.SparseArray based
-      classes have been removed from org.openmdx.base.collection 
-      and added to org.openmdx.compatibility.base.collection: 
-      * org.openmdx.base.collection.SparseArray
-      * org.openmdx.base.collection.PopulationIterator
-      * org.openmdx.base.collection.AbstractSparseArray
-      * org.openmdx.base.collection.TreeSparseArray
-      * org.openmdx.base.collection.MarshallingSparseArray
-      
-      CR20007105
-      CollectionMarshaller
-      
-      The org.openmdx.base.collection.CollectionMarshaller interface with its
-      unmarshal() method throwing a ServiceException in case of failure has 
-      been replaced by org.openmdx.base.object.spi.Marshaller with its 
-      unmarshal() method throwing now an IllegalArgumentException
-      in case of failure. 
-      
-      CR20007105
-      Version
-      
-      The deprecated method org.openmdx.*.Version.getVersion() has been removed.
+      The deprecated class InProcessDataproviderConnectionFactory
+      in package org.openmdx.compatibility.base.application.cci has been
+      removed.
 
-      CR20007105
-      Configuration_2_0
+      CR20008100
+      InstanceCallbacks_1_0 & InstanceCallbackAdapter
       
-      The (up to now only package locally used) interface 
-      org.openmdx.base.object.spi.Configuration_2_0 has been removed.
-       
-      CR20007302
-      Removal of deprecated classes
-      
-      Some of the following classes, which had been deprecated for years, have 
-      been removed finally, some will be reomved in the neaer future:
-      * org.openmdx.compatibility.base.naming.InitialContainerContextFactory
-      * org.openmdx.compatibility.base.application.cci.Application
-      * org.openmdx.compatibility.base.application.cci.ServiceLocator_1_0
-      * org.openmdx.compatibility.base.application.container.SimpleServiceLocator
-      * org.openmdx.compatibility.base.application.container.LightweightContainer_1
-      * org.openmdx.compatibility.base.application.j2ee.ApplicationServerManager_1
-      * org.openmdx.compatibility.base.application.j2ee.StandardServiceLocator
-      * org.openmdx.compatibility.base.application.j2ee.WlsManager_1
-      * org.openmdx.compatibility.base.application.spi.CommandOptions_1
-      * org.openmdx.compatibility.base.application.spi.JndiServiceLocator_1
-      * org.openmdx.compatibility.base.application.spi.SimpleServiceLocator_1
-      * org.openmdx.compatibility.base.application.spi.StandardServiceLocator_1
-      * org.openmdx.compatibility.base.dataprovider.kernel.ConnectorContainer_1
-      * org.openmdx.compatibility.base.dataprovider.kernel.WlsDataproviderConnectionManager_1
-      * org.openmdx.compatibility.base.dataprovider.transport.none.DataproviderConnection
-      * org.openmdx.compatibility.base.dataprovider.transport.none.DataproviderConnectionFactory
-      * org.openmdx.compatibility.base.dataprovider.transport.none.DataproviderContainer_1
-      * org.openmdx.compatibility.base.dataprovider.transport.none.ManagedDataproviderConnectionFactory
-      * org.openmdx.kernel.naming.LocalContext
-      * org.openmdx.kernel.naming.LocalContext.Factory
-
-      CR20006291
-      DateState Views
-      
-      The marshalling object's delegate is no longer available as field.
+      The deprecated interface InstanceCallbacks_1_0 in package
+      org.openmdx.compatibility.base.accessor.object.cci and the deprecated
+      class InstanceCallbackAdapter in package 
+      org.openmdx.compatibility.base.accessor.object.spi have been removed.
 
 ---

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValue.java,v 1.57 2007/11/23 00:21:02 wfro Exp $
+ * Name:        $Id: AttributeValue.java,v 1.59 2008/04/04 17:01:09 hburger Exp $
  * Description: AttributeValue
- * Revision:    $Revision: 1.57 $
+ * Revision:    $Revision: 1.59 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/23 00:21:02 $
+ * Date:        $Date: 2008/04/04 17:01:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,7 +74,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
@@ -87,6 +86,7 @@ public abstract class AttributeValue
 implements Serializable {
 
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     public static AttributeValue createAttributeValue(
         String valueClassName,
         Object object,
@@ -246,14 +246,14 @@ implements Serializable {
                 }
                 else {
                     AppLog.info("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
-                    AppLog.info(e.getMessage(), e.getCause(), 1);
+                    AppLog.info(e.getMessage(), e.getCause());
                     return null;
                 }
             }
             catch(Exception e) {
                 AppLog.info("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
                 ServiceException e0 = new ServiceException(e);
-                AppLog.info(e0.getMessage(), e0.getCause(), 1);
+                AppLog.info(e0.getMessage(), e0.getCause());
                 return null;
             }
         }
@@ -276,6 +276,7 @@ implements Serializable {
     }
 
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     protected Collection getValues(
         boolean shortFormat
     ) {
@@ -343,7 +344,7 @@ implements Serializable {
         boolean shortFormat
     ) {    
         Object value = this.getValue(shortFormat);
-        CharSequence stringifiedValue = StringBuilders.newStringBuilder();
+        StringBuilder stringifiedValue = new StringBuilder();
         if(value instanceof Collection) {
             for(
                 Iterator i = ((Collection)value).iterator(); 
@@ -356,28 +357,28 @@ implements Serializable {
                 catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
                     SysLog.warning("Error when getting element from collection (more info at detail level)", e0.getMessage());
-                    SysLog.detail(e0.getMessage(), e0.getCause(), 1);
+                    SysLog.detail(e0.getMessage(), e0.getCause());
                 }
                 boolean hasDivTag = false;
                 if(!this.isSingleValued()) {
                     if(forEditing) {                	  
                         if(stringifiedValue.length() > 0) {
-                            StringBuilders.asStringBuilder(stringifiedValue).append("\n");
+                            stringifiedValue.append("\n");
                         }
                     }
                     else if(multiLine)  {
-                        StringBuilders.asStringBuilder(stringifiedValue).append("<div>");
+                        stringifiedValue.append("<div>");
                         hasDivTag = true;
                     }
                     // multi-valued, non-spanned
                     else {
                         if(stringifiedValue.length() > 0) {
-                            StringBuilders.asStringBuilder(stringifiedValue).append("; ");
+                            stringifiedValue.append("; ");
                         }
                     }              
                 }
                 if(v != null) {
-                    StringBuilders.asStringBuilder(stringifiedValue).append(
+                    stringifiedValue.append(
                         this.getStringifiedValueInternal(
                             p, 
                             v, 
@@ -387,14 +388,14 @@ implements Serializable {
                         )
                     ); 
                     if(hasDivTag) {
-                        StringBuilders.asStringBuilder(stringifiedValue).append("</div>");
+                        stringifiedValue.append("</div>");
                     }                
                 }
             }
         }
         else {
             if(value != null) {
-                stringifiedValue = StringBuilders.newStringBuilder(
+                stringifiedValue = new StringBuilder(
                     this.getStringifiedValueInternal(
                         p, 
                         value, 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingList.java,v 1.10 2008/02/18 14:11:33 hburger Exp $
- * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.10 $
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: MarshallingList.java,v 1.13 2008/04/12 14:14:00 wfro Exp $
+ * Description: MarshallingList
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:11:33 $
+ * Date:        $Date: 2008/04/12 14:14:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,24 +52,37 @@ package org.openmdx.base.collection;
 
 import java.io.Serializable;
 import java.util.AbstractList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
-import org.openmdx.base.exception.BadParameterException;
 import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
 
 /**
  * A Marshalling List
  */
-public class MarshallingList<E>
-    extends AbstractList<E> 
-    implements Serializable
+public class MarshallingList<E> extends AbstractList<E> implements Serializable
 {
 
     /**
+     * Constructor
      * 
-     */
-    private static final long serialVersionUID = 3761694498107044406L;
+     * @param marshaller
+     * @param list
+     * @param unmarshalling
+     */    
+    @SuppressWarnings("unchecked")
+    public MarshallingList(
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
+        List<?> list, 
+        Unmarshalling unmarshalling 
+    ) {
+        this.marshaller = marshaller;
+        this.list = (List<Object>) list;
+        this.unmarshalling = unmarshalling;
+    }
 
     /**
      * Constructor
@@ -79,11 +92,10 @@ public class MarshallingList<E>
      */    
     @SuppressWarnings("unchecked")
     public MarshallingList(
-        org.openmdx.base.object.spi.Marshaller marshaller,
+        org.openmdx.base.persistence.spi.Marshaller marshaller,
         List<?> list 
     ) {
-        this.marshaller = marshaller;
-        this.list = (List<Object>) list;
+        this(marshaller, list, Unmarshalling.EAGER);
     }
 
     /**
@@ -96,19 +108,24 @@ public class MarshallingList<E>
         Marshaller marshaller,
         List<?> list 
     ) {
-        this(new CollectionMarshallerAdapter(marshaller), list);
+        this(
+            new CollectionMarshallerAdapter(marshaller), 
+            list, 
+            marshaller instanceof ReluctantUnmarshalling ? Unmarshalling.RELUCTANT : Unmarshalling.EAGER
+        );
     }
 
-    /**
-     * 
-     */    
+    //------------------------------------------------------------------------
+    // Implements List
+    //------------------------------------------------------------------------
+
     public void add(
         int index, 
         E element
     ) {
         this.list.add(
             index,
-            unmarshal(element)
+            this.marshaller.unmarshal(element)
         ); 
     }
   
@@ -117,7 +134,7 @@ public class MarshallingList<E>
      */
     public boolean add(E element) {
         return this.list.add(
-            unmarshal(element)
+            this.marshaller.unmarshal(element)
         );
     }
 
@@ -137,23 +154,28 @@ public class MarshallingList<E>
         );
     }
 
-    /**
-     * 
-     */  
     @SuppressWarnings("unchecked")
     public E get(
         int index
     ) {
-        return (E) this.marshaller.marshal(this.list.get(index));
+        return (E) this.marshaller.marshal(
+            this.list.get(index)
+        );
     }
 
     /* (non-Javadoc)
      * @see java.util.List#indexOf(java.lang.Object)
      */
     public int indexOf(Object candidate) {
-        return this.list.indexOf(
-            this.marshaller.unmarshal(candidate)
-        );
+        switch(this.unmarshalling) {
+            case RELUCTANT:
+                return super.indexOf(candidate);
+            case EAGER:
+            default:    
+                return this.list.indexOf(
+                    this.marshaller.unmarshal(candidate)
+                );
+        }
     }
 
     /* (non-Javadoc)
@@ -167,14 +189,17 @@ public class MarshallingList<E>
      * @see java.util.List#lastIndexOf(java.lang.Object)
      */
     public int lastIndexOf(Object candidate) {
-        return this.list.lastIndexOf(
-            this.marshaller.unmarshal(candidate)
-        );
+        switch(this.unmarshalling) {
+            case RELUCTANT:
+                return super.lastIndexOf(candidate);
+            case EAGER:
+            default:    
+                return this.list.lastIndexOf(
+                    this.marshaller.unmarshal(candidate)
+                );
+        }
     }
 
-    /**
-     * 
-     */  
     @SuppressWarnings("unchecked")
     public E remove(
         int index
@@ -187,15 +212,20 @@ public class MarshallingList<E>
     /* (non-Javadoc)
      * @see java.util.Collection#remove(java.lang.Object)
      */
-    public boolean remove(Object candidate) {
-        return this.list.remove(
-            this.marshaller.unmarshal(candidate)
-        );
+    public boolean remove(
+        Object candidate
+    ) {
+        switch(this.unmarshalling) {
+            case RELUCTANT:
+                return super.remove(candidate);
+            case EAGER:
+            default:    
+                return this.list.remove(
+                    this.marshaller.unmarshal(candidate)
+                );
+        }
     }
 
-    /**
-     * 
-     */    
     @SuppressWarnings("unchecked")
     public E set(
         int index, 
@@ -204,45 +234,108 @@ public class MarshallingList<E>
         return (E) this.marshaller.marshal(
             this.list.set(
                 index, 
-                unmarshal(element)
+                this.marshaller.unmarshal(element)
             )
         );
     }
 
-    /**
-     * 
-     */
     public int size(
     ) {
         return this.list.size();
     }
- 
-    /**
-     * Unmarshals an argument
-     *
-     * @param     argument
-     *            The argument to be unmarshalled
-     *
-     * @return    the unmarshalled argument
-     * 
-     * @exception BadParameterException
-     *            if some aspect of argument prevents it from being
-     *            unmarshalled 
-     */
-    private Object unmarshal(
-        Object argument
-    ){
-        return this.marshaller.unmarshal(argument);
+
+    public Iterator<E> iterator(
+    ) {
+        return new MarshallingListIterator<E>();
     }
-    
-    /**
-     * 
-     */
+
+    public ListIterator<E> listIterator(
+    ) {
+        return new MarshallingListIterator<E>();
+    }
+
+    public ListIterator<E> listIterator(
+        int index
+    ) {
+        return new MarshallingListIterator<E>(index);
+    }
+ 
+    //-----------------------------------------------------------------------    
+    public class MarshallingListIterator<T> implements ListIterator<T> {
+        
+        public MarshallingListIterator(
+        ) {
+            this.iterator = MarshallingList.this.list.listIterator();
+        }
+
+        public MarshallingListIterator(
+            int index
+        ) {
+            this.iterator = MarshallingList.this.list.listIterator(index);
+        }
+
+        public void add(
+            T element
+        ) {
+            this.iterator.add(
+                MarshallingList.this.marshaller.unmarshal(element)
+            );
+        }
+
+        public boolean hasNext(
+        ) {
+            return this.iterator.hasNext();
+        }
+
+        public boolean hasPrevious(
+        ) {
+            return this.iterator.hasPrevious();
+        }
+
+        @SuppressWarnings("unchecked")        
+        public T next(
+        ) {
+            return (T)MarshallingList.this.marshaller.marshal(this.iterator.next());
+        }
+
+        public int nextIndex(
+        ) {
+            return this.iterator.nextIndex();
+        }
+
+        @SuppressWarnings("unchecked")        
+        public T previous(
+        ) {
+            return (T)MarshallingList.this.marshaller.marshal(this.iterator.previous());
+        }
+
+        public int previousIndex(
+        ) {
+            return this.iterator.previousIndex();
+        }
+
+        public void remove(
+        ) {
+            this.iterator.remove();            
+        }
+
+        public void set(
+            T element
+        ) {
+            this.iterator.set(
+                MarshallingList.this.marshaller.unmarshal(element)
+            );
+        }
+       
+        private final ListIterator<Object> iterator;
+    }
+
+    //-----------------------------------------------------------------------
+    // Members
+    //-----------------------------------------------------------------------    
+    private static final long serialVersionUID = 3761694498107044406L;
     protected List<Object> list;
-
-    /**
-     * 
-     */
-    protected org.openmdx.base.object.spi.Marshaller marshaller;
-
+    protected org.openmdx.base.persistence.spi.Marshaller marshaller;
+    protected final Unmarshalling unmarshalling;
+        
 }

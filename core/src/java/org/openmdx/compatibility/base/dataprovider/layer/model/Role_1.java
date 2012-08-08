@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Role_1.java,v 1.16 2007/10/10 17:16:06 hburger Exp $
+ * Name:        $Id: Role_1.java,v 1.18 2008/04/25 22:22:57 hburger Exp $
  * Description: Role_1 plugin
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 17:16:06 $
+ * Date:        $Date: 2008/04/25 22:22:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -102,6 +102,7 @@ import org.openmdx.kernel.log.SysLog;
  * @author anyff
  *
  */
+@SuppressWarnings("unchecked")
 public class Role_1
     extends Standard_1 {
 
@@ -4194,7 +4195,7 @@ public class Role_1
      *
      * @param       header
      *              request header
-     * @param       request
+     * @param       _request
      *              the request
      *
      * @return      the reply

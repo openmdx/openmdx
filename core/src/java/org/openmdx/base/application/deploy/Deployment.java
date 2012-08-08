@@ -1,15 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Deployment.java,v 1.1 2005/04/20 21:08:36 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Deployment.java,v 1.2 2008/07/02 16:07:24 hburger Exp $
  * Description: Deployment
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/20 21:08:36 $
+ * Date:        $Date: 2008/07/02 16:07:24 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2005, OMEX AG, Switzerland
  * All rights reserved.
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.application.deploy;
 
@@ -65,7 +64,7 @@ public interface Deployment {
      * Create a new initial context referring to this deployment
      * 
      * @return this deployment's initial context;
-     * or <code>null</code> if deployment was successfull but not registered
+     * or <code>null</code> if deployment was successful but not registered
      * with a naming service
      * 
      * @throws ServiceException in case of failure
@@ -77,7 +76,7 @@ public interface Deployment {
      * Tells that the deployment is no longer used.
      * An implementation may<ul>
      * <li>undeploy the deployed units
-     * <li>shutdown the corresponding process of the deployment has been made 
+     * <li>shutdown the corresponding process if the deployment has been made 
      * in another virtual machine
      * </ul>
      */

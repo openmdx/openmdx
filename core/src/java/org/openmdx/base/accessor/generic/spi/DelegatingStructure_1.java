@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingStructure_1.java,v 1.4 2007/10/10 16:05:50 hburger Exp $
+ * Name:        $Id: DelegatingStructure_1.java,v 1.5 2008/03/19 17:13:11 hburger Exp $
  * Description: Delegating Structure_1_0 Implementation
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:50 $
+ * Date:        $Date: 2008/03/19 17:13:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,6 +59,7 @@ import org.openmdx.base.exception.ServiceException;
 /**
  * Abstract implementation of Structure_1_0 which delegates to a delegate.
  */
+@SuppressWarnings("unchecked")
 public abstract class DelegatingStructure_1
     implements Structure_1_0, Delegating_1_0 
 {

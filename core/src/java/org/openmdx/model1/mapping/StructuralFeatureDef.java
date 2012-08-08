@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StructuralFeatureDef.java,v 1.5 2007/01/23 15:00:19 hburger Exp $
+ * Name:        $Id: StructuralFeatureDef.java,v 1.7 2008/06/28 00:21:26 hburger Exp $
  * Description: VelocityStructuralFeatureDef class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/23 15:00:19 $
+ * Date:        $Date: 2008/06/28 00:21:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@ import java.util.Set;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
 
+@SuppressWarnings("unchecked")
 public abstract class StructuralFeatureDef
   extends FeatureDef {
 
@@ -90,12 +91,12 @@ public abstract class StructuralFeatureDef
     boolean singleValued = 
         Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
         Multiplicities.OPTIONAL_VALUE.equals(multiplicity);
-    this.beanGenericName = Names.capitalize(name);
+    this.beanGenericName = AbstractNames.capitalize(name);
     this.beanGetterName = openmdx1 ? Names.openmdx1AccessorName(
         name,
         true, // forQuery
         forBoolean
-    ) : Names.openmdx2AccessorName(
+    ) : AbstractNames.openmdx2AccessorName(
         name,
         true, // forQuery
         forBoolean,
@@ -105,7 +106,7 @@ public abstract class StructuralFeatureDef
         name,
         false, // forQuery
         forBoolean
-    ) : Names.openmdx2AccessorName(
+    ) : AbstractNames.openmdx2AccessorName(
         name,
         false, // forQuery
         forBoolean,

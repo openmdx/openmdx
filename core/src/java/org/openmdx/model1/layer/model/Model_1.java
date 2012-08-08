@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.3 2004/04/02 16:59:04 wfro Exp $
+ * Name:        $Id: Model_1.java,v 1.4 2008/03/21 18:40:15 hburger Exp $
  * Description: model1 application plugin
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:04 $
+ * Date:        $Date: 2008/03/21 18:40:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,7 @@ import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.compatibility.base.dataprovider.layer.model.OptimisticLocking_1;
 
+@SuppressWarnings("unchecked")
 public class Model_1 
   extends OptimisticLocking_1 {
 

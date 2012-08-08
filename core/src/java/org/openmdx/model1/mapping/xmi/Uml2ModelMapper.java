@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Uml2ModelMapper.java,v 1.8 2007/09/27 15:26:54 hburger Exp $
+ * Name:        $Id: Uml2ModelMapper.java,v 1.9 2008/03/21 18:40:21 hburger Exp $
  * Description: Uml2ModelMapper
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/09/27 15:26:54 $
+ * Date:        $Date: 2008/03/21 18:40:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import org.openmdx.model1.code.AggregationKind;
 import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.Stereotypes;
 
+@SuppressWarnings("unchecked")
 public class Uml2ModelMapper {
 
     //---------------------------------------------------------------------------

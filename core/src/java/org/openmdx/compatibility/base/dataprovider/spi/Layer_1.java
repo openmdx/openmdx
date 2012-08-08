@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Layer_1.java,v 1.16 2008/02/29 15:22:03 hburger Exp $
+ * Name:        $Id: Layer_1.java,v 1.17 2008/06/24 16:17:21 hburger Exp $
  * Description: User Profile Service
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 15:22:03 $
+ * Date:        $Date: 2008/06/24 16:17:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -148,7 +148,7 @@ public class Layer_1
         ServiceHeader header,
         UnitOfWorkRequest request,
         UnitOfWorkReply reply
-    ) {
+    ) throws ServiceException {
         if(this.delegation instanceof Layer_1_2) {
             ((Layer_1_2)this.delegation).epilog(header, request, reply);
         }
@@ -160,7 +160,7 @@ public class Layer_1
     public void prolog(
         ServiceHeader header, 
         UnitOfWorkRequest request
-    ) {
+    ) throws ServiceException {
         if(this.delegation instanceof Layer_1_2) {
             ((Layer_1_2)this.delegation).prolog(header, request);
         }
@@ -576,12 +576,78 @@ public class Layer_1
     }
 
     /**
-     * Process one working units
+     * Dispatch a single unit of work
+     *
+     * @param       header
+     *              the requests' service header
+     * @param       requests
+     *              the request list
+     *
+     * @exception   ServiceException
+     *              on failure
+     */
+    public void process (
+        ServiceHeader header,
+        DataproviderRequest[] requests,
+        DataproviderReply[] replies
+    ) throws ServiceException {
+        prolog(header,requests);
+        for (
+            int index = 0;
+            index < requests.length;
+            index++
+        ) {
+            DataproviderRequest request = requests[index];
+            SysLog.trace(
+                DataproviderLayers.toString(this.id),
+                request
+            );
+            switch (request.operation()) {
+                case DataproviderOperations.OBJECT_OPERATION:
+                    replies[index] = operation(header,request);
+                break;
+                case DataproviderOperations.OBJECT_CREATION:
+                    replies[index] = create(header,request);
+                break;
+                case DataproviderOperations.OBJECT_MODIFICATION:
+                    replies[index] = modify(header,request);
+                break;
+                case DataproviderOperations.OBJECT_REPLACEMENT:
+                    replies[index] = replace(header,request);
+                break;
+                case DataproviderOperations.OBJECT_REMOVAL:
+                    replies[index] = remove(header,request);
+                break;
+                case DataproviderOperations.OBJECT_SETTING:
+                    replies[index] = set(header,request);
+                break;
+                case DataproviderOperations.ITERATION_START:
+                case DataproviderOperations.ITERATION_CONTINUATION:
+                    replies[index] = find(header,request);
+                break;
+                case DataproviderOperations.OBJECT_MONITORING:
+                    replies[index] = startPublishing(header,request);
+                break;
+                case DataproviderOperations.OBJECT_RETRIEVAL:
+                    replies[index] = get(header,request);
+                break;
+            }
+        }
+        epilog(
+          header,
+          requests,
+          replies
+        );
+    }
+
+
+    /**
+     * Process a single unit of work
      *
      * @param   header          the service header
-     * @param   workingUnits    a collection of working units
+     * @param   unitOfWorkRequest    a unit of work
      *
-     * @return  a collection of working unit replies
+     * @return  a unit of work reply
      */
     protected UnitOfWorkReply process(
         ServiceHeader header,
@@ -622,53 +688,7 @@ public class Layer_1
                         unitOfWorkRequest
                     );
                 }
-                prolog(header,requests);
-                for (
-                    int index = 0;
-                    index < requests.length;
-                    index++
-                ) {
-                    DataproviderRequest request = requests[index];
-                    SysLog.trace(
-                        DataproviderLayers.toString(this.id),
-                        request
-                    );
-                    switch (request.operation()) {
-                        case DataproviderOperations.OBJECT_OPERATION:
-                            replies[index] = operation(header,request);
-                        break;
-                        case DataproviderOperations.OBJECT_CREATION:
-                            replies[index] = create(header,request);
-                        break;
-                        case DataproviderOperations.OBJECT_MODIFICATION:
-                            replies[index] = modify(header,request);
-                        break;
-                        case DataproviderOperations.OBJECT_REPLACEMENT:
-                            replies[index] = replace(header,request);
-                        break;
-                        case DataproviderOperations.OBJECT_REMOVAL:
-                            replies[index] = remove(header,request);
-                        break;
-                        case DataproviderOperations.OBJECT_SETTING:
-                            replies[index] = set(header,request);
-                        break;
-                        case DataproviderOperations.ITERATION_START:
-                        case DataproviderOperations.ITERATION_CONTINUATION:
-                            replies[index] = find(header,request);
-                        break;
-                        case DataproviderOperations.OBJECT_MONITORING:
-                            replies[index] = startPublishing(header,request);
-                        break;
-                        case DataproviderOperations.OBJECT_RETRIEVAL:
-                            replies[index] = get(header,request);
-                        break;
-                    }
-                }
-                epilog(
-                  header,
-                  requests,
-                  replies
-                );
+                process(header,requests,replies);
                 if (this.statistics != null) this.statistics.update(
                   requests,
                   replies

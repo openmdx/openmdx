@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIExporterMain.java,v 1.13 2007/04/27 12:00:35 hburger Exp $
+ * Name:        $Id: XMIExporterMain.java,v 1.14 2008/03/21 18:40:08 hburger Exp $
  * Description: RoseExporterMain command-line tool
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/04/27 12:00:35 $
+ * Date:        $Date: 2008/03/21 18:40:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,6 +67,7 @@ import org.openmdx.uses.gnu.getopt.Getopt;
 import org.openmdx.uses.gnu.getopt.LongOpt;
 
 //---------------------------------------------------------------------------  
+@SuppressWarnings("unchecked")
 public class XMIExporterMain {
 
   //-------------------------------------------------------------------------  

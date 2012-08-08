@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractTransactionContext.java,v 1.4 2005/04/14 19:16:47 hburger Exp $
+ * Name:        $Id: AbstractTransactionContext.java,v 1.5 2008/03/27 19:16:29 hburger Exp $
  * Description: TransactionContext
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/14 19:16:47 $
+ * Date:        $Date: 2008/03/27 19:16:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -178,8 +178,8 @@ public abstract class AbstractTransactionContext {
             if(this.suspendedTransaction != null) this.transactionManager.resume(
                 this.suspendedTransaction
             );
-        } else {
-            this.transactionManager.setRollbackOnly();
+//      } else {
+//          this.transactionManager.setRollbackOnly();
         }                    
     }
 

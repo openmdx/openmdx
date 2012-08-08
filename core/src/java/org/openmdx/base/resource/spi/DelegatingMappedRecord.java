@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingMappedRecord.java,v 1.10 2005/02/21 13:07:59 hburger Exp $
+ * Name:        $Id: DelegatingMappedRecord.java,v 1.11 2008/03/21 18:31:20 hburger Exp $
  * Description: openMDX JCA: Delegating Mapped Record
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:07:59 $
+ * Date:        $Date: 2008/03/21 18:31:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,6 +65,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  * 
  * Delegating Mapped Record
  */
+@SuppressWarnings("unchecked")
 public class DelegatingMappedRecord 
 	implements MappedRecord, MultiLineStringRepresentation
 {

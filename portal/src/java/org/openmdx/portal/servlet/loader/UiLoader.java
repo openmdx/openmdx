@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiLoader.java,v 1.15 2008/02/12 19:32:19 wfro Exp $
+ * Name:        $Id: UiLoader.java,v 1.19 2008/04/18 11:10:39 wfro Exp $
  * Description: UiLoader
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/12 19:32:19 $
+ * Date:        $Date: 2008/04/18 11:10:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,6 +69,7 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 
 import javax.jdo.PersistenceManager;
+import javax.jmi.reflect.RefObject;
 import javax.servlet.ServletContext;
 
 import org.openmdx.application.log.AppLog;
@@ -113,6 +114,23 @@ public class UiLoader
         this.uiRepository = createUiRepository(model);      
     }
   
+    //-------------------------------------------------------------------------
+    protected static org.openmdx.ui1.jmi1.Ui1Package getUiPackage(
+        PersistenceManager pm
+    ) {
+        org.openmdx.ui1.jmi1.Ui1Package uiPkg = null;
+        try {
+            uiPkg = (org.openmdx.ui1.jmi1.Ui1Package)((RefObject)pm.newInstance(org.openmdx.ui1.jmi1.Segment.class)).refImmediatePackage();
+        }
+        catch(UnsupportedOperationException e) {        
+            uiPkg = (org.openmdx.ui1.jmi1.Ui1Package)((Authority)pm.getObjectById(
+                Authority.class,
+                org.openmdx.ui1.jmi1.Ui1Package.AUTHORITY_XRI
+            )).refImmediatePackage();
+        }
+        return uiPkg;
+    }
+    
     //-------------------------------------------------------------------------
     protected static class Dataprovider
         extends Layer_1 {
@@ -223,6 +241,7 @@ public class UiLoader
     /**
      * load ui config in case the ui config resources have changed
      */
+    @SuppressWarnings("unchecked")
     public boolean load(
         String[] locale
     ) throws ServiceException {
@@ -383,17 +402,14 @@ public class UiLoader
               // Store ui elements. First remove existing elements
               try {
                   PersistenceManager pm = this.getRepository();
-                  org.openmdx.ui1.jmi1.Ui1Package uiPkg = (org.openmdx.ui1.jmi1.Ui1Package)((Authority)pm.getObjectById(
-                      Authority.class,
-                      org.openmdx.ui1.jmi1.Ui1Package.AUTHORITY_XRI
-                  )).refImmediatePackage();
+                  org.openmdx.ui1.jmi1.Ui1Package uiPkg = getUiPackage(pm);
                   
                   String segmentName = this.getSegmentName(dir);
                   // Remove existing ui config
                   try {
                       pm.currentTransaction().begin();
                       org.openmdx.base.jmi1.Provider provider = (org.openmdx.base.jmi1.Provider)pm.getObjectById(
-                          this.providerPath.toXri()
+                          this.providerPath
                       );
                       provider.getSegment(segmentName).refDelete();
                       pm.currentTransaction().commit();
@@ -407,7 +423,7 @@ public class UiLoader
                   try {
                     pm.currentTransaction().begin();
                     org.openmdx.base.jmi1.Provider provider = (org.openmdx.base.jmi1.Provider)pm.getObjectById(
-                        this.providerPath.toXri()
+                        this.providerPath
                     );
                     provider.addSegment(
                         false,

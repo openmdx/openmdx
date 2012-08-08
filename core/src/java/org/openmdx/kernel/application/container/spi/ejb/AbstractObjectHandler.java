@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractObjectHandler.java,v 1.1 2008/01/25 00:58:53 hburger Exp $
+ * Name:        $Id: AbstractObjectHandler.java,v 1.2 2008/03/27 19:16:29 hburger Exp $
  * Description: Abstract Enterprise Java Bean Object Invocation Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:53 $
+ * Date:        $Date: 2008/03/27 19:16:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -94,56 +94,20 @@ abstract class AbstractObjectHandler<H extends AbstractHomeHandler>
         Method method, 
         Object[] args
     ) throws Throwable {
-        if (
-            GET_LOCAL_OBJECT_PRIMARY_KEY.equals(method) ||
-            GET_REMOTE_OBJECT_PRIMARY_KEY.equals(method)
-        ) {
-            throw new RemoveException(
+        Class<?> declaringClass = method.getDeclaringClass();
+        if(EJBLocalObject.class == declaringClass || EJBObject.class == declaringClass) {
+            String methodName = method.getName().intern();
+            if("getPrimaryKey" == methodName) throw new RemoveException(
                 this + " is a session, not an entity bean"
             );
-        } else if (
-            REMOVE_LOCAL_OBJECT.equals(method) ||
-            REMOVE_REMOTE_OBJECT.equals(method)
-        ) {
-            this.homeHandler = null;
-            return null;
-        } else {
-            return super.invoke(proxy, method, args);
+            if("remove" == methodName) {
+                this.homeHandler = null;
+                return null;
+            }
         }
+        return super.invoke(proxy, method, args);
     }
 
-    /**
-     * Object getPrimaryKey() 
-     */
-    protected final static Method GET_LOCAL_OBJECT_PRIMARY_KEY = getMethod(
-        EJBLocalObject.class, 
-        "getPrimaryKey"
-    );
-
-    /**
-     * void remove() 
-     */
-    protected final static Method REMOVE_LOCAL_OBJECT = getMethod(
-        EJBLocalObject.class, 
-        "remove"
-    );
-
-    /**
-     * Object getPrimaryKey() 
-     */
-    protected final static Method GET_REMOTE_OBJECT_PRIMARY_KEY = getMethod(
-        EJBObject.class, 
-        "getPrimaryKey"
-    );
-
-    /**
-     * void remove() 
-     */
-    protected final static Method REMOVE_REMOTE_OBJECT = getMethod(
-        EJBObject.class, 
-        "remove"
-    );
-    
 
     //------------------------------------------------------------------------
     // Extends Object

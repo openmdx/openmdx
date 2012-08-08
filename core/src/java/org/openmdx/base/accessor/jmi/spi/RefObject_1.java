@@ -1,10 +1,10 @@
 /*
  * ==================================================================== 
- * Name: $Id: RefObject_1.java,v 1.38 2008/02/08 16:51:25 hburger Exp $ 
+ * Name: $Id: RefObject_1.java,v 1.48 2008/07/04 14:56:01 hburger Exp $ 
  * Description: RefObject_1 class 
- * Revision: $Revision: 1.38 $ 
+ * Revision: $Revision: 1.48 $ 
  * Owner: OMEX AG, Switzerland,
- *        http://www.omex.ch Date: $Date: 2008/02/08 16:51:25 $
+ *        http://www.omex.ch Date: $Date: 2008/07/04 14:56:01 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
@@ -79,7 +80,6 @@ import org.openmdx.base.accessor.generic.cci.Structure_1_0;
 import org.openmdx.base.accessor.generic.spi.ViewObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefClass_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefContainer_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_1;
 import org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_0;
@@ -90,12 +90,13 @@ import org.openmdx.base.accessor.jmi.cci.RefPackage_1_2;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.collection.MarshallingList;
+import org.openmdx.base.collection.MarshallingMap;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.MarshalException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.Container;
+import org.openmdx.base.transaction.UnitOfWork_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes;
 import org.openmdx.compatibility.base.exception.StackedException;
@@ -124,7 +125,7 @@ import org.openmdx.model1.code.PrimitiveTypes;
  * handle to the class object.
  */
 public abstract class RefObject_1
-    implements RefObject_1_2, Serializable, PersistenceCapable
+    implements RefObject_1_3, Serializable, PersistenceCapable
 {
 
     // -------------------------------------------------------------------------
@@ -642,12 +643,10 @@ public abstract class RefObject_1
             // MAP
             else if (Multiplicities.MAP.equals(multiplicity)) {
                 FilterableMap values = this.object.objGetContainer((String) featureDef.values("name").get(0));
-                return values == null 
-                    ? null 
-                    : new RefContainer_1(
-                        (Marshaller) this.refClass.refOutermostPackage(),
-                        values
-                      );
+                return values == null ? null : new MarshallingMap(
+                    (Marshaller) this.refClass.refOutermostPackage(),
+                    values
+                );
             } 
             else {
                 throw new ServiceException(
@@ -1176,12 +1175,29 @@ public abstract class RefObject_1
             qualifiedNameInParamType
         ).unmarshal(param);
         return this.toRefStructMarshaller(qualifiedNameResultType).marshal(
-            ((Boolean) featureDef.values("isQuery").get(0)).booleanValue() 
-                ? this.object.objInvokeOperation((String) featureDef.values("name").get(0), unmarshalledParam)
-                : this.object.objInvokeOperationInUnitOfWork((String) featureDef.values("name").get(0), unmarshalledParam)
+            invokeOperationInUnitOfWork(((Boolean) featureDef.values("isQuery").get(0)).booleanValue()) ? 
+                this.object.objInvokeOperationInUnitOfWork((String) featureDef.values("name").get(0), unmarshalledParam) :
+                this.object.objInvokeOperation((String) featureDef.values("name").get(0), unmarshalledParam) 
         );
     }
 
+    /**
+     * Tells, whether an operation must be invoked immediately or not
+     * 
+     * @return <code>false</code> if an operation must be invoked immediately
+     */
+    private boolean invokeOperationInUnitOfWork(
+        boolean query
+    ) {
+        if(query) {
+            return false;
+        } else {
+            RefPackage_1_0 refPackage = (RefPackage_1_0) this.refOutermostPackage();
+            UnitOfWork_1_0 unitOfWork = refPackage.refUnitOfWork();
+            return unitOfWork.isTransactional() && unitOfWork.isOptimistic();
+        }
+    }
+    
     // -------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     final public Object refGetValue(
@@ -1277,8 +1293,13 @@ public abstract class RefObject_1
     /**
      * Feature must be attribute or reference stored as attribute
      */
-    @SuppressWarnings("unchecked")
-    final protected Object refGetValue(String featureName, String qualifier) {
+    @SuppressWarnings({
+        "unchecked", "deprecation"
+    })
+    final protected Object refGetValue(
+        String featureName, 
+        String qualifier
+    ) {
         Object map = null;
         Object value = null;
         RefRootPackage_1 rootPkg = (RefRootPackage_1) this.refClass.refOutermostPackage();
@@ -1291,9 +1312,9 @@ public abstract class RefObject_1
         if (map instanceof Map) {
             value = ((Map<String,?>) map).get(qualifier);
         } 
-        else if (map instanceof RefContainer_1_0) {
+        else if (map instanceof org.openmdx.compatibility.base.collection.Container) {
             try {
-                value = ((RefContainer_1_0) map).get(qualifier);
+                value = ((org.openmdx.compatibility.base.collection.Container) map).get(qualifier);
             } 
             catch (MarshalException exception) {
                 throw new JmiServiceException(exception, this);
@@ -1331,7 +1352,7 @@ public abstract class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    final protected Object refGetValue(
+    final public Object refGetValue(
         String featureName, 
         Object qualifier
     ) {
@@ -1512,7 +1533,9 @@ public abstract class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+        "unchecked", "deprecation"
+    })
     final protected void refAddValue(
         String featureName, 
         Object value
@@ -1533,8 +1556,8 @@ public abstract class RefObject_1
                 value
             );
         } 
-        else if (values instanceof Container && value instanceof RefObject_1_0) {
-            ((Container<RefObject_1_0>) values).add((RefObject_1_0)value);
+        else if (values instanceof org.openmdx.compatibility.base.collection.Container && value instanceof RefObject_1_0) {
+            ((org.openmdx.compatibility.base.collection.Container<RefObject_1_0>) values).add((RefObject_1_0)value);
         } 
         else {
             throw new JmiServiceException(
@@ -1589,6 +1612,7 @@ public abstract class RefObject_1
     }
 
     // -------------------------------------------------------------------------
+    @SuppressWarnings("deprecation")
     final protected void refRemoveValue(
         String featureName
     ) {
@@ -1602,7 +1626,7 @@ public abstract class RefObject_1
         if (
             values instanceof List || 
             values instanceof Set || 
-            values instanceof Container
+            values instanceof org.openmdx.compatibility.base.collection.Container
         ) {
             try {
                 ((Collection<?>) values).clear();
@@ -2093,7 +2117,6 @@ public abstract class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public Set<String> refDefaultFetchGroup(
     ) {
         try {
@@ -2198,7 +2221,9 @@ public abstract class RefObject_1
                             else if (PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
                                 this.setValue(
                                     featureDef, 
-                                    DateTimeMarshaller.getInstance(true).marshal("20000101T000000Z")
+                                    DateTimeMarshaller.getInstance(true).marshal
+                                        (org.openmdx.base.text.format.DateFormat.getInstance().format(new Date())
+                                    )
                                 );
                             } 
                             else if (PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
@@ -2355,7 +2380,10 @@ public abstract class RefObject_1
         try {
             ModelElement_1_0 feature = this.getFeature(featureName);
             // optimized remove. do not marshal Object_1_0 to RefObject
-            if (this.getModel().isReferenceType(feature)) {
+            if (
+                this.getModel().isReferenceType(feature) &&
+                !this.getModel().referenceIsStoredAsAttribute(feature)
+            ) {
                 String base = qualifier.toString();
                 String reference = (String) feature.values("name").get(0);
                 if (base.indexOf(';') < 0) {
@@ -2423,6 +2451,7 @@ public abstract class RefObject_1
     }
 
     // -------------------------------------------------------------------------
+    @SuppressWarnings("deprecation")
     final public void refRemoveValue(
         String featureName, 
         RefObject value
@@ -2435,7 +2464,7 @@ public abstract class RefObject_1
         }
 
         // remove object
-        if (values instanceof Container) {
+        if (values instanceof org.openmdx.compatibility.base.collection.Container) {
             try {
                 Object_1_0 objToRemove = ((RefObject_1_0) value).refDelegate();
                 if (objToRemove.objIsPersistent()) {
@@ -2954,13 +2983,14 @@ public abstract class RefObject_1
     // -------------------------------------------------------------------------
     // Instance members
     // -------------------------------------------------------------------------
-    private static final String OPENMDX_1_JDO = "This JDO operation is not supported in openMDX 1 compatibility mode";
+    private static final String OPENMDX_1_JDO = 
+        "This JDO operation is not supported in openMDX 1 compatibility mode";
     private static Model_1_2 model = null;
 
     private String refMofId = null;
     private transient RefObject metaObject = null;
     private transient ModelElement_1_0 refClassDef = null;
-
+    
     /**
      * @serial
      */

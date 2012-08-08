@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Container.java,v 1.6 2008/02/08 16:52:21 hburger Exp $
+ * Name:        $Id: Container.java,v 1.7 2008/04/21 16:52:48 hburger Exp $
  * Description: Container interface
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:52:21 $
+ * Date:        $Date: 2008/04/21 16:52:48 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,6 +57,8 @@ import java.util.List;
 /**
  * The Container interface adds the ability to filter and order its elements
  * to a Collection.
+ * 
+ * @deprecated
  */
 public interface Container<E>
     extends Collection<E>

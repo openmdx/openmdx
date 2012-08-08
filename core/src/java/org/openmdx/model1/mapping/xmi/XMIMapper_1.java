@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIMapper_1.java,v 1.8 2007/03/26 23:57:34 hburger Exp $
+ * Name:        $Id: XMIMapper_1.java,v 1.10 2008/04/02 17:38:40 wfro Exp $
  * Description: XMIExternalizer_1
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/26 23:57:34 $
+ * Date:        $Date: 2008/04/02 17:38:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,12 +67,13 @@ import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 import org.openmdx.model1.code.AggregationKind;
 import org.openmdx.model1.code.ModelAttributes;
 import org.openmdx.model1.mapping.AbstractMapper_1;
 
 //---------------------------------------------------------------------------
+@SuppressWarnings("unchecked")
 public class XMIMapper_1
   extends AbstractMapper_1 {
 
@@ -87,7 +88,7 @@ public class XMIMapper_1
   //---------------------------------------------------------------------------
   public void externalize(
     String qualifiedPackageName,
-    Model_1_0 model, 
+    Model_1_3 model, 
     ZipOutputStream zip
   ) throws ServiceException {
     

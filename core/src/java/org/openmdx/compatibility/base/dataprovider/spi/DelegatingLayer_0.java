@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingLayer_0.java,v 1.8 2007/10/10 16:06:01 hburger Exp $
+ * Name:        $Id: DelegatingLayer_0.java,v 1.9 2008/03/04 14:21:12 hburger Exp $
  * Description: DelegatingLayer_0 class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:01 $
+ * Date:        $Date: 2008/03/04 14:21:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@ import java.util.Map;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.compatibility.base.application.cci.ConfigurationSpecifier;
 import org.openmdx.compatibility.base.application.configuration.Configuration;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderLayers;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
@@ -646,8 +647,8 @@ public class DelegatingLayer_0
         //
     }
 
-    public Map configurationSpecification() {
-        return new HashMap();
+    public Map<String,ConfigurationSpecifier> configurationSpecification() {
+        return new HashMap<String,ConfigurationSpecifier>();
     }
 
     /**

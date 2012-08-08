@@ -1,9 +1,10 @@
 /*
- *  Copyright 2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -45,7 +46,7 @@ import java.lang.ref.Reference;
  * This map will violate the detail of various Map and map view contracts.
  * As a general rule, don't compare this map to other maps.
  * <p>
- * This {@link Map} implementation does <i>not</i> allow null elements.
+ * This {@link java.util.Map Map} implementation does <i>not</i> allow null elements.
  * Attempting to add a null key or value to the map will raise a <code>NullPointerException</code>.
  * <p>
  * This implementation is not synchronized.
@@ -55,14 +56,21 @@ import java.lang.ref.Reference;
  * <p>
  * All the available iterators can be reset back to the start by casting to
  * <code>ResettableIterator</code> and calling <code>reset()</code>.
+ * <p>
+ * <strong>Note that ReferenceIdentityMap is not synchronized and is not thread-safe.</strong>
+ * If you wish to use this map from multiple threads concurrently, you must use
+ * appropriate synchronization. The simplest approach is to wrap this map
+ * using {@link java.util.Collections#synchronizedMap}. This class may throw 
+ * exceptions when accessed by concurrent threads without synchronization.
  *
  * @see java.lang.ref.Reference
  * 
  * @since Commons Collections 3.0 (previously in main package v2.1)
- * @version $Revision: 1.1 $ $Date: 2004/10/24 12:17:16 $
+ * @version $Revision: 1.4 $ $Date: 2008/06/28 00:21:22 $
  * 
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public class ReferenceIdentityMap extends AbstractReferenceMap implements Serializable {
 
     /** Serialization version */
@@ -174,8 +182,8 @@ public class ReferenceIdentityMap extends AbstractReferenceMap implements Serial
      * @param key2  the second key extracted from the entry via <code>entry.key</code>
      * @return true if equal by identity
      */
-    protected boolean isEqualKey(Object key1, Object key2) {
-        key2 = (keyType > HARD ? ((Reference) key2).get() : key2);
+    protected boolean isEqualKey(Object key1, Object _key2) {
+        Object key2 = (keyType > HARD ? ((Reference) _key2).get() : _key2);
         return (key1 == key2);
     }
 

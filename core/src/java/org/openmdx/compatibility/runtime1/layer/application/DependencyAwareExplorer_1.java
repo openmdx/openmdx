@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DependencyAwareExplorer_1.java,v 1.6 2007/11/21 17:59:55 hburger Exp $
+ * Name:        $Id: DependencyAwareExplorer_1.java,v 1.7 2008/03/21 20:14:53 hburger Exp $
  * Description: Dependency Aware Explorer Plug-In
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/21 17:59:55 $
+ * Date:        $Date: 2008/03/21 20:14:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -105,6 +105,7 @@ import org.openmdx.kernel.log.SysLog;
  *      exposed path. 
  * </ol>
  */
+@SuppressWarnings("unchecked")
 public class DependencyAwareExplorer_1
     extends Explorer_1
 {

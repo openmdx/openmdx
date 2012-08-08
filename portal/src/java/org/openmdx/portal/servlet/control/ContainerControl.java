@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ContainerControl.java,v 1.8 2007/01/21 20:46:19 wfro Exp $
+ * Name:        $Id: ContainerControl.java,v 1.10 2008/05/01 21:43:57 wfro Exp $
  * Description: ContainerControl
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:46:19 $
+ * Date:        $Date: 2008/05/01 21:43:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,7 +60,11 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.portal.servlet.HtmlPage;
 
 public abstract class ContainerControl
     extends Control
@@ -124,11 +128,38 @@ public abstract class ContainerControl
     }
     
     //-------------------------------------------------------------------------
+    public void paintContent(
+        HtmlPage p, 
+        String frame,
+        boolean forEditing        
+    ) {
+        try {
+            int ii = 0;
+            for(
+                Iterator i = this.controls.iterator();
+                i.hasNext();
+                ii++
+            ) {
+                Control control = (Control)i.next();
+                // Menu entry
+                control.paint(
+                    p, 
+                    (String)this.frames.get(ii),
+                    forEditing
+                );
+            }
+        }
+        catch(Exception e) {
+            new ServiceException(e).log();
+        }
+    }
+    
+    //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = -1231427781842708999L;
 
-    protected final List controls = new ArrayList();
-    protected final List frames = new ArrayList();
+    protected final List<Control> controls = new ArrayList<Control>();
+    protected final List<String> frames = new ArrayList<String>();
     
 }

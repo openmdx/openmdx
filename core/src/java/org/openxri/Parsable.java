@@ -26,6 +26,7 @@ package org.openxri;
  *
  * @author =chetan
  */
+@SuppressWarnings("unchecked")
 public abstract class Parsable implements Comparable
 {
 	String msValue = null;

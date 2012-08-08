@@ -17,7 +17,7 @@
 		<config-property>
 			<config-property-name>UserName</config-property-name>
 			<config-property-type>java.lang.String</config-property-type>
-			<config-property-value>system</config-property-value>
+			<config-property-value>OPENMDX_TEST</config-property-value>
 		</config-property>
 		<config-property>
 			<config-property-name>Password</config-property-name>
@@ -27,7 +27,7 @@
 		<config-property>
 			<config-property-name>ConnectionURL</config-property-name>
 			<config-property-type>java.lang.String</config-property-type>
-			<config-property-value>jdbc:sqlserver://localhost:1433;databaseName=openMDX_test;selectMethod=cursor</config-property-value>
+			<config-property-value>jdbc:sqlserver://localhost:1433;databaseName=openMDX_Test;selectMethod=cursor</config-property-value>
 		</config-property>
 		<authentication-mechanism>
 			<authentication-mechanism-type>BasicPassword</authentication-mechanism-type>

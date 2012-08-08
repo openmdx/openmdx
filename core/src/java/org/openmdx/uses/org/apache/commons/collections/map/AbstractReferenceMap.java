@@ -1,9 +1,10 @@
 /*
- *  Copyright 2002-2004 The Apache Software Foundation
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *  Licensed to the Apache Software Foundation (ASF) under one or more
+ *  contributor license agreements.  See the NOTICE file distributed with
+ *  this work for additional information regarding copyright ownership.
+ *  The ASF licenses this file to You under the Apache License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance with
+ *  the License.  You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -76,11 +77,12 @@ import org.openmdx.uses.org.apache.commons.collections.keyvalue.DefaultMapEntry;
  *
  * @see java.lang.ref.Reference
  * @since Commons Collections 3.1 (extracted from ReferenceMap in 3.0)
- * @version $Revision: 1.3 $ $Date: 2007/10/10 16:06:13 $
+ * @version $Revision: 1.6 $ $Date: 2008/06/28 00:21:21 $
  * 
  * @author Paul Jack
  * @author Stephen Colebourne
  */
+@SuppressWarnings("unchecked")
 public abstract class AbstractReferenceMap extends AbstractHashedMap {
 
     /** Constant indicating that hard references should be used */
@@ -274,9 +276,7 @@ public abstract class AbstractReferenceMap extends AbstractHashedMap {
      */
     public void clear() {
         super.clear();
-        while (queue.poll() != null) {
-         // drain the queue
-        } 
+        while (queue.poll() != null) {} // drain the queue
     }
 
     //-----------------------------------------------------------------------
@@ -430,7 +430,8 @@ public abstract class AbstractReferenceMap extends AbstractHashedMap {
      * @param key2  the second key extracted from the entry via <code>entry.key</code>
      * @return true if equal
      */
-    protected boolean isEqualKey(Object key1, Object key2) {
+    protected boolean isEqualKey(Object key1, Object _key2) {
+        Object key2 = _key2;
         key2 = (keyType > HARD ? ((Reference) key2).get() : key2);
         return (key1 == key2 || key1.equals(key2));
     }

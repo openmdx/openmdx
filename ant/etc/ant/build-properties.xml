@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-properties.xml,v 1.29 2008/02/15 23:28:01 wfro Exp $
+= Name:        $Id: build-properties.xml,v 1.30 2008/03/21 18:22:26 hburger Exp $
 = Description: openMDX Build Properties
-= Revision:    $Revision: 1.29 $
-= Date:        $Date: 2008/02/15 23:28:01 $
+= Revision:    $Revision: 1.30 $
+= Date:        $Date: 2008/03/21 18:22:26 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -130,7 +130,7 @@
 	<!-- =================================================================== -->
 	<property name="junit.test.halt.on.error" value="no"/>
 	<property name="junit.test.halt.on.failure" value="no"/>
-	<property name="junit.test.log.level" value="info"/>
+	<property name="junit.test.log.level" value="INFO"/>
 	<property name="junit.test.log.debug" value="true"/>
 	<property name="junit.test.report" value="yes"/>
 	
@@ -222,7 +222,7 @@
 	<property 
 		name="openmdx.log.format" 
 		value="$${logger}|$${time}|$${level}|$${logsource}|$${host}|$${thread}|$${class}|$${method}|$${line}|$${summary}|$${detail}"
-	/>
+	/><!-- The deprecated openmdx.log.format property is no longer used -->
 	
 	<!-- =================================================================== -->
 	<!-- = Vendor Properties                                               = -->
@@ -233,7 +233,7 @@
 	<!-- =================================================================== -->
 	<!-- = MOF Model Externalization                                       = -->
 	<!-- =================================================================== -->
-	<property name="model.transformation.log.level" value="info"/>
+	<property name="model.transformation.log.level" value="INFO"/>
 	<property name="model.transformation.source" value="rose"/>
 	<property name="model.transformation.class.path" value="project.lib.classpath"/>
 	

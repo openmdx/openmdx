@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StopWatch.java,v 1.4 2006/08/11 09:24:08 hburger Exp $
+ * Name:        $Id: StopWatch.java,v 1.5 2008/03/21 18:32:33 hburger Exp $
  * Description: StopWatch
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:24:08 $
+ * Date:        $Date: 2008/03/21 18:32:33 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -50,8 +50,6 @@
  * Foundation (http://www.apache.org/).
  */
 package org.openmdx.base.time;
-
-import org.openmdx.kernel.text.StringBuilders;
 
 /**
  * Class for stop time
@@ -126,7 +124,7 @@ public class StopWatch {
     	long ms = l % 1000;
         String msString = String.valueOf(ms);
     
-        return StringBuilders.newStringBuilder(
+        return new StringBuilder(
         ).append(
             s
         ).append(

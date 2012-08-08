@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collection;
 import javax.jmi.reflect.RefPackage;
 
+@SuppressWarnings("unchecked")
 public interface XmiReader {
     public Collection read(InputStream stream, String URI, RefPackage extent) 
         throws IOException, MalformedXMIException;

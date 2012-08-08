@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractAuthenticationHandler.java,v 1.20 2006/11/24 10:14:59 hburger Exp $
+ * Name:        $Id: AbstractAuthenticationHandler.java,v 1.21 2008/04/04 17:55:30 hburger Exp $
  * Description: Abstract HTTP Authentication Handler
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/11/24 10:14:59 $
+ * Date:        $Date: 2008/04/04 17:55:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -93,7 +93,7 @@ public abstract class AbstractAuthenticationHandler
     /**
      * Maps correlation IDs to <code>Authentication</code> objects.
      */
-    private Map associations;
+    private Map<String,AuthenticationContext> associations;
     
     /**
      * Tells whether the <code>HttpAuthenticationHandler</code> is lenient.
@@ -117,7 +117,7 @@ public abstract class AbstractAuthenticationHandler
      * 
      * @throws ServletException
      */
-    protected abstract Map getSharedOptions(
+    protected abstract Map<String,?> getSharedOptions(
     ) throws ServletException;
     
     
@@ -182,9 +182,9 @@ public abstract class AbstractAuthenticationHandler
                 isDebug(), 
                 this
             );
-            this.associations = Collections.synchronizedMap(new HashMap());
+            this.associations = Collections.synchronizedMap(new HashMap<String,AuthenticationContext>());
             if(isDebug()) {
-                log("$Id: AbstractAuthenticationHandler.java,v 1.20 2006/11/24 10:14:59 hburger Exp $");
+                log("$Id: AbstractAuthenticationHandler.java,v 1.21 2008/04/04 17:55:30 hburger Exp $");
                 log("login-configuration: " + loginConfiguration);
                 log("application-name: " + applicationName);
                 log("initial-capacity: " + initialCapacity);
@@ -205,7 +205,7 @@ public abstract class AbstractAuthenticationHandler
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
                 new BasicException.Parameter[]{
-                    new BasicException.Parameter("info", "$Id: AbstractAuthenticationHandler.java,v 1.20 2006/11/24 10:14:59 hburger Exp $"),
+                    new BasicException.Parameter("info", "$Id: AbstractAuthenticationHandler.java,v 1.21 2008/04/04 17:55:30 hburger Exp $"),
                     new BasicException.Parameter("name", getServletName()),
                     new BasicException.Parameter("login-configuration", loginConfiguration),
                     new BasicException.Parameter("application-name", applicationName),

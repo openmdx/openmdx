@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightSessionContext.java,v 1.7 2008/01/25 00:58:54 hburger Exp $
+ * Name:        $Id: LightweightSessionContext.java,v 1.9 2008/03/27 19:16:29 hburger Exp $
  * Description: Session Context Implementation
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:54 $
+ * Date:        $Date: 2008/03/27 19:16:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,10 @@ import javax.ejb.EJBLocalObject;
 import javax.ejb.EJBObject;
 import javax.ejb.SessionContext;
 import javax.ejb.TimerService;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.LinkRef;
+import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.spi.NamingManager;
 import javax.transaction.Status;
@@ -72,206 +76,215 @@ import javax.xml.rpc.handler.MessageContext;
 /**
  * Session Context Implementation
  */
+@SuppressWarnings("unchecked")
 class LightweightSessionContext implements SessionContext {
 
-        /**
-	 * 
-	 */
-        Reference localReference = null;
+    /**
+     * 
+     */
+    Reference localReference = null;
 
-        /**
-	 * 
-	 */
-        Reference remoteReference = null;
+    /**
+     * 
+     */
+    Reference remoteReference = null;
 
-        /**
-	 *
-	 */
-        private final UserTransaction userTransaction;
+    /**
+     *
+     */
+    private final UserTransaction userTransaction;
 
-        /**
-	 *
-	 */
-        private final TransactionManager transactionManager;
+    /**
+     *
+     */
+    private final TransactionManager transactionManager;
 
-        /**
-	 * Constructor
-	 * 
-	 * @param transactionManager the TransactionManager instance or 
-	 * <code>null</code> in case of a bean managed transaction.
-	 * @param userTransaction the UserTransaction instance or 
-	 * <code>null</code> in case of a container managed transaction.
-	 */
-        public LightweightSessionContext(
-            TransactionManager transactionManager,
-            UserTransaction userTransaction
-        ) {
-            this.transactionManager = transactionManager;
-            this.userTransaction = userTransaction;
-        }
+    /**
+     * Constructor
+     * 
+     * @param transactionManager the TransactionManager instance or 
+     * <code>null</code> in case of a bean managed transaction.
+     * @param userTransaction the UserTransaction instance or 
+     * <code>null</code> in case of a container managed transaction.
+     */
+    public LightweightSessionContext(
+        TransactionManager transactionManager,
+        UserTransaction userTransaction
+    ) {
+        this.transactionManager = transactionManager;
+        this.userTransaction = userTransaction;
+    }
 
     /* (non-Javadoc)
      * @see javax.ejb.SessionContext#getEJBLocalObject()
-	 */
+     */
     public EJBLocalObject getEJBLocalObject() throws IllegalStateException {
         EJBLocalHome localHome = getEJBLocalHome();
         try {
             return (EJBLocalObject) localHome.getClass().getMethod(
                 "create",
                 (Class[])null
-             ).invoke(
-                 localHome,
-                 (Object[])null
-             );
+            ).invoke(
+                localHome,
+                (Object[])null
+            );
         } catch (Exception e) {
             throw new IllegalStateException("EJB Local Object creation failed " + e);
         }
     }
 
     /* (non-Javadoc)
-	 * @see javax.ejb.SessionContext#getEJBObject()
-	 */
+     * @see javax.ejb.SessionContext#getEJBObject()
+     */
     public EJBObject getEJBObject() throws IllegalStateException {
         EJBHome home = getEJBHome();
         try {
             return (EJBObject) home.getClass().getMethod(
                 "create",
                 (Class[])null
-             ).invoke(
-                 home,
-                 (Object[])null
-             );
+            ).invoke(
+                home,
+                (Object[])null
+            );
         } catch (Exception e) {
             throw new IllegalStateException("EJB Object creation failed " + e);
         }
     }
 
-        /* (non-Javadoc)
-	 * @see javax.ejb.EJBContext#getEJBHome()
-	 */
-        public EJBHome getEJBHome() {
-                if(this.remoteReference == null) {
-                    throw new IllegalStateException(
-                            "No remote interface available for this EJB"
-                    ); 
-                } else try {
-                    return (EJBHome) NamingManager.getObjectInstance(
-                        this.remoteReference, 
-                        null, // name
-                        null, // nameCtx
-                        null // environment
-                    );
-                } catch (Exception exception) {
-                     throw (IllegalStateException) new IllegalStateException(
-                         "EJB Home acquisition failed"
-                     ).initCause(
-                         exception
-                     );
-                }
-
-        }
-
-        /* (non-Javadoc)
-	 * @see javax.ejb.EJBContext#getEJBLocalHome()
-	 */
-        public EJBLocalHome getEJBLocalHome() {
-                if(this.localReference == null){ 
-                    throw new IllegalStateException(
-                        "No local interface available for this EJB"
-                    );
-                } else  try {
-                    return (EJBLocalHome) NamingManager.getObjectInstance(
-                        this.localReference, 
-                        null, // name
-                        null, // nameCtx
-                        null // environment
-                    );
-                } catch (Exception exception) {
-                     throw (IllegalStateException) new IllegalStateException(
-                         "EJB Local Home acquisition failed"
-                     ).initCause(
-                         exception
-                     );
-                }
-        }
-
-        /* (non-Javadoc)
-	 * @see javax.ejb.EJBContext#getEnvironment()
-	 */
-        public Properties getEnvironment() {
-                return null;
-        }
-
-        /**
-	 * @deprecated
-	 */
-        public java.security.Identity getCallerIdentity() {
-                return null;
-        }
-
-        /* (non-Javadoc)
-	 * @see javax.ejb.EJBContext#getCallerPrincipal()
-	 */
-        public Principal getCallerPrincipal() {
-                return anonymous;
-        }
-
-        /**
-	 * @deprecated
-	 */
-        public boolean isCallerInRole(java.security.Identity identity) {
-                return isCallerInRole(identity.getName());
-        }
-
-        /* (non-Javadoc)
-	 * @see javax.ejb.EJBContext#isCallerInRole(java.lang.String)
-	 */
-        public boolean isCallerInRole(String role) {
-                return anonymous.getName().equals(role);
-        }
-
-        /* (non-Javadoc)
-	 * @see javax.ejb.EJBContext#getUserTransaction()
-	 */
-        public UserTransaction getUserTransaction() throws IllegalStateException {
-            if(this.userTransaction == null) throw new IllegalStateException(
-                "Container-managed transaction"
+    /* (non-Javadoc)
+     * @see javax.ejb.EJBContext#getEJBHome()
+     */
+    public EJBHome getEJBHome() {
+        if(this.remoteReference == null) {
+            throw new IllegalStateException(
+                "No remote interface available for this EJB"
+            ); 
+        } else try {
+            return (EJBHome) (
+                this.remoteReference instanceof LinkRef ? urlLookup(
+                    ((LinkRef)this.remoteReference).getLinkName()
+                ) : NamingManager.getObjectInstance(
+                    this.remoteReference, 
+                    null, // name
+                    null, // nameCtx
+                    null // environment
+                )
             );
-                return this.userTransaction;
+        } catch (Exception exception) {
+            throw (IllegalStateException) new IllegalStateException(
+                "EJB Home acquisition failed"
+            ).initCause(
+                exception
+            );
         }
 
-        /* (non-Javadoc)
-	 * @see javax.ejb.EJBContext#setRollbackOnly()
-	 */
-        public void setRollbackOnly() throws IllegalStateException {
-            if(this.transactionManager == null) throw new IllegalStateException(
-                "Bean-managed transaction"
+    }
+
+    /* (non-Javadoc)
+     * @see javax.ejb.EJBContext#getEJBLocalHome()
+     */
+    public EJBLocalHome getEJBLocalHome() {
+        if(this.localReference == null){ 
+            throw new IllegalStateException(
+                "No local interface available for this EJB"
             );
+        } else  try {
+            return (EJBLocalHome) (
+                this.localReference instanceof LinkRef ? urlLookup(
+                    ((LinkRef)this.localReference).getLinkName()
+                ) : NamingManager.getObjectInstance(
+                    this.localReference, 
+                    null, // name
+                    null, // nameCtx
+                    null // environment
+                )
+            );
+        } catch (Exception exception) {
+            throw (IllegalStateException) new IllegalStateException(
+                "EJB Local Home acquisition failed"
+            ).initCause(
+                exception
+            );
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see javax.ejb.EJBContext#getEnvironment()
+     */
+    public Properties getEnvironment() {
+        return null;
+    }
+
+    /**
+     * @deprecated
+     */
+    public java.security.Identity getCallerIdentity() {
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.ejb.EJBContext#getCallerPrincipal()
+     */
+    public Principal getCallerPrincipal() {
+        return anonymous;
+    }
+
+    /**
+     * @deprecated
+     */
+    public boolean isCallerInRole(java.security.Identity identity) {
+        return isCallerInRole(identity.getName());
+    }
+
+    /* (non-Javadoc)
+     * @see javax.ejb.EJBContext#isCallerInRole(java.lang.String)
+     */
+    public boolean isCallerInRole(String role) {
+        return anonymous.getName().equals(role);
+    }
+
+    /* (non-Javadoc)
+     * @see javax.ejb.EJBContext#getUserTransaction()
+     */
+    public UserTransaction getUserTransaction() throws IllegalStateException {
+        if(this.userTransaction == null) throw new IllegalStateException(
+            "Container-managed transaction"
+        );
+        return this.userTransaction;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.ejb.EJBContext#setRollbackOnly()
+     */
+    public void setRollbackOnly() throws IllegalStateException {
+        if(this.transactionManager == null) throw new IllegalStateException(
+            "Bean-managed transaction"
+        );
         try {
             this.transactionManager.setRollbackOnly();
         } catch (SystemException exception) {
             throw new RuntimeException(exception.getMessage());
         }
-        }
+    }
 
-        /* (non-Javadoc)
-	 * @see javax.ejb.EJBContext#getRollbackOnly()
-	 */
-        public boolean getRollbackOnly() throws IllegalStateException {
-            if(this.transactionManager == null) throw new IllegalStateException(
-                "Bean-managed transaction"
-            );
+    /* (non-Javadoc)
+     * @see javax.ejb.EJBContext#getRollbackOnly()
+     */
+    public boolean getRollbackOnly() throws IllegalStateException {
+        if(this.transactionManager == null) throw new IllegalStateException(
+            "Bean-managed transaction"
+        );
         try {
             return this.transactionManager.getStatus() == Status.STATUS_MARKED_ROLLBACK;
         } catch (SystemException exception) {
             throw new RuntimeException(exception.getMessage());
         }
-        }
+    }
 
-        /**
-	 * No security support
-	 */
-        private final static Principal anonymous = new Anonymous();
+    /**
+     * No security support
+     */
+    private final static Principal anonymous = new Anonymous();
 
 
 
@@ -283,7 +296,7 @@ class LightweightSessionContext implements SessionContext {
      * @see javax.ejb.EJBContext#getTimerService()
      */
     public TimerService getTimerService() throws IllegalStateException {
-                throw new IllegalStateException("TimerService not yet supported");
+        throw new IllegalStateException("TimerService not yet supported");
     }
 
     /* (non-Javadoc)
@@ -296,10 +309,9 @@ class LightweightSessionContext implements SessionContext {
     /* (non-Javadoc)
      * @see javax.ejb.SessionContext#getBusinessObject(java.lang.Class)
      */
-    public Object getBusinessObject(Class arg0)
+    public <T> T getBusinessObject(Class<T> businessInterface)
         throws IllegalStateException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not yet implemented"); // TODO
     }
 
     /* (non-Javadoc)
@@ -307,16 +319,47 @@ class LightweightSessionContext implements SessionContext {
      */
     public Class getInvokedBusinessInterface()
         throws IllegalStateException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not yet implemented"); // TODO
     }
 
     /* (non-Javadoc)
      * @see javax.ejb.EJBContext#lookup(java.lang.String)
      */
-    public Object lookup(String arg0) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException();
+    public Object lookup(String name) {
+        return urlLookup("java:comp/env/" + name);
+    }
+
+    /**
+     * URL based lookup
+     * 
+     * @param url JNDI name starting with scheme
+     * 
+     * @return the object
+     * 
+     * @throws IllegalArgumentException if the given URL is inaccessible
+     * @throws RuntimeException if the initial context is inaccessible
+     */
+    private static Object urlLookup(
+        String url
+    ){
+        try {
+            Context initialContext = new InitialContext(); 
+            try {
+                return initialContext.lookup(url);
+            } catch (NamingException exception) {
+                throw new IllegalArgumentException(
+                    "Could not look up '" + url + "'",
+                    exception
+                );
+            } finally {
+                initialContext.close();
+            }
+        } catch (NamingException exception) {
+            throw new RuntimeException(
+                "Initial context access failure",
+                exception
+            );
+        }
     }
 
 }

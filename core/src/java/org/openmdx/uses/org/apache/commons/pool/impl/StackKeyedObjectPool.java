@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/StackKeyedObjectPool.java,v $
- * $Revision: 1.4 $
- * $Date: 2005/02/16 18:58:49 $
+ * $Revision: 1.5 $
+ * $Date: 2008/03/21 18:42:15 $
  *
  * ====================================================================
  *
@@ -84,8 +84,9 @@ import org.openmdx.uses.org.apache.commons.pool.KeyedPoolableObjectFactory;
  * artificial limits.
  *
  * @author Rodney Waldhoff
- * @version $Id: StackKeyedObjectPool.java,v 1.4 2005/02/16 18:58:49 hburger Exp $
+ * @version $Id: StackKeyedObjectPool.java,v 1.5 2008/03/21 18:42:15 hburger Exp $
  */
+@SuppressWarnings("unchecked")
 public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedObjectPool {
     /**
      * Create a new pool using

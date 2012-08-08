@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TestThreadSafety.java,v 1.6 2007/01/21 20:47:49 wfro Exp $
+ * Name:        $Id: TestThreadSafety.java,v 1.7 2008/04/04 11:52:35 hburger Exp $
  * Description: TestThreadSafety
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/21 20:47:49 $
+ * Date:        $Date: 2008/04/04 11:52:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -79,7 +79,6 @@ import junit.textui.TestRunner;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.text.conversion.Base64;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.WebKeys;
 
@@ -194,7 +193,7 @@ public class TestThreadSafety
         this.nThreads = Integer.valueOf(reader.readLine()).intValue();
         this.userName = reader.readLine();
         this.password = reader.readLine();
-        this.objectXris = new ArrayList();
+        this.objectXris = new ArrayList<String>();
         while(reader.ready()) {
             objectXris.add(reader.readLine());
         }
@@ -255,14 +254,12 @@ public class TestThreadSafety
         String[] components = new String[n];
         n = 0;
       
-        CharSequence href = StringBuilders.newStringBuilder(WebKeys.SERVLET_NAME);      
+        StringBuilder href = new StringBuilder(WebKeys.SERVLET_NAME);      
         if(
             (action.getEvent() == Action.EVENT_DOWNLOAD_FROM_LOCATION) || 
             (action.getEvent() == Action.EVENT_DOWNLOAD_FROM_FEATURE)
         ) {
-            StringBuilders.asStringBuilder(
-                href
-            ).append(
+            href.append(
                 "/"
             ).append(
                 action.getParameter(Action.PARAMETER_NAME)
@@ -298,11 +295,9 @@ public class TestThreadSafety
             action, 
             requestId
         );
-        CharSequence href = StringBuilders.newStringBuilder(components[0]);
+        StringBuilder href = new StringBuilder(components[0]);
         for(int i = 1; i < components.length; i+=2) try {
-            StringBuilders.asStringBuilder(
-                href
-            ).append(
+            href.append(
                 i == 1 ? "?" : "&"
             ).append(
                 components[i]
@@ -335,6 +330,6 @@ public class TestThreadSafety
     private final URL url;
     private final String userName;
     private final String password;
-    private final List objectXris;
+    private final List<String> objectXris;
     
 }

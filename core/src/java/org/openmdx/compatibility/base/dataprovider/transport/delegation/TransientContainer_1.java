@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TransientContainer_1.java,v 1.9 2007/11/06 09:32:44 hburger Exp $
+ * Name:        $Id: TransientContainer_1.java,v 1.10 2008/03/19 17:06:09 hburger Exp $
  * Description: Transient Container
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/06 09:32:44 $
+ * Date:        $Date: 2008/03/19 17:06:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,12 +65,12 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.collection.Container;
 import org.openmdx.compatibility.base.naming.PathComponent;
 import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.kernel.text.StringBuilders;
 
 
 /**
  * Transient Container
  */
+@SuppressWarnings("unchecked")
 class TransientContainer_1
     extends AbstractContainer
 {
@@ -365,13 +365,11 @@ class TransientContainer_1
      */
     public String toString(
     ){
-        CharSequence text = StringBuilders.newStringBuilder(
+        StringBuilder text = new StringBuilder(
             getClass().getName()
         );
         try {
-            StringBuilders.asStringBuilder(
-                text
-            ).append(
+            text.append(
                 ": (transient, "
             ).append(
                 this.attributeFilter.length
@@ -379,9 +377,7 @@ class TransientContainer_1
                 " filter properties)"
             ).toString();
         } catch (Exception exception) {
-            StringBuilders.asStringBuilder(
-                text
-            ).append(
+            text.append(
                 "// "
             ).append(
                 exception.getMessage()

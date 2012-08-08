@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ObjectView_1.java,v 1.5 2005/07/14 18:53:23 hburger Exp $
+ * Name:        $Id: ObjectView_1.java,v 1.6 2008/03/21 18:46:21 hburger Exp $
  * Description: ObjectView_1 class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/07/14 18:53:23 $
+ * Date:        $Date: 2008/03/21 18:46:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,11 +78,13 @@ import org.openmdx.kernel.log.SysLog;
 /**
  * @author wfro
  */
+@SuppressWarnings("unchecked")
 public abstract class ObjectView_1
   extends Standard_1 {
 
   //------------------------------------------------------------------------
-  public void activate(
+  @SuppressWarnings("deprecation")
+public void activate(
     short id,
     Configuration configuration,
     Layer_1_0 delegation

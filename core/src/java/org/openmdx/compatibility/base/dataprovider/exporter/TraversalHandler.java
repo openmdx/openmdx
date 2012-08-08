@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TraversalHandler.java,v 1.4 2005/01/21 23:39:17 wfro Exp $
+ * Name:        $Id: TraversalHandler.java,v 1.6 2008/05/12 10:45:50 wfro Exp $
  * Description: A traversal handler receives and treats callbacks from a Traverser. 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/01/21 23:39:17 $
+ * Date:        $Date: 2008/05/12 10:45:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,6 +66,7 @@ import org.openmdx.compatibility.base.naming.Path;
  *  @author  anyff
  *
  */
+@SuppressWarnings("unchecked")
 public interface TraversalHandler {
 
     /** no special treatment of transactions */
@@ -134,7 +135,13 @@ public interface TraversalHandler {
      * @param operation     if the object should be synchronized or not
      * @return boolean      continue processing this object
      */
-    public boolean startObject(String qualifiedName, String qualifierName, String id, short operation) throws ServiceException;
+    public boolean startObject(
+        Path reference,
+        String qualifiedName, 
+        String qualifierName, 
+        String id, 
+        short operation
+    ) throws ServiceException;
 
     /**
      * End of the object. 
@@ -162,7 +169,10 @@ public interface TraversalHandler {
      * @param tags     attribute tags added as XML comment <!-- tag value -->
      * @return boolean continue processing of this object
      */
-    public boolean featureComplete(DataproviderObject_1_0 object) throws ServiceException;
+    public boolean featureComplete(
+        Path reference,
+        DataproviderObject_1_0 object
+    ) throws ServiceException;
 
     /**
      * Provide all the contained objects of the object.

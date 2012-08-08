@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Replicate.java,v 1.16 2007/12/06 16:30:52 hburger Exp $
+ * Name:        $Id: Replicate.java,v 1.17 2008/03/21 20:17:18 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/06 16:30:52 $
+ * Date:        $Date: 2008/03/21 20:17:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -79,6 +79,7 @@ import org.openmdx.model1.accessor.basic.spi.Model_1;
 /**
  * @author anyff
  */
+@SuppressWarnings("unchecked")
 public class Replicate
     extends Application
     implements ExceptionListener
@@ -421,7 +422,7 @@ public class Replicate
     private static final String EOL = System.getProperty("line.separator");
 
     /** The version gets set by CVS */
-    private static final String VERSION = "$Revision: 1.16 $";
+    private static final String VERSION = "$Revision: 1.17 $";
 
     /** The application name */
     private static final String APP_NAME = "Replicate";

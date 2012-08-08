@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Bean.java,v 1.10 2005/03/18 00:06:35 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Dataprovider_1Bean.java,v 1.12 2008/03/06 19:03:24 hburger Exp $
  * Description: Transaction Controller
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/03/18 00:06:35 $
+ * Date:        $Date: 2008/03/06 19:03:24 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004.2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction;
 
@@ -56,6 +55,7 @@ import javax.transaction.UserTransaction;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.transaction.TransactionManager_1;
 import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.LateBindingConnection_1;
+import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
@@ -66,6 +66,7 @@ import org.openmdx.kernel.exception.BasicException;
  */
 public class Dataprovider_1Bean 
     extends UnitOfWork_1Bean 
+    implements Dataprovider_1_0
 {
 
     //------------------------------------------------------------------------
@@ -109,7 +110,7 @@ public class Dataprovider_1Bean
      *
      * @param   header          the service header
      * @param   transaction     the user transaction
-     * @param   unitOfWork      thr unit of work
+     * @param   unitOfWork      the unit of work
      *
      * @return  the reply
      */
