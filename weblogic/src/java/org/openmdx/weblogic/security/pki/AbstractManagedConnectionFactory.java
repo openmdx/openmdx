@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.1 2009/01/04 18:10:46 wfro Exp $
+ * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.2 2009/07/06 11:14:48 hburger Exp $
  * Description: Abstract Managed Connection Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/04 18:10:46 $
+ * Date:        $Date: 2009/07/06 11:14:48 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,12 +68,14 @@ import javax.resource.spi.SecurityException;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
-import org.openmdx.kernel.application.container.lightweight.ShareableConnectionManager;
+import org.openmdx.kernel.resource.spi.ShareableConnectionManager;
 
 /**
  * Abstract Managed Connection Factory
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public abstract class AbstractManagedConnectionFactory
     implements ManagedConnectionFactory
 {

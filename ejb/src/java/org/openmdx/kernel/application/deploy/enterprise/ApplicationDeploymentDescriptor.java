@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ApplicationDeploymentDescriptor.java,v 1.1 2009/01/12 12:49:22 wfro Exp $
+ * Name:        $Id: ApplicationDeploymentDescriptor.java,v 1.3 2010/04/09 09:33:38 hburger Exp $
  * Description: Application Deployment Descriptor
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:22 $
+ * Date:        $Date: 2010/04/09 09:33:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,7 +66,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.openmdx.kernel.application.configuration.Report;
+import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Application;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Bean;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Component;
@@ -166,7 +166,7 @@ public class ApplicationDeploymentDescriptor
                         i < files.length;
                         i++
                     ){
-                        urls[i] = files[i].toURL();
+                        urls[i] = files[i].toURI().toURL();
                     }
                     setApplicationClassPath(urls);
                 } else {

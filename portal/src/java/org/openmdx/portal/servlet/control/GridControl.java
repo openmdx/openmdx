@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: GridControl.java,v 1.43 2009/03/08 18:03:25 wfro Exp $
+ * Name:        $Id: GridControl.java,v 1.45 2009/09/25 12:02:38 wfro Exp $
  * Description: GridControlDef
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.45 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:25 $
+ * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,7 +69,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.portal.servlet.Action;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.AttributeValueFactory;
 import org.openmdx.portal.servlet.view.Grid;
@@ -106,7 +106,7 @@ public class GridControl
         List<Action> columnFilterSetActions = new ArrayList<Action>();
         List<Action> columnFilterAddActions = new ArrayList<Action>();
         List<Integer> columnTypes = new ArrayList<Integer>();
-    
+        this.columnDefs = new ArrayList<org.openmdx.ui1.jmi1.ValuedField>();
         // first column contains object icon
         columnFilterSetActions.add(
           new Action(
@@ -127,7 +127,6 @@ public class GridControl
         columnTypes.add(
             new Integer(Grid.COLUMN_TYPE_NONE)
         );
-    
         // column filter actions and initial sort orders
         this.initialColumnSortOrders = new HashMap<String,Short>();
         for(
@@ -135,40 +134,40 @@ public class GridControl
             (i < objectContainer.getMember().size()) && (i < Grid.MAX_COLUMNS); 
             i++
         ) {
-          org.openmdx.ui1.jmi1.ValuedField columnTitle = (org.openmdx.ui1.jmi1.ValuedField)objectContainer.getMember().get(i);
+          org.openmdx.ui1.jmi1.ValuedField columnDef = (org.openmdx.ui1.jmi1.ValuedField)objectContainer.getMember().get(i);
           String columnLabel = 
-              this.localeAsIndex < columnTitle.getShortLabel().size()
-                  ? columnTitle.getShortLabel().get(this.localeAsIndex)
-                  : columnTitle.getShortLabel().size() > 0 ? columnTitle.getShortLabel().get(0) : "N/A";
+              this.localeAsIndex < columnDef.getShortLabel().size() ? 
+            	  columnDef.getShortLabel().get(this.localeAsIndex) : 
+            	  columnDef.getShortLabel().size() > 0 ? columnDef.getShortLabel().get(0) : "N/A";
           String columnToolTip =
-              this.localeAsIndex < columnTitle.getToolTip().size()
-                  ? columnTitle.getToolTip().get(this.localeAsIndex)
-                  : columnTitle.getToolTip().size() > 0 ? columnTitle.getToolTip().get(0) : "N/A";
+              this.localeAsIndex < columnDef.getToolTip().size() ? 
+            	  columnDef.getToolTip().get(this.localeAsIndex) : 
+            	  columnDef.getToolTip().size() > 0 ? columnDef.getToolTip().get(0) : "N/A";
           columnFilterSetActions.add(
               new Action(
-                  columnTitle.isFilterable() && !objectContainer.isReferenceIsStoredAsAttribute() 
-                      ? Action.EVENT_SET_COLUMN_FILTER 
-                      : Action.EVENT_NONE,
+                  columnDef.isFilterable() && !objectContainer.isReferenceIsStoredAsAttribute() ? 
+                	  Action.EVENT_SET_COLUMN_FILTER : 
+                	  Action.EVENT_NONE,
                   new Action.Parameter[]{
                       new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex),
                       new Action.Parameter(Action.PARAMETER_REFERENCE, this.id),       
-                      new Action.Parameter(Action.PARAMETER_NAME, columnTitle.getFeatureName())
+                      new Action.Parameter(Action.PARAMETER_NAME, columnDef.getFeatureName())
                   },
                   columnLabel,
                   columnToolTip,
-                  columnTitle.getIconKey(),
+                  columnDef.getIconKey(),
                   true
               )
           );
           columnFilterAddActions.add(
               new Action(
-                  columnTitle.isFilterable() && !objectContainer.isReferenceIsStoredAsAttribute() 
-                      ? Action.EVENT_ADD_COLUMN_FILTER 
-                      : Action.EVENT_NONE,
+                  columnDef.isFilterable() && !objectContainer.isReferenceIsStoredAsAttribute() ? 
+                	  Action.EVENT_ADD_COLUMN_FILTER : 
+                	  Action.EVENT_NONE,
                   new Action.Parameter[]{
                       new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex),
                       new Action.Parameter(Action.PARAMETER_REFERENCE, this.id),       
-                      new Action.Parameter(Action.PARAMETER_NAME, columnTitle.getFeatureName())          
+                      new Action.Parameter(Action.PARAMETER_NAME, columnDef.getFeatureName())          
                   },
                   columnLabel,
                   controlFactory.getTextsFactory().getTexts(locale).getSearchIncrementallyText(),
@@ -179,28 +178,28 @@ public class GridControl
           // columnTitle.isSortable() may throw NullPointer. Ignore it
           boolean columnTitleIsSortable = false;
           try {
-              columnTitleIsSortable = columnTitle.isSortable(); 
+              columnTitleIsSortable = columnDef.isSortable(); 
           } 
           catch(Exception e) {}
           if(!columnTitleIsSortable) {
               this.initialColumnSortOrders.put(
-                  columnTitle.getFeatureName(),
+                  columnDef.getFeatureName(),
                   new Short(Short.MIN_VALUE)              
               );
           }
           columnTypes.add(
               new Integer(
-                  columnTitle instanceof DateField
-                      ? Grid.COLUMN_TYPE_DATE
-                      : columnTitle instanceof NumberField
-                          ? Grid.COLUMN_TYPE_NUMBER
-                          : columnTitle instanceof CheckBox
-                              ? Grid.COLUMN_TYPE_BOOLEAN
-                              : Grid.COLUMN_TYPE_STRING
+                  columnDef instanceof DateField ? 
+                	  Grid.COLUMN_TYPE_DATE : 
+                	  columnDef instanceof NumberField ? 
+                		  Grid.COLUMN_TYPE_NUMBER : 
+                		  columnDef instanceof CheckBox ? 
+                			  Grid.COLUMN_TYPE_BOOLEAN : 
+                			  Grid.COLUMN_TYPE_STRING
               )
           );
-        }
-            
+          this.columnDefs.add(columnDef);
+        }            
         this.columnTypes = new int[columnTypes.size()];
         for(int i = 0; i < columnTypes.size(); i++) {
             this.columnTypes[i] = ((Number)columnTypes.get(i)).intValue();
@@ -269,6 +268,12 @@ public class GridControl
     }
 
     //-----------------------------------------------------------------------
+    public List<org.openmdx.ui1.jmi1.ValuedField> getColumnDefs(
+    ) {
+    	return this.columnDefs;
+    }
+    
+    //-----------------------------------------------------------------------
     /**
      * @return Returns the objectContainer.
      */
@@ -330,7 +335,7 @@ public class GridControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {
@@ -347,6 +352,7 @@ public class GridControl
     private final Action[] columnFilterAddActions;
     private final Map<String,Short> initialColumnSortOrders;
     private final int[] columnTypes;
+    private final List<org.openmdx.ui1.jmi1.ValuedField> columnDefs;
     private final String containerClass;
     private final String containerId;
     private final int paneIndex;      

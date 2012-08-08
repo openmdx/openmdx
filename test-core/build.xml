@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.50 2009/03/16 17:53:13 hburger Exp $
-= Description: openmdx project raw
-= Revision:    $Revision: 1.50 $
-= Date:        $Date: 2009/03/16 17:53:13 $
-= Copyright:   (c) 2003-2004 OMEX AG
+= Name:        $Id: build.xml,v 1.62 2010/04/12 09:11:55 wfro Exp $
+= Description: openMDX/Test Core
+= Revision:    $Revision: 1.62 $
+= Date:        $Date: 2010/04/12 09:11:55 $
+= Copyright:   (c) 2003-2010 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -51,19 +51,18 @@
  * listed in the NOTICE file.
 -->
 <project 
-	name="openmdx-test-core" 
+	name="openmdx-test.core" 
 	default="-projecthelp"
 	xmlns:openmdx="xri://(antlib:org.openmdx.tools.ant)"
 	xmlns:antcontrib="antlib:net.sf.antcontrib"
-	xmlns:jpox="http://www.jpox.org"
 >
-	<description>Builds the openMDX/Test.Core component</description>
-	<property name="project.specification.title" value="openMDX/Test.Core"/>
+	<description>Builds the openMDX/Test-Core component</description>
+	<property name="project.specification.title" value="openMDX/Test-Core"/>
 
 	<property name="model.transformation.class.path" value="project.lib.classpath"/>
 
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.5"/>
+	<property name="project.platform.list" value="jre-1.6"/>
 
 	<!-- Included Ant Projects -->
 	<import file="../ant/etc/ant/build-properties.xml"/>
@@ -72,9 +71,8 @@
     
 	<path id="project.lib.classpath">
 		<path refid="openmdx.core.bin"/>
-		<path refid="microsoft.sql-server.lib"/>
+		<path refid="postgresql.jdbc.lib"/>
 		<path refid="oracle.jdbc.lib"/>
-		<pathelement location="../${build.target.platform}/ejb/lib/openmdx-ejb.jar"/>
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>
@@ -84,10 +82,10 @@
 		<pathelement location="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip"/>
 	</path>
 	<patternset id="project.junit.test.case">
-		<include name="org/openmdx/test/**/Test*.java"/>
+		<include name="test/**/Test*.java"/>
+		<exclude name="test/openmdx/base/*"/>
+		<exclude name="test/openmdx/state2/**"/>
 		<patternset refid="build.exclude"/>
-		<exclude name="org/openmdx/test/compatibility/audit1/**/Test*.java"/>
-		<exclude name="org/openmdx/test/test/app1/layer/**/Test*.java"/>
 	</patternset>
 
 	<!-- ******************************************************************* -->
@@ -95,9 +93,6 @@
 	<!-- ******************************************************************* -->
 	<target name="generate" description="Generate version, jt and model dependend files" depends="build-init">
 		<ant dir="${openmdx.home}/core" inheritAll="false" target="deliverables">
-			<property name="build.target.platform" value="${build.java.platform}"/>
-		</ant> 
-		<ant dir="${openmdx.home}/ejb" inheritAll="false" target="deliverables">
 			<property name="build.target.platform" value="${build.java.platform}"/>
 		</ant> 
 		<!-- There are no JT files at the moment
@@ -126,7 +121,7 @@
 		depends="distribution-init,deliverables"
 	>
 		<openmdx:archive 
-			destfile="${distribution.dir}/openmdx-${project.implementation.version}-test.core.${build.target.platform}."
+			destfile="${distribution.dir}/openmdx-${project.implementation.version}-test-core.${build.target.platform}."
 			format="${distribution.format}"
 			checksum="MD5"
 		>
@@ -139,7 +134,8 @@
 				<include name="README"/>
 				<include name="RELEASE-NOTES"/>
 				<include name="build.xml"/>
-				<include name="project.properties"/>
+				<include name="*.properties"/>
+				<include name="*.xml"/>
 				<include name=".cvsignore"/>
 				<include name="etc/**"/>
 			</openmdx:archivefileset>
@@ -150,6 +146,22 @@
 				<include name="${build.target.platform}/test-core/**"/>
 				<include name="source-archive/test-core/**"/>
 			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${project.home}/${base.dir.name}" 
+				prefix="${project.implementation.prefix}-${project.implementation.version}/${base.dir.name}/"
+			>
+				<include name=".classpath"/>
+				<include name=".project"/>
+			</openmdx:archivefileset>						
+			<openmdx:archivefilterchain>
+				<patternset>
+					<include name="**/.project"/>
+					<include name="**/.classpath"/>
+				</patternset>
+				<tokenfilter>
+				    <replaceregex pattern="( \(.*\))? ~ " replace=" (${project.implementation.version}) ~ "/>
+				</tokenfilter>
+			</openmdx:archivefilterchain>			
 		</openmdx:archive>
 	</target>
 		

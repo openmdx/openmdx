@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConfigurationDecorator.java,v 1.1 2009/01/12 12:49:22 wfro Exp $
+ * Name:        $Id: ConfigurationDecorator.java,v 1.2 2009/09/07 13:03:04 hburger Exp $
  * Description: Abstract Configuration Decorator
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:22 $
+ * Date:        $Date: 2009/09/07 13:03:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,8 @@
  */
 package org.openmdx.kernel.application.deploy.lightweight;
 
-import org.openmdx.kernel.application.configuration.Configuration;
-import org.openmdx.kernel.application.configuration.Report;
+import org.openmdx.kernel.application.deploy.spi.Configuration;
+import org.openmdx.kernel.application.deploy.spi.Report;
 
 /**
  * Abstract Configuration Decorator

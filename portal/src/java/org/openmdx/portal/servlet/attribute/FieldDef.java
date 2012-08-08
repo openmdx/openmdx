@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FieldDef.java,v 1.12 2009/02/27 15:52:52 wfro Exp $
+ * Name:        $Id: FieldDef.java,v 1.13 2010/02/04 11:25:03 wfro Exp $
  * Description: FieldDef 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/27 15:52:52 $
+ * Date:        $Date: 2010/02/04 11:25:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.DataBinding_1_0;
+import org.openmdx.portal.servlet.DataBinding;
 
 public class FieldDef
     implements Serializable {
@@ -75,7 +75,7 @@ public class FieldDef
         String color,
         String backColor,
         String defaultValue,
-        DataBinding_1_0 dataBinding        
+        DataBinding dataBinding        
     ) {
         this.featureName = featureName;
         this.qualifiedFeatureName = qualifiedFeatureName;
@@ -108,7 +108,7 @@ public class FieldDef
         String backColor,
         String format,
         String defaultValue,
-        DataBinding_1_0 dataBinding
+        DataBinding dataBinding
     ) {
         this.featureName = featureName;
         this.qualifiedFeatureName = qualifiedFeatureName;
@@ -144,7 +144,7 @@ public class FieldDef
         String color,
         String backColor,
         String defaultValue,
-        DataBinding_1_0 dataBinding
+        DataBinding dataBinding
     ) {
         this.featureName = featureName;
         this.qualifiedFeatureName = qualifiedFeatureName; 
@@ -177,7 +177,7 @@ public class FieldDef
         String backColor,
         String mimeType,
         boolean isInPlace,                          
-        DataBinding_1_0 dataBinding
+        DataBinding dataBinding
     ) {
         this.featureName = featureName;
         this.qualifiedFeatureName = qualifiedFeatureName; 
@@ -213,7 +213,7 @@ public class FieldDef
             f.getColor(),
             f.getBackColor(),
             f.getDefaultValue(),
-            application.getPortalExtension().getDataBinding(f.getDataBindingName(), application)            
+            application.getPortalExtension().getDataBinding(f.getDataBindingName())            
         );
     }
 
@@ -236,7 +236,7 @@ public class FieldDef
             f.getColor(),
             f.getBackColor(),
             f.getDefaultValue(),
-            application.getPortalExtension().getDataBinding(f.getDataBindingName(), application)            
+            application.getPortalExtension().getDataBinding(f.getDataBindingName())            
         );
     }
     
@@ -256,7 +256,7 @@ public class FieldDef
             f.getBackColor(),
             f.getFormat(),
             f.getDefaultValue(),
-            application.getPortalExtension().getDataBinding(f.getDataBindingName(), application)
+            application.getPortalExtension().getDataBinding(f.getDataBindingName())
         );        
     }
     
@@ -276,7 +276,7 @@ public class FieldDef
             f.getBackColor(),
             f.getMimeType(),
             f.isInPlace(),
-            application.getPortalExtension().getDataBinding(f.getDataBindingName(), application)
+            application.getPortalExtension().getDataBinding(f.getDataBindingName())
         );
     }
     
@@ -299,7 +299,7 @@ public class FieldDef
     public final BigDecimal increment;
     public final String mimeType;
     public final boolean isInPlace;
-    public DataBinding_1_0 dataBinding;
+    public DataBinding dataBinding;
 
 }
 

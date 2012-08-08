@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection_2LocalHome.java,v 1.1 2009/04/24 01:04:10 hburger Exp $
+ * Name:        $Id: Connection_2LocalHome.java,v 1.2 2009/09/29 15:42:34 hburger Exp $
  * Description: Connection 2 Local Home Interface
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/24 01:04:10 $
+ * Date:        $Date: 2009/09/29 15:42:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,7 @@ package org.openmdx.application.rest.ejb;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalHome;
+import javax.resource.cci.ConnectionSpec;
 
 /**
  * Connection 2 Local Home Interface
@@ -64,6 +65,8 @@ public interface Connection_2LocalHome extends EJBLocalHome {
    * calls <code>Connection_2LocalHome.create()</code>, the container
    * allocates an instance of the EJBean and calls <code>ejbCreate()</code>.
    *
+   * @param         connectionSpec the REST <code>ConnectionSpec</code> 
+   * 
    * @return        a Connection_2_0Local object
    *
    * @exception     EJBExcpetion
@@ -71,6 +74,8 @@ public interface Connection_2LocalHome extends EJBLocalHome {
    * @exception     CreateException
    *                if there is a problem creating the bean
    */
-  Connection_2_0Local create() throws CreateException;
+  Connection_2_0Local create(
+      ConnectionSpec connectionSpec
+  ) throws CreateException;
   
 }

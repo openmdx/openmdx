@@ -1,3 +1,19 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -74,17 +90,11 @@
 <table id="banner" width="100%">
     <tr>
       <td align="left" style="width:130px">
-		  <a href="http://tomcat.apache.org/">
-			<img src="tomcat.gif" height="92" width="130" alt="The Mighty Tomcat - MEOW!"/>
-		  </a>
+      <a href="http://tomcat.apache.org/">
+        <img src="tomcat.gif" height="92" width="130" alt="The Mighty Tomcat - MEOW!"/>
+      </a>
       </td>
       <td align="left" valign="top"><b>Apache Tomcat</b></td>
-      <td align="left" style="width:130px">
-		  <a href="http://www.openmdx.org/">
-			<img src="openmdx.gif" alt="openMDX Lightweight Container!"/>
-		  </a>
-      </td>
-      <td align="left" valign="top"><b>openMDX Lightweight Container</b></td>
       <td align="right">
         <a href="http://www.apache.org/">
 	  <img src="asf-logo-wide.gif" height="51" width="537" alt="The Apache Software Foundation"/>
@@ -104,9 +114,8 @@
                 </tr>
                 <tr>
 		  <td class="menu">
-		    <a href="manager/status">Status</a><br/>
-                    <!--<a href="admin">Tomcat&nbsp;Administration</a><br/>-->
-                    <a href="manager/html">Tomcat&nbsp;Manager</a><br/>
+		    <a href="/manager/status">Status</a><br/>
+                    <a href="/manager/html">Tomcat&nbsp;Manager</a><br/>
                     &nbsp;
                   </td>
                 </tr>
@@ -120,8 +129,8 @@
                 <tr>
                   <td class="menu">
                     <a href="RELEASE-NOTES.txt">Release&nbsp;Notes</a><br/>
-                    <a href="docs/changelog.html">Change&nbsp;Log</a><br/>
-                    <a href="docs">Tomcat&nbsp;Documentation</a><br/>                        &nbsp;
+                    <a href="/docs/changelog.html">Change&nbsp;Log</a><br/>
+                    <a href="/docs">Tomcat&nbsp;Documentation</a><br/>                        &nbsp;
                     &nbsp;
 		    </td>
                 </tr>
@@ -153,39 +162,11 @@
                 </tr>
                 <tr>
                   <td class="menu">
-                    <a href="examples/servlets/">Servlets Examples</a><br/>
-                    <a href="examples/jsp/">JSP Examples</a><br/>
+                    <a href="/examples/servlets/">Servlets Examples</a><br/>
+                    <a href="/examples/jsp/">JSP Examples</a><br/>
                     <a href="http://java.sun.com/products/jsp">Sun's&nbsp;Java&nbsp;Server&nbsp;Pages&nbsp;Site</a><br/>
                     <a href="http://java.sun.com/products/servlet">Sun's&nbsp;Servlet&nbsp;Site</a><br/>
     		    &nbsp;
-                  </td>
-                </tr>
-            </table>
-			<!-- openCRX -->
-            <br/>
-            <table width="100%" border="1" cellspacing="0" cellpadding="3">
-                <tr>
-				  <th>openCRX CRM</th>
-                </tr>
-                <tr>
-                  <td class="menu">
-                    <a href="/opencrx-core-CRX">openCRX Core</a><br/>
-                    <a href="/opencrx-store-CRX/Store.jsp">openCRX Store</a><br/>
-                    <a href="http://www.opencrx.org">openCRX Web Site</a><br/>
-                  </td>
-                </tr>
-            </table>
-			<!-- openMDX -->
-            <br/>
-            <table width="100%" border="1" cellspacing="0" cellpadding="3">
-                <tr>
-				  <th>openMDX SDK</th>
-                </tr>
-                <tr>
-                  <td class="menu">
-                    <a href="/openmdx-helloworld">Helloworld Example</a><br/>
-                    <a href="/openmdx-workshop">Workshop Example</a><br/>
-                    <a href="http://www.openmdx.org">openMDX Web Site</a><br/>
                   </td>
                 </tr>
             </table>
@@ -200,10 +181,9 @@
           <p>As you may have guessed by now, this is the default Tomcat home page. It can be found on the local filesystem at:</p>
           <p class="code">$CATALINA_HOME/webapps/ROOT/index.html</p>
 	  
-          <p>where "$CATALINA_HOME" is the root of the Tomcat installation directory. If you're seeing this page, and you don't think you should be, then either you're either a user who has arrived at new installation of Tomcat, or you're an administrator who hasn't got his/her setup quite right. Providing the latter is the case, please refer to the <a href="docs">Tomcat Documentation</a> for more detailed setup and administration information than is found in the INSTALL file.</p>
+          <p>where "$CATALINA_HOME" is the root of the Tomcat installation directory. If you're seeing this page, and you don't think you should be, then you're either a user who has arrived at new installation of Tomcat, or you're an administrator who hasn't got his/her setup quite right. Providing the latter is the case, please refer to the <a href="/docs">Tomcat Documentation</a> for more detailed setup and administration information than is found in the INSTALL file.</p>
 
-            <p><b>NOTE: For security reasons, using the administration webapp
-            is restricted to users with role "admin". The manager webapp
+            <p><b>NOTE: For security reasons, using the manager webapp
             is restricted to users with role "manager".</b>
             Users are defined in <code>$CATALINA_HOME/conf/tomcat-users.xml</code>.</p>
 
@@ -221,7 +201,7 @@
             <p id="footer"><img src="tomcat-power.gif" width="77" height="80" alt="Powered by Tomcat"/><br/>
 	    &nbsp;
 
-	    Copyright &copy; 1999-2007 Apache Software Foundation<br/>
+	    Copyright &copy; 1999-2010 Apache Software Foundation<br/>
             All Rights Reserved
             </p>
         </td>

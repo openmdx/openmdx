@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LDAPConnectionFactory.java,v 1.4 2009/03/08 18:52:20 wfro Exp $
+ * Name:        $Id: LDAPConnectionFactory.java,v 1.5 2009/09/29 16:09:23 hburger Exp $
  * Description: Managed LDAP Connection Factory
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:20 $
+ * Date:        $Date: 2009/09/29 16:09:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -49,7 +49,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.resource.ldap.v3;
 
 import javax.resource.ResourceException;
@@ -67,47 +66,36 @@ import org.openmdx.resource.ldap.spi.ManagedConnection;
 /**
  * Managed LDAP Connection Factory
  */
-public class LDAPConnectionFactory
-    extends AbstractConnectionFactory {
+public class LDAPConnectionFactory extends AbstractConnectionFactory {
 
 	/**
 	 * Implements <code>Serializable</code>
 	 */
 	private static final long serialVersionUID = -2136791474088304800L;
 
+    /* (non-Javadoc)
+     * @see javax.resource.spi.ManagedConnectionFactory#createManagedConnection(javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
+     */
     public javax.resource.spi.ManagedConnection createManagedConnection(
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
         PasswordCredential credential = this.getCredential(subject);
-        String hosts = this.getConnectionURL();
-    	try {
+        try {
         	LDAPv3 physicalConnection = new LDAPConnection();
-        	if(credential == null) {
-    			physicalConnection.connect(
-    				this.getProtocolVersion(),
-					hosts, 
-					LDAPConnection.DEFAULT_PORT,
-					null,
-					null
-				);
-        	} 
-        	else {
-    			physicalConnection.connect(
-    				this.getProtocolVersion(),
-					hosts, 
-					LDAPConnection.DEFAULT_PORT, 
-					credential.getUserName(), 
-					new String (credential.getPassword())
-				);
-        	}
+			physicalConnection.connect(
+				this.getProtocolVersion(),
+				this.getConnectionURL(), 
+				LDAPConnection.DEFAULT_PORT,
+				credential == null ? this.getUserName() : credential.getUserName(),
+				credential == null ? this.getPassword() : new String (credential.getPassword())
+			);
 	        return new ManagedConnection(
                 physicalConnection,
                 credential
              );
-		} 
-    	catch (LDAPException exception) {
-			 String message = "Could not connect to LDAP host(s) \"" + hosts + "\".";
+		} catch (LDAPException exception) {
+			 String message = "Could not connect to LDAP host(s) \"" + this.getConnectionURL() + "\".";
 		     switch( exception.getLDAPResultCode() ) {
 		         case LDAPException.NO_SUCH_OBJECT:
 		        	 message += "User \"" + credential.getUserName() + "\" does not exist.";

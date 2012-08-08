@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextValue.java,v 1.13 2008/08/12 16:38:06 wfro Exp $
+ * Name:        $Id: TextValue.java,v 1.14 2009/09/25 12:02:38 wfro Exp $
  * Description: TextValue 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:06 $
+ * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,7 +58,7 @@ package org.openmdx.portal.servlet.attribute;
 import java.io.Serializable;
 
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 
 public class TextValue
     extends AttributeValue
@@ -133,7 +133,7 @@ public class TextValue
      * Prepares a single stringified Value to append.
      */
     protected String getStringifiedValueInternal(
-        HtmlPage p, 
+        ViewPort p, 
         Object v,
         boolean multiLine,
         boolean forEditing,

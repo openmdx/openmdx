@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BeanInstanceFactory.java,v 1.2 2009/02/24 16:02:51 hburger Exp $
+ * Name:        $Id: BeanInstanceFactory.java,v 1.3 2009/08/25 13:47:02 hburger Exp $
  * Description: Bean Instance Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 16:02:51 $
+ * Date:        $Date: 2009/08/25 13:47:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,9 +56,9 @@ import java.lang.reflect.Method;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.application.deploy.spi.Deployment;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
 
 /**

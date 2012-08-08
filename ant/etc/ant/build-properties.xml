@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-properties.xml,v 1.33 2009/02/13 18:21:36 wfro Exp $
+= Name:        $Id: build-properties.xml,v 1.34 2009/09/18 16:29:41 hburger Exp $
 = Description: openMDX Build Properties
-= Revision:    $Revision: 1.33 $
-= Date:        $Date: 2009/02/13 18:21:36 $
+= Revision:    $Revision: 1.34 $
+= Date:        $Date: 2009/09/18 16:29:41 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -47,6 +47,16 @@
 -->
 <project name="openmdx-build-properties">
 
+	<macrodef name="copyproperty">
+		<attribute name="target" />
+		<attribute name="source" />
+		<sequential>
+			<condition property="@{target}" value="${@{source}}">
+				<isset property="@{source}"/>
+			</condition>
+		</sequential>
+	</macrodef>
+	
 	<!-- =================================================================== -->
 	<!-- = Operating System Environment                                    = -->
 	<!-- =================================================================== -->
@@ -80,7 +90,6 @@
 		value="${basedir}/${build.target.platform}-properties.xml"
 	/>
 	<import file="${target.platform.properties}" optional="true"/>
-
 	<!-- load the Java 2 runtime environment specific settings -->
 	<property name="build.java.platform" value="${build.target.platform}"/>
 	<property 
@@ -128,6 +137,12 @@
 	<!-- =================================================================== -->
 	<!-- = JUnit settings                                                  = -->
 	<!-- =================================================================== -->
+	<copyproperty target="junit.test.timezone" source="${ant.project.name}.timezone"/>
+	<condition property="junit.set.timezone" value="user.timezone">
+		<isset property="junit.test.timezone"/>
+	</condition>
+	<property name="junit.set.timezone" value="unused.timezone"/>
+	<copyproperty target="junit.test.datasource" source="${ant.project.name}.datasource"/>
 	<property name="junit.test.halt.on.error" value="no"/>
 	<property name="junit.test.halt.on.failure" value="no"/>
 	<property name="junit.test.log.level" value="INFO"/>

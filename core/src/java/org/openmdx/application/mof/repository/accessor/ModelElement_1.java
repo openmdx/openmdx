@@ -1,15 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelElement_1.java,v 1.13 2009/06/14 00:03:42 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ModelElement_1.java,v 1.24 2010/02/11 13:14:13 hburger Exp $
  * Description: ModelElement_1 class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/14 00:03:42 $
+ * Date:        $Date: 2010/02/11 13:14:13 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,19 +45,20 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.mof.repository.accessor;
 
-import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.UUID;
 
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
+import javax.jdo.listener.InstanceLifecycleListener;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
 import javax.resource.NotSupportedException;
@@ -70,13 +70,13 @@ import javax.resource.cci.Record;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.LargeObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.rest.spi.Object_2Facade;
 
 //---------------------------------------------------------------------------
 public class ModelElement_1 implements ModelElement_1_0
@@ -90,7 +90,7 @@ public class ModelElement_1 implements ModelElement_1_0
         Model_1 model
     ) throws ServiceException {
         try {
-            this.data = ObjectHolder_2Facade.newInstance(data);
+            this.data = Object_2Facade.newInstance(data);
             this.model = model;
         }
         catch(Exception e) {
@@ -103,8 +103,8 @@ public class ModelElement_1 implements ModelElement_1_0
         ModelElement_1_0 element
     ) throws ServiceException {
         try {
-            this.data = ObjectHolder_2Facade.newInstance(
-                ObjectHolder_2Facade.cloneObject(((ModelElement_1)element).data.getDelegate())
+            this.data = Object_2Facade.newInstance(
+                Object_2Facade.cloneObject(((ModelElement_1)element).data.getDelegate())
             );
         } 
         catch (ResourceException e) {
@@ -429,11 +429,15 @@ public class ModelElement_1 implements ModelElement_1_0
     /* (non-Javadoc)
      * @see org.openmdx.base.mof.cci.ModelElement_1_0#getValues(java.lang.String)
      */
+    @SuppressWarnings("unchecked")
     public List<Object> objGetList(
         String featureName
     ) {
         try {
-            return this.data.attributeValues(featureName);
+            return (List<Object>)this.data.attributeValues(
+                featureName,
+                Multiplicities.LIST
+            );
         }
         catch(Exception e) {
             throw new JDOUserException("Unable to get value", e);
@@ -449,7 +453,8 @@ public class ModelElement_1 implements ModelElement_1_0
         }
         else {
             try {
-                this.data.clearAttributeValues(featureName).add(value);
+                this.data.attributeValuesAsList(featureName).clear();
+                this.data.attributeValuesAsList(featureName).add(value);
             }
             catch(Exception e) {
                 throw new JDOUserException("Unable to set value", e);
@@ -504,22 +509,6 @@ public class ModelElement_1 implements ModelElement_1_0
     }
     
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.cci.DataObject_1_0#getAspect(java.lang.String)
-     */
-    public Map<String, DataObject_1_0> getAspect(String aspectClass)
-        throws ServiceException {
-        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.cci.DataObject_1_0#getAspect(java.lang.String)
-     */
-    public Map<String, DataObject_1_0> getAspects()
-        throws ServiceException {
-        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
-    }
-
-    /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#getInaccessibilityReason()
      */
     public ServiceException getInaccessibilityReason()
@@ -530,7 +519,7 @@ public class ModelElement_1 implements ModelElement_1_0
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objAddEventListener(java.lang.String, java.util.EventListener)
      */
-    public void objAddEventListener(EventListener listener)
+    public void objAddEventListener(InstanceLifecycleListener listener)
         throws ServiceException {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
@@ -562,16 +551,8 @@ public class ModelElement_1 implements ModelElement_1_0
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objGetEventListeners(java.lang.String, java.lang.Class)
      */
-    public <T extends EventListener> T[] objGetEventListeners(
+    public <T extends InstanceLifecycleListener> T[] objGetEventListeners(
         Class<T> listenerType)
-        throws ServiceException {
-        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objGetLargeObject(java.lang.String)
-     */
-    public LargeObject_1_0 objGetLargeObject(String feature)
         throws ServiceException {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
@@ -621,7 +602,7 @@ public class ModelElement_1 implements ModelElement_1_0
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objMove(org.openmdx.base.accessor.cci.Container_1_0, java.lang.String)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#objMove(org.openmdx.base.accessor.cci.Selection_1_0, java.lang.String)
      */
     public void objMove(Container_1_0 there, String criteria)
         throws ServiceException {
@@ -631,7 +612,7 @@ public class ModelElement_1 implements ModelElement_1_0
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objRemoveEventListener(java.lang.String, java.util.EventListener)
      */
-    public void objRemoveEventListener(EventListener listener)
+    public void objRemoveEventListener(InstanceLifecycleListener listener)
         throws ServiceException {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
@@ -676,7 +657,7 @@ public class ModelElement_1 implements ModelElement_1_0
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
-    public Path jdoGetTransactionalObjectId() {
+    public UUID jdoGetTransactionalObjectId() {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
 
@@ -824,7 +805,7 @@ public class ModelElement_1 implements ModelElement_1_0
     // Variables
     //-------------------------------------------------------------------------
     private final Model_1 model;
-    private final ObjectHolder_2Facade data;
+    private final Object_2Facade data;
     private Boolean isAliasType = null;
     private Boolean isPrimitiveType = null;
     private Boolean isStructureType = null;

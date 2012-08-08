@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_l_0U4Eb9Ed-o1OTPw_6HJg" name="model">
+  <eAnnotations xmi:id="_9dbckEcCEd-o1OTPw_6HJg" source="org.ietf">
+    <references xmi:type="uml:Package" href="org.ietf.uml#_Szs1cLeAEdueCKP_VeXehw"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_GYc20EcDEd-o1OTPw_6HJg" source="org.iso">
+    <references xmi:type="uml:Package" href="org.iso.uml#_3C7B8A60016D3C8B7F0E0072"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_KGZIMEcDEd-o1OTPw_6HJg" source="org.oasis">
+    <references xmi:type="uml:Package" href="org.oasis-open.uml#_3C7B8A60016D4022002100C9"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_6r56sEcDEd-o1OTPw_6HJg" source="org.un">
+    <references xmi:type="uml:Package" href="org.un.uml#_3C7B8A60016D3C8B7F380249"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_KELFMEcEEd-o1OTPw_6HJg" source="net.rfc">
+    <references xmi:type="uml:Package" href="net.rfc.uml#_3C7B8A60016D3C8B8343014DP"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_yxKcQEcEEd-o1OTPw_6HJg" source="org.w3c">
+    <references xmi:type="uml:Package" href="org.w3c.uml#_3C7B8A60016D3C8B62D700DA"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_SInSMEcDEd-o1OTPw_6HJg" source="org.omg.PrimitiveTypes">
+    <references xmi:type="uml:Package" href="org.omg.PrimitiveTypes.uml#_3C7B8A60016D3D0C708700E2"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_Oc3ZMEcDEd-o1OTPw_6HJg" source="org.omg.model1">
+    <references xmi:type="uml:Package" href="org.omg.model1.uml#_3C7B8A60016D3C3238A3033A"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_V9XWMEcDEd-o1OTPw_6HJg" source="org.openmdx.audit2">
+    <references xmi:type="uml:Package" href="org.openmdx.audit2.uml#_3C7B8A60016D3FF13E19007A"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_aATnMEcDEd-o1OTPw_6HJg" source="org.openmdx.base">
+    <references xmi:type="uml:Package" href="org.openmdx.base.uml#_3C7B8A60016D40A89A0D0015"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_dkHFIEcDEd-o1OTPw_6HJg" source="org.openmdx.compatibility.audit1">
+    <references xmi:type="uml:Package" href="org.openmdx.compatibility.audit1.uml#_3C7B8A60016D3EC4B01F0206"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_iqz5MEcDEd-o1OTPw_6HJg" source="org.openmdx.compatibility.datastore1">
+    <references xmi:type="uml:Package" href="org.openmdx.compatibility.datastore1.uml#_SeNosB19EdyPsfP_gjYckQ"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_nHnbsEcDEd-o1OTPw_6HJg" source="org.openmdx.compatibility.sequence1">
+    <references xmi:type="uml:Package" href="org.openmdx.compatibility.sequence1.uml#_3C7B8A60016D41C3075B0029"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_rmL4wEcDEd-o1OTPw_6HJg" source="org.openmdx.generic1">
+    <references xmi:type="uml:Package" href="org.openmdx.generic1.uml#_3C7B8A60016D3FF13E0E02A5"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_vHZ8wEcDEd-o1OTPw_6HJg" source="org.openmdx.preferences1">
+    <references xmi:type="uml:Package" href="org.openmdx.preferences1.uml#_o9hDQFhTEdqpq69lOCMZBw"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_y0TsUEcDEd-o1OTPw_6HJg" source="org.openmdx.role2">
+    <references xmi:type="uml:Package" href="org.openmdx.role2.uml#_3C7B8A60016D407129D101F2"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_2UgcoEcDEd-o1OTPw_6HJg" source="org.openmdx.state2">
+    <references xmi:type="uml:Package" href="org.openmdx.state2.uml#_3C7B8A60016D407170B300B4"/>
+  </eAnnotations>
+</uml:Model>

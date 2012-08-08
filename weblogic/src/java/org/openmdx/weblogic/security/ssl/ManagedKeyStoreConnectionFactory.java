@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ManagedKeyStoreConnectionFactory.java,v 1.5 2007/08/13 17:33:08 hburger Exp $
+ * Name:        $Id: ManagedKeyStoreConnectionFactory.java,v 1.6 2009/07/06 11:14:48 hburger Exp $
  * Description: KeyStoreEntryManagedConnectionFactory 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/13 17:33:08 $
+ * Date:        $Date: 2009/07/06 11:14:48 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,11 +78,10 @@ import javax.resource.spi.ResourceAdapterInternalException;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
-import org.openmdx.base.security.pki.AbstractManagedConnectionFactory;
+import org.openmdx.weblogic.security.pki.AbstractManagedConnectionFactory;
 
 /**
  * KeyStoreEntryManagedConnectionFactory
- *
  */
 public class ManagedKeyStoreConnectionFactory
     extends AbstractManagedConnectionFactory

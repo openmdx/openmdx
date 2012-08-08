@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FormControl.java,v 1.5 2009/05/01 23:41:51 wfro Exp $
+ * Name:        $Id: FormControl.java,v 1.7 2010/03/28 00:49:52 wfro Exp $
  * Description: TabControl
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/01 23:41:51 $
+ * Date:        $Date: 2010/03/28 00:49:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,7 +66,7 @@ import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.UiContext;
 import org.openmdx.portal.servlet.attribute.Attribute;
 
@@ -129,7 +129,7 @@ public class FormControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {
@@ -171,8 +171,7 @@ public class FormControl
                 object, 
                 parameterMap, 
                 attributesAsMap, 
-                application, 
-                pm
+                application
             );
         }
     }

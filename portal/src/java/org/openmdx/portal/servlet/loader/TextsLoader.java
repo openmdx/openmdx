@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextsLoader.java,v 1.8 2008/08/12 16:38:07 wfro Exp $
+ * Name:        $Id: TextsLoader.java,v 1.11 2009/10/29 23:37:19 wfro Exp $
  * Description: TextsLoader
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:07 $
+ * Date:        $Date: 2009/10/29 23:37:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,6 +57,7 @@ package org.openmdx.portal.servlet.loader;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -65,6 +66,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 import org.openmdx.portal.servlet.texts.TextsFactory;
 
@@ -86,7 +88,9 @@ public class TextsLoader
   synchronized public TextsFactory loadTexts(
     String[] locale
   ) throws ServiceException {
-    System.out.println("Loading texts");
+	  String messagePrefix = new Date() + "  ";
+    System.out.println(messagePrefix + "Loading texts");
+    SysLog.info("Loading texts");
     // 2-dim list: first index=locale, second index = input stream
     List<List<InputStream>> textsInputStreams = new ArrayList<List<InputStream>>();
     int fallbackLocaleIndex = 0;
@@ -102,7 +106,7 @@ public class TextsLoader
                         break;
                     }
                 }
-                System.out.println(locale[i] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
+                SysLog.info(locale[i] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
                 localeTextsPaths = context.getResourcePaths("/WEB-INF/config/texts/" + locale[fallbackLocaleIndex]);
             }
         }
@@ -111,13 +115,15 @@ public class TextsLoader
         for(Iterator j = localeTextsPaths.iterator(); j.hasNext(); ) {
             String path = (String)j.next();
             if(!path.endsWith("/")) {            
-                System.out.println("Loading " + path);
+                SysLog.info("Loading " + path);
                 localeTextsInputStreams.add(
                     context.getResourceAsStream(path)
                 );
             }
         }
     }
+    System.out.println(messagePrefix + "Done");
+    SysLog.info("Done");
     return new TextsFactory(
         locale,
         (List[])textsInputStreams.toArray(new List[textsInputStreams.size()])

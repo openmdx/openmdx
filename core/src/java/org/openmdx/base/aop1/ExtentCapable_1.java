@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtentCapable_1.java,v 1.4 2009/05/27 22:49:41 hburger Exp $
+ * Name:        $Id: ExtentCapable_1.java,v 1.6 2009/11/04 15:59:44 hburger Exp $
  * Description: Extent Capable
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/27 22:49:41 $
+ * Date:        $Date: 2009/11/04 15:59:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,9 +50,10 @@
  */
 package org.openmdx.base.aop1;
 
+import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
-import org.openmdx.base.accessor.view.PlugIn_1;
+import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
@@ -60,7 +61,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Extent Capable Plug-In
  */
-public class ExtentCapable_1 extends PlugIn_1 {
+public class ExtentCapable_1 extends Interceptor_1 {
 
     /**
      * Constructor 
@@ -72,10 +73,19 @@ public class ExtentCapable_1 extends PlugIn_1 {
      */
     public ExtentCapable_1(
         ObjectView_1_0 self,
-        PlugIn_1 next
+        Interceptor_1 next
     ) throws ServiceException {
         super(self, next);
+        this.aspect = self.getModel().isInstanceof(
+            self.objGetDelegate(), 
+            "org:openmdx:base:Aspect"
+        );
     }
+    
+    /**
+     * <code>true</code> in case of an <code>org::openmdx::base::Aspect</code> instance
+     */
+    private boolean aspect;
     
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetValue(java.lang.String)
@@ -85,7 +95,13 @@ public class ExtentCapable_1 extends PlugIn_1 {
         String feature
     ) throws ServiceException {
         if(SystemAttributes.OBJECT_IDENTITY.equals(feature)) {
-            Object resourceIdentifier = this.jdoGetObjectId();
+            Object resourceIdentifier;
+            if(this.aspect) {
+                DataObject_1_0 core = (DataObject_1_0) this.self.objGetDelegate().objGetValue("core");
+                resourceIdentifier = core == null ? null : core.jdoGetObjectId();
+            } else {
+                resourceIdentifier = this.jdoGetObjectId();
+            }
             return resourceIdentifier == null ? null : ( 
                 resourceIdentifier instanceof Path ? ((Path)resourceIdentifier) : new Path(resourceIdentifier.toString())
             ).toXRI();

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Deployment.java,v 1.1 2009/01/12 15:17:48 wfro Exp $
+ * Name:        $Id: Deployment.java,v 1.4 2009/09/10 14:45:07 hburger Exp $
  * Description: Deployment 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 15:17:48 $
+ * Date:        $Date: 2009/09/10 14:45:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -59,7 +59,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 
-import org.openmdx.kernel.application.configuration.Configuration;
+
 
 /**
  * Deployment
@@ -300,116 +300,6 @@ public interface Deployment {
           Appendable webApplicationContext
         ) throws NamingException;
 
-    }
-
-    /**
-     * An openMDX Pool 
-     */
-    interface Pool {
-        
-        /**
-         * The initial-capacity element identifies the initial number 
-         * of instance which the openMDX Container will 
-         * attempt to obtain during deployment.
-         * <p>
-         * The default initial capacity is 1.
-         * 
-         * @return the initial number of pool instances
-         */
-        Integer getInitialCapacity();
-        
-        /**
-         * The maximum-capacity element identifies the maximum number of 
-         * managed connections which the openMDX Container will allow. 
-         * Requests beyond this limit will result in an Exception being 
-         * returned to the caller.
-         * <p>
-         * The default maximum capacity is java.lang.Integer.MAX_VALUE, 
-         * i.e.2<sup>31</sup>-1.
-         * 
-         * @return the maximum number of pool instances that are allowed.
-         */
-        Integer getMaximumCapacity(
-        );
-        
-        /**
-         * The maximum-wait element defines the time in milliseconds to wait 
-         * for an instance to be returned to the pool when there are 
-         * maximum-capacity active instances.
-         * <p>
-         * A value of 0 will mean not to wait at all. When a request times out 
-         * waiting for an instance an Exception is generated and the call aborted.
-         * <p>
-         * The default timeout value is java.lang.Long.MAX_VALUE, 
-         * i.e. 2<sup>63</sup>-1.
-         * 
-         * @return time in milliseconds to wait for an instance to be returned 
-         * to the pool when there are maximum-capacity active instances
-         * 
-         * @see #getMaximumCapacity()
-         */
-        Long getMaximumWait(
-        ); 
-
-        /**
-         * Returns the cap on the number of "idle" instances in the pool.
-         * @return the cap on the number of "idle" instances in the pool.
-         */
-        Integer getMaximumIdle();
-        
-        /**
-         * Returns the minimum number of objects allowed in the pool
-         * before the evictor thread (if active) spawns new objects.
-         * (Note no objects are created when: numActive + numIdle >= maxActive)
-         *
-         * @return The minimum number of objects.
-         */
-        Integer getMinimumIdle();
-        
-        /**
-         * When <tt>true</tt>, objects will be validated
-         * before being returned by the borrowObject()
-         * method.  If the object fails to validate,
-         * it will be dropped from the pool, and we will attempt
-         * to borrow another.
-         */
-        Boolean getTestOnBorrow();
-        
-        /**
-         * When <tt>true</tt>, objects will be validated
-         * before being returned to the pool within the
-         * returnObject().
-         */
-        Boolean getTestOnReturn();
-        
-        /**
-         * Returns the number of milliseconds to sleep between runs of the
-         * idle object evictor thread.
-         * When non-positive, no idle object evictor thread will be
-         * run.
-         */
-        Long getTimeBetweenEvictionRuns();
-
-        /**
-         * Returns the number of objects to examine during each run of the
-         * idle object evictor thread (if any).
-         */
-        Integer getNumberOfTestsPerEvictionRun();
-        
-        /**
-         * Returns the minimum amount of time an object may sit idle in the pool
-         * before it is eligable for eviction by the idle object evictor
-         * (if any).
-         */
-        Long getMinimumEvictableIdleTime();
-        
-        /**
-         * When <tt>true</tt>, objects will be validated
-         * by the idle object evictor (if any).  If an object
-         * fails to validate, it will be dropped from the pool.
-         */
-        Boolean getTestWhileIdle();
-        
     }
 
     /**

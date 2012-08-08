@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractEJBObject.java,v 1.3 2009/03/31 17:06:10 hburger Exp $
+ * Name:        $Id: AbstractEJBObject.java,v 1.4 2009/08/25 17:23:06 hburger Exp $
  * Description: Abstract EJBObject implementation
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:06:10 $
+ * Date:        $Date: 2009/08/25 17:23:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,9 +58,9 @@ import java.util.Arrays;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import javax.ejb.RemoveException;
+import javax.ejb.TransactionAttributeType;
 
 import org.openmdx.kernel.application.container.spi.ejb.RemoteTransactionContext;
-import org.openmdx.kernel.application.container.spi.ejb.TransactionAttribute;
 import org.openmdx.kernel.exception.BasicException;
 
 
@@ -211,7 +211,7 @@ public abstract class AbstractEJBObject
     protected Action newAction(
         AbstractEJBHome home,
         Method method, 
-        TransactionAttribute transactionAttribute
+        TransactionAttributeType transactionAttribute
     ) throws RemoteException {
         return new StandardAction(
             home,
@@ -228,7 +228,7 @@ public abstract class AbstractEJBObject
         StandardAction(
             AbstractEJBHome home,
             Method method, 
-            TransactionAttribute transactionAttribute
+            TransactionAttributeType transactionAttribute
         ){
             this.home = home;
             this.method = method;
@@ -239,7 +239,7 @@ public abstract class AbstractEJBObject
         
         private final Method method;
         
-        private final TransactionAttribute transactionAttribute;
+        private final TransactionAttributeType transactionAttribute;
         
         public Object invoke(
             Object... arguments

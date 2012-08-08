@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Autocompleter_1_0.java,v 1.13 2008/08/12 16:38:05 wfro Exp $
+ * Name:        $Id: Autocompleter_1_0.java,v 1.15 2009/09/25 12:02:38 wfro Exp $
  * Description: Autocompleter_1_0
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/08/12 16:38:05 $
+ * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,7 +68,7 @@ public interface Autocompleter_1_0 {
      * Generates the html code for the autocompleter.
      * @param p painting area
      * @param id optional id for input field. If none is specified an id is automatically generated.        
-     * @param index field index
+     * @param tabIndex field index
      * @param fieldName name of autocompletion field
      * @param currentValue current value of autocompletion field
      * @param numericCompare if a numeric compare should be applied to current value
@@ -78,9 +78,9 @@ public interface Autocompleter_1_0 {
      * @param imgTag optional image tag is placed right after the autocomplete input field
      */
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String id,
-        int index,
+        int tabIndex,
         String fieldName,
         AttributeValue currentValue,
         boolean numericCompare,

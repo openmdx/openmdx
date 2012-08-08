@@ -18,7 +18,7 @@ if "%OS%" == "Windows_NT" setlocal
 rem ---------------------------------------------------------------------------
 rem Script to digest password using the algorithm specified
 rem
-rem $Id: digest.bat,v 1.1 2009/02/23 18:05:56 wfro Exp $
+rem $Id: digest.bat,v 1.3 2010/04/12 08:36:30 wfro Exp $
 rem ---------------------------------------------------------------------------
 
 rem Guess CATALINA_HOME if not defined
@@ -33,11 +33,11 @@ echo This environment variable is needed to run this program
 goto end
 :okHome
 
-set EXECUTABLE=%CATALINA_HOME%\bin\tool-wrapper.bat
+set "EXECUTABLE=%CATALINA_HOME%\bin\tool-wrapper.bat"
 
 rem Check that target executable exists
 if exist "%EXECUTABLE%" goto okExec
-echo Cannot find %EXECUTABLE%
+echo Cannot find "%EXECUTABLE%"
 echo This file is needed to run this program
 goto end
 :okExec

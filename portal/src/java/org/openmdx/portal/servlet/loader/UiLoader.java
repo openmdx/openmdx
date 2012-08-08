@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiLoader.java,v 1.52 2009/06/13 18:48:08 wfro Exp $
+ * Name:        $Id: UiLoader.java,v 1.79 2010/04/28 13:40:33 wfro Exp $
  * Description: UiLoader
- * Revision:    $Revision: 1.52 $
+ * Revision:    $Revision: 1.79 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/13 18:48:08 $
+ * Date:        $Date: 2010/04/28 13:40:33 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,9 +55,10 @@
  */
 package org.openmdx.portal.servlet.loader;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -68,32 +69,32 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
+import javax.ejb.TransactionAttributeType;
+import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 import javax.servlet.ServletContext;
 
 import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.dataprovider.importer.XmlImporter;
-import org.openmdx.application.dataprovider.spi.Dataprovider_2Connection;
+import org.openmdx.application.dataprovider.kernel.EmbeddedDataprovider_1;
 import org.openmdx.application.dataprovider.spi.Layer_1;
-import org.openmdx.application.dataprovider.spi.Layer_1_0;
-import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
-import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
-import org.openmdx.base.accessor.rest.DataObjectManagerFactory_1;
-import org.openmdx.base.accessor.view.ViewManager_1;
+import org.openmdx.application.xml.Importer;
+import org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_1;
+import org.openmdx.base.accessor.rest.DataManagerFactory_1;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.ConnectionAdapter;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
+import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.log.SysLog;
+import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 
 public class UiLoader
@@ -132,24 +133,24 @@ public class UiLoader
     }
     
     //-------------------------------------------------------------------------
-    protected static class Dataprovider
-        extends Layer_1 {
+    protected static class Dataprovider extends Layer_1 {
 
         public Dataprovider(
             List delegates
         ) throws Exception {
             this.delegates = delegates;
-            this.activate(
+            super.activate(
                 (short)5, 
                 new Configuration(), 
-                (Layer_1_0)delegates.get(0)
+                (Layer_1)delegates.get(0)
             );
         }
 
+        @Override
         public void deactivate(
         ) throws Exception {
             for(Iterator i = this.delegates.iterator(); i.hasNext(); ) {
-                ((Layer_1_0)i.next()).deactivate();
+                ((Layer_1)i.next()).deactivate();
             }          
         }
     
@@ -165,33 +166,33 @@ public class UiLoader
     ) throws ServiceException {
         try {
             Configuration configuration = new Configuration();
-            configuration.values("namespaceId").add("ui");
-            Layer_1_0 persistencePlugin = (Layer_1_0)Classes.getApplicationClass(
+            configuration.values("namespaceId").put(0, "ui");
+            Layer_1 persistencePlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
             ).newInstance();
             persistencePlugin.activate((short)0, configuration, null);
-            Layer_1_0 modelPlugin = (Layer_1_0)Classes.getApplicationClass(
+            Layer_1 modelPlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.dataprovider.layer.model.Standard_1.class.getName()
             ).newInstance();
             modelPlugin.activate((short)1, configuration, persistencePlugin);
-            Layer_1_0 applicationPlugin = (Layer_1_0)Classes.getApplicationClass(
+            Layer_1 applicationPlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.ui1.layer.application.Ui_1.class.getName()
             ).newInstance();
             applicationPlugin.activate((short)2, configuration, modelPlugin);
-            Layer_1_0 typePlugin = (Layer_1_0)Classes.getApplicationClass(
+            Layer_1 typePlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.dataprovider.layer.type.Strict_1.class.getName()
             ).newInstance();
             typePlugin.activate((short)3, configuration, applicationPlugin);
-            Layer_1_0 interceptionPlugin = (Layer_1_0)Classes.getApplicationClass(
+            Layer_1 interceptionPlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.dataprovider.layer.interception.Standard_1.class.getName()
             ).newInstance();
             Configuration interceptionConfiguration = new Configuration(configuration);
-            interceptionConfiguration.values("propagateSet").add(Boolean.TRUE);
+            interceptionConfiguration.values("propagateSet").put(0, Boolean.TRUE);
             interceptionPlugin.activate((short)4, interceptionConfiguration, typePlugin);
        
             return new Dataprovider(
                 Arrays.asList(
-                    new Layer_1_0[]{
+                    new Layer_1[]{
                         interceptionPlugin,
                         typePlugin,
                         applicationPlugin,
@@ -212,21 +213,37 @@ public class UiLoader
     //-------------------------------------------------------------------------
     public PersistenceManager getRepository(
     ) throws ServiceException {
-        if(this.pm == null) {
-        	DataObjectManagerFactory_1 pmf = new DataObjectManagerFactory_1(
-        		new ArrayList<String>(),
-        		ConnectionAdapter.newInstance(
-        			new Dataprovider_2Connection(this.uiRepository)
-        		),
-        		null
-        	);
-        	DataObjectManager_1_0 connection = pmf.getPersistenceManager();
-            ViewManager_1 manager = new ViewManager_1(connection);
-            RefRootPackage_1 rootPkg = new RefRootPackage_1(
-                manager,
-                true
+        if(this.pm == null) try {
+        	EmbeddedDataprovider_1 uiPort = new EmbeddedDataprovider_1();
+        	uiPort.setDelegate(this.uiRepository);
+        	ConnectionFactoryAdapter connectionFactoryAdapter = new ConnectionFactoryAdapter(
+                uiPort,
+            	false, // supportsLocalTransactionDemarcation
+            	TransactionAttributeType.NEVER
             );
-            this.pm = rootPkg.refPersistenceManager();
+        	PersistenceManagerFactory dataObjectManagerFactory = DataManagerFactory_1.getPersistenceManagerFactory(
+    			Collections.singletonMap(
+    				ConfigurableProperty.ConnectionFactory.qualifiedName(),
+    				connectionFactoryAdapter
+    			)
+    		);
+        	Map<String,Object> entityManagerConfiguration = new HashMap<String,Object>();
+        	entityManagerConfiguration.put(
+            	ConfigurableProperty.ConnectionFactory.qualifiedName(),
+            	dataObjectManagerFactory
+            );
+            entityManagerConfiguration.put(
+            	ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(),
+            	EntityManagerFactory_1.class.getName()
+            );        	
+            this.pm = JDOHelper.getPersistenceManagerFactory(
+            	entityManagerConfiguration
+            ).getPersistenceManager(
+            	null, // userName
+            	null // password
+            );
+        } catch (Exception exception) {
+            throw new ServiceException(exception);
         }
         return this.pm;
     }
@@ -239,6 +256,9 @@ public class UiLoader
     public List<Path> load(
         String[] locale
     ) throws ServiceException {
+    	String messagePrefix = new Date() + "  ";
+    	System.out.println(messagePrefix + "Loading ui configuration...");
+    	SysLog.info("Loading ui configuration");
         Map<String,Path> loadedUiSegments = new TreeMap<String,Path>();
         List dirs = this.getDirectories("/WEB-INF/config/ui/");
         for(
@@ -261,7 +281,7 @@ public class UiLoader
               (this.uiCRC.get(dir) == null) || 
               (((Long)this.uiCRC.get(dir)).longValue() != crc)
             ) {
-              Map<Path,MappedRecord> mergedUiElements = new LinkedHashMap<Path,MappedRecord>();
+              Map<Path,MappedRecord> mergedUiElementDefs = new LinkedHashMap<Path,MappedRecord>();
               int fallbackLocaleIndex = 0;
               for(int j = 0; j < locale.length; j++) {
                 fallbackLocaleIndex = 0;
@@ -281,7 +301,7 @@ public class UiLoader
                                 break;
                             }
                         }
-                        System.out.println(locale[j] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
+                        SysLog.info(locale[j] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
                     } 
                     else {
                     	uiResources = new TreeSet(uiResources);
@@ -293,140 +313,134 @@ public class UiLoader
                       uiResources.add("./"); // empty dir
                   }
                   else {
-                      System.out.println("Loading " + uiResources.size() + " ui files for locale " + locale[j]);
+                      System.out.println(messagePrefix + "Loading " + uiResources.size() + " files for locale " + locale[j]);
+                      SysLog.info("Loading " + uiResources.size() + " files for locale " + locale[j]);
                   }                  
                   for(
                       Iterator k = uiResources.iterator(); 
                       k.hasNext(); 
                   ) {        
-                      Map<Path,MappedRecord> uiElements = new LinkedHashMap<Path,MappedRecord>();
+                      Map<Path,MappedRecord> uiElementDefs = new LinkedHashMap<Path,MappedRecord>();
                       String path = (String)k.next();
                       if(!path.endsWith("/")) {
-                          AppLog.detail("Loading", path);
+                    	  SysLog.detail("Loading", path);
                           try {
-                              XmlImporter importer = new XmlImporter(
-                                  uiElements,
-                                  false
-                              );
-                              importer.process(
-                                  new String[]{context.getResource(path).toString()}
+                        	  Importer.importObjects(
+                        		  Importer.asTarget(uiElementDefs),
+                        		  Importer.asSource(context.getResource(path))
                               );
                           }
-                          catch(ServiceException e) {
-                              e.log();
-                              System.out.println("STATUS: " + e.getMessage());
+                          catch(Exception e) {
+                              new ServiceException(e).log();
+                              System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                           }
                       }        
                       // Merge entries
-                      Set entrySet = j == 0 ? uiElements.entrySet() : mergedUiElements.entrySet();
-                      for(Iterator l = entrySet.iterator(); l.hasNext(); ) {
-                          Entry<Path,MappedRecord> e = (Entry)l.next();
-                          // merge entry
-                          if(
-                              (j > 0) &&
-                              (mergedUiElements.get(e.getKey()) != null)
-                          ) {                      
-                              MappedRecord mergedUiElement = mergedUiElements.get(e.getKey());   
-                              ObjectHolder_2Facade mergedUiElementFacade;
-                              try {
-	                              mergedUiElementFacade = ObjectHolder_2Facade.newInstance(mergedUiElement);
-                              }
-                              catch(ResourceException e0) {
-                            	  throw new ServiceException(e0);
-                              }
+                      if(j == 0) {
+                    	  mergedUiElementDefs.putAll(
+                    		  uiElementDefs
+                    	  );
+                      }
+                      else {
+	                      for(Entry<Path,MappedRecord> e: mergedUiElementDefs.entrySet()) {
+                              MappedRecord mergedUiElementDef = e.getValue();   
+	                    	  MappedRecord mergedUiElementDefValue = Object_2Facade.getValue(mergedUiElementDef);
+	                          // merge entry
                               // do not merge if label for locale 0 is not set
-                              if(mergedUiElementFacade.getAttributeValues("label") != null) {
-                                  if(mergedUiElementFacade.attributeValues("label").size() <= j) {
-                                	  mergedUiElementFacade.attributeValues("label").add(
-                                		  mergedUiElementFacade.attributeValues("label").get(fallbackLocaleIndex)
+                              List<Object> mergedLabels = mergedUiElementDefValue.get("label") == null ?
+                            	  null :
+                            		  (List<Object>)mergedUiElementDefValue.get("label");
+                              if(mergedLabels != null && !mergedLabels.isEmpty()) {
+                                  if(mergedLabels.size() <= j) {
+                                	  mergedLabels.add(
+                                		  mergedLabels.get(fallbackLocaleIndex)
                                       );
                                   }
+                                  List<Object> mergedShortLabels = (List<Object>)mergedUiElementDefValue.get("shortLabel");
                                   // assert that shortLabel is set for locale i. 
-                                  if(mergedUiElementFacade.getAttributeValues("shortLabel") == null) {
-                                	  mergedUiElementFacade.attributeValues("shortLabel").add("");                                     
+                                  if(mergedShortLabels == null) {
+                                	  mergedUiElementDefValue.put(
+                                		  "shortLabel", 
+                                		  mergedShortLabels = new ArrayList<Object>()
+                                	  );
+                                  } 
+                                  if(mergedShortLabels.isEmpty()) {
+                                	  mergedShortLabels.add("");
                                   }
-                                  if(mergedUiElementFacade.attributeValues("shortLabel").size() <= j) {
-                                	  mergedUiElementFacade.attributeValues("shortLabel").add(
-                                		  mergedUiElementFacade.attributeValues("shortLabel").get(fallbackLocaleIndex)
+                                  if(mergedShortLabels.size() <= j) {
+                                	  mergedShortLabels.add(
+                                		  mergedShortLabels.get(fallbackLocaleIndex)
                                       );
                                   }
                                   // assert that toolTip is set for locale i
-                                  if(mergedUiElementFacade.getAttributeValues("toolTip") == null) {
-                                	  mergedUiElementFacade.attributeValues("toolTip").add("");
+                                  List<Object> mergedToolTips = (List<Object>)mergedUiElementDefValue.get("toolTip");
+                                  if(mergedToolTips == null) {
+                                	  mergedUiElementDefValue.put(
+                                		  "toolTip", 
+                                		  mergedToolTips = new ArrayList<Object>()
+                                	  );                                	  
                                   }
-                                  if(mergedUiElementFacade.attributeValues("toolTip").size() <= j) {
-                                	  mergedUiElementFacade.attributeValues("toolTip").add(
-                                		  mergedUiElementFacade.attributeValues("toolTip").get(fallbackLocaleIndex)
+                                  if(mergedToolTips.isEmpty()) {
+                                	  mergedToolTips.add("");
+                                  }
+                                  if(mergedToolTips.size() <= j) {
+                                	  mergedToolTips.add(
+                                		  mergedToolTips.get(fallbackLocaleIndex)
                                       );
                                   }                                 
                                   // overwrite label, shortLabel and toolTip with uiElement values if available
-                                  MappedRecord uiElement = uiElements.get(e.getKey());
-                                  ObjectHolder_2Facade uiElementFacade;
-                                  try {
-	                                  uiElementFacade = ObjectHolder_2Facade.newInstance(uiElement);
-                                  }
-                                  catch (ResourceException e0) {
-                                	  throw new ServiceException(e0);
-                                  }
-                                  if(uiElement != null) {
-                                      if(!uiElementFacade.attributeValues("label").isEmpty()) {
-                                          mergedUiElementFacade.attributeValues("label").set(
+                                  MappedRecord uiElementDef = uiElementDefs.get(e.getKey());
+                                  if(uiElementDef != null) {
+                                	  MappedRecord elementDefValue = Object_2Facade.getValue(uiElementDef);
+                                	  List<Object> labels = (List<Object>)elementDefValue.get("label");
+                                      if(labels != null && !labels.isEmpty()) {
+                                          mergedLabels.set(
                                               j,
-                                              uiElementFacade.attributeValue("label")
+                                              labels.get(0)
                                           );
                                       }
-                                      if(!uiElementFacade.attributeValues("shortLabel").isEmpty()) {
-                                          mergedUiElementFacade.attributeValues("shortLabel").set(
+                                      List<Object> shortLabels = (List<Object>)elementDefValue.get("shortLabel");
+                                      if(shortLabels != null && !shortLabels.isEmpty()) {
+                                          mergedShortLabels.set(
                                               j,
-                                              uiElementFacade.attributeValue("shortLabel")
+                                              shortLabels.get(0)
                                           );
                                       }
                                       // Take label of same locale as shortLabel fallback 
                                       // Do not take shortLabel of fallback locale 
                                       else {
-                                          mergedUiElementFacade.attributeValues("shortLabel").set(
+                                          mergedShortLabels.set(
                                               j,
-                                              mergedUiElementFacade.attributeValues("label").get(j)
+                                              mergedLabels.get(j)
                                           );                                      
                                       }
-                                      if(!uiElementFacade.attributeValues("toolTip").isEmpty()) {
-                                          mergedUiElementFacade.attributeValues("toolTip").set(
+                                      List<Object> toolTips = (List<Object>)elementDefValue.get("toolTip");
+                                      if(toolTips != null && !toolTips.isEmpty()) {
+                                          mergedToolTips.set(
                                               j,
-                                              uiElementFacade.attributeValue("toolTip")
+                                              toolTips.get(0)
                                           );
                                       }
                                   }
                               }
-                          }
-                          // add if it does not exist. Only add for locale=0 (en_US)
-                          else if(j == 0) {
-                              mergedUiElements.put(
-                                  e.getKey(),
-                                  e.getValue()
-                              );
-                          }
-                          // locale > 0 requires that locale=0 exists. Complain if it
-                          // does not
-                          else {
-                              AppLog.warning("entry " + e.getKey() + " of locale " + locale[j] + " has no corresponding entry for locale " + locale[0] + ". Not loading");
-                          }
+	                      }
                       }
                   }
                 }
-                catch(MalformedURLException e) {
+                catch(Exception e) {
                     throw new ServiceException(e);
                 }          
               }          
               // Store ui elements. First remove existing elements
               try {
                   String[] segmentName = this.getSegmentName(dir);
-                  RequestCollection store = new RequestCollection(
+                  DataproviderRequestProcessor store = new DataproviderRequestProcessor(
                       new ServiceHeader(),
                       this.uiRepository
                   );
                   // Assert existence of provider
                   try {
-                	  MappedRecord uiProvider = ObjectHolder_2Facade.newInstance(
+                	  MappedRecord uiProvider = Object_2Facade.newInstance(
                 		  this.providerPath,
                 		  "org:openmdx:base:Provider"
                 	  ).getDelegate();
@@ -441,7 +455,7 @@ public class UiLoader
                   catch(Exception e) {}
                   // Re-create segment
                   try {
-                	  MappedRecord uiSegment = ObjectHolder_2Facade.newInstance(
+                	  MappedRecord uiSegment = Object_2Facade.newInstance(
                 		  uiSegmentPath,
                 		  "org:openmdx:ui1:Segment"
                 	  ).getDelegate();
@@ -449,9 +463,10 @@ public class UiLoader
                   }
                   catch(Exception e) {}
                   // Store ui elements
-                  System.out.println("Storing " + mergedUiElements.size() + " ui elements");
+                  System.out.println(messagePrefix + "Storing " + mergedUiElementDefs.size() + " ui elements for segment " + uiSegmentPath);
+                  SysLog.info("Storing " + mergedUiElementDefs.size() + " ui elements for segment " + uiSegmentPath);
                   store.beginBatch();
-                  for(Iterator<MappedRecord> j = mergedUiElements.values().iterator(); j.hasNext(); ) {
+                  for(Iterator<MappedRecord> j = mergedUiElementDefs.values().iterator(); j.hasNext(); ) {
                       MappedRecord uiElement = j.next();
                       store.addCreateRequest(
                           uiElement
@@ -464,7 +479,7 @@ public class UiLoader
                   );
               }
               catch(ServiceException e) {
-                  AppLog.error("can not create ui config", e.getMessage());
+            	  SysLog.error("can not create ui config", e.getMessage());
               }              
               this.uiCRC.put(
                   dir,
@@ -472,6 +487,8 @@ public class UiLoader
               );
           }
         }    
+    	System.out.println(messagePrefix + "Done (" + loadedUiSegments.size() + " segments)");
+    	SysLog.info("Done", loadedUiSegments.size());        
         return new ArrayList<Path>(loadedUiSegments.values());
     }
 
@@ -480,7 +497,6 @@ public class UiLoader
     private final Layer_1 uiRepository;
     private transient PersistenceManager pm = null;
     private final Path providerPath;
-  
 }
 
 //--- End of File -----------------------------------------------------------

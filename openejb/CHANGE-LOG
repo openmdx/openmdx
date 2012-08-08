@@ -1,0 +1,65 @@
+
+                    =====================================
+                             CHANGE LOG openMDX
+                    =====================================
+
+
+==============================================================================
+Version 2.5.3+                                                      2009-11-05
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR10008958
+      Tomcat Connectors: pause / resume. Tomcat extension which allows to start 
+      multiple Tomcat instances with the same configuration and allow to stop / 
+      start the connectors of these instances individually.
+      
+      The class org.openmdx.catalina.core.ExtendedService allows to handle the 
+      requested scenario. Adapt the server.xml as follows:
+
+      <Server port="${tomcat.server.port}" shutdown="SHUTDOWN">
+      ...
+      <Service name="Catalina" port="${tomcat.service.port}" className="org.openmdx.catalina.core.ExtendedService">
+      ...
+
+      The system properties are set per Tomcat instance, e.g.
+
+      Instance A:
+      * -Dtomcat.server.port=8005
+      * -Dtomcat.service.port=8006
+
+      Instance B:
+      * -Dtomcat.server.port=8105
+      * -Dtomcat.service.port=8106
+
+      If instance A and instance B have to run with different versions of EARs/WARs 
+      create a Tomcat directory for each instance.
+
+      Start instance A. The connectors are started. 
+      Start instance B. The connectors can not be started because of port conflicts.
+
+      Switch from instance A to B as follows:
+      * telnet localhost 8006. Enter command stopConnectors.
+      * telnet localhost 8106. Enter command startConnectors.
+      
+      If the property org.openmdx.catalina.core.ExtendedService.autostartConnectors is unset 
+      or the property is set to true then the connectors will be started at startup of Tomcat. 
+      Otherwise the connectors are not started.      
+        
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none     
+       
+2.1.  FIXED BUGS
+      none
+      
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+   
+---

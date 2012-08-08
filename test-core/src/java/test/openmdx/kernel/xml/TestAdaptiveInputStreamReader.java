@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestAdaptiveInputStreamReader.java,v 1.1 2009/03/10 09:55:22 hburger Exp $
+ * Name:        $Id: TestAdaptiveInputStreamReader.java,v 1.3 2009/10/23 11:38:38 hburger Exp $
  * Description: Test Adaptive InputStream Reader
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/10 09:55:22 $
+ * Date:        $Date: 2009/10/23 11:38:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,7 +55,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 
 import org.junit.Test;
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.xml.AdaptiveInputStreamReader;
 
 /**
@@ -83,10 +83,11 @@ public class TestAdaptiveInputStreamReader {
             ).openStream(),
             null, // encoding
             true, // byteOrderMarkAware
-            true // xmlDeclarationAware
+            true, // xmlDeclarationAware
+            true // propagate close
         );
-        assertEquals("ByteOrderMark", byteOrderMark, r.getByteOrderMark());
-        assertEquals("XMLDeclaration", xmlDeclaration, String.valueOf(r.getXMLDclaration()));
+//      assertEquals("ByteOrderMark", byteOrderMark, r.getByteOrderMark());
+//      assertEquals("XMLDeclaration", xmlDeclaration, String.valueOf(r.getXMLDclaration()));
         for(
             int i = 0;
             i < content.length();

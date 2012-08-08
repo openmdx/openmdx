@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TogetherMapper_1.java,v 1.6 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: TogetherMapper_1.java,v 1.7 2010/04/13 17:37:55 wfro Exp $
  * Description: TogetherCppExternalizer_1
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2010/04/13 17:37:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -337,7 +337,7 @@ public class TogetherMapper_1
       ) {
         // no composite or shared aggregation in both directions
         // Have to do some guess work!!!!
-        SysLog.warning(
+        SysLog.detail(
           "Have no indication to which class the association must be assigned; both ends are possible",
           Arrays.asList(
               "end1=" + modelRefAssociationEnd.objGetValue("qualifiedName") + "; " + 
@@ -352,7 +352,7 @@ public class TogetherMapper_1
           );
         } 
         else {
-          SysLog.warning("The association does NOT belong to the current package and is therefore ignored (assume that association will be handled at owner package). Association", modelAssociation.objGetValue("qualifiedName"));
+          SysLog.detail("The association does NOT belong to the current package and is therefore ignored (assume that association will be handled at owner package). Association", modelAssociation.objGetValue("qualifiedName"));
           return false;
         }
       } 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultDataBinding.java,v 1.4 2009/05/01 22:08:09 wfro Exp $
+ * Name:        $Id: DefaultDataBinding.java,v 1.5 2010/02/04 11:25:03 wfro Exp $
  * Description: DefaultDataBinding 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/01 22:08:09 $
+ * Date:        $Date: 2010/02/04 11:25:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,7 @@ import javax.jmi.reflect.RefObject;
  *
  */
 public class DefaultDataBinding 
-    implements DataBinding_1_0 {
+    implements DataBinding_2_0 {
 
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
@@ -76,7 +76,8 @@ public class DefaultDataBinding
      */
     public Object getValue(
         RefObject object, 
-        String qualifiedFeatureName
+        String qualifiedFeatureName,
+        ApplicationContext app
     ) {
         try {
             Object value = object.refGetValue(
@@ -96,7 +97,8 @@ public class DefaultDataBinding
     public void setValue(
         RefObject object, 
         String qualifiedFeatureName, 
-        Object newValue
+        Object newValue,
+        ApplicationContext app
     ) {
         if(newValue instanceof Collection) {
             Collection<Object> newValues = valueAsCollection(newValue);

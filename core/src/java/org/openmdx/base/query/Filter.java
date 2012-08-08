@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.13 2009/05/16 22:17:51 wfro Exp $
+ * Name:        $Id: Filter.java,v 1.17 2009/12/27 23:39:43 wfro Exp $
  * Description: Filter
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:51 $
+ * Date:        $Date: 2009/12/27 23:39:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,10 +55,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.resource.ResourceException;
 
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.Records;
 import org.w3c.cci2.AnyTypePredicate;
 
@@ -70,7 +72,6 @@ import org.w3c.cci2.AnyTypePredicate;
  * The Filter class is bean-compliant. Hence, it can be externalized
  * with the XMLDecoder.
  * 
- * @see org.openmdx.base.collection.FilterableMap
  * @see java.beans.XMLDecoder
  * @see java.beans.XMLEncoder
  */
@@ -95,9 +96,8 @@ public class Filter
     public Filter(
         Condition[] conditions
     ) {
-        this.conditions = new ArrayList<Condition>();
+        this();
         this.setCondition(conditions);
-        this.orderSpecifiers = new ArrayList<OrderSpecifier>();
     }
 
     //-------------------------------------------------------------------------
@@ -109,9 +109,8 @@ public class Filter
         Condition[] conditions,
         OrderSpecifier[] orderSpecifiers
     ) {
-        this.conditions = new ArrayList<Condition>();
+        this();
         this.setCondition(conditions);
-        this.orderSpecifiers = new ArrayList<OrderSpecifier>();
         this.setOrderSpecifier(orderSpecifiers);
     }
 
@@ -120,7 +119,7 @@ public class Filter
          FilterProperty[] filterProperties,
          AttributeSpecifier[] attributeSpecifiers
     ) {
-        this.conditions = new ArrayList<Condition>();
+        this();
         if(filterProperties != null) {
             for(FilterProperty p: filterProperties) {
                 this.conditions.add(
@@ -128,7 +127,6 @@ public class Filter
                 );
             }
         }
-        this.orderSpecifiers = new ArrayList<OrderSpecifier>();
         if(attributeSpecifiers != null) {
             for(AttributeSpecifier a: attributeSpecifiers) {
                 this.orderSpecifiers.add(
@@ -139,6 +137,13 @@ public class Filter
                 );
             }
         }
+    }
+    
+    //-------------------------------------------------------------------------
+    public void addCondition(
+        Condition condition
+    ) {
+        this.conditions.add(condition);
     }
     
     //-------------------------------------------------------------------------
@@ -194,6 +199,13 @@ public class Filter
     }
 
     //-------------------------------------------------------------------------
+    public void addOrderSpecifier(
+        OrderSpecifier orderSpecifier
+    ) {
+        this.orderSpecifiers.add(orderSpecifier);
+    }
+    
+    //-------------------------------------------------------------------------
     /**
      * Returns the order specifier at position index.
      * @param index - index of element to return. 
@@ -243,7 +255,7 @@ public class Filter
             Arrays.asList(orderSpecifiers)
         );
     }
-
+     
     //-------------------------------------------------------------------------
     public String toString(
     ) {
@@ -320,11 +332,33 @@ public class Filter
     public void notEqualTo(Object operand) {
         throw new UnsupportedOperationException();
     }
+
+    //-------------------------------------------------------------------------
+    public static List<FilterProperty> getFilterProperties(
+        Filter filter
+    ) throws ServiceException {
+        if(filter != null) {
+            List<FilterProperty> filterProperties = new ArrayList<FilterProperty>();
+            for(Condition condition : filter.getCondition()) {
+                filterProperties.add(
+                    new FilterProperty(
+                        condition.getQuantor(),
+                        condition.getFeature(),
+                        FilterOperators.fromString(condition.getName()),
+                        condition.getValue()
+                    )
+                );
+            }
+            return filterProperties;
+        }
+        return Collections.emptyList();
+    }
     
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3257285842266371888L;
+    
     private final List<Condition> conditions;
     private final List<OrderSpecifier> orderSpecifiers;
     private static final String[] TO_STRING_FIELDS = {

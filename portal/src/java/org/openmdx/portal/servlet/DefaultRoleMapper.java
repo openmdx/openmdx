@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultRoleMapper.java,v 1.20 2009/04/07 19:29:13 hburger Exp $
+ * Name:        $Id: DefaultRoleMapper.java,v 1.21 2009/06/16 17:08:26 wfro Exp $
  * Description: DefaultRoleMapper 
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/07 19:29:13 $
+ * Date:        $Date: 2009/06/16 17:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,9 +64,9 @@ import java.util.List;
 import javax.jdo.PersistenceManager;
 
 import org.oasisopen.cci2.QualifierType;
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.log.SysLog;
 
 public class DefaultRoleMapper
     implements Serializable, RoleMapper_1_0 {
@@ -80,8 +80,8 @@ public class DefaultRoleMapper
         try {
             String loginPrincipalName = new Path(loginPrincipal.refMofId()).getBase();            
             Path loginPrincipalIdentity = loginPrincipal.refGetPath();
-            AppLog.detail("Group membership for segment", segmentName);
-            AppLog.detail("Group membership for principal", loginPrincipalIdentity);
+            SysLog.detail("Group membership for segment", segmentName);
+            SysLog.detail("Group membership for principal", loginPrincipalIdentity);
             org.openmdx.security.realm1.jmi1.Principal principal = 
                 (org.openmdx.security.realm1.jmi1.Principal)pm.getObjectById(
                     loginPrincipalIdentity.getPrefix(loginPrincipalIdentity.size()-3).getDescendant(
@@ -91,7 +91,7 @@ public class DefaultRoleMapper
             return principal.getIsMemberOf();
         }
         catch(Exception e) {
-            AppLog.detail("Can not retrieve group membership", e);
+        	SysLog.detail("Can not retrieve group membership", e);
             new ServiceException(e).log();
             return null;
         }
@@ -106,7 +106,7 @@ public class DefaultRoleMapper
         try {
             org.openmdx.security.realm1.cci2.Principal loginPrincipal = realm.getPrincipal().get(QualifierType.REASSIGNABLE, principalName);
             if(loginPrincipal == null) {
-                AppLog.info("principal not found in realm", "realm=" + realm + ", principal=" + principalName);
+            	SysLog.info("principal not found in realm", "realm=" + realm + ", principal=" + principalName);
                 return null;
             }
             boolean disabled = false;
@@ -151,12 +151,12 @@ public class DefaultRoleMapper
             long leastRecentLoginAt = 0L;
             Collection<org.openmdx.security.realm1.jmi1.Realm> realms = realmSegment.getRealm();
             for(org.openmdx.security.realm1.jmi1.Realm realm: realms) {
-                AppLog.detail("Checking realm", realm);
+            	SysLog.detail("Checking realm", realm);
                 // Skip login realm
                 if(!realm.refGetPath().equals(loginRealm.refGetPath())) {
                     for(org.openmdx.security.realm1.jmi1.Principal loginPrincipal: allLoginPrincipals) {
                         String principalId = loginPrincipal.refGetPath().getBase();
-                        AppLog.detail("Checking principal", principalId);
+                        SysLog.detail("Checking principal", principalId);
                         org.openmdx.security.realm1.jmi1.Principal principal = 
                             (org.openmdx.security.realm1.jmi1.Principal)this.checkPrincipal(realm, principalId, pm);
                         String realmName = realm.getName();
@@ -168,7 +168,7 @@ public class DefaultRoleMapper
                                     realmName,
                                     pm
                                 );
-                                AppLog.detail("Principal groups", groups);
+                                SysLog.detail("Principal groups", groups);
                                 if(groups != null) {
                                     long lastLoginAt = 0L;
                                     try {
@@ -179,12 +179,12 @@ public class DefaultRoleMapper
                                     } 
                                     catch(Exception e) {}
                                     String roleId = principalId + "@" + realmName;
-                                    AppLog.detail("Checking role", roleId);
+                                    SysLog.detail("Checking role", roleId);
                                     if(
                                         !userRoles.contains(roleId) &&
                                         (!ROOT_REALM_NAME.equals(realmName) || ROOT_PRINCIPAL_NAME.equals(principalId))                                    
                                     ) {
-                                        AppLog.detail("Adding role", roleId);
+                                    	SysLog.detail("Adding role", roleId);
                                         userRoles.add(
                                             lastLoginAt > leastRecentLoginAt ? 0 : userRoles.size(),
                                             roleId
@@ -192,12 +192,12 @@ public class DefaultRoleMapper
                                     }
                                     try {
                                         for(org.openmdx.security.realm1.jmi1.Group userGroup: groups) {
-                                            AppLog.detail("Checking group", userGroup);
+                                        	SysLog.detail("Checking group", userGroup);
                                             String userGroupIdentity = userGroup.refGetPath().getBase();
                                             if(USER_GROUP_ADMINISTRATORS.equals(userGroupIdentity)) {
                                                 roleId = ADMIN_PRINCIPAL_PREFIX + realmName + "@" + realmName;
                                                 if(!userRoles.contains(roleId)) {
-                                                    AppLog.detail("Adding role", roleId);
+                                                	SysLog.detail("Adding role", roleId);
                                                     userRoles.add(
                                                         lastLoginAt > leastRecentLoginAt ? 1 : userRoles.size(),
                                                         roleId

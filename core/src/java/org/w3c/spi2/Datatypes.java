@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Datatypes.java,v 1.2 2009/03/20 15:05:46 hburger Exp $
+ * Name:        $Id: Datatypes.java,v 1.5 2010/04/26 16:06:45 hburger Exp $
  * Description: Date 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/20 15:05:46 $
+ * Date:        $Date: 2010/04/26 16:06:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,7 +53,6 @@ package org.w3c.spi2;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -66,7 +65,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
 import org.openmdx.base.text.conversion.UUIDConversion;
-import org.openmdx.base.text.format.DateFormat;
+import org.openmdx.kernel.exception.BasicException;
 import org.w3c.spi.DatatypeFactories;
 
 /**
@@ -75,9 +74,10 @@ import org.w3c.spi.DatatypeFactories;
 public class Datatypes {
     
     /**
-     * Avoid instantiation 
+     * Constructor 
      */
-    protected Datatypes() {
+    private Datatypes() {
+        // Avoid instantiation
     }
 
     /**
@@ -91,7 +91,6 @@ public class Datatypes {
      * @exception IllegalArgumentException if the string can't be parsed according to the
      * requested type
      */
-    @SuppressWarnings("unchecked")
     public static <V> V create(
         Class<V> valueClass,
         String string
@@ -99,51 +98,56 @@ public class Datatypes {
         if(string == null) {
             return null;
         } else if (valueClass == Long.class) {
-            return (V) Long.valueOf(string);
+            return valueClass.cast(Long.valueOf(string));
         } else if (valueClass == Integer.class) {
-            return (V) Integer.valueOf(string);
+            return valueClass.cast(Integer.valueOf(string));
         } else if (valueClass == Short.class) {
-            return (V) Short.valueOf(string);
+            return valueClass.cast(Short.valueOf(string));
         } else if (valueClass == String.class) {
-            return (V) string;
+            return valueClass.cast(string);
         } else if(valueClass == Boolean.class) {
-            return (V) Boolean.valueOf(string);
+            return valueClass.cast(Boolean.valueOf(string));
         } else if(valueClass == BigDecimal.class) {
-            return (V) new BigDecimal(string);
+            return valueClass.cast(new BigDecimal(string));
         } else if(valueClass == BigInteger.class) {
-            return (V) new BigInteger(string);
+            return valueClass.cast(new BigInteger(string));
         } else if (valueClass == URI.class) {
-            return (V) URI.create(string); 
+            return valueClass.cast(URI.create(string));
         } else if (valueClass == Date.class) {
-            try {
-                return (V) DateFormat.getInstance().parse(
-                    toBasicFormat(string)
-                ); 
-            } catch (ParseException exception) {
-                throw new IllegalArgumentException(
-                    "Unable to parse the given date time value: " + string,
-                    exception
-                );
-            }
+            return valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDateTime(string));
         } else if (valueClass == UUID.class){
-            return (V) UUIDConversion.fromString(string);
+            return valueClass.cast(UUIDConversion.fromString(string));
         } else if (valueClass == Duration.class){
-            return (V) DatatypeFactories.xmlDatatypeFactory().newDuration(string);
+            return valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDuration(string));
         } else if (valueClass == XMLGregorianCalendar.class){
-            return (V) DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
-                toExtendedFormat(string)
-            );
+            return valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDate(string));
         } else if (valueClass == Oid.class){
             try {
-                return (V) new Oid(string);
+                return valueClass.cast(new Oid(string));
             } catch (GSSException exception) {
-                throw new IllegalArgumentException(
-                    "Unable to parse the given OID value: " + string,
-                    exception
+                throw BasicException.initHolder(
+                    new IllegalArgumentException(
+                        "Unable to parse the given OID value",
+                        BasicException.newEmbeddedExceptionStack(
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.PARSE_FAILURE,
+                            new BasicException.Parameter("class", valueClass.getName()),
+                            new BasicException.Parameter("value", string)
+                        )
+                    )
                 );
             }
-        } else throw new UnsupportedOperationException(
-            "The value class " + valueClass.getName() + " is not supported by " + Datatypes.class.getName()
+        } else throw BasicException.initHolder(
+            new UnsupportedOperationException(
+                "Unsupported value class",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    new BasicException.Parameter("class", valueClass.getName()),
+                    new BasicException.Parameter("value", string)
+                )
+            )
         );
     }
 
@@ -192,49 +196,6 @@ public class Datatypes {
         return new Structures.Member<T>(name, value);
     }
         
-    /**
-     * Normalize calendar dates to extended format
-     * 
-     * @param date a calendar date in either basic or extended format
-     * 
-     * @return calendar date in extended format
-     */
-    private static String toExtendedFormat(
-        String date
-    ){
-        return date.length() == 8  && date.indexOf('-') < 0 ? new StringBuilder(
-            date.substring(0, 4)
-        ).append(
-            '-'
-        ).append(
-            date.substring(4, 6)
-        ).append(
-            '-'
-        ).append(
-            date.substring(6)
-        ).toString() : date;
-    }
-
-    /**
-     * Normalize date time values to basic format
-     * 
-     * @param date time value in either basic or extended format
-     * 
-     * @return date time values in basic format
-     */
-    private static String toBasicFormat(
-        String dateTime
-    ){
-        return dateTime.replace(
-            "-", ""
-        ).replace(
-            ":", ""
-        ).replace(
-            ',', 
-            '.'
-        );
-    }
-    
     /**
      * Create a qualified type name
      * 

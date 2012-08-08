@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: XMLGregorianCalendarMarshaller.java,v 1.1 2009/05/26 14:31:21 wfro Exp $
+ * Name:        $Id: XMLGregorianCalendarMarshaller.java,v 1.7 2009/12/14 15:00:31 hburger Exp $
  * Description: XMLGregorianCalendarMarshaller 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:21 $
+ * Date:        $Date: 2009/12/14 15:00:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,57 +59,135 @@ import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.text.format.DatatypeFormat;
-import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi2.Datatypes;
 
 /**
  * XMLGregorianCalendarMarshaller
  */
-@SuppressWarnings("unchecked")
 public class XMLGregorianCalendarMarshaller {
 
     /**
      * Constructor 
      *
-     * @param timeType
-     * @param dateType
-     * @param dateTimeType
-     * @param xmlDatatypes
-     * 
+     * @param dateTimeZone
+     * @param sqlDataTypes
+     * @param dateTimePrecision 
      * @throws ServiceException
      */
     protected XMLGregorianCalendarMarshaller(
         String dateTimeZone,
-        boolean xmlDatatypes,
-        DataTypes sqlDataTypes
+        DataTypes sqlDataTypes,
+        TimeUnit dateTimePrecision
     ) throws ServiceException {
         this.sqlDataTypes = sqlDataTypes;
-        this.datatypeFormat = xmlDatatypes ? new DatatypeFormat[]{
-            DatatypeFormat.newInstance(false), // EXTENDED
-            DatatypeFormat.newInstance(true) // BASIC
-        } : null;
-            this.xmlDatatypes = xmlDatatypes;
-            this.dateTimeFormatBefore1970 = new SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss.SSS"
-            );
-            this.dateTimeFormatBefore1970.setTimeZone(
-                XMLGregorianCalendarMarshaller.UTC
-            );
-            this.dateTimeFormatSince1970 = new SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss.SSS"
-            );
-            this.dateTimeFormatSince1970.setTimeZone(
-                TimeZone.getTimeZone(dateTimeZone)
-            );
+        this.dateTimeFormatBefore1970 = new SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss.SSS"
+        );
+        this.dateTimeFormatBefore1970.setTimeZone(
+            XMLGregorianCalendarMarshaller.UTC
+        );
+        this.dateTimeFormatSince1970 = new SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss"
+        );
+        this.dateTimeFormatSince1970.setTimeZone(
+            TimeZone.getTimeZone(dateTimeZone)
+        );
+        this.dateTimePrecision = dateTimePrecision;
     }
+
+    /**
+     * The precision used for date/time values since <code>1970-01-01T00:00:00Z</code>.
+     */
+    private final TimeUnit dateTimePrecision;
+    
+    /**
+     * 
+     */
+    private DataTypes sqlDataTypes;
+
+    /**
+     * The type used to store <code>org::w3c::time</code> values, i.e. one of<ul>
+     * <li><code>STANDARD</code>
+     * <li><code>TIME</code>
+     * <li><code>CHARACTER</code> <i>(default)</i>
+     * <li><code>NUMERIC</code>
+     * </ul>
+     * 
+     * @see LayerConfigurationEntries#TIME_TYPE_STANDARD
+     * @see LayerConfigurationEntries#TIME_TYPE_TIME
+     * @see LayerConfigurationEntries#TIME_TYPE_CHARACTER
+     * @see LayerConfigurationEntries#TIME_TYPE_NUMERIC
+     */
+    private static final List<String> TIME_TYPES = Arrays.asList(
+        LayerConfigurationEntries.TIME_TYPE_STANDARD,
+        LayerConfigurationEntries.TIME_TYPE_TIME,
+        LayerConfigurationEntries.TIME_TYPE_CHARACTER,
+        LayerConfigurationEntries.TIME_TYPE_NUMERIC
+    );
+
+    /**
+     * The type used to store <code>org::w3c::date</code> values, i.e. one of<ul>
+     * <li><code>STANDARD</code>
+     * <li><code>DATE</code>
+     * <li><code>CHARACTER</code> <i>(default)</i>
+     * </ul>
+     * 
+     * @see LayerConfigurationEntries#DATE_TYPE_STANDARD
+     * @see LayerConfigurationEntries#DATE_TYPE_DATE
+     * @see LayerConfigurationEntries#DATE_TYPE_CHARACTER
+     */
+    private static final List<String> DATE_TYPES = Arrays.asList(
+        LayerConfigurationEntries.DATE_TYPE_STANDARD,
+        LayerConfigurationEntries.DATE_TYPE_DATE,
+        LayerConfigurationEntries.DATE_TYPE_CHARACTER
+    );
+
+    /**
+     * The type used to store <code>org::w3c::dateTime</code> values, i.e. one of<ul>
+     * <li><code>STANDARD</code>
+     * <li><code>TIMESTAMP</code>
+     * <li><code>TIMESTAMP_WITH_TIMEZONE</code>
+     * <li><code>CHARACTER</code> <i>(default)</i>
+     * <li><code>NUMERIC</code>
+     * </ul>
+     * @see LayerConfigurationEntries#DATETIME_TYPE_STANDARD
+     * @see LayerConfigurationEntries#DATETIME_TYPE_TIMESTAMP
+     * @see LayerConfigurationEntries#DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE
+     * @see LayerConfigurationEntries#DATETIME_TYPE_CHARACTER
+     * @see LayerConfigurationEntries#DATETIME_TYPE_NUMERIC
+     */
+    private static final List<String> DATETIME_TYPES = Arrays.asList(
+        LayerConfigurationEntries.DATETIME_TYPE_STANDARD,
+        LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP,
+        LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE,
+        LayerConfigurationEntries.DATETIME_TYPE_CHARACTER,
+        LayerConfigurationEntries.DATETIME_TYPE_NUMERIC            
+    );
+
+    /**
+     * 
+     */
+    protected final static TimeZone UTC = TimeZone.getTimeZone("UTC");
+
+    /**
+     * For values >= 1979-01-01T00:00:00.000Z
+     */
+    private final SimpleDateFormat dateTimeFormatSince1970;
+
+    /**
+     * For values < 1979-01-01T00:00:00.000Z
+     */
+    private final SimpleDateFormat dateTimeFormatBefore1970;
 
     /**
      * Factory method
@@ -118,7 +196,7 @@ public class XMLGregorianCalendarMarshaller {
      * @param dateType
      * @param dateTimeType
      * @param dateTimeZone 
-     * @param xmlDatatypes
+     * @param dateTimePrecision TODO
      * @return a new XML GregorianCalendar Marshaller Instance
      * 
      * @throws ServiceException
@@ -128,7 +206,7 @@ public class XMLGregorianCalendarMarshaller {
         String dateType,
         String dateTimeType, 
         String dateTimeZone, 
-        boolean xmlDatatypes,
+        String dateTimePrecision,
         DataTypes sqlDataTypes
     ) throws ServiceException{
         if(!TIME_TYPES.contains(timeType)) throw new ServiceException(
@@ -152,111 +230,25 @@ public class XMLGregorianCalendarMarshaller {
             new BasicException.Parameter("supported", DATETIME_TYPES),
             new BasicException.Parameter("requested", dateTimeType)
         );
+        TimeUnit precision;
+        try {
+            precision = TimeUnit.valueOf(dateTimePrecision);
+        } catch (RuntimeException exception) {
+            throw new ServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                "Unsupported dateTimePrecision value",
+                new BasicException.Parameter("supported", TimeUnit.SECONDS, TimeUnit.MILLISECONDS, TimeUnit.MICROSECONDS, TimeUnit.NANOSECONDS),
+                new BasicException.Parameter("requested", dateTimePrecision)
+            );
+        }
         return new XMLGregorianCalendarMarshaller(
             dateTimeZone,
-            xmlDatatypes,
-            sqlDataTypes
+            sqlDataTypes,
+            precision
         );
     }
-
-    /**
-     * datatypeFormat index
-     */
-    private final static int EXTENDED = 0;
-
-    /**
-     * datatypeFormat index
-     */
-    private final static int BASIC = 1;
-
-    /**
-     * 
-     */
-    private DataTypes sqlDataTypes;
-
-    /**
-     * The type used to store <code>org::w3c::time</code> values, i.e. one of<ul>
-     * <li><code>STANDARD</code>
-     * <li><code>TIME</code>
-     * <li><code>CHARACTER</code> <i>(default)</i>
-     * <li><code>NUMERIC</code>
-     * </ul>
-     * 
-     * @see LayerConfigurationEntries#TIME_TYPE_STANDARD
-     * @see LayerConfigurationEntries#TIME_TYPE_TIME
-     * @see LayerConfigurationEntries#TIME_TYPE_CHARACTER
-     * @see LayerConfigurationEntries#TIME_TYPE_NUMERIC
-     */
-    private static final List TIME_TYPES = Arrays.asList(
-        LayerConfigurationEntries.TIME_TYPE_STANDARD,
-        LayerConfigurationEntries.TIME_TYPE_TIME,
-        LayerConfigurationEntries.TIME_TYPE_CHARACTER,
-        LayerConfigurationEntries.TIME_TYPE_NUMERIC
-    );
-
-    /**
-     * The type used to store <code>org::w3c::date</code> values, i.e. one of<ul>
-     * <li><code>STANDARD</code>
-     * <li><code>DATE</code>
-     * <li><code>CHARACTER</code> <i>(default)</i>
-     * </ul>
-     * 
-     * @see LayerConfigurationEntries#DATE_TYPE_STANDARD
-     * @see LayerConfigurationEntries#DATE_TYPE_DATE
-     * @see LayerConfigurationEntries#DATE_TYPE_CHARACTER
-     */
-    private static final List DATE_TYPES = Arrays.asList(
-        LayerConfigurationEntries.DATE_TYPE_STANDARD,
-        LayerConfigurationEntries.DATE_TYPE_DATE,
-        LayerConfigurationEntries.DATE_TYPE_CHARACTER
-    );
-
-    /**
-     * The type used to store <code>org::w3c::dateTime</code> values, i.e. one of<ul>
-     * <li><code>STANDARD</code>
-     * <li><code>TIMESTAMP</code>
-     * <li><code>TIMESTAMP_WITH_TIMEZONE</code>
-     * <li><code>CHARACTER</code> <i>(default)</i>
-     * <li><code>NUMERIC</code>
-     * </ul>
-     * @see LayerConfigurationEntries#DATETIME_TYPE_STANDARD
-     * @see LayerConfigurationEntries#DATETIME_TYPE_TIMESTAMP
-     * @see LayerConfigurationEntries#DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE
-     * @see LayerConfigurationEntries#DATETIME_TYPE_CHARACTER
-     * @see LayerConfigurationEntries#DATETIME_TYPE_NUMERIC
-     */
-    private static final List DATETIME_TYPES = Arrays.asList(
-        LayerConfigurationEntries.DATETIME_TYPE_STANDARD,
-        LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP,
-        LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE,
-        LayerConfigurationEntries.DATETIME_TYPE_CHARACTER,
-        LayerConfigurationEntries.DATETIME_TYPE_NUMERIC            
-    );
-
-    /**
-     * Non-<code>null</code> if <code>xmlDatatypes</code> is <code>true</code>.
-     */
-    private final DatatypeFormat[] datatypeFormat;
-
-    /**
-     * The <code>xmlDatatypes</code> flag.
-     */
-    private final boolean xmlDatatypes;
-
-    /**
-     * 
-     */
-    protected final static TimeZone UTC = TimeZone.getTimeZone("UTC");
-
-    /**
-     * For values >= 1979-01-01T00:00:00.000Z
-     */
-    private final SimpleDateFormat dateTimeFormatSince1970;
-
-    /**
-     * For values < 1979-01-01T00:00:00.000Z
-     */
-    private final SimpleDateFormat dateTimeFormatBefore1970;
 
     /**
      * 
@@ -301,9 +293,14 @@ public class XMLGregorianCalendarMarshaller {
             } else if (DatatypeConstants.DATETIME.equals(schemaType)) {
                 String dateTimeType = sqlDataTypes.getDateTimeType(connection).intern();
                 if(dateTimeType == LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP) {
-                    return new Timestamp(
+                    Timestamp timestamp = new Timestamp(
                         value.toGregorianCalendar().getTimeInMillis()
                     );
+                    BigDecimal fractionalSeconds = value.getFractionalSecond();
+                    if(fractionalSeconds != null && fractionalSeconds.scale() > 3) {
+                        timestamp.setNanos(fractionalSeconds.scaleByPowerOfTen(9).intValue());
+                    }
+                    return timestamp;
                 } else if(dateTimeType == LayerConfigurationEntries.DATETIME_TYPE_TIMESTAMP_WITH_TIMEZONE) {
                     return sqlDateTime(value, true);
                 } else if(dateTimeType == LayerConfigurationEntries.DATETIME_TYPE_NUMERIC) {
@@ -346,12 +343,30 @@ public class XMLGregorianCalendarMarshaller {
         boolean withTimeZone
     ){
         long millisecondsSince1970 = xmlDateTime.toGregorianCalendar().getTimeInMillis();
-        SimpleDateFormat format = millisecondsSince1970 < 0 ? this.dateTimeFormatBefore1970 : this.dateTimeFormatSince1970;
-        String sqlDateTime = format.format(new Date(millisecondsSince1970));
-        return withTimeZone ? 
-            sqlDateTime + ' ' + format.getTimeZone().getID() :
-                sqlDateTime;
-
+        SimpleDateFormat format;
+        String part1;
+        if(millisecondsSince1970 < 0){
+            format = this.dateTimeFormatBefore1970; // including fractional part in MILLISECONDS precision
+            part1 = "";
+        } else {
+            format = this.dateTimeFormatSince1970; // excluding fractional part
+            switch(this.dateTimePrecision) {
+                case NANOSECONDS: 
+                    part1 = "." + String.valueOf(1000000000 + xmlDateTime.getFractionalSecond().movePointRight(9).intValue()).substring(1);
+                    break;
+                case MICROSECONDS:
+                    part1 = "." + String.valueOf(1000000 + xmlDateTime.getFractionalSecond().movePointRight(6).intValue()).substring(1);
+                    break;
+                case MILLISECONDS:
+                    part1 = "." + String.valueOf(1000 + xmlDateTime.getFractionalSecond().movePointRight(3).intValue()).substring(1);
+                    break;
+                case SECONDS: default: 
+                    part1 = "";
+            }
+        }
+        String part2 = withTimeZone ? " " + format.getTimeZone().getID() : ""; 
+        String part0 = format.format(new Date(millisecondsSince1970));
+        return part0 + part1 + part2;
     }
 
     /**
@@ -364,59 +379,62 @@ public class XMLGregorianCalendarMarshaller {
         Object source
     ) throws ServiceException {
         if(source instanceof String) {
-            String value = ((String) source).replaceFirst(" ", "T");
-            boolean extended = value.indexOf('-') >= 0 || value.indexOf(':') >= 0;
-            return this.datatypeFormat == null ?
-                (extended ? value.replaceAll("[:\\-]", "") : value ) :
-                    (this.datatypeFormat[extended ? EXTENDED : BASIC].marshal(value));
+            return parse(((String) source).replaceFirst(" ", "T"));
         } else if(source instanceof Time) {
-            String value = "T" + source;
-            return this.datatypeFormat == null ?
-                value.replaceAll(":", "") :
-                    this.datatypeFormat[EXTENDED].marshal(value);
+            return parse("T" + source);
         } else if (source instanceof Timestamp) {
             Timestamp value = (Timestamp) source;
             long milliseconds = value.getTime();
-            if(this.xmlDatatypes) {
-                java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
-                calendar.setTimeInMillis(milliseconds);
-                XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar); 
-                target.setFractionalSecond(
-                    // JAXP 1.4.0 issue
+            java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
+            calendar.setTimeInMillis(milliseconds);
+            XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar); 
+            switch(this.dateTimePrecision){
+                case NANOSECONDS:
+                    //
+                    // Be aware JAXP 1.4.0 issue:
                     // we get E notation of BigDecimal if (-scale + coeff.length-1) < -6
-                    // Adjust to micros so we never get E notation
-                    BigDecimal.valueOf(value.getNanos() / 1000, 6)
-                );
-                return target;
-            } else {
-                return DateFormat.getInstance().format(
-                    new java.util.Date(milliseconds)
-                );
+                    //
+                    target.setFractionalSecond(BigDecimal.valueOf(value.getNanos(), 9));
+                    break;
+                case MICROSECONDS:
+                    target.setFractionalSecond(BigDecimal.valueOf(value.getNanos() / 1000, 6));
+                    break;
+                case SECONDS:
+                    target.setFractionalSecond(BigDecimal.ZERO);
+                    break;
             }
+            return target;
         } else if (source instanceof Date) {
-            String value = source.toString();
-            return this.datatypeFormat == null ?
-                value.replaceAll("-", "") :
-                    this.datatypeFormat[EXTENDED].marshal(value);
+            return parse(source.toString());
         } else if (source instanceof BigDecimal) {
             BigDecimal value = (BigDecimal)source;
             long milliseconds = value.movePointRight(3).longValue();
-            if(this.xmlDatatypes) {
-                java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
-                calendar.setTimeInMillis(milliseconds);
-                XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar); 
-                target.setFractionalSecond(
-                    value.subtract(BigDecimal.valueOf(milliseconds / 1000))
-                );
-                return target;
-            } else {
-                return DateFormat.getInstance().format(
-                    new java.util.Date(milliseconds)
-                );
-            }
+            java.util.GregorianCalendar calendar = new GregorianCalendar(UTC);
+            calendar.setTimeInMillis(milliseconds);
+            XMLGregorianCalendar target = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(calendar); 
+            target.setFractionalSecond(
+                value.subtract(BigDecimal.valueOf(milliseconds / 1000))
+            );
+            return target;
         } else {
             return source;
         }
     }
 
+    /**
+     * Unmarshal an XML datatype value
+     * 
+     * @param value
+     * 
+     * @return the corresponding datatype value
+     */
+    private Object parse(
+        String value
+    ){
+        return 
+            value.startsWith("P") || value.startsWith("-P") ? Datatypes.create(Duration.class, value) : 
+            value.indexOf('T') < 0 ? Datatypes.create(XMLGregorianCalendar.class, value) : 
+            Datatypes.create(java.util.Date.class, value);
+    }
+       
 }

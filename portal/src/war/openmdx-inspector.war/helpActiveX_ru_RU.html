@@ -20,56 +20,56 @@
   </td>
 </tr>
 </table>
-<p>Use of features based on ActiveX controls requires that<br />
+<p>Использование особенностей, основанных на средствах управления ActiveX, требует чтобы<br />
 <ul>
-  <li>your browser is <strong>capable of handling ActiveX controls</strong> (e.g. Internet Explorer on MS Windows) and</li>
-  <li>security settings are such that <strong>permission is granted to load/execute ActiveX controls</strong></p></li>
+  <li>ваш броузер был <strong>способен обрабатывать ActiveX элементы управления</strong> (например, Internet Explorer для MS Windows) и</li>
+  <li>настройки безопасности <strong>разрешали загрузку/выполнение ActiveX</strong></p></li>
 </ul>
-<p>Depending on the feature, certain third-party software packages might also be required:</p>
+<p>В зависимости от используемых возможностей, может потребоваться ПО сторонних фирм:</p>
 <table class="browserHints">
   <tbody>
   <tr>
-    <td><b>Feature</b></td>
-	<td><b>Requirement</b></td>
-  <td><strong>Additional Hints </strong></td>
+    <td><b>Возможность</b></td>
+	<td><b>Требование</b></td>
+  <td><strong>Дополнительные подсказки</strong></td>
   </tr>
   <tr>
     <td>MS Word XML Merge</td>
-    <td>client-based installation of MS Word 2000 or newer</td>
-  <td><a href="#trustedsites">Trusted Sites</a>, <a href="#activexsettings">ActiveX Permissions</a></td>
+    <td>установленный на клиенте MS Word 2000 или более новый</td>
+  <td><a href="#trustedsites">Надежные узлы</a>, <a href="#activexsettings">Разрешения ActiveX</a></td>
   </tr>
   <tr>
     <td>MS Excel XML Merge </td>
-    <td>client-based installation of MS Excel 2000 or newer</td>
+    <td>установленный на клиенте MS Excel 2000 или более новый</td>
   <td>&nbsp;</td>
   </tr>
   <tr>
     <td>XML Export to MS Outlook</td>
-    <td>client-based installation of MS Outlook 2000 or newer</td>
+    <td>установленный на клиенте MS Outlook 2000 или более новый</td>
   <td>&nbsp;</td>
   </tr>
   <tr>
     <td>XML Import from MS Outlook</td>
-    <td>client-based installation of MS Outlook 2000 or newer </td>
+    <td>установленный на клиенте MS Outlook 2000 или более новый</td>
   <td>&nbsp;</td>
   </tr>
   </tbody>
 </table>
-<a name="trustedsites"></a><p class="hh1">Trusted Sites (Internet Explorer)</p>
-<p>For security reasons we do not recommend that you enable ActiveX controls for the <strong>Internet Zone</strong>. It is better to add the site running openCRX to your <strong>Trusted sites zone</strong> or to your <strong>Local intranet zone</strong> (only if the site really is in your Intranet) and then <a href="#activexsettings">enable ActiveX controls</a> for the respective zone. Below are examples for adding the openCRX demo server (<strong><font color="#FF0000">demo.opencrx.org</font></strong>) to your Trusted sites zone and adding a local openCRX server (<strong><font color="#FF0000">10.1.1.20</font></strong>) to the Local intranet zone. </p>
+<a name="trustedsites"></a><p class="hh1">Надежные узлы (Internet Explorer)</p>
+<p>По соображениям безопасности мы не рекомендуем, чтобы Вы разрешили элементы управления ActiveX для <strong>Internet Zone</strong>. Лучше добавить сайт с установленным openCRX сервером в <strong>зону надежных узлов</strong> или Вашу <strong>Местную интрасеть</strong> (только если ваш сайт действительно в зоне местной интрасети) и тогда <a href="#activexsettings">разрешить элементы управления ActiveX</a> для этой зоны. Ниже пример добавления openCRX демонстрационного сервера (<strong><font color="#FF0000">demo.opencrx.org</font></strong>) в вашу зону надежных узлов и добавления openCRX сервера(<strong><font color="#FF0000">10.1.1.20</font></strong>) в зону местной интрасети.</p>
 <p><img src="images/ie_trusted_sites.png" width="384" height="342"> <img src="images/ie_local_intranet_zone.png" width="384" height="342"></p>
 <a name="activexsettings"></a>
-<p class="hh1">ActiveX Permissions  (Internet Explorer)</p>
-<p>For security reasons we do not recommend that you enable ActiveX controls for the <strong>Internet Zone</strong>. It is better to add the site running openCRX to your <strong><a href="#trustedsites">Trusted sites zone</a></strong> or to your <strong><a href="#trustedsites">Local intranet zone</a></strong> (only if the site really is in your Intranet) and then enable ActiveX controls for the respective zone as follows:</p>
-<p class="hh1">Where to find your ActiveX security settings:</p>
+<p class="hh1">Разрешения ActiveX (Internet Explorer)</p>
+<p>По соображениям безопасности мы не рекомендуем, чтобы Вы разрешили элементы управления ActiveX для <strong>Internet Zone</strong>. Лучше добавить сайт с установленным openCRX сервером в <strong><a href="#trustedsites">зону надежных узлов</a></strong> или Вашу <strong><a href="#trustedsites">Местную интрасеть</a></strong> (только если ваш сайт действительно в зоне местной интрасети) и разрешить элементы управления ActiveX для этой зоны:</p>
+<p class="hh1">Где найти настройки безопасности ActiveX:</p>
 
 <table class="activeXHints">
   <tr>
-    <td><b>Platform</b></td>
-    <td colSpan=2><b>Browser</b> &amp; <b>Version</b></td>
-    <td><b>Find ActiveX Settings in ...</b></td>
-    <td><strong>ActiveX enabled (with pop-up warnings)</strong></td>
-    <td><strong>ActiveX enabled (without pop-up warnings)</strong></td>
+    <td><b>Платформа</b></td>
+    <td colSpan=2><b>Броузер</b> &amp; <b>версия</b></td>
+    <td><b>Найти настройки ActiveX в ...</b></td>
+    <td><strong>ActiveX разрешены (со всплывающими предупреждениями)</strong></td>
+    <td><strong>ActiveX разрешены (без всплывающих предупреждений)</strong></td>
   </tr>
   <tr>
     <td align="center">

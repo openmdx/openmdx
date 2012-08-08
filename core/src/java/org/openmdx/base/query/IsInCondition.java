@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: IsInCondition.java,v 1.7 2009/01/06 10:21:19 wfro Exp $
+ * Name:        $Id: IsInCondition.java,v 1.9 2010/03/31 14:39:23 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2010/03/31 14:39:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,56 +62,56 @@ public class IsInCondition
      */
     private static final long serialVersionUID = 3905809681837732661L;
 
-public IsInCondition(
-  ) {
-    super(
-        EMPTY_OBJECT_ARRAY
-    );
-  }
-  
-  public IsInCondition(
-      short quantor,
-      String feature,
-      boolean fulfil,
-      Object... values
-  ) {
-    super(
-        quantor,
-        feature,
-        fulfil,
-        values
-    );
-  }
+    public IsInCondition(
+    ) {
+        super(
+            EMPTY_OBJECT_ARRAY
+        );
+    }
 
-  public String getName(
-  ) {
-    return this.isFulfil()
-      ? "IS_IN"
-      : "IS_NOT_IN";
-  }
+    public IsInCondition(
+        short quantor,
+        String feature,
+        boolean fulfil,
+        Object... values
+    ) {
+        super(
+            quantor,
+            feature,
+            fulfil,
+            values
+        );
+    }
 
-  public Object getValue(
-      int index
-  ) {
-    return this.values[index];
-  }
+    public String getName(
+    ) {
+        return this.isFulfil()
+        ? "IS_IN"
+            : "IS_NOT_IN";
+    }
 
-  public Object[] getValue(
-  ) {
-    return this.values;
-  }
+    public Object getValue(
+        int index
+    ) {
+        return this.values[index];
+    }
 
-  public void setValue(
-      Object[] values
-  ) {
-    this.values = values;
-  }
+    public Object[] getValue(
+    ) {
+        return this.values;
+    }
 
-  public void setValue(
-      int index,
-      Object value
-  ) {
-    this.values[index] = value;
-  }
+    public void setValue(
+        Object... values
+    ) {
+        this.values = values;
+    }
+
+    public void setValue(
+        int index,
+        Object value
+    ) {
+        this.values[index] = value;
+    }
 
 }

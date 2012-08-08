@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Condition.java,v 1.10 2009/05/15 00:26:36 hburger Exp $
+ * Name:        $Id: Condition.java,v 1.12 2010/03/31 14:39:23 hburger Exp $
  * Description: Condition
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/15 00:26:36 $
+ * Date:        $Date: 2010/03/31 14:39:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -176,7 +176,7 @@ public abstract class Condition
 
     //-----------------------------------------------------------------------    
     public void setValue(
-        Object[] values
+        Object... values
     ) {
         this.values = values;
     }
@@ -190,7 +190,7 @@ public abstract class Condition
         try {
             return Records.getRecordFactory().asMappedRecord(
                 getClass().getName(), 
-                quantifier.toString() + ' ' + feature + ' ' + getName() + ' ' + Arrays.asList(values),
+                (quantifier == null ? "" : quantifier.toString() + ' ' + feature + ' ') + getName() + ' ' + Arrays.asList(values),
                 TO_STRING_FIELDS, 
                 new Object[]{
                     quantifier,
@@ -204,6 +204,25 @@ public abstract class Condition
         }
     }
   
+    @Override
+    public boolean equals(
+        Object obj
+    ) {
+        if(obj instanceof Condition) {
+            Condition that = (Condition)obj;
+            boolean isEqual =
+                this.isFulfil() == that.isFulfil() &&
+                this.getFeature().equals(that.getFeature()) &&
+                this.getName().equals(that.getName()) &&
+                Arrays.asList(this.getValue()).equals(Arrays.asList(that.getValue()));
+            return isEqual;
+                
+        }
+        else {
+            return false;
+        }
+    }
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------

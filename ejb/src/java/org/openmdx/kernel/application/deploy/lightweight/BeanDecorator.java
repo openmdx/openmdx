@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BeanDecorator.java,v 1.1 2009/01/12 12:49:23 wfro Exp $
+ * Name:        $Id: BeanDecorator.java,v 1.4 2009/09/10 14:45:07 hburger Exp $
  * Description: Bean Decorator
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:23 $
+ * Date:        $Date: 2009/09/10 14:45:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 
-import org.openmdx.kernel.application.configuration.Report;
+import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Bean;
 import org.openmdx.kernel.application.deploy.spi.Deployment.ContainerTransaction;
 
@@ -146,7 +146,7 @@ abstract class BeanDecorator<T extends Bean>
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getMaximumIdle()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getMaximumIdle()
      */
     public Integer getMaximumIdle() {
         return super.delegate.getMaximumIdle();
@@ -154,7 +154,7 @@ abstract class BeanDecorator<T extends Bean>
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getMinimumEvictableIdleTime()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getMinimumEvictableIdleTime()
      */
     public Long getMinimumEvictableIdleTime() {
         return super.delegate.getMinimumEvictableIdleTime();
@@ -162,7 +162,7 @@ abstract class BeanDecorator<T extends Bean>
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getMinimumIdle()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getMinimumIdle()
      */
     public Integer getMinimumIdle() {
         return super.delegate.getMinimumIdle();
@@ -170,7 +170,7 @@ abstract class BeanDecorator<T extends Bean>
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getNumberOfTestsPerEvictionRun()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getNumberOfTestsPerEvictionRun()
      */
     public Integer getNumberOfTestsPerEvictionRun() {
         return super.delegate.getNumberOfTestsPerEvictionRun();
@@ -178,7 +178,7 @@ abstract class BeanDecorator<T extends Bean>
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTestOnBorrow()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getTestOnBorrow()
      */
     public Boolean getTestOnBorrow() {
         return super.delegate.getTestOnBorrow();
@@ -186,7 +186,7 @@ abstract class BeanDecorator<T extends Bean>
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTestOnReturn()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getTestOnReturn()
      */
     public Boolean getTestOnReturn() {
         return super.delegate.getTestOnReturn();
@@ -194,7 +194,7 @@ abstract class BeanDecorator<T extends Bean>
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTestWhileIdle()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getTestWhileIdle()
      */
     public Boolean getTestWhileIdle() {
         return super.delegate.getTestWhileIdle();
@@ -202,7 +202,7 @@ abstract class BeanDecorator<T extends Bean>
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTimeBetweenEvictionRuns()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getTimeBetweenEvictionRuns()
      */
     public Long getTimeBetweenEvictionRuns() {
         return super.delegate.getTimeBetweenEvictionRuns();

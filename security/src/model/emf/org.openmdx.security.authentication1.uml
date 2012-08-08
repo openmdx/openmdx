@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_yrxUAN6_EdmkJO73lqONhA" name="authentication1">
+  <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FC4BEDF0244PPP" name="org">
+    <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FC4BEDF0244PP" name="openmdx">
+      <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FC4BEDF0244P" name="security">
+        <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3FC4BEDF0244" name="authentication1">
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417D0F29038C" name="Segment">
+            <generalization xmi:id="_3C7B8A60016D417D27F6025F">
+              <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FC487C80099"/>
+            </generalization>
+            <ownedAttribute xmi:id="_3C7B8A60016D417D0FBB02D8" name="credential" type="_3C7B8A60016D417D211400A3" isUnique="false" aggregation="composite" association="_3C7B8A60016D417D0FBB00E3">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0296-EdmkJO73lqONhA" value="1"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVI02t6-EdmkJO73lqONhA"/>
+              <qualifier xmi:id="_3C7B8A60016D417D0FD80199" name="id" visibility="private">
+                <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+              </qualifier>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_scldQfJFEdqAh-jti9npDQ" name="authenticationContext" visibility="private" type="_paVNMPJFEdqAh-jti9npDQ" aggregation="composite" association="_scldQPJFEdqAh-jti9npDQ">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_EgaCofJGEdqAh-jti9npDQ" value="1"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_EgaCoPJGEdqAh-jti9npDQ"/>
+              <qualifier xmi:id="_HKUEIPJGEdqAh-jti9npDQ" name="id" visibility="private">
+                <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+              </qualifier>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3FC68A7D01CF" name="Password">
+            <generalization xmi:id="_3C7B8A60016D417D3886011C" general="_3C7B8A60016D417D211400A3"/>
+            <ownedAttribute xmi:id="_3C7B8A60016D417D2E9B0392" name="password">
+              <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVCuNt6-EdmkJO73lqONhA" value="1"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVCuNd6-EdmkJO73lqONhA"/>
+            </ownedAttribute>
+            <ownedOperation xmi:id="_3C7B8A60016D414AD86003A3" name="change">
+              <ownedParameter xmi:id="_hU8noN6-EdmkJO73lqONhA" direction="return">
+                <type xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3E40433402E1"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_3C7B8A60016D417D298900BA" name="&lt;&lt;0..1>> oldPassword" direction="inout">
+                <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3E0F6F8900AB"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_3C7B8A60016D417D5016024F" name="&lt;&lt;0..1>> password" direction="inout">
+                <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3E0F6F8900AB"/>
+              </ownedParameter>
+            </ownedOperation>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417D157300F2" name="Passcode">
+            <generalization xmi:id="_3C7B8A60016D417D3728030D" general="_3C7B8A60016D417D211400A3"/>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417D211400A3" name="Credential" isAbstract="true">
+            <generalization xmi:id="_3C7B8A60016D417D21600323">
+              <general xmi:type="uml:Class" href="org.openmdx.security.realm1.uml#_3C7B8A60016D3FC6886601D0"/>
+            </generalization>
+            <generalization xmi:id="_3C7B8A60016D417D216600BF">
+              <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
+            </generalization>
+            <ownedAttribute xmi:id="_3C7B8A60016D417D2F82002D" name="id" isReadOnly="true" isDerived="true">
+              <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_3C7B8A60016D417D43A303D0" name="resetCredential" type="_3C7B8A60016D417D211400A3" isUnique="false" association="_3C7B8A60016D417D439D0056">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0496-EdmkJO73lqONhA" value="1"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVI04t6-EdmkJO73lqONhA"/>
+              <qualifier xmi:id="_3C7B8A60016D417D43D601F2" name="index" visibility="private">
+                <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
+              </qualifier>
+            </ownedAttribute>
+            <ownedOperation xmi:id="_3C7B8A60016D417D4D3700FE" name="reset">
+              <ownedParameter xmi:id="_hVCuPd6-EdmkJO73lqONhA" direction="return">
+                <type xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3E40433402E1"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_3C7B8A60016D417D4D9F0157" name="&lt;&lt;list>> resetValue" direction="inout">
+                <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3E0F6F8900AB"/>
+              </ownedParameter>
+              <ownedParameter xmi:id="_3C7B8A60016D417D500B0055" name="&lt;&lt;0..1>> value" direction="inout">
+                <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3E0F6F8900AB"/>
+              </ownedParameter>
+            </ownedOperation>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417D2CFB022B" name="ChallengeResponse">
+            <generalization xmi:id="_3C7B8A60016D417D4F240107" general="_3C7B8A60016D417D211400A3"/>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417D423F0157" name="SendPasscode">
+            <generalization xmi:id="_3C7B8A60016D417E1AEC030F" general="_3C7B8A60016D417D157300F2"/>
+            <ownedAttribute xmi:id="_3C7B8A60016D417D44D10398" name="address">
+              <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62F20331"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_3C7B8A60016D417E1E68009B" name="template">
+              <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B63110001"/>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D417D0FBB00E3" name="SegmentHostsCredential" memberEnd="_3C7B8A60016D417D0FBB02D8 _3C7B8A60016D417D0FBB02DA">
+            <ownedEnd xmi:id="_3C7B8A60016D417D0FBB02DA" name="segment" type="_3C7B8A60016D417D0F29038C" isUnique="false" association="_3C7B8A60016D417D0FBB00E3">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0396-EdmkJO73lqONhA" value="1"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVI03t6-EdmkJO73lqONhA" value="1"/>
+            </ownedEnd>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D417D439D0056" name="CredentialCanBeReset" memberEnd="_3C7B8A60016D417D43A303D0 _3C7B8A60016D417D43A303DA">
+            <ownedEnd xmi:id="_3C7B8A60016D417D43A303DA" name="credentialToBeReset" type="_3C7B8A60016D417D211400A3" isUnique="false" association="_3C7B8A60016D417D439D0056">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVI0596-EdmkJO73lqONhA" value="*"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVI05t6-EdmkJO73lqONhA"/>
+            </ownedEnd>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_paVNMPJFEdqAh-jti9npDQ" name="AuthenticationContext">
+            <generalization xmi:id="_ksvAMPJGEdqAh-jti9npDQ">
+              <general xmi:type="uml:Class" href="org.openmdx.security.realm1.uml#_lxp0IPI2EdqAh-jti9npDQ"/>
+            </generalization>
+            <generalization xmi:id="_lFSDEPJGEdqAh-jti9npDQ">
+              <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
+            </generalization>
+            <ownedAttribute xmi:id="_n-GYYPJIEdqAh-jti9npDQ" name="completion">
+              <eAnnotations xmi:id="_3pt4gPJPEdqAh-jti9npDQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+                <details xmi:id="_3pt4gfJPEdqAh-jti9npDQ" key="0..1"/>
+              </eAnnotations>
+              <ownedComment xmi:id="_klsnQPJKEdqAh-jti9npDQ" annotatedElement="_n-GYYPJIEdqAh-jti9npDQ">
+                <body>The following mapping is applied as long enumerations are not supported&lt;ul>&#xD;
+      &lt;li>0: Completion.ABORTED&#xD;
+      &lt;li>1: Completion.COMMITED&#xD;
+      &lt;/ul></body>
+              </ownedComment>
+              <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B63110001"/>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Association" xmi:id="_scldQPJFEdqAh-jti9npDQ" name="SegmentHostsAuthenticationContext" memberEnd="_scldQfJFEdqAh-jti9npDQ _scldQvJFEdqAh-jti9npDQ">
+            <ownedEnd xmi:id="_scldQvJFEdqAh-jti9npDQ" name="segment" visibility="private" type="_3C7B8A60016D417D0F29038C" association="_scldQPJFEdqAh-jti9npDQ">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_HPo58PJPEdqAh-jti9npDQ" value="1"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_GdymQPJPEdqAh-jti9npDQ" value="1"/>
+            </ownedEnd>
+          </packagedElement>
+        </packagedElement>
+      </packagedElement>
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

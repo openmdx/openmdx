@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.6 2009/03/31 17:06:10 hburger Exp $
+= Name:        $Id: build.xml,v 1.7 2010/01/09 00:20:48 wfro Exp $
 = Description: ant build for openMDX/EJB
-= Revision:    $Revision: 1.6 $
-= Date:        $Date: 2009/03/31 17:06:10 $
+= Revision:    $Revision: 1.7 $
+= Date:        $Date: 2010/01/09 00:20:48 $
 = Copyright:   (c) 2004-2006 OMEX AG
 =======================================================================
  *
@@ -57,7 +57,7 @@
 	<description>Builds the openMDX/EJB component</description>
 	<property name="project.specification.title" value="openMDX/EJB"/>
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.5"/>
+	<property name="project.platform.list" value="jre-1.6"/>
 	<!-- Included Ant Projects -->
 	<import file="../ant/etc/ant/build-properties.xml"/>
 	<import file="../ant/etc/ant/build-library.xml"/>

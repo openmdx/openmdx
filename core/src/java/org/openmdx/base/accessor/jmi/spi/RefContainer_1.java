@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefContainer_1.java,v 1.39 2009/06/03 17:36:22 hburger Exp $
+ * Name:        $Id: RefContainer_1.java,v 1.48 2010/01/26 15:38:36 hburger Exp $
  * Description: RefContainer_1 class
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.48 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/03 17:36:22 $
+ * Date:        $Date: 2010/01/26 15:38:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,19 +61,19 @@ import javax.jmi.reflect.RefPackage;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.cci.Container_1_0;
-import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
-import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
-import org.openmdx.base.collection.Container;
-import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.collection.MarshallingSequentialList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.spi.Container;
+import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
@@ -82,13 +82,12 @@ import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.kernel.exception.BasicException;
 
-//---------------------------------------------------------------------------
-//RefContainer_1
-//---------------------------------------------------------------------------
-@SuppressWarnings("deprecation")
+/**
+ * RefContainer_1
+ */
 public class RefContainer_1
     extends AbstractCollection<RefObject_1_0>
-    implements Serializable, LegacyContainer, RefContainer
+    implements Serializable, RefContainer, Container
 {
 
     /**
@@ -144,7 +143,8 @@ public class RefContainer_1
      */
     public String refMofId(
     ) {
-        return ((Path)this.container.getContainerId()).toXRI();
+        Path containerId = openmdxjdoGetContainerId();
+        return containerId == null ? null : containerId.toXRI();
     }
 
     /* (non-Javadoc)
@@ -177,100 +177,6 @@ public class RefContainer_1
         catch(ServiceException e) {
             throw new JmiServiceException(e);
         }
-    }
-
-    //-------------------------------------------------------------------------
-    public Container<RefObject_1_0> subSet(
-        Object filter
-    ) {
-        Container_1_0 delegate;
-        if(filter instanceof RefFilter_1_0) {
-            Collection<FilterProperty> filterProperties = ((RefFilter_1_0)filter).refGetFilterProperties();
-            delegate = (Container_1_0)this.container.subMap(
-                filterProperties.toArray(new FilterProperty[filterProperties.size()])
-            );
-        } else if(filter instanceof Filter) {
-            FilterProperty[] mapped = new FilterProperty[((Filter)filter).getCondition().length];
-            for(int i = 0; i < mapped.length; i++) {
-                Condition condition = ((Filter)filter).getCondition()[i];
-                mapped[i] = new FilterProperty(
-                    condition.getQuantor(),
-                    condition.getFeature(),
-                    FilterOperators.fromString(condition.getName()),
-                    condition.getValue()
-                );
-            }
-            delegate = (Container_1_0)this.container.subMap(mapped);
-        } else {
-            delegate = (Container_1_0)this.container.subMap(filter);
-        }
-        return new RefContainer_1(
-            this.marshaller,
-            delegate
-        );
-    }
-
-    //-------------------------------------------------------------------------
-    public List<RefObject_1_0> toList(
-        Object _criteria
-    ) {
-        Object criteria = _criteria;
-        FilterableMap<String, ?> source = this.container;
-        if(criteria instanceof Object[]) {
-            Object[] args = (Object[]) criteria;
-            if(args.length == 1 && args[0] instanceof RefFilter_1_0) {
-                criteria = args[0];
-            }
-        }
-        if(criteria instanceof FilterProperty[]) {
-            source = this.container.subMap(criteria);
-            criteria = null;            
-        }
-        else if(criteria instanceof AttributeSpecifier[]) {
-            source = this.container.subMap(null);
-        }
-        else if(
-            (criteria instanceof Object[]) && 
-            (((Object[])criteria).length == 2) &&
-            (((Object[])criteria)[0] instanceof FilterProperty[]) && 
-            (((Object[])criteria)[1] instanceof AttributeSpecifier[]) 
-        ) {
-            source = this.container.subMap(((Object[])criteria)[0]);
-            criteria = ((Object[])criteria)[1];
-        }
-        else if(criteria instanceof RefFilter_1_0) {
-            RefFilter_1_0 filter=(RefFilter_1_0)criteria;
-            Collection<?> filterProperties = filter.refGetFilterProperties();
-            Collection<?> attributeSpecifiers = filter.refGetAttributeSpecifiers();
-            source = this.container.subMap(
-                filterProperties.toArray(new FilterProperty[filterProperties.size()])
-            );
-            criteria = attributeSpecifiers.toArray(new AttributeSpecifier[attributeSpecifiers.size()]);
-        }
-        else if(criteria instanceof Filter) {  
-            FilterProperty[] conditions = new FilterProperty[((Filter)criteria).getCondition().length];
-            for(int i = 0; i < conditions.length; i++) {
-                Condition condition = ((Filter)criteria).getCondition()[i];
-                conditions[i] = new FilterProperty(
-                    condition.getQuantor(),
-                    condition.getFeature(),
-                    FilterOperators.fromString(condition.getName()),
-                    condition.getValue()
-                );
-            }
-            source = this.container.subMap(conditions);
-            AttributeSpecifier[] orderSpecifiers = new AttributeSpecifier[((Filter)criteria).getOrderSpecifier().length];
-            for(int i = 0; i < orderSpecifiers.length; i++) {
-                OrderSpecifier specifier = ((Filter)criteria).getOrderSpecifier()[i];
-                orderSpecifiers[i] = new AttributeSpecifier(
-                    specifier.getFeature(),
-                    0,
-                    specifier.getOrder()
-                );
-            }
-            criteria = orderSpecifiers;
-        }
-        return new MarshallingSequentialList<RefObject_1_0>(this.marshaller, source.values(criteria));
     }
 
     /* (non-Javadoc)
@@ -307,31 +213,28 @@ public class RefContainer_1
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.collection.Container#retrieveAll(boolean)
-     */
-    public void retrieveAll(boolean useFetchPlan) {
-        this.container.retrieveAll(useFetchPlan);
-    }
-
-    /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.collection.Container#get(java.lang.Object)
      */
     public RefObject_1_0 get(Object filter) {
         if(filter instanceof String) {
             try {
-                DataObject_1_0 object = this.container.get(filter);
-                return (RefObject_1_0) this.marshaller.marshal(object);
-            } catch (ServiceException exception){
-                if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) return null;
-                throw new RuntimeServiceException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.TRANSFORMATION_FAILURE,
-                    "Marshal failure"
+                return (RefObject_1_0) this.marshaller.marshal(
+                    this.container.get(filter)
                 );
+            } catch (ServiceException exception){
+                if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
+                    return null;
+                } else {
+                    throw new RuntimeServiceException(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.TRANSFORMATION_FAILURE,
+                        "Marshal failure"
+                    );
+                }
             }
         } else {
-            List<RefObject_1_0> selection = toList(filter);
+            List<RefObject_1_0> selection = refGetAll(filter);
             switch(selection.size()){
                 case 0: return null;
                 case 1: return selection.get(0);
@@ -360,6 +263,32 @@ public class RefContainer_1
 
 
     //------------------------------------------------------------------------
+    // Implements Container
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.Container#openmdxjdoGetContainerId()
+     */
+    public Path openmdxjdoGetContainerId() {
+        return PersistenceHelper.getContainerId(this.container);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.Container#openmdxjdoGetTransientContainerId()
+     */
+    public TransientContainerId openmdxjdoGetTransientContainerId() {
+        return PersistenceHelper.getTransientContainerId(this.container);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.Container#openmdxjdoIsPersistent()
+     */
+    public boolean openmdxjdoIsPersistent() {
+        return PersistenceHelper.isPersistent(this.container);
+    }
+
+    
+    //------------------------------------------------------------------------
     // Implements RefContainer
     //------------------------------------------------------------------------
 
@@ -386,8 +315,60 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refGetAll(java.lang.Object)
      */
-    public List<?> refGetAll(Object query) {
-        return this.toList(query);
+    public List<RefObject_1_0> refGetAll(Object query) {
+        Container_1_0 source = this.container;
+        if(query instanceof Object[]) {
+            Object[] args = (Object[]) query;
+            if(args.length == 1 && args[0] instanceof RefQuery_1_0) {
+                query = args[0];
+            }
+        }
+        if(query instanceof FilterProperty[]) {
+            source = this.container.subMap(query);
+            query = null;            
+        } else if(query instanceof AttributeSpecifier[]) {
+            source = this.container.subMap(null);
+        } else if(
+            (query instanceof Object[]) && 
+            (((Object[])query).length == 2) &&
+            (((Object[])query)[0] instanceof FilterProperty[]) && 
+            (((Object[])query)[1] instanceof AttributeSpecifier[]) 
+        ) {
+            source = this.container.subMap(((Object[])query)[0]);
+            query = ((Object[])query)[1];
+        } else if(
+            (query instanceof RefQuery_1_0) ||
+            (query instanceof Filter)
+        ) {
+            Filter filter = query instanceof RefQuery_1_0 ?
+                ((RefQuery_1_0)query).refGetFilter() :
+                    (Filter)query;
+            FilterProperty[] conditions = new FilterProperty[filter.getCondition().length];
+            for(int i = 0; i < conditions.length; i++) {
+                Condition condition = filter.getCondition()[i];
+                conditions[i] = new FilterProperty(
+                    condition.getQuantor(),
+                    condition.getFeature(),
+                    FilterOperators.fromString(condition.getName()),
+                    condition.getValue()
+                );
+            }
+            source = this.container.subMap(conditions);
+            AttributeSpecifier[] orderSpecifiers = new AttributeSpecifier[filter.getOrderSpecifier().length];
+            for(int i = 0; i < orderSpecifiers.length; i++) {
+                OrderSpecifier specifier = filter.getOrderSpecifier()[i];
+                orderSpecifiers[i] = new AttributeSpecifier(
+                    specifier.getFeature(),
+                    0,
+                    specifier.getOrder()
+                );
+            }
+            query = orderSpecifiers;
+        }
+        return new MarshallingSequentialList<RefObject_1_0>(
+            this.marshaller, 
+            source.values(query)
+        );
     }
 
     /* (non-Javadoc)
@@ -405,7 +386,7 @@ public class RefContainer_1
      */
     public long refRemoveAll(Object query) {
         long removed = 0;
-        for(RefObject_1_0 refObject : toList(query)) {
+        for(RefObject_1_0 refObject : refGetAll(query)) {
             refObject.refDelete();
             removed++;
         }
@@ -464,7 +445,8 @@ public class RefContainer_1
      */
     @Override
     public String toString() {
-        return String.valueOf(this.container.getContainerId());
+        String id = this.refMofId();
+        return getClass().getName() + ": " + (id == null ? "transient" : id);
     }
 
     /* (non-Javadoc)
@@ -484,5 +466,5 @@ public class RefContainer_1
         // TODO mingle persistence manager id, container id and filter
         return super.hashCode();
     }
-    
+
 }

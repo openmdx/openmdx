@@ -1,12 +1,12 @@
-<%@ page contentType= "text/html;charset=UTF-8" language= "java" pageEncoding= "UTF-8" %><%
+﻿<%@ page contentType= "text/html;charset=UTF-8" language= "java" pageEncoding= "UTF-8" %><%
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Login.jsp,v 1.60 2009/06/09 12:48:14 cmu Exp $
+ * Name:        $Id: Login.jsp,v 1.68 2009/11/16 06:14:31 cmu Exp $
  * Description: Login.jsp
- * Revision:    $Revision: 1.60 $
+ * Revision:    $Revision: 1.68 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:48:14 $
+ * Date:        $Date: 2009/11/16 06:14:31 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,82 +59,127 @@ java.io.PrintWriter,
 org.openmdx.portal.servlet.*
 "%>
 <%
-	request.setCharacterEncoding("UTF-8");
-
-	String requestURL = request.getRequestURL().toString();
-	System.out.println(new Date() + ": Login: requestURL=" + requestURL + "; isRequestedSessionIdFromCookie=" + request.isRequestedSessionIdFromCookie() + "; servletPath=" + request.getServletPath() + "; remoteUser=" + request.getRemoteUser());
-
-	if(request.getParameter("locale") != null) {
-		request.getSession().setAttribute(
-			"locale",
-			request.getParameter("locale")
-		);
+	// Handle getPath request. Return servlet path and query string as plain text.
+	// This function can be used by Ajax clients to test whether they are redirected
+	// to the login page or the session is already authenticated
+	if(request.getParameter("getPath") != null && "true".equals(request.getParameter("getPath"))) {
+%>
+		<%= request.getServletPath() + "?" + request.getQueryString() %>
+<%
 	}
+	// Login form
 	else {
-		ApplicationContext app = (ApplicationContext)session.getAttribute(WebKeys.APPLICATION_KEY);
-		request.getSession().setAttribute(
-			"locale",
-			app == null ?
-				(request.getHeader("accept-language") == null || request.getHeader("accept-language").length()<5) ?
-					null :
-					request.getHeader("accept-language").substring(0,2) + "_" + request.getHeader("accept-language").substring(3) :
-				app.getCurrentLocaleAsString()
-		);
-	}
-	String localeStr = (String)session.getAttribute("locale");
+		request.setCharacterEncoding("UTF-8");
+		String requestURL = request.getRequestURL().toString();
+		System.out.println(new Date() + ": Login: requestURL=" + requestURL + "; isRequestedSessionIdFromCookie=" + request.isRequestedSessionIdFromCookie() + "; servletPath=" + request.getServletPath() + "; remoteUser=" + request.getRemoteUser());
+		if(request.getParameter("locale") != null) {
+			request.getSession().setAttribute(
+				"locale",
+				request.getParameter("locale")
+			);
+		}
+		else {
+			ApplicationContext app = (ApplicationContext)session.getAttribute(WebKeys.APPLICATION_KEY);
+			request.getSession().setAttribute(
+				"locale",
+				app == null ?
+					(request.getHeader("accept-language") == null || request.getHeader("accept-language").length()<5) ?
+						null :
+						request.getHeader("accept-language").substring(0,2) + "_" + request.getHeader("accept-language").substring(3) :
+					app.getCurrentLocaleAsString()
+			);
+		}
+		String localeStr = (String)session.getAttribute("locale");
 %><%@ include file="localeSettings.jsp" %><%
-
-	if(request.getParameter("timezone") != null) {
-		request.getSession().setAttribute(
-			"timezone",
-			request.getParameter("timezone")
-		);
-	}
-
-	localeStr = (String)session.getAttribute("locale");
-	String timezone = (String)session.getAttribute("timezone");
-
-	// Redirect if user is already authenticated or Login.jsp is accessed directly
-	if(
-		(request.getRemoteUser() != null) ||
-		(request.getServletPath().endsWith("/Login.jsp") && (request.getSession().getAttribute("loginFailed") == null))
-	) {
-		System.out.println(new Date() + ": Login: Redirecting...");
-		String event = request.getParameter("event");
-		String parameter = request.getParameter("parameter");
-		response.sendRedirect(
-			"ObjectInspectorServlet?" +
-			(localeStr == null ? "" : "locale=" + localeStr) +
-			(timezone == null ? "" : "&timezone=" + URLEncoder.encode(timezone)) +
-			(event == null ? "" : "&event=" + URLEncoder.encode(event)) +
-			(parameter == null ? "" : "&parameter=" + URLEncoder.encode(parameter))
-		);
-	}
-
-	boolean loginFailed = "true".equals((String)request.getSession().getAttribute("loginFailed"));
-	request.getSession().setAttribute("loginFailed", "false");
-
-	// Set default timezone
-	if(timezone == null) {
-		timezone = TimeZone.getDefault().getID();
-		request.getSession().setAttribute("timezone", timezone);
-	}
+		if(request.getParameter("timezone") != null) {
+			request.getSession().setAttribute(
+				"timezone",
+				request.getParameter("timezone")
+			);
+		}
+		localeStr = (String)session.getAttribute("locale");
+		String timezone = (String)session.getAttribute("timezone");
+		boolean loginFailed = "true".equals((String)request.getSession().getAttribute("loginFailed"));
+		request.getSession().setAttribute("loginFailed", "false");
+		// Set default timezone
+		if(timezone == null) {
+			timezone = TimeZone.getDefault().getID();
+			request.getSession().setAttribute("timezone", timezone);
+		}
+		// servletUrl
+		String queryString = request.getQueryString();
+		if(queryString != null) {
+			queryString = queryString.replace("getPath=true", "getPath=false");
+		}
+	    String servletUrl = request.getContextPath() + "/" + WebKeys.SERVLET_NAME  + (queryString == null ? "" : "?" + queryString);
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="<%= dir.get(localeStr) %>" style="background:white;">
 <head>
-	<title>openCRX - Login</title>
+	<title>Login</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta http-equiv="Expires" content="0">
+	<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+	<meta name="apple-touch-fullscreen" content="YES" />
 	<link href="<%=request.getContextPath()%>/_style/colors.css" rel="stylesheet" type="text/css">
-	<script language="javascript" type="text/javascript" src="<%=request.getContextPath()%>/javascript/portal-all.js"></script>
+	<script language="javascript" type="text/javascript" src="<%=request.getContextPath()%>/javascript/prototype.js"></script>
 	<!--[if lt IE 7]><script type="text/javascript" src="<%=request.getContextPath()%>/javascript/iehover-fix.js"></script><![endif]-->
 	<link href="<%=request.getContextPath()%>/_style/ssf.css" rel="stylesheet" type="text/css">
 	<link href="<%=request.getContextPath()%>/_style/n2default.css" rel="stylesheet" type="text/css">
 	<link href="<%=request.getContextPath()%>/javascript/yui/build/assets/skins/sam/container.css" rel="stylesheet" type="text/css">
 	<link rel='shortcut icon' href='<%=request.getContextPath()%>/images/favicon.ico' />
+
+ 	<script language="javascript" type="text/javascript">
+
+ 		function checkRedirect() {
+		    var isRedirected = false;
+ 			var isEmbedded = <%= !loginFailed && (queryString == null || queryString.indexOf("loginFailed") == -1) ? "true" : "false" %>;
+ 			// Do not embed the login page in another page
+ 			if(isEmbedded) {
+				window.location.href = window.location.href + '?loginFailed=false';
+				isRedirected = true;
+ 			}
+ 			else {
+				var servletUrl = '<%= servletUrl %>';
+				new Ajax.Request(
+					'<%=request.getContextPath()%>/jsp/GetPath.jsp?getPath=true',
+		 			{
+		 			    method:'get',
+		 			    asynchronous:false,
+		 			    onSuccess: function(transport){
+							var responseText = transport == null || transport.responseText == null ?
+								"no response text" :
+									transport.responseText;
+							if(responseText.indexOf("/Login.jsp") == -1) {
+								window.location.href = servletUrl;
+								isRedirected = true;
+							}
+		 			    },
+		 			    onFailure: function(){
+		 	 			}
+					}
+				);
+				// The previous Ajax request destroys the redirect URL. Fix it.
+				new Ajax.Request(
+					servletUrl,
+		 			{
+		 			    method:'get',
+		 			    asynchronous:false,
+		 			    onSuccess: function(transport){
+		 			    },
+		 			    onFailure: function(){
+		 	 			}
+					}
+				);
+ 			}
+			return isRedirected;
+ 		}
+ 	</script>
 </head>
 <body class="yui-skin-sam" style="border:0px solid white;" onLoad="javascript:document.forms.formLogin.j_username.focus();">
+<script language="javascript" type="text/javascript">
+ 	checkRedirect();
+</script>
 <div id="header" style="height:90px;">
     <div id="logoTable" style="padding-left:10px;">
       <table dir="ltr" id="headerlayout" style="position:relative;">
@@ -154,7 +199,7 @@ org.openmdx.portal.servlet.*
   </div>
   <div id="login" style="position:relative;text-align:center;margin-left:auto;margin-right:auto;padding-top:15em;">
   <%@ include file="login-header.html" %>
-  <form name="formLogin" method="POST" action="j_security_check">
+  <form name="formLogin" method="POST" action="j_security_check" accept-charset="UTF-8">
     <table style="text-align:left;border-collapse:collapse;margin-left:auto;margin-right:auto;width:550px;border:solid 1px #DDDDDD;">
       <tr>
         <td colspan="2" width="100%" style="vertical-align: middle;padding:8px;white-space:nowrap;">
@@ -167,7 +212,7 @@ org.openmdx.portal.servlet.*
 <%
                 for (int i = 0; i < activeLocales.size(); i++) {
 %>
-                  <li><a href="#" onclick="javascript:window.location.href='Login?locale=<%= activeLocales.get(i).toString() %>&timezone=<%= URLEncoder.encode(timezone) %>';"><span style="font-family:courier;"><%= activeLocales.get(i).toString() %>&nbsp;&nbsp;</span><%= textsLocale.get(activeLocales.get(i)).toString() %></a></li>
+					<li><a href="#" onclick="javascript:window.location.href='Login.jsp?locale=<%= activeLocales.get(i).toString() %>&timezone=<%= URLEncoder.encode(timezone) %>';"><span style="font-family:courier;"><%= activeLocales.get(i).toString() %>&nbsp;&nbsp;</span><%= textsLocale.get(activeLocales.get(i)).toString() %></a></li>
 <%
                 }
 %>
@@ -212,7 +257,7 @@ org.openmdx.portal.servlet.*
 	        <input type="password" name="j_password" title="<%= textsPassword.get(localeStr) %>">
 	      </td>
 	      <td nowrap style="vertical-align: middle;padding-right:8px;">
-	        <span style="vertical-align: bottom;"><input class="submit" type="submit" name="button" value="<%= textsLogin.get(localeStr) %>" onclick="$('flyout').style.display='none';$('wait').style.visibility='visible';this.disabled=true;this.form.submit();" >&nbsp;<img id="wait" src="<%=request.getContextPath()%>/images/wait.gif" alt="" title="" style="visibility:hidden;" /></span>
+	        <span style="vertical-align: bottom;"><input class="submit" type="submit" name="button" value="<%= textsLogin.get(localeStr) %>" onclick="if(checkRedirect()){return false;}else{$('flyout').style.display='none';$('wait').style.visibility='visible';this.disabled=true;this.form.submit();};" >&nbsp;<img id="wait" src="<%=request.getContextPath()%>/images/wait.gif" alt="" title="" style="visibility:hidden;" /></span>
 	      </td>
       </tr>
       <tr>
@@ -221,11 +266,11 @@ org.openmdx.portal.servlet.*
 <%
       if(loginFailed) {
 %>
-      <tr>
-        <td colspan="3" class="cellErrorRight" style="padding:5px;">
-          &nbsp;<b><%= textsLoginFailed.get(localeStr) %></b>
-        </td>
-      </tr>
+	      <tr>
+	        <td colspan="3" class="cellErrorRight" style="padding:5px;">
+	          &nbsp;<b><%= textsLoginFailed.get(localeStr) %></b>
+	        </td>
+	      </tr>
 <%
       }
 %>
@@ -240,19 +285,14 @@ org.openmdx.portal.servlet.*
   <div style="height:100px;"></div>
   <%@ include file="login-footer.html" %>
   <script language="javascript" type="text/javascript">
-    if(<%= !request.isRequestedSessionIdFromCookie() && (request.getParameter("cookieError") != null) %>) {
+	if(<%= !request.isRequestedSessionIdFromCookie() && (request.getParameter("cookieError") != null) %>) {
       if($('cookieWarningBlock')) {
         $('cookieWarningBlock').style.display = 'block';
       }
     }
-    var fullRequest = '<%= request.getRequestURL()%>' + '<%= request.getQueryString() == null ? "" : "?" + request.getQueryString() %>';
-<%
-    if (!loginFailed) {
-%>
-      if (fullRequest != location.href) {window.location.href = fullRequest;} // never embed the login page in another page
-<%
-    }
-%>
   </script>
 </body>
 </html>
+<%
+	}
+%>

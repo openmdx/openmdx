@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValue.java,v 1.77 2009/06/09 12:50:34 hburger Exp $
+ * Name:        $Id: AttributeValue.java,v 1.94 2010/02/04 11:25:03 wfro Exp $
  * Description: AttributeValue
- * Revision:    $Revision: 1.77 $
+ * Revision:    $Revision: 1.94 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:50:34 $
+ * Date:        $Date: 2010/02/04 11:25:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,19 +66,20 @@ import java.util.Map;
 
 import javax.jdo.JDOHelper;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Multiplicities;
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
+import org.openmdx.portal.servlet.DataBinding;
 import org.openmdx.portal.servlet.DataBinding_1_0;
+import org.openmdx.portal.servlet.DataBinding_2_0;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 
 public abstract class AttributeValue
 implements Serializable {
@@ -97,7 +98,7 @@ implements Serializable {
                 valueClass = Classes.getApplicationClass(valueClassName);
             } 
             catch(ClassNotFoundException e) {
-                AppLog.warning("binary value class not found", valueClassName);
+            	SysLog.warning("binary value class not found", valueClassName);
             }
             AttributeValue.cachedValueClasses.put(
                 valueClassName,
@@ -122,16 +123,16 @@ implements Serializable {
                 );
             }
             catch(NoSuchMethodException e) {
-                AppLog.error("constructor for value class not found", valueClassName + "(Object object, FieldDef fieldDef, ApplicationContext application)");
+            	SysLog.error("constructor for value class not found", valueClassName + "(Object object, FieldDef fieldDef, ApplicationContext application)");
             }
             catch(InvocationTargetException e) {
-                AppLog.error("InvocationTargetException: can not create attribute value", e.getTargetException());
+            	SysLog.error("InvocationTargetException: can not create attribute value", e.getTargetException());
             }
             catch(InstantiationException e) {
-                AppLog.error("InstantiationException: can not create attribute value", e);
+            	SysLog.error("InstantiationException: can not create attribute value", e);
             }
             catch(IllegalAccessException e) {
-                AppLog.error("IllegalAccessException: can not create attribute value", e);
+            	SysLog.error("IllegalAccessException: can not create attribute value", e);
             }
         }        
         return null;
@@ -233,10 +234,21 @@ implements Serializable {
         else if(this.object instanceof RefObject_1_0) {
             try {
                 RefObject_1_0 refObj = (RefObject_1_0)this.object;
-                Object value = this.fieldDef.dataBinding.getValue(
-                    refObj,
-                    feature
-                );
+                Object value;
+                if(this.fieldDef.dataBinding instanceof DataBinding_1_0) {
+                    value = ((DataBinding_1_0)this.fieldDef.dataBinding).getValue(
+                        refObj,
+                        feature
+                    );
+                	
+                }
+                else {
+                    value = ((DataBinding_2_0)this.fieldDef.dataBinding).getValue(
+                        refObj,
+                        feature,
+                        this.application
+                    );                	
+                }
                 Object defaultValue = this.getDefaultValue();
                 if(
                     !JDOHelper.isPersistent(refObj) &&
@@ -260,15 +272,15 @@ implements Serializable {
                     return e.getCause();
                 }
                 else {
-                    AppLog.detail("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
-                    AppLog.detail(e.getMessage(), e.getCause());
+                	SysLog.detail("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
+                	SysLog.detail(e.getMessage(), e.getCause());
                     return null;
                 }
             }
             catch(Exception e) {
-                AppLog.detail("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
+            	SysLog.detail("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
                 ServiceException e0 = new ServiceException(e);
-                AppLog.detail(e0.getMessage(), e0.getCause());
+                SysLog.detail(e0.getMessage(), e0.getCause());
                 return null;
             }
         }
@@ -353,7 +365,7 @@ implements Serializable {
      * Returns stringified attribute value. 
      */
     public String getStringifiedValue(
-        HtmlPage p,
+        ViewPort p,
         boolean multiLine,
         boolean forEditing,
         boolean shortFormat
@@ -422,13 +434,34 @@ implements Serializable {
         }    
         return stringifiedValue.toString();
     }
-
+    
+    //-------------------------------------------------------------------------
+    public static boolean isWikiText(
+    	String value
+    ) {
+        boolean isWikiText =
+        	value.indexOf("\n= ") >= 0 || value.startsWith("= ") ||
+        	value.indexOf("\n== ") >= 0 || value.startsWith("== ") ||
+        	value.indexOf("\n=== ") >= 0 || value.startsWith("=== ") ||
+        	value.indexOf("\n[") >= 0 || value.startsWith("[") ||
+        	value.indexOf("\n* ") >= 0 || value.startsWith("* ") ||
+        	(value.indexOf("[%") >= 0 && value.indexOf("%]") > 0);
+        return isWikiText;
+    }
+    
+    //-------------------------------------------------------------------------
+    public static boolean isHtmlText(
+    	String value
+    ) {
+    	return value.startsWith("<");
+    }
+    
     //-------------------------------------------------------------------------
     /**
      * Prepares a single stringified Value to append.
      */
     protected String getStringifiedValueInternal(
-        HtmlPage p, 
+        ViewPort p, 
         Object v,
         boolean multiLine,
         boolean forEditing,
@@ -476,7 +509,7 @@ implements Serializable {
     }
 
     //-------------------------------------------------------------------------
-    public DataBinding_1_0 getDataBinding(
+    public DataBinding getDataBinding(
     ) {
         return fieldDef.dataBinding;
     }
@@ -514,6 +547,24 @@ implements Serializable {
     }
 
     //-------------------------------------------------------------------------
+    protected String getLabel(
+    	Attribute attribute,
+    	ViewPort p,
+    	String label
+    ) {
+        if(label == null) {
+            label = attribute.getLabel();
+            if(label == null) {
+            	label = attribute.getName();
+            }
+            if(p.getViewPortType() != ViewPort.Type.MOBILE) {
+            	label += label.trim().length() == 0 ? "" : ":";
+            }
+        }
+        return label;
+    }
+    
+    //-------------------------------------------------------------------------
     /**
      * Paints the attribute to p.
      * 
@@ -538,7 +589,7 @@ implements Serializable {
      */
     public void paint(
         Attribute attribute,
-        HtmlPage p,
+        ViewPort p,
         String id,
         String label,
         RefObject_1_0 lookupObject,
@@ -554,25 +605,25 @@ implements Serializable {
         String stringifiedValue,
         boolean forEditing
     ) throws ServiceException { 
-        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();        
-        if(label == null) {
-            label = attribute.getLabel();
-            label += label.length() == 0 ? "" : ":";        
-        }
+        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();   
+        label = this.getLabel(attribute, p, label);
         if(forEditing) {
             // Only generate id if required
             String feature = this.getName();
-            id = (id == null) || (id.length() == 0)            
-            ? feature + "[" + Integer.toString(tabIndex) + "]"
-                : id;            
+            id = (id == null) || (id.length() == 0) ? 
+            	feature + "[" + Integer.toString(tabIndex) + "]" : 
+            	id;            
             p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {
                 p.write("<td ", rowSpanModifier, ">");
                 if(attribute.getSpanRow() > 1) {
                     if(this.isChangeable() && this.isEnabled()) {
-                        // Multiline textarea always requires an id for launching HTML editor
                         if(attribute.getSpanRow() > 4) {
-                            p.write("  <div onclick=\"javascript:loadHTMLedit('", id, "');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/html"), p.getImgType(), "\" border=\"0\" alt=\"o\" title=\"\""), "</div>");
+                        	p.write("  <table style=\"width:100%;\"><tr>");
+                            p.write("    <td><div onclick=\"javascript:loadHTMLedit('", id, "', '", p.getResourcePathPrefix(), "');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/html"), p.getImgType(), "\" border=\"0\" alt=\"html\" title=\"\""), "</div></td>");
+                            p.write("    <td style=\"width:100%;\"><div onclick=\"javascript:loadWIKYedit('", id, "','./');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/wiki"), p.getImgType(), "\" border=\"0\" alt=\"wiki\" title=\"\""), "</div></td>");                             
+                            p.write("    <td><div onclick=\"javascript:$('", id, "').value=Wiky.toWiki($('", id, "').value);\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/htmltowiki"), p.getImgType(), "\" border=\"0\" alt=\"html &gt; wiki\" title=\"\""), "</div></td>");
+                            p.write("  </tr></table>");
                         }
                         String classModifier = this.isMandatory() ?
                             "mandatory" :
@@ -640,27 +691,94 @@ implements Serializable {
             if(stringifiedValue.length() == 0) {
                 styleModifier += "\"";
                 p.write(gapModifier);
-                p.write("<td class=\"label\"><span class=\"nw\">",  htmlEncoder.encode(label, false), "</span></td>");
-                p.write("<td ", rowSpanModifier, " class=\"valueL\" ",  widthModifier, " ", styleModifier, ">&nbsp;</td>");
+                if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
+                    p.write("       <div class=\"valueL\"></div>");
+                }
+                else {
+                	p.write("<td class=\"label\"><span class=\"nw\">",  htmlEncoder.encode(label, false), "</span></td>");
+                    p.write("<td ", rowSpanModifier, " class=\"valueL\" ",  widthModifier, " ", styleModifier, ">&nbsp;</td>");
+                }
             }
             else {                                
                 if(this.isSingleValued()) {
                     p.debug("<!-- single-valued AttributeValue -->");
                     p.write(gapModifier);
-                    p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+                    if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                    	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	                    	
+                    }
+                    else {
+                    	p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+                    }
+                    String feature = this.getName();                    	
+                    id = (id == null) || (id.length() == 0) ? 
+                        feature + "[" + Integer.toString(tabIndex) + "]" : 
+                        id;  
+                    boolean isWikiText = AttributeValue.isWikiText(stringifiedValue);
+                    boolean isHtmlText = AttributeValue.isHtmlText(stringifiedValue);
                     if(attribute.getSpanRow() > 1) {
                         if(nCols == 1) {
                             styleModifier += "\"";
-                            p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " ", (styleModifier.length() == 0 ? "" : styleModifier), ">");
-                            p.write("<div class=\"fieldSpannedFull\" ", (styleModifier.length() == 0 ? "" : styleModifier), ">");
-                            this.application.getPortalExtension().renderTextValue(p, stringifiedValue);
+                        	if(p.getViewPortType() != ViewPort.Type.MOBILE) {
+                        		p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " ", (styleModifier.length() == 0 ? "" : styleModifier), ">");
+                        	}
+                            if(isWikiText) {
+	                            p.write("<div id=\"", id, "Value\" style='display:none'>");
+	                            this.application.getPortalExtension().renderTextValue(
+	                            	p, 
+	                            	stringifiedValue, 
+	                            	true
+	                            );
+	                            p.write("</div>");
+                            }
+                        	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                                p.write("       <div class=\"valueL\" id=\"", id, "\">");                        		
+                        	}
+                        	else {                            
+                        		p.write("<div class=\"fieldSpannedFull\" id=\"", id, "\" ", (styleModifier.length() == 0 ? "" : styleModifier), ">");
+                        	}
+                            if(isWikiText) {
+                            	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");                            	
+                            }
+                            else {
+	                            this.application.getPortalExtension().renderTextValue(
+	                            	p, 
+	                            	isHtmlText ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
+	                            	false
+	                            );
+                            }
                             p.write("</div>");
                         }
                         else {
                             styleModifier += "height:" + (1.2+(attribute.getSpanRow()-1)*1.5) + "em;\"";
-                            p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " ",  styleModifier, ">");
-                            p.write("<div class=\"fieldSpanned\" ", styleModifier, ">");
-                            this.application.getPortalExtension().renderTextValue(p, stringifiedValue);
+                        	if(p.getViewPortType() != ViewPort.Type.MOBILE) {
+                        		p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " ",  styleModifier, ">");
+                        	}
+                            if(isWikiText) {
+	                            p.write("<div id=\"", id, "Value\" style='display:none'>");
+	                            this.application.getPortalExtension().renderTextValue(
+	                            	p, 
+	                            	stringifiedValue, 
+	                            	true
+	                            );
+	                            p.write("</div>");
+                            }
+                        	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                                p.write("       <div class=\"valueL\" id=\"", id, "\">");                        		
+                        	}
+                        	else {
+                        		p.write("<div class=\"fieldSpanned\" id=\"", id, "\" ", styleModifier, ">");
+                        	}
+                            if(isWikiText) {
+                            	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};{</script>");
+                            }
+                            else {
+	                            this.application.getPortalExtension().renderTextValue(
+	                            	p, 
+	                            	isHtmlText ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
+	                            	false
+	                            );                            	
+                            }
                             p.write("</div>");
                         }
                     }
@@ -668,24 +786,82 @@ implements Serializable {
                         styleModifier += "\"";
                         CharSequence iconTag = this.getIconKey() == null ? 
                             "" : 
-                            "" + p.getImg("src=\"", p.getResourcePath("images/"), this.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/spacer"), p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");                                                                      
-                        p.write("<td ",  rowSpanModifier, " class=\"valueL\" ", widthModifier, " ", styleModifier, ">");
-                        p.write("<div class=\"field\">", iconTag);
-                        this.application.getPortalExtension().renderTextValue(p, stringifiedValue);
-                        p.write("</div>");
+                            "" + p.getImg("src=\"", p.getResourcePath("images/"), this.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/spacer"), p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");
+                        if(p.getViewPortType() != ViewPort.Type.MOBILE) {
+                        	p.write("<td ",  rowSpanModifier, " class=\"valueL\" ", widthModifier, " ", styleModifier, ">");
+                        }
+                        if(attribute.getValue() instanceof TextValue) {
+                        	if(isWikiText) {
+		                        p.write("<div id=\"", id, "Value\" style='display:none'>");
+		                        this.application.getPortalExtension().renderTextValue(
+		                        	p, 
+		                        	stringifiedValue, 
+		                        	true
+		                        );
+		                        p.write("</div>");
+                        	}
+                        	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                                p.write("       <div class=\"valueL\" id=\"", id, "\">");                        		
+                        	}
+                        	else {
+                        		p.write("<div class=\"field\" id=\"", id, "\">", iconTag);
+                        	}
+	                        if(isWikiText) {
+	                        	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");
+	                        }
+	                        else {
+	                            this.application.getPortalExtension().renderTextValue(
+	                            	p, 
+	                            	stringifiedValue, 
+	                            	false
+	                            );                            		                        	
+	                        }
+	                        p.write("</div>");
+                        }
+                        else {
+                        	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                                p.write("       <div class=\"valueL\" id=\"", id, "\">");                        		
+                        	}
+                        	else {
+                        		p.write("<div class=\"field\" id=\"", id, "\">", iconTag);
+                        	}
+	                        this.application.getPortalExtension().renderTextValue(
+	                        	p, 
+	                        	isHtmlText ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
+	                        	false
+	                        );
+	                        p.write("</div>");                        	
+                        }
                     }
-                    p.write("</td>");
+                    if(p.getViewPortType() != ViewPort.Type.MOBILE) {
+                    	p.write("</td>");
+                    }
                 }
                 else {
                     styleModifier += "height:" + (1.2+(attribute.getSpanRow()-1)*1.5) + "em;\"";
-                    p.debug("<!-- multi-valued AttributeValue -->");
-                    p.write(gapModifier);
-                    p.write("<td class=\"label\"><span class=\"nw\">",  htmlEncoder.encode(label, false), "</span></td>");
-                    p.write("<td class=\"valueL\" ",  rowSpanModifier, " ",  widthModifier, " ",  styleModifier, ">");
-                    p.write("  <div class=\"valueMulti\" ",  styleModifier, "> ");
-                    this.application.getPortalExtension().renderTextValue(p, stringifiedValue);
-                    p.write("  </div>");
-                    p.write("</td>");
+                    if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                    	p.write("		<label>", label, "</label>");                	                    	
+                        p.write("       <div class=\"valueL\">");                        		
+                    }
+                    else {
+	                    p.debug("<!-- multi-valued AttributeValue -->");
+	                    p.write(gapModifier);
+	                    p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
+	                    p.write("<td class=\"valueL\" ",  rowSpanModifier, " ",  widthModifier, " ",  styleModifier, ">");
+	                    p.write("  <div class=\"valueMulti\" ",  styleModifier, "> ");
+                    }
+                    this.application.getPortalExtension().renderTextValue(
+                    	p, 
+                    	stringifiedValue, 
+                    	false
+                    );
+                    if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                    	p.write("       </div>");                    	
+                    }
+                    else {
+                    	p.write("  </div>");
+                    	p.write("</td>");
+                    }
                 }
             }
         }

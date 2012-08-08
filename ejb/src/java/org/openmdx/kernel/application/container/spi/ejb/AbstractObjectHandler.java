@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractObjectHandler.java,v 1.2 2009/02/24 16:02:51 hburger Exp $
+ * Name:        $Id: AbstractObjectHandler.java,v 1.3 2009/08/25 17:23:05 hburger Exp $
  * Description: Abstract Enterprise Java Bean Object Invocation Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 16:02:51 $
+ * Date:        $Date: 2009/08/25 17:23:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,6 +57,7 @@ import java.lang.reflect.Method;
 import javax.ejb.EJBLocalObject;
 import javax.ejb.EJBObject;
 import javax.ejb.RemoveException;
+import javax.ejb.TransactionAttributeType;
 
 import org.openmdx.kernel.exception.BasicException;
 
@@ -149,7 +150,7 @@ abstract class AbstractObjectHandler<H extends AbstractHomeHandler>
         protected AbstractAction(
             H homeHandler,
             Method method, 
-            TransactionAttribute transactionAttribute
+            TransactionAttributeType transactionAttribute
         ){
             this.homeHandler = homeHandler;
             this.method = method;
@@ -169,7 +170,7 @@ abstract class AbstractObjectHandler<H extends AbstractHomeHandler>
         /**
          * 
          */
-        protected final TransactionAttribute transactionAttribute;
+        protected final TransactionAttributeType transactionAttribute;
 
         private BasicException.Parameter[] getParameters(
             Object ejbInstance,

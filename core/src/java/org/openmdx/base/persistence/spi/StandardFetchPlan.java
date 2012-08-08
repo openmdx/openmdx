@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StandardFetchPlan.java,v 1.1 2009/02/10 18:06:02 hburger Exp $
+ * Name:        $Id: StandardFetchPlan.java,v 1.4 2009/11/10 15:24:54 hburger Exp $
  * Description: Standard Fetch Plan 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/10 18:06:02 $
+ * Date:        $Date: 2009/11/10 15:24:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,7 @@ import java.util.Set;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOUserException;
+import javax.jdo.PersistenceManager;
 
 /**
  * Standard Fetch Plan 
@@ -72,7 +73,7 @@ public class StandardFetchPlan
      * @param that the fetch plan to be cloned
      */
     @SuppressWarnings("unchecked")
-    public StandardFetchPlan(
+    private StandardFetchPlan(
         FetchPlan that
     ){
         this.maxFetchDepths = that.getMaxFetchDepth();
@@ -86,15 +87,22 @@ public class StandardFetchPlan
     /**
      * Constructor 
      */
-    public StandardFetchPlan(
+    private StandardFetchPlan(
     ){
         this.maxFetchDepths = 1;
         this.fetchSize = FETCH_SIZE_OPTIMAL;
-        this.groups = new HashSet<String>(Arrays.asList(DEFAULT));
+        this.groups = new HashSet<String>(DEFAULT_GROUPS);
         this.detachmentOptions = DETACH_LOAD_FIELDS;
         this.detachmentRoots = Collections.emptySet();
         this.detachmentRootClasses = NO_ROOT_CLASSES;
     }
+    
+    /**
+     * The default fetch groups
+     */
+    public static final Set<String> DEFAULT_GROUPS = Collections.singleton(
+        FetchPlan.DEFAULT
+    );
     
     private static final Class<?>[] NO_ROOT_CLASSES = {};
     
@@ -112,6 +120,25 @@ public class StandardFetchPlan
     @SuppressWarnings("unchecked")
     private Class[] detachmentRootClasses = null;
     
+    /**
+     * Fetch plan factory
+     * 
+     * @param persistenceManager
+     * 
+     * @return a new fetch plan
+     */
+    public static FetchPlan newInstance(
+        PersistenceManager persistenceManager
+    ){
+        if(persistenceManager != null) {
+            FetchPlan that = persistenceManager.getFetchPlan();
+            if(that != null) {
+                return new StandardFetchPlan(that);
+            }
+        }
+        return new StandardFetchPlan();
+    }
+        
     /* (non-Javadoc)
      * @see javax.jdo.FetchPlan#addGroup(java.lang.String)
      */

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsAutocompleter.java,v 1.28 2009/01/06 14:12:02 wfro Exp $
+ * Name:        $Id: FindObjectsAutocompleter.java,v 1.34 2009/10/12 13:06:49 wfro Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 14:12:02 $
+ * Date:        $Date: 2009/10/12 13:06:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,10 +59,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.FilterOperators;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 
@@ -177,9 +177,9 @@ public class FindObjectsAutocompleter
     
     //-----------------------------------------------------------------------
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String id,
-        int index,
+        int tabIndex,
         String fieldName,
         AttributeValue currentValue,
         boolean numericCompare,
@@ -189,9 +189,9 @@ public class FindObjectsAutocompleter
         CharSequence imgTag
     ) throws ServiceException {
         
-        AppLog.detail("> paint");        
+    	SysLog.detail("> paint");        
         id = (id == null) || (id.length() == 0)
-            ? fieldName + (index >= 0 ? "[" + index + "]" : "")
+            ? fieldName + (tabIndex >= 0 ? "[" + tabIndex + "]" : "")
             : id;
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();
         
@@ -204,7 +204,7 @@ public class FindObjectsAutocompleter
             objectReference = (ObjectReference)currentValue.getValue(false);
         }
         // Generate id if none is specified
-        String acName = "ac_" + fieldName.replace(':', '_').replace('!', '_').replace('*', '_') + Integer.toString(index);
+        String acName = "ac_" + fieldName.replace(':', '_').replace('!', '_').replace('*', '_') + Integer.toString(tabIndex);
         
         p.write("<div class=\"autocompleterMenu\">");
         p.write("  <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
@@ -217,7 +217,7 @@ public class FindObjectsAutocompleter
         p.write("    </li>");
         p.write("  </ul>");                    
         p.write("</div>");       
-        p.write("<div ", (inputFieldDivClass == null ? "" : inputFieldDivClass), "><input type=\"text\" ", (inputFieldClass == null ? "" : inputFieldClass), " id=\"", id, ".Title\" name=\"", id, ".Title\" tabindex=\"", Integer.toString(index), "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\" />", (imgTag == null ? "" : "&nbsp;" + imgTag) ,"</div>");
+        p.write("<div ", (inputFieldDivClass == null ? "" : inputFieldDivClass), "><input type=\"text\" ", (inputFieldClass == null ? "" : inputFieldClass), " id=\"", id, ".Title\" name=\"", id, ".Title\" tabindex=\"", Integer.toString(tabIndex), "\" value=\"", (objectReference == null ? "" : objectReference.getTitle(true)), "\" />", (imgTag == null ? "" : "&nbsp;" + imgTag) ,"</div>");
         p.write("<input type=\"hidden\" class=\"valueLLocked\" id=\"", id, "\" name=\"", id, "\" readonly value=\"", (objectReference == null ? "" : objectReference.refMofId()), "\" />");
         if(tdTag != null) {
             p.write("</td>");

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SessionEventHandler.java,v 1.15 2008/09/10 16:21:44 wfro Exp $
+ * Name:        $Id: SessionEventHandler.java,v 1.17 2009/09/25 12:02:38 wfro Exp $
  * Description: SessionEventHandler 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/10 16:21:44 $
+ * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,12 +65,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
-import org.openmdx.portal.servlet.HtmlPageFactory;
+import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.ViewPortFactory;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
@@ -93,7 +93,7 @@ public class SessionEventHandler {
             
                 case Action.EVENT_SET_PANEL_STATE:
                     try {
-                        HtmlPage p = HtmlPageFactory.openPage(view, request, EventHandlerHelper.getWriter(request, response));
+                        ViewPort p = ViewPortFactory.openPage(view, request, EventHandlerHelper.getWriter(request, response));
                         String panelName = Action.getParameter(parameter, Action.PARAMETER_NAME);
                         int panelState = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_STATE));
                         application.setPanelState(panelName, panelState);
@@ -101,19 +101,19 @@ public class SessionEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
         
                 case Action.EVENT_SAVE_SETTINGS:
                     try {
-                        HtmlPage p = HtmlPageFactory.openPage(view, request, EventHandlerHelper.getWriter(request, response));
+                        ViewPort p = ViewPortFactory.openPage(view, request, EventHandlerHelper.getWriter(request, response));
                         application.saveSettings(false);
                         p.close(true);
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                     
@@ -136,7 +136,7 @@ public class SessionEventHandler {
                         request, 
                         response
                     );      
-                    AppLog.detail("logoff");
+                    SysLog.detail("logoff");
                     break;                    
             }
         }

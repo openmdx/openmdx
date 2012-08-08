@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestLoginConfiguration.java,v 1.2 2009/03/12 17:47:57 hburger Exp $
+ * Name:        $Id: TestLoginConfiguration.java,v 1.3 2009/09/07 15:16:04 hburger Exp $
  * Description: Test Login Configuration
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/12 17:47:57 $
+ * Date:        $Date: 2009/09/07 15:16:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.openmdx.base.text.conversion.URLReader;
-import org.openmdx.security.auth.context.spi.URLConfiguration;
+import org.openmdx.security.auth.login.configuration.URLConfiguration;
 
 public class TestLoginConfiguration extends TestCase {
 

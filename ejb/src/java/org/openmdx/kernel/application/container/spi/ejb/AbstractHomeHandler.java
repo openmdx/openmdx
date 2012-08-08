@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractHomeHandler.java,v 1.3 2009/03/31 17:06:10 hburger Exp $
+ * Name:        $Id: AbstractHomeHandler.java,v 1.4 2009/08/25 17:23:05 hburger Exp $
  * Description: Abstract Enterprise Java Bean Home Invocation Handler
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:06:10 $
+ * Date:        $Date: 2009/08/25 17:23:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import javax.ejb.EJBLocalHome;
 import javax.ejb.HomeHandle;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
+import javax.ejb.TransactionAttributeType;
 import javax.transaction.TransactionManager;
 
 import org.openmdx.kernel.exception.BasicException;
@@ -162,7 +163,7 @@ implements HomeConfiguration
     /**
      * 
      */
-    TransactionAttribute getTransactionAttribute(
+    TransactionAttributeType getTransactionAttribute(
         String methodInterface, 
         String methodName, 
         String[] methodParameters

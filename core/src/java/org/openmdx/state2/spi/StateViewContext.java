@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateViewContext.java,v 1.6 2009/04/28 13:58:52 hburger Exp $
+ * Name:        $Id: StateViewContext.java,v 1.10 2010/01/03 14:59:51 wfro Exp $
  * Description: AbstractStateContext 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/28 13:58:52 $
+ * Date:        $Date: 2010/01/03 14:59:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,14 +54,13 @@ import java.util.Date;
 
 import javax.resource.cci.InteractionSpec;
 
-import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.state2.cci.StateContext;
 import org.openmdx.state2.cci.ViewKind;
+import org.w3c.format.DateTimeFormat;
 
 /**
  * AbstractStateContext
  */
-@SuppressWarnings("serial")
 public abstract class StateViewContext<V>
     implements InteractionSpec, StateContext<V>
 {
@@ -97,7 +96,7 @@ public abstract class StateViewContext<V>
                     id.append(
                         '@'
                     ).append(
-                        DateFormat.getInstance().format(getExistsAt())
+                        DateTimeFormat.BASIC_UTC_FORMAT.format(getExistsAt())
                     );
                 }
                 break;
@@ -156,6 +155,11 @@ public abstract class StateViewContext<V>
      */
     private final String id;
     
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 113453722360985152L;
+
     /**
      * Tests the transaction time
      * 

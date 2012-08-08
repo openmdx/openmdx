@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openMEX, http://www.openmdx.org/
- * Name:        $Id: MarshallingObject_1.java,v 1.13 2009/06/02 23:18:31 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: MarshallingObject_1.java,v 1.22 2010/01/26 15:41:36 hburger Exp $
  * Description: MarshallingObject_1 class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/02 23:18:31 $
+ * Date:        $Date: 2010/01/26 15:41:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,7 +50,6 @@
  */
 package org.openmdx.base.accessor.spi;
 
-import java.util.EventListener;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -58,23 +57,22 @@ import java.util.SortedMap;
 import javax.jdo.JDOUserException;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
-import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
-import org.openmdx.base.collection.MarshallingFilterableMap;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.CachingMarshaller_1_0;
 import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
 import org.openmdx.base.marshalling.Marshaller;
-import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * A marshalling object
  */
-public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
+public abstract class MarshallingObject_1<M extends Marshaller>
     extends DelegatingObject_1 
 {
 
@@ -277,13 +275,10 @@ public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
     public Container_1_0 objGetContainer(
         String feature
     ) throws ServiceException {
-        Container_1_0 delegate = getContainer(feature);
-        return delegate == null ? 
-            null : 
-            (Container_1_0)new MarshallingContainer(
-                getMarshaller(),
-                delegate
-            );
+        return new MarshallingContainer(
+            getMarshaller(),
+            getContainer(feature)
+        );
     }
 
     /**
@@ -297,8 +292,7 @@ public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
     protected Container_1_0 getContainer(
         String feature
     ) throws ServiceException {
-        DataObject_1_0 delegate = getDelegate();
-        return delegate == null ? null : delegate.objGetContainer(feature);
+        return getDelegate().objGetContainer(feature);
     }
     
     //--------------------------------------------------------------------------
@@ -366,59 +360,14 @@ public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
 
 
     //------------------------------------------------------------------------
-    // Event Handling
-    //------------------------------------------------------------------------
-
-    /**
-     * Add an event listener.
-     * 
-     * @param listener
-     *        the event listener to be added
-     */
-    public void objAddEventListener(
-        EventListener listener
-    ) throws ServiceException{
-        super.objAddEventListener(listener);
-    }
-
-    /**
-     * Remove an event listener.
-     * 
-     * @param listener
-     *        the event listener to be removed
-     */
-    public void objRemoveEventListener(
-        EventListener listener
-    ) throws ServiceException{
-        super.objRemoveEventListener(listener);
-    }
-
-    /**
-     * Add an event listener.
-     * 
-     * @param listenerType
-     *        the type of the event listeners to be returned
-     * 
-     * @return an array of listenerType containing the matching event
-     *         listeners
-     */
-    public <T extends EventListener> T[] objGetEventListeners(
-        Class<T> listenerType
-    ) throws ServiceException{
-        return super.objGetEventListeners(listenerType);
-    }
-
-    //------------------------------------------------------------------------
     // Class MarshallingContainer
     //------------------------------------------------------------------------
 
     /**
      * Marshalling Container
      */
-    @SuppressWarnings("unchecked")
     protected static class MarshallingContainer 
-        extends MarshallingFilterableMap
-        implements Container_1_0
+        extends MarshallingContainer_1
     {
 
         /**
@@ -463,57 +412,22 @@ public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
             Marshaller actualMarshaller = ((ExceptionListenerMarshaller)super.marshaller).getDelegate();
             MarshallingContainer container;
             if(actualMarshaller == requestedMarshaller) {
+                //
+                // Identical manager
+                //
                 container = this;
-            } else {                
-                Container_1_0 foreignDelegate = (Container_1_0) getDelegate();
-                Path id = (Path)foreignDelegate.getContainerId();
-                if(id == null) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        "A transient parent must belong to the same manager as its future child"
-                    );
-                }
-                DataObjectManager_1_0 factory = (DataObjectManager_1_0)actualMarshaller;
-                container = (MarshallingContainer)((DataObject_1_0)factory.getObjectById(
-                    id.getParent()
+            } else {  
+                //
+                // Manager has changed, e.g. in case of context switch
+                //
+                TransientContainerId containerId = PersistenceHelper.getTransientContainerId(getDelegate());
+                container = (MarshallingContainer)((DataObject_1_0)((DataObjectManager_1_0)actualMarshaller).getObjectById(
+                    containerId.getParent()
                 )).objGetContainer(
-                    id.getBase()
+                    containerId.getFeature()
                 );
             }
-            Container_1_0 delegate = (Container_1_0)container.getDelegate(); 
-            return delegate;
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#toString()
-         */
-        @Override
-        public String toString() {
-            return getDelegate().toString();
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.generic.cci.Container_1_0#superSet()
-         */
-        public Container_1_0 superSet(
-        ) {
-            return ((Container_1_0)this.getDelegate()).superSet();
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
-         */
-        public void retrieveAll(boolean useFetchPlan) {
-            ((Container_1_0)this.getDelegate()).retrieveAll(useFetchPlan);
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.generic.cci.Container_1_0#getObjectId()
-         */
-        public Object getContainerId(
-        ) {
-            return ((Container_1_0)this.getDelegate()).getContainerId();
+            return container.getDelegate();
         }
 
     }

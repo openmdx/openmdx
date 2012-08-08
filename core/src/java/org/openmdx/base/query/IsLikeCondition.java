@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: IsLikeCondition.java,v 1.7 2009/01/06 10:21:19 wfro Exp $
+ * Name:        $Id: IsLikeCondition.java,v 1.8 2010/03/31 14:39:23 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2010/03/31 14:39:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -99,7 +99,7 @@ public IsLikeCondition(
   }
 
   public void setValue(
-      Object[] values
+      Object... values
   ) {
     this.values = values;
   }

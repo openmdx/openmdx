@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ImmutableDatatypeFactory.java,v 1.1 2008/09/25 16:44:31 hburger Exp $
+ * Name:        $Id: ImmutableDatatypeFactory.java,v 1.2 2009/10/19 12:40:35 hburger Exp $
  * Description: Immutable Datatype Factory 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 16:44:31 $
+ * Date:        $Date: 2009/10/19 12:40:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,7 +65,7 @@ public interface ImmutableDatatypeFactory {
     //------------------------------------------------------------------------
     
     /**
-     * Create a new immutable date-time instance
+     * Create an UTC based immutable date-time instance
      * 
      * @param value the basic or extended representation
      * 
@@ -95,7 +95,7 @@ public interface ImmutableDatatypeFactory {
     /**
      * Create a new immutable duration instance
      * 
-     * @param value the basic or extended representation
+     * @param value the representation with designators
      * 
      * @return a corresponding date-time instance
      * 
@@ -148,39 +148,6 @@ public interface ImmutableDatatypeFactory {
      */
     Duration toNormalizedDuration(
         Duration value
-    );
-
-    
-    //------------------------------------------------------------------------
-    // To String Representation
-    //------------------------------------------------------------------------
-    
-    /**
-     * Return the value in basic format according to ISO8601:2000
-     * 
-     * @param datatype an org::w3c::date, org::w3c::dateTime or org::w3c::duration
-     * 
-     * @return a <code>String</code> representing the value in basic format
-     * 
-     * @exception IllegalArgumentException
-     * if the value's basic format can't be determined
-     */
-    String toBasicFormat(
-        Object datatype
-    );
-
-    /**
-     * Return the value in extended format according to ISO8601:2000
-     * 
-     * @param datatype an org::w3c::date, org::w3c::dateTime or org::w3c::duration
-     * 
-     * @return a <code>String</code> representing the value in basic format
-     * 
-     * @exception IllegalArgumentException
-     * if the value's basic format can't be determined
-     */
-    String toExtendedFormat(
-        Object datatype
     );
 
 }

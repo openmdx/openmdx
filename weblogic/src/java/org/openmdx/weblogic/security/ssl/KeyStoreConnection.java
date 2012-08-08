@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: KeyStoreConnection.java,v 1.7 2007/08/20 09:37:19 hburger Exp $
+ * Name:        $Id: KeyStoreConnection.java,v 1.8 2009/07/06 11:14:48 hburger Exp $
  * Description: Connection 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/20 09:37:19 $
+ * Date:        $Date: 2009/07/06 11:14:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,8 +67,6 @@ import javax.naming.spi.InitialContextFactory;
 import javax.security.auth.Subject;
 
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.io.Resettable;
 import org.openmdx.kernel.security.ExecutionContext;
 
 import weblogic.jndi.Environment;
@@ -188,36 +186,35 @@ public class KeyStoreConnection
             this.subject = subject;
             this.token = System.currentTimeMillis();
         } catch (Exception exception) {
-            throw (SecurityException) Throwables.initCause(
+            throw BasicException.initHolder(
                 new SecurityException(
-                    "Lazy connection establishment failed"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.COMMUNICATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        WLContext.INITIAL_CONTEXT_FACTORY, 
-                        this.environment.get(WLContext.INITIAL_CONTEXT_FACTORY)
-                    ),
-                    new BasicException.Parameter(
-                        WLContext.PROVIDER_URL,
-                        this.environment.get(WLContext.PROVIDER_URL)
-                    ),
-                    new BasicException.Parameter(
-                        WLContext.SECURITY_PRINCIPAL,
-                        this.environment.containsKey(WLContext.SECURITY_PRINCIPAL)
-                    ),
-                    new BasicException.Parameter(
-                        WLContext.SECURITY_CREDENTIALS,
-                        this.environment.containsKey(WLContext.SECURITY_CREDENTIALS)
-                    ),
-                    new BasicException.Parameter(
-                        WLContext.SSL_CLIENT_CERTIFICATE,
-                        hasSSLClientCertificate()
-                    )                       
-                },
-                null
+                    "Lazy connection establishment failed",
+                    BasicException.newEmbeddedExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.COMMUNICATION_FAILURE,
+                        new BasicException.Parameter(
+                            WLContext.INITIAL_CONTEXT_FACTORY, 
+                            this.environment.get(WLContext.INITIAL_CONTEXT_FACTORY)
+                        ),
+                        new BasicException.Parameter(
+                            WLContext.PROVIDER_URL,
+                            this.environment.get(WLContext.PROVIDER_URL)
+                        ),
+                        new BasicException.Parameter(
+                            WLContext.SECURITY_PRINCIPAL,
+                            this.environment.containsKey(WLContext.SECURITY_PRINCIPAL)
+                        ),
+                        new BasicException.Parameter(
+                            WLContext.SECURITY_CREDENTIALS,
+                            this.environment.containsKey(WLContext.SECURITY_CREDENTIALS)
+                        ),
+                        new BasicException.Parameter(
+                            WLContext.SSL_CLIENT_CERTIFICATE,
+                            hasSSLClientCertificate()
+                        )                       
+                   )
+               )
             );
         }
         return this.subject;

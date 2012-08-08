@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI2Parser.java,v 1.4 2009/03/10 18:14:01 wfro Exp $
+ * Name:        $Id: XMI2Parser.java,v 1.8 2010/04/15 16:44:50 wfro Exp $
  * Description: XMI2 Parser
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/10 18:14:01 $
+ * Date:        $Date: 2010/04/15 16:44:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,14 +53,18 @@
 package org.openmdx.application.mof.externalizer.xmi;
 
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -310,9 +314,15 @@ public class XMI2Parser
                 Boolean.valueOf(atts.getValue("isAbstract")).booleanValue(),
                 Boolean.valueOf(atts.getValue("isDerived"))
             );
-            String memberEnd = atts.getValue("memberEnd");
-            associationDef.setExposedEndId(memberEnd.substring(0, memberEnd.indexOf(" ")));
-            associationDef.setReferencedEndId(memberEnd.substring(memberEnd.indexOf(" ") + 1));
+            String memberEnds = atts.getValue("memberEnd");
+            String[] memberEndIds = memberEnds.split(" ");
+            associationDef.setExposedEndId(memberEndIds[0]);
+            associationDef.setReferencedEndId(memberEndIds[1]);
+            String navigableOwnedEnds = atts.getValue("navigableOwnedEnd");
+            List<String> navigableOwnedEndIds = navigableOwnedEnds == null ? 
+                new ArrayList<String>() : 
+                    Arrays.asList(navigableOwnedEnds.split(" "));
+            associationDef.setNavigableOwnedEndIds(navigableOwnedEndIds);
             elementStack.push(associationDef);
         }
         // ownedEnd
@@ -328,7 +338,11 @@ public class XMI2Parser
                     "true".equals(atts.getValue("isReadOnly"))
                         ? UML1ChangeableKind.FROZEN
                         : UML1ChangeableKind.CHANGEABLE,
-                    false // ownedEnd is never navigable. Navigable ends mapped to ownedAttribute
+                    false 
+                    // At this point we don't know whether the end is navigable or not.
+                    // There are two cases to handle:
+                    // - either the navigable end appears as ownedAttribute
+                    // - or the navigable end is declared as navigableOwnedEnd at association level
                 );
             associationEndDef.setParticipant(
                 resolver.lookupXMIId(
@@ -444,11 +458,11 @@ public class XMI2Parser
         }
         // generalization reference
         else if("general".equals(qName)) {
-            HRef href = null;
+            URI href = null;
             try {
-                href = new HRef(atts.getValue("href"));
+                href = new URI(atts.getValue("href"));
             }
-            catch(ServiceException e) {
+            catch(URISyntaxException e) {
                 this.error("reference is not a valid URI " + atts.getValue("href"));
             }
             if(href != null) {
@@ -578,17 +592,24 @@ public class XMI2Parser
             "references".equals(qName) &&
             ("uml:Package".equals(atts.getValue("xmi:type")) || "uml:Model".equals(atts.getValue("xmi:type"))) 
         ) {
-            HRef href = null;
+            URI href = null;
             try {
-                href = new HRef(atts.getValue("href"));
+                String value = atts.getValue("href");
+                // Convert relative paths to platform resource paths
+                String schema = "";
+                while(value.startsWith("../") || value.startsWith("..\\")) {
+                    value = value.substring(3);
+                    schema = "platform:/resource/";
+                }                 
+                href = new URI(schema + value);
             }
-            catch(ServiceException e) {
+            catch(URISyntaxException e) {
                 this.error("reference is not a valid URI " + atts.getValue("href"));
             }
             if(href != null) {
                 try {
                     String scheme = href.getScheme();
-                    String path = Pattern.compile("%20").matcher(href.getPath()).replaceAll(" ");
+                    String path = href.getPath().replace("%20", " ");
                     String packageName = null;
                     if("platform".equals(scheme) && path.startsWith("/resource/")) {
                         path = path.substring("/resource/".length());
@@ -621,17 +642,18 @@ public class XMI2Parser
                     }
                 }
                 catch(Exception e) {
+                    new ServiceException(e).log();
                     this.error("Can not process nested model " + atts.getValue("href") + ". Reason=" + e.getMessage());
                 }
             }
         }
         // type reference
         else if("type".equals(qName)) {
-            HRef href = null;
+            URI href = null;
             try {
-                href = new HRef(atts.getValue("href"));
+                href = new URI(atts.getValue("href"));
             }
-            catch(ServiceException e) {
+            catch(URISyntaxException e) {
                 this.error("reference is not a valid URI " + atts.getValue("href"));
             }
             if(href != null) {
@@ -659,6 +681,7 @@ public class XMI2Parser
                 }
             }
         }
+        this.value.setLength(0);        
     }
 
     //---------------------------------------------------------------------------
@@ -702,12 +725,20 @@ public class XMI2Parser
                     }
                     else if(element instanceof UML1Association) {
                         UML1Association associationDef = (UML1Association)element;
-                        associationDef.getConnection().add(
-                            this.associationEnds.get(associationDef.getExposedEndId())
+                        UML1AssociationEnd exposedEnd = (UML1AssociationEnd)this.associationEnds.get(
+                            associationDef.getExposedEndId()
                         );
-                        associationDef.getConnection().add(
-                            this.associationEnds.get(associationDef.getReferencedEndId())
+                        UML1AssociationEnd referencedEnd = (UML1AssociationEnd)this.associationEnds.get(
+                            associationDef.getReferencedEndId()
                         );
+                        if(associationDef.getNavigableOwnedEndId().contains(exposedEnd.getId())) {
+                            exposedEnd.setNavigable(true);
+                        }
+                        if(associationDef.getNavigableOwnedEndId().contains(referencedEnd.getId())) {
+                            referencedEnd.setNavigable(true);
+                        }
+                        associationDef.getConnection().add(exposedEnd);
+                        associationDef.getConnection().add(referencedEnd);
                         this.importer.processUMLAssociation((UML1Association)element);
                     }
                 }
@@ -780,6 +811,7 @@ public class XMI2Parser
         catch(Exception ex) {
             ex.printStackTrace(this.errors);
         }
+        this.value.setLength(0);        
     }
 
     //---------------------------------------------------------------------------
@@ -788,7 +820,6 @@ public class XMI2Parser
         int start,
         int length
     ) {
-        this.value.setLength(0);
         for(int i = 0; i < length; i++) {
         	this.value.append(ch[start + i]);        	
         }

@@ -31,6 +31,10 @@ NavigationControl.paintSelectPerspectives(
     p,
     forEditing
 );
+NavigationControl.paintToggleViewPort(
+    p,
+    forEditing
+);
 NavigationControl.paintBreadcrum(
     p,
     forEditing

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Structures.java,v 1.24 2009/04/28 13:58:51 hburger Exp $
+ * Name:        $Id: Structures.java,v 1.29 2010/04/16 12:35:36 hburger Exp $
  * Description: Structures 
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/28 13:58:51 $
+ * Date:        $Date: 2010/04/16 12:35:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -87,8 +87,8 @@ import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
 import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.resource.Records;
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.collection.ArraysExtension;
+import org.openmdx.kernel.loading.Classes;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 
@@ -116,13 +116,12 @@ public class Structures {
      * 
      * @throws IllegalArgumentException
      */
-    @SuppressWarnings("unchecked")
     private static <S> S create(
         Class<S> structureClass, 
         MetaData metaData,
         Object... values
     ) {
-        return (S) Classes.newProxyInstance(
+        return Classes.<S>newProxyInstance(
             new ProxyHandler(metaData, values), 
             structureClass, PersistenceAware.class
         );
@@ -464,7 +463,7 @@ public class Structures {
         /**
          * 
          */
-        private static final int[] NO_INDICES = new int[] {
+        private static final Integer[] NO_INDICES = new Integer[] {
         };
         
         
@@ -720,7 +719,7 @@ public class Structures {
                                 value = Records.getRecordFactory().asMappedRecord(
                                     MetaData.toType(t),
                                     null, // recordShortDescription 
-                                    i[0], // keys
+                                    (Object[])i[0], // keys
                                     toRecordValues(
                                         (Object[])i[1], 
                                         mapNullValues
@@ -1194,6 +1193,12 @@ public class Structures {
             return value;
         }
 
+        @Override
+        public String toString(
+        ) {
+            return this.name.toString();
+        }
+
     }
 
     
@@ -1444,7 +1449,7 @@ public class Structures {
         /**
          * Retrieve the member name for a given key
          * 
-         * @param name
+         * @param featureName
          * 
          * @return the member name for a given key
          */

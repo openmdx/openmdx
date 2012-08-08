@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: OperationAwareLayer_1.java,v 1.3 2009/06/01 15:39:40 wfro Exp $
+ * Name:        $Id: OperationAwareLayer_1.java,v 1.15 2010/03/24 15:50:53 hburger Exp $
  * Description: Stream Operation Aware Layer_1_0 Implementation
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/01 15:39:40 $
+ * Date:        $Date: 2010/03/24 15:50:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,27 +51,45 @@
  */
 package org.openmdx.application.dataprovider.spi;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 
 
 /**
  * Stream operation aware Layer_1_0 implementation.
  * <p>
- * This class dipatches operation requests to<ul>
+ * This class dispatches operation requests to<ul>
  * <li>getStreamOperation
  * <li>otherOperation
  * </ul>
  */
 public abstract class OperationAwareLayer_1 extends Layer_1 {
 
+    //-----------------------------------------------------------------------
+    public OperationAwareLayer_1(
+    ) {
+    }
+    
+    //-----------------------------------------------------------------------
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new LayerInteraction(connection);
+    }
+    
+    //-----------------------------------------------------------------------
     /**
      * Retrieves a configuration value
      * 
@@ -91,6 +109,7 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
                 defaultValue;
     }
 
+    //-----------------------------------------------------------------------
     /**
      * Retrieves a configuration value
      * 
@@ -106,61 +125,86 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
     ){
         Configuration configuration = getConfiguration();
         return configuration.containsEntry(key) && !configuration.values(key).isEmpty() ?
-            ((Number)configuration.values(key).get(0)).intValue() :
+            configuration.values(key).get(0) instanceof Number ?
+                ((Number)configuration.values(key).get(0)).intValue() :
+                    Integer.valueOf(((String)configuration.values(key).get(0))) : 
                 defaultValue;
     }
 
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.Operation_1_0#operation(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
-     */
-    public final DataproviderReply operation(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        MappedRecord response = null;
-        String operationName = request.path().get(
-            request.path().size() - 2
-        );
-        Path replyPath = request.path().getDescendant(
-            "reply", super.uidAsString()
-        );
-        response = this.otherOperation(
-            header, 
-            request, 
-            operationName, 
-            replyPath
-        ); 
-        return response == null ?
-            super.operation(header, request) :
-            new DataproviderReply(response);         
-    }
+    //-----------------------------------------------------------------------
+    public class LayerInteraction extends Layer_1.LayerInteraction {
+        
+        public LayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
+        }
+        
+        /* (non-Javadoc)
+         * @see org.openmdx.compatibility.base.dataprovider.spi.Operation_1_0#operation(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
+         */
+        @Override
+        public boolean invoke(
+            RestInteractionSpec ispec, 
+            MessageRecord input, 
+            MessageRecord output
+        ) throws ServiceException {
+            ServiceHeader header = this.getServiceHeader();
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            String operationName = request.path().get(
+                request.path().size() - 2
+            );
+            MappedRecord response = this.otherOperation(
+                header, 
+                request, 
+                operationName, 
+                newResponseId(input.getPath())
+            ); 
+            if(response == null) {
+                super.invoke(
+                    ispec, 
+                    input, 
+                    output
+                );
+            } else {
+                try {
+                    Object_2Facade responseFacade = Object_2Facade.newInstance(response);
+                    output.setPath(responseFacade.getPath());
+                    output.setBody(responseFacade.getValue());
+                } catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
+            }
+            return true;
+        }
 
-    /**
-     * This method is overridden by a subclass if it supports otherOperation().
-     * 
-     * @param header
-     * @param request
-     * @param operation
-     * @param replyPath
-     * 
-     * @return the reply object; or null if the request should be delegated
-     * 
-     * @throws ServiceException
-     */
-    protected MappedRecord otherOperation(
-        ServiceHeader header,
-        DataproviderRequest request,
-        String operation, 
-        Path replyPath
-    ) throws ServiceException {
-        throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED,
-            "Operation not supported",
-            new BasicException.Parameter("path", request.path()),
-            new BasicException.Parameter("operation", operation)
-        );
+        /**
+         * This method is overridden by a subclass if it supports otherOperation().
+         * 
+         * @param header
+         * @param request
+         * @param operation
+         * @param replyPath
+         * 
+         * @return the reply object; or null if the request should be delegated
+         * 
+         * @throws ServiceException
+         */
+        protected MappedRecord otherOperation(
+            ServiceHeader header,
+            DataproviderRequest request,
+            String operation, 
+            Path replyPath
+        ) throws ServiceException {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "Operation not supported",
+                new BasicException.Parameter("path", request.path()),
+                new BasicException.Parameter("operation", operation)
+            );
+        }
+        
     }
 
 }
-

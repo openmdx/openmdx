@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.1 2009/03/11 16:04:22 hburger Exp $
+ * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.2 2010/01/04 14:03:18 hburger Exp $
  * Description: Abstract Managed Connection Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/11 16:04:22 $
+ * Date:        $Date: 2010/01/04 14:03:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -375,7 +375,7 @@ public abstract class AbstractManagedConnectionFactory
      *
      * @return Returns the password.
      */
-    protected final String getPassword() {
+    public final String getPassword() {
         return this.password;
     }    
 

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-library.xml,v 1.147 2009/01/13 02:12:28 wfro Exp $
+= Name:        $Id: build-library.xml,v 1.162 2010/04/22 08:45:09 wfro Exp $
 = Description: openMDX Build Library
-= Revision:    $Revision: 1.147 $
-= Date:        $Date: 2009/01/13 02:12:28 $
+= Revision:    $Revision: 1.162 $
+= Date:        $Date: 2010/04/22 08:45:09 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -81,7 +81,7 @@
 		<antcontrib:else>
 			<taskdef resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)">
 				<classpath>
-					<pathelement location="${openmdx.home}/jre-1.5/ant/lib/openmdx-ant.jar"/>
+					<pathelement location="${openmdx.home}/${build.java.platform}/ant/lib/openmdx-ant.jar"/>
 				</classpath>
 			</taskdef>
 			<property name="org.openmdx.tools.ant.is.available" value="true"/>
@@ -97,7 +97,7 @@
 		<property name="ant.since1_7" value="-Dignore=" />
 		<java classname="org.apache.tools.ant.launch.Launcher">
 			<arg value="${ant.since1_7}-lib"/>
-				<arg value="${ant.since1_7}${openmdx.home}/jre-1.5/ant/lib/openmdx-ant.jar"/>
+				<arg value="${ant.since1_7}${openmdx.home}/${build.java.platform}/ant/lib/openmdx-ant.jar"/>
 			<arg value="${ant.since1_7}-main"/>
 				<arg value="${ant.since1_7}org.openmdx.tools.ant.Main"/>
 			<arg value="-projecthelp"/>
@@ -152,6 +152,13 @@
 		</condition>
 		<available file="${env.JRE_15}" type="dir" value="[+] ${env.JRE_15}" property="JRE_15.info"/>
 		<property name="JRE_15.info" value="[-] ${env.JRE_15}"/>
+		<condition property="JRE_16.info" value="[-]">
+			<not>
+				<isset property="env.JRE_16"/>
+			</not>
+		</condition>
+		<available file="${env.JRE_16}" type="dir" value="[+] ${env.JRE_16}" property="JRE_16.info"/>
+		<property name="JRE_16.info" value="[-] ${env.JRE_16}"/>
 		<condition property="unix.distribution.is-set">
 			<isset property="unix.distribution"/>
 		</condition>
@@ -207,7 +214,21 @@
 		<echo message="unix.distribution              = ${unix.distribution.is-set}"/>
 		<echo message="source.distribution            = ${source.distribution.is-set}"/>
 		<echo message="distribution.format            = ${distribution.format}"/>
+		<echo/>
+		<echo message="junit.test.halt.on.error       = ${junit.test.halt.on.error}"/>
+		<echo message="junit.test.halt.on.failure     = ${junit.test.halt.on.failure}"/>
+		<echo message="junit.test.log.level           = ${junit.test.log.level}"/>
+		<echo message="junit.test.log.debug           = ${junit.test.log.debug}"/>
+		<echo message="junit.test.report              = ${junit.test.report}"/>
+		<condition property="junit.test.timezone.info" value="${junit.test.timezone}">
+			<isset property="junit.test.timezone"/>
+		</condition>
+		<property name="junit.test.timezone.info" value="[-]"/>
+		<echo message="junit.test.timezone            = ${junit.test.timezone.info}"/>
+		<echo message="junit.test.datasource          = ${junit.test.datasource}"/>
+		<echo message="junit.test.datasource.name     = ${junit.test.datasource.name}"/>
 	</target>
+	
 	<!--*******************************************************************
 	* Initialization
 	********************************************************************-->
@@ -496,7 +517,7 @@
 	<!--*******************************************************************
 	* Preprocess Model Files
 	********************************************************************-->
-	<target name="-preprocess-model-files-" depends="-preprocess-model-init,-preprocess-rose-models,-preprocess-poseidon-models,-preprocess-magicdraw-models,-preprocess-together-models,-preprocess-rsm-models" unless="model-files.are.up-to-date">
+	<target name="-preprocess-model-files-" depends="-preprocess-model-init,-preprocess-rose-models,-preprocess-poseidon-models,-preprocess-magicdraw-models,-preprocess-together-models,-preprocess-rsm-models,-preprocess-emf-models" unless="model-files.are.up-to-date">
 		<!-- Distributing the ZIP content -->
 		<unzip dest="${build.dir}/src/java" src="${build.dir}/model/models.zip">
 			<patternset>
@@ -612,23 +633,6 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 	</target>
 	<target name="-preprocess-rose-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-rose">
 		<echo>Transforming Rose models ${basedir}/src/model/rose/models.mdl to ${build.dir}/model/models.zip...</echo>
-		<antcontrib:if>
-			<not>
-				<available file="logging.properties" filepath="${log.dir}/model"/>
-			</not>
-			<antcontrib:then>
-				<mkdir dir="${log.dir}/model"/>
-				<echo>Creating ${log.dir}/model/logging.properties</echo>
-				<echo file="${log.dir}/model/logging.properties" append="false"># Model Externalization Log Properties
-handlers= java.util.logging.FileHandler, java.util.logging.ConsoleHandler
-java.util.logging.FileHandler.level = ${model.transformation.log.level}
-java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/model/transformation.%u.log
-java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
-java.util.logging.ConsoleHandler.level = SEVERE
-java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
-			    </echo>
-			</antcontrib:then>
-		</antcontrib:if>
 		<!-- Externalizes the model metadata from a rose model file -->
 		<echo/>
 		<echo>Externalizing Rose models to ${build.dir}/model/models.zip ...</echo>
@@ -643,7 +647,6 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
-			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
 			<arg value="--pathMapSymbol=$$curdir"/>
 			<arg value="--pathMapPath=&amp;"/>
 			<arg value="--pathMapSymbol=$$${project.implementation.prefix}_opt_openmdx"/>
@@ -662,23 +665,6 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 	</target>
 	<target name="-preprocess-rsm-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-rsm">
 		<echo>Transforming RSM models ${basedir}/src/model/rsm/models.emx to ${build.dir}/model/models.zip...</echo>
-		<antcontrib:if>
-			<not>
-				<available file="logging.properties" filepath="${log.dir}/model"/>
-			</not>
-			<antcontrib:then>
-				<mkdir dir="${log.dir}/model"/>
-				<echo>Creating ${log.dir}/model/logging.properties</echo>
-				<echo file="${log.dir}/model/logging.properties" append="false"># Model Externalization Log Properties
-handlers= java.util.logging.FileHandler, java.util.logging.ConsoleHandler
-java.util.logging.FileHandler.level = ${model.transformation.log.level}
-java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/model/transformation.%u.log
-java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
-java.util.logging.ConsoleHandler.level = SEVERE
-java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
-			    </echo>
-			</antcontrib:then>
-		</antcontrib:if>
 		<!-- Externalizes the model metadata from a rose model file -->
 		<echo/>
 		<echo>Externalizing RSM models to ${build.dir}/model/models.zip ...</echo>
@@ -693,7 +679,6 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 			<sysproperty key="user.language" value="en"/>
 			<sysproperty key="user.region" value="US"/>
 			<sysproperty key="file.encoding" value="Cp1252"/>
-			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/model/logging.properties"/>
 			<arg value="--pathMapSymbol=openMDX 2 ~ Core (RSM)"/>
 			<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/rsm/"/>
 			<arg value="--pathMapSymbol=openMDX 2 ~ Security (RSM)"/>
@@ -708,6 +693,36 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 			<arg value="%"/>
 		</java>
 	</target>
+	<target name="-preprocess-emf-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-emf">
+		<echo>Transforming EMF models ${basedir}/src/model/emf/src/uml/models.uml to ${build.dir}/model/models.zip...</echo>
+		<!-- Externalizes the model metadata from a EMF model file -->
+		<echo/>
+		<echo>Externalizing EMF models to ${build.dir}/model/models.zip ...</echo>
+		<java 
+			classname="org.openmdx.application.mof.externalizer.xmi.XMIExternalizer" 
+			fork="true" 
+			failonerror="true" 
+			maxmemory="${build.memory.limit}" 
+			classpathref="${model.transformation.class.path}"
+		>
+			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
+			<sysproperty key="user.language" value="en"/>
+			<sysproperty key="user.region" value="US"/>
+			<sysproperty key="file.encoding" value="Cp1252"/>
+			<arg value="--pathMapSymbol=openMDX 2 ~ Core (EMF)"/>
+			<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/emf/"/>
+			<arg value="--pathMapSymbol=openMDX 2 ~ Security (EMF)"/>
+			<arg value="--pathMapPath=file:${openmdx.home}/security/src/model/emf/"/>
+			<arg value="--pathMapSymbol=${thirdparty.model.name}"/>
+			<arg value="--pathMapPath=file:${thirdparty.model.home}"/>
+			<arg value="--url=file:src/model/emf/models.uml"/>
+			<arg value="--xmi=emf"/>
+			<arg value="--out=${build.dir}/model/models.zip"/>
+			<arg value="--openmdxjdo=${basedir}/src/resource"/>
+			<arg line="${model.build.formats}"/>
+			<arg value="%"/>
+		</java>
+	</target>	
 	<target name="-preprocess-model-init">
 		<uptodate property="model-files.are.up-to-date" targetfile="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
 			<srcfiles dir="${basedir}/src/model"/>
@@ -726,6 +741,9 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 		</condition>
 		<condition property="model.transformation.source.is-rsm">
 			<equals arg1="${model.transformation.source}" arg2="rsm"/>
+		</condition>
+		<condition property="model.transformation.source.is-emf">
+			<equals arg1="${model.transformation.source}" arg2="emf"/>
 		</condition>
 		<mkdir dir="build/${build.target.platform}/log/model"/>
 		<mkdir dir="${build.dir}/model"/>
@@ -776,8 +794,12 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 			tempdir="${tmp.dir}"
 		>
 			<jvmarg value="-Djava.endorsed.dirs=${openmdx.home}/java2/${build.java.platform}/endorsed/lib"/>
+			<jvmarg value="-Xmx200M" />
 			<classpath refid="project.bin.classpath"/>
 			<formatter type="xml"/>
+			<sysproperty key="${junit.set.timezone}" value="${junit.test.timezone}" />
+			<sysproperty key="org.openmdx.comp.env.jdbc.DataSource" value="${junit.test.datasource}" />
+			<sysproperty key="org.openmdx.comp.env.${junit.test.datasource.name}" value="${junit.test.datasource}" />
 			<sysproperty key="org.openmdx.log.debug" value="${junit.test.log.debug}"/>
 			<sysproperty key="org.openmdx.log.path" value="build/${build.target.platform}/log/junit"/>
 			<sysproperty key="java.util.logging.config.file" value="build/${build.target.platform}/log/junit/logging.properties"/>
@@ -847,7 +869,7 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 		<mkdir dir="build/${build.target.platform}/log/junit"/>
 		<echo file="build/${build.target.platform}/log/junit/logging.properties" append="false"># Log properties
 handlers= java.util.logging.FileHandler
-java.util.logging.FileHandler.level = {junit.test.log.level}
+java.util.logging.FileHandler.level = ${junit.test.log.level}
 java.util.logging.FileHandler.pattern = build/${build.target.platform}/log/junit/junit.%u.log
 java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
 	    </echo>
@@ -952,6 +974,7 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 							target="${build.target.version}" 
 							bootclasspath="${build.target.jre}/lib/rt.jar" 
 							extdirs="${build.target.jre}/ext"
+							includeantruntime="true"
 						>
 							<src>
 								<pathelement location="${build.dir}/src/java"/>
@@ -972,6 +995,7 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 							target="${build.target.version}" 
 							bootclasspath="${build.target.jre}/lib/rt.jar" 
 							extdirs="${build.target.jre}/ext"
+							includeantruntime="true"
 						>
 							<src>
 								<pathelement location="${basedir}/src/java"/>
@@ -1095,7 +1119,6 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 					<include name="*"/>
 					<exclude name="model"/>
 					<exclude name="data"/>
-					<exclude name="sql"/>
 					<exclude name="connector"/>
 					<exclude name="?ar"/>
 				</dirset>
@@ -1154,19 +1177,6 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 			</antcontrib:then>
 		</antcontrib:if>
 		<antcontrib:if>
-			<available file="${basedir}/src/sql" type="dir"/>
-			<antcontrib:then>
-				<antcontrib:foreach target="-deliverable-" param="deliverable.source">
-					<path>
-						<dirset dir="${basedir}/src/sql" includes="*"/>
-					</path>
-					<param name="deliverable.prefix" value="${src-archive.prefix}"/>
-					<param name="deliverable.suffix" value="-sql"/>
-					<param name="deliverable.pattern" value="all.pattern"/>
-				</antcontrib:foreach>
-			</antcontrib:then>
-		</antcontrib:if>
-		<antcontrib:if>
 			<available file="${basedir}/src/connector" type="dir"/>
 			<antcontrib:then>
 				<antcontrib:foreach target="-deliverable-" param="deliverable.source">
@@ -1208,9 +1218,9 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 	<target name="-deliverable-" depends="init">
 		<basename property="deliverable.tag" file="${deliverable.source}"/>
 		<property name="deliverable.target" value="${deliverable.prefix}${deliverable.tag}${deliverable.suffix}"/>
-		<zip destfile="${deliverable.target}.zip" basedir="${deliverable.source}">
+		<openmdx:archive format="zip" destfile="${deliverable.target}.zip" basedir="${deliverable.source}">
 			<patternset refid="${deliverable.pattern}"/>
-		</zip>
+		</openmdx:archive>
 	</target>
 	<!--*******************************************************************
 	* Java API Documentation

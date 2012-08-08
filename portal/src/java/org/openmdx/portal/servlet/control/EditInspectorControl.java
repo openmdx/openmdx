@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditInspectorControl.java,v 1.7 2008/08/12 16:38:06 wfro Exp $
+ * Name:        $Id: EditInspectorControl.java,v 1.8 2009/09/25 12:02:37 wfro Exp $
  * Description: EditObjectView
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:06 $
+ * Date:        $Date: 2009/09/25 12:02:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,7 +58,7 @@ package org.openmdx.portal.servlet.control;
 import java.io.Serializable;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 
 public class EditInspectorControl
     extends InspectorControl
@@ -84,7 +84,7 @@ public class EditInspectorControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p, 
+        ViewPort p, 
         String frame,
         boolean forEditing    
     ) throws ServiceException {

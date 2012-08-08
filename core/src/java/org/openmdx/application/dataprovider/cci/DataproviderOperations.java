@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderOperations.java,v 1.1 2009/01/05 13:44:50 wfro Exp $
+ * Name:        $Id: DataproviderOperations.java,v 1.3 2009/12/13 23:46:06 wfro Exp $
  * Description: Generated constants for DataproviderOperations
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:50 $
+ * Date:        $Date: 2009/12/13 23:46:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,27 +74,15 @@ public class DataproviderOperations {
   static public final short OBJECT_OPERATION = 0;
 
 
-
   /**
    * Create a complete object.
    */
   static public final short OBJECT_CREATION = 1;
 
-
-
-  /**
-   * Set or replace some of the object's attributes' values.
-   */
-  static public final short OBJECT_MODIFICATION = 2;
-
-
-
   /**
    * Set or replace some of the object's attributes.
    */
   static public final short OBJECT_REPLACEMENT = 3;
-
-
 
   /**
    * Object removal.
@@ -102,18 +90,6 @@ public class DataproviderOperations {
    * Removes an objects including its contained subtree.
    */
   static public final short OBJECT_REMOVAL = 4;
-
-
-
-  /**
-   * Object set request.
-   * <p>
-   * Replacement of an existsing object ignoring its digest respectively
-   * creation of a new one.
-   */
-  static public final short OBJECT_SETTING = 5;
-
-
 
   /**
    * Iterates over the paths of a selection of objects.
@@ -295,31 +271,12 @@ public class DataproviderOperations {
    */
   static public final short ITERATION_START = 6;
 
-
-
-  /**
-   */
-  static public final short ITERATION_CONTINUATION = 7;
-
-
-
-  /**
-   * Object monitoring.
-   * <p>
-   * An event will be fired when a an update operation is performed on an
-   * object or reference specified by the request.
-   */
-  static public final short OBJECT_MONITORING = 8;
-
-
-
   /**
    * Object retrieval.
    * <p>
    * Returns an object specified by its path.
    */
   static public final short OBJECT_RETRIEVAL = 9;
-
 
 
   /**
@@ -359,13 +316,9 @@ public class DataproviderOperations {
     switch(code) {
       case OBJECT_OPERATION: return "OBJECT_OPERATION";
       case OBJECT_CREATION: return "OBJECT_CREATION";
-      case OBJECT_MODIFICATION: return "OBJECT_MODIFICATION";
       case OBJECT_REPLACEMENT: return "OBJECT_REPLACEMENT";
       case OBJECT_REMOVAL: return "OBJECT_REMOVAL";
-      case OBJECT_SETTING: return "OBJECT_SETTING";
       case ITERATION_START: return "ITERATION_START";
-      case ITERATION_CONTINUATION: return "ITERATION_CONTINUATION";
-      case OBJECT_MONITORING: return "OBJECT_MONITORING";
       case OBJECT_RETRIEVAL: return "OBJECT_RETRIEVAL";
       default:
         return String.valueOf(code);
@@ -387,13 +340,9 @@ public class DataproviderOperations {
   {  
     if (code.equalsIgnoreCase("OBJECT_OPERATION")) return OBJECT_OPERATION;
     if (code.equalsIgnoreCase("OBJECT_CREATION")) return OBJECT_CREATION;
-    if (code.equalsIgnoreCase("OBJECT_MODIFICATION")) return OBJECT_MODIFICATION;
     if (code.equalsIgnoreCase("OBJECT_REPLACEMENT")) return OBJECT_REPLACEMENT;
     if (code.equalsIgnoreCase("OBJECT_REMOVAL")) return OBJECT_REMOVAL;
-    if (code.equalsIgnoreCase("OBJECT_SETTING")) return OBJECT_SETTING;
     if (code.equalsIgnoreCase("ITERATION_START")) return ITERATION_START;
-    if (code.equalsIgnoreCase("ITERATION_CONTINUATION")) return ITERATION_CONTINUATION;
-    if (code.equalsIgnoreCase("OBJECT_MONITORING")) return OBJECT_MONITORING;
     if (code.equalsIgnoreCase("OBJECT_RETRIEVAL")) return OBJECT_RETRIEVAL;
 
     // Not found

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/ant-launcher.jar" sourcepath="src/ant-main.java.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/ant.jar" sourcepath="src/ant-main.java.zip"/>
+	<classpathentry kind="lib" path="lib/ant-junit.jar" sourcepath="src/ant-main.java.zip"/>
+	<classpathentry kind="lib" path="lib/ant-nodeps.jar" sourcepath="src/ant-main.java.zip"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 6"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

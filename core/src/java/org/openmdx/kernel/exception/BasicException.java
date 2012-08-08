@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicException.java,v 1.41 2009/06/05 15:22:24 hburger Exp $
+ * Name:        $Id: BasicException.java,v 1.42 2010/01/13 15:04:14 hburger Exp $
  * Description: Basic Exception
- * Revision:    $Revision: 1.41 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/05 15:22:24 $
+ * Date:        $Date: 2010/01/13 15:04:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -132,7 +132,6 @@ public final class BasicException extends Exception {
      * @param exceptionCode  An exception code. Negative codes describe common
      * exceptions codes. Positive exception codes are specific for a given
      * exception domain.
-     * @param description A readable description
      * @param parameters  Any exception parameters
      */
     private BasicException(
@@ -180,6 +179,40 @@ public final class BasicException extends Exception {
         if(cause != null) {
             setCause(cause);
         }
+    }
+
+    /**
+     * Constructor for the XML parser
+     *
+     * @param exceptionDomain
+     * @param exceptionCode
+     * @param exceptionClass
+     * @param exceptionTime
+     * @param exceptionMethod
+     * @param exceptionLine
+     * @param description
+     * @param parameters
+     */
+    public BasicException(
+        String exceptionDomain,
+        int exceptionCode,
+        String exceptionClass,
+        Date exceptionTime,
+        String exceptionMethod,
+        Integer exceptionLine,
+        String description,
+        Parameter[] parameters
+    ){
+        super();
+        this.source = null;
+        this.domain = exceptionDomain;
+        this.code = exceptionCode;
+        this.exceptionClass = exceptionClass;
+        this.timestamp = exceptionTime == null ? Long.MIN_VALUE : exceptionTime.getTime();
+        this.methodName = exceptionMethod;
+        this.lineNumber = exceptionLine == null ? -1 : exceptionLine.intValue();
+        this.description = description;
+        this.parameter = parameters;
     }
 
     /**
@@ -249,6 +282,16 @@ public final class BasicException extends Exception {
      * a dot is built lazily.
      */
     private String message = null;
+    
+    /**
+     * 
+     */
+    private String methodName = null;
+    
+    /**
+     * 
+     */
+    private int lineNumber = -1;
     
     /**
      * The stack trace is lazily retrieved from the throwable
@@ -355,7 +398,6 @@ public final class BasicException extends Exception {
      * @param exceptionCode  An exception code. Negative codes describe common
      * exceptions codes. Positive exception codes are specific for a given
      * exception domain.
-     * @param description A readable description
      * @param parameters  Any exception parameters
      */
     public static BasicException newEmbeddedExceptionStack(
@@ -380,7 +422,6 @@ public final class BasicException extends Exception {
      * @param exceptionCode  An exception code. Negative codes describe common
      * exceptions codes. Positive exception codes are specific for a given
      * exception domain.
-     * @param description A readable description
      * @param parameters  Any exception parameters
      */
     public static BasicException newEmbeddedExceptionStack(
@@ -461,6 +502,20 @@ public final class BasicException extends Exception {
             this.stackTrace = this.source == null ? NO_STACK_TRACE : this.source.getStackTrace();
         }
         return this.stackTrace;
+    }
+
+    /**
+     * Retrieve the stack trace
+     * 
+     * @param lazily if <code>true</code> <code>null</code> is returned unless
+     * the information is already available
+     * 
+     * @return the stack trace
+     */
+    private final StackTraceElement[] getStackTrace(
+        boolean lazily
+    ) {
+        return this.stackTrace == null && lazily ? NO_STACK_TRACE : getStackTrace();
     }
     
     /**
@@ -700,25 +755,39 @@ public final class BasicException extends Exception {
 
     /**
      * Retrieves the method for this <code>BasicException</code> object.
+     * 
+     * @param lazily if <code>true</code> <code>null</code> is returned unless
+     * the information is already available
      *
      * @return the method
      */
-    public String getMethodName()
-    {
-        StackTraceElement[] stackTrace = getStackTrace();
-        return stackTrace.length > 0 ? stackTrace[0].getMethodName() : null;
+    public String getMethodName(
+        boolean lazily
+    ){
+        if(this.methodName == null) {
+            StackTraceElement[] stackTrace = getStackTrace(lazily);
+            this.methodName = stackTrace.length > 0 ? stackTrace[0].getMethodName() : null;
+        }
+        return this.methodName;
     }
 
 
     /**
      * Retrieves the line number for this <code>BasicException</code> object.
+     * 
+     * @param lazily if <code>true</code> <code>null</code> is returned unless
+     * the information is already available
      *
      * @return the line nr
      */
-    public int getLineNr()
-    {
-        StackTraceElement[] stackTrace = getStackTrace();
-        return stackTrace.length > 0 ? stackTrace[0].getLineNumber() : -1;
+    public Integer getLineNr(
+        boolean lazily
+    ){
+        if(this.lineNumber < 0) {
+            StackTraceElement[] stackTrace = getStackTrace(lazily);
+            this.lineNumber = stackTrace.length > 0 ? stackTrace[0].getLineNumber() : -1;
+        }
+        return this.lineNumber < 0 ? null : Integer.valueOf(this.lineNumber);
     }
 
     /**

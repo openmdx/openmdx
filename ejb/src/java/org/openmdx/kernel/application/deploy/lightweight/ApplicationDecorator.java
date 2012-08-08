@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ApplicationDecorator.java,v 1.1 2009/01/12 12:49:23 wfro Exp $
+ * Name:        $Id: ApplicationDecorator.java,v 1.3 2009/09/07 13:03:04 hburger Exp $
  * Description: Application Decorator
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:23 $
+ * Date:        $Date: 2009/09/07 13:03:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,12 +55,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.openmdx.kernel.application.configuration.Report;
-import org.openmdx.kernel.application.deploy.spi.Deployment.WebApplication;
+import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Application;
 import org.openmdx.kernel.application.deploy.spi.Deployment.ApplicationClient;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Connector;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Module;
+import org.openmdx.kernel.application.deploy.spi.Deployment.WebApplication;
 
 public class ApplicationDecorator implements Application {
 

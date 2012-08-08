@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SessionBeanDecorator.java,v 1.1 2009/01/12 12:49:23 wfro Exp $
+ * Name:        $Id: SessionBeanDecorator.java,v 1.2 2009/09/07 13:03:04 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:23 $
+ * Date:        $Date: 2009/09/07 13:03:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,7 @@
  */
 package org.openmdx.kernel.application.deploy.lightweight;
 
-import org.openmdx.kernel.application.configuration.Report;
+import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.SessionBean;
 
 

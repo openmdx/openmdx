@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ResourceEnvReferenceDeploymentDescriptor.java,v 1.2 2009/03/31 17:06:10 hburger Exp $
+ * Name:        $Id: ResourceEnvReferenceDeploymentDescriptor.java,v 1.3 2009/09/07 13:03:03 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:06:10 $
+ * Date:        $Date: 2009/09/07 13:03:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,7 +55,7 @@ import javax.naming.Context;
 import javax.naming.LinkRef;
 import javax.naming.NamingException;
 
-import org.openmdx.kernel.application.configuration.Report;
+import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.naming.Contexts;
 import org.openmdx.kernel.naming.container.openmdx.openmdxURLContextFactory;
 import org.w3c.dom.Element;

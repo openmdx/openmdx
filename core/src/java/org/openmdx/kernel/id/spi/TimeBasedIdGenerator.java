@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TimeBasedIdGenerator.java,v 1.2 2007/10/10 16:06:06 hburger Exp $
+ * Name:        $Id: TimeBasedIdGenerator.java,v 1.3 2009/10/14 16:05:14 hburger Exp $
  * Description: Time Based Id Provider using Random based Node
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:06 $
+ * Date:        $Date: 2009/10/14 16:05:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,6 +52,8 @@
 package org.openmdx.kernel.id.spi;
 
 import java.security.SecureRandom;
+
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Time Based Id Provider Using Random Based Node
@@ -128,54 +130,87 @@ public abstract class TimeBasedIdGenerator
     }
 
     /**
-     * Reserves a time frame of a millisecond for a specific
-     * UUID generator instance.
+     * Reserves a time frame of a millisecond for a specific UUID generator 
+     * instance.
      * 
      * @return a time frame of a millisecond to be reserved for a specific
      * UUID generator instance
      */
-    protected static synchronized long getTimeFrame(
+    protected static long getTimeFrame(
     ){
-        return OFFSET + (
-            getSystemTimeFrame() * FRAME_SIZE
-        );
+        try {
+            return OFFSET + (
+                getSystemTimeFrame(System.currentTimeMillis()) * FRAME_SIZE
+            );
+        } catch (InterruptedException exception) {
+            throw BasicException.initHolder(
+                new RuntimeException(
+                    "Time frame acquisition failure", 
+                    BasicException.newEmbeddedExceptionStack(exception)
+                )
+            );
+        }
     }
     
     /**
-     * Reserves a time frame of a millisecond for a specific
-     * UUID generator instance.
+     * Reserves a time frame of a millisecond for a specific UUID generator 
+     * instance.
      * 
-     * @return a time frame of a millisecond to be reserved for a specific
-     * UUID generator instance.
+     * @param currentMillisecond the current time retrieval does not 
+     * require locking
+     * 
+     * @return a time frame of a millisecond reserved for a the calling
+     * UUID generator instance
+     *
+     * @throws InterruptedException 
      */
-    protected static long getSystemTimeFrame(
-    ){
-        long nextMillisecond = System.currentTimeMillis();
-        if(nextMillisecond == lastMillisecond){
-            if(savedMillisecond < lastMillisecond) return savedMillisecond++;
-            do try {
-                Thread.sleep(1L);
-                nextMillisecond = System.currentTimeMillis();
-            } catch (InterruptedException ie) {
-                // ignore
-            } while(nextMillisecond == lastMillisecond);
-        }
-        if (nextMillisecond < TimeBasedIdGenerator.lastMillisecond) {
+    private static synchronized long getSystemTimeFrame(
+        long currentMillisecond
+    ) throws InterruptedException{
+        if(currentMillisecond > TimeBasedIdGenerator.lastMillisecond){
+            //
+            // Return 'actual' time frame
+            // 
+            TimeBasedIdGenerator.savedMillisecond = TimeBasedIdGenerator.lastMillisecond + 1L;
+            return TimeBasedIdGenerator.lastMillisecond = currentMillisecond;
+        } else if (currentMillisecond < TimeBasedIdGenerator.lastMillisecond) {
             //
             // Clock has been set back in the meanwhile
             // 
-            clockSequence = (clockSequence + 1) & 0x3FFF;
-            savedMillisecond = nextMillisecond;
-        } else {
+            TimeBasedIdGenerator.clockSequence = (TimeBasedIdGenerator.clockSequence + 1) & 0x3FFF;
+            TimeBasedIdGenerator.savedMillisecond = currentMillisecond; // no spare time frames left
+            return TimeBasedIdGenerator.lastMillisecond = currentMillisecond;
+        } else if(TimeBasedIdGenerator.savedMillisecond < TimeBasedIdGenerator.lastMillisecond) {
             //
-            // Standard completion
-            // 
-            savedMillisecond = TimeBasedIdGenerator.lastMillisecond + 1L;
+            // Recycle unused time frame
+            //
+            return TimeBasedIdGenerator.savedMillisecond++;
         }
-        TimeBasedIdGenerator.lastMillisecond = nextMillisecond;
-        return nextMillisecond;
+        //
+        // Wait for the next tick
+        //
+        do {
+            Thread.sleep(1L);
+            currentMillisecond = System.currentTimeMillis();
+        } while(
+            currentMillisecond == TimeBasedIdGenerator.lastMillisecond
+        );
+        if(currentMillisecond < TimeBasedIdGenerator.lastMillisecond){
+            //
+            // Clock has been set back in the meanwhile
+            // 
+            TimeBasedIdGenerator.clockSequence = (TimeBasedIdGenerator.clockSequence + 1) & 0x3FFF;
+            TimeBasedIdGenerator.savedMillisecond = currentMillisecond;  // no spare time frames left
+            return TimeBasedIdGenerator.lastMillisecond = currentMillisecond;
+        } else { // currentMillisecond > TimeBasedIdGenerator.lastMillisecond
+            //
+            // Return 'actual' time frame
+            // 
+            TimeBasedIdGenerator.savedMillisecond = TimeBasedIdGenerator.lastMillisecond + 1L;
+            return TimeBasedIdGenerator.lastMillisecond = currentMillisecond;
+        }
     }
-
+    
     /**
      * Since System.currentTimeMillis() returns time from january 1st 1970,
      * and UUIDs need time from the beginning of gregorian calendar
@@ -197,7 +232,7 @@ public abstract class TimeBasedIdGenerator
 
     /**
      * Remember the second-last used system timestamp to allow reuse of
-     * milliseconds anavailable due to low system clock resolution.
+     * milliseconds unavailable due to low system clock resolution.
      */
     private static long savedMillisecond = lastMillisecond;
    

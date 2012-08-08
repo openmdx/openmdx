@@ -1,3 +1,15 @@
+drop table audit2_UnitOfWork
+;
+
+drop table audit2_UnitOfWork_
+;
+
+drop table audit2_Involvement
+;
+
+drop table audit2_Involvement_
+;
+
 drop table app1_Address
 ;
 
@@ -19,28 +31,13 @@ drop table app1_Member
 drop table app1_PersonGroup
 ;
 
-drop table app1_REF
-;
-
 drop table app1_SLICED
 ;
 
 drop table app1_Segment
 ;
 
-drop table audit1_Segment
-;
-
-drop table audit_REF
-;
-
-drop table audit_SLICED
-;
-
 drop table test_CB_SLICED
-;
-
-drop table test_REF
 ;
 
 drop table test_SLB_SLICED
@@ -50,12 +47,14 @@ drop table app1_MessageTemplate
 ;
 
 CREATE TABLE app1_Address (
-	object_referenceid INTEGER NOT NULL ,
-	object_objectid VARCHAR2 (200) NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
+	p$$object_parent__rid VARCHAR2 (200)  NULL ,
+	p$$object_parent__oid VARCHAR2 (200)  NULL ,
 	object__class VARCHAR2 (200) NULL ,
 	description VARCHAR2 (200) NULL ,
-	created_at VARCHAR2 (20) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
 	postal_code VARCHAR2 (100) NULL ,
 	street VARCHAR2 (100) NULL ,
 	country VARCHAR2 (100) NULL ,
@@ -66,8 +65,8 @@ CREATE TABLE app1_Address (
 ;
 
 CREATE TABLE app1_Address_N (
-	object_referenceid INTEGER NOT NULL ,
-	object_objectid VARCHAR2 (200) NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
 	modified_by VARCHAR2 (50) NULL ,
 	created_by VARCHAR2 (50) NULL ,
@@ -76,12 +75,14 @@ CREATE TABLE app1_Address_N (
 ;
 
 CREATE TABLE app1_DOC (
-	object_referenceid INTEGER NOT NULL ,
-	object_objectid VARCHAR2 (200) NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
-	created_at VARCHAR2 (20) NULL ,
+	p$$object_parent__rid VARCHAR2 (200)  NULL ,
+	p$$object_parent__oid VARCHAR2 (200)  NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
 	created_by VARCHAR2 (200) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
 	modified_by VARCHAR2 (200) NULL ,
 	object__class VARCHAR2 (60) NULL ,
 	description VARCHAR2 (100) NULL ,
@@ -91,27 +92,31 @@ CREATE TABLE app1_DOC (
 ;
 
 CREATE TABLE app1_Invoice (
-	object_referenceid INTEGER NOT NULL ,
-	object_objectid VARCHAR2 (200) NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
+	p$$object_parent__rid VARCHAR2 (200) NOT NULL ,
+	p$$object_parent__oid VARCHAR2 (200) NOT NULL ,
 	object__class VARCHAR2 (200) NULL ,
 	description VARCHAR2 (200) NULL ,
 	product_group_id VARCHAR2 (100) NULL ,
-	created_at VARCHAR2 (20) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
 	created_by VARCHAR2 (100) NULL ,
 	modified_by VARCHAR2 (100) NULL 
 )
 ;
 
 CREATE TABLE app1_InvoicePosition (
-	object_referenceid INTEGER NOT NULL ,
-	object_objectid VARCHAR2 (200) NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
+	p$$object_parent__rid VARCHAR2 (200)  NULL ,
+	p$$object_parent__oid VARCHAR2 (200)  NULL ,
 	object__class VARCHAR2 (200) NULL ,
 	description VARCHAR2 (200) NULL ,
-	created_at VARCHAR2 (20) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
 	created_by VARCHAR2 (100) NULL ,
 	modified_by VARCHAR2 (100) NULL ,
 	product_id VARCHAR2 (50) NULL 
@@ -119,66 +124,51 @@ CREATE TABLE app1_InvoicePosition (
 ;
 
 CREATE TABLE app1_Member (
-	object_referenceid INTEGER NOT NULL ,
-	object_objectid VARCHAR2 (200) NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
+	p$$object_parent__rid VARCHAR2 (200)  NULL ,
+	p$$object_parent__oid VARCHAR2 (200)  NULL ,
 	object__class VARCHAR2 (200) NULL ,
 	description VARCHAR2 (200) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
-	created_at VARCHAR2 (20) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
 	modified_by VARCHAR2 (50) NULL ,
 	created_by VARCHAR2 (50) NULL ,
 	m1 VARCHAR2 (200) NULL ,
-	m2 VARCHAR2 (200) NULL 
+	p$$m1__rid VARCHAR2 (200) NULL ,
+	p$$m1__oid VARCHAR2 (200) NULL ,
+	m2 VARCHAR2 (200) NULL ,
+	p$$m2__rid VARCHAR2 (200) NULL ,
+	p$$m2__oid VARCHAR2 (200) NULL 
 )
 ;
 
 CREATE TABLE app1_PersonGroup (
-	object_referenceid INTEGER NOT NULL ,
-	object_objectid VARCHAR2 (200) NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
+	p$$object_parent__rid VARCHAR2 (200)  NULL ,
+	p$$object_parent__oid VARCHAR2 (200)  NULL ,
 	object__class VARCHAR2 (200) NULL ,
 	description VARCHAR2 (200) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
-	created_at VARCHAR2 (20) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
 	modified_by VARCHAR2 (50) NULL ,
 	created_by VARCHAR2 (50) NULL ,
 	name VARCHAR2 (100) NULL 
 )
 ;
 
-CREATE TABLE app1_REF (
-	object_referenceId INTEGER NOT NULL ,
-	n INTEGER NOT NULL ,
-	c$0 VARCHAR2 (100) NOT NULL ,
-	c$1 VARCHAR2 (100) NOT NULL ,
-	c$2 VARCHAR2 (100) NOT NULL ,
-	c$3 VARCHAR2 (100) NOT NULL ,
-	c$4 VARCHAR2 (100) NOT NULL ,
-	c$5 VARCHAR2 (100) NOT NULL ,
-	c$6 VARCHAR2 (100) NOT NULL ,
-	c$7 VARCHAR2 (100) NOT NULL ,
-	c$8 VARCHAR2 (100) NOT NULL ,
-	c$9 VARCHAR2 (100) NOT NULL ,
-	c$10 VARCHAR2 (100) NOT NULL ,
-	c$11 VARCHAR2 (100) NOT NULL ,
-	c$12 VARCHAR2 (100) NOT NULL ,
-	c$13 VARCHAR2 (100) NOT NULL ,
-	c$14 VARCHAR2 (100) NOT NULL ,
-	c$15 VARCHAR2 (100) NOT NULL 
-)
-;
-
-DROP SEQUENCE app1_REF_SEQ;
-CREATE SEQUENCE app1_REF_SEQ INCREMENT BY 1 START WITH 100000 MAXVALUE 1000000000 MINVALUE 1 NOCYCLE CACHE 100 NOORDER;
-
 CREATE TABLE app1_SLICED (
-	object_referenceId INTEGER NOT NULL ,
-	object_objectId VARCHAR2 (200) NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
+	p$$object_parent__rid VARCHAR2 (200)  NULL ,
+	p$$object_parent__oid VARCHAR2 (200)  NULL ,
 	object_idx INTEGER NOT NULL ,
-	created_at VARCHAR2 (20) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
 	created_by VARCHAR2 (200) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
 	modified_by VARCHAR2 (200) NULL ,
 	object__class VARCHAR2 (60) NULL ,
 	m1 VARCHAR2 (200) NULL ,
@@ -189,110 +179,47 @@ CREATE TABLE app1_SLICED (
 	postal_code VARCHAR2 (200) NULL ,
 	description VARCHAR2 (200) NULL ,
 	assigned_address VARCHAR2 (200) NULL ,
+	p$$assigned_address__rid VARCHAR2 (200) NULL ,
+	p$$assigned_address__oid VARCHAR2 (200) NULL ,
 	product_id VARCHAR2 (200) NULL ,
 	salutation VARCHAR2 (200) NULL ,
 	street VARCHAR2 (200) NULL ,
 	address_line VARCHAR2 (200) NULL ,
 	address VARCHAR2 (200) NULL ,
 	text VARCHAR2 (200) NULL ,
-	birthdate VARCHAR2 (8) NULL ,
+	birthdate DATE NULL ,
 	member_of_group VARCHAR2 (200) NULL ,
-	birthdate_as_date_time VARCHAR2 (200) NULL ,
+	birthdate_as_date_time TIMESTAMP (3) WITH TIME ZONE NULL,
 	person_group VARCHAR2 (200) NULL ,
+	p$$person_group__rid VARCHAR2 (200) NULL ,
+	p$$person_group__oid VARCHAR2 (200) NULL ,
 	country VARCHAR2 (200) NULL ,
 	sex INTEGER NULL ,
 	given_name VARCHAR2 (200) NULL ,
 	product_group_id VARCHAR2 (200) NULL ,
-	place_of_birth VARCHAR2 (200) NULL 
+	place_of_birth VARCHAR2 (200) NULL ,
+	additional_info VARCHAR2 (200) NULL 
 )
 ;
 
 CREATE TABLE app1_Segment (
-	object_referenceid INTEGER NOT NULL ,
-	object_objectid VARCHAR2 (200) NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
+	p$$object_parent__rid VARCHAR2 (200)  NULL ,
+	p$$object_parent__oid VARCHAR2 (200)  NULL ,
 	object__class VARCHAR2 (200) NULL ,
 	description VARCHAR2 (200) NULL 
 )
 ;
 
-CREATE TABLE audit1_Segment (
-	object_referenceid INTEGER NOT NULL ,
-	object_objectid VARCHAR2 (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	object__class VARCHAR2 (200) NULL ,
-	description VARCHAR2 (200) NULL
-)
-;
-
-CREATE TABLE audit_REF (
-	object_referenceId INTEGER NOT NULL ,
-	n INTEGER NOT NULL ,
-	c$0 VARCHAR2 (100) NOT NULL ,
-	c$1 VARCHAR2 (100) NOT NULL ,
-	c$2 VARCHAR2 (100) NOT NULL ,
-	c$3 VARCHAR2 (100) NOT NULL ,
-	c$4 VARCHAR2 (100) NOT NULL ,
-	c$5 VARCHAR2 (100) NOT NULL ,
-	c$6 VARCHAR2 (100) NOT NULL ,
-	c$7 VARCHAR2 (100) NOT NULL ,
-	c$8 VARCHAR2 (100) NOT NULL ,
-	c$9 VARCHAR2 (100) NOT NULL ,
-	c$10 VARCHAR2 (100) NOT NULL ,
-	c$11 VARCHAR2 (100) NOT NULL ,
-	c$12 VARCHAR2 (100) NOT NULL ,
-	c$13 VARCHAR2 (100) NOT NULL ,
-	c$14 VARCHAR2 (100) NOT NULL ,
-	c$15 VARCHAR2 (100) NOT NULL 
-)
-;
-
-DROP SEQUENCE audit_REF_SEQ;
-CREATE SEQUENCE audit_REF_SEQ INCREMENT BY 1 START WITH 100000 MAXVALUE 1000000000 MINVALUE 1 NOCYCLE CACHE 100 NOORDER;
-
-CREATE TABLE audit_SLICED (
-	object_referenceId INTEGER NOT NULL ,
-	object_objectId VARCHAR2 (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	created_at VARCHAR2 (20) NULL ,
-	created_by VARCHAR2 (200) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
-	modified_by VARCHAR2 (200) NULL ,
-	object__class VARCHAR2 (60) NULL ,
-	m1 VARCHAR2 (200) NULL ,
-	last_name VARCHAR2 (200) NULL ,
-	house_number VARCHAR2 (200) NULL ,
-	city VARCHAR2 (200) NULL ,
-	foreign_id VARCHAR2 (200) NULL ,
-	postal_code VARCHAR2 (200) NULL ,
-	description VARCHAR2 (200) NULL ,
-	assigned_address VARCHAR2 (200) NULL ,
-	product_id VARCHAR2 (200) NULL ,
-	salutation VARCHAR2 (200) NULL ,
-	street VARCHAR2 (200) NULL ,
-	address_line VARCHAR2 (200) NULL ,
-	address VARCHAR2 (200) NULL ,
-	text VARCHAR2 (200) NULL ,
-	birthdate VARCHAR2 (200) NULL ,
-	member_of_group VARCHAR2 (200) NULL ,
-	birthdate_as_date_time VARCHAR2 (200) NULL ,
-	person_group VARCHAR2 (200) NULL ,
-	country VARCHAR2 (200) NULL ,
-	sex INTEGER NULL ,
-	given_name VARCHAR2 (200) NULL ,
-	product_group_id VARCHAR2 (200) NULL ,
-	involved VARCHAR2 (200) NULL ,
-	place_of_birth VARCHAR2 (200) NULL
-)
-;
-
 CREATE TABLE test_CB_SLICED (
-	object_rid INTEGER NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
 	object_oid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
-	created_at VARCHAR2 (20) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
 	created_by VARCHAR2 (200) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
 	modified_by VARCHAR2 (200) NULL ,
 	object__class VARCHAR2 (60) NULL ,
 	cb_type VARCHAR2 (10) NULL ,
@@ -301,38 +228,13 @@ CREATE TABLE test_CB_SLICED (
 )
 ;
 
-CREATE TABLE test_REF (
-	object_rid INTEGER NOT NULL ,
-	n INTEGER NOT NULL ,
-	c$0 VARCHAR2 (100) NOT NULL ,
-	c$1 VARCHAR2 (100) NOT NULL ,
-	c$2 VARCHAR2 (100) NOT NULL ,
-	c$3 VARCHAR2 (100) NOT NULL ,
-	c$4 VARCHAR2 (100) NOT NULL ,
-	c$5 VARCHAR2 (100) NOT NULL ,
-	c$6 VARCHAR2 (100) NOT NULL ,
-	c$7 VARCHAR2 (100) NOT NULL ,
-	c$8 VARCHAR2 (100) NOT NULL ,
-	c$9 VARCHAR2 (100) NOT NULL ,
-	c$10 VARCHAR2 (100) NOT NULL ,
-	c$11 VARCHAR2 (100) NOT NULL ,
-	c$12 VARCHAR2 (100) NOT NULL ,
-	c$13 VARCHAR2 (100) NOT NULL ,
-	c$14 VARCHAR2 (100) NOT NULL ,
-	c$15 VARCHAR2 (100) NOT NULL 
-)
-;
-
-DROP SEQUENCE test_REF_SEQ;
-CREATE SEQUENCE test_REF_SEQ INCREMENT BY 1 START WITH 100000 MAXVALUE 1000000000 MINVALUE 1 NOCYCLE CACHE 100 NOORDER;
-
 CREATE TABLE test_SLB_SLICED (
-	object_rid INTEGER NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
 	object_oid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
-	created_at VARCHAR2 (20) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
 	created_by VARCHAR2 (200) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
 	modified_by VARCHAR2 (200) NULL ,
 	object__class VARCHAR2 (60) NULL ,
 	slb_type VARCHAR2 (10) NULL ,
@@ -359,17 +261,61 @@ CREATE TABLE test_SLB_SLICED (
 ;
 
 CREATE TABLE app1_MessageTemplate (
-	object_referenceid INTEGER NOT NULL ,
-	object_objectid VARCHAR2 (200) NOT NULL ,
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
+	p$$object_parent__rid VARCHAR2 (200)  NULL ,
+	p$$object_parent__oid VARCHAR2 (200)  NULL ,
 	object__class VARCHAR2 (200) NULL ,
+	text VARCHAR2 (200) NULL ,
 	description VARCHAR2 (200) NULL ,
-	created_at VARCHAR2 (20) NULL ,
-	modified_at VARCHAR2 (20) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
 	created_by VARCHAR2 (100) NULL ,
 	modified_by VARCHAR2 (100) NULL
 )
 ;
+
+CREATE TABLE audit2_UnitOfWork (
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
+	p$$object_parent__rid VARCHAR2 (200)  NULL ,
+	p$$object_parent__oid VARCHAR2 (200)  NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	object__class VARCHAR2 (60) NULL ,
+	task_id VARCHAR2 (200) NULL
+) ;
+
+CREATE TABLE audit2_UnitOfWork_ (
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
+	object_idx INTEGER NOT NULL ,
+	created_by VARCHAR2 (200) NULL ,
+	involved VARCHAR2 (200) NULL ,
+	p$$involved__rid VARCHAR2 (200) NULL ,
+	p$$involved__oid VARCHAR2 (200) NULL
+) ;
+
+CREATE TABLE audit2_Involvement (
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
+	p$$object_parent__rid VARCHAR2 (200)  NULL ,
+	p$$object_parent__oid VARCHAR2 (200)  NULL ,
+	object__class VARCHAR2 (60) NULL ,
+	before_image VARCHAR2 (200) NULL,
+	p$$before_image__rid VARCHAR2 (200) NULL ,
+	p$$before_image__oid VARCHAR2 (200) NULL ,
+	after_image VARCHAR2 (200) NULL,
+	p$$after_image__rid VARCHAR2 (200) NULL ,
+	p$$after_image__oid VARCHAR2 (200) NULL
+) ;
+
+CREATE TABLE audit2_Involvement_ (
+	object_rid VARCHAR2 (200) NOT NULL ,
+	object_oid VARCHAR2 (200) NOT NULL ,
+	object_idx INTEGER NOT NULL ,
+	modified_feature VARCHAR2 (60) NULL
+) ;
 
 REM OPENMDX_TEST EXTENSION_DEFAULT
 
@@ -614,3 +560,30 @@ REM OPENMDX_TEST state2_NATIVE
 	state_c VARCHAR2 (256) NULL
   );
 
+  DROP TABLE generic1_Property ;
+  
+ CREATE TABLE generic1_Property (
+	object_rid VARCHAR2(100) NOT NULL,
+	object_oid VARCHAR2(200) NOT NULL,
+	p$$object_parent__rid VARCHAR2(100) NULL, 
+	p$$object_parent__oid VARCHAR2(200) NULL,
+	object__class VARCHAR2(200) NULL ,
+	description VARCHAR2(200) NULL ,
+    created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (3) WITH TIME ZONE NULL
+ );
+
+  DROP TABLE generic1_Property_N ;
+
+ CREATE TABLE generic1_Property_N (
+	object_rid VARCHAR2(100) NOT NULL,
+	object_oid VARCHAR2(200) NOT NULL,
+	object_idx INTEGER NOT NULL ,
+	modified_by VARCHAR2(50) NULL ,
+	created_by VARCHAR2(50) NULL,
+	boolean_value CHAR(1 CHAR) NULL ,
+	uri_value VARCHAR2(200) NULL ,
+	decimal_value NUMBER(18, 6) NULL ,
+	string_value VARCHAR2(200) NULL ,
+	integer_value NUMBER(10, 0) NULL 
+);

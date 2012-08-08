@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ContainerControl.java,v 1.12 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: ContainerControl.java,v 1.13 2009/09/25 12:02:37 wfro Exp $
  * Description: ContainerControl
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/09/25 12:02:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 
 public abstract class ContainerControl
     extends Control
@@ -124,7 +124,7 @@ public abstract class ContainerControl
     
     //-------------------------------------------------------------------------
     public void paintContent(
-        HtmlPage p, 
+        ViewPort p, 
         String frame,
         boolean forEditing        
     ) {

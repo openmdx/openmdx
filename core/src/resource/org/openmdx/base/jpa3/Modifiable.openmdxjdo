@@ -3,7 +3,7 @@
 <openmdxjdo>
   <package name="org.openmdx.base.jpa3">
     <class name="Modifiable">
-      <field name="modifiedAt" visibility="cci" persistence-modifier="persistent"/>
+      <field name="modifiedAt" visibility="cci" persistence-modifier="version"/>
       <field name="modifiedBy" visibility="cci" persistence-modifier="persistent"/>
     </class>
   </package>

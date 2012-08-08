@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: NullMaskingMap.java,v 1.2 2009/05/26 12:40:49 wfro Exp $
+ * Name:        $Id: NullMaskingMap.java,v 1.4 2009/09/17 13:15:17 hburger Exp $
  * Description: Null Masking Map 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 12:40:49 $
+ * Date:        $Date: 2009/09/17 13:15:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,7 @@ import java.util.Set;
  *
  */
 @SuppressWarnings("unchecked") 
-public class NullMaskingMap extends AbstractMapDecorator {
+class NullMaskingMap extends AbstractMapDecorator {
 
     /**
      * Constructor only used in deserialization, do not use otherwise.
@@ -98,7 +98,7 @@ public class NullMaskingMap extends AbstractMapDecorator {
      * The entry set
      */
     private transient Set entries;
-    
+
     /**
      * Decorate a given map
      * 
@@ -107,7 +107,7 @@ public class NullMaskingMap extends AbstractMapDecorator {
      * 
      * @return a newly created decorated map
      */
-    public static Map decorate(
+    static Map decorate(
         Map delegate,
         Object nullValue
     ){
@@ -248,6 +248,14 @@ public class NullMaskingMap extends AbstractMapDecorator {
         public int size() {
             return this.delegate.size();
         }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#isEmpty()
+         */
+        @Override
+        public boolean isEmpty() {
+            return this.delegate.isEmpty();
+        }
         
     }
 
@@ -327,6 +335,14 @@ public class NullMaskingMap extends AbstractMapDecorator {
         @Override
         public int size() {
             return this.delegate.size();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#isEmpty()
+         */
+        @Override
+        public boolean isEmpty() {
+            return this.delegate.isEmpty();
         }
         
     }

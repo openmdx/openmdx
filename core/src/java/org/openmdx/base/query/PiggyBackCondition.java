@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PiggyBackCondition.java,v 1.4 2009/05/15 00:26:36 hburger Exp $
+ * Name:        $Id: PiggyBackCondition.java,v 1.5 2010/03/31 14:39:23 hburger Exp $
  * Description: PiggyBackCondition
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/15 00:26:36 $
+ * Date:        $Date: 2010/03/31 14:39:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -94,7 +94,7 @@ public class PiggyBackCondition
     }
 
     public void setValue(
-        Object[] values
+        Object... values
     ) {
         this.values = values;
     }

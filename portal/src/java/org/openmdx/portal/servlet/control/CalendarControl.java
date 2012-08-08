@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CalendarControl.java,v 1.20 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: CalendarControl.java,v 1.21 2009/09/25 12:02:38 wfro Exp $
  * Description: CalendarControl
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,7 +62,7 @@ import java.util.Locale;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 
 public class CalendarControl
     extends Control
@@ -85,14 +85,14 @@ public class CalendarControl
     @Override
     @SuppressWarnings("unchecked")
     public void paint(
-        HtmlPage p, 
+        ViewPort p, 
         String frame,
         boolean forEditing        
     ) throws ServiceException {
         ApplicationContext app = p.getApplicationContext();
         String language = app.getCurrentLocaleAsString().substring(0, 2);
         DateFormat timeFormat = DateFormat.getTimeInstance(DateFormat.LONG, new Locale(language));        
-        List calendarIds = (List)p.getProperty(HtmlPage.PROPERTY_CALENDAR_IDS);
+        List calendarIds = (List)p.getProperty(ViewPort.PROPERTY_CALENDAR_IDS);
         calendarIds.add(this.id);
         p.write("<div id=\"", this.id, "\" style=\"overflow:hidden;padding:0px;\"></div>");
         p.write("<div id=\"timestamp\">", timeFormat.format(app.getPmDataReloadedAt()), "</div>");        

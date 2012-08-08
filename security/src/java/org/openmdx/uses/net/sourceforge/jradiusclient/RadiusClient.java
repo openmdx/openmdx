@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusClient.java,v 1.18 2009/03/31 17:30:55 hburger Exp $
+ * Name:        $Id: RadiusClient.java,v 1.19 2010/03/11 18:50:58 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:30:55 $
+ * Date:        $Date: 2010/03/11 18:50:58 $
  * ====================================================================
  *
  * Copyright (C) 2004-2007  OMEX AG
@@ -67,8 +67,12 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
@@ -77,7 +81,6 @@ import org.openmdx.kernel.text.format.DatagramPacketFormatter;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameterException;
 import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
-
 
 /**
  * Released under the LGPL<BR>
@@ -108,7 +111,6 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
  * for laying the groundwork for the development of this class.
  *
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.18 $
  */
 public class RadiusClient
     extends AbstractRadiusClient
@@ -120,7 +122,6 @@ public class RadiusClient
     private static final int DEFAULT_AUTH_PORT = 1812;
     private static final int DEFAULT_ACCT_PORT = 1813;
     private static final int DEFAULT_SOCKET_TIMEOUT = 6000;
-    private static final boolean DEFAULT_LOGGING = false;
     private byte[] sharedSecret = null;
     private InetAddress[] hostname = null;
     private int authenticationPort[] = null;
@@ -129,7 +130,7 @@ public class RadiusClient
     private int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
     private MessageDigest md5MessageDigest;
     private final byte [] NAS_IP;
-
+    private boolean valid;
     public static final String ENCODING = "UTF-8";
     
     /*
@@ -205,27 +206,26 @@ public class RadiusClient
         	new int[]{acctPort}, 
         	sharedSecret, 
         	sockTimeout, 
-        	DEFAULT_LOGGING, 
+        	Logger.getLogger(Logger.GLOBAL_LOGGER_NAME), 
+        	false, 
         	null
         );
     }
 
     /**
-     * Constructor allows the user to specify an alternate port for the radius server
-     * @param hostname java.lang.String
-     * @param authPort int the port to use for authentication requests
-     * @param acctPort int the port to use for accounting requests
-     * @param sharedSecret java.lang.String
-     * @param logging Defines whether logging is enabled or disabled
-     * @param nasAddress 
-     * @param timeout int the timeout to use when waiting for return packets can't be neg and shouldn't be zero
-     * @exception org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException If we could not create the necessary socket,
-     * If we could not get an instance of the MD5 algorithm, or the hostname did not pass validation
-     * @exception org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameterException If an invalid hostname
-     *                              (null or empty string), an invalid
-     *                              port ( port < 0 or port > 65536)
-     *                              or an invalid shared secret (null, shared
-     *                              secret can be empty string) is passed in.
+     * Constructor
+     * 
+     * @param hostname
+     * @param authPort
+     * @param acctPort
+     * @param sharedSecret
+     * @param sockTimeout
+     * @param logger
+     * @param trace
+     * @param nasAddress
+     * 
+     * @throws RadiusException
+     * @throws InvalidParameterException
      */
     public RadiusClient(
         String[] hostname, 
@@ -233,10 +233,11 @@ public class RadiusClient
         int[] acctPort, 
         String sharedSecret, 
         int sockTimeout, 
-        boolean logging, 
+        Logger logger, 
+        boolean trace, 
         InetAddress nasAddress
     ) throws RadiusException, InvalidParameterException{
-        super(logging);
+        super(logger, trace);
         this.setProvider(hostname, authPort, acctPort);
         this.setSharedSecret(sharedSecret);
         //set up the socket for this client
@@ -248,11 +249,13 @@ public class RadiusClient
         this.setTimeout(sockTimeout);
         //set up the md5 engine
         try{
-        this.md5MessageDigest = MessageDigest.getInstance("MD5");
+	        this.md5MessageDigest = MessageDigest.getInstance("MD5");
         }catch(NoSuchAlgorithmException nsaex){
             throw new RadiusException(nsaex);
         }
         this.NAS_IP = nasAddress == null ? null : nasAddress.getAddress();
+        this.valid = true;
+        logInfo("Radius client instance #{0} created");
     }
     
     /**
@@ -338,7 +341,6 @@ public class RadiusClient
             }
         );
         short length = (short) (RadiusPacket.RADIUS_HEADER_LENGTH + requestAttributes.length );
-
         // now send the request and receive the response
         return this.sendReceivePacket(
             code, 
@@ -571,52 +573,69 @@ public class RadiusClient
         int[] authPort,
         int[] acctPort
     ) throws InvalidParameterException{
+        List<String> exceptions = new ArrayList<String>();
+        List<InetAddress> hostnames = new ArrayList<InetAddress>();
+        List<Integer> acctPorts = new ArrayList<Integer>();
+        List<Integer> authPorts = new ArrayList<Integer>();
         if (hostname == null){
-            throw new InvalidParameterException("Hostname array can not be null!");
+        	exceptions.add("Hostname array can not be null");
         } else if (authPort == null || acctPort == null) {
-        	throw new InvalidParameterException("Port array can not be null!");
+        	exceptions.add("Port array can not be null");
         } else if (hostname.length == 0) {
-            throw new InvalidParameterException("Hostname and port arrays can't be empty!");
+        	exceptions.add("Hostname array can't be empty");
         } else if (hostname.length != authPort.length || hostname.length != acctPort.length) {
-            throw new InvalidParameterException("Hostname and port arrays must have the same length!");
+        	exceptions.add("Hostname and port arrays must have the same length");
         }
-        this.hostname = new InetAddress[hostname.length];
-        for(
-            int i = 0;
-            i < hostname.length;
-            i++
-        ){ 
-            if (null == hostname[i]){
- 	            throw new InvalidParameterException("Hostname can not be empty or all blanks!");
-            } else if ("".equals(hostname[i].trim())){
- 	            throw new InvalidParameterException("Hostname can not be null!");
-            } else try{
-                this.hostname[i] = InetAddress.getByName(hostname[i]);
-            } catch(java.net.UnknownHostException uhex){
-                throw new InvalidParameterException("Hostname failed InetAddress.getByName() validation!");
-            }
-        }
-        for(
-            int i = 0;
-            i < authPort.length;
-            i++
-        ){
-            if (authPort[i] < 0 || authPort[i] > 65535){
-                throw new InvalidParameterException("Port value out of range!");
-            }
-        }
-        this.authenticationPort = authPort;
-        for(
-            int i = 0;
-            i < acctPort.length;
-            i++
-        ){
-	    	if (acctPort[i] < 0 || acctPort[i] > 65535){
-	    	    throw new InvalidParameterException("Port value out of range!"); 
-	    	}
-	    }
-        this.accountingPort = acctPort;
+        if(exceptions.isEmpty()) {
+	        for(
+	            int i = 0;
+	            i < hostname.length;
+	            i++
+	        ){ 
+	        	int exceptionCount = exceptions.size();
+	            if (authPort[i] < 0 || authPort[i] > 65535) exceptions.add(
+            		"authorizationPort[" + i + "] out of range: " + authPort[i]
+		        );
+    	    	if (acctPort[i] < 0 || acctPort[i] > 65535) exceptions.add(
+	                "accountingPort[" + i + "] out of range: " + acctPort[i]
+	            );
+	            if (null == hostname[i]){
+	            	exceptions.add("Hostname[" + i + "] is null");
+	            } else if ("".equals(hostname[i].trim())){
+	            	exceptions.add("Hostname[" + i + "] is empty or blank");
+	            }
+	            if(exceptionCount == exceptions.size()) try{
+	            	hostnames.add(InetAddress.getByName(hostname[i]));
+	            	authPorts.add(valueOf(authPort[i]));
+	            	acctPorts.add(valueOf(acctPort[i]));
+	            } catch(java.net.UnknownHostException exception){
+	            	exceptions.add("Hostname[" + i + "] could not be resolved: " + hostname[i]);
+	            }
+	        }
+    		for(
+    			Iterator<String> e = exceptions.iterator();
+    			e.hasNext();
+    		){
+    			super.logWarning("Radius Client #{0}: {1}", e.next());
+    		}
+    		int acceptable = hostnames.size();
+	        if(acceptable == 0) {
+	        	logSevere("Radius Client #{0}: None of the host configurations was acceptable");
+	        	throw new InvalidParameterException(
+	        		"None of the host configurations was acceptable: " + exceptions
+	        	);
+	        }
+	        this.hostname = new InetAddress[acceptable];
+	        this.authenticationPort = new int[acceptable];
+	        this.accountingPort = new int[acceptable];
+	        for(int i = 0; i < acceptable; i++) {
+	        	this.hostname[i] = (InetAddress) hostnames.get(i);
+	        	this.authenticationPort[i] = ((Number)authPorts.get(i)).intValue();
+	        	this.accountingPort[i] = ((Number)acctPorts.get(i)).intValue();
+	        }
+    	}
     }
+    
     /**
      * Get the host names
      * 
@@ -750,7 +769,7 @@ public class RadiusClient
                 for (int i = 0; i<responseAuthenticator.length;i++){
                     if (responseAuthenticator[i] != myResponseAuthenticator[i]){
                         logWarning(
-                        	"Response Authenticator Mismatch (Identifier={0})\n{1}\n{2}",
+                        	"Radius Client #{0}: Response Authenticator Mismatch (Identifier={1})\n{2}\n{3}",
                         	identifierByte,
                         	new ByteArrayFormatter(
                                 myResponseAuthenticator, 0, myResponseAuthenticator.length,
@@ -790,11 +809,14 @@ public class RadiusClient
             throw new RadiusException(ioex);
         }catch(InvalidParameterException ipex){
             throw new RadiusException(ipex, "Invalid response attributes sent back from server.");
-        }finally{
+        } finally{
             try{
-                input.close();
-                bais.close();
-            }catch(IOException ignore){}
+	            input.close();
+            } catch(
+            	IOException ignore
+            ){
+            	// Ignore close exception
+            }
         }
     }
     /**
@@ -866,46 +888,53 @@ public class RadiusClient
         InetAddress[] hostname, 
         int[] port
     ) throws RadiusException{
-        DatagramPacket packet_out =
-            this.composeRadiusPacket(code, identifier, length, requestAuthenticator, requestAttributes);
-
-        if (packet_out.getLength() > RadiusPacket.MAX_PACKET_LENGTH){
-            throw new RadiusException("Packet too big!");
-        }else if (packet_out.getLength() < RadiusPacket.MIN_PACKET_LENGTH){
-            throw new RadiusException("Packet too short !");
-        }else{
-            DatagramPacket packet_in =
-                    new DatagramPacket(new byte[RadiusPacket.MAX_PACKET_LENGTH],
-                                                    RadiusPacket.MAX_PACKET_LENGTH);
-            IOException ioException = null;
-            for (int i = 0; i < retry; i++) try{
-                int p = provider < 0 ? i % hostname.length : provider;
-                packet_out.setAddress(hostname[p]);
-                packet_out.setPort(port[p]);
-            	if(i == 0) {
-            		logDebug(
-            			"Send\n{0}",
-            			new DatagramPacketFormatter(packet_out)
-            		);
-            	} else {
-            		logDebug(
-            			"Retry {0}\n{1}",
-            			i,
-            			new DatagramPacketFormatter(packet_out)
-            		);
-            	}
-                this.socket.send(packet_out);
-                this.socket.receive(packet_in);
-                logDebug(
-                    "Receive\n{0}",
-                    new DatagramPacketFormatter(packet_in)
-                );
-                return this.checkRadiusPacket(packet_in, identifier, requestAuthenticator, provider);
-            }catch (IOException exception){
-                ioException = exception;
-            }
-            throw new RadiusException(ioException);
-        }
+    	try {
+	        DatagramPacket packet_out =
+	            this.composeRadiusPacket(code, identifier, length, requestAuthenticator, requestAttributes);
+	
+	        if (packet_out.getLength() > RadiusPacket.MAX_PACKET_LENGTH){
+	            throw new RadiusException("Packet too big!");
+	        }else if (packet_out.getLength() < RadiusPacket.MIN_PACKET_LENGTH){
+	            throw new RadiusException("Packet too short !");
+	        }else{
+	            DatagramPacket packet_in =
+	                    new DatagramPacket(new byte[RadiusPacket.MAX_PACKET_LENGTH],
+	                                                    RadiusPacket.MAX_PACKET_LENGTH);
+	            IOException ioException = null;
+	            for (int i = 0; i < retry; i++) { 
+	            	try{
+		                int p = provider < 0 ? i % hostname.length : provider;
+		                packet_out.setAddress(hostname[p]);
+		                packet_out.setPort(port[p]);
+		            	if(i == 0) {
+		            		logDebug(
+		            			"RadiusClient #{0}: Send\n{1}",
+		            			new DatagramPacketFormatter(packet_out)
+		            		);
+		            	} else {
+		            		logDebug(
+		            			"RadiusClient #{0}: Retry {1}\n{2}",
+		            			i,
+		            			new DatagramPacketFormatter(packet_out)
+		            		);
+		            	}
+		                this.socket.send(packet_out);
+		                this.socket.receive(packet_in);
+		                logDebug(
+		                    "RadiusClient #{0}: Receive\n{1}",
+		                    new DatagramPacketFormatter(packet_in)
+		                );
+		                return this.checkRadiusPacket(packet_in, identifier, requestAuthenticator, provider);
+		            }catch (IOException exception){
+		                ioException = exception;
+		            }
+	            }
+	            throw new RadiusException(ioException);
+	        }
+    	} catch (RadiusException exception) {
+    		this.valid = false;
+    		throw exception;
+    	}
     }
     
     /**
@@ -993,4 +1022,16 @@ public class RadiusClient
         super.finalize();
     }
 
+    /**
+     * We should not reuse radius clients with send/receaive failures
+     * 
+     * @return <code>true</code> unless there was asend/receivw failure
+     */
+    public boolean isValid(){
+    	if(!this.valid){
+	        logInfo("Radius client instance #{0} is invalid");
+    	}
+    	return this.valid;
+    }
+    
 }

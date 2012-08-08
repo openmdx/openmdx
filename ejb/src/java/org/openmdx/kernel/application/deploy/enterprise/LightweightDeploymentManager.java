@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightDeploymentManager.java,v 1.4 2009/03/31 17:06:10 hburger Exp $
+ * Name:        $Id: LightweightDeploymentManager.java,v 1.6 2010/04/09 09:33:38 hburger Exp $
  * Description: Lightweight Deployment Manager
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:06:10 $
+ * Date:        $Date: 2010/04/09 09:33:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -82,8 +82,8 @@ import javax.enterprise.deploy.spi.status.DeploymentStatus;
 import javax.enterprise.deploy.spi.status.ProgressListener;
 import javax.enterprise.deploy.spi.status.ProgressObject;
 
-import org.openmdx.kernel.application.configuration.Report;
 import org.openmdx.kernel.application.container.lightweight.LightweightContainer;
+import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.url.URLInputStream;
@@ -133,7 +133,7 @@ public class LightweightDeploymentManager implements DeploymentManager {
 		File deploymentPlan
 	) throws IllegalStateException {
 		try {
-			URL moduleURL = moduleArchive.toURL();
+			URL moduleURL = moduleArchive.toURI().toURL();
 			ModuleType type = getType(moduleArchive);
 			return distribute(
 				targetList,

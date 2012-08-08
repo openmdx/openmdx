@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.1 2009/05/26 14:31:21 wfro Exp $
+ * Name:        $Id: LayerConfigurationEntries.java,v 1.5 2010/01/14 12:55:12 wfro Exp $
  * Description: Generated constants for LayerConfigurationEntries
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:21 $
+ * Date:        $Date: 2010/01/14 12:55:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,129 +66,6 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
    // Avoid instantiation
   }
 
-
-  /**
-   * Path to real role types. (Where they are stored on db)
-   */
-  static public final String ROLE_TYPE_MAPPING_REAL_PATH = "RoleTypeMappingRealPath";
-
-
-
-  /**
-   * Reference path to virtual role types. (The ones which get mapped to the ones above)
-   */
-  static public final String ROLE_TYPE_MAPPING_VIRTUAL_REFERENCE_PATH = "RoleTypeMappingVirtualReferencePath";
-
-
-
-  /**
-   * The class of the real role type at this path.
-   */
-  static public final String ROLE_TYPE_MAPPING_REAL_CLASS = "RoleTypeMappingRealClass";
-
-
-
-  /**
-   * The class of the virtual role type at this path.
-   */
-  static public final String ROLE_TYPE_MAPPING_VIRTUAL_CLASS = "RoleTypeMappingVirtualClass";
-
-
-
-  /**
-   * Use this setting to set if holes in the validity of the objects are allowed.
-   * Default is true.
-   */
-  static public final String ENABLE_HOLES_IN_OBJECT_VALIDITY = "EnableHolesInObjectValidity";
-
-  
-  
-  /**
-   * Enable the creation of another valid state.
-   * Default is false.
-   */
-  static public final String ENABLE_DISJUNCT_STATE_CREATION = "EnableDisjunctStateCreation";
-
-  
-  
-  /**
-   * Enables showDB if at trace level
-   * Default is false.
-   */
-  static public final String ENABLE_SHOW_DB = "EnableShowDB";
-
-  
-  
-  /**
-   * Defines, which state is selected in absence of a validity specification other than validAt.
-   * <p>
-   * Valid values are<ul>
-   * <li><code>current</code> (default)
-   * <li><code>initial</code>
-   * </ul>
-   * @see #CURRENT_STATE 
-   * @see #INITIAL_STATE 
-   */
-  static public final String DEFAULT_STATE = "DefaultState";
-
-  /**
-   * Defines, that the current state is the default state
-   */
-  static public final String CURRENT_STATE = "CurrentState";
-  
-  /**
-   * Defines, that the initial state is the default state
-   */
-  static public final String INITIAL_STATE = "InitialState";
-  
-  
- 
-  
-  /**
-   * @deprecated use DISABLE_HISTORY_REFERENCE_PATTERN instead
-   */
-  static public final String COMPATIBILITY_DISABLE_HISTORY_REFERENCE_PATTERN = "DisableHistoryPathPattern";
-  
-  
-  
-  /**
-   * Use this setting to disable history states for the specified references.
-   */
-  static public final String DISABLE_HISTORY_REFERENCE_PATTERN = "DisableHistoryReferencePattern";
-
-  
-  
-  /**
-   * Use this setting to define the maximum length for createdBy's and 
-   * modifiedBy's principal chains. 
-   */
-  static public final String PRINCIPAL_LIMIT = "principalLimit";
-  
-  
-  
-  /**
-   * Tells whether warnings should be propagated to the client
-   */
-  static public final String THROW_WARNING = "throwWarning";
-
-  /**
-   * If true, calls notifyPreDelete() before an object is removed.
-   * notifiyPreDelete() is called for the removed object and recursively
-   * for each of its composite objects.   
-   */
-  static public final String NOTIFY_PRE_DELETE = "notifyPreDelete";
-
-  
-  
-  /**
-   * Tells whether the <code>NoState_1</code> plug-in holds a single state per 
-   * object instead of an object which is valid forever.
-   * <p> 
-   * Default is <code>false</code>, i.e. no state mode where each object is
-   * valid forever.
-   */
-  static public final String SINGLE_STATE_MODE = "SingleStateMode";
-
   /**
    * Posssible entry values are<ul>
    * <li><code>false</code> disables optimistic locking
@@ -199,59 +76,9 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
   static public final String OPTIMISTIC_LOCKING = "optimisticLocking";
   
   /**
-   * Returns the smallest defined integer constant or
-   * Integer.MAX_VALUE if no integer constant is defined.
-   *
-   * @return an int
+   * Defines whether "instance of state" filter properties may be substituted by
+   * core filter properties.
    */
-  static public int min()
-  {
-  return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.min();  // delegate
-  }
-
-
-
-  /**
-   * Returns the biggest defined integer constant or
-   * Integer.MIN_VALUE if no integer constant is defined.
-   *
-   * @return an int
-   */
-  static public int max()
-  {
-  return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.max();  // delegate
-  }
-
-
-
-  /**
-   * Returns a string representation of the passed code
-   *
-   * @param code  a code to be stringified
-   * @return a stringified code
-   */
-  static public String toString(int code)
-  {
-      return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.toString(code);  // delegate
-  }
-
-
-
-  /**
-   * Returns the code of the passed code's string representation.
-   * The string representation is case insensitive.
-   *
-   * @exception  throws an <code>IllegalArgumentException</code> 
-   *             if the stringified code cannot be resolved
-   * @param code a stringified code
-   * @return a code
-   */
-  static public int fromString(String code)
-  {  
-
-    return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.fromString(code);  // delegate
-  }
-
-
+  static public final String DISABLE_STATE_FILTER_SUBSTITUATION = "disableStateFilterSubstitution";
 
 }

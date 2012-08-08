@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FakeLoginModule.java,v 1.1 2009/03/11 16:32:33 hburger Exp $
+ * Name:        $Id: FakeLoginModule.java,v 1.2 2010/03/05 13:21:20 hburger Exp $
  * Description: FakeLoginModule
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/11 16:32:33 $
+ * Date:        $Date: 2010/03/05 13:21:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,7 +67,7 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
-import org.openmdx.kernel.security.authentication.spi.GenericPrincipal;
+import test.openmdx.security.auth.GenericPrincipal;
 
 /**
  * 

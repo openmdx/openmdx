@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithParentAndIdAsKey.java,v 1.1 2009/05/26 14:31:21 wfro Exp $
+ * Name:        $Id: DBOSlicedWithParentAndIdAsKey.java,v 1.2 2010/03/31 23:14:59 wfro Exp $
  * Description: DBOSlicedWithParentAndIdAsKey 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:21 $
+ * Date:        $Date: 2010/03/31 23:14:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -112,7 +112,16 @@ public class DBOSlicedWithParentAndIdAsKey extends DBOSlicedWithIdAsKey
             )
         );
         if(this.getJoinCriteria() == null) {
-            this.referenceClause = "(v." + database.privateAttributesPrefix + "parent" + " = ?)";            
+            this.referenceClause = 
+                "(v." + 
+                this.database.getColumnName(
+                    conn, 
+                    database.privateAttributesPrefix + "parent", 
+                    0, 
+                    false, // indexSuffixIfZero
+                    false // ignoreReservedWords
+                ) + 
+                " = ?)";            
         } else {
             this.referenceClause = "(vj." + this.getJoinCriteria()[1] + " = ?)";            
         }

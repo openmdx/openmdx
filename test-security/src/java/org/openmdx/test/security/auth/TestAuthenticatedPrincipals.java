@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestAuthenticatedPrincipals.java,v 1.1 2009/03/11 16:32:33 hburger Exp $
+ * Name:        $Id: TestAuthenticatedPrincipals.java,v 1.3 2010/03/13 20:29:49 hburger Exp $
  * Description: Signed Token
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/11 16:32:33 $
+ * Date:        $Date: 2010/03/13 20:29:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,10 +66,11 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.openmdx.base.text.conversion.Base64;
-import org.openmdx.kernel.security.authentication.spi.GenericPrincipal;
-import org.openmdx.kernel.security.token.TokenException;
-import org.openmdx.kernel.security.token.TokenFactory;
-import org.openmdx.kernel.security.token.TokenValidator;
+
+import test.openmdx.security.auth.GenericPrincipal;
+import test.openmdx.security.auth.TokenException;
+import test.openmdx.security.auth.TokenFactory;
+import test.openmdx.security.auth.TokenValidator;
 
 public class TestAuthenticatedPrincipals extends TestCase {
 	
@@ -141,7 +142,7 @@ public class TestAuthenticatedPrincipals extends TestCase {
 	}
 	
 	protected String getKeyStoreFileName(){
-		return "C:\\opt\\BEA\\weblogic81\\server\\lib\\DemoIdentity.jks";
+		return "/opt/Oracle/Middleware/wlserver_10.3/server/lib/DemoIdentity.jks";
 	}
 	
 	protected void setUp() throws Exception {		

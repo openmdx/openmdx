@@ -7,5 +7,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Java2 Extension (jre-1.5)"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX 2 ~ Core (jre-1.5)"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Java2 Enterprise (jre-1.5)"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX 2 ~ Security (jre-1.5)"/>
 	<classpathentry kind="output" path="build/weblogic-8/eclipse"/>
 </classpath>

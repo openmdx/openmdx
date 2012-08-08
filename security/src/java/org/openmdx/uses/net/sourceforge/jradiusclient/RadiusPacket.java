@@ -1,14 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusPacket.java,v 1.7 2009/02/06 16:43:49 hburger Exp $
+ * Project:     openMDX/Security, http://www.openmdx.org/
+ * Name:        $Id: RadiusPacket.java,v 1.9 2010/03/13 20:14:05 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/06 16:43:49 $
+ * Date:        $Date: 2010/03/13 20:14:05 $
  * ====================================================================
  *
- * Copyright (C) 2004  OMEX AG
+ * Copyright (C) 2004-2010  OMEX AG
  *
  * * This library is free software; you can redistribute it and/or
  *   modify it under the terms of the GNU Lesser General Public
@@ -44,8 +44,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  * 
  * This library BASED on Java Radius Client 2.0.0
  * (http://http://jradius-client.sourceforge.net/),
@@ -68,7 +68,6 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
 /**
  * Released under the LGPL<BR>
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.7 $
  */
 public class RadiusPacket {
     public static final int MIN_PACKET_LENGTH       = 20;
@@ -105,7 +104,6 @@ public class RadiusPacket {
     private Map<Integer,RadiusAttribute> attributes;
     private int socketIndex = -1;
     
-    private final static List<RadiusAttribute> NO_ATTRIBUTES = Collections.emptyList(); 
     /**
      * builds a type RadiusPacket with no Attributes set
      *
@@ -137,7 +135,7 @@ public class RadiusPacket {
         final byte identifier,
         final int socketIndex
     ) throws InvalidParameterException{
-        this(type, identifier, NO_ATTRIBUTES);
+        this(type, identifier, Collections.<RadiusAttribute>emptyList());
         this.setSocketIndex(socketIndex);
     }
     
@@ -182,7 +180,7 @@ public class RadiusPacket {
         }
         validateAttribute(radiusAttribute);
         synchronized(this.attributes){
-            this.attributes.put(new Integer(radiusAttribute.getType()),radiusAttribute);
+            this.attributes.put(Integer.valueOf(radiusAttribute.getType()),radiusAttribute);
         }
     }
     /**
@@ -195,9 +193,12 @@ public class RadiusPacket {
             throw new InvalidParameterException("Attribute List was null");
         }
         for(RadiusAttribute tempRa : attributeList) {
-            validateAttribute(tempRa);
-            synchronized(this.attributes){
-                this.attributes.put(new Integer(tempRa.getType()),tempRa);
+            try{
+                validateAttribute(tempRa);
+            }catch(ClassCastException ccex){
+                throw new InvalidParameterException("Attribute List contained an entry that was not a net.sourceforge.jradiusclient.RadiusAttribute");
+            } synchronized(this.attributes){
+                this.attributes.put(Integer.valueOf(tempRa.getType()),tempRa);
             }
         }
     }
@@ -221,7 +222,7 @@ public class RadiusPacket {
         }
         RadiusAttribute tempRa = null;
         synchronized(this.attributes){
-            tempRa = (RadiusAttribute)this.attributes.get(new Integer(attributeType));
+            tempRa = this.attributes.get(Integer.valueOf(attributeType));
         }
         if (null == tempRa){
             throw new RadiusException("No attribute found for type " +  attributeType);
@@ -260,13 +261,13 @@ public class RadiusPacket {
     protected final byte[] getAttributeBytes() throws RadiusException{
         //check for an empty packet
         ByteArrayOutputStream bytes = new  ByteArrayOutputStream();
-        synchronized (this.attributes){
-        	for(RadiusAttribute attribute : this.attributes.values()) {
-                try{
+        synchronized (this.attributes) {
+            try{
+            	for(RadiusAttribute attribute : this.attributes.values()) {
                     bytes.write(attribute.getBytes());
-                }catch(java.io.IOException ioex){
-                    throw new RadiusException (ioex, "Error writing bytes to ByteArrayOutputStream!!!");
-                }
+            	}
+            }catch(java.io.IOException ioex){
+                throw new RadiusException (ioex, "Error writing bytes to ByteArrayOutputStream!!!");
             }
             return bytes.toByteArray();
         }
@@ -277,7 +278,7 @@ public class RadiusPacket {
      * @throws RadiusException If there is any error assembling the bytes into a byte array
      */
     public final byte[] getAttributeBytes(
-        int[] order
+        int... order
     ) throws RadiusException{
         try {
 	        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -287,10 +288,10 @@ public class RadiusPacket {
                 i < order.length;
                 i++
             ){
-                RadiusAttribute candidate = attributes.remove(new Integer(order[i]));
+                RadiusAttribute candidate = attributes.remove(Integer.valueOf(order[i]));
                 if(candidate != null) bytes.write(candidate.getBytes()); 
             }
-            for (RadiusAttribute attribute : attributes.values()){
+            for (RadiusAttribute attribute : attributes.values()) {
                 bytes.write(attribute.getBytes());
             }
 	        return bytes.toByteArray();
@@ -330,20 +331,4 @@ public class RadiusPacket {
         return this.socketIndex;
     }
     
-    //    /**
-//     * This method returns the bytes sent in the STATE attribute of the RADIUS
-//     * Server's response to a request
-//     *@return java.lang.String the challenge message to display to the user
-//     *@exception net.sourceforge.jradiusclient.exception.RadiusException
-//     */
-//    private byte[] getStateAttributeFromResponse() throws RadiusException{
-//        if(this.responseAttributes == null){
-//            throw new RadiusException("No Response Attributes have been set.");
-//        }
-//        byte[] stateBytes = (byte[])this.responseAttributes.get(new Integer(RadiusAttributeValues.STATE));
-//        if ((stateBytes == null) || (stateBytes.length == 0)){
-//            throw new RadiusException("No State Attribute has been set.");
-//        }
-//        return stateBytes;
-//    }
 }

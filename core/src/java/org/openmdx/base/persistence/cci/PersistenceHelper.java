@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceHelper.java,v 1.6 2009/05/29 17:04:11 hburger Exp $
+ * Name:        $Id: PersistenceHelper.java,v 1.18 2010/03/23 15:34:26 hburger Exp $
  * Description: PersistenceHelper 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/29 17:04:11 $
+ * Date:        $Date: 2010/03/23 15:34:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,14 +50,27 @@
  */
 package org.openmdx.base.persistence.cci;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.UUID;
 
 import javax.jdo.Extent;
 import javax.jdo.JDOHelper;
+import javax.jdo.Query;
+import javax.jmi.reflect.RefObject;
 
+import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.spi.Container;
+import org.openmdx.base.persistence.spi.ExtentCollection;
+import org.openmdx.base.persistence.spi.TransientContainerId;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.Quantifier;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.AnyTypePredicate;
 
 /**
  * PersistenceHelper
@@ -108,41 +121,50 @@ public class PersistenceHelper {
     }
 
     /**
-     * Retrieve the object id for persistent objects and the
-     * transactional object id for transient objects, respectively.
+     * Tells whether a container is persistent
      * 
-     * @param pc
+     * @param object a container
      * 
-     * @return an object id, or <code>null</code> if <code>pc</code> is <code>null</code>
+     * @return <code>true</code> if the container is persistent
      */
-    public static Object getCurrentObjectId(
-        Object pc
+    public static boolean isPersistent(
+        Object object
     ){
-        return 
-            pc == null ? null : 
-            JDOHelper.isPersistent(pc) ? JDOHelper.getObjectId(pc) :
-            JDOHelper.getTransactionalObjectId(pc);
+        return object instanceof Container ? 
+            ((Container)object).openmdxjdoIsPersistent() :
+            JDOHelper.isPersistent(object);
+    }
+        
+    /**
+     * Return the container's id
+     * 
+     * @param container a container
+     * 
+     * @return the container id, or <code>null</code> if the container's owner is <em>transient</em>.
+     */
+    public static Path getContainerId(
+        Object container
+    ){
+        return container instanceof Container ? ((Container)container).openmdxjdoGetContainerId() : null;
     }
 
     /**
-     * Retrieve a candidate collection
+     * Return a container's transient id
      * 
-     * @param extent the extent
-     * @param pattern the object id pattern
+     * @param container a container
      * 
-     * @return the candidate collection
+     * @return the transient container id, or <code>null</code> if the container's owner is <em>persistent</em>.
      */
-    public static <T> Collection<T> getCandidates(
-        Extent<T> extent,
-        Object pattern
+    public static TransientContainerId getTransientContainerId(
+        Object container
     ){
-        return null; // TODO
+        return container instanceof Container ? ((Container)container).openmdxjdoGetTransientContainerId() : null;
     }
-
+    
     /**
      * A way to avoid fetching an object just to retrieve its object id
      * 
-        Object pc a persistence capable object
+     * @param pc a persistence capable object
      * @param featureName
      * 
      * @return the value where each object is replaced by its id
@@ -153,8 +175,55 @@ public class PersistenceHelper {
     ){  
         PersistenceManager_1_0 pm = (PersistenceManager_1_0) JDOHelper.getPersistenceManager(pc);
         return pm.getFeatureReplacingObjectById(
-            getCurrentObjectId(pc), 
+            (UUID) JDOHelper.getTransactionalObjectId(pc), 
             featureName
+        );
+    }
+
+    /**
+     * Retrieve a candidate collection
+     * 
+     * @param extent the extent
+     * @param pattern the object id pattern either as a Path or XRI string representation
+     * 
+     * @return the candidate collection
+     */
+    public static Query newQuery(
+        Extent<?> extent,
+        Object xriPattern
+    ){
+        Query query = extent.getPersistenceManager().newQuery(extent);
+        query.setCandidates(getCandidates(extent, xriPattern));
+        return query;
+    }
+
+    /**
+     * Retrieve a candidate collection
+     * 
+     * @param extent the extent
+     * @param xriPattern the object id pattern either as a Path or XRI string representation
+     * 
+     * @return the candidate collection
+     */
+    public static <E> Collection<E> getCandidates(
+        Extent<E> extent,
+        Object xriPattern
+    ){
+        return new ExtentCollection<E>(
+            extent, 
+            xriPattern instanceof Path ? (Path)xriPattern : new Path((String)xriPattern)
+        );
+    }
+
+    public static void setClasses(
+        AnyTypePredicate query,
+        Class<? extends RefObject>... classes 
+    ){
+        ((RefQuery_1_0)query).refAddValue(
+            SystemAttributes.OBJECT_INSTANCE_OF,
+            Quantifier.THERE_EXISTS.code(),
+            FilterOperators.IS_IN,
+            Arrays.asList(classes)
         );
     }
     

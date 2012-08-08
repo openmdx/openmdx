@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObject.java,v 1.3 2009/06/09 12:45:19 hburger Exp $
+ * Name:        $Id: DbObject.java,v 1.4 2009/08/19 17:19:30 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:19 $
+ * Date:        $Date: 2009/08/19 17:19:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -256,6 +256,31 @@ public abstract class DbObject
   ) throws ServiceException;
   
   /**
+   * Retrieve the version clause
+   * 
+   * @param columnName
+   * @param expectedVersion
+   * 
+   * @return the version clause
+   * 
+   * @throws ServiceException  
+   */
+  public String getVersionClause(
+      String columnName,
+      Object value
+  ) throws ServiceException {
+      return " AND (" + this.database.getColumnName(
+          this.conn, 
+          columnName, 
+          0, // index
+          false, // indexSuffixIfZero
+          true // forPreparedStatement
+      ) + (
+          value == null ? " IS NULL " : (" = " + this.database.getPlaceHolder(conn,value))
+      )  + ")";
+  }
+  
+  /**
    * Returns an SQL clause whch select the objects by their object oid.
    * <p>
    * Example: StandardDbObject return '(OBJECT_OID IN <oid>)'
@@ -406,11 +431,17 @@ public abstract class DbObject
    * <p>
    * Example: StandardDbObject implements object replacement with UPDATE
    * operations.
+   *
+   * @param index
+   * @param newObject
+   * @param oldObject
+   * @param lockAssertion 
    */
   public abstract void replaceObjectSlice(
     int index,
     MappedRecord newObject,
-    MappedRecord oldObject
+    MappedRecord oldObject, 
+    String lockAssertion
   ) throws ServiceException;
 
   /**

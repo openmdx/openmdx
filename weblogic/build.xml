@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.28 2008/02/12 18:05:30 wfro Exp $
+= Name:        $Id: build.xml,v 1.29 2009/07/06 11:14:48 hburger Exp $
 = Description: openMDX WebLogic Platform
-= Revision:    $Revision: 1.28 $
-= Date:        $Date: 2008/02/12 18:05:30 $
+= Revision:    $Revision: 1.29 $
+= Date:        $Date: 2009/07/06 11:14:48 $
 = Copyright:   (c) 2003-2004 OMEX AG
 =======================================================================
  *
@@ -67,7 +67,10 @@
 	<import file="../ant/etc/ant/build-library.xml"/>
 
 	<path id="project.lib.classpath">
-		<path refid="openmdx.core.bin"/>
+		<pathelement location="${openmdx.home}/${build.java.platform}/core/lib/openmdx-system.jar"/>
+		<pathelement location="${openmdx.home}/${build.java.platform}/core/lib/openmdx-base.jar"/>
+		<pathelement location="${openmdx.home}/${build.java.platform}/core/lib/openmdx-application.jar"/>
+		<pathelement location="${openmdx.home}/${build.java.platform}/security/lib/openmdx-pki.jar"/>
 		<pathelement location="${bea.weblogic.home}/server/lib/weblogic.jar"/>
 		<pathelement location="${deliver.dir}/deployment-unit/openmdx-weblogic.mbean.jar"/>
 	</path>
@@ -88,9 +91,10 @@
 	<!-- * generate -->
 	<!-- ******************************************************************* -->
 	<target name="generate" description="Generate version, jt and model dependend files" depends="build-init">
-		<ant dir="${openmdx.home}/core" inheritAll="false" target="deliverables">
+		<ant dir="${openmdx.home}/security" inheritAll="false" target="deliverables">
 			<property name="build.target.platform" value="${build.java.platform}"/>
 		</ant> 
+		<echo>${openmdx.home}/${build.java.platform}/security/lib/openmdx-security.jar</echo>
 	</target>
 
 	<!-- ******************************************************************* -->

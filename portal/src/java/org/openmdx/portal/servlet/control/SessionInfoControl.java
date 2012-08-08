@@ -1,10 +1,10 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SessionInfoControl.java,v 1.42 2008/11/12 10:36:53 wfro Exp $
+ * Name:        $Id: SessionInfoControl.java,v 1.45 2009/09/30 16:08:51 wfro Exp $
  * Description: SessionInfoControl
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 10:36:53 $
+ * Date:        $Date: 2009/09/30 16:08:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,8 @@ import java.util.Date;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.HtmlEncoder_1_0;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.view.ShowObjectView;
@@ -86,7 +87,7 @@ public class SessionInfoControl
     
     //---------------------------------------------------------------------------------
     public static void paintLoginPrincipal(
-        HtmlPage p
+        ViewPort p
     ) {
         try {
             ApplicationContext app = p.getApplicationContext();
@@ -99,7 +100,7 @@ public class SessionInfoControl
     
     //---------------------------------------------------------------------------------
     public static void paintLocalesMenu(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing
     ) {
         try {
@@ -129,7 +130,7 @@ public class SessionInfoControl
     
     //---------------------------------------------------------------------------------
     public static void paintLogoffButton(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing,
         String buttonClass
     ) {
@@ -148,14 +149,27 @@ public class SessionInfoControl
     
     //---------------------------------------------------------------------------------
     public static void paintRolesMenu(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing
     ) {
         try {
             ApplicationContext app = p.getApplicationContext();
+            HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
             View view = p.getView();        
             Action[] setRoleAction = view.getSetRoleActions();
-            if(forEditing || (setRoleAction.length < 2)) {
+            if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+            	String groupId = "selectRole";
+                p.write("    <ul id=\"t", groupId, "\" selected=\"true\" style=\"position:relative;top:auto;min-height:0px;\" onclick=\"javascript:var e=document.getElementById('p", groupId, "');if(e.style.display=='block'){e.style.display='none';}else{e.style.display='block';};\">");
+                p.write("      <li class=\"group\" style=\"height:40px;\"><div style=\"padding-top:10px;\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", WebKeys.ICON_ROLE, "\""), "&nbsp;&nbsp;&nbsp;", htmlEncoder.encode(app.getCurrentUserRole(), false), "</div></li>");
+                p.write("    </ul>");
+                p.write("    <ul id=\"p", groupId, "\" selected=\"true\" style=\"display:none;position:relative;top:auto;min-height:0px;\">");
+                for(int i = 0; i < setRoleAction.length; i++) {
+                    Action action = setRoleAction[i];
+                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", WebKeys.ICON_ROLE, "\""), "&nbsp;&nbsp;&nbsp;", action.getParameter(Action.PARAMETER_NAME), "</a></li>");
+                }
+                p.write("    </ul>");
+            }
+            else if(forEditing || (setRoleAction.length < 2)) {            	
                 p.write("<span>", app.getCurrentUserRole(), "</span>");            
             }
             else {
@@ -173,13 +187,12 @@ public class SessionInfoControl
         }
         catch(Exception e) {
             new ServiceException(e).log();
-        }
-        
+        }        
     }
     
     //---------------------------------------------------------------------------------
     public static void paintCurrentDateTime(
-        HtmlPage p,
+        ViewPort p,
         String separator
     ) {
         try {
@@ -203,7 +216,7 @@ public class SessionInfoControl
     
     //---------------------------------------------------------------------------------
     public static void paintSaveSettingsButton(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing,
         String buttonClass
     ) {

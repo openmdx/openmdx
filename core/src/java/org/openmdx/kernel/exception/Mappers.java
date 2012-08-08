@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Mappers.java,v 1.1 2009/04/02 14:56:21 hburger Exp $
+ * Name:        $Id: Mappers.java,v 1.2 2010/02/24 23:44:34 hburger Exp $
  * Description: Mapping 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/02 14:56:21 $
+ * Date:        $Date: 2010/02/24 23:44:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -89,16 +89,16 @@ class Mappers implements BasicException.Mapper {
         } catch (IOException exception) {
             SysLog.error("Exception mapper configuration failure", exception);
         }
-        for(Map.Entry<?, ?> entries : configuration.entrySet()) {
+        for(Map.Entry<?, ?> entry : configuration.entrySet()) {
             try {
                 Class<?> exceptionClass = Class.forName(
-                    entries.getKey().toString(),
+                    entry.getKey().toString(),
                     false,
                     classLoader
                 );
                 if(Throwable.class.isAssignableFrom(exceptionClass)) {
                     Class<?> mapperClass = Class.forName(
-                        entries.getValue().toString(),
+                        entry.getValue().toString(),
                         false,
                         classLoader
                     );
@@ -109,28 +109,28 @@ class Mappers implements BasicException.Mapper {
                                 (BasicException.Mapper)mapperClass.newInstance()
                             );
                         } catch (InstantiationException exception) {
-                            SysLog.warning("Exception mapper instantiation failure: " + entries, exception);
+                            SysLog.warning("Exception mapper instantiation failure: " + entry, exception);
                         } catch (IllegalAccessException exception) {
-                            SysLog.warning("Exception mapper instantiation failure: " + entries, exception);
+                            SysLog.warning("Exception mapper instantiation failure: " + entry, exception);
                         }
                     } else {
                         SysLog.log(
                             Level.WARNING, 
                             "Mapper {1} could not be registered for {0} beacuse it does not implement {2}", 
-                            entries.getKey(), entries.getValue(), BasicException.Mapper.class.getName()
+                            entry.getKey(), entry.getValue(), BasicException.Mapper.class.getName()
                         );
                     }
                 } else {
                     SysLog.log(
                         Level.WARNING, 
                         "Mapper {1} could not be registered because {0} is not a subclass of {2}", 
-                        entries.getKey(), entries.getValue(), Throwable.class.getName()
+                        entry.getKey(), entry.getValue(), Throwable.class.getName()
                     );
                 }
             } catch (NoClassDefFoundError error) {
-                SysLog.warning("Exception mapper registration failure: " + entries, error);
+                SysLog.warning("Exception mapper registration failure: " + entry, error);
             } catch (ClassNotFoundException exception) {
-                SysLog.warning("Exception mapper registration failure: " + entries, exception);
+                SysLog.warning("Exception mapper registration failure: " + entry, exception);
             }
         }
        

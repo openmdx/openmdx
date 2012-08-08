@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LenientCharacterComparator.java,v 1.11 2009/01/06 10:21:19 wfro Exp $
+ * Name:        $Id: LenientCharacterComparator.java,v 1.12 2010/01/26 15:43:30 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2010/01/26 15:43:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,19 +59,9 @@ import java.util.Comparator;
 public class LenientCharacterComparator implements Comparator<Object> {
 
     /**
-     * Factory for a LenientComparator using the default CharSequence comparator
-     * 
-     * @return  a linient comparator using the default CharSequence comparator
-     */
-    public static Comparator<Object> getInstance(
-    ){
-        return LenientCharacterComparator.instance;
-    }
-
-    /**
      * Use specific CharSequence camparator
      */
-    public LenientCharacterComparator(
+    protected LenientCharacterComparator(
         Comparator<Object> charSequenceComparator
     ) {
         this.charSequenceComparator = charSequenceComparator;
@@ -81,11 +71,6 @@ public class LenientCharacterComparator implements Comparator<Object> {
      * 
      */
     private final Comparator<Object> charSequenceComparator;
-
-    /**
-     * 
-     */
-    private static final Comparator<Object> instance = new LenientCharacterComparator(null);
 
 
     //------------------------------------------------------------------------

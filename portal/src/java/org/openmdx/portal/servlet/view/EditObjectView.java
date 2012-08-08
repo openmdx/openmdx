@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectView.java,v 1.39 2009/02/27 15:52:52 wfro Exp $
+ * Name:        $Id: EditObjectView.java,v 1.44 2010/04/27 12:21:07 wfro Exp $
  * Description: EditObjectView
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/27 15:52:52 $
+ * Date:        $Date: 2010/04/27 12:21:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,15 +58,16 @@ package org.openmdx.portal.servlet.view;
 import java.io.Serializable;
 import java.util.Map;
 
+import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.id.UUIDs;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.WebKeys;
@@ -84,10 +85,8 @@ public class EditObjectView
     public EditObjectView(
         String id,
         String containerElementId,
-        RefObject_1_0 object,
         Path editObjectIdentity,
         ApplicationContext application,
-        PersistenceManager pm,
         Map<Path,Action> historyActions,
         String lookupType,
         Map restrictToElements, 
@@ -96,10 +95,10 @@ public class EditObjectView
         this(
             id,
             containerElementId,
-            object,
+            // Handle edit with its own persistence manager
+            (RefObject_1_0)application.getNewPmData().getObjectById(editObjectIdentity),
             editObjectIdentity,
             application,
-            pm,
             historyActions,
             lookupType,
             restrictToElements,       
@@ -130,7 +129,6 @@ public class EditObjectView
         RefObject_1_0 object,
         Path editObjectIdentity,
         ApplicationContext application,
-        PersistenceManager pm,
         Map<Path,Action> historyActions,
         String lookupType,
         Map restrictToElements,       
@@ -157,7 +155,7 @@ public class EditObjectView
         );
         this.inspectorControl = inspectorControl;
         // Attribute pane
-        AppLog.detail("Preparing attribute pane");
+        SysLog.detail("Preparing attribute pane");
         this.attributePane = new AttributePane(
             inspectorControl.getAttributePaneControl(),
             this,
@@ -186,98 +184,119 @@ public class EditObjectView
       }
   }
 
-  //-------------------------------------------------------------------------
-  public void storeObject(
-      Map parameterMap,
-      Map<String,Attribute> attributeMap
-  ) {
-      // Collect all attributes
-      for(int i = 0; i < this.getAttributePane().getAttributeTab().length; i++) {
-        AttributeTab tab = this.getAttributePane().getAttributeTab()[i];
-        for(int j = 0; j < tab.getFieldGroup().length; j++) {
-          FieldGroup fieldGroup = tab.getFieldGroup()[j];
-          Attribute[][] attributes = fieldGroup.getAttribute();
-          for(int u = 0; u < attributes.length; u++) {
-            for(int v = 0; v < attributes[u].length; v++) {
-              Attribute attribute = attributes[u][v];
-              if((attribute != null) && !attribute.isEmpty()) {
-                attributeMap.put(
-                  attribute.getValue().getName(),
-                  attribute
-                );
-              }
-            }
-          }
-        }
-      }
-      RefObject_1_0 target = this.editObjectIdentity == null ? 
-          this.getRefObject() : 
-          (RefObject_1_0)pm.getObjectById(this.editObjectIdentity);
-      this.editObjectIdentity = target.refGetPath();
-      this.application.getPortalExtension().updateObject(
-          target,
-          parameterMap,
-          attributeMap,
-          this.application,
-          this.getPersistenceManager()
-      );
-      if(this.application.getErrorMessages().isEmpty()) {
-          if(!this.isEditMode()) {
-              Object[] qualifiers = (Object[])parameterMap.get("qualifier");
-              if(qualifiers == null) {
-                  qualifiers = new String[]{
-                      UUIDConversion.toUID(UUIDs.getGenerator().next())
-                  };    
-              }
-              // Assert that this.parent is retrieved from the same persistence manager as this.object
-              // A reload during edit can change the package which would lead to an exception
-              // when adding the object with refAddValue
-              this.parent = (RefObject_1_0)this.getPersistenceManager().getObjectById(this.parent.refGetPath());
-              Object container = this.parent.refGetValue(this.forReference);
-              ((RefContainer)container).refAdd(
-                  org.oasisopen.cci2.QualifierType.REASSIGNABLE,
-                  qualifiers.length > 0 ? (String)qualifiers[0] : "",
-                  (RefObject_1_0)this.object
-              );
-          }
-      }
-  }
+	// -------------------------------------------------------------------------
+	public void storeObject(
+	    Map parameterMap,
+	    Map<String, Attribute> attributeMap
+	) throws ServiceException {
+		// Collect all attributes
+		for(AttributeTab tab: this.getAttributePane().getAttributeTab()) {
+			for(FieldGroup fieldGroup: tab.getFieldGroup()) {
+				Attribute[][] attributes = fieldGroup.getAttribute();
+				for (int u = 0; u < attributes.length; u++) {
+					for (int v = 0; v < attributes[u].length; v++) {
+						Attribute attribute = attributes[u][v];
+						if((attribute != null) && !attribute.isEmpty()) {
+							attributeMap.put(
+							    attribute.getValue().getName(),
+							    attribute);
+						}
+					}
+				}
+			}
+		}
+		RefObject_1_0 target = this.getRefObject();
+		if(this.isEditMode()) {
+			PersistenceManager pm = JDOHelper.getPersistenceManager(target);
+			try {
+				pm.currentTransaction().begin();
+				this.application.getPortalExtension().updateObject(
+				    target,
+				    parameterMap,
+				    attributeMap,
+				    this.application
+				);
+				pm.currentTransaction().commit();
+			} catch(Exception e) {
+				try {
+					pm.currentTransaction().rollback();
+				} catch(Exception e1) {}
+				throw new ServiceException(e);
+			}			
+		} else {
+			PersistenceManager pm = JDOHelper.getPersistenceManager(this.parent);
+			try {
+				pm.currentTransaction().begin();
+				this.application.getPortalExtension().updateObject(
+				    target,
+				    parameterMap,
+				    attributeMap,
+				    this.application
+				);
+				if(this.application.getErrorMessages().isEmpty()) {
+					Object[] qualifiers = (Object[])parameterMap.get("qualifier");
+					if (qualifiers == null) {
+						qualifiers = new String[] {
+							UUIDConversion.toUID(UUIDs.newUUID())
+						};
+					}
+					Object container = this.parent.refGetValue(this.forReference);
+					((RefContainer)container).refAdd(
+					    org.oasisopen.cci2.QualifierType.REASSIGNABLE,
+					    qualifiers.length > 0 ? (String) qualifiers[0] : "",
+					    target
+					);
+					pm.currentTransaction().commit();
+				} else {
+					try {
+						pm.currentTransaction().rollback();
+					} catch(Exception e1) {}
+				}
+			} catch(Exception e) {
+				try {
+					pm.currentTransaction().rollback();				
+				} catch(Exception e1) {}
+				throw new ServiceException(e);
+			}
+		}
+		this.editObjectIdentity = target.refGetPath();
+	}
   
-  //-------------------------------------------------------------------------
-  public String getType(
-  ) {
-    return ObjectView.VIEW_EDIT_OBJECT;
-  }
+	//-------------------------------------------------------------------------
+	public String getType(
+	) {
+		return ObjectView.VIEW_EDIT_OBJECT;
+	}
 
-  //-------------------------------------------------------------------------
-  public Action getCancelAction(
-  ) {
-      return new Action(
-          Action.EVENT_CANCEL,
-          new Action.Parameter[]{},
-          this.application.getTexts().getCancelTitle(),
-          WebKeys.ICON_CANCEL,
-          true
-     ); 
-  }
+	//-------------------------------------------------------------------------
+	public Action getCancelAction(
+	) {
+		return new Action(
+			Action.EVENT_CANCEL,
+			new Action.Parameter[]{},
+			this.application.getTexts().getCancelTitle(),
+			WebKeys.ICON_CANCEL,
+			true
+		); 
+	}
 
-  //-------------------------------------------------------------------------
-  public Action getSaveAction(
-  ) {
-      return new Action(
-          Action.EVENT_SAVE,
-          new Action.Parameter[]{},
-          this.application.getTexts().getSaveTitle(),
-          WebKeys.ICON_SAVE,
-          true
-      );
-  }
+	//-------------------------------------------------------------------------
+	public Action getSaveAction(
+	) {
+		return new Action(
+			Action.EVENT_SAVE,
+			new Action.Parameter[]{},
+			this.application.getTexts().getSaveTitle(),
+			WebKeys.ICON_SAVE,
+			true
+		);
+	}
 
-    // -------------------------------------------------------------------------
-    public EditInspectorControl getEditInspectorControl(
-    ) {
-        return (EditInspectorControl)this.inspectorControl;
-    }
+	// -------------------------------------------------------------------------
+	public EditInspectorControl getEditInspectorControl(
+	) {
+		return (EditInspectorControl)this.inspectorControl;
+	}
 
     //-------------------------------------------------------------------------
     public RefObject_1_0 getParentObject(
@@ -304,13 +323,15 @@ public class EditObjectView
     }
     
     //-------------------------------------------------------------------------
+    @Override
     public RefObject_1_0 getLookupObject(
     ) {
+    	PersistenceManager pm = JDOHelper.getPersistenceManager(this.getRefObject());
         return this.isEditMode() ? 
             this.getEditObjectIdentity() != null ?
-                (RefObject_1_0)this.application.getPmData().getObjectById(this.getEditObjectIdentity()) : 
-                this.getObjectReference().getObject() :
-            this.getParent();
+                (RefObject_1_0)pm.getObjectById(this.getEditObjectIdentity()) : 
+                	this.getObjectReference().getObject() :
+                		this.getParent();
     }
     
     //-------------------------------------------------------------------------

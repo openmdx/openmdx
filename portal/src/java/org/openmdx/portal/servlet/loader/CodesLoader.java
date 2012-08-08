@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodesLoader.java,v 1.20 2009/06/13 18:48:08 wfro Exp $
+ * Name:        $Id: CodesLoader.java,v 1.31 2010/01/25 17:03:40 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/13 18:48:08 $
+ * Date:        $Date: 2010/01/25 17:03:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -76,13 +77,13 @@ import javax.servlet.ServletContext;
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.dataprovider.cci.JmiHelper;
-import org.openmdx.application.dataprovider.importer.XmlImporter;
-import org.openmdx.application.log.AppLog;
+import org.openmdx.application.xml.Importer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 
 public class CodesLoader
@@ -103,10 +104,13 @@ public class CodesLoader
   }
     
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     synchronized public void loadCodes(
         String[] locale
     ) throws ServiceException {
-        System.out.println("Loading codes");
+    	String messagePrefix = new Date() + "  ";
+        System.out.println(messagePrefix + "Loading codes");
+        SysLog.info("Loading codes");
         List dirs = this.getDirectories("/WEB-INF/config/code/");
         // Iterate all code directories. Each directory may contain segment 
         // and locale specific code files
@@ -131,7 +135,7 @@ public class CodesLoader
                               break;
                           }
                       }
-                      System.out.println(locale[j] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
+                      SysLog.info(locale[j] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
                   }
               }
               try {
@@ -139,19 +143,16 @@ public class CodesLoader
                     Map<Path,MappedRecord> codes = new LinkedHashMap<Path,MappedRecord>();
                     String path = (String)k.next();
                     if(!path.endsWith("/")) {
-                        System.out.println("Loading " + path);
+                        SysLog.info("Loading " + path);
                         try {
-                            XmlImporter importer = new XmlImporter(
-                                codes,
-                                false
-                            );
-                            importer.process(
-                                new String[]{context.getResource(path).toString()}
-                            );
+                            Importer.importObjects(
+                                Importer.asTarget(codes),
+                                Importer.asSource(context.getResource(path))
+                             );
                         }
                         catch(ServiceException e) {
                             e.log();
-                            System.out.println("STATUS: " + e.getMessage());
+                            SysLog.info("STATUS: " + e.getMessage());
                         }
                     }
                     // merge entries
@@ -166,47 +167,59 @@ public class CodesLoader
                             (mergedCodes.get(e.getKey()) != null)
                         ) {                                                            
                         	MappedRecord mergedCodeEntry = mergedCodes.get(e.getKey());
-                            ObjectHolder_2Facade mergedCodeEntryFacade;
+                            Object_2Facade mergedCodeEntryFacade;
                             try {
-	                            mergedCodeEntryFacade = ObjectHolder_2Facade.newInstance(mergedCodeEntry);
+	                            mergedCodeEntryFacade = Object_2Facade.newInstance(mergedCodeEntry);
                             }
                             catch (ResourceException e0) {
                             	throw new ServiceException(e0);
                             }
                             // do not merge if shortText for locale 0 is not set
-                            if(mergedCodeEntryFacade.getAttributeValues("shortText") != null) {
-                                if(mergedCodeEntryFacade.attributeValues("shortText").size() <= j) {
-                                	mergedCodeEntryFacade.attributeValues("shortText").add(
-                                		mergedCodeEntryFacade.attributeValues("shortText").get(fallbackLocaleIndex)
-                                    );
+                            if("org:opencrx:kernel:code1:CodeValueEntry".equals(mergedCodeEntryFacade.getObjectClass())) {
+                                if(mergedCodeEntryFacade.attributeValuesAsList("shortText").size() <= j) {
+                                	if(fallbackLocaleIndex < mergedCodeEntryFacade.attributeValuesAsList("shortText").size()) {
+	                                	mergedCodeEntryFacade.attributeValuesAsList("shortText").add(
+	                                		mergedCodeEntryFacade.attributeValuesAsList("shortText").get(fallbackLocaleIndex)
+	                                    );
+                                	}
                                 }
                                 // assert that longText is set for locale i
                                 if(mergedCodeEntryFacade.getAttributeValues("longText") == null) {
-                                	mergedCodeEntryFacade.attributeValues("longText").add("N/A");
+                                	mergedCodeEntryFacade.attributeValuesAsList("longText").add("N/A");
                                 }
-                                if(mergedCodeEntryFacade.attributeValues("longText").size() <= j) {
-                                	mergedCodeEntryFacade.attributeValues("longText").add(
-                                		mergedCodeEntryFacade.attributeValues("longText").get(fallbackLocaleIndex)
+                                if(mergedCodeEntryFacade.attributeValuesAsList("longText").size() <= j) {
+                                	mergedCodeEntryFacade.attributeValuesAsList("longText").add(
+                                		mergedCodeEntryFacade.attributeValuesAsList("longText").get(fallbackLocaleIndex)
                                     );
                                 }                                  
                                 // overwrite shortText and longText with uiElement values if available
                                 MappedRecord codeEntry = codes.get(e.getKey());
                                 if(codeEntry != null) {
-                                    ObjectHolder_2Facade codeEntryFacade;
+                                    Object_2Facade codeEntryFacade;
                                     try {
-	                                    codeEntryFacade = ObjectHolder_2Facade.newInstance(codeEntry);
+	                                    codeEntryFacade = Object_2Facade.newInstance(codeEntry);
                                     }
                                     catch (ResourceException e0) {
                                     	throw new ServiceException(e0);
                                     }
-                                    if(codeEntryFacade.attributeValues("shortText").size() > 0) {
-                                    	mergedCodeEntryFacade.attributeValues("shortText").set(
+                                    if(!codeEntryFacade.attributeValuesAsList("shortText").isEmpty()) {
+                                    	while(mergedCodeEntryFacade.attributeValuesAsList("shortText").size() <= j) {
+                                    		mergedCodeEntryFacade.attributeValuesAsList("shortText").add(
+                                                codeEntryFacade.attributeValue("shortText")
+                                    	    );
+                                    	}
+                                    	mergedCodeEntryFacade.attributeValuesAsList("shortText").set(
                                             j,
                                             codeEntryFacade.attributeValue("shortText")
                                         );
                                     }
-                                    if(codeEntryFacade.attributeValues("longText").size() > 0) {
-                                    	mergedCodeEntryFacade.attributeValues("longText").set(
+                                    if(!codeEntryFacade.attributeValuesAsList("longText").isEmpty()) {
+                                    	while(mergedCodeEntryFacade.attributeValuesAsList("longText").size() <= j) {
+                                    		mergedCodeEntryFacade.attributeValuesAsList("longText").add(
+                                                codeEntryFacade.attributeValue("longText")
+                                    	    );
+                                    	}
+                                    	mergedCodeEntryFacade.attributeValuesAsList("longText").set(
                                             j,
                                             codeEntryFacade.attributeValue("longText")
                                         );
@@ -224,7 +237,7 @@ public class CodesLoader
                         // locale > 0 requires that locale=0 exists. Complain if it
                         // does not
                         else {
-                            AppLog.warning("entry " + e.getKey() + " of locale " + locale[j] + " has no corresponding entry for locale " + locale[0] + ". Not loading");
+                        	SysLog.warning("entry " + e.getKey() + " of locale " + locale[j] + " has no corresponding entry for locale " + locale[0] + ". Not loading");
                         }
                     }
                 }
@@ -235,7 +248,8 @@ public class CodesLoader
             }
             
             // Store merged codes
-            System.out.println("Storing " + mergedCodes.size() + " code entries");
+            SysLog.info("Storing " + mergedCodes.size() + " code entries");
+            System.out.println(messagePrefix + "Storing " + mergedCodes.size() + " code entries");
             PersistenceManager store = this.pmf.getPersistenceManager(
                 this.getAdminPrincipal(dir),
                 null
@@ -251,7 +265,7 @@ public class CodesLoader
                     j.hasNext(); 
                 ) {
                   MappedRecord entry = j.next();
-                  Path entryPath = ObjectHolder_2Facade.getPath(entry);
+                  Path entryPath = Object_2Facade.getPath(entry);
                   codeSegmentIdentities.add(
                 	  entryPath.getPrefix(5)
                   );
@@ -273,13 +287,11 @@ public class CodesLoader
                             entry,
                             existing,
                             loadedObjects, // object cache
-                            store,
-                            true, // replace values
-                            true // remove trailing empty string
+                            null // ignorable features
                         );
                     }
                     else {
-                        String qualifiedClassName = ObjectHolder_2Facade.getObjectClass(entry);
+                        String qualifiedClassName = Object_2Facade.getObjectClass(entry);
                         String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
                         RefObject_1_0 newEntry = (RefObject_1_0)((org.openmdx.base.jmi1.Authority)store.getObjectById(
                             Authority.class,
@@ -290,9 +302,7 @@ public class CodesLoader
                             entry,
                             newEntry,
                             loadedObjects, // object cache
-                            store,
-                            true, // replace values
-                            true // remove trailing empty string
+                            null // ignorable features
                         );
                         Path parentIdentity = entryPath.getParent().getParent();
                         RefObject_1_0 parent = null;
@@ -321,14 +331,15 @@ public class CodesLoader
                   }
                   catch(Exception e) {
                     new ServiceException(e).log();
-                    System.out.println("STATUS: " + e.getMessage() + " (for more info see log)");
+                    System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                   }
                 }
                 store.currentTransaction().commit();
                 if(!hasNewObjects) break;
             }
         }
-        System.out.println("Done");
+        SysLog.info("Done");
+        System.out.println(messagePrefix + "Done");
     }
 
     //-------------------------------------------------------------------------

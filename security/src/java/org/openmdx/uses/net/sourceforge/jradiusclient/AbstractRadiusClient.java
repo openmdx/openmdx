@@ -1,14 +1,14 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractRadiusClient.java,v 1.1 2009/03/31 17:32:00 hburger Exp $
+ * Project:     openMDX/Security, http://www.openmdx.org/
+ * Name:        $Id: AbstractRadiusClient.java,v 1.2 2010/03/11 18:50:58 hburger Exp $
  * Description: Abstract Java Radius Client
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:32:00 $
+ * Date:        $Date: 2010/03/11 18:50:58 $
  * ====================================================================
  *
- * Copyright (C) 2007  OMEX AG
+ * Copyright (C) 2007-2010  OMEX AG
  *
  * * This library is free software; you can redistribute it and/or
  *   modify it under the terms of the GNU Lesser General Public
@@ -54,26 +54,41 @@
  */
 package org.openmdx.uses.net.sourceforge.jradiusclient;
 
+import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.openmdx.kernel.log.LoggerFactory;
 
 /**
  * Abstract Radius CLient
  */
 public class AbstractRadiusClient {
 
-        /**
+    /**
      * Constructor
      * 
      * @param logging
+     * @param trace
      */
     protected AbstractRadiusClient(
-        boolean logging
+        Logger logger,
+        boolean trace
     ){
-        this.logger = logging ? LoggerFactory.getLogger() : null;
+        this.logger = logger;
+        this.trace = trace;
+        synchronized(AbstractRadiusClient.class) {
+            this.id = valueOf(AbstractRadiusClient.nextId++);
+        }
     }
+
+    /**
+     * The instance id
+     */
+    private final Integer id;
+
+    /**
+     * The next instance id
+     */
+    private static int nextId;
 
     /**
      * 
@@ -81,61 +96,188 @@ public class AbstractRadiusClient {
     private final Logger logger;
 
     /**
+     * 
+     */
+    private final boolean trace;
+
+    /**
      * Log at warn level
      * 
      * @param format
      * @param id
-     * @param argument1
      * @param argument2
+     * @param argument3
      */
     protected final void logWarning(
         String format,
         byte id,
-        Object argument1,
-        Object argument2
+        Object argument2,
+        Object argument3
     ){
-        if(this.logger != null) this.logger.log(
-        	Level.WARNING,
-            format,
-            new Object[]{Byte.valueOf(id),argument1,argument2}
-		);
+        if(this.logger.isLoggable(Level.WARNING)) {
+         this.logger.warning(
+             MessageFormat.format(
+                    format,
+                 new Object[]{
+                     this.id,
+                     valueOf(id),
+                     argument2,
+                     argument3
+                 }
+             )
+         );
+        }
     }
 
     /**
-     * Log at debug  level
+     * Log at debug level
      * 
      * @param format
      * @param id
-     * @param argument1
+     * @param argument2
      */
     protected final void logDebug(
         String format,
         int id,
-        Object argument1
+        Object argument2
     ){
-        if(this.logger != null) this.logger.log(
-        	Level.FINER,
-            format,
-            new Object[]{Integer.valueOf(id),argument1}
-        );
+        if(
+            this.trace &&
+            this.logger.isLoggable(Level.FINE)
+        ){
+         this.logger.fine(
+                MessageFormat.format(
+                    format,
+                    new Object[]{
+                        this.id,
+                        valueOf(id),
+                        argument2
+                    }
+                )
+            );
+        }
     }
 
     /**
      * Log at debug  level
      * 
      * @param format
-     * @param id
      * @param argument1
      */
     protected final void logDebug(
         String format,
         Object argument1
     ){
-            if(this.logger != null) this.logger.log(
-            	Level.FINER,
-                format,
-                argument1
-        );
+        if(
+         this.trace &&
+         this.logger.isLoggable(Level.FINE)
+         ){
+         this.logger.fine(
+                MessageFormat.format(
+                    format,
+                    new Object[]{
+                        this.id,
+                        argument1
+                    }
+                )
+            );
+        }
+    }
+
+    /**
+     * Log at info level
+     * 
+     * @param format
+     */
+    protected final void logInfo(
+        String format
+    ){
+        if(this.logger.isLoggable(Level.INFO)){
+         this.logger.info(
+                MessageFormat.format(
+                   format,
+                   new Object[]{
+                       this.id
+                   }
+                )
+            );
+        }
+    }
+
+    /**
+     * Log at warn level
+     * 
+     * @param message
+     */
+    protected final void logWarning(
+        String format,
+        Object argument1
+    ){
+        if(this.logger.isLoggable(Level.WARNING)){
+         this.logger.warning(
+                MessageFormat.format(
+                   format,
+                   new Object[]{
+                       this.id,
+                       argument1
+                   }
+                )
+            );
+        }
+    }
+
+    /**
+     * Log at severe level
+     * 
+     * @param message
+     */
+    protected final void logSevere(
+        String format
+    ){
+        if(this.logger.isLoggable(Level.SEVERE)){
+         this.logger.severe(
+                MessageFormat.format(
+                   format,
+                   new Object[]{
+                       this.id,
+                   }
+                )
+            );
+        }
+    }
+
+    /**
+     * Convert a number value to a number object
+     * 
+     * @param value the byte value 
+     * 
+     * @return the Byte object
+     */
+    protected final static Byte valueOf(
+        byte value
+    ){
+
+        return Byte.valueOf(value);
+
+
+
+    }
+
+    /**
+     * Convert a number value to a number object
+     * 
+     * @param value the integer value 
+     * 
+     * @return the Integer object
+     */
+    protected final static Integer valueOf(
+        int value
+    ){
+
+        return Integer.valueOf(value);
+
+
+
     }
 
 }

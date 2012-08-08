@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: JavaBeans.java,v 1.6 2009/06/01 15:44:23 wfro Exp $
+ * Name:        $Id: JavaBeans.java,v 1.14 2010/01/21 17:36:09 hburger Exp $
  * Description: Java Beans 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/01 15:44:23 $
+ * Date:        $Date: 2010/01/21 17:36:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,18 +58,24 @@ import java.beans.Expression;
 import java.beans.PersistenceDelegate;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.io.StringInputStream;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.ImmutableDate;
+import org.w3c.cci2.ImmutableDateTime;
+import org.w3c.format.DateTimeFormat;
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
 
 /**
@@ -114,10 +120,13 @@ public class JavaBeans {
 
     private static class BigDecimalPersistenceDelegate extends DefaultPersistenceDelegate {
 
-        public BigDecimalPersistenceDelegate(
-        ) {            
+        /**
+         * Constructor 
+         */
+        public BigDecimalPersistenceDelegate() {
+            super();
         }
-        
+
         @Override
         protected boolean mutatesTo(
             Object oldInstance, 
@@ -143,10 +152,13 @@ public class JavaBeans {
     
     private static class PathPersistenceDelegate extends DefaultPersistenceDelegate {
 
-        public PathPersistenceDelegate(
-        ) {            
+        /**
+         * Constructor 
+         */
+        public PathPersistenceDelegate() {
+            super();
         }
-        
+
         @Override
         protected boolean mutatesTo(
             Object oldInstance, 
@@ -169,18 +181,23 @@ public class JavaBeans {
         }
     }
 
-    private static class XMLGregorianCalendarPersistenceDelegate extends DefaultPersistenceDelegate {
+    private static class ImmutableDatePersistenceDelegate extends DefaultPersistenceDelegate {
 
-        public XMLGregorianCalendarPersistenceDelegate(
-        ) {            
+        /**
+         * Constructor 
+         */
+        public ImmutableDatePersistenceDelegate() {
+            super();
         }
-        
+
         @Override
         protected boolean mutatesTo(
             Object oldInstance, 
             Object newInstance
         ) {
-            return oldInstance.equals(newInstance);
+            return newInstance != null && ( 
+                oldInstance.getClass() == newInstance.getClass() ? oldInstance.equals(newInstance) : oldInstance.toString().equals(newInstance.toString())
+            );
         }
 
         @Override
@@ -192,7 +209,38 @@ public class JavaBeans {
                 oldInstance,
                 Datatypes.class,
                 "create", 
-                new Object[]{((XMLGregorianCalendar)oldInstance).toXMLFormat()}
+                new Object[]{XMLGregorianCalendar.class,oldInstance.toString()}
+            );
+        }
+    }    
+
+    private static class DurationPersistenceDelegate extends DefaultPersistenceDelegate {
+
+        /**
+         * Constructor 
+         */
+        public DurationPersistenceDelegate() {
+            super();
+        }
+
+        @Override
+        protected boolean mutatesTo(
+            Object oldInstance, 
+            Object newInstance
+        ) {
+            return newInstance != null && oldInstance.equals(newInstance);
+        }
+
+        @Override
+        protected Expression instantiate(
+            Object oldInstance, 
+            Encoder out
+        ) {
+            return new Expression(
+                oldInstance,
+                Datatypes.class,
+                "create", 
+                new Object[]{Duration.class,((Duration)oldInstance).toString()}
             );
         }
     }    
@@ -218,9 +266,40 @@ public class JavaBeans {
         ) {
             return new Expression(
                 oldInstance,
-                Datatypes.class,
+                Date.class,
                 "new", 
                 new Object[]{((Date)oldInstance).getTime()}
+            );
+        }
+    }    
+    
+    private static class DateTimePersistenceDelegate extends DefaultPersistenceDelegate {
+
+        public DateTimePersistenceDelegate(
+        ) {            
+        }
+        
+        @Override
+        protected boolean mutatesTo(
+            Object oldInstance, 
+            Object newInstance
+        ) {
+            return newInstance != null && oldInstance.equals(newInstance);
+        }
+
+        @Override
+        protected Expression instantiate(
+            Object oldInstance, 
+            Encoder out
+        ) {
+            return new Expression(
+                oldInstance,
+                Datatypes.class,
+                "create", 
+                new Object[]{
+                    Date.class, 
+                    DateTimeFormat.BASIC_UTC_FORMAT.format((Date)oldInstance)
+                }
             );
         }
     }    
@@ -254,8 +333,20 @@ public class JavaBeans {
             datePersistenceDelegate
         );
         encoder.setPersistenceDelegate(
-            XMLGregorianCalendar.class, 
-            xmlGregorianCalendarPersistenceDelegate
+            xmlGregorianCalendarClass, 
+            immutableDatePersistenceDelegate
+        );
+        encoder.setPersistenceDelegate(
+            ImmutableDate.class, 
+            immutableDatePersistenceDelegate
+        );
+        encoder.setPersistenceDelegate(
+            ImmutableDateTime.class, 
+            dateTimePersistenceDelegate
+        );
+        encoder.setPersistenceDelegate(
+            Duration.class, 
+            durationPersistenceDelegate
         );
         try {
             encoder.writeObject(javaBean);
@@ -288,31 +379,25 @@ public class JavaBeans {
     public static Object fromXML(
         CharSequence xmlEncodedJavaBean
     ){
-        try {
-            if(xmlEncodedJavaBean == null) return null;
-            XMLDecoder decoder = new XMLDecoder(
-                new ByteArrayInputStream(
-                    xmlEncodedJavaBean.toString().getBytes("UTF-8")
-                )
-            );
-            decoder.setExceptionListener(
-                new JavaBeanExceptionListener(xmlEncodedJavaBean)
-            );
-            return decoder.readObject();
-        } 
-        catch (UnsupportedEncodingException exception) {
-            throw new RuntimeServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "UTF-8 is expected to be supported"
-            );
-        }
+        if(xmlEncodedJavaBean == null) return null;
+        XMLDecoder decoder = new XMLDecoder(
+        	new StringInputStream(
+        		xmlEncodedJavaBean.toString(),
+        		"UTF-8"
+        	)
+        );
+        decoder.setExceptionListener(
+            new JavaBeanExceptionListener(xmlEncodedJavaBean)
+        );
+        return decoder.readObject();
     }
 
     private static PersistenceDelegate bigDecimalPersistenceDelegate = new BigDecimalPersistenceDelegate();
     private static PersistenceDelegate pathPersistenceDelegate = new PathPersistenceDelegate();
     private static PersistenceDelegate datePersistenceDelegate = new DatePersistenceDelegate();
-    private static PersistenceDelegate xmlGregorianCalendarPersistenceDelegate = new XMLGregorianCalendarPersistenceDelegate();
+    private static PersistenceDelegate dateTimePersistenceDelegate = new DateTimePersistenceDelegate();
+    private static PersistenceDelegate durationPersistenceDelegate = new DurationPersistenceDelegate();
+    private static PersistenceDelegate immutableDatePersistenceDelegate = new ImmutableDatePersistenceDelegate();
+    private static Class<? extends XMLGregorianCalendar> xmlGregorianCalendarClass = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED).getClass();
     
 }

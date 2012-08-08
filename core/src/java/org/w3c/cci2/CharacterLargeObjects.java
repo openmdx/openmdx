@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CharacterLargeObjects.java,v 1.11 2009/05/26 14:00:11 wfro Exp $
+ * Name:        $Id: CharacterLargeObjects.java,v 1.15 2010/02/10 16:05:15 hburger Exp $
  * Description: Object Relational Mapping 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:00:11 $
+ * Date:        $Date: 2010/02/10 16:05:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,7 +51,6 @@
 package org.w3c.cci2;
 
 import java.io.CharArrayReader;
-import java.io.CharArrayWriter;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,7 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.Serializable;
+import java.io.StringReader;
 import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
@@ -70,18 +69,199 @@ import java.net.URLConnection;
 public class CharacterLargeObjects {
 
     /**
-     * To avoid instantiation
+     * Constructor
      */
-    protected CharacterLargeObjects() {
-        super();
+    private CharacterLargeObjects() {
+        // To avoid instantiation
     }
 
+    /**
+     * Default capacity for stream copy
+     */
+    private final static int CAPACITY = 10000;
+
+    /**
+     * Create a <code>CharacterLargeObject</code> facade for the given string
+     * 
+     * @param source
+     * 
+     * @return a <code>CharacterLargeObject</code> facade for the given string
+     */
+    public static CharacterLargeObject valueOf(
+        String source
+    ){
+        return new StringLargeObject(source);
+    }
+
+    /**
+     * Create a <code>CharacterLargeObject</code> facade for the given byte array
+     * 
+     * @param source
+     * 
+     * @return a <code>CharacterLargeObject</code> facade for the given byte array
+     */
     public static CharacterLargeObject valueOf(
         char[] source
     ){
         return new ArrayLargeObject(source);
     }
-           
+
+    /**
+     * Create a <code>CharacterLargeObject</code> facade for the given URL
+     * 
+     * @param source
+     * 
+     * @return a <code>CharacterLargeObject</code> facade for the given URL
+     */
+    public static CharacterLargeObject valueOf(
+        URL source
+    ){
+        return new URLLargeObject(source);
+    }
+    
+    /**
+     * Create a <code>CharacterLargeObject</code> facade for the given file
+     * 
+     * @param source
+     * 
+     * @return a <code>CharacterLargeObject</code> facade for the given file
+     */
+    public static CharacterLargeObject valueOf(
+        File source
+    ){
+        return new FileLargeObject(source);
+    }
+    
+    /**
+     * Create a <code>CharacterLargeObject</code> facade for the given stream
+     * 
+     * @param source
+     * 
+     * @return a <code>CharacterLargeObject</code> facade for the given stream
+     */
+    public static CharacterLargeObject valueOf(
+        Reader source
+    ){
+        return new StreamLargeObject(source);
+    }
+    
+    /**
+     * Create a <code>CharacterLargeObject</code> facade for the given stream
+     * 
+     * @param source
+     * @param length
+     * 
+     * @return a <code>CharacterLargeObject</code> facade for the given stream
+     */
+    public static CharacterLargeObject valueOf(
+        Reader source,
+        Long length
+    ){
+        return new StreamLargeObject(source, length);
+    }
+    
+    /**
+     * A negative length is converted to <code>null</code>.
+     * 
+     * @param length
+     * 
+     * @return the length as object
+     */
+    public static Long asLength(
+        long length
+    ){
+        return length < 0 ? null : Long.valueOf(length);
+    }
+
+    /**
+     * Copy a reader's content to a writer
+     * @param source
+     * @param position
+     * @param target
+     * 
+     * @return the number of character's written to the writer
+     * 
+     * @throws IOException
+     */
+    public static long streamCopy(
+        Reader source,
+        long position,
+        Writer target
+    ) throws IOException {
+        char[] buffer = new char[CAPACITY];
+        if(position != 0l) {
+            source.skip(position);
+        }
+        long count = 0l;
+        for(
+            int i = source.read(buffer);
+            i >= 0;
+        ){
+            count += i;
+            target.write(buffer, 0, i);
+        }
+        return count;
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Class StringLargeObject
+    //------------------------------------------------------------------------
+    
+    /**
+     * String  CLOB
+     */
+    private static class StringLargeObject implements CharacterLargeObject {
+
+        /**
+         * Constructor 
+         *
+         * @param value
+         */
+        StringLargeObject(
+            String value
+        ) {
+            this.value = value;
+        }
+
+        /**
+         * 
+         */
+        final String value;
+        
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.CharacterLargeObject#getContent()
+         */
+        public Reader getContent(
+        ) throws IOException {
+            return new StringReader(this.value);
+        }
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
+         */
+        public void getContent(
+            Writer writer, 
+            long position
+        ) throws IOException {
+            writer.write(this.value, (int)position, this.value.length() - (int)position);
+        }
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.LargeObject#getLength()
+         */
+        public Long getLength(
+        ) throws IOException {
+            return Long.valueOf(this.value.length());
+        }
+        
+    }
+    
+
+    //------------------------------------------------------------------------
+    // Class ArrayLargeObject
+    //------------------------------------------------------------------------
+    
     /**
      * Array CLOB
      */
@@ -133,11 +313,10 @@ public class CharacterLargeObjects {
 
     }
     
-    public static CharacterLargeObject valueOf(
-        URL source
-    ){
-        return new URLLargeObject(source);
-    }
+
+    //------------------------------------------------------------------------
+    // Class URLLargeObject
+    //------------------------------------------------------------------------
     
     /**
      * URL CLOB
@@ -220,32 +399,11 @@ public class CharacterLargeObjects {
         
     }
 
+
     //------------------------------------------------------------------------
-    private static class CharacterSource_1Reader extends CharacterStringReader {
-        /**
-         * Constructor 
-         *
-         * @param chars
-         */
-        public CharacterSource_1Reader(
-            CharacterString chars
-        ) {
-            super(chars);
-        }
+    // Class FileLargeObject
+    //------------------------------------------------------------------------
 
-        public long length(
-        ) {
-            return getString().length();
-        }
-
-    }
-    
-    public static CharacterLargeObject valueOf(
-        File source
-    ){
-        return new FileLargeObject(source);
-    }
-    
     /**
      * File CLOB
      */
@@ -305,99 +463,98 @@ public class CharacterLargeObjects {
 
     }
 
+
     //------------------------------------------------------------------------
-    public static class CharacterHolder implements Serializable  {
-    
+    // Class StreamLargeObject
+    //------------------------------------------------------------------------
+
+   /**
+     * The underlying stream may be retrieved once only
+     */
+    public static class StreamLargeObject implements CharacterLargeObject {
+        
         /**
          * Constructor 
          *
-         * @param reader
+         * @param stream
+         */
+        public StreamLargeObject(
+            final Reader stream
+        ){
+            this(stream, null);
+        }
+        
+        /**
+         * Constructor 
+         *
+         * @param stream
+         */
+        StreamLargeObject(
+            final Reader stream,
+            Long length
+        ){
+            this.stream = stream;
+            this.length = length;
+        }
+        
+        /**
+         * 
+         */
+        private Reader stream;
+
+        /**
+         * 
+         */
+        private Long length;
+
+        /**
+         * Provide the input stream content
+         * 
+         * @return the content
          * 
          * @throws IOException
          */
-        public CharacterHolder(
-            Reader reader
+        protected Reader newContent(
         ) throws IOException {
-            if(reader instanceof CharacterStringReader) {
-                this.string = ((CharacterStringReader)reader).getString();
+            throw new IllegalStateException("The content may be retrieved once only");
+        }
+        
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.BinaryLargeObject#getContent()
+         */
+        public Reader getContent(
+        ) throws IOException {
+            if(this.stream == null) {
+                return newContent();
             } else {
-                CharArrayWriter out = new CharArrayWriter();
-                int c;
-                while((c = reader.read()) != -1) {
-                    out.write(c);
-                }
-                this.string = new CharacterString(out.toCharArray());
+                Reader stream = this.stream;
+                this.stream = null;
+                return stream;
             }
         }
-    
-        /**
-         * Implements <code>Serializable</code>
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
          */
-        private static final long serialVersionUID = -1526645671101459098L;
-    
-        /**
-         * The content
+        public void getContent(
+            Writer stream, 
+            long position
+        ) throws IOException {
+            this.length = position + streamCopy(
+                getContent(),
+                position,
+                stream
+            );
+        }
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.LargeObject#getLength()
          */
-        private final CharacterString string;
+        public Long getLength(
+        ) throws IOException {
+            return this.length;
+        }
+        
+    }
     
-        /**
-         * Create an input stream
-         * 
-         * @return a newly created input stream
-         */
-        public CharacterSource_1Reader toStream(
-        ){
-            return new CharacterSource_1Reader(this.string);
-        }
-    
-    }
-
-    /**
-     * A negative length is converted to <code>null</code>.
-     * 
-     * @param length
-     * 
-     * @return the length as object
-     */
-    public static Long asLength(
-        long length
-    ){
-        return length < 0 ? null : Long.valueOf(length);
-    }
-
-    /**
-     * Copy a reader's content to a writer
-     * @param source
-     * @param position
-     * @param target
-     * 
-     * @return the number of character's written to the writer
-     * 
-     * @throws IOException
-     */
-    public static long streamCopy(
-        Reader source,
-        long position,
-        Writer target
-    ) throws IOException {
-        char[] buffer = new char[CAPACITY];
-        if(position != 0l) {
-            source.skip(position);
-        }
-        long count = 0l;
-        for(
-            int i = source.read(buffer);
-            i >= 0;
-        ){
-            count += i;
-            target.write(buffer, 0, i);
-        }
-        return count;
-    }
-
-    /**
-     * Default capacity for stream copy
-     */
-    private final static int CAPACITY = 10000;
-
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection_2_0Local.java,v 1.4 2009/05/20 15:12:55 hburger Exp $
+ * Name:        $Id: Connection_2_0Local.java,v 1.7 2009/10/01 16:12:01 hburger Exp $
  * Description: Connection 2.0 Local Interface
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/20 15:12:55 $
+ * Date:        $Date: 2009/10/01 16:12:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,14 +51,48 @@
 package org.openmdx.application.rest.ejb;
 
 import javax.ejb.EJBLocalObject;
-
-import org.openmdx.base.rest.spi.RestConnection;
+import javax.resource.NotSupportedException;
+import javax.resource.ResourceException;
+import javax.resource.cci.InteractionSpec;
+import javax.resource.cci.Record;
 
 /**
  * Connection 2.0 Local Interface
  */
-public interface Connection_2_0Local 
-    extends RestConnection, EJBLocalObject 
-{
-    // All methods are declared in its sub-classes.
+public interface Connection_2_0Local extends EJBLocalObject {
+
+    /** 
+     * Allows the execution of an interaction represented by the 
+     * <code>InteractionSpec</code>.
+     * This invocation takes an input <code>Record</code> and returns an  
+     * output <code>Record</code> if the execution of the Interaction has been
+     * successful.
+     *  
+     * @param   ispec   InteractionSpec representing a target EIS 
+     *                  data/function module   
+     * @param   input   Input Record
+     *
+     * @return  output Record if execution of the EIS function has been 
+     *          successful; null otherwise
+     *
+     * @throws  ResourceException   Exception if execute operation
+     *                              fails. Examples of error cases
+     *                              are:
+     *         <UL>
+     *           <LI> Resource adapter internal, EIS-specific or 
+     *                communication error 
+     *           <LI> Invalid specification of an InteractionSpec 
+     *                or input record structure
+     *           <LI> Errors in use of input Record or creation
+     *                of an output Record
+     *           <LI> Invalid connection associated with this 
+     *                Interaction
+     *         </UL>
+     * @throws NotSupportedException Operation not supported 
+     */
+    Record execute(
+        InteractionSpec ispec, 
+        Record input
+    ) throws ResourceException;
+
 }

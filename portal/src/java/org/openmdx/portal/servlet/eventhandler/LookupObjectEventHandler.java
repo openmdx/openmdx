@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LookupObjectEventHandler.java,v 1.19 2009/03/08 18:03:21 wfro Exp $
+ * Name:        $Id: LookupObjectEventHandler.java,v 1.24 2010/03/28 00:49:53 wfro Exp $
  * Description: LookupObjectEventHandler 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:21 $
+ * Date:        $Date: 2010/03/28 00:49:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,15 +63,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.PaintScope;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.ObjectView;
@@ -93,7 +92,6 @@ public class LookupObjectEventHandler {
     ) throws IOException, ServletException {
 
         ObjectView nextView = null;
-        PaintScope nextPaintMode = PaintScope.FULL;
         if(view instanceof ShowObjectView) {
             ShowObjectView currentView = (ShowObjectView)view;
             
@@ -104,11 +102,13 @@ public class LookupObjectEventHandler {
                     try {
                         referenceName = Action.getParameter(parameter, Action.PARAMETER_REFERENCE);
                         String id = Action.getParameter(parameter, Action.PARAMETER_ID);
-                        AppLog.detail("find object", Action.PARAMETER_REFERENCE + "=" + referenceName + "; " + Action.PARAMETER_ID + "=" + id);
+                        SysLog.detail("find object", Action.PARAMETER_REFERENCE + "=" + referenceName + "; " + Action.PARAMETER_ID + "=" + id);
                         RefPackage_1_0 rootPkg = (RefPackage_1_0) currentView.getRefObject().refOutermostPackage();
                         Model_1_0 model = rootPkg.refModel();
-                        ModelElement_1_0 reference = model.getElement(referenceName);
-                        ModelElement_1_0 lookupType = model.getElement(reference.objGetValue("type"));
+                        ModelElement_1_0 element = model.getElement(referenceName);
+                        ModelElement_1_0 lookupType = model.isClassType(element) ? 
+                        	element : 
+                        		model.getElement(element.objGetValue("type"));
                         Object[] parameterValues = (Object[]) parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
                         String filterValues = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);
                         nextView = application.getPortalExtension().getLookupView(
@@ -135,11 +135,9 @@ public class LookupObjectEventHandler {
         }
         
         else if(view instanceof EditObjectView) {
-
-            EditObjectView currentView = (EditObjectView)view;
-            PersistenceManager pm = currentView.getPersistenceManager();
-            
+            EditObjectView currentView = (EditObjectView)view;           
             switch(event) {
+            	
               case Action.EVENT_FIND_OBJECT:
                 ModelElement_1_0 lookupType = null;
                 try {
@@ -162,11 +160,12 @@ public class LookupObjectEventHandler {
                   String id = Action.getParameter(parameter, Action.PARAMETER_ID);
                   
                   // start lookup navigation either on parent or object itself
-                  RefObject_1_0 startWith = currentView.getParentObject() == null
-                      ? currentView.getEditObjectIdentity() == null 
-                          ? currentView.getRefObject() 
-                          : (RefObject_1_0)pm.getObjectById(currentView.getEditObjectIdentity())
-                      : currentView.getParentObject();
+                  PersistenceManager pm = application.getNewPmData();
+                  RefObject_1_0 startWith = currentView.getParentObject() != null ? 
+                      (RefObject_1_0)pm.getObjectById(currentView.getParentObject().refGetPath()) :
+                    	  currentView.getEditObjectIdentity() != null ?
+                        	  (RefObject_1_0)pm.getObjectById(currentView.getEditObjectIdentity()) :
+                        		  (RefObject_1_0)pm.getObjectById(currentView.getRefObject().refGetPath()); 
                   Object[] parameterValues = (Object[]) parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
                   String filterValues = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);                  
                   nextView = application.getPortalExtension().getLookupView(
@@ -195,8 +194,7 @@ public class LookupObjectEventHandler {
             }            
         }
         return new HandleEventResult(
-            nextView,
-            nextPaintMode
+            nextView
         );
     }
 

@@ -3,11 +3,11 @@
  *
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: build.xml,v 1.105 2009/04/01 08:36:20 hburger Exp $
+ * Name:        $Id: build.xml,v 1.106 2010/01/11 13:54:52 wfro Exp $
  * Description: Ant master build file for openMDX
- * Revision:    $Revision: 1.105 $
+ * Revision:    $Revision: 1.106 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/01 08:36:20 $
+ * Date:        $Date: 2010/01/11 13:54:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -47,18 +47,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * 
 -->
-<project name="openmdx" default="-projecthelp">
+<project 
+  name="openmdx" 
+  default="-projecthelp" 
+>
 	<description>Builds the openMDX projects</description>
 	
-	<target name="all" depends="-all,prolog,platforms,extensions,plugins,examples,documentation,epilog" description="Cleans, builds and makes distributions for all projects"/>	
-	<target name="generate" depends="-generate,platforms,extensions,plugins,examples" description="Generates the projects for their default platform"/>	
-	<target name="prolog" depends="-ant" description="Create the Ant environment"/>	
-	<target name="platforms" depends="-core,-weblogic,-tomcat,-jboss,-test-core" description="Create the JRE and application server platforms"/>
-	<target name="extensions" depends="-security,-document" description="Create the security and document extensions"/>
-	<target name="plugins" depends="-poseidon,-together" description="Create the model tool plugins"/>
-	<target name="examples" depends="-example-lab,-example-petstore" description="Create the lab and pestore examples"/>
-	<target name="documentation" depends="-doc" description="Create the openMDX documentation"/>
-	<target name="epilog" depends="-installer" description="Create the openMDX installer"/>
+	<target name="all" depends="-all,-ant,-core,-security,-portal,-ejb,-openejb,-test-core" description="Cleans, builds and makes distributions for all projects"/>	
 	
 	<!-- ******************************************************************* -->
 	<!-- * -projecthelp -->
@@ -87,41 +82,23 @@
 		<condition property="include.core">
 			<available file="build.xml" filepath="core"/>
 		</condition>
-		<condition property="include.doc">
-			<available file="build.xml" filepath="doc"/>
-		</condition>
-		<condition property="include.document">
-			<available file="build.xml" filepath="document"/>
-		</condition>
-		<condition property="include.example-lab">
-			<available file="build.xml" filepath="example-lab"/>
-		</condition>
-		<condition property="include.example-petstore">
-			<available file="build.xml" filepath="example-petstore"/>
-		</condition>
-		<condition property="include.poseidon">
-			<available file="build.xml" filepath="poseidon"/>
-		</condition>
 		<condition property="include.security">
 			<available file="build.xml" filepath="security"/>
+		</condition>
+		<condition property="include.portal">
+			<available file="build.xml" filepath="portal"/>
+		</condition>
+		<condition property="include.ejb">
+			<available file="build.xml" filepath="ejb"/>
+		</condition>
+		<condition property="include.openejb">
+			<available file="build.xml" filepath="openejb"/>
 		</condition>
 		<condition property="include.test-core">
 			<available file="build.xml" filepath="test-core"/>
 		</condition>
-		<condition property="include.together">
-			<available file="build.xml" filepath="together"/>
-		</condition>
-		<condition property="include.tomcat">
-			<available file="build.xml" filepath="tomcat"/>
-		</condition>
-		<condition property="include.jboss">
-			<available file="build.xml" filepath="jboss"/>
-		</condition>
-		<condition property="include.weblogic">
-			<available file="build.xml" filepath="weblogic"/>
-		</condition>
-		<condition property="include.installer">
-			<available file="build.xml" filepath="installer"/>
+		<condition property="include.test-security">
+			<available file="build.xml" filepath="test-security"/>
 		</condition>
 	</target>
 	
@@ -134,44 +111,28 @@
 	<target name="-core" depends="-init" if="include.core">
 		<ant inheritAll="false" dir="core" target="${ant.target}"/>
 	</target>
-	<target name="-doc" depends="-init" if="include.doc">
-		<ant inheritAll="false" dir="doc" target="${ant.target}"/>
-	</target>
-	<target name="-document" depends="-init" if="include.document">
-		<ant inheritAll="false" dir="document" target="${ant.target}"/>
-	</target>
-	<target name="-example-lab" depends="-init" if="include.example-lab">
-		<ant inheritAll="false" dir="example-lab" target="${ant.target}"/>
-	</target>
-	<target name="-example-petstore" depends="-init" if="include.example-petstore">
-		<ant inheritAll="false" dir="example-petstore" target="${ant.target}"/>
-	</target>
-	<target name="-installer" depends="-init" if="include.installer">
-		<ant inheritAll="false" dir="installer" target="${ant.target}"/>
-	</target>
-	<target name="-poseidon" depends="-init" if="include.poseidon">
-		<ant inheritAll="false" dir="poseidon" target="${ant.target}"/>
-	</target>
 	<target name="-security" depends="-init" if="include.security">
 		<ant inheritAll="false" dir="security" target="${ant.target}"/>
+	</target>
+	<target name="-portal" depends="-init" if="include.portal">
+		<ant inheritAll="false" dir="portal" target="${ant.target}"/>
+	</target>
+	<target name="-ejb" depends="-init" if="include.ejb">
+		<ant inheritAll="false" dir="ejb" target="${ant.target}"/>
+	</target>
+	<target name="-openejb" depends="-init" if="include.openejb">
+		<ant inheritAll="false" dir="openejb" target="${ant.target}"/>
 	</target>
 	<target name="-test-core" depends="-init" if="include.test-core">
 		<ant inheritAll="false" dir="test-core">
 			<target name="clean"/>
 			<target name="distribution"/>		
 		</ant>
-	</target>
-	<target name="-together" depends="-init" if="include.together">
-		<ant inheritAll="false" dir="together" target="${ant.target}"/>
-	</target>
-	<target name="-tomcat" depends="-init" if="include.tomcat">
-		<ant inheritAll="false" dir="tomcat" target="${ant.target}"/>
-	</target>
-	<target name="-jboss" depends="-init" if="include.jboss">
-		<ant inheritAll="false" dir="jboss" target="${ant.target}"/>
-	</target>
-	<target name="-weblogic" depends="-init" if="include.weblogic">
-		<ant inheritAll="false" dir="weblogic" target="${ant.target}"/>
-	</target>
-    
+	</target>    
+	<target name="-test-security" depends="-init" if="include.test-security">
+		<ant inheritAll="false" dir="test-security">
+			<target name="clean"/>
+			<target name="distribution"/>		
+		</ant>
+	</target>    
 </project>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SingletonMappedRecord.java,v 1.2 2009/05/07 14:30:50 hburger Exp $
+ * Name:        $Id: SingletonMappedRecord.java,v 1.3 2009/09/17 13:17:12 hburger Exp $
  * Description: SingletonMappedRecord 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/07 14:30:50 $
+ * Date:        $Date: 2009/09/17 13:17:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -148,6 +148,22 @@ final class SingletonMappedRecord
                 
             }
         ) : this.entries;
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.AbstractMap#isEmpty()
+     */
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.AbstractMap#size()
+     */
+    @Override
+    public int size() {
+        return 1;
     }
 
     /* (non-Javadoc)

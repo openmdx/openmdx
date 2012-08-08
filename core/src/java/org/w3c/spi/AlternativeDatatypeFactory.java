@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AlternativeDatatypeFactory.java,v 1.7 2009/05/25 14:24:33 hburger Exp $
+ * Name:        $Id: AlternativeDatatypeFactory.java,v 1.17 2010/02/16 18:40:42 hburger Exp $
  * Description: Immutable Datatype Factory
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/25 14:24:33 $
+ * Date:        $Date: 2010/02/16 18:40:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,15 +53,15 @@ package org.w3c.spi;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
-import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.ImmutableDate;
+import org.w3c.cci2.ImmutableDateTime;
+import org.w3c.format.DateTimeFormat;
 
 /**
  * Alternative Datatype Factory
@@ -77,23 +77,19 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * Match YYYY[...]MMDD
      */
     private static final Pattern basicDatePattern = Pattern.compile("^\\d{8,}$");
-    
-    /**
-     * Removes '-' and ':', but must not be applied to negative signs!
-     */
-    private static final Pattern toBasicFormatPattern = Pattern.compile("[-:]");
-    
+
     private static final BigInteger MONTHS_PER_YEAR = BigInteger.valueOf(12);
     private static final BigDecimal SECONDS_PER_MINUTE = BigDecimal.valueOf(60);
     private static final BigInteger MINUTES_PER_HOUR = BigInteger.valueOf(60);
     private static final BigInteger HOURS_PER_DAY = BigInteger.valueOf(24);
+    
     
     //------------------------------------------------------------------------
     // Implements DatatypeFactory
     //------------------------------------------------------------------------
     
     /**
-     * Create a date-time instance
+     * Create an UTC based immutable date-time instance
      * 
      * @param value the basic or extended representation
      * 
@@ -105,8 +101,18 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
     public ImmutableDateTime newDateTime(
         String value
     ){
-        try {
-            return toDateTime(DateFormat.getInstance().parse(value));
+        if(value == null) {
+            return null;
+        } else try {
+            DateTimeFormat dateTimeFormat = DateTimeFormat.BASIC_UTC_FORMAT;
+            int firstMinus = value.indexOf('-');
+            if(firstMinus > 0) {
+                int timeSeparator = value.indexOf('T');
+                if(timeSeparator < 0 || firstMinus < timeSeparator) {
+                    dateTimeFormat = DateTimeFormat.EXTENDED_UTC_FORMAT;
+                }
+            }
+            return toDateTime(dateTimeFormat.parse(value));
         } catch (ParseException exception) {
         	throw BasicException.initHolder(
         		new IllegalArgumentException(
@@ -130,17 +136,25 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
      * @return a corresponding date-time instance
      * 
      * @exception IllegalArgumentException
-     * if the value can't be parse
+     * if the value can't be parsed
      */
     public ImmutableDate newDate(
         String value
     ){
         if(value == null) {
             return null;
-        } else if(basicDatePattern.matcher(value).matches()) {
+        } else try {
+            value = DateTimeFormat.completeCentury(value);
+        } catch (Exception exception) {
+            throw new IllegalArgumentException(
+                "Century completion failure",
+                exception
+            );
+        }
+        if(basicDatePattern.matcher(value).matches()) {
             return new ImmutableDate(value);
         } else if(extendedDatePattern.matcher(value).matches()) {
-            return new ImmutableDate(toBasicFormat(value));
+            return new ImmutableDate(value.replaceAll("-", ""));
         } else {
             throw BasicException.initHolder(
                 new IllegalArgumentException(
@@ -148,7 +162,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("pattern", "YYYY[...]-MM-DD", "YYYY[...]-MM-DD"),
+                        new BasicException.Parameter("pattern", "YYYY[...]-MM-DD"),
                         new BasicException.Parameter("value", value)
                     )
                 )
@@ -159,17 +173,26 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
     /**
      * Create a duration instance
      * 
-     * @param value the basic or extended representation
+     * @param value the representation with designators
      * 
-     * @return a corresponding date-time instance
+     * @return a corresponding Duration instance
      * 
      * @exception IllegalArgumentException
-     * if the value can't be parse
+     * if the value can't be parsed
      */
     public Duration newDuration(
         String value
     ){
-        return DatatypeFactories.xmlDatatypeFactory().newDuration(value);
+        if(value == null) {
+            return null;
+        } else {
+            boolean yearMonth = value.indexOf('Y') > 0 || value.indexOf('M') > 0;
+            boolean dayTime = value.indexOf('D') > 0 || value.indexOf('T') > 0;   
+            return 
+                yearMonth == dayTime ? DatatypeFactories.xmlDatatypeFactory().newDuration(value) :
+                yearMonth ? DatatypeFactories.xmlDatatypeFactory().newDurationYearMonth(value) :
+                DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value);
+        }
     }
 
     /**
@@ -186,7 +209,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
         java.util.Date value
     ){
         return 
-            value == null ? null :
+        value == null ? null :
             value instanceof ImmutableDateTime ? (ImmutableDateTime)value :
             new ImmutableDateTime(value.getTime());
     }
@@ -257,7 +280,7 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
         }
         return normalized ? value : DatatypeFactories.xmlDatatypeFactory().newDuration(
             value.getSign() > 0, 
-            years, // years 
+            years, 
             months, 
             days, 
             hours, 
@@ -266,92 +289,5 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
         );
     }
 
-    /**
-     * Return the value in basic format according to ISO8601:2000
-     * 
-     * @param datatype
-     * 
-     * @return a <code>String</code> representing the value in basic format
-     * 
-     * @exception IllegalArgumentException
-     * if the value's basic format can't be determined
-     */
-    public String toBasicFormat(
-        Object datatype
-    ){
-        if(datatype == null) {
-            return null;
-        } else if(datatype instanceof ImmutableDatatype) {
-            return ((ImmutableDatatype<?>)datatype).toBasicFormat();
-        } else if (datatype instanceof Date) {
-            return ImmutableDateTime.basicFormat.format((Date)datatype);
-        } else if (datatype instanceof Duration) {
-            return ((Duration)datatype).toString();
-        } else if (datatype instanceof XMLGregorianCalendar) {
-            return toBasicFormat(((XMLGregorianCalendar)datatype).toXMLFormat());
-        } else {
-            throw BasicException.initHolder(
-                new IllegalArgumentException(
-                    "Unsupported Argument Class",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.TRANSFORMATION_FAILURE,
-                        new BasicException.Parameter("class", datatype.getClass().getName()),
-                        new BasicException.Parameter("value", datatype.toString())
-                    )
-                )
-            );
-        }
-    }
-
-    /**
-     * Remove '-' and ':' except for signs
-     * 
-     * @param extendedFormat value in extended format
-     * 
-     * @return value in basic format
-     */
-    private static String toBasicFormat(
-        String extendedFormat
-    ){
-        return extendedFormat.startsWith("-") ? '-' + toBasicFormatPattern.matcher(
-            extendedFormat.subSequence(1, extendedFormat.length())
-        ).replaceAll(
-            ""
-        ) : toBasicFormatPattern.matcher(
-            extendedFormat
-        ).replaceAll(
-            ""
-        );
-    }
     
-    /* (non-Javadoc)
-     * @see org.w3c.spi.LenientDatatypeFactory#toExtendedFormat(java.lang.Object)
-     */
-    public String toExtendedFormat(Object datatype) {
-        if(datatype == null) {
-            return null;
-        } else if(datatype instanceof ImmutableDatatype<?>) {
-            return ((ImmutableDatatype<?>)datatype).toXMLFormat();
-        } else if (datatype instanceof Date) {
-            return ImmutableDateTime.extendedFormat.format((Date)datatype);
-        } else if (datatype instanceof Duration) {
-            return ((Duration)datatype).toString();
-        } else if (datatype instanceof XMLGregorianCalendar) {
-            return ((XMLGregorianCalendar)datatype).toXMLFormat();
-        } else {
-            throw BasicException.initHolder(
-                new IllegalArgumentException(
-                    "Unsupported Argument Class",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.TRANSFORMATION_FAILURE,
-                        new BasicException.Parameter("class", datatype.getClass().getName()),
-                        new BasicException.Parameter("value", datatype.toString())
-                    )
-                )
-            );
-        }
-    }
-
 }

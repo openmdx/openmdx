@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObject.jsp,v 1.9 2008/06/11 21:12:58 wfro Exp $
+ * Name:        $Id: EditObject.jsp,v 1.10 2009/11/30 13:58:23 wfro Exp $
  * Description: EditObject.jsp
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/11 21:12:58 $
+ * Date:        $Date: 2009/11/30 13:58:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,13 +56,19 @@
  */
 %><%@ page session="true" import="
 org.openmdx.portal.servlet.*,
-org.openmdx.portal.servlet.view.*
+org.openmdx.portal.servlet.view.*,
+org.openmdx.base.exception.*
 " %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <%
-	ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_EDIT);
-	EditObjectView view = (EditObjectView)viewsCache.getView(request.getParameter(Action.PARAMETER_REQUEST_ID));
-    ServletContext sc = getServletConfig().getServletContext();
-    RequestDispatcher rd = sc.getRequestDispatcher(view.getLayout(true));
-    rd.forward(request, response);      
+	try {
+		ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_EDIT);
+		EditObjectView view = (EditObjectView)viewsCache.getView(request.getParameter(Action.PARAMETER_REQUEST_ID));
+	    ServletContext sc = getServletConfig().getServletContext();
+	    RequestDispatcher rd = sc.getRequestDispatcher(view.getLayout(true));
+	    rd.forward(request, response);
+	}
+	catch(Exception e) {
+		new ServiceException(e).log();
+	}
 %>

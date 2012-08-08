@@ -1,3 +1,19 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -81,7 +97,7 @@
       </td>
       <td align="left" valign="top"><b><%= application.getServerInfo() %></b></td>
       <td align="right">
-        <a href="http://jakarta.apache.org/">
+        <a href="http://www.apache.org/">
 	  <img src="asf-logo-wide.gif" height="51" width="537" alt="The Apache Software Foundation"/>
 	</a>
        </td>
@@ -180,10 +196,9 @@
           <p>As you may have guessed by now, this is the default Tomcat home page. It can be found on the local filesystem at:</p>
           <p class="code">$CATALINA_HOME/webapps/ROOT/index.jsp</p>
 	  
-          <p>where "$CATALINA_HOME" is the root of the Tomcat installation directory. If you're seeing this page, and you don't think you should be, then either you're either a user who has arrived at new installation of Tomcat, or you're an administrator who hasn't got his/her setup quite right. Providing the latter is the case, please refer to the <a href="docs">Tomcat Documentation</a> for more detailed setup and administration information than is found in the INSTALL file.</p>
+          <p>where "$CATALINA_HOME" is the root of the Tomcat installation directory. If you're seeing this page, and you don't think you should be, then you're either a user who has arrived at new installation of Tomcat, or you're an administrator who hasn't got his/her setup quite right. Providing the latter is the case, please refer to the <a href="docs">Tomcat Documentation</a> for more detailed setup and administration information than is found in the INSTALL file.</p>
 
-            <p><b>NOTE: For security reasons, using the administration webapp
-            is restricted to users with role "admin". The manager webapp
+            <p><b>NOTE: For security reasons, using the manager webapp
             is restricted to users with role "manager".</b>
             Users are defined in <code>$CATALINA_HOME/conf/tomcat-users.xml</code>.</p>
 
@@ -201,7 +216,7 @@
             <p id="footer"><img src="tomcat-power.gif" width="77" height="80" alt="Powered by Tomcat"/><br/>
 	    &nbsp;
 
-	    Copyright &copy; 1999-2006 Apache Software Foundation<br/>
+	    Copyright &copy; 1999-2010 Apache Software Foundation<br/>
             All Rights Reserved
             </p>
         </td>

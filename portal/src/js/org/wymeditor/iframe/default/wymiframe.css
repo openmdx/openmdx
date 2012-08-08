@@ -1,17 +1,17 @@
 /*
  * WYMeditor : what you see is What You Mean web-based editor
- * Copyright (c) 2008 Jean-Francois Hovinne, http://www.wymeditor.org/
+ * Copyright (c) 2005 - 2009 Jean-Francois Hovinne, http://www.wymeditor.org/
  * Dual licensed under the MIT (MIT-license.txt)
  * and GPL (GPL-license.txt) licenses.
  *
  * For further information visit:
  *        http://www.wymeditor.org/
- *
+ * 
  * File Name:
  *        wymeditor.css
  *        Main editor css file.
  *        See the documentation for more info.
- *
+ * 
  * File Authors:
  *        Jean-Francois Hovinne (jf.hovinne a-t wymeditor dotorg)
  *        Daniel Reszka (d.reszka a-t wymeditor dotorg)
@@ -20,9 +20,8 @@
 /* VISUAL FEEDBACK */
 
 /* basic */
-  body  {background: #e1e8f1;}
-  html, body {margin:0;padding:0;height:100%; /* 100 % height */}
-
+  body  { background: #e1e8f1;}
+ 
 /* make HTML blocs visible */
   p,
   h1,
@@ -52,7 +51,7 @@
   p             { min-height: 1em; } /*min-height is needed under Firefox, because empty parargraphs */
   *+html p      { min-height: auto; } /* but we have to remove it under IE7 because it triggers the 'haslayout' mode */
   td            { height: 1.6em; }
-
+ 
 /* labels */
   p         { background-image: url(lbl-p.png); }
   h1        { background-image: url(lbl-h1.png); }
@@ -72,6 +71,7 @@
               border-width: 0; }
   a img     { border-width: 1px; border-color: blue; }
   acronym   { border: 1px solid gray; }
+  span      { background-color: #eef; }
 
 /* visual feedback for non-valid nesting of elements*/
   h1 h1, h1 h2, h1 h3, h1 h4, h1 h5, h1 h6, h1 p, h1 pre, h1 address,

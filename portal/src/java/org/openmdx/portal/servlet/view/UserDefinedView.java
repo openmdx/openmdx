@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UserDefinedView.java,v 1.13 2008/11/10 15:16:30 wfro Exp $
+ * Name:        $Id: UserDefinedView.java,v 1.15 2009/11/05 18:05:58 hburger Exp $
  * Description: UserDefinedView 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 15:16:30 $
+ * Date:        $Date: 2009/11/05 18:05:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -77,7 +77,7 @@ public class UserDefinedView
         View parentView
     ) {
         super(
-            UUIDs.getGenerator().next().toString(),
+            UUIDs.newUUID().toString(),
             null,
             object,
             application
@@ -151,11 +151,28 @@ public class UserDefinedView
             forClass, 
             featureName
         );
-        return field == null
-            ? null
-            : locale < field.getLabel().size()
-                ? field.getLabel().get(locale)
-                : field.getLabel().get(0);
+        return field == null ? 
+        	null : 
+    		locale < field.getLabel().size() ? 
+    			field.getLabel().get(locale) : 
+    			field.getLabel().get(0);
+    }
+    
+    //-------------------------------------------------------------------------
+    public String getFieldShortLabel(
+        String forClass,
+        String featureName,
+        short locale
+    ) throws ServiceException {
+        org.openmdx.ui1.jmi1.LabelledField field = this.findField(
+            forClass, 
+            featureName
+        );
+        return field == null ? 
+        	null : 
+        	locale < field.getShortLabel().size() ? 
+        		field.getShortLabel().get(locale) : 
+        		field.getShortLabel().get(0);
     }
     
     //-------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RoseImporter_1.java,v 1.8 2009/06/14 00:03:42 wfro Exp $
+ * Name:        $Id: RoseImporter_1.java,v 1.10 2009/12/30 19:09:51 wfro Exp $
  * Description: model.importer.RoseImporter
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/14 00:03:42 $
+ * Date:        $Date: 2009/12/30 19:09:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -83,7 +83,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -490,11 +490,11 @@ extends ModelImporter_1 {
             parameterName,
             multiplicity
         );
-        ObjectHolder_2Facade parameterDefFacade;
+        Object_2Facade parameterDefFacade;
         try {
-            parameterDefFacade = ObjectHolder_2Facade.newInstance(
+            parameterDefFacade = Object_2Facade.newInstance(
                 newFeaturePath(
-                    ObjectHolder_2Facade.getPath(parameterType),
+                    Object_2Facade.getPath(parameterType),
                     parameterName
                 ),
                 ModelAttributes.STRUCTURE_FIELD
@@ -504,12 +504,12 @@ extends ModelImporter_1 {
             throw new ServiceException(e);
         }
         // container
-        parameterDefFacade.attributeValues("container").add(
-            ObjectHolder_2Facade.getPath(parameterType)
+        parameterDefFacade.attributeValuesAsList("container").add(
+            Object_2Facade.getPath(parameterType)
         );
 
-        parameterDefFacade.attributeValues("maxLength").add(new Integer(1000000));
-        parameterDefFacade.attributeValues("multiplicity").add(multiplicity.toString());
+        parameterDefFacade.attributeValuesAsList("maxLength").add(new Integer(1000000));
+        parameterDefFacade.attributeValuesAsList("multiplicity").add(multiplicity.toString());
 
         // quid
         if("quid".equals(lexer.peekToken())) {
@@ -520,7 +520,7 @@ extends ModelImporter_1 {
         // documentation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            parameterDefFacade.attributeValues("annotation").add(
+            parameterDefFacade.attributeValuesAsList("annotation").add(
                 lexer.getToken()
             );
         }
@@ -528,7 +528,7 @@ extends ModelImporter_1 {
         // type
         if("type".equals(lexer.peekToken())) {
             lexer.assertToken("type");
-            parameterDefFacade.attributeValues("type").add(
+            parameterDefFacade.attributeValuesAsList("type").add(
                 roseNameToPath(lexer.getToken())
             );
         }
@@ -557,11 +557,11 @@ extends ModelImporter_1 {
 
         String operationName = lexer.getToken();
 
-        ObjectHolder_2Facade operationDefFacade;
+        Object_2Facade operationDefFacade;
         try {
-            operationDefFacade = ObjectHolder_2Facade.newInstance(
+            operationDefFacade = Object_2Facade.newInstance(
                 newFeaturePath(
-                    ObjectHolder_2Facade.getPath(classDef),
+                    Object_2Facade.getPath(classDef),
                     operationName
                 ),
                 ModelAttributes.OPERATION
@@ -571,12 +571,12 @@ extends ModelImporter_1 {
             throw new ServiceException(e);
         }
         // container
-        operationDefFacade.attributeValues("container").add(
-            ObjectHolder_2Facade.getPath(classDef)
+        operationDefFacade.attributeValuesAsList("container").add(
+            Object_2Facade.getPath(classDef)
         );
 
         // default values
-        operationDefFacade.attributeValues("isQuery").add(
+        operationDefFacade.attributeValuesAsList("isQuery").add(
             new Boolean(false)
         );
 
@@ -609,12 +609,14 @@ extends ModelImporter_1 {
                 //SysLog.trace("tool=" + toolName + "; attribute=" + attrName + "; value=", attrValue);
                 if("SPICE".equals(toolName)) {
                     if("true".equals(attrValue) || "false".equals(attrValue)) {
-                        operationDefFacade.clearAttributeValues(attrName).add(
+                        operationDefFacade.attributeValuesAsList(attrName).clear();
+                        operationDefFacade.attributeValuesAsList(attrName).add(
                             new Boolean((String)attrValue)
                         );
                     }
                     else {
-                        operationDefFacade.clearAttributeValues(attrName).add(
+                        operationDefFacade.attributeValuesAsList(attrName).clear();
+                        operationDefFacade.attributeValuesAsList(attrName).add(
                             attrValue 
                         );
                     }
@@ -633,7 +635,7 @@ extends ModelImporter_1 {
         // documentation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            operationDefFacade.attributeValues("annotation").add(
+            operationDefFacade.attributeValuesAsList("annotation").add(
                 lexer.getToken()
             );
         }
@@ -642,15 +644,15 @@ extends ModelImporter_1 {
         boolean isException = false;
         if("stereotype".equals(lexer.peekToken())) {
             lexer.assertToken("stereotype");
-            operationDefFacade.attributeValues("stereotype").addAll(
+            operationDefFacade.attributeValuesAsList("stereotype").addAll(
                 this.parseStereotype(lexer.getToken())
             );
             // Stereotype <<exception>>
-            if(operationDefFacade.attributeValues("stereotype").contains(Stereotypes.EXCEPTION)) {
+            if(operationDefFacade.attributeValuesAsList("stereotype").contains(Stereotypes.EXCEPTION)) {
                 operationDefFacade.getValue().setRecordName(
                     ModelAttributes.EXCEPTION
                 );
-                operationDefFacade.clearAttributeValues("stereotype");
+                operationDefFacade.attributeValuesAsList("stereotype").clear();
                 isException = true;
             }
         }
@@ -674,11 +676,11 @@ extends ModelImporter_1 {
             String capOperationName = 
                 operationName.substring(0,1).toUpperCase() +
                 operationName.substring(1);
-            ObjectHolder_2Facade parameterTypeFacade;
+            Object_2Facade parameterTypeFacade;
             try {
-                parameterTypeFacade = ObjectHolder_2Facade.newInstance(
+                parameterTypeFacade = Object_2Facade.newInstance(
                     new Path(
-                        ObjectHolder_2Facade.getPath(classDef).toString() + capOperationName + "Params"
+                        Object_2Facade.getPath(classDef).toString() + capOperationName + "Params"
                     ),
                     ModelAttributes.STRUCTURE_TYPE
                 );
@@ -686,11 +688,11 @@ extends ModelImporter_1 {
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }
-            parameterTypeFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
-            parameterTypeFacade.attributeValues("isAbstract").add(new Boolean(false));
+            parameterTypeFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
+            parameterTypeFacade.attributeValuesAsList("isAbstract").add(new Boolean(false));
             try {
-                parameterTypeFacade.attributeValues("container").addAll(
-                    ObjectHolder_2Facade.newInstance(classDef).attributeValues("container")
+                parameterTypeFacade.attributeValuesAsList("container").addAll(
+                    Object_2Facade.newInstance(classDef).attributeValuesAsList("container")
                 );
             } 
             catch (ResourceException e) {
@@ -719,7 +721,7 @@ extends ModelImporter_1 {
                 /**
                  * Case 2: Parameter with name 'in'. Create object as PARAMETER.
                  */
-                String fullQualifiedParameterName = ObjectHolder_2Facade.getPath(parameterDef).getBase();
+                String fullQualifiedParameterName = Object_2Facade.getPath(parameterDef).getBase();
                 if("in".equals(fullQualifiedParameterName.substring(fullQualifiedParameterName.lastIndexOf(':') + 1))) {
                     // 'in' is the only allowed parameter
                     if(parametersCreated) {
@@ -731,8 +733,8 @@ extends ModelImporter_1 {
                         );              
                     }
                     try {
-                        parameterTypeFacade = ObjectHolder_2Facade.newInstance(
-                            (Path)ObjectHolder_2Facade.newInstance(parameterDef).attributeValues("type").get(0)
+                        parameterTypeFacade = Object_2Facade.newInstance(
+                            (Path)Object_2Facade.newInstance(parameterDef).attributeValuesAsList("type").get(0)
                         );
                     } 
                     catch (ResourceException e) {
@@ -771,9 +773,9 @@ extends ModelImporter_1 {
                 );
             }
             // in-parameter
-            ObjectHolder_2Facade inParameterDefFacade;
+            Object_2Facade inParameterDefFacade;
             try {
-                inParameterDefFacade = ObjectHolder_2Facade.newInstance(
+                inParameterDefFacade = Object_2Facade.newInstance(
                     newFeaturePath(
                         operationDefFacade.getPath(),
                         "in"
@@ -784,16 +786,16 @@ extends ModelImporter_1 {
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }
-            inParameterDefFacade.attributeValues("container").add(
+            inParameterDefFacade.attributeValuesAsList("container").add(
                 operationDefFacade.getPath()
             );  
-            inParameterDefFacade.attributeValues("direction").add(
+            inParameterDefFacade.attributeValuesAsList("direction").add(
                 DirectionKind.IN_DIR
             );
-            inParameterDefFacade.attributeValues("multiplicity").add(
+            inParameterDefFacade.attributeValuesAsList("multiplicity").add(
                 "1..1"
             );
-            inParameterDefFacade.attributeValues("type").add(
+            inParameterDefFacade.attributeValuesAsList("type").add(
                 parameterTypeFacade.getPath()
             );
             this.createModelElement(
@@ -804,9 +806,9 @@ extends ModelImporter_1 {
 
         // void in-parameter
         else {
-            ObjectHolder_2Facade inParameterDefFacade;
+            Object_2Facade inParameterDefFacade;
             try {
-                inParameterDefFacade = ObjectHolder_2Facade.newInstance(
+                inParameterDefFacade = Object_2Facade.newInstance(
                     newFeaturePath(
                         operationDefFacade.getPath(),
                         "in"
@@ -817,16 +819,16 @@ extends ModelImporter_1 {
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }
-            inParameterDefFacade.attributeValues("container").add(
+            inParameterDefFacade.attributeValuesAsList("container").add(
                 operationDefFacade.getPath()
             );  
-            inParameterDefFacade.attributeValues("direction").add(
+            inParameterDefFacade.attributeValuesAsList("direction").add(
                 DirectionKind.IN_DIR
             );
-            inParameterDefFacade.attributeValues("multiplicity").add(
+            inParameterDefFacade.attributeValuesAsList("multiplicity").add(
                 "1..1"
             );
-            inParameterDefFacade.attributeValues("type").add(
+            inParameterDefFacade.attributeValuesAsList("type").add(
                 roseNameToPath("org::openmdx::base::Void")
             );
             this.createModelElement(
@@ -836,9 +838,9 @@ extends ModelImporter_1 {
         }
 
         // result
-        ObjectHolder_2Facade resultDefFacade;
+        Object_2Facade resultDefFacade;
         try {
-            resultDefFacade = ObjectHolder_2Facade.newInstance(
+            resultDefFacade = Object_2Facade.newInstance(
                 newFeaturePath(
                     operationDefFacade.getPath(),
                     "result"
@@ -849,27 +851,27 @@ extends ModelImporter_1 {
         catch (ResourceException e) {
             throw new ServiceException(e);
         }
-        resultDefFacade.attributeValues("container").add(
+        resultDefFacade.attributeValuesAsList("container").add(
             operationDefFacade.getPath()
         );  
-        resultDefFacade.attributeValues("direction").add(
+        resultDefFacade.attributeValuesAsList("direction").add(
             DirectionKind.RETURN_DIR
         );
-        resultDefFacade.attributeValues("multiplicity").add(
+        resultDefFacade.attributeValuesAsList("multiplicity").add(
             "1..1"
         );
 
         // result type
         if("result".equals(lexer.peekToken())) {
             lexer.assertToken("result");
-            resultDefFacade.attributeValues("type").add(
+            resultDefFacade.attributeValuesAsList("type").add(
                 this.roseNameToPath(
                     lexer.getToken()
                 )
             );
         }
         else {
-            resultDefFacade.attributeValues("type").add(
+            resultDefFacade.attributeValuesAsList("type").add(
                 this.roseNameToPath(
                     "org:openmdx:base:Void"
                 )
@@ -891,7 +893,7 @@ extends ModelImporter_1 {
             while(exceptions.hasMoreTokens()) {
                 String qualifiedExceptionName = exceptions.nextToken();
                 String qualifiedClassName = qualifiedExceptionName.substring(0, qualifiedExceptionName.lastIndexOf(':'));
-                operationDefFacade.attributeValues("exception").add(
+                operationDefFacade.attributeValuesAsList("exception").add(
                     newFeaturePath(
                         this.roseNameToPath(
                             qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'))
@@ -915,7 +917,7 @@ extends ModelImporter_1 {
             lexer.assertToken("object");
             lexer.assertToken("Semantic_Info");
             lexer.assertToken("PDL");
-            operationDefFacade.attributeValues("semantics").add(
+            operationDefFacade.attributeValuesAsList("semantics").add(
                 lexer.getToken()
             );
             lexer.assertToken(")");
@@ -938,12 +940,12 @@ extends ModelImporter_1 {
             lexer.assertToken("exportControl");
             lexer.getToken();
         }
-        operationDefFacade.attributeValues("visibility").add(
+        operationDefFacade.attributeValuesAsList("visibility").add(
             VisibilityKind.PUBLIC_VIS
         );
 
         // scope
-        operationDefFacade.attributeValues("scope").add(
+        operationDefFacade.attributeValuesAsList("scope").add(
             ScopeKind.INSTANCE_LEVEL
         );
 
@@ -968,11 +970,11 @@ extends ModelImporter_1 {
         lexer.assertToken("Role");
         String roleName = lexer.getToken();
 
-        ObjectHolder_2Facade associationEndDefFacade;
+        Object_2Facade associationEndDefFacade;
         try {
-            associationEndDefFacade = ObjectHolder_2Facade.newInstance(
+            associationEndDefFacade = Object_2Facade.newInstance(
                 newFeaturePath(
-                    ObjectHolder_2Facade.getPath(associationDef),
+                    Object_2Facade.getPath(associationDef),
                     roleName
                 ),
                 ModelAttributes.ASSOCIATION_END
@@ -990,12 +992,12 @@ extends ModelImporter_1 {
         }
 
         // container
-        associationEndDefFacade.attributeValues("container").add(
-            ObjectHolder_2Facade.getPath(associationDef)
+        associationEndDefFacade.attributeValuesAsList("container").add(
+            Object_2Facade.getPath(associationDef)
         );   
 
         // name
-        associationEndDefFacade.attributeValues("name").add(
+        associationEndDefFacade.attributeValuesAsList("name").add(
             roleName
         );
 
@@ -1011,7 +1013,7 @@ extends ModelImporter_1 {
         // documentation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            associationEndDefFacade.attributeValues("annotation").add(
+            associationEndDefFacade.attributeValuesAsList("annotation").add(
                 lexer.getToken()
             );
         }
@@ -1025,7 +1027,7 @@ extends ModelImporter_1 {
         // supplier
         if("supplier".equals(lexer.peekToken())) {
             lexer.assertToken("supplier");
-            associationEndDefFacade.attributeValues("type").add(
+            associationEndDefFacade.attributeValuesAsList("type").add(
                 roseNameToPath(lexer.getToken())
             );
         }
@@ -1046,13 +1048,13 @@ extends ModelImporter_1 {
                 lexer.assertToken("(");
                 lexer.assertToken("object");
                 lexer.assertToken("ClassAttribute");
-                associationEndDefFacade.attributeValues("qualifierName").add(
+                associationEndDefFacade.attributeValuesAsList("qualifierName").add(
                     lexer.getToken()
                 );
                 lexer.assertToken("quid");
                 lexer.getToken();
                 lexer.assertToken("type");
-                associationEndDefFacade.attributeValues("qualifierType").add(
+                associationEndDefFacade.attributeValuesAsList("qualifierType").add(
                     roseNameToPath(lexer.getToken())
                 );
                 if("quidu".equals(lexer.peekToken())) {
@@ -1077,7 +1079,7 @@ extends ModelImporter_1 {
                 roleName,
                 multiplicity
             );
-            associationEndDefFacade.attributeValues("multiplicity").add(
+            associationEndDefFacade.attributeValuesAsList("multiplicity").add(
                 multiplicity.toString()
             );
             lexer.assertToken(")");
@@ -1088,14 +1090,14 @@ extends ModelImporter_1 {
             lexer.assertToken("Constraints");
             String constraints = lexer.getToken();
             boolean constraintIsFrozen = "isFrozen".equals(constraints);
-            associationEndDefFacade.attributeValues("isChangeable").add(
+            associationEndDefFacade.attributeValuesAsList("isChangeable").add(
                 new Boolean(!constraintIsFrozen)
             );
             if(!constraintIsFrozen) {
                 // add new constraint
-                ObjectHolder_2Facade associationEndConstraintDefFacade;
+                Object_2Facade associationEndConstraintDefFacade;
                 try {
-                    associationEndConstraintDefFacade = ObjectHolder_2Facade.newInstance(
+                    associationEndConstraintDefFacade = Object_2Facade.newInstance(
                         newFeaturePath(
                             associationEndDefFacade.getPath(),
                             constraints
@@ -1107,7 +1109,7 @@ extends ModelImporter_1 {
                     throw new ServiceException(e);
                 }
                 // container
-                associationEndConstraintDefFacade.attributeValues("container").add(
+                associationEndConstraintDefFacade.attributeValuesAsList("container").add(
                     associationEndDefFacade.getPath()
                 );   
                 this.createModelElement(
@@ -1117,7 +1119,7 @@ extends ModelImporter_1 {
             }
         }
         else {
-            associationEndDefFacade.attributeValues("isChangeable").add(
+            associationEndDefFacade.attributeValuesAsList("isChangeable").add(
                 new Boolean(true)
             );
         }
@@ -1129,19 +1131,21 @@ extends ModelImporter_1 {
         }
 
         // aggregation (none = link)    
-        associationEndDefFacade.attributeValues("aggregation").add(
+        associationEndDefFacade.attributeValuesAsList("aggregation").add(
             AggregationKind.NONE
         );
         if("Containment".equals(lexer.peekToken())) {
             lexer.assertToken("Containment");
             String containment = lexer.getToken();
             if("By Reference".equals(containment)) {
-                associationEndDefFacade.clearAttributeValues("aggregation").add(
+                associationEndDefFacade.attributeValuesAsList("aggregation").clear();
+                associationEndDefFacade.attributeValuesAsList("aggregation").add(
                     AggregationKind.SHARED
                 );
             }
             else if("By Value".equals(containment)) {
-                associationEndDefFacade.clearAttributeValues("aggregation").add(
+                associationEndDefFacade.attributeValuesAsList("aggregation").clear();
+                associationEndDefFacade.attributeValuesAsList("aggregation").add(
                     AggregationKind.COMPOSITE
                 );
             }
@@ -1150,12 +1154,14 @@ extends ModelImporter_1 {
         // isNavigable
         if("is_navigable".equals(lexer.peekToken())) {
             lexer.assertToken("is_navigable");
-            associationEndDefFacade.clearAttributeValues("isNavigable").add(
+            associationEndDefFacade.attributeValuesAsList("isNavigable").clear();
+            associationEndDefFacade.attributeValuesAsList("isNavigable").add(
                 new Boolean("TRUE".equals(lexer.getToken()))
             );
         }
         else { 
-            associationEndDefFacade.clearAttributeValues("isNavigable").add(
+            associationEndDefFacade.attributeValuesAsList("isNavigable").clear();
+            associationEndDefFacade.attributeValuesAsList("isNavigable").add(
                 new Boolean(false)
             );
         }
@@ -1194,11 +1200,11 @@ extends ModelImporter_1 {
         lexer.assertToken("ClassAttribute");
         String attributeName = lexer.getToken();
 
-        ObjectHolder_2Facade attributeDefFacade;
+        Object_2Facade attributeDefFacade;
         try {
-            attributeDefFacade = ObjectHolder_2Facade.newInstance(
+            attributeDefFacade = Object_2Facade.newInstance(
                 newFeaturePath(
-                    ObjectHolder_2Facade.getPath(classDef),
+                    Object_2Facade.getPath(classDef),
                     attributeName
                 ),
                 ModelAttributes.STRUCTURE_FIELD
@@ -1220,14 +1226,14 @@ extends ModelImporter_1 {
         }
 
         // container
-        attributeDefFacade.attributeValues("container").add(
-            ObjectHolder_2Facade.getPath(classDef)
+        attributeDefFacade.attributeValuesAsList("container").add(
+            Object_2Facade.getPath(classDef)
         );
 
         // user-defined attributes. set default values for
         // maxLength, uniqueValues, isLanguageNeutral, isChangeable
-        attributeDefFacade.attributeValues("maxLength").add(new Integer(DEFAULT_ATTRIBUTE_MAX_LENGTH));
-        attributeDefFacade.attributeValues("isChangeable").add(new Boolean(true));
+        attributeDefFacade.attributeValuesAsList("maxLength").add(new Integer(DEFAULT_ATTRIBUTE_MAX_LENGTH));
+        attributeDefFacade.attributeValuesAsList("isChangeable").add(new Boolean(true));
 
         // overwrite default values if set
         if("attributes".equals(lexer.peekToken())) {
@@ -1258,7 +1264,8 @@ extends ModelImporter_1 {
                 //SysLog.trace("tool=" + toolName + "; attribute=" + attrName + "; value=", attrValue);
                 if("SPICE".equals(toolName)) {
                     if("true".equals(attrValue) || "false".equals(attrValue)) {
-                        attributeDefFacade.clearAttributeValues(attrName).add(
+                        attributeDefFacade.attributeValuesAsList(attrName).clear();
+                        attributeDefFacade.attributeValuesAsList(attrName).add(
                             new Boolean((String)attrValue)
                         );
                     }
@@ -1275,10 +1282,12 @@ extends ModelImporter_1 {
                             );
                             intVal = new Integer(DEFAULT_ATTRIBUTE_MAX_LENGTH); 
                         }
-                        attributeDefFacade.clearAttributeValues("maxLength").add(intVal);
+                        attributeDefFacade.attributeValuesAsList("maxLength").clear();
+                        attributeDefFacade.attributeValuesAsList("maxLength").add(intVal);
                     }
                     else {
-                        attributeDefFacade.clearAttributeValues(attrName).add(
+                        attributeDefFacade.attributeValuesAsList(attrName).clear();
+                        attributeDefFacade.attributeValuesAsList(attrName).add(
                             attrValue 
                         );
                     }
@@ -1297,7 +1306,7 @@ extends ModelImporter_1 {
         // annotation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            attributeDefFacade.attributeValues("annotation").add(
+            attributeDefFacade.attributeValuesAsList("annotation").add(
                 lexer.getToken()
             );
         }
@@ -1312,12 +1321,14 @@ extends ModelImporter_1 {
                 attributeName,
                 multiplicity
             );
-            attributeDefFacade.clearAttributeValues("multiplicity").add(
+            attributeDefFacade.attributeValuesAsList("multiplicity").clear();
+            attributeDefFacade.attributeValuesAsList("multiplicity").add(
                 multiplicity.toString()
             );
         }
         else {
-            attributeDefFacade.clearAttributeValues("multiplicity").add(
+            attributeDefFacade.attributeValuesAsList("multiplicity").clear();
+            attributeDefFacade.attributeValuesAsList("multiplicity").add(
                 "1..1"
             );
         }
@@ -1325,7 +1336,8 @@ extends ModelImporter_1 {
         // type
         if("type".equals(lexer.peekToken())) {
             lexer.assertToken("type");
-            attributeDefFacade.clearAttributeValues("type").add(
+            attributeDefFacade.attributeValuesAsList("type").clear();
+            attributeDefFacade.attributeValuesAsList("type").add(
                 roseNameToPath(lexer.getToken())
             );
         }
@@ -1340,12 +1352,12 @@ extends ModelImporter_1 {
         if("exportControl".equals(lexer.peekToken())) {
             lexer.assertToken("exportControl");
             lexer.getToken();
-            attributeDefFacade.attributeValues("visibility").add(
+            attributeDefFacade.attributeValuesAsList("visibility").add(
                 VisibilityKind.PUBLIC_VIS
             );
         }
         else {
-            attributeDefFacade.attributeValues("visibility").add(
+            attributeDefFacade.attributeValuesAsList("visibility").add(
                 VisibilityKind.PRIVATE_VIS
             );
         }
@@ -1353,18 +1365,18 @@ extends ModelImporter_1 {
         // isDerived
         if("derived".equals(lexer.peekToken())) {
             lexer.assertToken("derived");
-            attributeDefFacade.attributeValues("isDerived").add(
+            attributeDefFacade.attributeValuesAsList("isDerived").add(
                 new Boolean("TRUE".equals(lexer.getToken()))
             );
         }
         else {
-            attributeDefFacade.attributeValues("isDerived").add(
+            attributeDefFacade.attributeValuesAsList("isDerived").add(
                 new Boolean(false)
             );
         }
 
         // scope
-        attributeDefFacade.attributeValues("scope").add(
+        attributeDefFacade.attributeValuesAsList("scope").add(
             ScopeKind.INSTANCE_LEVEL
         );
 
@@ -1372,10 +1384,10 @@ extends ModelImporter_1 {
 
         // remove non StructureField attributes
         if(isStructureField) {
-            attributeDefFacade.clearAttributeValues("visibility");
-            attributeDefFacade.clearAttributeValues("isDerived");
-            attributeDefFacade.clearAttributeValues("scope");
-            attributeDefFacade.clearAttributeValues("isChangeable");
+            attributeDefFacade.attributeValuesAsList("visibility").clear();
+            attributeDefFacade.attributeValuesAsList("isDerived").clear();
+            attributeDefFacade.attributeValuesAsList("scope").clear();
+            attributeDefFacade.attributeValuesAsList("isChangeable").clear();
         }
 
         this.createModelElement(
@@ -1427,9 +1439,9 @@ extends ModelImporter_1 {
         String associationName = lexer.getToken();
 
         // ModelAssociation object
-        ObjectHolder_2Facade modelAssociationFacade;
+        Object_2Facade modelAssociationFacade;
         try {
-            modelAssociationFacade = ObjectHolder_2Facade.newInstance(
+            modelAssociationFacade = Object_2Facade.newInstance(
                 toElementPath(
                     scope,
                     associationName
@@ -1442,7 +1454,7 @@ extends ModelImporter_1 {
         }
 
         // container
-        modelAssociationFacade.attributeValues("container").add(
+        modelAssociationFacade.attributeValuesAsList("container").add(
             toElementPath(
                 scope,
                 (String)scope.get(scope.size()-1)
@@ -1456,7 +1468,7 @@ extends ModelImporter_1 {
         // documentation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            modelAssociationFacade.attributeValues("annotation").add(
+            modelAssociationFacade.attributeValuesAsList("annotation").add(
                 lexer.getToken()
             );
         }
@@ -1484,12 +1496,12 @@ extends ModelImporter_1 {
         // isDerived
         if("derived".equals(lexer.peekToken())) {
             lexer.assertToken("derived");
-            modelAssociationFacade.attributeValues("isDerived").add(
+            modelAssociationFacade.attributeValuesAsList("isDerived").add(
                 new Boolean("TRUE".equals(lexer.getToken()))
             );
         }
         else {
-            modelAssociationFacade.attributeValues("isDerived").add(
+            modelAssociationFacade.attributeValuesAsList("isDerived").add(
                 new Boolean(false)
             );
         }
@@ -1511,7 +1523,7 @@ extends ModelImporter_1 {
         );
         // remove name attributes before setting
         try {
-            ObjectHolder_2Facade.newInstance(modelAssociationEnd1).getValue().keySet().remove("name");
+            Object_2Facade.newInstance(modelAssociationEnd1).getValue().keySet().remove("name");
         } 
         catch (ResourceException e) {
             throw new ServiceException(e);
@@ -1521,7 +1533,7 @@ extends ModelImporter_1 {
             modelAssociationEnd1
         );
         try {
-            ObjectHolder_2Facade.newInstance(modelAssociationEnd2).getValue().keySet().remove("name");
+            Object_2Facade.newInstance(modelAssociationEnd2).getValue().keySet().remove("name");
         } 
         catch (ResourceException e) {
             throw new ServiceException(e);
@@ -1531,8 +1543,8 @@ extends ModelImporter_1 {
             modelAssociationEnd2
         );
         // complete association
-        modelAssociationFacade.attributeValues("isAbstract").add(new Boolean(false));
-        modelAssociationFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
+        modelAssociationFacade.attributeValuesAsList("isAbstract").add(new Boolean(false));
+        modelAssociationFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
         this.createModelElement(
             scope,
             modelAssociationFacade.getDelegate()
@@ -1549,9 +1561,9 @@ extends ModelImporter_1 {
         String className = lexer.getToken();
 
         // ModelClass object
-        ObjectHolder_2Facade classifierDefFacade;
+        Object_2Facade classifierDefFacade;
         try {
-            classifierDefFacade = ObjectHolder_2Facade.newInstance(
+            classifierDefFacade = Object_2Facade.newInstance(
                 toElementPath(
                     scope,
                     className
@@ -1564,7 +1576,7 @@ extends ModelImporter_1 {
         }
 
         // container
-        classifierDefFacade.attributeValues("container").add(
+        classifierDefFacade.attributeValuesAsList("container").add(
             toElementPath(
                 scope,
                 (String)scope.get(scope.size()-1)
@@ -1581,7 +1593,7 @@ extends ModelImporter_1 {
         // documentation
         if("documentation".equals(lexer.peekToken())) {
             lexer.assertToken("documentation");
-            classifierDefFacade.attributeValues("annotation").add(
+            classifierDefFacade.attributeValuesAsList("annotation").add(
                 lexer.getToken()
             );
         }
@@ -1592,35 +1604,35 @@ extends ModelImporter_1 {
 
         if("stereotype".equals(lexer.peekToken())) {
             lexer.assertToken("stereotype");
-            classifierDefFacade.attributeValues("stereotype").addAll(
+            classifierDefFacade.attributeValuesAsList("stereotype").addAll(
                 this.parseStereotype(lexer.getToken())
             );
 
             // handle well-known stereotypes
-            if(classifierDefFacade.attributeValues("stereotype").contains(Stereotypes.PRIMITIVE)) {
+            if(classifierDefFacade.attributeValuesAsList("stereotype").contains(Stereotypes.PRIMITIVE)) {
                 SysLog.trace("changing type to " + ModelAttributes.PRIMITIVE_TYPE);
                 classifierDefFacade.getValue().setRecordName(
                     ModelAttributes.PRIMITIVE_TYPE
                 );
-                classifierDefFacade.clearAttributeValues("stereotype");
+                classifierDefFacade.attributeValuesAsList("stereotype").clear();
             }
-            else if(classifierDefFacade.attributeValues("stereotype").contains(Stereotypes.STRUCT)) {
+            else if(classifierDefFacade.attributeValuesAsList("stereotype").contains(Stereotypes.STRUCT)) {
                 isStructureType = true;
                 SysLog.trace("changing type to " + ModelAttributes.STRUCTURE_TYPE);
                 classifierDefFacade.getValue().setRecordName(
                     ModelAttributes.STRUCTURE_TYPE
                 );
-                classifierDefFacade.clearAttributeValues("stereotype");
+                classifierDefFacade.attributeValuesAsList("stereotype").clear();
             }
-            else if(classifierDefFacade.attributeValues("stereotype").contains(Stereotypes.ALIAS)) {
+            else if(classifierDefFacade.attributeValuesAsList("stereotype").contains(Stereotypes.ALIAS)) {
                 isAliasType = true;
                 SysLog.trace("changing type to " + ModelAttributes.ALIAS_TYPE);
                 classifierDefFacade.getValue().setRecordName(
                     ModelAttributes.ALIAS_TYPE
                 );
-                classifierDefFacade.clearAttributeValues("stereotype");
+                classifierDefFacade.attributeValuesAsList("stereotype").clear();
             }
-            else if(classifierDefFacade.attributeValues("stereotype").contains("parameter")) {
+            else if(classifierDefFacade.attributeValuesAsList("stereotype").contains("parameter")) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED, 
@@ -1662,7 +1674,7 @@ extends ModelImporter_1 {
                 Iterator it = superTypePaths.iterator();
                 it.hasNext();
             ) {
-                classifierDefFacade.attributeValues("supertype").add(
+                classifierDefFacade.attributeValuesAsList("supertype").add(
                     it.next()
                 );
             }
@@ -1705,7 +1717,7 @@ extends ModelImporter_1 {
                 lexer.assertToken("(");
                 lexer.assertToken("object");
                 lexer.assertToken("ClassAttribute");
-                classifierDefFacade.attributeValues("type").add(
+                classifierDefFacade.attributeValuesAsList("type").add(
                     roseNameToPath(lexer.getToken())
                 );
                 // Ignore attributes
@@ -1737,25 +1749,25 @@ extends ModelImporter_1 {
         // isAbstract
         if("abstract".equals(lexer.peekToken())) {
             lexer.assertToken("abstract");      
-            classifierDefFacade.attributeValues("isAbstract").add(
+            classifierDefFacade.attributeValuesAsList("isAbstract").add(
                 new Boolean(
                     "TRUE".equals(lexer.getToken())
                 )
             );
         }
         else {
-            classifierDefFacade.attributeValues("isAbstract").add(
+            classifierDefFacade.attributeValuesAsList("isAbstract").add(
                 new Boolean(false)
             );      
         }  
 
         // visibility
-        classifierDefFacade.attributeValues("visibility").add(
+        classifierDefFacade.attributeValuesAsList("visibility").add(
             VisibilityKind.PUBLIC_VIS
         );
 
         // isSingleton
-        classifierDefFacade.attributeValues("isSingleton").add(new Boolean(false));
+        classifierDefFacade.attributeValuesAsList("isSingleton").add(new Boolean(false));
 
         // usage
         if("used_nodes".equals(lexer.peekToken())) {
@@ -1902,9 +1914,9 @@ extends ModelImporter_1 {
             // Container modelPackage. 
             // The container package can be overwritten at a later time depending 
             // on the structure of the mdl/cat files
-            ObjectHolder_2Facade modelPackageFacade;
+            Object_2Facade modelPackageFacade;
             try {
-                modelPackageFacade = ObjectHolder_2Facade.newInstance(
+                modelPackageFacade = Object_2Facade.newInstance(
                     toElementPath(
                         newScope,
                         (String)newScope.get(newScope.size()-1)
@@ -1915,8 +1927,8 @@ extends ModelImporter_1 {
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }
-            modelPackageFacade.attributeValues("isAbstract").add(new Boolean(false));
-            modelPackageFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
+            modelPackageFacade.attributeValuesAsList("isAbstract").add(new Boolean(false));
+            modelPackageFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
             createModelElement(
                 newScope,
                 modelPackageFacade.getDelegate()
@@ -2012,7 +2024,7 @@ extends ModelImporter_1 {
                 // internal unit --> ModelPackage
                 else {
                     try {
-                        modelPackageFacade = ObjectHolder_2Facade.newInstance(
+                        modelPackageFacade = Object_2Facade.newInstance(
                             toElementPath(
                                 newScope,
                                 (String)newScope.get(newScope.size()-1)
@@ -2023,8 +2035,8 @@ extends ModelImporter_1 {
                     catch (ResourceException e) {
                         throw new ServiceException(e);
                     }
-                    modelPackageFacade.attributeValues("isAbstract").add(new Boolean(false));
-                    modelPackageFacade.attributeValues("visibility").add(VisibilityKind.PUBLIC_VIS);
+                    modelPackageFacade.attributeValuesAsList("isAbstract").add(new Boolean(false));
+                    modelPackageFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
                 }
 
             }
@@ -2064,7 +2076,7 @@ extends ModelImporter_1 {
             if("documentation".equals(lexer.peekToken())) {
                 lexer.assertToken("documentation");
                 if(modelPackageFacade != null) {
-                    modelPackageFacade.attributeValues("annotation").add(lexer.getToken());
+                    modelPackageFacade.attributeValuesAsList("annotation").add(lexer.getToken());
                 }
             }
 

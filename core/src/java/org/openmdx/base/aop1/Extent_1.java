@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Extent_1.java,v 1.10 2009/06/09 12:45:19 hburger Exp $
- * Description: State Object Container
- * Revision:    $Revision: 1.10 $
+ * Name:        $Id: Extent_1.java,v 1.18 2010/01/26 15:42:08 hburger Exp $
+ * Description: Extent
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:19 $
+ * Date:        $Date: 2010/01/26 15:42:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,27 +56,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.jdo.FetchPlan;
+
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
-import org.openmdx.base.collection.FilterableMap;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.Quantors;
-import org.openmdx.compatibility.state1.aop1.StateContainer_1;
-import org.openmdx.compatibility.state1.aop1.StatedObjectContainer_1;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.spi.Container;
+import org.openmdx.base.persistence.spi.TransientContainerId;
 
 /**
- * State Object Container
+ * org::openmdx::base aware extent
  */
 public class Extent_1 
-    implements Serializable, Container_1_0, Delegating_1_0<Container_1_0> 
+    implements Container, Serializable, Container_1_0, Delegating_1_0<Container_1_0> 
 {
 
     /**
@@ -85,7 +82,7 @@ public class Extent_1
      * @param parent
      * @param container
      */
-    public Extent_1(
+    protected Extent_1(
         ObjectView_1_0 parent,
         Container_1_0 container
     ) throws ServiceException {
@@ -97,65 +94,48 @@ public class Extent_1
     
     protected final Container_1_0 container;
     
-    private transient Container_1_0 stateContainer;
-
-    private transient Container_1_0 statedObjectContainer;
-    
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 5143844081800565000L;
+    private static final long serialVersionUID = -1452567179504985867L;
 
     protected Model_1_0 getModel(){
         return this.parent.getModel();
     }
     
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.cci.Container_1_0#getContainerId()
-     */
-    public Object getContainerId() {
-        return objGetDelegate().getContainerId();
+    public Path openmdxjdoGetContainerId() {
+        return PersistenceHelper.getContainerId(objGetDelegate());
     }
 
     /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.Container_1_0#getContainerId()
+     */
+    public TransientContainerId openmdxjdoGetTransientContainerId() {
+        return PersistenceHelper.getTransientContainerId(objGetDelegate());
+    }
+    
+    public boolean openmdxjdoIsPersistent() {
+        return true;
+    }
+    
+    /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
      */
-    public void retrieveAll(boolean useFetchPlan) {
+    public void retrieveAll(FetchPlan fetchPlan) {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#superSet()
      */
-    public Container_1_0 superSet() {
-        return objGetDelegate();
+    public Container_1_0 container() {
+        return this;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#subMap(java.lang.Object)
      */
-    public FilterableMap<String, DataObject_1_0> subMap(Object filter) {
-        if(filter instanceof FilterProperty[]){
-            FilterProperty[] filterProperties =(FilterProperty[])filter;
-            for(FilterProperty filterProperty : filterProperties){
-                if(
-                    Quantors.THERE_EXISTS == filterProperty.quantor() &&
-                    SystemAttributes.OBJECT_INSTANCE_OF.equals(filterProperty.name()) &&
-                    FilterOperators.IS_IN == filterProperty.operator() &&
-                    filterProperty.values().size() == 1
-                ) try {
-                    if(getModel().isSubtypeOf(filterProperty.getValue(0), "org:openmdx:state2:BasicState")){
-                        return getStateContainer(
-                            State_1_Attributes.indexOfStatedObject(filterProperties) < 0
-                        ).subMap(
-                            filter
-                        );
-                    }
-                } catch (ServiceException exception) {
-                    throw new RuntimeServiceException(exception);
-                }
-            }
-        }
+    public Container_1_0 subMap(Object filter) {
         return objGetDelegate().subMap(filter);
     }
 
@@ -184,20 +164,18 @@ public class Extent_1
      * @see java.util.Map#containsValue(java.lang.Object)
      */
     public boolean containsValue(Object value) {
-        if(value instanceof DataObject_1_0){
+        if(value instanceof DataObject_1_0) try {
             DataObject_1_0 object = (DataObject_1_0) value;
-            try {
-                if(getModel().isInstanceof(object, "org:openmdx:base:ExtentCapable")){
-                    Path candidate = object.jdoGetObjectId();
-                    Path parent = this.parent.jdoGetObjectId();
-                    return 
-                        candidate != null &&
-                        parent != null &&
-                        candidate.startsWith(parent);
-                }
-            } catch (ServiceException ignored) {
-                return false;
+            if(getModel().isInstanceof(object, "org:openmdx:base:ExtentCapable")){
+                Path candidate = object.jdoGetObjectId();
+                Path parent = this.parent.jdoGetObjectId();
+                return 
+                    candidate != null &&
+                    parent != null &&
+                    candidate.startsWith(parent);
             }
+        } catch (ServiceException ignored) {
+            return false;
         }
         return false;
     }
@@ -266,6 +244,13 @@ public class Extent_1
     }
 
     /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.Container_1_0#refreshAll()
+     */
+    public void refreshAll() {
+        throw new UnsupportedOperationException("This operation must not be applied to an extent");
+    }
+
+    /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.Delegating_1_0#objGetDelegate()
      */
     public Container_1_0 objGetDelegate(
@@ -273,26 +258,8 @@ public class Extent_1
         return this.container;
     }
     
-    public Container_1_0 getStateContainer(
-        boolean object
-    ) throws ServiceException{
-        if(object) {
-            if(this.statedObjectContainer == null) {
-                this.statedObjectContainer = new StatedObjectContainer_1(
-                    this.parent,
-                    this.container
-                );
-            }
-            return this.statedObjectContainer;
-        } else {
-            if(this.stateContainer == null) {
-                this.stateContainer = new StateContainer_1(
-                    this.parent,
-                    this.container
-                );
-            }
-            return this.stateContainer;
-        }
+    public boolean isRetrieved() {
+        return false;
     }
 
 }

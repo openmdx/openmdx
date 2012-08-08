@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.35 2009/05/16 22:17:44 wfro Exp $
+ * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.37 2010/03/31 14:40:36 hburger Exp $
  * Description: Jmi1StructInvocationHandler 
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.37 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:44 $
+ * Date:        $Date: 2010/03/31 14:40:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -127,8 +127,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
         }
         ModelElement_1_0 fieldDef = fields.get(methodName);
         if(fieldDef == null) {
-            Model_1_0 model = Model_1Factory.getModel();
-            ModelElement_1_0 structDef = model.getElement(structName);
+            ModelElement_1_0 structDef = Model_1Factory.getModel().getElement(structName);
             for(Map.Entry<String,ModelElement_1_0> field: ((Map<String,ModelElement_1_0>)structDef.objGetValue("field")).entrySet()) {
                 fields.putIfAbsent(
                     Identifier.OPERATION_NAME.toIdentifier(
@@ -159,10 +158,8 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.NOT_FOUND, 
                     "field not found for struct",
-                    new BasicException.Parameter [] {
-                      new BasicException.Parameter("field.name", methodName),
-                      new BasicException.Parameter("struct.name", structName)
-                    }
+                    new BasicException.Parameter("field.name", methodName),
+                    new BasicException.Parameter("struct.name", structName)
                 );                
             }
         }

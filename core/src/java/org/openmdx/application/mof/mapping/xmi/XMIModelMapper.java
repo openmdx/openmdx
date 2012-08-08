@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIModelMapper.java,v 1.5 2009/06/03 00:03:34 wfro Exp $
+ * Name:        $Id: XMIModelMapper.java,v 1.9 2010/01/03 15:02:03 wfro Exp $
  * Description: write model as org.omg.model1.xsd compliant XML file
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/03 00:03:34 $
+ * Date:        $Date: 2010/01/03 15:02:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,12 +56,14 @@
 package org.openmdx.application.mof.mapping.xmi;
 
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
+import org.w3c.format.DateTimeFormat;
 
 @SuppressWarnings("unchecked")
 public class XMIModelMapper {
@@ -169,7 +171,7 @@ public class XMIModelMapper {
    */
   void writeElementAsDateTime(
     String elementName,
-    String elementValue
+    Date elementValue
   ) {
     this.writeElementAsDateTime(
       44,
@@ -182,16 +184,11 @@ public class XMIModelMapper {
   void writeElementAsDateTime(
     int pos,
     String elementName,
-    String elementValue
+    Date elementValue
   ) {
     this.pw.println(
       spaces(pos) + "<" + elementName +  ">" + 
-      elementValue.substring(0,4) + "-" + 
-      elementValue.substring(4,6) + "-" + 
-      elementValue.substring(6,8) + "T" +
-      elementValue.substring(9,11) + ":" + 
-      elementValue.substring(11,13) + ":" + 
-      elementValue.substring(13,15) + "Z" +
+      DateTimeFormat.EXTENDED_UTC_FORMAT.format(elementValue) +
       "</" + elementName + ">"
     );
   }  
@@ -252,8 +249,8 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", primitiveTypeDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)primitiveTypeDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)primitiveTypeDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)primitiveTypeDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)primitiveTypeDef.objGetValue("modifiedAt"));
     }
     writeElement("container", primitiveTypeDef.objGetValue("container"));
     if(this.allFeatures) {
@@ -286,8 +283,8 @@ public class XMIModelMapper {
   
     if(this.allFeatures) {
       writeElement("identity", attributeDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)attributeDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)attributeDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)attributeDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)attributeDef.objGetValue("modifiedAt"));
     }
     writeElement("isDerived", attributeDef.objGetValue("isDerived"));
     writeElement("maxLength", attributeDef.objGetValue("maxLength"));
@@ -319,8 +316,8 @@ public class XMIModelMapper {
   
     if(this.allFeatures) {
       writeElement("identity", structureFieldDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)structureFieldDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)structureFieldDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)structureFieldDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)structureFieldDef.objGetValue("modifiedAt"));
     }
     writeElement("maxLength", structureFieldDef.objGetValue("maxLength"));
     writeElement("multiplicity", structureFieldDef.objGetValue("multiplicity"));
@@ -348,8 +345,8 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", operationDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)operationDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)operationDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)operationDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)operationDef.objGetValue("modifiedAt"));
     }
     if(this.allFeatures) {
       writeElement("parameter", operationDef.objGetList("parameter"));
@@ -386,8 +383,8 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", exceptionDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)exceptionDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)exceptionDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)exceptionDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)exceptionDef.objGetValue("modifiedAt"));
     }
     if(this.allFeatures) {
       writeElement("parameter", exceptionDef.objGetList("parameter"));
@@ -421,8 +418,8 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", parameterDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)parameterDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)parameterDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)parameterDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)parameterDef.objGetValue("modifiedAt"));
     }
     writeElement("container", parameterDef.objGetValue("container"));
     if(this.allFeatures) {
@@ -451,8 +448,8 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", associationDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)associationDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)associationDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)associationDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)associationDef.objGetValue("modifiedAt"));
     }
     writeElement("container", associationDef.objGetValue("container"));
     if(this.allFeatures) {
@@ -486,8 +483,8 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", associationEndDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)associationEndDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)associationEndDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)associationEndDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)associationEndDef.objGetValue("modifiedAt"));
     }
     writeElement("aggregation", associationEndDef.objGetValue("aggregation"));
     writeElement("isChangeable", associationEndDef.objGetValue("isChangeable"));
@@ -519,8 +516,8 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", referenceDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)referenceDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)referenceDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)referenceDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)referenceDef.objGetValue("modifiedAt"));
     }
     writeElement("container", referenceDef.objGetValue("container"));
     if(this.allFeatures) {
@@ -556,8 +553,8 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", classDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)classDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)classDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)classDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)classDef.objGetValue("modifiedAt"));
     }
     writeElement("isSingleton", classDef.objGetValue("isSingleton"));
     if(this.allFeatures) {
@@ -597,8 +594,8 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", structDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)structDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)structDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)structDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)structDef.objGetValue("modifiedAt"));
     }
     if(this.allFeatures) {
       writeElement("feature", structDef.objGetList("feature"));
@@ -635,8 +632,8 @@ public class XMIModelMapper {
 
     if(this.allFeatures) {
       writeElement("identity", aliasTypeDef.jdoGetObjectId().toString());
-      writeElementAsDateTime("createdAt", (String)aliasTypeDef.objGetValue("createdAt"));
-      writeElementAsDateTime("modifiedAt", (String)aliasTypeDef.objGetValue("modifiedAt"));
+      writeElementAsDateTime("createdAt", (Date)aliasTypeDef.objGetValue("createdAt"));
+      writeElementAsDateTime("modifiedAt", (Date)aliasTypeDef.objGetValue("modifiedAt"));
     }
     if(this.allFeatures) {
       writeElement("feature", aliasTypeDef.objGetList("feature"));

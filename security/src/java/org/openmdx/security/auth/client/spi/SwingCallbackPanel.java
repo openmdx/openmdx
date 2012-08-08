@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: SwingCallbackPanel.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
+ * Name:        $Id: SwingCallbackPanel.java,v 1.3 2009/08/25 13:49:33 hburger Exp $
  * Description: Swing Callback Panel
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:20 $
+ * Date:        $Date: 2009/08/25 13:49:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -75,7 +75,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.uses.layout.SpringUtilities;
 
 /**

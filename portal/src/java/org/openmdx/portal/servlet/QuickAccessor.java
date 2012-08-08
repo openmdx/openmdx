@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: QuickAccessor.java,v 1.7 2009/01/06 14:12:01 wfro Exp $
+ * Name:        $Id: QuickAccessor.java,v 1.10 2009/08/25 11:58:00 wfro Exp $
  * Description: QuickAccess 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 14:12:01 $
+ * Date:        $Date: 2009/08/25 11:58:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,9 +54,10 @@ package org.openmdx.portal.servlet;
 
 import java.util.List;
 
-import org.openmdx.application.log.AppLog;
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.Base64;
+import org.openmdx.kernel.log.SysLog;
 
 public class QuickAccessor {
     
@@ -95,30 +96,36 @@ public class QuickAccessor {
     
     //-----------------------------------------------------------------------
     public Action getAction(
+    	Object currentObject
     ) {
-        if(this.action == null) {
-            try {
-              this.action = new Action(
-                  Action.EVENT_MACRO,
-                  new Action.Parameter[]{
-                      new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.targetIdentity.toXri()),
-                      new Action.Parameter(Action.PARAMETER_NAME, Base64.encode(this.actionName.getBytes())),
-                      new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(this.actionType))                    
-                  },
-                  this.name,
-                  this.description,
-                  this.iconKey,
-                  true
-              );
-              this.action.setIconKey(
-                  this.iconKey
-              );
-            }
-            catch(Exception e) {
-                AppLog.detail("Can not get action for quick accessor", e.getMessage());
-            }
+    	Path targetIdentity = this.targetIdentity == null ?
+    		currentObject instanceof RefObject_1_0 ? 
+    			((RefObject_1_0)currentObject).refGetPath() :
+    			null :
+    		this.targetIdentity;
+        String actionName = this.actionName.replace("$XRI", targetIdentity.toXri());
+        try {
+          Action action = new Action(
+              Action.EVENT_MACRO,
+              new Action.Parameter[]{
+                  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetIdentity.toXri()),
+                  new Action.Parameter(Action.PARAMETER_NAME, Base64.encode(actionName.getBytes())),
+                  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(this.actionType))                    
+              },
+              this.name,
+              this.description,
+              this.iconKey,
+              true
+          );
+          action.setIconKey(
+              this.iconKey
+          );
+          return action;
         }
-        return this.action;
+        catch(Exception e) {
+        	SysLog.detail("Can not get action for quick accessor", e.getMessage());
+        }
+        return null;
     }
 
     //-----------------------------------------------------------------------
@@ -130,6 +137,5 @@ public class QuickAccessor {
     private final String actionName;
     @SuppressWarnings("unused")
     private final String[] actionParams;
-    private Action action = null;
     
 }

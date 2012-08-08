@@ -20,11 +20,6 @@
 	    is_loaded  	FALSE
 	    file_name  	"$curdir\\compatibility\\datastore1.cat"
 	    quid       	"3FF0C394039D")
-	(object Class_Category "state1"
-	    is_unit    	TRUE
-	    is_loaded  	FALSE
-	    file_name  	"$curdir\\compatibility\\state1.cat"
-	    quid       	"3FF0C38D01E4")
 	(object Class_Category "sequence1"
 	    is_unit    	TRUE
 	    is_loaded  	FALSE
@@ -37,7 +32,7 @@
 	    zoom       	100
 	    max_height 	28350
 	    max_width  	21600
-	    origin_x   	0
+	    origin_x   	444
 	    origin_y   	0
 	    items      	(list diagram_item_list
 		(object CategoryView "Logical View::org::openmdx::compatibility::audit1" @1
@@ -90,32 +85,7 @@
 		    quidu      	"3FF0C394039D"
 		    width      	300
 		    height     	180)
-		(object CategoryView "Logical View::org::openmdx::compatibility::state1" @3
-		    location   	(2296, 240)
-		    font       	(object Font
-			size       	8
-			face       	"Arial"
-			bold       	FALSE
-			italics    	FALSE
-			underline  	FALSE
-			strike     	FALSE
-			color      	0
-			default_color 	TRUE)
-		    label      	(object ItemLabel
-			Parent_View 	@3
-			location   	(2152, 156)
-			fill_color 	13434879
-			nlines     	2
-			max_width  	288
-			justify    	0
-			label      	"state1")
-		    icon_style 	"Icon"
-		    line_color 	3342489
-		    fill_color 	13434879
-		    quidu      	"3FF0C38D01E4"
-		    width      	300
-		    height     	180)
-		(object CategoryView "Logical View::org::openmdx::compatibility::sequence1" @4
+		(object CategoryView "Logical View::org::openmdx::compatibility::sequence1" @3
 		    location   	(1868, 237)
 		    font       	(object Font
 			size       	8
@@ -127,7 +97,7 @@
 			color      	0
 			default_color 	TRUE)
 		    label      	(object ItemLabel
-			Parent_View 	@4
+			Parent_View 	@3
 			location   	(1724, 153)
 			fill_color 	13434879
 			nlines     	2

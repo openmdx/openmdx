@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DatatypeFactories.java,v 1.2 2009/03/31 17:05:17 hburger Exp $
- * Description: DatatypeFactories 
- * Revision:    $Revision: 1.2 $
+ * Name:        $Id: DatatypeFactories.java,v 1.3 2009/10/19 12:40:35 hburger Exp $
+ * Description: Datatype Factories 
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:05:17 $
+ * Date:        $Date: 2009/10/19 12:40:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,14 +51,11 @@
 package org.w3c.spi;
 
 
-import java.util.logging.Level;
-
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.LoggerFactory;
 
 /**
  * DatatypeFactories
@@ -73,19 +70,14 @@ public class DatatypeFactories {
     }
 
     /**
-     * The XML Datatype Factory 
+     * The XML Datatype Factory is lazily initialized
      */
-    private static final DatatypeFactory xmlFactory;
+    private static DatatypeFactory xmlFactory;
 
     /**
-     * The XML Datatype Factory Acquisition Exception
+     * The XML Datatype Factory is lazily initialized
      */
-    private static final DatatypeConfigurationException xmlException;
-    
-    /**
-     * The XML Datatype Factory is immediately initialized
-     */
-    private static final ImmutableDatatypeFactory immutablFactory  = new AlternativeDatatypeFactory();
+    private static ImmutableDatatypeFactory immutableFactory;
     
     /**
      * Retrieve an XML Datatype Factory
@@ -94,16 +86,17 @@ public class DatatypeFactories {
      */
     public static DatatypeFactory xmlDatatypeFactory(
     ){
-        if(xmlException == null) {
-            return xmlFactory;
-        } else {
+        if(xmlFactory == null) try {
+            xmlFactory = DatatypeFactory.newInstance();
+        } catch (DatatypeConfigurationException exception) {
             throw new RuntimeServiceException(
-                xmlException,
+                exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
                 "Datatype factory acquisition failure"
-            );
+            ).log();
         }
+        return xmlFactory;
     }
 
     /**
@@ -113,24 +106,10 @@ public class DatatypeFactories {
      */
     public static ImmutableDatatypeFactory immutableDatatypeFactory(
     ){  
-        return immutablFactory;
-    }
-
-    static {
-        DatatypeFactory factory = null;
-        DatatypeConfigurationException failure = null;
-        try {
-            factory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException exception) {
-            failure = exception;
-            LoggerFactory.getLogger().log(
-                Level.SEVERE,
-                "XML Datatype Factory Acquisition Failure",
-                failure
-            );
+        if(immutableFactory == null) {
+            immutableFactory = new AlternativeDatatypeFactory();
         }
-        xmlFactory = factory;
-        xmlException = failure;
+        return immutableFactory;
     }
 
 }

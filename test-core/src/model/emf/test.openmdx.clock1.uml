@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_riP6UN7EEdmkJO73lqONhA" name="test-clock1">
+  <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D40F55E5800B8PP" name="test">
+    <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D40F55E5800B8P" name="openmdx">
+      <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D40F55E5800B8" name="clock1">
+        <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D40F55F15031D" name="Segment">
+          <generalization xmi:id="_3C7B8A60016D40F55F2E02A1">
+            <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FC487C80099"/>
+          </generalization>
+          <ownedOperation xmi:id="_3C7B8A60016D40F560180207" name="currentDateAndTime" isQuery="true">
+            <ownedParameter xmi:id="_q8mhht7CEdmkJO73lqONhA" type="_3C7B8A60016D40F560B70043" direction="return"/>
+          </ownedOperation>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D40F560B70043" name="Time">
+          <eAnnotations xmi:id="_q8mhi97CEdmkJO73lqONhA" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:id="_q8mhjN7CEdmkJO73lqONhA" key="struct"/>
+          </eAnnotations>
+          <ownedAttribute xmi:id="_3C7B8A60016D40F561D001D8" name="utc">
+            <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B630802BB"/>
+          </ownedAttribute>
+        </packagedElement>
+      </packagedElement>
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

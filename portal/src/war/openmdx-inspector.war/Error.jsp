@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Error.jsp,v 1.9 2008/10/15 22:17:47 wfro Exp $
+ * Name:        $Id: Error.jsp,v 1.11 2009/09/22 11:16:26 wfro Exp $
  * Description: Error.jsp
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/15 22:17:47 $
+ * Date:        $Date: 2009/09/22 11:16:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -82,25 +82,31 @@ javax.servlet.*
 		} 
 		catch(Exception e) {}
 	}
+	String loginFailed = request.getParameter("loginFailed");	
 	System.out.println(new Date() + ": Error: login failed; locale=" + locale + "; timezone=" + timezone + "; requestURL=" + request.getRequestURL());
 	// Invalidate sesion
 	try {
 		request.getSession().invalidate();
 	} 
-	catch(Exception e) {}
+	catch(Exception e) {}	
 	// Forward to Login
 	String cookieMissingHint = request.isRequestedSessionIdFromCookie() ? 
 		"" : 
 		"&cookieError=true";
 	try {
-		request.getSession().setAttribute("loginFailed", "true");
+		request.getSession().setAttribute("loginFailed", loginFailed == null ? "true" : loginFailed);
 		request.getSession().setAttribute("locale", locale);
 		request.getSession().setAttribute("timezone", timezone);
+		request.getSession().setAttribute("processingLogin", "true");		
 	} 
 	catch(Exception e) {}
+	String event = request.getParameter("event");
+	String parameter = request.getParameter("parameter");
 	response.sendRedirect(
-		request.getContextPath() + "/Login?locale=" + locale +
+		request.getContextPath() + "/ObjectInspectorServlet?locale=" + locale +
 		(timezone == null ? "" : "&timezone=" + URLEncoder.encode(timezone)) + 
+		(event == null ? "" : "&event=" + URLEncoder.encode(event)) +
+		(parameter == null ? "" : "&parameter=" + URLEncoder.encode(parameter)) +
 		cookieMissingHint
 	);
 %>

@@ -4,7 +4,552 @@
                     =====================================
 
 ==============================================================================
-Version 2.5.0                                                       2009-06-14
+Version 2.6.0                                                       2010-05-01
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019135
+      Support for Eclipse EMF / UML2 Tools. openMDX models migrated to EMF / 
+      UML2 Tools models. The .uml files are located in src/model/emf. Eclipse EMF
+      replaces RSM as primary modeling tool for openMDX based applications.  
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019124
+      REST Exceptions
+      
+      * A REST exception's stack trace is included even if it has to be 
+        prepared.
+      * Resource Exceptions are logged at Level.FINE.
+        Internal Server Errors are logged at Level.SEVERE.
+         
+      CR20019076
+      JDO callbacks 
+      
+      * All matching implementation classes are now taken into consideration 
+        for lazy instantiation and feature dispatching, not only the most and 
+        least derived ones.
+      * Super-classes of matching implementation classes are excluded from the 
+        set of classes to be potentially instantiated.
+      * Callbacks are dispatched to all classes of this set implementing the
+        given callback interface.
+         
+      CR20019122
+      REST Servlet Behaviour
+      
+      * The REST Servlets default MIME type is "application/xml;charset=UTF-8".
+      * CREATE and UPDATE reply objects are re-fetched after auto-commit. 
+      
+2.1.  FIXED BUGS
+      
+      CR20019123
+      commit() behaviour 
+      
+      The unit of work of a persistence manager proxy re-orders persistent-new 
+      objects before propagation if necessary.
+      
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+
+      20019090
+      Remove SLF4 from openMDX/Core 
+
+      Remove SLF4J from
+      * openMDX/Core
+      * openMDX/Extension
+
+      Restrict its usage to dependent projects such us
+      * openMDX Thrirtparty OpenEJB
+      * openMDX Platform OpenEJB 
+
+      
+==============================================================================
+Version 2.5.4                                                       2010-03-12
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019036
+      HttpClient 
+      
+      HttpClient and HttpCookie support added.
+      
+      openmdx-authentication has been been added.
+
+      CR20019014
+      Subclass selection 
+      
+      Support for a multivalued OBJECT_INSTANCE_OF predicate.
+      
+      Usage:
+      
+            PropertyQuery query = (PropertyQuery) entityManager.newQuery(
+                Property.class
+            );
+            PersistenceHelper.setClasses(
+                query,
+                IntegerProperty.class, DecimalProperty.class
+            );
+      
+      
+      CR20018984
+      Entity Manager Proxy Factory 
+      
+      Provide an EJB independent Entity Manager Proxy Factory:
+      org.openmdx.application.rest.spi.EntityManagerProxyFactory_2
+      
+      CR20018982 
+      retainValues
+      
+      Support the retainValues flag.
+      
+      Transactional objects are
+      * evicted after flush or commit if retainValues is false
+      * not evicted after flush or commit if retainValues is true
+       
+      CR20018976
+      Database: support for nested queries. Support for filter property values 
+      of type org.openmdx.base.query.Filter. 
+      
+      CR20018820 	
+      audit2
+      
+      Audit2 storing audit entries the same way as audit1 does.
+      
+      CR20018959
+      Date/Time Precision
+      
+      The precision of timestamp fields may now be configured with the 
+      dateTimePrecision option as
+      * SECONDS
+      * MILLISECONDS
+      * MICROSECONDS (default)
+      * NANOSECONDS     
+      
+      It is applied under the following conditions:
+      * The protocol between PERSISTENCE and MODEL layer uses XML data types
+      * the value refers to a time point after 1970-01-01T00:00:00Z
+      * the column includes a timezone in case of write operations 
+      
+      CR20018955
+      VirtualObjects_2
+      
+      The new plug-in is well known to Switch_1 as it provides virtual objects 
+      on an object id base, overriding the ports configured for any matching 
+      pattern.
+      
+      There are two ways to inject virtual objects:
+      * as deployment configuration one can provide pattern/class pairs for 
+        final classes
+      * via the VirtualObjects_2_0.putSeed(Path,objectClass) method plug-ins 
+        are able to inject objects at run-time
+      
+      The default configuration is
+
+        <property 
+        	name="org.openmdx.jdo.DataManager.virtualObjectPlugIn" 
+        	value="org.openmdx.virtual.PlugIn"
+        />
+		<!-- ... -->
+        <property 
+        	name="org.openmdx.virtual.PlugIn.class" 
+        	value="org.openmdx.base.accessor.rest.spi.VirtualObjects_2"
+        />
+        <property 
+        	name="org.openmdx.virtual.PlugIn.finalPattern[0]" 
+        	value="xri://@openmdx*($..)"
+        />
+        <property
+        	name="org.openmdx.virtual.PlugIn.finalPattern[1]" 
+        	value="xri://@openmdx*($..)/provider/($..)"
+        />
+        <prop20018969erty
+        	name="org.openmdx.virtual.PlugIn.finalClass[0]"
+        	value="org:openmdx:base:Authority"
+        />
+        <property
+        	name="org.openmdx.virtual.PlugIn.finalClass[1]"
+			value="org:openmdx:base:Provider"
+		/>
+
+      The VirtualObjects_2_0 instance is retrieved through
+
+		VirtualObjects_2_0 virtualObjects = SharedObjects.getPlugInObject(
+			persistenceManager, 
+			VirtualObjects_2_0.class
+		);
+				
+      CR20018905
+      UUIDs
+      
+      The expression UUIDs.newUUID() is now preferred over 
+      UUIDs.getGenerator().next() as the former one reuses thread local UUID
+      generators while the latter one creates a new generator on each 
+      invocation.
+      
+      CR20018820 	
+      View Manager Plug-Ins 
+      
+      The view manager interceptors are now pluggable, e.g.
+      
+        <property 
+        	name="org.openmdx.jdo.ViewManager.plugIn[0]" 
+        	value="org.openmdx.base.PlugIn"
+        />
+        <property 
+        	name="org.openmdx.jdo.ViewManager.plugIn[1]" 
+        	value="org.openmdx.state2.PlugIn"
+        />
+        <property 
+        	name="org.openmdx.state2.PlugIn.class" 
+        	value="org.openmdx.state2.aop1.PlugIn_1"
+        />
+        <property 
+        	name="org.openmdx.base.PlugIn.class" 
+        	value="org.openmdx.base.aop1.PlugIn_1"
+        />
+      
+      A singleton list with org.openmdx.base.aop1.StandardPlugIn_1 is used if 
+      no plug-in is configured. 
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019064
+      ResultRecord-Externalization
+      
+      org::openmdx::kernel::ResultRecord are implemented by the class 
+      org.openmdx.base.rest.spi.ResultRecord and externalized with as
+      application/vnd.openmdx.wbxml document.
+      
+      CR20018977
+      Association Impl 
+      
+       The current approach to dispatch to an association implementation was 
+       inconsistent:
+       * overriding the getReference accessor was ignored by getObjectById calls  
+            
+      CR20018980
+      Deprecated SparseList. Use List or SparseArray instead.
+            
+      CR20018924
+      Database: optimize find(). Optimize find() in case multi-valued attributes 
+      have to be returned. Multi-valued attributes are now retrieved from the 
+      secondary table with one SELECT for all objects instead of one SELECT for
+      each object.  
+      
+      CR20018820 	
+      audit2 
+      
+      DataManager_2Bean no longer invokes setRollbackOnly() when execute()
+      terminates with a ResourceException.
+      
+      It's up to the client whether the unit of work should be committed or
+      rolled back.
+      
+2.1.  FIXED BUGS
+      
+      CR20018969
+      SparseArray
+      
+      Store and retrieval was not erroneous.
+      
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+
+      
+==============================================================================
+Version 2.5.3                                                       2009-10-23
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20018820
+      audit2
+      
+      The method 
+      org.openmdx.base.persistence.cci.UserObjects.setTaskIdentifier
+      is used to provide the task identifier for the org::openmdx::audit2
+      sub-system.
+      
+        public static void setTaskIdentifier(
+          PersistenceManager persistenceManager,
+          Object taskIdentifier
+        );
+        
+      If set the task identifier's toString() method is evaluated at the
+      beginning of each unit of work.
+      
+      An application may therefore
+      * either replace unmodifiable task identifiers (e.g. java.langString
+        instances) to change the task id
+      * or use a stateful task identifier providing the current task id each 
+        time its toString() method is invoked  
+       
+      CR20018822 	
+      XmlImporter / XmlExporter für openMDX 2
+      
+      Re-factored and aspect aware
+      (to support org::openmdx::state2 for example).
+      
+      CR20018750
+      getManagedObjects(). Implement DataObjectManager_1.getManagedObjects(...) 
+      methods.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20018873
+      OpenMDXSchemes
+      
+      This class has been removed.
+      Its LEGACY_PREFIX field has been replaced by URI_1.OPENMDX_PREFIX.
+      
+      CR20018872
+      Connection & Connection Factory
+      
+      The package org.openmdx.kernel.security.resource has been moved from
+      openMDX/Core to openMDX/Security
+      
+      CR20018847
+      JDO deleted state
+      
+      * JDO 2.2 says "Read access to primary key fields is permitted. Any 
+        other access to persistent fields is not supported and might throw a 
+        JDOUserException."
+      * openMDX 2 shall not throw a JDOUserException when accessing other 
+        fields in an optimistic unit of work.
+      
+      CR20018821
+      XmlImporter / XmlExporter for openMDX 2
+      
+      org:w3c:date and org:w3c:dateTime values are no longer imported as 
+      java.lang.String but as javax.xml.datatype.XMLGregorianCalendar and 
+      java.util.Date respectively.
+      
+      org.openmdx.base.text.format.DateFormat's getInstance() methods are 
+      replaced by org.openmdx.base.text.format.DateTimeFormat's<ul>
+      * BASIC_UTC_FORMAT field
+      * EXTENDED_UTC_FORMAT field
+      * getInstance() method (for other formats)    
+      
+      CR20018826
+      isEmpty
+     
+      isEmpty() should avoid delegating to size() if it can delegate to
+      isEmpty().     
+      
+2.1.  FIXED BUGS
+      
+      CR20018875
+      getObjectById returns null
+      
+      The PersistenceManager's getObjectById() method must not return null.
+      
+      It may
+      * either return an instance
+      * or throw an exception 
+      
+      CR20018846
+      JDO life cycle
+      
+      deleted implies dirty 
+      
+      CR20018838 	
+      A Container's Cardinality
+      
+      It depends on the container's state whether the predicate isEmpty() is 
+      evaluated correctly. 
+      
+2.2.  DEPRECATED FEATURES
+
+      CR20018821
+      XmlImporter / XmlExporter for openMDX 2
+      
+      "resource:..." and "xri:+resource/..." URLs are deprecated in favour 
+      of the XRI 2 URLs "xri://+resource/...".
+      
+      org.openmdx.base.text.format.DateFormat deprecated in favour of
+      org.openmdx.base.text.format.DateTimeFormat
+      
+2.3.  REMOVED FEATURES
+
+      CR20018873
+      OpenMDXSchemes
+      
+      This class has been removed.
+      
+      CR20018870
+      Dataprovider Transport
+      
+      Unreferenced classes removed:
+      * Dataprovider_1ShareableConnectionHolder
+      * Dataprovider_1ConnectionFactory
+      * Dataprovider_1Connection
+      
+      CR20018869
+      Abstract Session Bean
+      
+      Unreferenced package org.openmdx.application.ejb.spi removed.
+      
+      CR20018868
+      Application Control
+      
+      Unreferenced package org.openmdx.application.control removed.
+      
+      CR20018867 
+      Application Context
+      
+      Unreferenced class ApplicationContext_1_0 removed.
+      
+      CR20018866
+      Dependencies
+      
+      Unreferenced Dependencies classes have been discarded.
+       
+      CR20018865
+      State Transitions
+      
+      org.openmdx.base.concurrent.StateTransitions in openMDX/Core has been
+      replaced by org.openmdx.security.auth.context.pool.StateTransitions in
+      openMDX/Security.
+       
+      CR20018821
+      XmlImporter / XmlExporter for openMDX 2
+
+      * The package org.openmdx.application.dataprovider.exporter has been 
+        removed.
+            
+      *  .../xmi/... schema paths are no longer mapped to the actual 
+         .../xmi1/... schema paths.
+      
+      
+==============================================================================
+Version 2.5.2                                                       2009-09-14
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20018768 
+      refreshAll
+      
+      The PersistenceManager's refreshAll() methods have been implemented.  
+
+      CR20018750
+      getManagedObjects
+      
+      The PersistenceManager's getManagedObjects() methods have been 
+      implemented.  
+      
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20018800 	
+      Deployment_1
+      
+      Deployment_1's default principal chain is now the user name as defined
+      by the system property "user.name". 
+
+      CR20018768 
+      refresh
+      
+      refreshing an object invalidates its container's stored cache.
+      
+      The PersistenceManager's refreshAll methods have been implemented  
+      
+      CR20018789
+      Support unmarshalling of micro second precision timestamps
+      
+      * Marshal micro seconds and nano seconds already present in an 
+        XMLGregorianCalendar into an SQL Timestamp
+      * Do not modify the unmarshal code at the moment.       
+
+      CR20018742
+      Aspect handling
+      
+      The getAspect() and getAspects() methods have been replaced by named
+      queries.
+      
+      CR20018765
+      Slice Cache
+      
+      Synchronize slice cache write operations only.
+      
+2.1.  FIXED BUGS
+      
+      CR20018800 	
+      PersistenceManagerFactory
+      
+      An accessors persistence manager factory shall be set correctly.
+      
+      CR20018745
+      Persistent-New Objects
+      
+      Persistent-new objects must be dirty from the beginning, even if no 
+      attribute has been set yet 
+
+      CR20018766
+      object_class Filter 
+      
+      An object_class filter must not be treated the same way as an 
+      object_instanceof filter. 
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      
+      CR20018767
+      Lenient Access Modifier
+      
+      Get rid of the lenient access modifier support. 
+      
+      
+==============================================================================
+Version 2.5.1                                                       2009-07-22
+==============================================================================
+
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR10008700
+      Database: improve case-insensitive search. UPPER(column) LIKE UPPER(?) 
+      does not work for all databases. 
+      
+2.1.  FIXED BUGS
+      
+      CR20018720
+      Datastore Commit Failure
+      
+      Correct JDO Exception:
+      A datastore commit failure should raise a JDOFatalDataStoreEception or a 
+      subclass thereof (e.g. JDOOptimisticVerificationException). 
+
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 2.5.0                                                       2009-06-16
 ==============================================================================
 
 1.    NEW FEATURES
@@ -203,8 +748,7 @@ Version 2.5.0                                                       2009-06-14
       
       Dependency on SLF4J removed from openMDX.
       openMDX uses the plain Java Logging API.
-      
-      
+               
 ==============================================================================
 Version 2.4.1                                                       2009-04-02
 ==============================================================================

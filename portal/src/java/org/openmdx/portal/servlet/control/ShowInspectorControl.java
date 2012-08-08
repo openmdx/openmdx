@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowInspectorControl.java,v 1.13 2008/11/14 14:56:47 wfro Exp $
+ * Name:        $Id: ShowInspectorControl.java,v 1.15 2009/09/25 12:02:37 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/14 14:56:47 $
+ * Date:        $Date: 2009/09/25 12:02:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,9 +61,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.reports.ReportDefinitionFactory;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
@@ -93,7 +93,7 @@ public class ShowInspectorControl
             inspector
         );
 
-        AppLog.detail("Preparing operation and reference panes");
+        SysLog.detail("Preparing operation and reference panes");
         List<Object> paneOp = new ArrayList<Object>();
         List<Object> paneRef = new ArrayList<Object>();
         for(Iterator i = inspector.getMember().iterator(); i.hasNext();) {
@@ -111,7 +111,7 @@ public class ShowInspectorControl
         this.paneRef = (org.openmdx.ui1.jmi1.ReferencePane[])paneRef.toArray(new org.openmdx.ui1.jmi1.ReferencePane[paneRef.size()]);
 
         // Operation pane
-        AppLog.detail("Preparing operation panes");
+        SysLog.detail("Preparing operation panes");
         List<OperationPaneControl> operationPaneControls = new ArrayList<OperationPaneControl>();
         for (int i = 0; i < this.paneOp.length; i++) {
             org.openmdx.ui1.jmi1.OperationPane pane = this.paneOp[i];
@@ -131,7 +131,7 @@ public class ShowInspectorControl
         );
 
         // Reference pane
-        AppLog.detail("Preparing reference panes");
+        SysLog.detail("Preparing reference panes");
         this.referencePaneControl = new ReferencePaneControl[this.paneRef.length];
         for(int i = 0; i < this.referencePaneControl.length; i++) {
             this.referencePaneControl[i] = controlFactory.createReferencePaneControl(
@@ -146,24 +146,24 @@ public class ShowInspectorControl
         }
 
         // Reports
-        AppLog.detail("Preparing reports");
+        SysLog.detail("Preparing reports");
         this.reportControl = controlFactory.createReportControl(
             null, 
             locale,
             localeAsIndex,
             reportFactory.findReportDefinitions(forClass, locale, null)
         );
-        AppLog.detail("Preparing reports done");
+        SysLog.detail("Preparing reports done");
 
         // Wizards
-        AppLog.detail("Preparing wizards");
+        SysLog.detail("Preparing wizards");
         this.wizardControl = controlFactory.createWizardControl(
             null, 
             locale,
             localeAsIndex,
             wizardFactory.findWizardDefinitions(forClass, locale, null)
         );
-        AppLog.detail("Preparing wizards done");
+        SysLog.detail("Preparing wizards done");
     }
 
     // -------------------------------------------------------------------------
@@ -209,7 +209,7 @@ public class ShowInspectorControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing
     ) throws ServiceException {

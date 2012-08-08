@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1Package_1_0.java,v 1.11 2009/05/29 17:04:10 hburger Exp $
- * Description: RefPackage Interface 1.5
- * Revision:    $Revision: 1.11 $
+ * Name:        $Id: Jmi1Package_1_0.java,v 1.13 2010/04/07 13:08:05 hburger Exp $
+ * Description: JMI 1 Package Interface
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/29 17:04:10 $
+ * Date:        $Date: 2010/04/07 13:08:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,31 +53,12 @@ package org.openmdx.base.accessor.jmi.spi;
 import javax.jdo.PersistenceManagerFactory;
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 
 /**
- * RefPackage Interface 1.5
+ * JMI 1 Package Interface
  */
 public interface Jmi1Package_1_0 extends RefPackage_1_0 {
-
-    /**
-     * Lookup the implementation specified by <code>qualifiedClassName</code> and create
-     * an instance with refDelegate as delegate object. The Java package name is derived 
-     * from the package name of the specified class and this RefPackage packageImpl 
-     * mapping, i.e. refCreateImpl() returns an instance of org.openmdx.base.BasicObjectImpl 
-     * if <code>qualifiedClassName</code> is <code>org:openmdx:base:BasicObject</code> 
-     * the packageImpl mapping is set to [org:openmdx:base->org.openmdx.base]. 
-     */
-    Object refCreateImpl(
-        String qualifiedClassName,
-        RefObject_1_0 refDelegate
-    );
-
-    /**
-     * @return config option bindingPackageSuffix
-     */
-    String refBindingPackageSuffix();
 
     /**
      * Retrieves the JDO Persistence Manager Factory.
@@ -100,28 +81,11 @@ public interface Jmi1Package_1_0 extends RefPackage_1_0 {
     boolean isTerminal();
     
     /**
-     * Retrieve the implementation package name
+     * Retrieve the associated implementation mapper
      * 
-     * @param packageName 
-     * 
-     * @return the implementation package name
+     * @return the associated implementation mapper
      */
-    String refImplPackageName(
-        String packageName
+    Mapping_1_0 refMapping(
     );
-
-    /**
-     * Lookup the implementation specified by <code>qualifiedClassName</code> and create
-     * an instance with refDelegate as delegate object. The Java package name is derived 
-     * from the package name of the specified class and this RefPackage packageImpl 
-     * mapping, i.e. refCreateImpl() returns an instance of org.openmdx.base.BasicObjectImpl 
-     * if <code>qualifiedClassName</code> is <code>org:openmdx:base:BasicObject</code> 
-     * the packageImpl mapping is set to [org:openmdx:base->org.openmdx.base]. 
-     */
-    Object refCreateImpl(
-        String qualifiedClassName,
-        Object self,
-        Object next
-    );
-
+    
 }

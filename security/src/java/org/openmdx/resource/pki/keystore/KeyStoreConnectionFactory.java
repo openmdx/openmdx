@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: KeyStoreConnectionFactory.java,v 1.1 2009/03/11 16:04:22 hburger Exp $
+ * Name:        $Id: KeyStoreConnectionFactory.java,v 1.2 2010/03/05 13:24:12 hburger Exp $
  * Description: ConnectionFactory 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/11 16:04:22 $
+ * Date:        $Date: 2010/03/05 13:24:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,8 +63,8 @@ import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnectionFactory;
 
-import org.openmdx.kernel.security.resource.Connection;
-import org.openmdx.kernel.security.resource.ConnectionFactory;
+import org.openmdx.resource.pki.cci.Connection;
+import org.openmdx.resource.pki.cci.ConnectionFactory;
 
 /**
  * ConnectionFactory

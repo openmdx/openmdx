@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Uml2Mapper_1.java,v 1.7 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: Uml2Mapper_1.java,v 1.8 2010/04/13 17:37:55 wfro Exp $
  * Description: XMIExternalizer_1
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2010/04/13 17:37:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -108,7 +108,7 @@ public class Uml2Mapper_1
         this.addToZip(zip, bs, null, "rsm6.xmi");
 
         long end = System.currentTimeMillis();
-        SysLog.info("Uml2Mapper: time(ms) used to externalize: " + (end - start));
+        SysLog.detail("Uml2Mapper: time(ms) used to externalize: " + (end - start));
 
     }
 

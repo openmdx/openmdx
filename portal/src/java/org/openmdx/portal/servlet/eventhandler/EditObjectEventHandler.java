@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectEventHandler.java,v 1.34 2009/06/09 12:50:34 hburger Exp $
+ * Name:        $Id: EditObjectEventHandler.java,v 1.39 2010/03/28 00:49:53 wfro Exp $
  * Description: EditObjectEventHandler 
- * Revision:    $Revision: 1.34 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:50:34 $
+ * Date:        $Date: 2010/03/28 00:49:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,18 +60,18 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jdo.JDOHelper;
-import javax.jdo.PersistenceManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ObjectReference;
-import org.openmdx.portal.servlet.PaintScope;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.ObjectCreationResult;
@@ -95,16 +95,14 @@ public class EditObjectEventHandler {
         ViewsCache showViewsCache      
     ) {
         ObjectView nextView = currentView;
-        PaintScope nextPaintMode = PaintScope.FULL;
+        ViewPort.Type nextViewPortType = null;
         ApplicationContext application = currentView.getApplicationContext();
         switch(event) {
 
             case Action.EVENT_SAVE: {
                 Map attributeMap = new HashMap();    
-                PersistenceManager pm = currentView.getPersistenceManager();
                 boolean hasErrors;
                 try {  
-                    pm.currentTransaction().begin();
                     currentView.storeObject(
                         parameterMap,
                         attributeMap
@@ -114,33 +112,32 @@ public class EditObjectEventHandler {
                     if(hasErrors) {
                         errorMessages.clear();                        
                     }
-                    else {
-                        pm.currentTransaction().commit();
-                    }
                 }
                 catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getMessage());
-                    AppLog.warning(e0.getMessage(), e0.getCause());
+                    SysLog.warning(e0.getMessage(), e0.getMessage());
+                    SysLog.warning(e0.getMessage(), e0.getCause());
                     currentView.handleCanNotCommitException(e0.getCause());                    
                     hasErrors = true;
                 }
                 if(hasErrors) {
                     try {
-                        pm.currentTransaction().rollback();
-                    } 
-                    catch(Exception e) {}
-                    try {
-                        // create a new empty instance ...
-                        RefObject_1_0 workObject = (RefObject_1_0)currentView.getRefObject().refClass().refCreateInstance(null);
-                        workObject.refInitialize(false, false);
+                        RefObject_1_0 workObject = null;
+                        try {
+                        	// Try to clone current object and use it as new working object
+                        	workObject = PersistenceHelper.clone(currentView.getRefObject());
+                        }
+                        catch(Exception e) {
+                            // If cloning fails, create a new empty instance
+                        	workObject = (RefObject_1_0)currentView.getRefObject().refClass().refCreateInstance(null);                        	
+                            workObject.refInitialize(false, false);
+                        }
                         // Initialize with received attribute values. This also updates the error messages
                         application.getPortalExtension().updateObject(
                             workObject,
                             parameterMap,
                             attributeMap,
-                            application,
-                            currentView.getPersistenceManager()
+                            application
                         );
                         nextView = new EditObjectView(
                             currentView.getId(),
@@ -148,14 +145,13 @@ public class EditObjectEventHandler {
                             workObject,
                             currentView.getEditObjectIdentity(),
                             application,
-                            pm,
                             currentView.getHistoryActions(),
                             currentView.getLookupType(),
                             currentView.getRestrictToElements(),
                             currentView.getParentObject(),
                             currentView.getForReference(),
                             currentView.getMode()
-                        );                
+                        );            
                         // Current view is dirty. Remove it and replace it by newly created. 
                         editViewsCache.removeView(
                             currentView.getRequestId()
@@ -189,7 +185,6 @@ public class EditObjectEventHandler {
                             )
                         );
                     }
-                    showViewsCache.evictViews();
                     // Object is saved. EditObjectView is not required any more. Remove 
                     // it from the set of open EditObjectViews.
                     editViewsCache.removeView(
@@ -203,7 +198,7 @@ public class EditObjectEventHandler {
                         catch(Exception e) {
                             new ServiceException(e).log();
                         }
-                        nextPaintMode = PaintScope.ATTRIBUTE_PANE;
+                        nextViewPortType = ViewPort.Type.EMBEDDED;
                     }
                 }
                 break;
@@ -216,7 +211,7 @@ public class EditObjectEventHandler {
                 nextView = currentView.getPreviousView(showViewsCache);
                 // If the view is embedded paint attribute pane
                 if(currentView.getMode() == ViewMode.EMBEDDED) {
-                    nextPaintMode = PaintScope.ATTRIBUTE_PANE;
+                    nextViewPortType = ViewPort.Type.EMBEDDED;
                 }                
                 break;
 
@@ -228,7 +223,7 @@ public class EditObjectEventHandler {
         }
         return new HandleEventResult(
             nextView,
-            nextPaintMode
+            nextViewPortType
         );
     }
     

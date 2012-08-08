@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI2ReferenceResolver.java,v 1.3 2009/03/04 18:44:38 wfro Exp $
+ * Name:        $Id: XMI2ReferenceResolver.java,v 1.5 2010/04/13 18:07:28 wfro Exp $
  * Description: XMI2 Reference Resolver
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/04 18:44:38 $
+ * Date:        $Date: 2010/04/13 18:07:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,10 +52,11 @@
 package org.openmdx.application.mof.externalizer.xmi;
 
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -188,17 +189,23 @@ public class XMI2ReferenceResolver
             "references".equals(qName) &&
             ("uml:Package".equals(atts.getValue("xmi:type")) || "uml:Model".equals(atts.getValue("xmi:type"))) 
         ) {
-            HRef href = null;
-            try {
-                href = new HRef(atts.getValue("href"));
-            }
-            catch(ServiceException e) {
+            URI href = null;
+            try {          
+                String value = atts.getValue("href");
+                // Convert relative paths to platform resource paths
+                String schema = "";
+                while(value.startsWith("../") || value.startsWith("..\\")) {
+                    value = value.substring(3);         
+                    schema = "platform:/resource/";
+                } 
+                href = new URI(schema + value);                   
+            } catch(URISyntaxException e) {
                 this.error("reference is not a valid URI " + atts.getValue("href"));
             }
             if(href != null) {
                 try {
                     String scheme = href.getScheme();
-                    String path = Pattern.compile("%20").matcher(href.getPath()).replaceAll(" ");
+                    String path = href.getPath().replace("%20", " ");
                     String packageName = null;
                     if("platform".equals(scheme) && path.startsWith("/resource/")) {
                         path = path.substring("/resource/".length());
@@ -234,6 +241,7 @@ public class XMI2ReferenceResolver
                     }
                 }
                 catch(Exception e) {
+                    new ServiceException(e).log();
                     this.error("Can not process nested model " + atts.getValue("href") + ". Reason=" + e.getMessage());
                 }
             }

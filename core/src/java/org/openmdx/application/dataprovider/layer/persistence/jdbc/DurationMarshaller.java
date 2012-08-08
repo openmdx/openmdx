@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DurationMarshaller.java,v 1.1 2009/05/26 14:31:20 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: DurationMarshaller.java,v 1.2 2009/12/14 15:00:13 hburger Exp $
  * Description: DurationMarshaller 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:20 $
+ * Date:        $Date: 2009/12/14 15:00:13 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -59,33 +58,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi2.Datatypes;
 
 /**
  * DurationMarshaller
  */
-public class DurationMarshaller
-implements Marshaller
-{
+public class DurationMarshaller implements Marshaller {
 
     /**
      * Constructor 
      *
      * @param durationType
-     * @param xmlDatatypes
-     * 
      * @throws ServiceException 
      */
-    protected DurationMarshaller(
-        String durationType, 
-        boolean xmlDatatypes
+    private DurationMarshaller(
+        String durationType
     ) throws ServiceException {
         if(!DURATION_TYPES.contains(durationType)) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
@@ -95,11 +87,6 @@ implements Marshaller
             new BasicException.Parameter("requested", durationType)
         );
         this.durationType = durationType.intern();
-        try {
-            this.datatypeFactory = xmlDatatypes ? DatatypeFactories.xmlDatatypeFactory() : null;
-        } catch (RuntimeServiceException exception) {
-            throw new ServiceException(exception);
-        }
         if(this.durationType == LayerConfigurationEntries.DURATION_TYPE_INTERVAL) {
             this.YEAR_TO_MONTH = Pattern.compile(
                 "^(-?)([0-9]+)-([0-9]+)$"
@@ -115,24 +102,16 @@ implements Marshaller
 
     /**
      * Factory
-     * 
      * @param type the duration type
-     * @param xmlDatatypes 
      * 
      * @return an new <code>DurationMarshaller</code> instance
      * @throws ServiceException 
      */
     public static DurationMarshaller newInstance(
-        String durationType, 
-        boolean xmlDatatypes
+        String durationType
     ) throws ServiceException{
-        return new DurationMarshaller(durationType, xmlDatatypes);
+        return new DurationMarshaller(durationType);
     }
-
-    /**
-     * Non-<code>null</code> if <code>xmlDatatypes</code> is <code>true</code>.
-     */
-    private final DatatypeFactory datatypeFactory;
 
     /**
      * The type used to store <code>org::w3c::duration</code> values, i.e. one of<ul>
@@ -255,7 +234,7 @@ implements Marshaller
         if(source == null) {
             return source;
         } else if(LayerConfigurationEntries.DURATION_TYPE_CHARACTER == durationType) {
-            return toDuration((CharSequence)source);
+            return Datatypes.create(Duration.class, source.toString());
         } else if (LayerConfigurationEntries.DURATION_TYPE_INTERVAL == durationType){
             String value = source.toString();
             Matcher matcher;
@@ -284,7 +263,7 @@ implements Marshaller
                 ).append(
                     "S"
                 );
-                return toDuration(duration);                
+                return Datatypes.create(Duration.class, duration.toString());                
             } else if ((matcher = YEAR_TO_MONTH.matcher(value)).matches()) {
                 StringBuilder duration = new StringBuilder(
                 ).append(
@@ -300,7 +279,7 @@ implements Marshaller
                 ).append(
                     "M"
                 );
-                return toDuration(duration);                
+                return Datatypes.create(Duration.class, duration.toString());                
             } else throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
@@ -313,7 +292,7 @@ implements Marshaller
                 Number value = (Number)source;
                 return source instanceof BigDecimal && ((BigDecimal)source).scale() > 0 ?
                     toDuration("T", value, "S") :
-                        toDuration("", value, "M");
+                    toDuration("", value, "M");
             } else throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
@@ -334,42 +313,14 @@ implements Marshaller
         String suffix
     ){
         String value = infix.toString();
-        return toDuration(
+        return Datatypes.create(
+            Duration.class,
             value.charAt(0) == '-' ? (
-                    "-P" + prefix + value.substring(1) + suffix
+                "-P" + prefix + value.substring(1) + suffix
             ) : (
-                    "P" + prefix + value + suffix 
+                "P" + prefix + value + suffix 
             )
         );
-    }
-
-    protected Object toDuration(
-        CharSequence source
-    ){
-        if(this.datatypeFactory == null) {
-            return source;
-        } else {
-            boolean yearMonth = false;
-            boolean dayTime = false;
-            for(
-                    int i = 0, iLimit = source.length();
-                    i < iLimit;
-                    i++
-            ) {
-                switch(source.charAt(i)) {
-                    case 'Y': case 'M': yearMonth = true; break;
-                    case 'D': case 'T': dayTime = true; break;
-                }
-            }
-            String duration = source.toString();
-            if(yearMonth == dayTime) {
-                return this.datatypeFactory.newDuration(duration);
-            } else if (yearMonth) {
-                return this.datatypeFactory.newDurationYearMonth(duration);
-            } else { // dayTime
-                return this.datatypeFactory.newDurationDayTime(duration);
-            }
-        }
     }
 
 }

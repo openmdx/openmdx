@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WebKeys.java,v 1.30 2009/03/08 18:03:20 wfro Exp $
+ * Name:        $Id: WebKeys.java,v 1.31 2009/09/30 16:08:51 wfro Exp $
  * Description: WebKeys 
- * Revision:    $Revision: 1.30 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:20 $
+ * Date:        $Date: 2009/09/30 16:08:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -127,6 +127,7 @@ public class WebKeys {
     public static final String ICON_HEADER_HIDE = "headerHide" + WebKeys.ICON_TYPE;
     public static final String ICON_LOGOFF_SELECTED = "logoffSelected" + WebKeys.ICON_TYPE;
     public static final String ICON_SAVE_SELECTED = "saveSelected" + WebKeys.ICON_TYPE;
+    public static final String ICON_ROLE = "Role" + WebKeys.ICON_TYPE;    
        
     // Configuration parameters
     public static final String CONFIG_USER_HOME = "userHome";

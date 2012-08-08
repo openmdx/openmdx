@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Layer_1.java,v 1.8 2009/06/09 12:45:19 hburger Exp $
+ * Name:        $Id: Layer_1.java,v 1.35 2010/04/13 17:15:13 wfro Exp $
  * Description: User Profile Service
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:19 $
+ * Date:        $Date: 2010/04/13 17:15:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,7 +51,19 @@
 package org.openmdx.application.dataprovider.spi;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.ConnectionFactory;
+import javax.resource.cci.ConnectionMetaData;
+import javax.resource.cci.IndexedRecord;
+import javax.resource.cci.Interaction;
+import javax.resource.cci.LocalTransaction;
+import javax.resource.cci.MappedRecord;
+import javax.resource.cci.ResultSetInfo;
 
 import org.openmdx.application.cci.ConfigurationSpecifier;
 import org.openmdx.application.configuration.Configuration;
@@ -59,25 +71,64 @@ import org.openmdx.application.dataprovider.cci.DataproviderLayers;
 import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
-import org.openmdx.application.dataprovider.cci.DataproviderRequestContexts;
+import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
-import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
-import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.Version;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.Records;
+import org.openmdx.base.resource.spi.Port;
+import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.ResultRecord;
+import org.openmdx.base.rest.spi.AbstractRestInteraction;
+import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.spi.Query_2Facade;
+import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.cci2.SparseArray;
 
 /**
- * A transparent implementation of Layer_1_0, i.e. all calls are delegated.
+ * A delegating rest interaction.
  */
-public class Layer_1
-    extends AbstractLayer_1
-    implements Layer_1_2
-{
+public abstract class Layer_1 implements Dataprovider_1_0, Port {
+
+    public Layer_1(
+    ) {        
+    }
+    
+    /**
+     * Provide a response path by appending "*-";
+     * 
+     * @param requestId
+     * 
+     * @return a response path 
+     */
+    public Path newReplyId(
+        Path requestId
+    ){
+        return requestId.getParent().getChild(requestId.getBase() + "*-");
+    }
+    
+    /**
+     * To replace the deprecated UIDFactory.create() calls
+     * 
+     * @return a UID as string
+     */
+    protected final String uidAsString(
+    ){
+        UUID uuid = UUIDs.newUUID();
+        return this.compressUID ?
+            UUIDConversion.toUID(uuid) :
+            uuid.toString();
+    }
 
     /**
      * Get the layer's id
@@ -106,28 +157,25 @@ public class Layer_1
      *
      * @return  the layer to delegate to
      */
-    protected final Layer_1_0 getDelegation(
+    protected final Layer_1 getDelegation(
     ){
         return this.delegation;
     }
 
-    protected boolean isLenient(
-        DataproviderRequest request
-    ){
-        return Boolean.TRUE.equals(request.context(DataproviderRequestContexts.LENIENT).get(0));
-    }
-
     /**
-     * The layer this layer delegates to
-     *
-     * @return  the layer to delegate to
+     * Lazy model accessor retrieval
+     * 
+     * @return the model accessor
      */
-    protected final Layer_1_0 getDelegation(
-        DataproviderRequest request
-    ){
-        return isLenient(request) ? getLenientDelegation() : getDelegation();
+    public final Model_1_0 getModel(){
+        return Model_1Factory.getModel();
     }
-
+    
+    protected ConnectionFactory getConnectionFactory(
+    ) {
+        return this.connectionFactory;
+    }
+    
     /**
      * Says whether this layer is the terminal layer or not
      *
@@ -137,83 +185,6 @@ public class Layer_1
     ){
         return this.delegation == null;
     }
-
-    /**
-     * Retrieve bypassedByLenientRequests.
-     *
-     * @return Returns the bypassedByLenientRequests.
-     */
-    protected final boolean isBypassedByLenientRequests() {
-        return this.bypassedByLenientRequests;
-    }
-
-    /**
-     * Retrieve model.
-     *
-     * @return Returns the model.
-     */
-    protected Model_1_0 getModel(
-    ) {
-        return this.model == null ? this.model = Model_1Factory.getModel() : this.model;
-    }
-    
-    
-    //------------------------------------------------------------------------
-    // Implements Layer_1_2
-    //------------------------------------------------------------------------    
-
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1_2#epilog(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest, org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply)
-     */
-    public void epilog(
-        ServiceHeader header,
-        UnitOfWorkRequest request,
-        UnitOfWorkReply reply
-    ) throws ServiceException {
-        if(this.delegation instanceof Layer_1_2) {
-            ((Layer_1_2)this.delegation).epilog(header, request, reply);
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1_2#prolog(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest)
-     */
-    public void prolog(
-        ServiceHeader header, 
-        UnitOfWorkRequest request
-    ) throws ServiceException {
-        if(this.delegation instanceof Layer_1_2) {
-            ((Layer_1_2)this.delegation).prolog(header, request);
-        }
-    }
-
-
-    //------------------------------------------------------------------------
-    // Implements Layer_1_1
-    //------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1_1#getLenientProcessor()
-     */
-    public Layer_1_0 getLenientProcessor() {
-        return this.bypassedByLenientRequests ? getLenientDelegation() : this;
-    }
-
-    /**
-     * Retrieve a delegate processing lenient requests
-     * 
-     * @return a delegate processing lenient requests
-     */
-    private Layer_1_0 getLenientDelegation() {
-        return this.delegation instanceof Layer_1_1 ? 
-            ((Layer_1_1)this.delegation).getLenientProcessor() :
-                this.delegation;
-    }
-
-
-    //------------------------------------------------------------------------
-    // Implements Layer_1_0
-    //------------------------------------------------------------------------
 
     /**
      * This layer's specific configuration specifiers.
@@ -233,10 +204,10 @@ public class Layer_1
      *
      * @return  a map with id/ConfigurationSpecifier entries
      */
-    public Map<String,ConfigurationSpecifier> configurationSpecification(){
+    public Map<String,ConfigurationSpecifier> configurationSpecification(
+    ){
         return new HashMap<String,ConfigurationSpecifier>();
     }
-
 
     /**
      * Activates a dataprovider layer
@@ -259,15 +230,20 @@ public class Layer_1
     public void activate(
         short id,
         Configuration configuration,
-        Layer_1_0 delegation
+        Layer_1 delegation
     ) throws ServiceException{
-        super.activate(id, configuration, delegation);
+        this.compressUID = configuration.isOn(
+            SharedConfigurationEntries.COMPRESS_UID
+        );        
         this.configuration = configuration;
         this.delegation = delegation;
         this.id = id;
-        this.bypassedByLenientRequests = configuration.isOn(
-            SharedConfigurationEntries.BYPASSED_BY_LENIENT_REQUESTS
-        );
+        SparseArray<Object> connectionFactories = configuration.values(
+            SharedConfigurationEntries.DATAPROVIDER_CONNECTION_FACTORY
+        );        
+        if(!connectionFactories.isEmpty()) {
+            this.connectionFactory = (ConnectionFactory)connectionFactories.get(0);
+        }        
         SysLog.detail(
             "Activating " + DataproviderLayers.toString(id) + " layer " + getClass().getName(),
             configuration
@@ -293,508 +269,427 @@ public class Layer_1
      */
     public void deactivate(
     ) throws Exception, ServiceException{
-        super.deactivate();
         SysLog.info(
             DataproviderLayers.toString(getId()) + " layer deactivated"
         );
         this.configuration = null;
         this.delegation = null;
+        this.connectionFactory = null;
+    }
+        
+    //-----------------------------------------------------------------------
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new LayerInteraction(connection);
     }
 
-    /**
-     * Get the object specified by the requests's path 
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply get(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        Layer_1_0 delegation = getDelegation(request);
-        return delegation == null ? null : delegation.get(header,request);
-    }
-
-    /**
-     * Request to start publishing the data stream specified by the requests's
-     * path 
-     *
-     * @param       header
-     *              request header
-     * @param       request     
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply startPublishing(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        Layer_1_0 delegation = getDelegation(request);
-        return delegation == null ? null : delegation.startPublishing(
-            header,
-            request
-        );
-    }
-
-    /**
-     * Get the objects specified by the references and filter properties
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply find(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        Layer_1_0 delegation = getDelegation(request);
-        return delegation == null ? null : delegation.find(header,request);
-    }
-
-    /**
-     * Create a new object
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply create(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        Layer_1_0 delegation = getDelegation(request);
-        return delegation == null ? null : delegation.create(header,request);
-    }
-
-    /**
-     * Modifies some of an object's attributes leaving the others unchanged.
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply modify(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        Layer_1_0 delegation = getDelegation(request);
-        return delegation == null ? null : delegation.modify(header,request);
-    }
-
-    /**
-     * Modifies all changeable attributes of an object.
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply replace(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        Layer_1_0 delegation = getDelegation(request);
-        return delegation == null ? null : delegation.replace(header,request);
-    }
-
-    /**
-     * Creates an object or modifies all its changeable attributes if it
-     * already exists.
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply set(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        Layer_1_0 delegation = getDelegation(request);
-        return delegation == null ? null : delegation.set(header,request);
-    }
-
-    /**
-     * Removes an object including its descendents
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply remove(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        Layer_1_0 delegation = getDelegation(request);
-        return delegation == null ? null : delegation.remove(header,request);
-    }
-
-    /**
-     * Operation request
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply operation(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        Layer_1_0 delegation = getDelegation(request);
-        return delegation == null ? null : delegation.operation(header,request);
-    }
-
-
-    /**
-     * This method allows the dataprovider layers to verify the integrity of a 
-     * set of requests as a whole before the actual processing of the 
-     * individual requests starts.
-     *
-     * @param       header
-     *              the requests' service header
-     * @param       requests
-     *              the request list
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public void prolog(
-        ServiceHeader header,
-        DataproviderRequest[] requests
-    ) throws ServiceException {
-        Layer_1_0 delegation = requests.length == 0 ? null : getDelegation(requests[0]);
-        if (delegation != null) {
-            delegation.prolog(header,requests);
+    //-----------------------------------------------------------------------
+    public class LayerInteraction extends AbstractRestInteraction {
+        
+        public LayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
+            this.serviceHeader = ServiceHeader.toServiceHeader(connection.getMetaData().getUserName(), null);            
         }
-    }
-
-    /**
-     * This method allows the dataprovider layers postprocessing of a 
-     * collection of requests as a whole after the actual processing of the 
-     * individual requests has been done.
-     *
-     * @param       header
-     *              the requests' service header
-     * @param       requests
-     *              the request list
-     * @param       replys
-     *              the reply list
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public void epilog(
-        ServiceHeader header,
-        DataproviderRequest[] requests,
-        DataproviderReply[] replies
-    ) throws ServiceException {
-        if(requests.length != replies.length) {
-            RuntimeServiceException assertionFailure = new RuntimeServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "The numbers of requests and replies do not match"
-            );
-            SysLog.error(
-                assertionFailure.getMessage(),
-                assertionFailure.getCause()
-            );
-            throw assertionFailure;
-        }
-        Layer_1_0 delegation = requests.length == 0 ? null : getDelegation(requests[0]);
-        if (delegation != null) {
-            delegation.epilog(header,requests,replies);
-        }
-    }
-
-
-    //------------------------------------------------------------------------
-    // Implements Dataprovider_1_0
-    //------------------------------------------------------------------------
-
-    /**
-     * Process a set of working units
-     *
-     * @param   header          the service header
-     * @param   workingUnits    a collection of working units
-     *
-     * @return  a collection of working unit replies
-     */
-    public UnitOfWorkReply[] process(
-        ServiceHeader header,
-        UnitOfWorkRequest... workingUnits
-    ){
-        UnitOfWorkReply[] replies = new UnitOfWorkReply[workingUnits.length];
-        for(
-            int index = 0;
-            index < workingUnits.length;
-            index++
+    
+        public ServiceHeader getServiceHeader(
         ) {
-            replies[index] = process(
-                header,
-                workingUnits[index]
+            return this.serviceHeader;
+        }
+        
+        public DataproviderReply newDataproviderReply(
+        ) throws ServiceException {
+            return new DataproviderReply();
+        }
+        
+        public DataproviderRequest newDataproviderRequest(
+            RestInteractionSpec ispec,
+            Query_2Facade input
+        ) {
+            return new DataproviderRequest(
+                ispec, 
+                input.getDelegate()
             );
         }
-        return replies;
+        
+        public DataproviderRequest newDataproviderRequest(
+            RestInteractionSpec ispec,
+            Object_2Facade input
+        ) {
+            return new DataproviderRequest(
+                ispec, 
+                input.getDelegate()
+            );
+        }
+        
+        public DataproviderRequest newDataproviderRequest(
+            RestInteractionSpec ispec,
+            MessageRecord input
+        ) throws ServiceException {
+            try {
+                Object_2Facade objectFacade = Object_2Facade.newInstance();
+                objectFacade.setPath(input.getPath());
+                objectFacade.setValue(input.getBody());
+                return new DataproviderRequest(
+                    ispec,
+                    objectFacade.getDelegate()
+                );
+            } catch(ResourceException e) {
+                throw new ServiceException(e);
+            }
+        }
+        
+        /**
+         * Create a dataprovider reply
+         * 
+         * @param result an org::openmdx::kernel::ResulSet instance
+         * 
+         * @return a dataprovider reply wrapping the result
+         * 
+         * @throws ClassCastException unless result is a ResultRecord instance
+         */
+        public DataproviderReply newDataproviderReply(
+            IndexedRecord result
+        ) {
+            return new DataproviderReply(
+                (ResultRecord) result, 
+                false
+            );
+        }
+        
+        /**
+         * Create a dataprovider reply
+         * 
+         * @param result an org::openmdx::kernel::Message instance
+         * 
+         * @return a dataprovider reply wrapping the result
+         * 
+         * @throws ClassCastException unless result is a MappedRecord instance
+         */
+        public DataproviderReply newDataproviderReply(
+            MessageRecord result
+        ) {
+            return new DataproviderReply(
+                result,
+                false
+            );
+        }
+        
+        
+        public ResourceException newResourceException(
+            ServiceException e
+        ) {
+            return ResourceExceptions.initHolder(
+                new ResourceException(
+                    e.getCause().getDescription(),
+                    BasicException.newEmbeddedExceptionStack(e)
+                )
+            );        
+        }
+        
+        protected final String uidAsString(
+        ){
+            UUID uuid = UUIDs.newUUID();
+            return Layer_1.this.compressUID ?
+                UUIDConversion.toUID(uuid) :
+                uuid.toString();
+        }
+        
+        protected final Layer_1 getDelegatingLayer(
+        ) {
+            return Layer_1.this.getDelegation();
+        }
+        
+        protected final LayerInteraction getDelegatingInteraction(
+        ) throws ServiceException {
+            try {
+                Port delegation = this.getDelegatingLayer();
+                return delegation == null ?
+                    null :
+                        (LayerInteraction)delegation.getInteraction(this.getConnection());
+            } catch(ResourceException e) {
+                throw new ServiceException(e);
+            }
+        }
+        
+        @Override
+        public boolean get(
+            RestInteractionSpec ispec,
+            Query_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            LayerInteraction interaction = this.getDelegatingInteraction();
+            return interaction == null ? false : interaction.get(ispec, input, output);
+        }
+
+        @Override
+        public boolean find(
+            RestInteractionSpec ispec,
+            Query_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            LayerInteraction interaction = this.getDelegatingInteraction();
+            return interaction == null ? false : interaction.find(ispec, input, output);
+        }
+    
+        @Override
+        public boolean create(
+            RestInteractionSpec ispec,
+            Object_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            LayerInteraction interaction = this.getDelegatingInteraction();
+            return interaction == null ? false : interaction.create(ispec, input, output);
+        }
+    
+        @Override
+        public boolean put(
+            RestInteractionSpec ispec,
+            Object_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            LayerInteraction interaction = this.getDelegatingInteraction();
+            return interaction == null ? false : interaction.put(ispec, input, output);
+        }
+    
+        @Override
+        public boolean delete(
+            RestInteractionSpec ispec,
+            Object_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            LayerInteraction interaction = this.getDelegatingInteraction();
+            return interaction == null ? false : interaction.delete(ispec, input, output);
+        }
+    
+        @Override
+        public boolean invoke(
+            RestInteractionSpec ispec, 
+            MessageRecord input, 
+            MessageRecord output
+        ) throws ServiceException {
+            LayerInteraction interaction = this.getDelegatingInteraction();
+            return interaction == null ? false : interaction.invoke(ispec, input, output);
+        }
+    
+        private final ServiceHeader serviceHeader;
+        
     }
 
-    /**
-     * Dispatch a single request
-     * 
-     * @param header
-     * @param request
-     * 
-     * @return the reply
-     * @throws ServiceException  
+    //-----------------------------------------------------------------------
+    static class DataproviderConnection implements Connection {
+    
+        public DataproviderConnection(
+            ServiceHeader serviceHeader
+        ) {
+            this.serviceHeader = serviceHeader;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.resource.cci.Connection#close()
+         */
+        public void close()
+            throws ResourceException {
+            // TODO Auto-generated method stub
+            
+        }
+
+        /* (non-Javadoc)
+         * @see javax.resource.cci.Connection#createInteraction()
+         */
+        public Interaction createInteraction()
+            throws ResourceException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.resource.cci.Connection#getLocalTransaction()
+         */
+        public LocalTransaction getLocalTransaction()
+            throws ResourceException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.resource.cci.Connection#getMetaData()
+         */
+        public ConnectionMetaData getMetaData(
+        ) throws ResourceException {
+            if(this.metaData == null) {
+                this.metaData = new ConnectionMetaData(){
+
+                    /**
+                     * It's an openMDX connection
+                     */
+                    public String getEISProductName(
+                    ) throws ResourceException {
+                        return "openMDX/REST";
+                    }
+
+                    /**
+                     * with the given openMDX version
+                     */
+                    public String getEISProductVersion(
+                    ) throws ResourceException {
+                        return Version.getSpecificationVersion();
+                    }
+
+                    /**
+                     * Use the stringified principal chain
+                     */
+                    public String getUserName(
+                    ) throws ResourceException {
+                        return DataproviderConnection.this.serviceHeader.getPrincipalChain().toString();
+                    }
+
+                };
+            }
+            return this.metaData;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.resource.cci.Connection#getResultSetInfo()
+         */
+        public ResultSetInfo getResultSetInfo()
+            throws ResourceException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        protected ConnectionMetaData metaData = null;
+        protected final ServiceHeader serviceHeader;
+    }
+    
+    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.cci.Dataprovider_1_0#process(org.openmdx.application.dataprovider.cci.ServiceHeader, java.util.List, java.util.List)
      */
-    protected final DataproviderReply process (
+    @SuppressWarnings("unchecked")
+    public ServiceException process(
         ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        switch (request.operation()) {
-            case DataproviderOperations.OBJECT_OPERATION:
-                return operation(header,request);
-            case DataproviderOperations.OBJECT_CREATION:
-                return create(header,request);
-            case DataproviderOperations.OBJECT_MODIFICATION:
-                return modify(header,request);
-            case DataproviderOperations.OBJECT_REPLACEMENT:
-                return replace(header,request);
-            case DataproviderOperations.OBJECT_REMOVAL:
-                return remove(header,request);
-            case DataproviderOperations.OBJECT_SETTING:
-                return set(header,request);
-            case DataproviderOperations.ITERATION_START:
-            case DataproviderOperations.ITERATION_CONTINUATION:
-                return find(header,request);
-            case DataproviderOperations.OBJECT_MONITORING:
-                return startPublishing(header,request);
-            case DataproviderOperations.OBJECT_RETRIEVAL:
-                return get(header,request);
-            default:
-                return null;
+        List<DataproviderRequest> requests,
+        List<DataproviderReply> replies
+    ) {
+        try {
+            LayerInteraction interaction = (LayerInteraction)this.getInteraction(
+                new DataproviderConnection(header)
+            );
+            for(DataproviderRequest request: requests) {
+                DataproviderReply reply = new DataproviderReply(
+                    request.operation() == DataproviderOperations.OBJECT_OPERATION
+                );
+                // Dispatch to layer interaction methods here. Do not let AbstractRestInteraction
+                // do the work because it requires Model_1 which might not be available at this time.
+                switch(request.operation()) {
+                    case DataproviderOperations.OBJECT_RETRIEVAL: {
+                        interaction.get(
+                            request.getInteractionSpec(), 
+                            Query_2Facade.newInstance(request.object()), 
+                            reply.getResult()
+                        );
+                        break;
+                    }
+                    case DataproviderOperations.ITERATION_START: {
+                        interaction.find(
+                            request.getInteractionSpec(), 
+                            Query_2Facade.newInstance(request.object()), 
+                            reply.getResult()
+                        );
+                        break;
+                    }
+                    case DataproviderOperations.OBJECT_REPLACEMENT: {
+                        interaction.put(
+                            request.getInteractionSpec(), 
+                            Object_2Facade.newInstance(request.object()), 
+                            reply.getResult()
+                        );
+                        break;
+                    }
+                    case DataproviderOperations.OBJECT_CREATION: {
+                        interaction.create(
+                            request.getInteractionSpec(), 
+                            Object_2Facade.newInstance(request.object()), 
+                            reply.getResult()
+                        );
+                        break;
+                    }
+                    case DataproviderOperations.OBJECT_REMOVAL: {
+                        interaction.delete(
+                            request.getInteractionSpec(), 
+                            Query_2Facade.newInstance(request.object()), 
+                            reply.getResult()
+                        );
+                        break;
+                    }
+                    case DataproviderOperations.OBJECT_OPERATION: {
+                        MappedRecord object = request.object();
+                        MessageRecord input;
+                        if(object instanceof MessageRecord) {
+                            input = (MessageRecord) object;                            
+                        } else {
+                            input = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
+                            if(MessageRecord.NAME.equals(object.getRecordName())) {
+                                input.putAll(object);
+                            } else if(Object_2Facade.isDelegate(object)) {
+                                input.setPath(Object_2Facade.getPath(object));
+                                input.setBody(Object_2Facade.getValue(object));
+                            } else {
+                                throw new ServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.BAD_PARAMETER,
+                                    "Unsupported operation argument",
+                                    new BasicException.Parameter("actual", object.getRecordName()),
+                                    new BasicException.Parameter("supported", MessageRecord.NAME, ObjectRecord.NAME)
+                                );                            
+                            }
+                        }
+                        interaction.invoke(
+                            request.getInteractionSpec(), 
+                            input,
+                            reply.getResponse()
+                        );                            
+                        break;
+                    }
+                    default:
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "Unsupported operation",
+                            new BasicException.Parameter("actual", DataproviderOperations.toString(request.operation())),
+                            new BasicException.Parameter("supported", "OBJECT_RETRIEVAL|OBJECT_RETRIEVAL|OBJECT_REPLACEMENT|OBJECT_REPLACEMENT|OBJECT_REMOVAL")
+                        );                            
+                }              
+                replies.add(reply);
+            }
+            return null;
+        }
+        catch(Exception e) {
+            return new ServiceException(e);
         }
     }
     
-    /**
-     * Dispatch a single unit of work
-     *
-     * @param       header
-     *              the requests' service header
-     * @param       requests
-     *              the request list
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public void process (
-        ServiceHeader header,
-        DataproviderRequest[]   requests,
-        DataproviderReply[] replies
-    ) throws ServiceException {
-        prolog(header,requests);
-        for (
-            int index = 0;
-            index < requests.length;
-            index++
-        ) {
-            DataproviderRequest request = requests[index];
-            replies[index] = process(header,request);
-        }
-        epilog(
-            header,
-            requests,
-            replies
-        );
-    }
-
-
-    /**
-     * Process a single unit of work
-     *
-     * @param   header          the service header
-     * @param   unitOfWorkRequest    a unit of work
-     *
-     * @return  a unit of work reply
-     */
-    protected UnitOfWorkReply process(
-        ServiceHeader header,
-        UnitOfWorkRequest unitOfWorkRequest
-    ){
-//        if(unitOfWorkRequest.isTransactionalUnit()) {
-//            RuntimeServiceException assertionFailure = new RuntimeServiceException(
-//                BasicException.Code.DEFAULT_DOMAIN,
-//                BasicException.Code.ASSERTION_FAILURE,
-//                "A layer can't handle transactions"
-//            );
-//            SysLog.error(
-//                assertionFailure.getMessage(),
-//                assertionFailure.getCause()
-//            );
-//            throw assertionFailure;
-//        }
-        DataproviderRequest[] requests = unitOfWorkRequest.getRequests();
-        DataproviderReply[] replies = new DataproviderReply[requests.length];
-        try {
-            int lenient = 0;
-            if(this.bypassedByLenientRequests) {
-                for(
-                        int i = 0;
-                        i < requests.length;
-                        i++
-                ){
-                    if(isLenient(requests[i])) {
-                        lenient++;
-                    }
-                }
-            }
-            if(lenient == 0) {
-                if(this.id == DataproviderLayers.INTERCEPTION) {
-                    prolog(
-                        header,
-                        unitOfWorkRequest
-                    );
-                }
-                process(header,requests,replies);
-                UnitOfWorkReply unitOfWorkReply = new UnitOfWorkReply(replies); 
-                if(this.id == DataproviderLayers.INTERCEPTION) {
-                    epilog(
-                        header,
-                        unitOfWorkRequest,
-                        unitOfWorkReply
-                    );
-                }
-                return unitOfWorkReply;
-            } else if(lenient == requests.length) {
-                Layer_1_0 delegation = getLenientDelegation();
-                if(delegation == null) {
-                    RuntimeServiceException configurationFailure = new RuntimeServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.INVALID_CONFIGURATION,
-                        "No layer processes lenient requests"
-                    );
-                    SysLog.error(
-                        configurationFailure.getMessage(),
-                        configurationFailure.getCause()
-                    );
-                    throw configurationFailure;
-                } else if(
-                        this.id == DataproviderLayers.INTERCEPTION &&
-                        delegation instanceof Layer_1_2
-                ){
-                    ((Layer_1_2)delegation).prolog(
-                        header,
-                        unitOfWorkRequest
-                    );
-                    UnitOfWorkReply unitOfWorkReply = delegation.process(
-                        header, 
-                        unitOfWorkRequest
-                    )[0];
-                    ((Layer_1_2)delegation).epilog(
-                        header,
-                        unitOfWorkRequest,
-                        unitOfWorkReply
-                    );
-                    return unitOfWorkReply;
-                } else {
-                    return delegation.process(
-                        header, 
-                        unitOfWorkRequest
-                    )[0];
-                }
-            } else throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_PARAMETER,
-                "In a unit of work either all requests or none must be lenient",
-                new BasicException.Parameter("requests", requests.length),
-                new BasicException.Parameter("lenient requests", lenient)
-            );
-        } 
-        catch (ServiceException exception) {
-            return new UnitOfWorkReply(exception);
-        }
-    }
-
     //------------------------------------------------------------------------
     // Variables
     //------------------------------------------------------------------------
 
     /**
-     * This flag defines whether this layer is bypassed by lenient requests.
-     * 
-     * @see SharedConfigurationEntries#BYPASSED_BY_LENIENT_REQUESTS
-     * @see DataproviderRequestContexts#LENIENT
+     * Defines whether the UID's should be in compressed or UUID format.
      */
-    private boolean bypassedByLenientRequests;
+    protected boolean compressUID;
 
     /**
      * The layer's id
      */
     private short id;
 
-    /**
-     *
-     */
-    private Layer_1_0 delegation;
+    protected Layer_1 delegation;
 
-    /**
-     *
-     */
     private Configuration configuration;
 
-    /**
-     * 
-     */
-    private Model_1_0 model;
+    private ConnectionFactory connectionFactory;
     
 }

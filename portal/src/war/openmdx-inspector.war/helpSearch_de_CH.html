@@ -1,17 +1,15 @@
 ﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="ltr">
 <head>
-  <title>openCRX - Advanced Search</title>
+  <title>openCRX - Suchen und Sortieren</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link href="_style/colors.css" rel="stylesheet" type="text/css">
   <link href="_style/default.css" rel="stylesheet" type="text/css" />
-
-
 </head>
 <body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
 <table class="objectTitle">
   <tr>
-    <td>Erweiterte Suche</td>
+    <td>Suchen und Sortieren</td>
 	<td>
 		<script>
 		  <!--
@@ -23,75 +21,47 @@
 </table>
 
  <div class="hh2">So funktioniert die erweiterte Suche</div>
- <div class="normal">Mit der Angabe von Operatoren k&ouml;nnen Sie die Suche besser
-   kontrollieren und erhalten dadurch bessere Antworten. Die folgenden Suchoptionen
-   k&ouml;nnen jeweils direkt in das Suchfeld eingegeben werden.</div>
- <div class="hh2">Die Grundlagen</div> 
- <div class="normal">In das Suchfeld k&ouml;nnen Sie Zahlen und/oder Buchstaben
-   sowie Ausdr&uuml;cke eingeben, z.B. <strong>'M&uuml;ller'</strong>, <strong>'> 500'</strong> or <strong>'>=
-   Meier'</strong> und dann</div>
-  <table cellpadding="0" cellspacing="10">
-   <tr valign="top">
-     <td>&#8226; auf den <strong>Text der Tabellenspalte</strong> klicken,
-       um Objekte zu finden, die f&uuml;r das entsprechende Attribut passende Werte
-       aufweisen
-       (bei dieser Suche werden <strong>alle
-       Objekte</strong> durchsucht, unabh&auml;ngig von evtl. vorherigen Suchen oder
-       gesetzten Filtern; bestehende Suchresultate gehen verloren</td>
-	 <td bgcolor="#CCCCCC"><strong>Neue Suche</strong><br />
-	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
-   </tr>
-   <tr valign="top">
-     <td>&#8226; auf den <strong>[+] Knopf</strong> klicken, um Objekte zu finden,
-       die f&uuml;r das entsprechende Attribut passende Werte aufweisen (<strong>nur
-       diejenigen Objekte werden durchsucht, welche sich im aktuellen Filter
-       oder im vorherigen Suchresultat befinden</strong>, d.h. diese Suche 'hinzuf&uuml;gen'
-       bewirkt, dass das neue Resultatset eingeschr&auml;nkter sein wird)</td>
-	 <td bgcolor="#CCCCCC"><strong>Suche hinzufügen</strong><br />
-	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
-   </tr>
-</table>
+ <div class="normal">Mit der Angabe von Operatoren können Sie die Suche besser kontrollieren und erhalten dadurch bessere Antworten. Die folgenden Suchoptionen können jeweils direkt in das Suchfeld resp. die Suchfelder eingegeben werden.</div>
+ <div class="hh2">Grundlagen des Suchens</div>
+ <div class="normal">Mittels Klick auf die Lupe <img src="images/search_panel.gif" width="14" height="14" /> wird das Suchformular aktiviert. In die Suchfelder können Sie beliebige Zahlen und/oder Buchstaben sowie Ausdrücke eingeben, z.B.  <span style="font-weight:bold;background-color:#FFCF31;">Miller</span>, <span style="font-weight:bold;background-color:#FFCF31;">> 500</span> or <span style="font-weight:bold;background-color:#FFCF31;">>=
+   Smith</span>, und anschliessend den Knopf [OK] klicken.<br>
+<img src="images/helpSearchTut0.png" width="286" height="236" /></div>
+ <div class="hh2">Grundlagen des Sortierens</div>
+<div class="normal">Sofern nach einem bestimmten Attribut sortiert werden kann, ist der Kopf der entsprechenden Kolonne klickbar. Mittels Klick auf den Tabellenkopf kann die Sortierung entsprechend angepasst werden (aufsteigend - absteigend - keine Sortierung).<br>
+ <img src="images/helpSearchTut1.png" width="199" height="124" /></div>
+
 <div class="hh2">Operatoren</div>
- <div class="normal">Die folgenden Operatoren werden unterst&uuml;tzt (sofern
-   das eingesetzte Datenbanksystem die entsprechende Operation ebenfalls unterst&uuml;tzt):</div>
+ <div class="normal">Die folgenden Operatoren werden unterstützt (sofern das eingesetzte Datenbanksystem die entsprechende Operation ebenfalls unterstützt):</div>
  <ul>
- <li>t&ouml;nt &auml;hnlich wie (<strong>*</strong>)</li>
- <li>ist &auml;hnlich wie (<strong>%</strong>), voreingestellte Suche (Default)
-   f&uuml;r Zeichenketten</li>
- <li>gleich (<strong>=</strong>), voreingestellte Suche (Default) f&uuml;r boolesche
-   Werte, Zahlen und Codes</li>
- <li>nicht gleich (<strong><></strong>, <strong>!</strong>=)</li>
- <li>kleiner als (<strong><</strong>)</li>
- <li>kleiner als oder gleich wie (<strong><=</strong>)</li>
- <li>gr&ouml;sser als (<strong>></strong>)</li>
- <li>gr&ouml;sser als oder gleich wie <strong>(>=</strong>)</li>
+   <li>like (<span style="font-weight:bold;background-color:#FFCF31;">%</span>), [ist ähnlich wie] - voreingestellte Suche (Default) für Zeichenketten</li>
+   <li>not like (<span style="font-weight:bold;background-color:#FFCF31;">!%</span>), [ist nicht ähnlich wie]</li>
+   <li>sounds like (<span style="font-weight:bold;background-color:#FFCF31;">*</span>), [tönt ähnlich wie]</li>
+   <li>not sounds like (<span style="font-weight:bold;background-color:#FFCF31;">!*</span>) [tönt nicht ähnlich wie]</li>
+   <li>equal to (<span style="font-weight:bold;background-color:#FFCF31;">=</span>), [ist gleich wie]  - voreingestellte Suche (Default) für boolesche Werte, Zahlen und Codes</li>
+ <li>not equal to (<span style="font-weight:bold;background-color:#FFCF31;"><></span>, <span style="font-weight:bold;background-color:#FFCF31;">!=</span>) [ist nicht gleich wie]</li>
+ <li>less than (<span style="font-weight:bold;background-color:#FFCF31;"><</span>) [ist kleiner als]</li>
+ <li>less than or equal to (<span style="font-weight:bold;background-color:#FFCF31;"><=</span>) [ist kleiner als oder gleich wie]</li>
+ <li>greater than (<span style="font-weight:bold;background-color:#FFCF31;">></span>) [ist grösser als]</li>
+ <li>greater than or equal to (<span style="font-weight:bold;background-color:#FFCF31;">>=</span>) [ist grösser als oder gleich wie]</li>
  </ul>
- <div class="hh2">&quot;UND&quot; Suchen</div>
- <div class="normal">Um Objekte zu finden, die gleichzeitig mehr als eine Bedingung
-   erf&uuml;llen, k&ouml;nnen Bedingungen mit dem Zeichen &quot;<strong>&amp;</strong>&quot; verkn&uuml;pft
-   werden. Um zum Beispiel Objekte mit Werten zwischen 500 und 1000 zu finden
-   (d.h. gr&ouml;sser als 500 und kleiner als 1000), wird in das Suchfeld folgendes
-   eingegeben: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
- <div class="hh2">&quot;ODER&quot; Searches</div>
- <div class="normal">Um Objekte zu finden, die entweder das Wort A oder das Wort
-   B enthalten, werden die beiden Worte mit einem Strichpunkt &quot;<strong>;</strong>&quot; getrennt.
-   Um zum Beispiel Kontakte mit dem Namen 'Meier' ODER 'M&uuml;ller' zu finden, wird
-   in das Suchfeld folgendes eingegeben: <strong>'= Meier; M&uuml;ller'</strong></div>
- <div class="hh2">Suchen kombinieren</div>
- <div class="normal">Suchen k&ouml;nnen fast ohne Einschr&auml;nkungen kombiniert werde.
-   Um zum Beispiel Objekte mit einem Wert kleiner als 1000,
-   aber verschieden von 500 und verschieden von 600 zu finden, geben Sie folgendes
-   ein in das
-   Suchfeld:<strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
- <div class="normal">Kombinierte Suchen werden nach den folgenden Regeln angewendet:</div>
- <ul>
+<div class="hh2">&quot;UND&quot; Suchen</div>
+ <div class="normal">Um Objekte zu finden, die gleichzeitig mehr als eine Bedingung     erfüllen, können Bedingungen mit dem Zeichen <span style="font-weight:bold;background-color:#FFCF31;">&amp;</span> verknüpft     werden. Um zum Beispiel Objekte mit Werten zwischen 500 und 1000 zu finden     (d.h. grösser als 500 und kleiner als 1000), wird in das Suchfeld folgendes     eingegeben: <span style="font-weight:bold;background-color:#FFCF31;">&gt;500 &amp; &lt;1000</span></div>
+<div class="hh2">&quot;ODER&quot; Suchen</div>
+<div class="normal">Um Objekte zu finden, die entweder den Wert A oder den Wert    B enthalten, werden die beiden Werte mit einem Strichpunkt <span style="font-weight:bold;background-color:#FFCF31;">;</span> getrennt.     Um zum Beispiel Kontakte mit dem Namen 'Meier' ODER 'Müller' zu finden, wird     in das Suchfeld folgendes eingegeben: <span style="font-weight:bold;background-color:#FFCF31;">Meier; Müller</span></div>
+
+<div class="hh2">Suchen kombinieren</div>
+<div class="normal">Suchen können fast ohne Einschränkungen kombiniert werde.     Um zum Beispiel Objekte mit einem Wert kleiner als 1000,     aber verschieden von 500 und verschieden von 600 zu finden, geben Sie folgendes     ein in das     Suchfeld: <span style="font-weight:bold;background-color:#FFCF31;">&lt;&gt;500; 600 &amp; &lt;1000</span></div>
+<div class="normal">Kombinierte Suchen werden nach den folgenden Regeln angewendet::</div>
+<ul>
    <li>searchExpr ::= filterValue { & filterValue }<br />
-   (--> die Zeichenkette wird jeweils bei einem <strong>&</strong> aufgeteilt)</li>
+   (--> string tokenizer with <strong>&</strong> as separator)</li>
    <li>filterValue ::= [operator] value { ; value }<br />
-   (--> die Zeichenkette wird jeweils bei einem <strong>;</strong> aufgeteilt)</li>
+   (--> string tokenizer with <strong>;</strong> as separator)</li>
  </ul>
  <div class="hh2">Suche mit Platzhalter (Wildcard)</div>
- <div class="normal">Gewisse Datenbanken unterst&uuml;tzen die Suche mit Platzhaltern. Um z.B. alle Kontakte zu finden, deren Name 'ller' enth&auml;lt, geben Sie folgendes ein in das Suchfeld: <strong>'%%ller'<br />
- ACHTUNG:</strong> Suchbefehle mit Platzhalter k&ouml;nnen sehr lange dauern, wenn die DB nicht optimiert ist (full table scans)! </div>
+<div class="normal">
+   <p>Gewisse Datenbanken unterstützen die Suche mit Platzhaltern. Um z.B.  alle Kontakte zu finden, deren Name 'ller' enthält, geben Sie folgendes  ein in das Suchfeld: <span style="font-weight:bold;background-color:#FFCF31;">%ller</span><br />
+   <strong>ACHTUNG:</strong> Suchbefehle mit Platzhalter können sehr lange dauern, wenn die DB nicht optimiert ist (full table scans)!</p>
+</div>
 </body>
 </html>

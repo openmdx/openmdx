@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URLConnection.java,v 1.6 2009/03/12 17:12:30 hburger Exp $
+ * Name:        $Id: URLConnection.java,v 1.7 2010/03/05 13:24:13 hburger Exp $
  * Description: URL Connection 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/12 17:12:30 $
+ * Date:        $Date: 2010/03/05 13:24:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,9 +78,9 @@ import netscape.ldap.LDAPModificationSet;
 import netscape.ldap.LDAPSearchConstraints;
 import netscape.ldap.LDAPSearchResults;
 
-import org.openmdx.base.io.LineReader;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.resource.ldap.cci.Connection;
+import org.openmdx.resource.ldap.spi.LineReader;
 
 /**
  * URL Connection

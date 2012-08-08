@@ -1,10 +1,10 @@
 // ====================================================================
 // Project:     openmdx, http://www.openmdx.org/
-// Name:        $Id: guicontrol.js,v 1.8 2009/01/14 14:18:39 cmu Exp $
+// Name:        $Id: guicontrol.js,v 1.10 2009/08/26 11:55:34 cmu Exp $
 // Description: java script helpers
-// Revision:    $Revision: 1.8 $
+// Revision:    $Revision: 1.10 $
 // Owner:       OMEX AG, Switzerland, http://www.omex.ch
-// Date:        $Date: 2009/01/14 14:18:39 $
+// Date:        $Date: 2009/08/26 11:55:34 $
 // ====================================================================
 //
 // This software is published under the BSD license
@@ -1199,8 +1199,16 @@ function yuiPrint() {
 }
 //---------------------------------------------------------------------------
 var HTMLeditTextAreaId = "";
-function loadHTMLedit(textareaID) {
+function loadHTMLedit(textareaID, urlPrefix) {
   HTMLeditTextAreaId = textareaID;
-  win = window.open('javascript/wymeditor/htmledit.htm', '_blank', "titlebar=no,menubar=no,help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true);
+  if(urlPrefix == null) urlPrefix = "";
+  win = window.open(urlPrefix + 'javascript/wymeditor/htmledit.htm', '_blank', "titlebar=no,menubar=no,help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true);
+  win.focus();
+}
+var WIKYeditTextAreaId = "";
+function loadWIKYedit(textareaID, urlPrefix) {
+  WIKYeditTextAreaId = textareaID;
+  if(urlPrefix == null) urlPrefix = "";
+  win = window.open(urlPrefix + 'javascript/wiky/wikyedit.htm', '_blank', "titlebar=no,menubar=no,help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true);
   win.focus();
 }

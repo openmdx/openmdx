@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Date.java,v 1.2 2009/01/17 10:16:21 wfro Exp $
+ * Name:        $Id: Date.java,v 1.4 2010/01/03 14:59:09 wfro Exp $
  * Description: Date 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/17 10:16:21 $
+ * Date:        $Date: 2010/01/03 14:59:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,10 @@
  */
 package org.w3c.jpa3;
 
-import org.w3c.spi2.Datatypes;
+import java.text.ParseException;
+
+import org.w3c.cci2.ImmutableDate;
+import org.w3c.format.DateTimeFormat;
 
 /**
  * Date
@@ -88,10 +91,25 @@ public class Date {
     public static final javax.xml.datatype.XMLGregorianCalendar toCCI (
         java.sql.Date jdoDate
     ){
-        return jdoDate == null ? null : Datatypes.create(
-            javax.xml.datatype.XMLGregorianCalendar.class,
-            jdoDate.toString()
-        );
+        String value = jdoDate == null ?
+            null :
+                jdoDate.toString();
+        if(value == null) {
+            return null;
+        } else try {
+            value = DateTimeFormat.completeCentury(value);
+        } catch (ParseException exception) {
+            throw new IllegalArgumentException(exception);
+        }
+        if(DateTimeFormat.BASIC_DATE_PATTERN.matcher(value).matches()) {
+            return new ImmutableDate(value);
+        } else if(DateTimeFormat.EXTENDED_DATE_PATTERN.matcher(value).matches()) {
+            return new ImmutableDate(value.replaceAll("-", ""));
+        } else {
+            throw new IllegalArgumentException(
+                "The value does not match the org::w3c::date pattern. Pattern=YYYY[...]-MM-DD. Value=" + value
+            );
+        }
     }
-    
+
 }

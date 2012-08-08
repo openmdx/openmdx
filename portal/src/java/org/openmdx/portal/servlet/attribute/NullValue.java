@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: NullValue.java,v 1.12 2008/08/12 16:38:06 wfro Exp $
+ * Name:        $Id: NullValue.java,v 1.14 2010/04/27 08:27:38 wfro Exp $
  * Description: openCRX application plugin
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/08/12 16:38:06 $
+ * Date:        $Date: 2010/04/27 08:27:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,7 @@ import java.io.Serializable;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 
 public final class NullValue 
     extends AttributeValue
@@ -84,6 +84,7 @@ public final class NullValue
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public Object getValue(
         boolean forGrid
     ) {
@@ -92,7 +93,7 @@ public final class NullValue
 
     //-------------------------------------------------------------------------
     public String getStringifiedValue(
-        HtmlPage p, 
+        ViewPort p, 
         boolean multiLine, 
         boolean forEditing,
         boolean shortFormat

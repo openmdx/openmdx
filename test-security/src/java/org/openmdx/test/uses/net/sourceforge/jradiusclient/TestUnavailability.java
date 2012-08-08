@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestUnavailability.java,v 1.1 2009/03/11 16:32:33 hburger Exp $
+ * Name:        $Id: TestUnavailability.java,v 1.2 2010/03/13 20:29:37 hburger Exp $
  * Description: Test Unavailability
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/11 16:32:33 $
+ * Date:        $Date: 2010/03/13 20:29:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -196,12 +196,10 @@ public class TestUnavailability {
         	new RadiusAttribute(RadiusAttributeValues.NAS_IDENTIFIER, this.localHostName.getBytes())
         );
         byte[] requestAttributes = accessRequest.getAttributeBytes(
-            new int[]{
-                RadiusAttributeValues.NAS_IP_ADDRESS,
-                RadiusAttributeValues.NAS_PORT_TYPE,
-                RadiusAttributeValues.USER_NAME,
-                RadiusAttributeValues.USER_PASSWORD
-            }
+            RadiusAttributeValues.NAS_IP_ADDRESS,
+            RadiusAttributeValues.NAS_PORT_TYPE,
+            RadiusAttributeValues.USER_NAME,
+            RadiusAttributeValues.USER_PASSWORD
         );
         return composeRadiusPacket(
         	accessRequest.getPacketType(),

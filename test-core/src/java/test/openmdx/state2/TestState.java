@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestState.java,v 1.10 2009/04/07 19:55:16 hburger Exp $
+ * Name:        $Id: TestState.java,v 1.14 2009/09/18 12:44:37 hburger Exp $
  * Description: TestState 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/07 19:55:16 $
+ * Date:        $Date: 2009/09/18 12:44:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,23 +54,21 @@ package test.openmdx.state2;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
 import javax.resource.ResourceException;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openmdx.application.dataprovider.deployment.Deployment_1;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
-import org.openmdx.base.persistence.cci.EntityManagerFactory;
-import org.openmdx.compatibility.state1.cci2.DateState;
 import org.openmdx.state2.cci.DateStateViews;
+import org.openmdx.state2.jmi1.DateState;
 import org.w3c.spi.DatatypeFactories;
 
 import test.openmdx.state2.jmi1.CoreA;
@@ -89,23 +87,25 @@ public class TestState {
 
     protected static Provider provider;
         
-    protected static final EntityManagerFactory managerFactory = new Deployment_1(
-        "xri://@openmdx*(+lightweight)*ENTERPRISE_APPLICATION_CONTAINER",
-//      "xri://@openmdx*(+openejb)*ENTERPRISE_APPLICATION_CONTAINER",
-        new String[]{"file:../test-core/src/connector/openmdx-2/oracle-10g.rar"}, // CONNECTOR_URL
-//      new String[]{"file:../test-core/src/connector/openmdx-2/postgresql-7.rar"}, // CONNECTOR_URL
-        new String[]{"file:../test-core/src/ear/test-state.ear"}, // APPLICATION_URL
-        false, /// LOG_DEPLOYMENT_DETAIL
-        "test/openmdx/state2/EntityProviderFactory", // ENTITY_MANAGER_FACTORY_JNDI_NAME
-        "test/openmdx/state2/Gateway", // GATEWAY_JNDI_NAME
-        new String[]{"test:openmdx:state2"} // MODEL
-    );
+    protected static final PersistenceManagerFactory managerFactory = null;
+//    new Deployment_1(
+//        "xri://@openmdx*(+lightweight)*ENTERPRISE_APPLICATION_CONTAINER",
+////      "xri://@openmdx*(+openejb)*ENTERPRISE_APPLICATION_CONTAINER",
+//        new String[]{"file:../test-core/src/connector/openmdx-2/oracle-10g.rar"}, // CONNECTOR_URL
+////      new String[]{"file:../test-core/src/connector/openmdx-2/postgresql-7.rar"}, // CONNECTOR_URL
+//        new String[]{"file:../test-core/src/ear/test-state.ear"}, // APPLICATION_URL
+//        false, /// LOG_DEPLOYMENT_DETAIL
+//        "test/openmdx/state2/EntityProviderFactory", // ENTITY_MANAGER_FACTORY_JNDI_NAME
+//        "test/openmdx/state2/Gateway", // GATEWAY_JNDI_NAME
+//        new String[]{"test:openmdx:state2"} // MODEL
+//    );
     
     @BeforeClass
     public static void reset(
     ) throws ResourceException{
-        PersistenceManager persistenceManager = managerFactory.getEntityManager(
-            Collections.singletonList("JUnit")
+        PersistenceManager persistenceManager = managerFactory.getPersistenceManager(
+            "JUnit",
+            null
         );
         Transaction transaction = persistenceManager.currentTransaction();
         Authority authority = (Authority) persistenceManager.getObjectById(

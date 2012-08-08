@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiContext.java,v 1.29 2009/03/08 18:03:19 wfro Exp $
+ * Name:        $Id: UiContext.java,v 1.30 2009/06/16 17:08:26 wfro Exp $
  * Description: UiContext 
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:19 $
+ * Date:        $Date: 2009/06/16 17:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,10 +66,10 @@ import java.util.Set;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.log.SysLog;
 
 public class UiContext
     implements Serializable {
@@ -161,10 +161,10 @@ public class UiContext
             );
         }
         catch(ServiceException e) {
-            AppLog.warning(e.getMessage(), e.getCause());
+        	SysLog.warning(e.getMessage(), e.getCause());
         }
         if(inspector == null) {
-            AppLog.info("Can not get inspector for", forClass);
+        	SysLog.info("Can not get inspector for", forClass);
             return "N/A";
         }
         else {
@@ -273,7 +273,7 @@ public class UiContext
         }
         // Assert on-demand makes start-up faster
         try {
-            AppLog.trace("Asserting inspector", forClass);
+        	SysLog.trace("Asserting inspector", forClass);
             synchronized(this.allAssertedInspectors) {
                 this.getUiSegment(perspective).assertInspector(
                     this.uiPackage.createSegmentAssertInspectorParams(forClass)
@@ -284,8 +284,8 @@ public class UiContext
         catch(Exception e0) {
             // can not assert it
             ServiceException s0 = new ServiceException(e0);
-            AppLog.warning("Can not assert inspector", s0.getMessage());
-            AppLog.warning(s0.getMessage(), s0.getCause());
+            SysLog.warning("Can not assert inspector", s0.getMessage());
+            SysLog.warning(s0.getMessage(), s0.getCause());
             return null;
         }
         // Try again
@@ -316,7 +316,7 @@ public class UiContext
             }
         }
         else {
-            AppLog.warning("Inspector not in set of assertable inspectors. Fallback to BasicObject", forClass);
+        	SysLog.warning("Inspector not in set of assertable inspectors. Fallback to BasicObject", forClass);
             inspector = this.getAssertedInspector(
                 "org:openmdx:base:BasicObject",
                 MAIN_PERSPECTIVE

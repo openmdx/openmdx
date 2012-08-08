@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URI_1.java,v 1.1 2009/05/28 16:36:39 hburger Exp $
+ * Name:        $Id: URI_1.java,v 1.2 2009/10/23 14:40:14 hburger Exp $
  * Description: Legacy URI Marshaller 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/28 16:36:39 $
+ * Date:        $Date: 2009/10/23 14:40:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.uri.scheme.OpenMDXSchemes;
 
 
 /**
@@ -74,6 +73,11 @@ public final class URI_1 implements Marshaller {
      * Memorize the singleton
      */ 
     final static private Marshaller instance = new URI_1();
+
+    /**
+     * Legacy' URI Scheme Prefix
+     */
+    public final static String OPENMDX_PREFIX = "spice:/";
 
     /**
      * Return the singleton
@@ -101,7 +105,7 @@ public final class URI_1 implements Marshaller {
     ) throws ServiceException {
         if (charSequences == null) return null;
         Object[]source = (Object[])charSequences;
-        StringBuilder target = new StringBuilder(URI_PREFIX);
+        StringBuilder target = new StringBuilder(URI_1.OPENMDX_PREFIX);
         for(
                 int i=0;
                 i < source.length;
@@ -131,8 +135,8 @@ public final class URI_1 implements Marshaller {
         ArrayList target = new ArrayList();
         try {
             String source = charSequence.toString();
-            if(source.length() > URI_PREFIX.length()){
-                source = source.substring(URI_PREFIX.length());
+            if(source.length() > URI_1.OPENMDX_PREFIX.length()){
+                source = source.substring(URI_1.OPENMDX_PREFIX.length());
                 if (
                         source.charAt(0) != '/'
                 ) throw new ServiceException(
@@ -276,7 +280,5 @@ public final class URI_1 implements Marshaller {
     final static public char ESCAPE = '%';
 
     final static int RADIX = 16;
-
-    final static String URI_PREFIX = OpenMDXSchemes.LEGACY_SCHEME + ":/";
 
 }

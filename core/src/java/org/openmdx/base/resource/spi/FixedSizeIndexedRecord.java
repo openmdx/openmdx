@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FixedSizeIndexedRecord.java,v 1.15 2009/05/20 15:13:42 hburger Exp $
+ * Name:        $Id: FixedSizeIndexedRecord.java,v 1.17 2010/01/17 13:34:09 wfro Exp $
  * Description: JCA: IndexedRecord backed-up by a primitive type array
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/20 15:13:42 $
+ * Date:        $Date: 2010/01/17 13:34:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,6 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  * Java Connector Architecture:
  * A fixed-size IndexedRecord implementation backed-up by an array.
  */
-@SuppressWarnings("unchecked")
 final class FixedSizeIndexedRecord 
 	extends ArraysExtension.AsList
 	implements ArrayBasedIndexedRecord, MultiLineStringRepresentation
@@ -83,7 +82,7 @@ final class FixedSizeIndexedRecord
 	FixedSizeIndexedRecord(
 		String recordName,
 		String recordShortDescription,
-		Object values
+		Object[] values
 	){
 		super(values);
 		this.name = recordName;

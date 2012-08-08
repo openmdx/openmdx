@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Identifier.java,v 1.3 2009/03/05 15:14:56 hburger Exp $
+ * Name:        $Id: Identifier.java,v 1.5 2009/09/23 12:05:39 hburger Exp $
  * Description: Identifier 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 15:14:56 $
+ * Date:        $Date: 2009/09/23 12:05:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -292,7 +292,7 @@ public enum Identifier {
     /**
      * Tells whether the standard mapping should be used or a strictly JMI 1 compliant one
      */
-    public static final boolean STRICTLY_JMI_1_COMPLIANT = false;
+    public static final boolean STRICTLY_JMI_1_COMPLIANT = Boolean.FALSE; // to avoid dead code warning
     
     /**
      * The first word's case

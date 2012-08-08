@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePane.java,v 1.10 2009/03/08 18:03:23 wfro Exp $
+ * Name:        $Id: ReferencePane.java,v 1.11 2009/06/16 17:08:26 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:23 $
+ * Date:        $Date: 2009/06/16 17:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,8 +60,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
@@ -107,14 +107,14 @@ public class ReferencePane
         }
     
         // init grid
-        AppLog.detail("initializing grids");
+        SysLog.detail("initializing grids");
         this.grid = new Grid[control.getGridControl().length];
         this.selectReference(
             initialReference == -1 
                 ? 0 
                 : initialReference
         );
-        AppLog.detail("end initializing grids");
+        SysLog.detail("end initializing grids");
     }
       
     //-------------------------------------------------------------------------

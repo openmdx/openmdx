@@ -17,7 +17,7 @@ rem limitations under the License.
 rem ---------------------------------------------------------------------------
 rem Set CLASSPATH and Java options
 rem
-rem $Id: setclasspath.bat,v 1.1 2009/02/23 18:05:56 wfro Exp $
+rem $Id: setclasspath.bat,v 1.3 2010/04/12 08:36:30 wfro Exp $
 rem ---------------------------------------------------------------------------
 
 rem Make sure prerequisite environment variables are set
@@ -40,7 +40,7 @@ if not exist "%JAVA_HOME%\bin\javaw.exe" goto noJavaHome
 if not exist "%JAVA_HOME%\bin\jdb.exe" goto noJavaHome
 if not exist "%JAVA_HOME%\bin\javac.exe" goto noJavaHome
 if not "%JRE_HOME%" == "" goto okJavaHome
-set JRE_HOME=%JAVA_HOME%
+set "JRE_HOME=%JAVA_HOME%"
 goto okJavaHome
 
 :noJavaHome
@@ -61,23 +61,17 @@ echo This environment variable is needed to run this program
 goto exit
 :okBasedir
 
+rem Don't override the endorsed dir if the user has set it previously
+if not "%JAVA_ENDORSED_DIRS%" == "" goto gotEndorseddir
 rem Set the default -Djava.endorsed.dirs argument
-set JAVA_ENDORSED_DIRS=%BASEDIR%\endorsed
-
-rem Set standard CLASSPATH
-rem Note that there are no quotes as we do not want to introduce random
-rem quotes into the CLASSPATH
-if not exist "%JAVA_HOME%\lib\tools.jar" goto noJavac
-set CLASSPATH=%JAVA_HOME%\lib\tools.jar
-:noJavac
+set "JAVA_ENDORSED_DIRS=%BASEDIR%\endorsed"
+:gotEndorseddir
 
 rem Set standard command for invoking Java.
 rem Note that NT requires a window name argument when using start.
 rem Also note the quoting as JAVA_HOME may contain spaces.
 set _RUNJAVA="%JRE_HOME%\bin\java"
-set _RUNJAVAW="%JRE_HOME%\bin\javaw"
 set _RUNJDB="%JAVA_HOME%\bin\jdb"
-set _RUNJAVAC="%JAVA_HOME%\bin\javac"
 
 goto end
 
@@ -85,3 +79,4 @@ goto end
 exit /b 1
 
 :end
+exit /b 0

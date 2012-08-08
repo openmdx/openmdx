@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ArraysExtension.java,v 1.9 2009/05/08 16:10:06 hburger Exp $
+ * Name:        $Id: ArraysExtension.java,v 1.12 2010/01/19 15:04:27 wfro Exp $
  * Description: Arrays Extension 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/08 16:10:06 $
+ * Date:        $Date: 2010/01/19 15:04:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,56 +62,60 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.openmdx.kernel.exception.BasicException;
+
 /**
  * Array Utility Class
  */
 @SuppressWarnings("unchecked")
 public class ArraysExtension {
 
-	private ArraysExtension(
-	){	
-	    // Avoid instantiation
-	}
-	
-	/**
-	 * Wraps an array into a list
-	 * 
-	 * @param array the array backing up the list
-	 * 
-	 * @return a List backed-up by the given array
-	 * 
-	 * @exception NullPointerException
-	 * 			  if the array argument is <code>null</code>
-	 * @exception ClassCastException 
-	 * 			  if the array argument is not an array
-	 */
-    public static <V> List<V> asList(
-		Object array
-	){
-		return new AsList(array);
-	}
-	
-	/**
-     * Wraps two arrays into a map.  
-	 * 
-	 * @param keys
-	 * @param values
+    private ArraysExtension(
+    ){  
+        // Avoid instantiation
+    }
+    
+    /**
+     * Wraps an array into a list
      * 
-	 * @return a Map backed-up by the given arrays
-	 * 
-	 * @exception NullPointerException
-	 * 			  if either argument is <code>null</code>
-	 * @exception IllegalArgumentException
-     *            if the values argument is not an array
-	 */
-    public static <K,V> Map<K,V> asMap(
-        Object keys,
-        Object values
+     * @param array the array backing up the list
+     * 
+     * @return a List backed-up by the given array
+     * 
+     * @exception NullPointerException
+     *            if the array argument is <code>null</code>
+     * @exception ClassCastException 
+     *            if the array argument is not an array
+     */
+    public static <V> List<V> asList(
+        Object array
     ){
-    	return new AsMap(keys,values);
+        return new AsList(array);
+    }
+    
+    /**
+     * Wraps two arrays into a map.  
+     * 
+     * @param keys
+     * @param values
+     * 
+     * @return a Map backed-up by the given arrays
+     * 
+     * @exception NullPointerException
+     *            if either argument is <code>null</code>
+     * @exception IllegalArgumentException
+     *            if the values argument is not an array
+     */
+    public static <K,V> Map<K,V> asMap(
+        Object[] keys,
+        Object[] values
+    ){
+        return new AsMap(
+            keys,
+            values
+        );
     }
 
-    
     static Object clone(
         Object original
     ){
@@ -304,7 +308,7 @@ public class ArraysExtension {
         /**
          * Constructor  
          * 
-         * @param keys
+         * @param keys 
          * @param values
          * 
          * @exception NullPointerException
@@ -313,26 +317,33 @@ public class ArraysExtension {
          *            if the values argument is not an array
          */
         protected AsMap(
-            Object keys,
-            Object values
+            Object[] keys,
+            Object[] values
         ){
             this.keys = keys;
+            this.normalizeKeys();
             this.values = values;
         }
 
-        /**
-         *
-         */
-        Object keys;
-       
-        /**
-         * An array
-         */
-        Object values;
-
-        private transient List<?> valueList = null;
+        protected void normalizeKeys(
+        ) {
+            if(!this.keysAreNormalized) {
+                boolean normalizeKeys = false;
+                for(int i = 0; i < keys.length; i++) {
+                    if(keys[i] != this.normalizeKey(keys[i])) {
+                        normalizeKeys = true;
+                        break;
+                    }
+                }
+                if(normalizeKeys) {
+                    for(int i = 0; i < this.keys.length; i++) {
+                        this.keys[i] = this.normalizeKey(this.keys[i]);
+                    }
+                }                
+                this.keysAreNormalized = true;
+            }
+        }
         
-
         protected AsMap(){  
             // Deserialization
         }
@@ -353,18 +364,49 @@ public class ArraysExtension {
             return new EntrySet();
         }
 
-        /**
-         * 
-         */
+        private Object normalizeKey(
+            Object key
+        ) {
+            if(key instanceof String) {
+                return ((String)key).intern();
+            } else if (key instanceof Integer) {
+                Integer i = ((Integer) key).intValue();
+                if(i < -128 || i > 127) throw BasicException.initHolder(
+                    new RuntimeException(
+                        "Inappropriate key value",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            new BasicException.Parameter("supported-range", -128, 127),
+                            new BasicException.Parameter("actual-value", i)
+                        )
+                    ) 
+                );
+                return Integer.valueOf(i);
+            } else throw BasicException.initHolder(
+                new RuntimeException(
+                    "Inappropriate key class",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("supported", String.class.getName(), Integer.class.getName()),
+                        new BasicException.Parameter("actual", key == null ? null : key.getClass().getName())
+                    )
+                )
+            );
+        }
+        
         private int slotOf(
-            Object object
+            Object key
         ){
+            this.normalizeKeys();
+            key = this.normalizeKey(key);
             for(
                 int index = 0, iLimit = size(); 
                 index < iLimit;
                 index++
             ) {
-                if (areEqual(Array.get(this.keys, index),object)) {
+                if(this.keys[index] == key) {
                     return index;
                 }
             }
@@ -374,39 +416,46 @@ public class ArraysExtension {
         /* (non-Javadoc)
          * @see java.util.Map#get(java.lang.Object)
          */
-        public Object get(Object key) {
-            int slot = slotOf(key);
-            return slot == -1 || slot >= Array.getLength(this.values) ? 
+        public Object get(
+            Object key
+        ) {
+            int slot = this.slotOf(key);
+            return slot == -1 || slot >= this.values.length ? 
                 null : 
-                Array.get(this.values,slot);
+                this.values[slot];
         }
         
         /* (non-Javadoc)
          * @see java.util.Map#put(java.lang.Object, java.lang.Object)
          */
-        public Object put(Object key, Object value) {
-            int slot = slotOf(key);
+        public Object put(
+            Object key, 
+            Object value
+        ) {
+            int slot = this.slotOf(key);
             if (slot == -1) throw new IllegalArgumentException(
                 "This key value is not among the fixed set of keys"
             );
-            Object oldValue = Array.get(this.values,slot);
-            Array.set(this.values, slot, value); 
+            Object oldValue = this.values[slot];
+            this.values[slot] = value;
             return oldValue;
         }
         
         /* (non-Javadoc)
          * @see java.util.Map#size()
          */
-        public int size() {
-            return Array.getLength(this.keys);
+        public int size(
+        ) {
+            return this.keys.length;
         }
         
         /* (non-Javadoc)
          * @see java.util.Map#values()
          */
-        public Collection values() {
+        public Collection values(
+        ) {
             if(this.valueList == null){
-                this.valueList = new AsList(this.values, size());
+                this.valueList = new AsList(this.values);
             }
             return this.valueList;
         }
@@ -414,15 +463,19 @@ public class ArraysExtension {
         /* (non-Javadoc)
          * @see java.util.Map#containsKey(java.lang.Object)
          */
-        public boolean containsKey(Object object) {
-            return slotOf(object) >= 0;
+        public boolean containsKey(
+            Object key
+        ) {
+            return this.slotOf(key) >= 0;
         }
         
         /* (non-Javadoc)
          * @see java.util.Map#containsValue(java.lang.Object)
          */
-        public boolean containsValue(Object object) {
-            int vLimit = Array.getLength(this.values); 
+        public boolean containsValue(
+            Object object
+        ) {
+            int vLimit = this.values.length; 
             if(vLimit < size() && object == null) {
                 return true;
             } else {
@@ -431,7 +484,7 @@ public class ArraysExtension {
                     index < vLimit;
                     index++
                 ) {
-                    if (areEqual(Array.get(this.values, index),object)) {
+                    if(areEqual(this.values[index], object)) {
                         return true;
                     }
                 }
@@ -442,8 +495,9 @@ public class ArraysExtension {
         /* (non-Javadoc)
          * @see java.util.Map#isEmpty()
          */
-        public boolean isEmpty() {
-            return size() == 0;
+        public boolean isEmpty(
+        ) {
+            return this.size() == 0;
         }
         
         class EntrySet extends AbstractSet{
@@ -456,6 +510,14 @@ public class ArraysExtension {
             public int size(
             ){
                 return AsMap.this.size();
+            }
+
+            /* (non-Javadoc)
+             * @see java.util.AbstractCollection#isEmpty()
+             */
+            @Override
+            public boolean isEmpty() {
+                return AsMap.this.isEmpty();
             } 
         
         }
@@ -495,13 +557,13 @@ public class ArraysExtension {
                 
             public Object getKey(
             ){
-                return Array.get(AsMap.this.keys, this.slot);
+                return AsMap.this.keys[this.slot];
             }
         
             public Object getValue(
             ){
-                return this.slot < Array.getLength(AsMap.this.values) ? 
-                    Array.get(AsMap.this.values, this.slot) : 
+                return this.slot < AsMap.this.values.length ? 
+                    AsMap.this.values[this.slot] : 
                     null;
             } 
         
@@ -524,7 +586,7 @@ public class ArraysExtension {
                 Object value
             ){
                 Object result = getValue();
-                Array.set(AsMap.this.values,this.slot, value);
+                AsMap.this.values[this.slot] = value;
                 return result;
             }
             
@@ -533,7 +595,8 @@ public class ArraysExtension {
             /* (non-Javadoc)
              * @see java.lang.Object#toString()
              */
-            public String toString() {
+            public String toString(
+            ) {
                 return String.valueOf(getKey()) + "=" + String.valueOf(getValue());
             }
 
@@ -581,11 +644,19 @@ public class ArraysExtension {
         public Object clone(
         ){      
             return new AsMap(
-                ArraysExtension.clone(this.keys),
-                ArraysExtension.clone(this.values)
+                (Object[])ArraysExtension.clone(this.keys),
+                (Object[])ArraysExtension.clone(this.values)
             );
         }
 
+        //-------------------------------------------------------------------
+        // Members
+        //-------------------------------------------------------------------
+        Object[] keys;       
+        Object[] values;
+        private transient List<?> valueList = null;
+        private transient boolean keysAreNormalized = false;
+        
     }
     
 }

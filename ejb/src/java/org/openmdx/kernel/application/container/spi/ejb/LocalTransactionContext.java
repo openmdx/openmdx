@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LocalTransactionContext.java,v 1.2 2009/03/31 17:06:10 hburger Exp $
+ * Name:        $Id: LocalTransactionContext.java,v 1.3 2009/08/25 17:23:05 hburger Exp $
  * Description: LocalTransactionContext
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:06:10 $
+ * Date:        $Date: 2009/08/25 17:23:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,6 +55,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.EJBException;
+import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionRequiredLocalException;
 import javax.ejb.TransactionRolledbackLocalException;
 import javax.transaction.HeuristicMixedException;
@@ -83,7 +84,7 @@ class LocalTransactionContext
      */
     LocalTransactionContext(
         TransactionManager transactionManager,
-        TransactionAttribute transactionAttribute
+        TransactionAttributeType transactionAttribute
      ){
         super(transactionManager);
         try {

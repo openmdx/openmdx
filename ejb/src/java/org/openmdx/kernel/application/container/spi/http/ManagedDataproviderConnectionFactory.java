@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ManagedDataproviderConnectionFactory.java,v 1.1 2009/01/12 12:49:24 wfro Exp $
+ * Name:        $Id: ManagedDataproviderConnectionFactory.java,v 1.2 2009/08/25 13:47:21 hburger Exp $
  * Description: ManagedDataproviderConnectionFactory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:24 $
+ * Date:        $Date: 2009/08/25 13:47:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ import javax.resource.spi.ResourceAdapterInternalException;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.loading.Classes;
 
 
 /**

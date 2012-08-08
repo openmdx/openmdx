@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Strict_1.java,v 1.4 2009/06/14 00:28:38 wfro Exp $
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: Strict_1.java,v 1.20 2010/03/17 16:31:22 hburger Exp $
  * Description: Strict_1 class performing type checking of DataproviderRequest/DataproviderReply
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/14 00:28:38 $
+ * Date:        $Date: 2010/03/17 16:31:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,36 +51,37 @@
  */
 package org.openmdx.application.dataprovider.layer.type;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.IndexedRecord;
+import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
 import org.openmdx.application.mof.repository.accessor.ModelElement_1;
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.AttributeSpecifier;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.cci2.SparseArray;
 
 /** 
  * Layer_1 plugin which performs strict type checking on DataproviderReplys.
@@ -90,40 +91,40 @@ import org.openmdx.kernel.log.SysLog;
  * <p>
  * <ul>
  *   <li>modelPackage: Model_1_0 model accessor.</li>
- *   <li>verifyReply: true --> reply objects are verified for model compliance.</li>
  * </ul>
  */
 @SuppressWarnings("unchecked")
-public class Strict_1
-    extends OperationAwareLayer_1 
-{
+public class Strict_1 extends OperationAwareLayer_1 {
 
+    //---------------------------------------------------------------------------
+    public Strict_1(
+    ) {
+    }
+    
+    // --------------------------------------------------------------------------
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new LayerInteraction(connection);
+    }
+                
     //---------------------------------------------------------------------------
     public void activate(
         short id,
         Configuration configuration,
-        Layer_1_0 delegation
+        Layer_1 delegation
     ) throws ServiceException {
-
         super.activate(
             id, 
             configuration, 
             delegation
         );
-
-        // verifyReply
-        this.verifyReply = 
-            configuration.values(LayerConfigurationEntries.VERIFY_REPLY).isEmpty() ||
-            Boolean.TRUE.equals(configuration.values(LayerConfigurationEntries.VERIFY_REPLY).get(0));
-
-        // allowEnumerationOfChildren
-        this.allowEnumerationOfChildren = configuration.isOn(LayerConfigurationEntries.ALLOW_ENUMERATION_OF_CHILDREN);
-
         // genericTypes
-        this.genericTypes = configuration.values(
-            LayerConfigurationEntries.GENERIC_TYPE_PATH
+        this.genericTypes = new ArrayList(
+            configuration.values(
+                LayerConfigurationEntries.GENERIC_TYPE_PATH
+            ).values()
         );
-
         // initialize genericObjectType to BasicObject to ensure that the 
         // system attributes are present.
         this.basicObjectClassDef = new ModelElement_1(
@@ -131,87 +132,6 @@ public class Strict_1
         );
     }
 
-    //---------------------------------------------------------------------------
-    private void removeForeignAndDerivedAttributes(
-        MappedRecord object,
-        ModelElement_1_0 typeDef,
-        boolean removeDerived,
-        boolean allowChangeable
-    ) throws ServiceException {   
-        try {
-            ObjectHolder_2Facade facade = ObjectHolder_2Facade.newInstance(object);
-            // remove derived attributes but not SystemAttributes
-            if(this.getModel().isClassType(typeDef)) {
-                Map structuralFeatureDefs = getModel().getStructuralFeatureDefs(
-                    typeDef, false, true, !this.allowEnumerationOfChildren
-                );
-                for(
-                    Iterator i = facade.getValue().keySet().iterator();
-                    i.hasNext();
-                ) {
-                    boolean isDerived = false;
-                    boolean isChangeable = true;
-                    boolean isForeign = true;
-                    String featureName = (String)i.next();
-                    // ignore namespaces
-                    if(featureName.indexOf(':') < 0) {
-                        ModelElement_1_0 featureDef = (ModelElement_1_0) structuralFeatureDefs.get(featureName);
-                        if (featureDef != null) {
-                            isDerived = 
-                                (!featureDef.objGetList("isDerived").isEmpty()) && 
-                                ((Boolean)featureDef.objGetValue("isDerived")).booleanValue();
-                            isChangeable = 
-                                (!featureDef.objGetList("isChangeable").isEmpty()) && 
-                                ((Boolean)featureDef.objGetValue("isChangeable")).booleanValue();          
-                            isForeign = false;
-                        }
-                        boolean isSystemAttribute = (
-                            SystemAttributes.CREATED_AT.equals(featureName) ||
-                            SystemAttributes.REMOVED_AT.equals(featureName) ||
-                            SystemAttributes.CREATED_BY.equals(featureName) ||
-                            SystemAttributes.REMOVED_BY.equals(featureName) ||
-                            SystemAttributes.VERSION.equals(featureName) 
-                        ) || (
-                            (SystemAttributes.MODIFIED_AT.equals(featureName) || SystemAttributes.MODIFIED_BY.equals(featureName)) &&
-                            !isState1BasicState(typeDef)
-                        );
-                        // Authority, Provider, Segment
-                        boolean isBaseObject = facade.getPath().size() <= 5;
-                        if(
-                            !SystemAttributes.OBJECT_CLASS.equals(featureName)
-                            && ((isDerived && removeDerived) || (!isChangeable && !allowChangeable) || isForeign) 
-                            && (!isSystemAttribute || isBaseObject)
-                        ) {
-                            i.remove();
-                        }
-                    }
-                }
-            }
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
-        }
-    }
-    
-    /**
-     * Test whether the given type is an org::openmdx::compatibility::state1::BasicState instance
-     * 
-     * @param typeDef
-     * 
-     * @return <code>true</code> if typeDef represents an org::openmdx::compatibility::state1::BasicState instance
-     * @throws ServiceException
-     */
-    private boolean isState1BasicState(
-    	ModelElement_1_0 typeDef
-    ) throws ServiceException{
-    	for(Object superTypeId : typeDef.objGetList("allSupertype")) {
-    		if(STATE1_BASIC_STATE_CLASS.equals(((Path)superTypeId).getBase())) {
-    			return true;
-    		}
-    	}
-    	return false;
-    }
-    
     //---------------------------------------------------------------------------
     private boolean isGenericTypePath(
         Path objectPath  
@@ -228,99 +148,26 @@ public class Strict_1
     }
 
     //---------------------------------------------------------------------------
-    /**
-     * This method asserts that the object contains only supported primitive types 
-     */
-    private void assertBasicTypesOnly(
-        MappedRecord object
-    ) throws ServiceException {
-        try {
-            ObjectHolder_2Facade facade = ObjectHolder_2Facade.newInstance(object);
-            for(
-                Iterator i = facade.getValue().keySet().iterator();
-                i.hasNext();
-            ) {
-                String attributeName = (String)i.next();
-                SparseList attributeValues = facade.getAttributeValues(attributeName);
-                if(attributeValues != null) {
-                    for(
-                        Iterator j = attributeValues.iterator();
-                        j.hasNext();
-                    ) {
-                        Object value = j.next();
-                        if(
-                            (value != null) &&
-                            !(value instanceof String) &&
-                            !(value instanceof Number) &&
-                            !(value instanceof Boolean) &&
-                            !(value instanceof Date) &&
-                            !(value instanceof XMLGregorianCalendar) &&
-                            !(value instanceof byte[]) &&
-                            !(value instanceof InputStream) &&
-                            !(value instanceof Path)
-                        ) {
-                            throw new ServiceException(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.ASSERTION_FAILURE, 
-                                "DataproviderObject must only contain primitive types [String|Number|Boolean|Path|byte[]|InputStream]",
-                                new BasicException.Parameter("object", object),
-                                new BasicException.Parameter("attribute", attributeName),
-                                new BasicException.Parameter("value class", (value == null ? null : value.getClass().getName())),
-                                new BasicException.Parameter("value", value)
-                            );          
-                        }
-                    }
-                }
-            }
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
-        }
-    }
-
-    //---------------------------------------------------------------------------
-    private void completeAndVerifyReplyObject(
+    protected void completeAndVerifyReplyObject(
         MappedRecord object, 
-        short attributeSelector,
-        AttributeSpecifier[] specifiers
+        short attributeSelector
     ) throws ServiceException {
         try {
-            ObjectHolder_2Facade facade = ObjectHolder_2Facade.newInstance(object);
-            // remove all attributes if any present silently. Do not complain anymore
             if(attributeSelector == AttributeSelectors.NO_ATTRIBUTES) {
-                facade.getValue().keySet().clear();    
+                // remove all attributes if any present silently. Do not complain anymore
+                Object_2Facade.getValue(object).clear();    
                 return;   
             }
-    
-            this.removeForeignAndDerivedAttributes(
-                object,
-                this.getObjectClass(object),
-                false,
-                true
-            );
-            this.assertBasicTypesOnly(
-                object
-            );
-            if(this.verifyReply) {
-                getModel().verifyObject(
-                    object, 
-                    ObjectHolder_2Facade.getObjectClass(object),
-                    null,
-                    false,
-                    !this.allowEnumerationOfChildren
-                );
-            }
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             throw new ServiceException(e);
         }
     }
 
     //---------------------------------------------------------------------------
-    private ModelElement_1_0 getObjectClass(
+    protected ModelElement_1_0 getObjectClass(
         MappedRecord object
     ) throws ServiceException {
-        String objectClass = ObjectHolder_2Facade.getObjectClass(object);
+        String objectClass = Object_2Facade.getObjectClass(object);
         if(objectClass == null) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -330,7 +177,7 @@ public class Strict_1
             );
         }
         ModelElement_1_0 typeDef = null;
-        if(this.isGenericTypePath(ObjectHolder_2Facade.getPath(object))) {
+        if(this.isGenericTypePath(Object_2Facade.getPath(object))) {
             typeDef = this.basicObjectClassDef; 
         }
         else {        
@@ -340,87 +187,111 @@ public class Strict_1
     }
 
     //---------------------------------------------------------------------------
-    private DataproviderReply completeAndVerifyReply(
+    protected DataproviderReply completeAndVerifyReply(
         ServiceHeader header,
         DataproviderRequest request,
         DataproviderReply reply
     ) throws ServiceException {
-        MappedRecord[] objects = reply.getObjects();
-        short attributeSelector = request.attributeSelector();
-        AttributeSpecifier[] attributeSpecifier = request.attributeSpecifier();
-        for (
-            int i = 0;
-            i < objects.length;
-            i++
-        ) {            
-            this.completeAndVerifyReplyObject(
-                objects[i], 
-                attributeSelector, 
-                attributeSpecifier
-            );
+        if(reply.getResult() != null) {
+            MappedRecord[] objects = reply.getObjects();
+            short attributeSelector = request.attributeSelector();
+            for (
+                int i = 0;
+                i < objects.length;
+                i++
+            ) {            
+                this.completeAndVerifyReplyObject(
+                    objects[i], 
+                    attributeSelector 
+                );
+            }
         }
         return reply;
     }
 
-    //---------------------------------------------------------------------------
-    public DataproviderReply find(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        return this.completeAndVerifyReply(
-            header,
-            request,
-            super.find(
-                header, 
-                request
-            )
-        );
-    }
+    // --------------------------------------------------------------------------
+    public class LayerInteraction extends OperationAwareLayer_1.LayerInteraction {
+        
+        public LayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
+        }
+                
+        //---------------------------------------------------------------------------
+        @Override
+        public boolean find(
+            RestInteractionSpec ispec,
+            Query_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            ServiceHeader header = this.getServiceHeader(); 
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);      
+            super.find(ispec, input, output);
+            Strict_1.this.completeAndVerifyReply(
+                header,
+                request,
+                reply
+            );
+            return true;
+        }
+    
+        //---------------------------------------------------------------------------
+        @Override
+        public boolean get(
+            RestInteractionSpec ispec,
+            Query_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            ServiceHeader header = this.getServiceHeader(); 
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);        
+            super.get(ispec, input, output);
+            Strict_1.this.completeAndVerifyReply(
+                header,
+                request,
+                reply
+            );
+            return true;
+        }
 
-    //---------------------------------------------------------------------------
-    public DataproviderReply get(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        return this.completeAndVerifyReply(
-            header,
-            request,
-            super.get(
-                header, 
-                request
-            )
-        );
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply create(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        try {
-            MappedRecord object = request.object();
-            ObjectHolder_2Facade facade = ObjectHolder_2Facade.newInstance(request.object());
-            ModelElement_1_0 objClassDef = this.getObjectClass(object);
-            SysLog.trace("create object", object);
-            SysLog.trace("create objClass", objClassDef.objGetValue("qualifiedName"));
-            // remove all attributes with empty value list
-            Set attributeNames = facade.getValue().keySet();
-            List attributesToBeRemoved = new ArrayList();
-            for(
-                Iterator i = attributeNames.iterator();
-                i.hasNext();
-            ) {
-                String attributeName = (String)i.next();
-                if(
-                    facade.getValue().get(attributeName) == null || 
-                    (facade.getValue() instanceof SparseList && ((SparseList)facade.getValue().get(attributeName)).isEmpty())
+        //---------------------------------------------------------------------------
+        @Override
+        public boolean create(
+            RestInteractionSpec ispec,
+            Object_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            ServiceHeader header = this.getServiceHeader(); 
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);            
+            
+            try {
+                MappedRecord object = request.object();
+                Object_2Facade facade = Object_2Facade.newInstance(request.object());
+                ModelElement_1_0 objClassDef = Strict_1.this.getObjectClass(object);
+                SysLog.trace("create object", object);
+                SysLog.trace("create objClass", objClassDef.objGetValue("qualifiedName"));
+                // remove all attributes with empty value list
+                Set attributeNames = facade.getValue().keySet();
+                List attributesToBeRemoved = new ArrayList();
+                for(
+                    Iterator i = attributeNames.iterator();
+                    i.hasNext();
                 ) {
-                    attributesToBeRemoved.add(attributeName);
+                    String attributeName = (String)i.next();
+                    Object value = facade.getValue().get(attributeName);
+                    if(
+                        (value == null) || 
+                        (value instanceof List && ((List)value).isEmpty()) ||
+                        (value instanceof SparseArray && ((SparseArray)value).isEmpty())                        
+                    ) {
+                        attributesToBeRemoved.add(attributeName);
+                    }
                 }
-            }
-            facade.getValue().keySet().removeAll(attributesToBeRemoved);
-            // check whether referenced type matches objClass
-            if(!STATE1_STATE_CAPABLE_CLASS.equals(objClassDef.objGetValue("qualifiedName"))) {    
+                facade.getValue().keySet().removeAll(attributesToBeRemoved);
+                // check whether referenced type matches objClass
                 ModelElement_1_0 typeDef = getModel().getTypes(facade.getPath())[2];
                 if(!getModel().objectIsSubtypeOf(object, typeDef)) {
                     throw new ServiceException(
@@ -437,282 +308,162 @@ public class Strict_1
                         )
                     );      
                 }
-            }
-            this.removeForeignAndDerivedAttributes(
-                object, 
-                objClassDef, 
-                true, 
-                true
-            );
-            getModel().verifyObject(
-                object, 
-                objClassDef,
-                null,
-                false 
-            );    
-            return this.completeAndVerifyReply(
-                header,
-                request,
                 super.create(
-                    header, 
-                    request
-                )
-            );
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
-        }
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply modify(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        MappedRecord object = request.object();
-        ModelElement_1_0 objClassDef = this.getObjectClass(object);
-        if(!STATE1_STATE_CAPABLE_CLASS.equals(objClassDef.objGetValue("qualifiedName"))) {    
-            //
-            // check whether referenced type matches objClass
-            //
-            ModelElement_1_0 typeDef = getModel().getTypes(ObjectHolder_2Facade.getPath(object))[2];
-            if(!getModel().objectIsSubtypeOf(object, typeDef)) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE, 
-                    "object not instance of type",
-                    new BasicException.Parameter("object class", objClassDef),
-                    new BasicException.Parameter("type", typeDef)
-                );      
-            }
-        }
-        this.removeForeignAndDerivedAttributes(
-            object, 
-            objClassDef, 
-            true, 
-            false
-        );
-        getModel().verifyObject(
-            object, 
-            objClassDef,
-            null,
-            false 
-        );    
-        return this.completeAndVerifyReply(
-            header,
-            request,
-            super.modify(
-                header, 
-                request
-            )
-        );
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply set(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        MappedRecord object = request.object();
-        ModelElement_1_0 objClassDef = this.getObjectClass(object);
-        // check whether referenced type matches objClass
-        ModelElement_1_0 typeDef = this.getModel().getTypes(ObjectHolder_2Facade.getPath(object))[2];
-        if(!this.getModel().objectIsSubtypeOf(object, typeDef)) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE, 
-                "object not instance of type",
-                new BasicException.Parameter("object class", objClassDef),
-                new BasicException.Parameter("type", typeDef)
-            );      
-        }
-        this.removeForeignAndDerivedAttributes(
-            object, 
-            objClassDef, 
-            true, 
-            false
-        );
-        this.getModel().verifyObject(
-            object, 
-            objClassDef,
-            null,
-            false 
-        );    
-        return this.completeAndVerifyReply(
-            header,
-            request,
-            super.set(
-                header, 
-                request
-            )
-        );
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply replace(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        MappedRecord object = request.object();
-        ModelElement_1_0 objClassDef = getObjectClass(object);
-        if(!STATE1_STATE_CAPABLE_CLASS.equals(objClassDef.objGetValue("qualifiedName"))) {    
-            //
-            // check whether referenced type matches objClass
-            //
-            ModelElement_1_0 typeDef = this.getModel().getTypes(ObjectHolder_2Facade.getPath(object))[2];
-            if(!getModel().objectIsSubtypeOf(object, typeDef)) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE, 
-                    "object not instance of type",
-                    new BasicException.Parameter("object class", objClassDef),
-                    new BasicException.Parameter("type", typeDef)
-                );      
-            }
-        }
-        this.removeForeignAndDerivedAttributes(
-            object, 
-            objClassDef, 
-            true, 
-            false
-        );
-        this.getModel().verifyObject(
-            object, 
-            objClassDef,
-            null,
-            false 
-        );    
-        return this.completeAndVerifyReply(
-            header,
-            request,
-            super.replace(
-                header, 
-                request
-            )
-        );
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply remove(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        return super.remove(
-            header,
-            request
-        );
-    }
-
-    //---------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#otherOperation(org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest, java.lang.String, org.openmdx.compatibility.base.naming.Path)
-     */
-    protected MappedRecord otherOperation(
-        ServiceHeader header,
-        DataproviderRequest request,
-        String operation, Path replyPath
-    ) throws ServiceException {
-        MappedRecord object = request.object();
-        //
-        // rewrite namespace '../view:<namespaceId>:<operationName>/<requestId>' 
-        // to .../view/<namespaceId>/<operationName>/<requestId>. This way the
-        // path matches the model
-        //
-        Path operationPath = request.path();
-        String operationName = operationPath.get(operationPath.size()-2);
-        //
-        // rewrite reference name with namespace to .../view/<namespaceId>/...
-        //
-        ModelElement_1_0 inParamTypeDef = this.getObjectClass(object);
-        // 
-        // Find operation and corresponding inParamDef and resultParamDef
-        // which is to be invoked. The lookup is made based on the type name
-        // of the parameter and the operation name.
-        //  
-        ModelElement_1_0 targetClassDef = getModel().getTypes(
-            operationPath.getPrefix(operationPath.size()-2
-            ))[2];
-        ModelElement_1_0 inParamDef = null;
-        //
-        // collect all types which could contain operation
-        //
-        Collection allTypes = new HashSet();
-        for(Iterator i = targetClassDef.objGetList("allSubtype").iterator(); i.hasNext(); ) {
-            ModelElement_1_0 subtype = getModel().getElement(i.next());
-            allTypes.addAll(
-                subtype.objGetList("allSupertype")
-            );
-        }
-        //  
-        // lookup operation
-        //
-        for(
-            Iterator i = allTypes.iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 classDef = getModel().getDereferencedType(i.next());
-            ModelElement_1_0 operationDef = null;
-            try {
-                operationDef = getModel().getElement(
-                    classDef.objGetValue("qualifiedName") + ":" + operationName
+                    ispec, 
+                    input, 
+                    output
                 );
+                Strict_1.this.completeAndVerifyReply(
+                    header,
+                    request,
+                    reply
+                );
+                return true;
             }
             catch(Exception e) {
-                // ignore
+                throw new ServiceException(e);
             }
-            if(
-                (operationDef != null) &&
-                this.getModel().isOperationType(operationDef)
-            ) {
-                // lookup parameters definition
-                for(
-                    Iterator j = operationDef.objGetList("content").iterator();
-                    j.hasNext();
-                ) {
-                    ModelElement_1_0 e = getModel().getElement(j.next());
-                    if("in".equals(e.objGetValue("name"))) {
-                        inParamDef = e;
-                    }
-                }
-                // operation found where type in parameter matches the request's in parameter
-                if(getModel().getElementType(inParamDef) == inParamTypeDef) {
-                    break;
-                }
-            }  
         }
-        //     
-        // no matching operation found
-        //
-        if(inParamDef == null) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE, 
-                "no matching operation found for request",
-                new BasicException.Parameter("request", request.path()),
-                new BasicException.Parameter("in param type", inParamTypeDef)
-            );      
-        }
-        //
-        // validate parameter
-        //
-        this.getModel().verifyObject(
-            object, 
-            inParamTypeDef,
-            null,
-            true
-        );
-        return null;
-    }
 
+        //---------------------------------------------------------------------------
+        @Override
+        public boolean put(
+            RestInteractionSpec ispec,
+            Object_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            ServiceHeader header = this.getServiceHeader();
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);            
+            
+            MappedRecord object = request.object();
+            ModelElement_1_0 objClassDef = getObjectClass(object);
+            //
+            // check whether referenced type matches objClass
+            //
+            ModelElement_1_0 typeDef = this.getModel().getTypes(Object_2Facade.getPath(object))[2];
+            if(!getModel().objectIsSubtypeOf(object, typeDef)) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE, 
+                    "object not instance of type",
+                    new BasicException.Parameter("object class", objClassDef),
+                    new BasicException.Parameter("type", typeDef)
+                );      
+            }
+            super.put(
+                ispec, 
+                input, 
+                output
+            );
+            Strict_1.this.completeAndVerifyReply(
+                header,
+                request,
+                reply
+            );
+            return true;
+        }
+    
+        //---------------------------------------------------------------------------
+        /* (non-Javadoc)
+         * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#otherOperation(org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest, java.lang.String, org.openmdx.compatibility.base.naming.Path)
+         */
+        @Override
+        protected MappedRecord otherOperation(
+            ServiceHeader header,
+            DataproviderRequest request,
+            String operation, Path replyPath
+        ) throws ServiceException {
+            MappedRecord object = request.object();
+            //
+            // rewrite namespace '../view:<namespaceId>:<operationName>/<requestId>' 
+            // to .../view/<namespaceId>/<operationName>/<requestId>. This way the
+            // path matches the model
+            //
+            Path operationPath = request.path();
+            String operationName = operationPath.get(operationPath.size()-2);
+            //
+            // rewrite reference name with namespace to .../view/<namespaceId>/...
+            //
+            ModelElement_1_0 inParamTypeDef = Strict_1.this.getObjectClass(object);
+            // 
+            // Find operation and corresponding inParamDef and resultParamDef
+            // which is to be invoked. The lookup is made based on the type name
+            // of the parameter and the operation name.
+            //  
+            ModelElement_1_0 targetClassDef = getModel().getTypes(
+                operationPath.getPrefix(operationPath.size()-2
+                ))[2];
+            ModelElement_1_0 inParamDef = null;
+            //
+            // collect all types which could contain operation
+            //
+            Collection allTypes = new HashSet();
+            for(Iterator i = targetClassDef.objGetList("allSubtype").iterator(); i.hasNext(); ) {
+                ModelElement_1_0 subtype = getModel().getElement(i.next());
+                allTypes.addAll(
+                    subtype.objGetList("allSupertype")
+                );
+            }
+            //  
+            // lookup operation
+            //
+            for(
+                Iterator i = allTypes.iterator();
+                i.hasNext();
+            ) {
+                ModelElement_1_0 classDef = getModel().getDereferencedType(i.next());
+                ModelElement_1_0 operationDef = null;
+                try {
+                    operationDef = getModel().getElement(
+                        classDef.objGetValue("qualifiedName") + ":" + operationName
+                    );
+                }
+                catch(Exception e) {
+                    // ignore
+                }
+                if(
+                    (operationDef != null) &&
+                    this.getModel().isOperationType(operationDef)
+                ) {
+                    // lookup parameters definition
+                    for(
+                        Iterator j = operationDef.objGetList("content").iterator();
+                        j.hasNext();
+                    ) {
+                        ModelElement_1_0 e = getModel().getElement(j.next());
+                        if("in".equals(e.objGetValue("name"))) {
+                            inParamDef = e;
+                        }
+                    }
+                    // operation found where type in parameter matches the request's in parameter
+                    if(getModel().getElementType(inParamDef) == inParamTypeDef) {
+                        break;
+                    }
+                }  
+            }
+            //     
+            // no matching operation found
+            //
+            if(inParamDef == null) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE, 
+                    "no matching operation found for request",
+                    new BasicException.Parameter("request", request.path()),
+                    new BasicException.Parameter("in param type", inParamTypeDef)
+                );      
+            }
+            return null;
+        }
+        
+    }
+    
     //---------------------------------------------------------------------------
     // Variables
     //---------------------------------------------------------------------------
     private List genericTypes = null;
     private ModelElement_1_0 basicObjectClassDef = null;
-    private boolean verifyReply = true;
-    private boolean allowEnumerationOfChildren = false;
-    public static String STATE1_STATE_CAPABLE_CLASS = "org:openmdx:compatibility:state1:StateCapable";
-    public static String STATE1_BASIC_STATE_CLASS = "org:openmdx:compatibility:state1:BasicState";
 
 }
 

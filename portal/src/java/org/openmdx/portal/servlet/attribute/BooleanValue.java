@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BooleanValue.java,v 1.25 2008/11/12 10:36:53 wfro Exp $
+ * Name:        $Id: BooleanValue.java,v 1.27 2009/09/26 23:28:49 wfro Exp $
  * Description: BooleanValue
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 10:36:53 $
+ * Date:        $Date: 2009/09/26 23:28:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,7 +63,7 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.control.EditObjectControl;
 
 public class BooleanValue
@@ -116,7 +116,7 @@ public class BooleanValue
      * Prepares a single stringified Value to append.
      */
     protected String getStringifiedValueInternal(
-        HtmlPage p, 
+        ViewPort p, 
         Object v,
         boolean multiLine,
         boolean forEditing,
@@ -145,9 +145,10 @@ public class BooleanValue
     }
   
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         Attribute attribute,
-        HtmlPage p,
+        ViewPort p,
         String id,
         String label,
         RefObject_1_0 lookupObject,
@@ -163,11 +164,8 @@ public class BooleanValue
         String stringifiedValue,
         boolean forEditing
     ) throws ServiceException { 
-        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();                
-        if(label == null) {
-            label = attribute.getLabel();
-            label += label.length() == 0 ? "" : ":";        
-        }
+        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();     
+        label = this.getLabel(attribute, p, label);
         if(forEditing) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0)            
@@ -222,18 +220,24 @@ public class BooleanValue
                 String images = "";
                 Collection values = this.getValues(false);
                 for(Iterator e = values.iterator(); e.hasNext(); ) {
-                  if(Boolean.TRUE.equals(e.next())) {
-                    images += p.getImg("src=\"", p.getResourcePath("images/checked"), p.getImgType(), "\" alt=\"checked\"");
-                  }
-                  else {
-                    images += p.getImg("src=\"", p.getResourcePath("images/notchecked"), p.getImgType(), "\" alt=\"not checked\"");
-                  }
+                    if(Boolean.TRUE.equals(e.next())) {
+                    	images += p.getImg("src=\"", p.getResourcePath("images/checked"), p.getImgType(), "\" alt=\"checked\"");
+                    }
+                    else {
+                    	images += p.getImg("src=\"", p.getResourcePath("images/notchecked"), p.getImgType(), "\" alt=\"not checked\"");
+                    }
                 }
                 styleModifier += "\"";
-                p.debug("<!-- BooleanValue -->");
-                p.write(gapModifier);
-                p.write("<td class=\"label\"><span class=\"nw\">",  htmlEncoder.encode(label, false), "</span></td>");
-                p.write("<td ",  rowSpanModifier, " class=\"valueL\" ",  widthModifier, " ",  styleModifier, "><div class=\"field\" title=\"",  stringifiedValue, "\">",  images, "</div></td>");
+                if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
+                	p.write("       <div class=\"valueL\" title=\"", stringifiedValue, "\">", images, "</div>");
+                }
+                else {
+	                p.debug("<!-- BooleanValue -->");
+	                p.write(gapModifier);
+	                p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+	                p.write("<td ",  rowSpanModifier, " class=\"valueL\" ",  widthModifier, " ",  styleModifier, "><div class=\"field\" title=\"", stringifiedValue, "\">",  images, "</div></td>");
+                }
             }
         }
     }

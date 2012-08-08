@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestImmutableDatatypes.java,v 1.2 2009/03/05 17:51:35 hburger Exp $
+ * Name:        $Id: TestImmutableDatatypes.java,v 1.6 2010/01/03 15:15:27 wfro Exp $
  * Description: TestImmutableDatatypes 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 17:51:35 $
+ * Date:        $Date: 2010/01/03 15:15:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,7 +65,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openmdx.base.text.format.DateFormat;
+import org.w3c.cci2.ImmutableDatatype;
+import org.w3c.format.DateTimeFormat;
 
 /**
  * TestImmutableDatatypes
@@ -109,8 +110,8 @@ public class TestImmutableDatatypes {
             01, // day
             FIELD_UNDEFINED // time zone
         );
-        mutableDateTime02 = DateFormat.getInstance().parse("20000229T120000.000Z");
-        mutableDateTime03 = DateFormat.getInstance().parse("20000301T120000.000Z");
+        mutableDateTime02 = DateTimeFormat.BASIC_UTC_FORMAT.parse("20000229T120000.000Z");
+        mutableDateTime03 = DateTimeFormat.BASIC_UTC_FORMAT.parse("20000301T120000.000Z");
     }
     
     @Test
@@ -135,8 +136,7 @@ public class TestImmutableDatatypes {
         assertEquals("immutableDate03.compareTo(immutableDate02)", +1, ((Comparable<XMLGregorianCalendar>)immutableDate03).compareTo(immutableDate02));
         assertEquals("mutableDate02.toXMLFormat()", "2000-02-29", mutableDate02.toXMLFormat());
         assertEquals("immutableDate02.toXMLFormat()", "2000-02-29", immutableDate02.toXMLFormat());
-        assertEquals("immutableDate02.toBasicFormat()", "2000-02-29", immutableDatatypeFactory().toExtendedFormat(immutableDate02));
-        assertEquals("immutableDate02.toBasicFormat()", "20000229", immutableDatatypeFactory().toBasicFormat(immutableDate02));
+        assertEquals("immutableDate02.toBasicFormat()", "20000229", ((ImmutableDatatype<?>)immutableDate02).toBasicFormat());
         mutableDate02.add(oneDay);
         assertEquals("mutableDate02 += P1D", mutableDate02, mutableDate03);
         try {
@@ -170,10 +170,10 @@ public class TestImmutableDatatypes {
         assertEquals("mutableDateTime02.compareTo(immutableDateTime03)", -1, mutableDateTime02.compareTo(immutableDateTime03));
         assertEquals("mutableDateTime02.compareTo(immutableDateTime02)", 0, mutableDateTime02.compareTo(immutableDateTime02));
         assertEquals("mutableDateTime02.compareTo(immutableDateTime03)", -1, mutableDateTime02.compareTo(immutableDateTime03));
-        assertEquals("immutableDate02.toExtendedFormat()", "2000-02-29T12:00:00.000Z", immutableDatatypeFactory().toExtendedFormat(immutableDateTime02));
-        assertEquals("mutableDate02.toExtendedFormat()", "2000-02-29T12:00:00.000Z", immutableDatatypeFactory().toExtendedFormat(mutableDateTime02));
-        assertEquals("immutableDate02.toBasicFormat()", "20000229T120000.000Z", immutableDatatypeFactory().toBasicFormat(immutableDateTime02));
-        assertEquals("mutableDate02.toBasicFormat()", "20000229T120000.000Z", immutableDatatypeFactory().toBasicFormat(mutableDateTime02));
+        assertEquals("immutableDate02.toExtendedFormat()", "2000-02-29T12:00:00.000Z", DateTimeFormat.EXTENDED_UTC_FORMAT.format(immutableDateTime02));
+        assertEquals("mutableDate02.toExtendedFormat()", "2000-02-29T12:00:00.000Z",  DateTimeFormat.EXTENDED_UTC_FORMAT.format(mutableDateTime02));
+        assertEquals("immutableDate02.toBasicFormat()", "20000229T120000.000Z",  DateTimeFormat.BASIC_UTC_FORMAT.format(immutableDateTime02));
+        assertEquals("mutableDate02.toBasicFormat()", "20000229T120000.000Z",  DateTimeFormat.BASIC_UTC_FORMAT.format(mutableDateTime02));
         mutableDateTime03 = new Date(mutableDateTime02.getTime() + 1000L * 60 * 60 * 24);
         assertEquals("mutableDateTime02 += P1D", immutableDateTime03, mutableDateTime03);
         try {

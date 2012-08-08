@@ -82,8 +82,8 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 
 // ---------------------------------------------------------------------------
@@ -146,8 +146,6 @@ public class Mapper_1
         String multiplicity = (String) attributeDef.objGetValue("multiplicity");
         boolean isDerived =
             ((Boolean) attributeDef.objGetValue("isDerived")).booleanValue();
-        boolean isChangeable =
-            ((Boolean) attributeDef.objGetValue("isChangeable")).booleanValue();
         // required for ...Class.create...() operations
         this.processedAttributes.add(attributeDef);
         try {
@@ -158,9 +156,6 @@ public class Mapper_1
                     new AttributeDef(attributeDef, this.model);
                 ClassDef mClassDef =
                     new ClassDef(classDef, this.model, this.metaData);
-                // Attributes are read-only if they are not changeable or
-                // derived
-                boolean isReadOnly = !isChangeable || isDerived;
                 // setter/getter interface only if modelAttribute.container =
                 // modelClass.
                 // Otherwise inherit from super interfaces.
@@ -187,7 +182,7 @@ public class Mapper_1
                         if (this.format == Format.JPA3) {
                             ormMetaDataMapper.mapAttribute(mAttributeDef);
                         }
-                        if (!isReadOnly) {
+                        if (!isDerived) {
                             if (instanceMapper != null) {
                                 instanceMapper
                                     .mapAttributeSet0_1(mAttributeDef);
@@ -203,7 +198,7 @@ public class Mapper_1
                         if (this.format == Format.JPA3) {
                             ormMetaDataMapper.mapAttribute(mAttributeDef);
                         }
-                        if (!isReadOnly) {
+                        if (!isDerived) {
                             if (instanceMapper != null) {
                                 instanceMapper
                                     .mapAttributeSet1_1(mAttributeDef);
@@ -233,7 +228,7 @@ public class Mapper_1
                                     fieldMetaData);
                             }
                         }
-                        if (!isReadOnly) {
+                        if (!isDerived) {
                             if (instanceMapper != null) {
                                 instanceMapper
                                     .mapAttributeSetList(mAttributeDef);
@@ -262,7 +257,7 @@ public class Mapper_1
                                     fieldMetaData);
                             }
                         }
-                        if (!isReadOnly) {
+                        if (!isDerived) {
                             if (instanceMapper != null) {
                                 instanceMapper
                                     .mapAttributeSetSet(mAttributeDef);
@@ -280,7 +275,7 @@ public class Mapper_1
                             ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
                             ormMetaDataMapper.mapSize(mAttributeDef);
                         }
-                        if (!isReadOnly) {
+                        if (!isDerived) {
                             if (instanceMapper != null) {
                                 instanceMapper
                                     .mapAttributeSetSparseArray(mAttributeDef);
@@ -300,7 +295,7 @@ public class Mapper_1
                             instanceMapper.mapAttributeGetStream(mAttributeDef);
                         }
 
-                        if (!isReadOnly) {
+                        if (!isDerived) {
                             if (instanceMapper != null) {
                                 instanceMapper
                                     .mapAttributeSetStream(mAttributeDef);
@@ -398,34 +393,30 @@ public class Mapper_1
                  * addition they are also read-only if the reference is derived
                  * and stored as attribute.
                  */
-                boolean isReadOnly =
-                    !isChangeable
-                        || (isDerived && this.model
-                            .referenceIsStoredAsAttribute(referenceDef));
-                if (this.model.referenceIsStoredAsAttribute(referenceDef)) {
-                    if (includeInClass && (queryMapper != null) && !inherited) {
-                        queryMapper.mapStructurealFeature(
-                            mClassDef,
-                            mReferenceDef);
-                    }
-                    if (includeInClass && (this.format == Format.JPA3)) {
+                boolean isReadOnly = !isChangeable || (isDerived && this.model.referenceIsStoredAsAttribute(referenceDef));
+                if(includeInClass && (queryMapper != null) && !inherited) {
+                    queryMapper.mapStructurealFeature(
+                        mClassDef,
+                        mReferenceDef
+                    );
+                }
+                if(this.model.referenceIsStoredAsAttribute(referenceDef)) {
+                    if(includeInClass && (this.format == Format.JPA3)) {
                         if (qualifierNames.isEmpty()) {
-                            if (Multiplicities.OPTIONAL_VALUE
-                                .equals(multiplicity)
-                                || Multiplicities.SINGLE_VALUE
-                                    .equals(multiplicity)) {
+                            if (Multiplicities.OPTIONAL_VALUE.equals(multiplicity) || Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
                                 ormMetaDataMapper.mapReference(mReferenceDef);
-                            } else if (Multiplicities.LIST.equals(multiplicity)
-                                || Multiplicities.SET.equals(multiplicity)
-                                || Multiplicities.MULTI_VALUE
-                                    .equals(multiplicity)
-                                || Multiplicities.SPARSEARRAY
-                                    .equals(multiplicity)) {
-                                ormSliceMetaDataMapper
-                                    .mapReference(mReferenceDef);
+                            } 
+                            else if (
+                                Multiplicities.LIST.equals(multiplicity) || 
+                                Multiplicities.SET.equals(multiplicity) || 
+                                Multiplicities.MULTI_VALUE.equals(multiplicity) || 
+                                Multiplicities.SPARSEARRAY.equals(multiplicity)
+                            ) {
+                                ormSliceMetaDataMapper.mapReference(mReferenceDef);
                                 ormMetaDataMapper.mapSize(mReferenceDef);
                             }
-                        } else {
+                        } 
+                        else {
                             ormSliceMetaDataMapper.mapReference(mReferenceDef);
                             ormMetaDataMapper.mapSize(mReferenceDef);
                         }
@@ -499,8 +490,7 @@ public class Mapper_1
                     boolean qualifiesUniquely = optional | mandatory;
                     if (qualifiesUniquely) {
                         if (includeInClass && instanceMapper != null) {
-                            if (this.model
-                                .referenceIsStoredAsAttribute(referenceDef)) {
+                            if (this.model.referenceIsStoredAsAttribute(referenceDef)) {
                                 instanceMapper.mapReferenceGet0_nNoQuery(
                                     mReferenceDef,
                                     inherited);
@@ -537,10 +527,10 @@ public class Mapper_1
                                     // TODO: feature not yet implemented for
                                     // JPA3.
                                     // Do not generate meta data
-                                    if (false) {
-                                        ormMetaDataMapper
-                                            .mapReference(mReferenceDef);
-                                    }
+//                                    if (false) {
+//                                        ormMetaDataMapper
+//                                            .mapReference(mReferenceDef);
+//                                    }
                                 }
                             }
                         }
@@ -1285,16 +1275,11 @@ public class Mapper_1
                                             classDef,
                                             queryMapper);
                                         // Map class features
-                                        for (Object f : getFeatures(
-                                            element,
-                                            instanceMapper,
-                                            false)) {
-                                            ModelElement_1_0 feature =
-                                                f instanceof ModelElement_1_0 ? (ModelElement_1_0) f
+                                        for (Object f : getFeatures(element, instanceMapper, false)) {
+                                            ModelElement_1_0 feature = f instanceof ModelElement_1_0 ? 
+                                                (ModelElement_1_0) f
                                                     : getModel().getElement(f);
-                                            SysLog.trace(
-                                                "processing class feature",
-                                                feature.jdoGetObjectId());
+                                            SysLog.trace("processing class feature", feature.jdoGetObjectId());
                                             if (feature.isAttributeType()) {
                                                 this.mapAttribute(
                                                     element,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UML1Association.java,v 1.1 2009/01/13 02:10:39 wfro Exp $
+ * Name:        $Id: UML1Association.java,v 1.2 2010/04/15 16:44:50 wfro Exp $
  * Description: lab client
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:39 $
+ * Date:        $Date: 2010/04/15 16:44:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -126,10 +126,22 @@ public List getConnection() {
       this.referencedEndId = id;
   }
 
+  public void setNavigableOwnedEndIds(
+      List<String> id
+  ) {
+      this.navigableOwnedEndIds = id;
+  }
+  
+  public List<String> getNavigableOwnedEndId(
+  ) {
+      return this.navigableOwnedEndIds;
+  }
+  
   private final Boolean isDerived;
   @SuppressWarnings("unchecked")
-private List connection = null;
+  private List connection = null;
   private String exposedEndId = null;
   private String referencedEndId = null;
+  private List<String> navigableOwnedEndIds = null;
   
 }

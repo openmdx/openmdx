@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX http://www.openmdx.org/
- * Name:        $Id: RequestedList.java,v 1.4 2009/05/28 11:15:12 wfro Exp $
+ * Name:        $Id: RequestedList.java,v 1.6 2009/12/14 15:21:32 wfro Exp $
  * Description: RequestedList class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/28 11:15:12 $
+ * Date:        $Date: 2009/12/14 15:21:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,22 +50,18 @@
  */
 package org.openmdx.application.dataprovider.cci;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.AbstractSequentialList;
 import java.util.Arrays;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-import org.openmdx.base.collection.Reconstructable;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.Directions;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -75,14 +71,8 @@ import org.openmdx.kernel.log.SysLog;
  */
 public class RequestedList 
     extends AbstractSequentialList<Object>
-    implements Serializable, DataproviderReplyListener, Reconstructable
+    implements Serializable, DataproviderReplyListener
 {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3257290248869721908L;
-
 
     /**
      * Constructor
@@ -91,11 +81,17 @@ public class RequestedList
      *              To get the next bunch of elements
      */ 
     public RequestedList(
-        IterationProcessor iterationProcessor,
-        Path referenceFilter
-    ){
+        DataproviderRequestProcessor iterationProcessor,
+        Path referenceFilter,
+        FilterProperty[] attributeFilter,
+        short attributeSelector,
+        AttributeSpecifier[] attributeSpecifiers
+    ) {
         this.iterationProcessor = iterationProcessor;
         this.referenceFilter = referenceFilter;
+        this.attributeFilter = attributeFilter;
+        this.attributeSelector = attributeSelector;
+        this.attributeSpecifiers = attributeSpecifiers;
         this.capacity = Integer.MAX_VALUE;
     }
 
@@ -103,103 +99,6 @@ public class RequestedList
         DataproviderReply reply
     ){
         //
-    }
-
-    //------------------------------------------------------------------------
-    // Implements Reconstructable
-    //------------------------------------------------------------------------
-
-    /**
-     * Constructor
-     */ 
-    public RequestedList(
-        IterationProcessor iterationProcessor,
-        Path referenceFilter,
-        InputStream stream
-    )throws ServiceException{
-        this.iterationProcessor = iterationProcessor;
-        this.referenceFilter = referenceFilter;
-        try{
-            DataInputStream buffer=new DataInputStream(stream);
-            this.capacity=buffer.readInt();
-            this.size=buffer.readInt();
-            this.attributeSelector=buffer.readShort();
-            if(buffer.readBoolean()){ // hasIterator
-                this.iterator=new byte[buffer.readInt()];
-                buffer.readFully(this.iterator);
-            } else {
-                this.iterator = null;
-            }
-            if(buffer.readBoolean()){ // hasAttributeSpecifiers
-                this.attributeSpecifiers = new AttributeSpecifier[buffer.readInt()];
-                for(
-                        int i = 0;
-                        i < this.attributeSpecifiers.length;
-                        i++
-                ){
-                    this.attributeSpecifiers[i] = new AttributeSpecifier(
-                        buffer.readUTF(), // name
-                        buffer.readInt(), // position
-                        buffer.readInt(), // size
-                        buffer.readShort(), // direction
-                        buffer.readShort() // order
-                    );
-                }
-            } else {
-                this.attributeSpecifiers = null;
-            }
-        }catch(Exception exception){
-            throw new ServiceException(exception);
-        }
-    }
-
-    /**
-     * Write part of a reconstructable object's state to an OutputStream
-     * (optional operation).
-     *
-     * @param   stream
-     *          OutputStream that holds part of a reconstructable object's 
-     *          state.
-     *
-     * @exception   ServiceException
-     *              if partial state streaming fails
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the instance is not reconstructable
-     */
-    public void write(
-        OutputStream stream
-    ) throws ServiceException{
-        try{
-            DataOutputStream buffer=new DataOutputStream(stream);
-            buffer.writeInt(this.capacity);
-            buffer.writeInt(this.size);
-            buffer.writeShort(this.attributeSelector);
-            boolean hasIterator = this.iterator != null;
-            buffer.writeBoolean(hasIterator);
-            if(hasIterator) {
-                buffer.writeInt(this.iterator.length);
-                buffer.write(this.iterator);
-            }
-            boolean hasAttributeSpecifiers = this.attributeSpecifiers != null;
-            buffer.writeBoolean(hasAttributeSpecifiers);
-            if(hasAttributeSpecifiers) {
-                buffer.writeInt(this.attributeSpecifiers.length);
-                for(
-                        int i = 0;
-                        i < this.attributeSpecifiers.length;
-                        i++
-                ){
-                    buffer.writeUTF(this.attributeSpecifiers[i].name());
-                    buffer.writeInt(this.attributeSpecifiers[i].position());
-                    buffer.writeInt(this.attributeSpecifiers[i].size());
-                    buffer.writeShort(this.attributeSpecifiers[i].direction());
-                    buffer.writeShort(this.attributeSpecifiers[i].order());
-                }
-            }
-            buffer.flush();
-        }catch(Exception exception){
-            throw new ServiceException(exception);
-        }
     }
 
     //------------------------------------------------------------------------
@@ -216,27 +115,13 @@ public class RequestedList
         this.exception = null;
         // Extract capacity from reply
         this.capacity = reply.getObjects().length;
-        // Extract iterator from reply
-        this.iterator = (byte[])reply.context(
-            DataproviderReplyContexts.ITERATOR
-        ).get(0);
-        // Extract attribute selector from reply
-        this.attributeSelector = reply.contexts().containsKey(
-            DataproviderReplyContexts.ATTRIBUTE_SELECTOR
-        ) ? ((Number)
-                reply.context(
-                    DataproviderReplyContexts.ATTRIBUTE_SELECTOR
-                ).get(0) 
-        ).shortValue() : 
-            AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES;
         // Extract size from reply
-        this.size = reply.contexts().containsKey(
-            DataproviderReplyContexts.TOTAL
-        ) ? total(reply) : Integer.MAX_VALUE;
+        this.size = reply.getTotal() != null ? 
+            total(reply) : 
+                Integer.MAX_VALUE;
         // Save initial reply for iterators
         this.initialReply = reply;
     }
-
 
     /**
      * Called if the work unit processing failed
@@ -248,34 +133,26 @@ public class RequestedList
         this.exception = exception;
     }
 
-
     //------------------------------------------------------------------------
     // Class Methods
     //------------------------------------------------------------------------
 
-    /**
-     *
-     */
     static boolean hasMore(
         DataproviderReply reply
-    ){
-        return ((Boolean)reply.context(DataproviderReplyContexts.HAS_MORE).get(0)).booleanValue();
+    ){        
+        return reply.getHasMore().booleanValue();
     }
 
-    /**
-     *
-     */
     static int total(
         DataproviderReply reply
     ){
-        Number value = (Number)reply.context(DataproviderReplyContexts.TOTAL).get(0);
+        Number value = reply.getTotal();
         if(value == null) SysLog.warning(
             "'total' context without value",
             reply
         );
         return value == null ? Integer.MAX_VALUE : value.intValue();
     }
-
 
     //------------------------------------------------------------------------
     // Instance Members
@@ -289,7 +166,7 @@ public class RequestedList
     /**
      *
      */
-    protected IterationProcessor iterationProcessor;
+    protected DataproviderRequestProcessor iterationProcessor;
 
     /**
      * The initial reply if the request succeeds; null otherwise.
@@ -306,26 +183,10 @@ public class RequestedList
      */
     protected int size;
 
-    /**
-     * The iteration context
-     */
-    protected byte[] iterator;
-
-    /**
-     *
-     */
-    protected short attributeSelector;
-
-    /**
-     * 
-     */
-    protected AttributeSpecifier[] attributeSpecifiers;
-
-    /**
-     *
-     */
     protected final Path referenceFilter;
-
+    protected final FilterProperty[] attributeFilter;
+    protected final short attributeSelector;
+    protected final AttributeSpecifier[] attributeSpecifiers;
 
     //------------------------------------------------------------------------
     // Extends AbstractSequentialList
@@ -413,7 +274,7 @@ public class RequestedList
             onReplyInterceptor(reply);
             RequestedList.this.exception = null;
             this.reply = reply;
-            if(reply.contexts().containsKey(DataproviderReplyContexts.TOTAL)){
+            if(reply.getTotal() != null){
                 int oldValue = size;
                 int newValue = total(reply);
                 if(newValue != Integer.MAX_VALUE) {
@@ -450,9 +311,9 @@ public class RequestedList
             short direction
         ){
             try {
-                RequestedList.this.iterationProcessor.addIterationRequest(
+                RequestedList.this.iterationProcessor.addFindRequest(
                     RequestedList.this.referenceFilter,
-                    RequestedList.this.iterator,
+                    RequestedList.this.attributeFilter,
                     RequestedList.this.attributeSelector,
                     RequestedList.this.attributeSpecifiers,
                     position,
@@ -660,5 +521,10 @@ public class RequestedList
         int nextIndex;
 
     }
+    
+    //-----------------------------------------------------------------------
+    // Members
+    //-----------------------------------------------------------------------
+    private static final long serialVersionUID = 3257290248869721908L;
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LenientPathComparator.java,v 1.4 2009/05/29 17:04:09 hburger Exp $
+ * Name:        $Id: LenientPathComparator.java,v 1.5 2010/01/26 15:43:30 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/29 17:04:09 $
+ * Date:        $Date: 2010/01/26 15:43:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,8 @@ package org.openmdx.base.query;
 
 import java.util.Comparator;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.openmdx.base.naming.Path;
 
 /**
@@ -82,7 +84,20 @@ public class LenientPathComparator extends LenientDatatypeComparator {
      * 
      */
     private static final Comparator<Object> instance = new LenientPathComparator(null);
-            
+
+    /**
+     * Tests whether this comparator is able to compare the given value with another one
+     * 
+     * @param candidate the value to be tested
+     * 
+     * @return <code>true</code> if  this comparator is able to compare the given value with another one
+     */
+    public static boolean isComparable(
+        Object candidate
+    ){
+        return candidate instanceof Comparable<?> || candidate instanceof XMLGregorianCalendar;
+    }
+       
     
     //------------------------------------------------------------------------
     // Implements Comparator
@@ -98,7 +113,7 @@ public class LenientPathComparator extends LenientDatatypeComparator {
         if(first instanceof Path || second instanceof Path) try {
             return toPath(first).compareTo(toPath(second)); 
         } catch (Exception exception){
-            return toUri(first).compareTo(toUri(second));
+            return String.valueOf(first).compareTo(String.valueOf(second));
         } else {
             return super.compare(first, second);
         }
@@ -119,19 +134,6 @@ public class LenientPathComparator extends LenientDatatypeComparator {
         return value instanceof Path ? 
             (Path)value :
             new Path(value.toString());
-    }
-     
-    /**
-     * 
-     * @param number
-     */
-    @SuppressWarnings("deprecation")
-    private static String toUri(
-        Object value
-    ){
-        return value instanceof Path ?
-            ((Path)value).toUri() :
-            value.toString();
     }
 
 }

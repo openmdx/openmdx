@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ContextCapable_1.java,v 1.4 2009/05/16 22:17:47 wfro Exp $
+ * Name:        $Id: ContextCapable_1.java,v 1.5 2009/11/04 15:59:44 hburger Exp $
  * Description: Object_1
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:47 $
+ * Date:        $Date: 2009/11/04 15:59:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,13 +59,13 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.EmbeddedContainer_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
-import org.openmdx.base.accessor.view.PlugIn_1;
+import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.exception.ServiceException;
 
 /**
  * Registers the the delegates with their manager
  */
-public class ContextCapable_1 extends PlugIn_1 {
+public class ContextCapable_1 extends Interceptor_1 {
 
     /**
      * Constructor 
@@ -77,7 +77,7 @@ public class ContextCapable_1 extends PlugIn_1 {
      */
     public ContextCapable_1(
         ObjectView_1_0 self,
-        PlugIn_1 next
+        Interceptor_1 next
     ) throws ServiceException{
         super(self, next);
     }

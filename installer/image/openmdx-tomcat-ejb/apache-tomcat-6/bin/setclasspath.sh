@@ -18,11 +18,8 @@
 # -----------------------------------------------------------------------------
 #  Set CLASSPATH and Java options
 #
-#  $Id: setclasspath.sh,v 1.1 2009/02/23 18:05:56 wfro Exp $
+#  $Id: setclasspath.sh,v 1.3 2010/04/12 08:36:30 wfro Exp $
 # -----------------------------------------------------------------------------
-
-# First clear out the user classpath
-CLASSPATH=
 
 # Make sure prerequisite environment variables are set
 if [ -z "$JAVA_HOME" -a -z "$JRE_HOME" ]; then
@@ -59,7 +56,7 @@ if [ -z "$JRE_HOME" ]; then
 fi
 
 # If we're running under jdb, we need a full jdk.
-if [ "$1" = "debug" -o "$1" = "javac" ] ; then
+if [ "$1" = "debug" ] ; then
   if [ "$os400" = "true" ]; then
     if [ ! -x "$JAVA_HOME"/bin/java -o ! -x "$JAVA_HOME"/bin/javac ]; then
       echo "The JAVA_HOME environment variable is not defined correctly"
@@ -95,21 +92,10 @@ if [ ! -x "$BASEDIR"/bin/setclasspath.sh ]; then
   fi
 fi
 
-# Set the default -Djava.endorsed.dirs argument
-JAVA_ENDORSED_DIRS="$BASEDIR"/endorsed
-
-# Set standard CLASSPATH
-if [ "$1" = "javac" ] ; then
-  if [ ! -f "$JAVA_HOME"/lib/tools.jar ]; then
-    echo "Can't find tools.jar in JAVA_HOME"
-    echo "Need a JDK to run javac"
-    exit 1
-  fi
-fi
-if [ "$1" = "debug" -o "$1" = "javac" ] ; then
-  if [ -f "$JAVA_HOME"/lib/tools.jar ]; then
-    CLASSPATH="$JAVA_HOME"/lib/tools.jar
-  fi
+# Don't override the endorsed dir if the user has set it previously
+if [ -z "$JAVA_ENDORSED_DIRS" ]; then
+  # Set the default -Djava.endorsed.dirs argument
+  JAVA_ENDORSED_DIRS="$BASEDIR"/endorsed
 fi
 
 # OSX hack to CLASSPATH
@@ -124,8 +110,7 @@ if [ `uname -s` = "Darwin" ]; then
 fi
 
 # Set standard commands for invoking Java.
-  _RUNJAVA="$JRE_HOME"/bin/java
+_RUNJAVA="$JRE_HOME"/bin/java
 if [ "$os400" != "true" ]; then
   _RUNJDB="$JAVA_HOME"/bin/jdb
 fi
-_RUNJAVAC="$JAVA_HOME"/bin/javac

@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1_0.java,v 1.2 2009/06/09 15:39:58 hburger Exp $
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: Dataprovider_1_0.java,v 1.3 2009/12/14 14:07:57 wfro Exp $
  * Description: Dataprovider Interface
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 15:39:58 $
+ * Date:        $Date: 2009/12/14 14:07:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,24 +51,25 @@
  */
 package org.openmdx.application.dataprovider.cci;
 
+import java.util.List;
 
-/**
- * The method in this interface is the transport independent face of a
- * dataprovider for processing request collections.
- */
+import org.openmdx.base.exception.ServiceException;
+
 public interface Dataprovider_1_0 {
 
     /**
-     * Process a set of working units
+     * Process data provider requests and return replies.
      *
      * @param   header          the service header
-     * @param   workingUnits    a collection of working units
+     * @param   requests        a collection of dataprovider requests.
+     * @param   replies         a collection of dataprovider replies.
      *
-     * @return  a collection of working unit replies
+     * @return  status.
      */
-    UnitOfWorkReply[] process(
+    ServiceException process(
         ServiceHeader header,
-        UnitOfWorkRequest... workingUnits
+        List<DataproviderRequest> requests,
+        List<DataproviderReply> replies
     );
 
 }

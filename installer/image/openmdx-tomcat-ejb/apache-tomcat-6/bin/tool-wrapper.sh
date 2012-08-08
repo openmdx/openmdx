@@ -30,7 +30,7 @@
 #   JAVA_OPTS     (Optional) Java runtime options used when the "start",
 #                 "stop", or "run" command is executed.
 #
-# $Id: tool-wrapper.sh,v 1.1 2009/02/23 18:05:57 wfro Exp $
+# $Id: tool-wrapper.sh,v 1.3 2010/04/12 08:36:30 wfro Exp $
 # -----------------------------------------------------------------------------
 
 # OS specific support.  $var _must_ be set to either true or false.
@@ -55,6 +55,11 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 CATALINA_HOME=`cd "$PRGDIR/.." ; pwd`
+
+# Ensure that any user defined CLASSPATH variables are not used on startup,
+# but allow them to be specified in setenv.sh, in rare case when it is needed.
+CLASSPATH=
+
 if [ -r "$CATALINA_HOME"/bin/setenv.sh ]; then
   . "$CATALINA_HOME"/bin/setenv.sh
 fi

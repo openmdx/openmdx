@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RadiusException.java,v 1.12 2009/06/05 16:23:42 hburger Exp $
+ * Project:     openMDX/Security, http://www.openmdx.org/
+ * Name:        $Id: RadiusException.java,v 1.13 2010/03/11 18:50:58 hburger Exp $
  * Description: Radius Exception 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/05 16:23:42 $
+ * Date:        $Date: 2010/03/11 18:50:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -45,24 +45,15 @@
  * 
  * ------------------
  * 
- * This product includes or is based on software developed by other
- * organizations as listed in the NOTICE file.
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.uses.net.sourceforge.jradiusclient.exception;
-
-import java.io.PrintStream;
-import java.io.PrintWriter;
-
-import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.exception.BasicException.Parameter;
 
 /**
  * Radius Exception
  */
-public class RadiusException
-    extends Exception 
-    implements BasicException.Holder
-{
+public class RadiusException extends Exception {
 
 	/**
      * Constructor
@@ -70,7 +61,7 @@ public class RadiusException
      * @param message
      */
     public RadiusException(String message) {
-        this(null, message);
+        super(message);
     }
     
     /**
@@ -81,96 +72,26 @@ public class RadiusException
     public RadiusException(
         Exception cause
     ) {
-    	super.initCause(
-            BasicException.toExceptionStack(cause == null ? this : cause)
-        );
+    	super(cause);
     }
 
-	/**
+    /**
      * Constructor
      * 
      * @param cause
-     * @param description
-     * @param parameters
+     * @param message
      */
     public RadiusException(
         Exception cause,
-        String description,
-        Parameter... parameters
+        String message
     ){
-    	super.initCause(
-        	new BasicException(
-	            cause,
-	            BasicException.Code.DEFAULT_DOMAIN,
-	            BasicException.Code.GENERIC,
-	            parameters,
-	            description,
-				this
-			)
-        );
+        super(message, cause);
     }
+
 
     /**
 	 * Implements <code>Serializable</code>.
 	 */
-	private static final long serialVersionUID = 5014284731661341777L;
+	private static final long serialVersionUID = 3256718472724755511L;
 	
-
-    /**
-     * Returns the cause of an exception. The cause actually is the wrapped exception.
-     *
-     * @return Throwable  The exception cause.
-     */
-    public final BasicException getCause(
-    ){
-        return (BasicException) super.getCause();
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.exception.BasicException.Holder#getCause(java.lang.String)
-     */
-    public BasicException getCause(String exceptionDomain) {
-        return getCause().getCause(exceptionDomain);
-    }
-
-    /**
-     * Retrieves the exception domain of this <code>ServiceException</code>.
-     *
-     * @return the exception domain
-     */
-    public String getExceptionDomain(
-    ){
-        return getCause().getExceptionDomain();
-    }
-
-    /**
-     * Retrieves the exception code of this <code>ServiceException</code>.
-     *
-     * @return the exception code
-     */
-    public int getExceptionCode(
-    ){
-        return getCause().getExceptionCode();
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
-     */
-    @Override
-    public void printStackTrace(PrintStream s) {
-        getCause().printStackTrace(s);
-    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
-     */
-    @Override
-    public void printStackTrace(PrintWriter s) {
-        getCause().printStackTrace(s);
-    }
-
-	public RadiusException log() {
-		return BasicException.log(this);
-	}
-
 }

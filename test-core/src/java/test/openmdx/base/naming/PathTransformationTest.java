@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PathTransformationTest.java,v 1.7 2009/06/02 13:03:37 hburger Exp $
+ * Name:        $Id: PathTransformationTest.java,v 1.9 2009/09/15 16:41:15 hburger Exp $
  * Description: Path Transformation Test
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/02 13:03:37 $
+ * Date:        $Date: 2009/09/15 16:41:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -94,14 +94,14 @@ public class PathTransformationTest {
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected String xri1compatibility_16;
+    protected String xri1compatibility_18;
     
     /**
      * Add an instance variable for each part of the fixture 
      */
     protected String[] paths;
 
-    private static final boolean LEGACY_STRING_REPRESENTATION = true;
+    private static final boolean LEGACY_STRING_REPRESENTATION = Boolean.TRUE.booleanValue(); // to avoid dead code warning
     
     @Before
     public void setUp() {
@@ -112,6 +112,8 @@ public class PathTransformationTest {
             "",
             "::*",
             "A::B",
+            "!($t*uuid*3a01c263-3ac7-48c1-8e86-cd653bc2ad10)",
+            "!($t*uuid*($.))",
             "A::B/::*",
             "org::openmdx::preferences1/provider/Java::Properties/segment/System",
             "org::openmdx::preferences1/provider/Java::Properties/segment/(+resource//application-preferences.xml)",
@@ -133,6 +135,8 @@ public class PathTransformationTest {
             "spice:/",
             "spice://:*",
             "spice://A:B",
+            "spice://!($t*uuid*3a01c263-3ac7-48c1-8e86-cd653bc2ad10)",
+            "spice://!($t*uuid*($.))",
             "spice://A:B/:*",
             "spice://org:openmdx:preferences1/provider/Java:Properties/segment/System",
             "spice://org:openmdx:preferences1/provider/Java:Properties/segment/(+resource%2fapplication-preferences.xml)",
@@ -154,6 +158,8 @@ public class PathTransformationTest {
             "xri:@openmdx",
             "xri:@openmdx:**",
             "xri:@openmdx:A.B",
+            "xri:@openmdx:!($t*uuid*3a01c263-3ac7-48c1-8e86-cd653bc2ad10)",
+            "xri:@openmdx:!($t*uuid*($.))",
             "xri:@openmdx:A.B/**",
             "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/System",
             "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/(+resource/application-preferences.xml)",
@@ -172,7 +178,7 @@ public class PathTransformationTest {
             "xri:(../../somewhere/else/e.jar)",
             "xri://www.openmdx.org/dtd/openmdx-ejb-jar_1_0.dtd"
         };
-        xri1compatibility_16 = "xri:@openmdx:*/provider/:*/segment/%";
+        xri1compatibility_18 = "xri:@openmdx:*/provider/:*/segment/%";
         xri2 = new String[]{
             null,
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp/env)",
@@ -180,6 +186,8 @@ public class PathTransformationTest {
             "xri://@openmdx",
             "xri://@openmdx*($..)",
             "xri://@openmdx*A.B",
+            "xri://@openmdx!($t*uuid*3a01c263-3ac7-48c1-8e86-cd653bc2ad10)",
+            "xri://@openmdx!($t*uuid*($.))",
             "xri://@openmdx*A.B/($..)",
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System",
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(+resource/application-preferences.xml)",
@@ -207,6 +215,8 @@ public class PathTransformationTest {
             "xri://@openmdx",
             "xri://@openmdx*($..)",
             "xri://@openmdx*A.B",
+            "xri://@openmdx!($t*uuid*3a01c263-3ac7-48c1-8e86-cd653bc2ad10)",
+            "xri://@openmdx!($t*uuid*($.))",
             "xri://@openmdx*A.B/($..)",
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System",
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(+resource%2Fapplication-preferences.xml)",
@@ -234,6 +244,8 @@ public class PathTransformationTest {
             "@openmdx",
             "@openmdx*($..)",
             "@openmdx*A.B",
+            "@openmdx!($t*uuid*3a01c263-3ac7-48c1-8e86-cd653bc2ad10)",
+            "@openmdx!($t*uuid*($.))",
             "@openmdx*A.B/($..)",
             "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System",
             "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(+resource%2Fapplication-preferences.xml)",
@@ -458,9 +470,9 @@ public class PathTransformationTest {
             new Path(paths[i]).toXri().toString()
         );
         assertEquals(
-            xri1compatibility_16,
-            xri1[16],
-            new Path(xri1compatibility_16).toXri().toString()
+            xri1compatibility_18,
+            xri1[18],
+            new Path(xri1compatibility_18).toXri().toString()
         );
     }
 
@@ -533,7 +545,7 @@ public class PathTransformationTest {
     @Test
     public void testCR20006216(
     ){
-        assertEquals(paths[8], "(+resource/application-preferences.xml)", new Path(paths[8]).getComponent(4).get(0));
+        assertEquals(paths[10], "(+resource/application-preferences.xml)", new Path(paths[10]).getComponent(4).get(0));
         PathComponent stateId = new PathComponent("sins:0:");
         assertEquals("Object Id", "sins", stateId.get(0));
         assertEquals("State Number", "0", stateId.get(1));

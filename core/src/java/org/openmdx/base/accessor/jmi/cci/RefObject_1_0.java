@@ -1,15 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefObject_1_0.java,v 1.20 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: RefObject_1_0.java,v 1.22 2010/01/18 17:57:32 hburger Exp $
  * Description: RefObject_1_0 interface
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2010/01/18 17:57:32 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
@@ -51,7 +50,6 @@
  */
 package org.openmdx.base.accessor.jmi.cci;
 
-import java.util.EventListener;
 import java.util.Set;
 
 import javax.jmi.reflect.RefObject;
@@ -161,62 +159,6 @@ public interface RefObject_1_0 extends RefObject {
     String feature,
     Object newValue,
     long length
-  );
-
-
-  //-------------------------------------------------------------------------
-  // Event Handling
-  //-------------------------------------------------------------------------
-
-  /**
-   * Add an event listener.
-   * 
-   * @param listener
-   *        the event listener to be added
-   * <p>
-   * It is implementation dependent whether the feature name is verified or 
-   * not.
-   * 
-   * @throws JmiServiceException in case of failure
-   */
-  void refAddEventListener(
-      EventListener listener
-  );
-
-  /**
-   * Remove an event listener.
-   * <p>
-   * It is implementation dependent whether feature name and listener
-   * class are verified. 
-   * 
-   * @param listener
-   *        the event listener to be removed
-   * 
-   * @throws JmiServiceException in case of failure
-   */
-  void refRemoveEventListener(
-      EventListener listener
-  );
-
-  /**
-   * Get event listeners.
-   * <p>
-   * The <code>feature</code> argument is ignored for listeners registered 
-   * with a <code>null</code> feature argument.
-   * <p>
-   * It is implementation dependent whether feature name and listener
-   * type are verified. 
-   * 
-   * @param listenerType
-   *        the type of the event listeners to be returned
-   * 
-   * @return an array of listenerType containing the matching event
-   *         listeners
-   *         
-   * @throws JmiServiceException in case of failure
-   */
-  <T  extends EventListener> T[] refGetEventListeners(
-      Class<T> listenerType
   );
 
 }

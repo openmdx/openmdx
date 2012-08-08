@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Path.java,v 1.15 2009/06/04 13:53:30 hburger Exp $
+ * Name:        $Id: Path.java,v 1.24 2010/01/21 17:32:35 hburger Exp $
  * Description: Profile Path 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/04 13:53:30 $
+ * Date:        $Date: 2010/01/21 17:32:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,13 +53,13 @@ package org.openmdx.base.naming;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Iterator;
-import java.util.List;
+import java.util.UUID;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.uri.scheme.OpenMDXSchemes;
 import org.openmdx.kernel.url.protocol.XRI_1Protocols;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.url.protocol.XriAuthorities;
@@ -90,7 +90,7 @@ public final class Path
      * Implements <code>Externalizable</code>
      * 
      * @deprecated Do NOT use! 
-s    */
+     */
     public Path(
     ){        
         // Required for Externalizable and XMLEncoder
@@ -146,7 +146,7 @@ s    */
             charSequence.startsWith(XRI_2Protocols.OPENMDX_PREFIX) ? XRI_2Marshaller.getInstance() :
             charSequence.startsWith(XriAuthorities.OPENMDX_AUTHORITY) ? IRI_2Marshaller.getInstance() :     
             charSequence.startsWith(XRI_1Protocols.OPENMDX_PREFIX) ? XRI_1Marshaller.getInstance() :
-            charSequence.startsWith(OpenMDXSchemes.LEGACY_PREFIX) ? URI_1.getInstance() : 
+            charSequence.startsWith(URI_1.OPENMDX_PREFIX) ? URI_1.getInstance() : 
             LegacyMarshaller.getInstance()
         );
     }
@@ -168,6 +168,21 @@ s    */
         );
     }
 
+    /**
+     * Constructor 
+     *
+     * @param transactionalObjectId
+     */
+    public Path(
+        UUID transactionalObjectId
+    ){
+        this(
+            new String[]{
+                "!($t*uuid*" + transactionalObjectId + ")"
+            }
+        );
+    }
+        
     //-------------------------------------------------------------------------
     private void setComponents(
         String[] components
@@ -175,8 +190,8 @@ s    */
         this.checkComponents(components);
         this.size = components.length;
         StringBuilder tmp = new StringBuilder();
-        for(int i = 0; i < components.length; i++) {
-            tmp.append(components[i]).append(COMPONENT_SEPARATOR);
+        for(String component : components) {
+            tmp.append(component).append(COMPONENT_SEPARATOR);
         }
         this.components = tmp.toString();
     }
@@ -184,15 +199,9 @@ s    */
     //-------------------------------------------------------------------------
     public String[] getComponents(
     ) {
-        if(this.components.length() == 0) {
-            return EMPTY_COMPONENTS;
-        }
-        else {
-            return this.components.substring(
-                0, 
-                this.components.length()-1
-            ).split(COMPONENT_SEPARATOR_STRING);
-        }
+        return this.components.length() == 0 ? 
+            EMPTY_COMPONENTS :
+            this.components.substring(0,this.components.length()-1).split(COMPONENT_SEPARATOR_STRING);
     }
 
     /**
@@ -200,9 +209,8 @@ s    */
      *
      * @param   charSequence
      *          The non-null string to parse.
-     * @param   uri
-     *          tells whether the charSequence is to be interpreted as URI or
-     *          not.
+     * @param   marshaller
+     *          the char sequence parser
      * 
      * @exception   RuntimeServiceException
      *              in case of marshalling error
@@ -413,9 +421,10 @@ s    */
      * </ul>
      */
     public boolean containsWildcard(){
+        String xri = toXRI();
         return 
-            toXRI().indexOf("($.") >= 0 || 
-            toXRI().indexOf("($\\.")  >= 0; // TODO to be removed together with the toResourcePattern() method
+            xri.indexOf("($.") >= 0 || 
+            xri.indexOf("($\\.")  >= 0; // TODO to be removed together with the toResourcePattern() method
     }
     
     /**
@@ -539,24 +548,11 @@ s    */
      * The string can be passed to the Path constructor to create a new equivalent path.
      *
      * @return   An XRI 2 String representation of this path.
-     * @deprecated Use {@link #toXRI()} instead
-     */
-    public String toResourceIdentifier(
-    ){
-        return toXRI();
-    }
-
-    /**
-     * Generates the XRI 2 String representation of this path.
-     * <p> 
-     * The string can be passed to the Path constructor to create a new equivalent path.
-     *
-     * @return   An XRI 2 String representation of this path.
      */
     public String toXRI(
     ){
         if(this.xri == null) try {
-            return XRI_2Marshaller.getInstance().marshal(this.getComponents()).toString();
+            this.xri = XRI_2Marshaller.getInstance().marshal(this.getComponents()).toString();
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         }
@@ -623,7 +619,37 @@ s    */
         return URI.create(iri.toString());
     }
 
-
+    /**
+     * Transient object id pattern (<code>xri://@openmdx!($t*uuid*&lt;uuid&gt;)</code>).
+     * 
+     * @return <code>true</code> if this path represents a transient object id
+     */
+    public boolean isTransientObjectId(){
+        return 
+            this.size == 1 && 
+            this.components.startsWith("!($t*uuid*") &&
+            this.components.length() == 48;
+    }
+    
+    /**
+     * Retrieve the transient object id represented by this path
+     * 
+     * @return the transient object id represented by this path
+     */
+    public UUID toUUID(
+    ){
+        if(isTransientObjectId()) {
+            return UUIDConversion.fromString(this.components.substring(10, 46));
+        } else {
+            throw new RuntimeServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.TRANSFORMATION_FAILURE,
+                "This path does not represent a transient object id",
+                new BasicException.Parameter("path", this)
+            );
+        }
+    }
+    
     //--------------------------------------------------------------------------
     // Implements Comparable
     //--------------------------------------------------------------------------
@@ -1130,6 +1156,7 @@ s    */
         this.checkState();
         this.components = source.components;
         this.size = source.size;
+        this.xri = source.xri;
     }
 
     /**
@@ -1297,9 +1324,9 @@ s    */
     public boolean equals(
         Object that
     ){
-        return 
-        (this == that) || 
-        ((that != null) && (that instanceof Path) && this.components.equals(((Path)that).components));
+        return this == that || (
+            that instanceof Path && this.components.equals(((Path)that).components)
+        );
     }
 
     /**
@@ -1314,25 +1341,6 @@ s    */
     public int hashCode(
     ) {
         return this.components.hashCode();
-    }
-
-    
-    //--------------------------------------------------------------------------
-    // Static methods
-    //--------------------------------------------------------------------------
-
-    /**
-     * Store a list's values in a Path array. 
-     *
-     * @return a Path array with the list's values
-     *   
-     * @exception   ClassCastException
-     *              If any of the values is not an instance of Path
-     */
-    public static Path[] toPathArray(
-        List<Path> source
-    ){
-        return source == null ? null: source.toArray(new Path[source.size()]);
     }
 
     
@@ -1352,7 +1360,7 @@ s    */
     private static String WILDCARD_COMPONENT_TERMINATOR = "*" + COMPONENT_SEPARATOR;
     private static final String COMPONENT_SEPARATOR_STRING = Character.toString(COMPONENT_SEPARATOR);
     private static final String[] EMPTY_COMPONENTS = {};
-    private static final boolean LEGACY_STRING_REPRESENTATION = true;
+    private static final boolean LEGACY_STRING_REPRESENTATION = Boolean.TRUE; // avoid dead code warning
 
     /**
      * Defines, whether the path can be modified or not

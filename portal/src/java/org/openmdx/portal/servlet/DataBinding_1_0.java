@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataBinding_1_0.java,v 1.2 2007/04/11 16:42:54 wfro Exp $
+ * Name:        $Id: DataBinding_1_0.java,v 1.3 2010/02/04 11:25:03 wfro Exp $
  * Description: DataBinding_1_0 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/04/11 16:42:54 $
+ * Date:        $Date: 2010/02/04 11:25:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,7 +58,7 @@ import javax.jmi.reflect.RefObject;
  * DataBinding_1_0
  *
  */
-public interface DataBinding_1_0 {
+public interface DataBinding_1_0 extends DataBinding {
     
     public Object getValue(
         RefObject object,

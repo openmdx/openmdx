@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_Y2KewUdEEd-nAY5dDg-0aQ" name="models">
+  <eAnnotations xmi:id="_jftQUEdEEd-nAY5dDg-0aQ" source="org.w3c">
+    <references xmi:type="uml:Package" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62D700DA"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_EsfI0EdGEd-nAY5dDg-0aQ" source="org.oasis-open">
+    <references xmi:type="uml:Package" href="../openMDX%202%20~%20Core%20(EMF)/org.oasis-open.uml#_3C7B8A60016D4022002100C9"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_0fIl4EdEEd-nAY5dDg-0aQ" source="org.openmdx.base">
+    <references xmi:type="uml:Package" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D40A89A0D0015"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_zdIEYEdGEd-nAY5dDg-0aQ" source="org.openmdx.generic1">
+    <references xmi:type="uml:Package" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.generic1.uml#_3C7B8A60016D3FF13E0E02A5"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_DlE_YEdHEd-nAY5dDg-0aQ" source="org.openmdx.state2">
+    <references xmi:type="uml:Package" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.state2.uml#_3C7B8A60016D407170B300B4"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_qL3mUEdEEd-nAY5dDg-0aQ" source="test.openmdx.app1">
+    <references xmi:type="uml:Package" href="test.openmdx.app1.uml#_3C7B8A60016D3DA87B1C0175"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_ELd74EdFEd-nAY5dDg-0aQ" source="test.openmdx.base">
+    <references xmi:type="uml:Package" href="test.openmdx.base.uml#_4ku8YINmEd2nyID2xZmdGQ"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_IzU30EdFEd-nAY5dDg-0aQ" source="test.openmdx.clock1">
+    <references xmi:type="uml:Package" href="test.openmdx.clock1.uml#_3C7B8A60016D40F55E5800B8"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_M1bbUEdFEd-nAY5dDg-0aQ" source="test.openmdx.datatypes1">
+    <references xmi:type="uml:Package" href="test.openmdx.datatypes1.uml#_5Ojh8BCkEduc4u2okTKmQA"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_SBTqUEdFEd-nAY5dDg-0aQ" source="test.openmdx.model1">
+    <references xmi:type="uml:Package" href="test.openmdx.model1.uml#_3C7B8A60016D3DA2E35D0299"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_X9k0cEdFEd-nAY5dDg-0aQ" source="test.openmdx.state2">
+    <references xmi:type="uml:Package" href="test.openmdx.state2.uml#_W6eScKQ6Ed2M_NU-u2UATw"/>
+  </eAnnotations>
+</uml:Model>

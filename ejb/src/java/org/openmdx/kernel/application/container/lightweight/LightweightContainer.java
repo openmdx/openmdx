@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightContainer.java,v 1.6 2009/03/31 17:06:10 hburger Exp $
+ * Name:        $Id: LightweightContainer.java,v 1.20 2010/04/16 10:02:59 hburger Exp $
  * Description: Lightweight Container
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:06:10 $
+ * Date:        $Date: 2010/04/16 10:02:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,8 +58,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -69,7 +67,7 @@ import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.rmi.registry.LocateRegistry;
 import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -98,27 +96,24 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.TextOutputCallback;
 import javax.sql.XADataSource;
+import javax.transaction.TransactionManager;
+import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.application.client.spi.Main;
-import org.openmdx.kernel.application.configuration.Report;
 import org.openmdx.kernel.application.container.spi.ejb.BeanInstanceFactory;
 import org.openmdx.kernel.application.container.spi.ejb.ContainerTransaction;
 import org.openmdx.kernel.application.container.spi.ejb.ContextSwitcher;
 import org.openmdx.kernel.application.container.spi.ejb.ProxyReference;
 import org.openmdx.kernel.application.container.spi.http.ManagedDataproviderConnectionFactory;
 import org.openmdx.kernel.application.container.spi.resource.ManagedCallbackHandler;
-import org.openmdx.kernel.application.container.spi.sql.DatabaseConnectionFactory;
-import org.openmdx.kernel.application.container.spi.sql.DatabaseConnectionRequestInfo;
-import org.openmdx.kernel.application.container.spi.sql.LightweightXADataSource;
-import org.openmdx.kernel.application.container.spi.sql.ManagedDatabaseConnectionFactory;
 import org.openmdx.kernel.application.deploy.cci.DeploymentProperties;
 import org.openmdx.kernel.application.deploy.enterprise.VerifyingDeploymentManager;
 import org.openmdx.kernel.application.deploy.lightweight.ValidatingDeploymentManager;
 import org.openmdx.kernel.application.deploy.spi.Deployment;
 import org.openmdx.kernel.application.deploy.spi.LightweightClassLoader;
+import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Application;
 import org.openmdx.kernel.application.deploy.spi.Deployment.AuthenticationMechanism;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Component;
@@ -126,11 +121,20 @@ import org.openmdx.kernel.application.deploy.spi.Deployment.SessionBean;
 import org.openmdx.kernel.application.process.Subprocess;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.kernel.id.cci.UUIDGenerator;
+import org.openmdx.kernel.lightweight.resource.LightweightConnectionManager;
+import org.openmdx.kernel.lightweight.sql.DatabaseConnectionFactory;
+import org.openmdx.kernel.lightweight.sql.DatabaseConnectionRequestInfo;
+import org.openmdx.kernel.lightweight.sql.LightweightXADataSource;
+import org.openmdx.kernel.lightweight.sql.ManagedDatabaseConnectionFactory;
+import org.openmdx.kernel.lightweight.transaction.LightweightTransactionManager;
+import org.openmdx.kernel.lightweight.transaction.LightweightTransactionSynchronizationRegistry;
+import org.openmdx.kernel.lightweight.transaction.LightweightUserTransaction;
+import org.openmdx.kernel.loading.BeanFactory;
+import org.openmdx.kernel.loading.Classes;
+import org.openmdx.kernel.loading.Factory;
 import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.naming.Contexts;
 import org.openmdx.kernel.naming.component.java.ComponentContextFactory;
-import org.openmdx.kernel.naming.container.jdbc.jdbcURLContextFactory;
 import org.openmdx.kernel.naming.container.openmdx.ContainerContextFactory;
 import org.openmdx.kernel.naming.container.openmdx.openmdxURLContextFactory;
 import org.openmdx.kernel.naming.spi.ClassLoadertContextFactory;
@@ -139,7 +143,6 @@ import org.openmdx.kernel.naming.tomcat.LinkReference;
 import org.openmdx.kernel.resource.spi.ShareableConnectionManager;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
-import org.openmdx.kernel.url.protocol.AbstractURLConnection;
 import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
 import org.openmdx.uses.org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -172,17 +175,25 @@ public class LightweightContainer {
     ) throws NamingException {
         logger.log(Level.INFO,"Starting {0}", mode);
         LightweightContainer.instance = this;
-        this.mode = mode;
+        this.mode = mode;        
         System.setProperty(
-           LightweightContainer.class + ".Mode",
+           LightweightContainer.class.getName() + ".Mode",
            mode.toString()
+        );
+        //
+        // Transaction set-up
+        //
+        LightweightTransactionManager transactionManager = new LightweightTransactionManager();
+        this.transactionManager = transactionManager;
+        this.transactionSynchronizationRegistry = new LightweightTransactionSynchronizationRegistry(
+    		transactionManager
         );
         //
         // URL setup
         //
         prependSystemPropertyValue(
             "java.protocol.handler.pkgs",
-            AbstractURLConnection.PROTOCOL_HANDLER_PKG,
+            "org.openmdx.kernel.url.protocol",
             '|'
         );
         //
@@ -261,11 +272,7 @@ public class LightweightContainer {
             //
             // Auto-Deploy Connectors 
             //
-            for(
-                    Iterator<String> i = getUrls(DeploymentProperties.CONNECTOR_URLS).iterator();
-                    i.hasNext();
-            ){
-                String url = i.next();
+            for(String url : getUrls(DeploymentProperties.CONNECTOR_URLS)){
                 logger.log(Level.INFO,"Auto-deploying connector {0}", url);
                 try {
                     Report report = deployConnector(new URL(url));
@@ -277,11 +284,7 @@ public class LightweightContainer {
             //
             // Auto-Deploy Applications
             //
-            for(
-                    Iterator<String> i = getUrls(DeploymentProperties.APPLICATION_URLS).iterator();
-                    i.hasNext();
-            ){
-                String url = i.next();
+            for(String url : getUrls(DeploymentProperties.APPLICATION_URLS)){
                 logger.log(Level.INFO,"Auto-deploying application {0}", url);
                 try {
                     Report[] reports = deployApplication(new URL(url));
@@ -755,16 +758,13 @@ public class LightweightContainer {
             Context applicationContext = this.applicationContextFactory.getInitialContext(
                 ClassLoadertContextFactory.getEnvironment(applicationClassLoader, uri)
             );
-            for (
-                    Iterator<Deployment.Module> i = application.getModules().iterator();
-                    i.hasNext();
-            ) {
+            for (Deployment.Module module : application.getModules()) {
                 deploy(
                     uri,
                     application,
                     applicationClassLoader,
                     applicationContext,
-                    i.next(),
+                    module,
                     reports,
                     applicationClientEnvironment, 
                     applicationClientArguments, 
@@ -892,16 +892,13 @@ public class LightweightContainer {
                         );
                     }
                 } else {
-                    for(
-                            Iterator<?> i = module.getComponents().iterator();
-                            i.hasNext();
-                    ) {
+                    for(Component component : module.getComponents()) {
                         deploy(
                             applicationClassLoader,
                             applicationContext,
                             moduleClassLoader,
                             uri,
-                            (Component) i.next(), 
+                            component, 
                             reports
                         );
                     }
@@ -1199,8 +1196,13 @@ public class LightweightContainer {
             report.addInfo("'UserTransaction' bound to 'java:comp'");
         }
         componentContext.bind(
+        	"TransactionManager",
+        	this.transactionManager
+        );
+        report.addInfo("'TransactionManager' bound to 'java:comp'");
+        componentContext.bind(
             "TransactionSynchronizationRegistry",
-            this.transactionManager.getTransactionSynchronizationRegistry()
+            this.transactionSynchronizationRegistry
         );
         report.addInfo("'TransactionSynchronizationRegistry' bound to 'java:comp'");
         //
@@ -1347,7 +1349,7 @@ public class LightweightContainer {
         );
         componentContext.bind(
             "TransactionSynchronizationRegistry",
-            this.transactionManager.getTransactionSynchronizationRegistry()
+            this.transactionSynchronizationRegistry
         );
         try {
             return new Main(
@@ -1355,7 +1357,7 @@ public class LightweightContainer {
                     applicationClient.getMainClass()
                 ).getDeclaredMethod(
                     "main",
-                    new Class[]{String[].class}
+                    String[].class
                 ),
                 applicationClientArguments,
                 moduleClassLoader
@@ -1399,9 +1401,9 @@ public class LightweightContainer {
         Report report
     ) throws NamingException {
         Deployment.ResourceAdapter resourceAdapter = connector.getResourceAdapter();
-        String id = this.uuidGenerator.next().toString();
+        String id = UUIDs.newUUID().toString();
         Object connectionFactory;
-        Map<Object, Object> configuration = new HashMap<Object, Object>(resourceAdapter.getConfigProperties());
+        Map<String, Object> configuration = new HashMap<String, Object>(resourceAdapter.getConfigProperties());
         Set<Object> credentials;
         List<?> authenticationMechanisms = resourceAdapter.getAuthenticationMechanism();
         switch(authenticationMechanisms.size()) {
@@ -1531,172 +1533,121 @@ public class LightweightContainer {
             return;
         }
         if(
-                ManagedDatabaseConnectionFactory.class.getName().equals(
-                    resourceAdapter.getManagedConnectionFactoryClass()
-                )
+            ManagedDatabaseConnectionFactory.class.getName().equals(
+                resourceAdapter.getManagedConnectionFactoryClass()
+            )
         ){
             if(resourceAdapter.getReauthenticationSupport()) report.addWarning(
                 "Re-authentication not supported by " +
                 DatabaseConnectionFactory.class.getName()
             );
-            String driver = (String) configuration.remove("Driver");
-            Integer transactionIsolation;
-            {
-                String value = (String)configuration.remove("TransactionIsolation");
-                if(value == null) {
-                    transactionIsolation = null;
-                } else if ("ReadCommitted".equals(value)) {
-                    transactionIsolation = new Integer(Connection.TRANSACTION_READ_COMMITTED);
-                } else if ("ReadUncommitted".equals(value)) {
-                    transactionIsolation = new Integer(Connection.TRANSACTION_READ_UNCOMMITTED);
-                } else if ("RepeatableRead".equals(value)) {
-                    transactionIsolation = new Integer(Connection.TRANSACTION_REPEATABLE_READ);
-                } else if ("Serializable".equals(value)) {
-                    transactionIsolation = new Integer(Connection.TRANSACTION_SERIALIZABLE);
-                } else {
-                    report.addError(
-                        "Could not parse transaction isolation value '" + value + "'"
-                    );
-                    return;
-                }
-            }
-            ConnectionManager connectionManager;
-            String connectionURL;
-            boolean xa = false;
-            String validationStatement = (String) configuration.remove("ValidationStatement");
-            Long loginTimeout = (Long) configuration.remove("LoginTimeout");
-            try {
-                String value = resourceAdapter.getTransactionSupport();
-                if("NoTransaction".equals(value)) {
-                    connectionManager = new ShareableConnectionManager(
-                        credentials,
-                        resourceAdapter.getConnectionImplClass()
-                    );
-                    connectionURL = (String) configuration.remove("ConnectionURL");
-                    xa = false;
-                } else {
-                    connectionManager = new LightweightConnectionManager(
-                        credentials,
-                        resourceAdapter.getConnectionImplClass(),
-                        this.transactionManager,
-                        resourceAdapter.getMaximumCapacity(),
-                        resourceAdapter.getMaximumWait(), 
-                        resourceAdapter.getMaximumIdle(), 
-                        resourceAdapter.getMaximumIdle(), 
-                        resourceAdapter.getTestOnBorrow(), 
-                        resourceAdapter.getTestOnReturn(), 
-                        resourceAdapter.getTimeBetweenEvictionRuns(), 
-                        resourceAdapter.getNumberOfTestsPerEvictionRun(), 
-                        resourceAdapter.getMinimumEvictableIdleTime(), 
-                        resourceAdapter.getTestWhileIdle() 
-                    );
-                    if ("LocalTransaction".equals(value)) {
-                        connectionURL = (String) configuration.remove("ConnectionURL");
-                        xa = false;
-                    } else if ("XATransaction".equals(value)) {
-                        connectionURL = null;
-                        xa = true;
-                    } else {
-                        report.addError(
-                            "Invalid transaction support value '" + value + "'"
-                        );
-                        return;
-                    }
-                }
-            } catch (ResourceException exception) {
-                report.addError(
-                    "Unable to acquire connection manager",
-                    exception
-                );
-                return;
-            }
-            XADataSource xaDataSource;
-            try {
-                if(xa) {
-                    Class<?> driverClass = Classes.getApplicationClass(driver);
-                    try {
-                        xaDataSource = (XADataSource) driverClass.newInstance();
-                    } catch (ClassCastException exception) {
-                        report.addError("Driver class '" + driver + "' must be an instance of '" + XADataSource.class.getName() + "'", exception);
-                        return;
-                    } catch (Exception exception) {
-                        report.addError("Driver class '" + driver + "' can't be instantiated", exception);
-                        return;
-                    }
-                    Method[] methods = driverClass.getMethods();
-                    Entries: for(
-                            Iterator<?> i = configuration.entrySet().iterator();
-                            i.hasNext();
-                    ){
-                        Map.Entry<?, ?> e = (Map.Entry<?, ?>) i.next();
-                        if(e.getValue() == null) {
-                            report.addInfo("Configuration entry " + e + " containing null value not applied to XADataSource");
-                        } else try {
-                            String methodName = "set" + e.getKey();
-                            for(
-                                    int j = 0;
-                                    j < methods.length;
-                                    j++
-                            ) if(
-                                    methodName.equals(methods[j].getName()) &&
-                                    methods[j].getParameterTypes().length == 1 &&
-                                    methods[j].getParameterTypes()[0].isAssignableFrom(e.getValue().getClass())
-                            ) {
-                                methods[j].invoke(xaDataSource, new Object[]{e.getValue()});
-                                report.addInfo("XADataSource accepted configuration entry " + e);
-                                continue Entries;
-                            }
-                            report.addWarning("XADataSource has no set method for configuration entry " + e);
-                        } catch (InvocationTargetException exception) {
-                            report.addError("XADataSource does not accept configuration entry " + e, exception.getTargetException());
-                        } catch (IllegalArgumentException exception) {
-                            report.addError("XADataSource does not accept configuration entry " + e + ": " + exception.getMessage());
-                        } catch (IllegalAccessException exception) {
-                            report.addError("XADataSource does not accept configuration entry " + e + ": " + exception.getMessage());
-                        }
-                    }
-                } else {
-                    try {
-                        if(connectionURL == null) {
-                            report.addError("ConnectionURL missing");
-                            return;
-                        }
-                        jdbcURLContextFactory.validateConnectionURL(driver, connectionURL);
-                        xaDataSource = new LightweightXADataSource(connectionURL, configuration);
-                    } catch (SQLException exception) {
-                        report.addInfo("Driver loaded: " + driver);
-                        report.addError("No driver supports the given URL '" + connectionURL + "'",exception);
-                        return;
-                    }
-                }
-                DatabaseConnectionRequestInfo connectionRequestInfo = new DatabaseConnectionRequestInfo(
-                    transactionIsolation,
-                    validationStatement, 
-                    loginTimeout
-                );
-                ManagedConnectionFactory managedConnectionFactory = new ManagedDatabaseConnectionFactory(
-                    xaDataSource,
-                    connectionRequestInfo
-                );
-                connectionFactory = managedConnectionFactory.createConnectionFactory(
-                    connectionManager
-                );
-                if(connectionManager instanceof LightweightConnectionManager) try {
-                    ((LightweightConnectionManager)connectionManager).preAllocateManagedConnection(
-                        resourceAdapter.getInitialCapacity(),
-                        managedConnectionFactory,
-                        connectionRequestInfo
-                    );
-                } catch (ResourceException exception) {
-                    report.addWarning("Unable to pre-allocate connections", exception);
-                }
-            } catch (ClassNotFoundException exception) {
-                report.addError("Driver class '" + driver + "' not found", exception);
-                return;
-            } catch (ResourceException exception) {
-                report.addError("Unable to acquire the connection factory", exception);
-                return;
-            }
+	            String driver = (String) configuration.remove("Driver");
+	            TransactionIsolation transactionIsolation = toTransactionIsolation(
+	            	(String)configuration.remove("TransactionIsolation")
+	            );
+	            String validationStatement = (String) configuration.remove("ValidationStatement");
+	            Long loginTimeout = (Long) configuration.remove("LoginTimeout");
+	            TransactionSupport transactionSupport = TransactionSupport.valueOf(
+	           		resourceAdapter.getTransactionSupport()
+	            );	
+	            String connectionURL = transactionSupport == TransactionSupport.XATransaction ? 
+	            	null :
+	        		(String) configuration.remove("ConnectionURL");
+	            String connectionImplClass = resourceAdapter.getConnectionImplClass();
+	            //
+	            // Connection Manager Acquisition
+	            // 
+	            ConnectionManager connectionManager;
+	            try {
+	                connectionManager = transactionSupport == TransactionSupport.NoTransaction ? new ShareableConnectionManager(
+	                    credentials,
+	                    connectionImplClass
+	                ) : new LightweightConnectionManager(
+	                    credentials,
+	                    connectionImplClass,
+	                    transactionManager,
+	                    resourceAdapter.getMaximumCapacity(),
+	                    resourceAdapter.getMaximumWait(), 
+	                    resourceAdapter.getMaximumIdle(), 
+	                    resourceAdapter.getMaximumIdle(), 
+	                    resourceAdapter.getTestOnBorrow(), 
+	                    resourceAdapter.getTestOnReturn(), 
+	                    resourceAdapter.getTimeBetweenEvictionRuns(), 
+	                    resourceAdapter.getNumberOfTestsPerEvictionRun(), 
+	                    resourceAdapter.getMinimumEvictableIdleTime(), 
+	                    resourceAdapter.getTestWhileIdle() 
+	                );
+	            } catch (ResourceException exception) {
+	            	report.addError(
+	            		"Unable to acquire connection manager",
+	                    exception
+	                );
+	            	return;
+	            }
+	            //
+	            // Data Source Acquisition
+	            // 
+	            XADataSource xaDataSource;
+	            try {
+	                if(transactionSupport == TransactionSupport.XATransaction) {
+	                    Factory<XADataSource> xaDataSourceFactory = BeanFactory.newInstance(
+	                        driver,
+	                        configuration
+	                    );
+	                    xaDataSource = xaDataSourceFactory.instantiate();
+	                } else {
+	                    if(connectionURL == null) {
+	    	            	report.addError("ConnectionURL missing");
+	    	            	return;
+	                    }
+	                    if(driver != null) {
+	                        Classes.getKernelClass(driver);
+	                    }
+	                    DriverManager.getDriver(connectionURL);
+	                    xaDataSource = new LightweightXADataSource(
+	                        connectionURL, 
+	                        configuration
+	                    );
+	                }
+	            } catch (Exception exception) {
+	            	report.addError(
+	                    "Unable to acquire DataSource",
+	                    exception
+	                );
+	            	return;
+	            }
+	            //
+	            // Connection Factory Acquisition
+	            // 
+	            DatabaseConnectionRequestInfo connectionRequestInfo = new DatabaseConnectionRequestInfo(
+	                transactionIsolation == null ? null : Integer.valueOf(transactionIsolation.value()),
+	                validationStatement, 
+	                loginTimeout
+	            );
+	            ManagedConnectionFactory managedConnectionFactory = new ManagedDatabaseConnectionFactory(
+	                xaDataSource,
+	                connectionRequestInfo
+	            );
+	            try {
+					connectionFactory = managedConnectionFactory.createConnectionFactory(
+					    connectionManager
+					);
+				} catch (ResourceException exception) {
+					report.addError(
+						"The connection factory, a DataSource, could not be created",
+						exception
+					);
+					return;
+				}
+	            if(connectionManager instanceof LightweightConnectionManager) try {
+	                ((LightweightConnectionManager)connectionManager).preAllocateManagedConnection(
+	                    resourceAdapter.getInitialCapacity(),
+	                    managedConnectionFactory,
+	                    connectionRequestInfo
+	                );
+	            } catch (ResourceException exception) {
+	            	report.addWarning("Unable to pre-allocate connections", exception);
+	            }
         } else if(
                 ManagedDataproviderConnectionFactory.class.getName().equals(
                     resourceAdapter.getManagedConnectionFactoryClass()
@@ -1738,42 +1689,11 @@ public class LightweightContainer {
             }
         } else {
             try {
-                Class<?> managedConnectionFactoryClass = Classes.getApplicationClass(
-                    resourceAdapter.getManagedConnectionFactoryClass()
+                Factory<ManagedConnectionFactory> managedConnectionFactoryBuilder = BeanFactory.newInstance(
+            		resourceAdapter.getManagedConnectionFactoryClass(),
+                    configuration
                 );
-                ManagedConnectionFactory managedConnectionFactory = (ManagedConnectionFactory) managedConnectionFactoryClass.newInstance();
-                Method[] methods = managedConnectionFactoryClass.getMethods();
-                Entries: for(
-                        Iterator<?> i = configuration.entrySet().iterator();
-                        i.hasNext();
-                ){
-                    Map.Entry<?, ?> e = (Map.Entry<?, ?>) i.next();
-                    if(e.getValue() == null) {
-                        report.addInfo("Configuration entry " + e + " containing null value not applied to ManagedConnectionFactory");
-                    } else try {
-                        String methodName = "set" + e.getKey();
-                        for(
-                                int j = 0;
-                                j < methods.length;
-                                j++
-                        ) if(
-                                methodName.equals(methods[j].getName()) &&
-                                methods[j].getParameterTypes().length == 1 &&
-                                methods[j].getParameterTypes()[0].isAssignableFrom(e.getValue().getClass())
-                        ) {
-                            methods[j].invoke(managedConnectionFactory, new Object[]{e.getValue()});
-                            report.addInfo("ManagedConnectionFactory accepted configuration entry " + e);
-                            continue Entries;
-                        }
-                        report.addWarning("ManagedConnectionFactory has no set method for configuration entry " + e);
-                    } catch (InvocationTargetException exception) {
-                        report.addError("ManagedConnectionFactory does not accept configuration entry " + e, exception.getTargetException());
-                    } catch (IllegalArgumentException exception) {
-                        report.addError("ManagedConnectionFactory does not accept configuration entry " + e + ": " + exception.getMessage());
-                    } catch (IllegalAccessException exception) {
-                        report.addError("ManagedConnectionFactory does not accept configuration entry " + e + ": " + exception.getMessage());
-                    }
-                }
+                ManagedConnectionFactory managedConnectionFactory = managedConnectionFactoryBuilder.instantiate();
                 connectionFactory = credentials.isEmpty() ? managedConnectionFactory.createConnectionFactory(
                 ) : managedConnectionFactory.createConnectionFactory(
                     new ShareableConnectionManager(credentials)
@@ -1783,14 +1703,6 @@ public class LightweightContainer {
                     "Managed connection factory class '" +
                     resourceAdapter.getManagedConnectionFactoryClass() +
                     "' must be an instance of '" + ManagedConnectionFactory.class.getName() + "'",
-                    exception
-                );
-                return;
-            } catch (ClassNotFoundException exception) {
-                report.addError(
-                    "Managed connection factory class '" +
-                    resourceAdapter.getManagedConnectionFactoryClass() +
-                    "' not found",
                     exception
                 );
                 return;
@@ -1821,6 +1733,23 @@ public class LightweightContainer {
     }
 
     /**
+     * Convert the transaction isolation's string representation
+     * 
+     * @param transactionIsolation the transaction isolation's string representation
+     * @return the transaction isolation object
+     * 
+     * @throws ResourceException
+     */
+    private TransactionIsolation toTransactionIsolation(
+    	String transactionIsolation
+    ){
+    	return transactionIsolation == null ?
+    		null :
+    		TransactionIsolation.valueOf(transactionIsolation);
+    }
+    
+    /**
+     * 
      * Create a link reference for a given home or local home object
      * 
      * @param object home or local home object
@@ -1835,7 +1764,7 @@ public class LightweightContainer {
         if(object == null) {
             return null;
         } else {
-            String id = this.uuidGenerator.next().toString();
+            String id = UUIDs.newUUID().toString();
             this.privateContext.bind(id, object);
             return new LinkRef(PRIVATE_PREFIX + id);
         }
@@ -1856,7 +1785,7 @@ public class LightweightContainer {
         Object homeHandler
     ) throws NamingException{
         if(homeHandler == null) return null;
-        String id = this.uuidGenerator.next().toString();
+        String id = UUIDs.newUUID().toString();
         this.privateContext.bind(id, homeHandler);
         return new ProxyReference(
             homeInterface,
@@ -1879,7 +1808,7 @@ public class LightweightContainer {
         if(object == null) {
             return null;
         } else {
-            String id = this.uuidGenerator.next().toString();
+            String id = UUIDs.newUUID().toString();
             this.privateContext.bind(id, object);
             return new LinkReference(PRIVATE_PREFIX + id);
         }
@@ -2152,11 +2081,6 @@ public class LightweightContainer {
     /**
      * 
      */
-    private final UUIDGenerator uuidGenerator = UUIDs.getGenerator();
-
-    /**
-     * 
-     */
     private static final String PRIVATE_PREFIX = openmdxURLContextFactory.URL_PREFIX + openmdxURLContextFactory.PRIVATE_CONTEXT + '/';
 
     /**
@@ -2180,11 +2104,15 @@ public class LightweightContainer {
     private final Context containerContext;
 
     /**
-     * Transaction Manager
+     * Transaction Manager Singleton
      */
-    private final LightweightTransactionManager transactionManager = 
-        new LightweightTransactionManager();
+    private final TransactionManager transactionManager;
 
+    /**
+     * Transaction Synchronization Registry Singleton
+     */
+    private final TransactionSynchronizationRegistry transactionSynchronizationRegistry;
+    
     /**
      * The callback handler in case of an application client
      */
@@ -2253,6 +2181,58 @@ public class LightweightContainer {
          */
         ENTERPRISE_JAVA_BEAN_SERVER
 
+    }
+
+    //------------------------------------------------------------------------
+    // Enum TransactionSupport
+    //------------------------------------------------------------------------
+    
+    /**
+     * Transaction Support
+     */
+    static enum TransactionSupport {
+
+        NoTransaction,
+        LocalTransaction,
+        XATransaction
+        
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Enum TransactionIsolation
+    //------------------------------------------------------------------------
+
+    /**
+     * Transaction Isolation
+     */
+    static enum TransactionIsolation {
+        
+        ReadCommitted(Connection.TRANSACTION_READ_COMMITTED),
+        ReadUncommitted(Connection.TRANSACTION_READ_UNCOMMITTED),
+        RepeatableRead(Connection.TRANSACTION_REPEATABLE_READ),
+        Serializable(Connection.TRANSACTION_SERIALIZABLE);
+
+        TransactionIsolation(
+            int value
+        ){
+            this.value = value;
+        }
+
+        /**
+         * The transaction isolation value
+         */
+        private final int value;
+        
+        /**
+         * Retrieve the connection's transaction isolation value
+         * 
+         * @return the connection's transaction isolation value
+         */
+        public int value(){
+            return this.value;
+        }
+        
     }
 
 }

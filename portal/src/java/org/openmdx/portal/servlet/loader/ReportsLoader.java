@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportsLoader.java,v 1.14 2009/01/13 02:16:10 wfro Exp $
+ * Name:        $Id: ReportsLoader.java,v 1.17 2009/10/29 23:37:19 wfro Exp $
  * Description: ReportsLoader
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:16:10 $
+ * Date:        $Date: 2009/10/29 23:37:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -96,9 +97,11 @@ public class ReportsLoader
         String[] locale,
         Model_1_0 model
     ) throws ServiceException {
-
         Map reportDefinitions = new HashMap();
         int fallbackLocaleIndex = 0;
+        SysLog.info("Loading reports");
+        String messagePrefix = new Date() + "  ";
+        System.out.println(messagePrefix + "Loading reports");
         for(int i = 0; i < locale.length; i++) {
             Set reportPaths = new HashSet();
             if(locale[i] != null) {
@@ -109,7 +112,7 @@ public class ReportsLoader
                     );
                 }
                 fallbackLocaleIndex = 0;
-                System.out.println("Loading reports from /WEB-INF/config/report/" + locale[i]);
+                SysLog.info("Loading reports from /WEB-INF/config/report/" + locale[i]);
                 reportPaths = context.getResourcePaths("/WEB-INF/config/report/" + locale[i]);
                 if(reportPaths == null) {
                     for(int j = i-1; j >= 0; j--) {
@@ -118,7 +121,7 @@ public class ReportsLoader
                             break;
                         }
                     }
-                    System.out.println(locale[i] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
+                    SysLog.info(locale[i] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
                     reportPaths = context.getResourcePaths("/WEB-INF/config/report/" + locale[fallbackLocaleIndex]);
                 }
                 if(reportPaths != null) {
@@ -135,12 +138,11 @@ public class ReportsLoader
                                 );
                             }
                             catch(Exception e) {
-                                System.out.println("Error loading report definition (for more information see log): " + e.getMessage());
-                                ServiceException e0 = new ServiceException(e);
-                                SysLog.error(e0.getMessage(), e0.getCause());
+                                System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
+                                new ServiceException(e).log();
                             }
                             if(def != null) {
-                                System.out.println("Loaded report " + path + " (forClass=" + def.getForClass() + ")");
+                                SysLog.info("Loaded report " + path + " (forClass=" + def.getForClass() + ")");
                                 ((List)reportDefinitions.get(
                                     locale[i]
                                 )).add(def);
@@ -150,11 +152,12 @@ public class ReportsLoader
                 }
             }
         }
+        System.out.println(messagePrefix + "Done (" + reportDefinitions.size() + " reports)");
+        SysLog.info("Done",  reportDefinitions.size());
         return new ReportDefinitionFactory(
             reportDefinitions,
             model
-        );
-        
+        );        
     }
   
     //-------------------------------------------------------------------------

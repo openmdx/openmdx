@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Query_2Facade.java,v 1.1 2009/06/01 15:43:32 wfro Exp $
+ * Name:        $Id: Query_2Facade.java,v 1.10 2010/03/19 12:32:54 hburger Exp $
  * Description: Query Facade
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/01 15:43:32 $
+ * Date:        $Date: 2010/03/19 12:32:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,16 +50,18 @@
  */
 package org.openmdx.base.rest.spi;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.resource.ResourceException;
+import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.QueryRecord;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -77,59 +79,39 @@ public class Query_2Facade {
     ) throws ResourceException {
         if(!isDelegate(delegate)) throw BasicException.initHolder(
             new ResourceException(
-                "Query name should be the candidate class' fully qualified MOF identifier amendet by the suffix \"Query\"",
+                "Unsupported query record",
                 BasicException.newEmbeddedExceptionStack(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_QUERY_CRITERIA,
-                    new BasicException.Parameter("actual", delegate.getRecordName())
+                    new BasicException.Parameter("actual", delegate.getRecordName()),
+                    new BasicException.Parameter("expected", QueryRecord.NAME)
                 )
             )
         );
-        this.delegate = delegate;
+        this.delegate = (QueryRecord) delegate;
     }
     
     /**
      * Constructor 
-     *
-     * @param queryType the candidate class' fully MOF identifier amended by the suffix "Query"
      * 
      * @throws ResourceException 
      */
     private Query_2Facade(
     ) throws ResourceException {
-        this(
-            Records.getRecordFactory().asMappedRecord(
-                "org:openmdx:kernel:Query",
-                null,
-                MEMBERS,
-                new Object[MEMBERS.length]
-            )
-        );
+        this.delegate = (QueryRecord) Records.getRecordFactory().createMappedRecord(QueryRecord.NAME);
     }
-
-    /**
-     * The data object members
-     */
-    private static final String[] MEMBERS = {
-        "path",
-        "queryType",
-        "query",
-        "position",
-        "size",
-        "parameters"
-    };    
     
     /**
      * The query record
      */
-    private final MappedRecord delegate;
+    private final QueryRecord delegate;
 
     /**
      * Retrieve delegate.
      *
      * @return Returns the delegate.
      */
-    public final MappedRecord getDelegate() {
+    public final QueryRecord getDelegate() {
         return this.delegate;
     }
 
@@ -148,10 +130,16 @@ public class Query_2Facade {
         return new Query_2Facade(record);
     }
     
+    public static Query_2Facade newInstance(
+        Path path
+    ) throws ResourceException {
+        Query_2Facade facade = newInstance();
+        facade.setPath(path);
+        return facade;
+    }
+    
     /**
      * Create a facade for the given query type
-     * 
-     * @param queryType the candidate class' fully MOF identifier amendet by the suffix "Query"
      * 
      * @return the object facade
      * 
@@ -172,7 +160,7 @@ public class Query_2Facade {
     public static boolean isDelegate(
         Record record
     ){
-        return "org:openmdx:kernel:Query".equals(record.getRecordName());
+        return QueryRecord.NAME.equals(record.getRecordName());
     }
     
     
@@ -181,19 +169,20 @@ public class Query_2Facade {
      *
      * @return Returns the resourceIdentifier.
      */
-    public final Path getPath() {
-        return new Path((String)this.delegate.get("path"));
+    public final Path getPath(
+    ) {
+        return this.delegate.getPath();
     }
-
     
     /**
      * Set resourceIdentifier.
      * 
      * @param path The resourceIdentifier to set.
      */
-    @SuppressWarnings("unchecked")
-    public final void setPath(Path path) {
-        this.delegate.put("path", path.toXRI());
+    public final void setPath(
+        Path path
+    ) {
+        this.delegate.setPath(path);
     }
 
     /**
@@ -205,7 +194,7 @@ public class Query_2Facade {
      */
     public final Record getParameters(
     ) throws ResourceException {
-        return (Record) this.delegate.get("parameters");
+        return this.delegate.getParameters();
     }
     
     /**
@@ -219,26 +208,19 @@ public class Query_2Facade {
     public final void setParameters(
         Object parameters
     ) throws ResourceException {
-        Record jcaParameters;
-        if (parameters instanceof List<?>) {
-            jcaParameters = Records.getRecordFactory().createIndexedRecord(
-                "list",
-                "Query Parameters",
-                (List<?>)parameters
-            );
+        if (parameters instanceof MappedRecord || parameters instanceof IndexedRecord) {
+            this.delegate.setParameters((Record) parameters);
+        } else if (parameters instanceof List<?>) {
+            IndexedRecord jcaParameters = Records.getRecordFactory().createIndexedRecord("list");
+            jcaParameters.addAll((List<?>)parameters);
+            this.delegate.setParameters(jcaParameters);
         } else if (parameters instanceof Map<?,?>) {
-            jcaParameters = Records.getRecordFactory().createMappedRecord(
-                "map",
-                "Query Parameters"
-            );
-            ((MappedRecord)jcaParameters).putAll(
-                (Map<?,?>)parameters
-            );
+            MappedRecord jcaParameters = Records.getRecordFactory().createMappedRecord("map");
+            jcaParameters.putAll((Map<?,?>)parameters);
+            this.delegate.setParameters(jcaParameters);
         } else if(parameters instanceof Object[]) {
-            jcaParameters = Records.getRecordFactory().createIndexedRecord(
-                "list",
-                "Query Parameters",
-                Arrays.asList(parameters)
+            this.delegate.setParameters(
+                Records.getRecordFactory().asIndexedRecord("list",null,parameters)
             );
         } else throw BasicException.initHolder(
             new ResourceException(
@@ -251,10 +233,6 @@ public class Query_2Facade {
                 )
             )
         );
-        this.delegate.put(
-            "parameters", 
-            jcaParameters
-        );
     }
 
     /**
@@ -263,7 +241,7 @@ public class Query_2Facade {
      * @return Returns the queryType.
      */
     public final String getQueryType() {
-        return (String) this.delegate.get("queryType");
+        return this.delegate.getQueryType();
     }
 
     
@@ -272,9 +250,8 @@ public class Query_2Facade {
      * 
      * @param queryType The queryType to set.
      */
-    @SuppressWarnings("unchecked")
     public final void setQueryType(String queryType) {
-        this.delegate.put("queryType", queryType);
+        this.delegate.setQueryType(queryType);
     }
 
     /**
@@ -283,7 +260,7 @@ public class Query_2Facade {
      * @return Returns the query.
      */
     public final String getQuery() {
-        return (String) this.delegate.get("query");
+        return this.delegate.getQuery();
     }
 
     
@@ -292,9 +269,8 @@ public class Query_2Facade {
      * 
      * @param query The query to set.
      */
-    @SuppressWarnings("unchecked")
     public final void setQuery(String query) {
-        this.delegate.put("query", query);
+        this.delegate.setQuery(query);
     }
 
     
@@ -303,8 +279,8 @@ public class Query_2Facade {
      *
      * @return Returns the position.
      */
-    public final Number getPosition() {
-        return (Number) this.delegate.get("position");
+    public final Long getPosition() {
+        return this.delegate.getPosition();
     }
 
     
@@ -313,9 +289,10 @@ public class Query_2Facade {
      * 
      * @param position The position to set.
      */
-    @SuppressWarnings("unchecked")
     public final void setPosition(Number position) {
-        this.delegate.put("position", position);
+        this.delegate.setPosition(
+            position == null || position instanceof Long ? (Long)position : Long.valueOf(position.longValue())
+        );
     }
 
     
@@ -324,8 +301,8 @@ public class Query_2Facade {
      *
      * @return Returns the size.
      */
-    public final Number getSize() {
-        return (Number) this.delegate.get("size");
+    public final Long getSize() {
+        return this.delegate.getSize();
     }
 
     
@@ -334,10 +311,60 @@ public class Query_2Facade {
      * 
      * @param size The size to set.
      */
-    @SuppressWarnings("unchecked")
     public final void setSize(Number size) {
-        this.delegate.put("size", size);
+        this.delegate.setSize(
+            size == null || size instanceof Long ? (Long)size : Long.valueOf(size.longValue())
+        );
     }
 
+    /**
+     * Retrieve the fetch groups
+     * 
+     * @return the fetch groups
+     */
+    public final Set<String> getGroups(){
+        return this.delegate.getGroups();
+    }
+
+    /**
+     * Set the fetch groups
+     * 
+     * @throws ResourceException 
+     */
+    public final void setGroups(
+        Set<String> groups
+    ) throws ResourceException{
+        this.delegate.setGroups(groups);
+    }
+
+    /**
+     * Retrieve the fetch group
+     * 
+     * @return the fields included in the active fetch groups
+     */
+    public final Set<String> getGroup(){
+        return this.delegate.getGroup();
+    }
+
+    /**
+     * Set the fetch group
+     * 
+     * @param group the fields included in the active fetch groups
+     * 
+     * @throws ResourceException 
+     */
+    public final void setGroup(
+        Set<String> group
+    ) throws ResourceException{
+        this.delegate.setGroup(group);
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return this.delegate.toString();
+    }
     
 }

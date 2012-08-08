@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportDefinitionFactory.java,v 1.21 2009/02/20 22:05:43 wfro Exp $
+ * Name:        $Id: ReportDefinitionFactory.java,v 1.22 2009/06/16 17:08:27 wfro Exp $
  * Description: TextsFactory
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/20 22:05:43 $
+ * Date:        $Date: 2009/06/16 17:08:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,10 +65,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 
 public class ReportDefinitionFactory
 implements Serializable {
@@ -114,7 +114,7 @@ implements Serializable {
         this.reportDefinitions = reports;
         this.customizedDefinitions = new HashMap<String,Set<String>>();
         this.model = model;
-        AppLog.info("loaded reports=" + this.reportDefinitions.keySet());
+        SysLog.info("loaded reports=" + this.reportDefinitions.keySet());
     }
 
     //-------------------------------------------------------------------------

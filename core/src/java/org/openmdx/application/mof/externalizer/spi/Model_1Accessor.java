@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1Accessor.java,v 1.7 2009/06/14 00:03:42 wfro Exp $
+ * Name:        $Id: Model_1Accessor.java,v 1.12 2010/03/23 16:31:58 hburger Exp $
  * Description: Wrapper for a org::omg::model1 compliant in-process dataprovider.
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/14 00:03:42 $
+ * Date:        $Date: 2010/03/23 16:31:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,20 +59,23 @@ import java.util.List;
 import java.util.Map;
 
 import javax.resource.ResourceException;
+import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.cci.ConfigurationProvider_1_0;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.DataproviderLayers;
+import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.application.dataprovider.cci.RequestCollection;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.dataprovider.kernel.Dataprovider_1;
 import org.openmdx.application.mof.externalizer.cci.ModelImporter_1_0;
 import org.openmdx.application.mof.repository.layer.application.LayerConfigurationEntries;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.kernel.log.SysLog;
 
 //---------------------------------------------------------------------------  
@@ -159,41 +162,54 @@ public class Model_1Accessor {
         if(section[0].equals(KERNEL_CONFIGURATION_SECTION)) {
 
           // namespaceId
-          configuration.values(SharedConfigurationEntries.NAMESPACE_ID).add(
-            "org::omg::model1"
+          configuration.values(SharedConfigurationEntries.NAMESPACE_ID).put(
+              0,
+              "org::omg::model1"
           );
   
           // exposed paths
-          configuration.values(SharedConfigurationEntries.EXPOSED_PATH).add(
-            "org::omg::model1/provider"
+          configuration.values(SharedConfigurationEntries.EXPOSED_PATH).put(
+              0,
+              "org::omg::model1/provider"
           );
   
           // layers
-          configuration.values(DataproviderLayers.toString(DataproviderLayers.INTERCEPTION)).add(
-            org.openmdx.application.dataprovider.layer.interception.Standard_1.class.getName()
+          configuration.values(DataproviderLayers.toString(DataproviderLayers.INTERCEPTION)).put(
+              0,
+              org.openmdx.application.dataprovider.layer.interception.Standard_1.class.getName()
           );
-          configuration.values(DataproviderLayers.toString(DataproviderLayers.TYPE)).add(
-            org.openmdx.application.mof.repository.layer.type.Model_1.class.getName()
+          configuration.values(DataproviderLayers.toString(DataproviderLayers.TYPE)).put(
+              0,
+              org.openmdx.application.mof.repository.layer.type.Model_1.class.getName()
           );
-          configuration.values(DataproviderLayers.toString(DataproviderLayers.APPLICATION)).add(
-            org.openmdx.application.mof.repository.layer.application.Model_1.class.getName()
+          configuration.values(DataproviderLayers.toString(DataproviderLayers.APPLICATION)).put(
+              0,
+              org.openmdx.application.mof.repository.layer.application.Model_1.class.getName()
           );
-          configuration.values(DataproviderLayers.toString(DataproviderLayers.MODEL)).add(
-            org.openmdx.application.mof.repository.layer.model.Model_1.class.getName()
+          configuration.values(DataproviderLayers.toString(DataproviderLayers.MODEL)).put(
+              0,
+              org.openmdx.application.mof.repository.layer.model.Model_1.class.getName()
           );
-          configuration.values(DataproviderLayers.toString(DataproviderLayers.PERSISTENCE)).add(
-            org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
+          configuration.values(DataproviderLayers.toString(DataproviderLayers.PERSISTENCE)).put(
+              0,
+              org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
           );
         }
 
         // INTERCEPTION        
         else if(section[0].equals(DataproviderLayers.toString(DataproviderLayers.INTERCEPTION))) {
-          configuration.values("propagateSet").add(Boolean.TRUE);
+          configuration.values("propagateSet").put(
+              0, 
+              Boolean.TRUE
+          );
         } 
 
         // APPLICATION        
         else if(section[0].equals(DataproviderLayers.toString(DataproviderLayers.APPLICATION))) {
-          configuration.values(LayerConfigurationEntries.OPENMDXJDO_METADATA_DIRECTORY).set(0, this.openmdxjdoMetadataDirectory);
+          configuration.values(LayerConfigurationEntries.OPENMDXJDO_METADATA_DIRECTORY).put(
+              0, 
+              this.openmdxjdoMetadataDirectory
+          );
         } 
       }   
       return configuration;
@@ -234,7 +250,7 @@ public class Model_1Accessor {
     List formats
   ) throws ServiceException {
 
-    RequestCollection requests = new RequestCollection(
+    DataproviderRequestProcessor requests = new DataproviderRequestProcessor(
       new ServiceHeader(), 
       this.dataprovider
     );
@@ -254,33 +270,23 @@ public class Model_1Accessor {
       }
     );
 
-    // Call externalizePackage
     SysLog.trace("> Externalize package");
-    ObjectHolder_2Facade params;
     try {
-        params = ObjectHolder_2Facade.newInstance(
-            modelPackagePath.getChild("externalizePackage"),
-            "org:omg:model1:PackageExternalizeParams"            
-        );
-    } 
-    catch (ResourceException e) {
+        //
+        // Call externalizePackage
+        //
+        MessageRecord request = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
+        request.setPath(modelPackagePath.getChild("externalizePackage"));
+        MappedRecord params = Records.getRecordFactory().createMappedRecord("org:omg:model1:PackageExternalizeParams"); 
+        request.setBody(params);
+        List values = Records.getRecordFactory().createIndexedRecord(Multiplicities.LIST);
+        params.put("format", values);
+        values.addAll(formats);
+        MessageRecord result = requests.addOperationRequest(request);
+        return (byte[]) result.getBody().get("packageAsJar");
+    } catch (ResourceException e) {
         throw new ServiceException(e);
     }
-    params.attributeValues("format").addAll(
-        formats
-    );
-    ObjectHolder_2Facade result;
-    try {
-        result = ObjectHolder_2Facade.newInstance(
-            requests.addOperationRequest(
-                params.getDelegate()
-            )
-        );
-    } 
-    catch (ResourceException e) {
-        throw new ServiceException(e);
-    }
-    return (byte[])result.attributeValue("packageAsJar");
   }
 
   //---------------------------------------------------------------------------  

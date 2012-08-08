@@ -81,8 +81,8 @@
 		    quidu      	"403CAF5A0142")
 		(object Inheritance_Relationship
 		    quid       	"491C39030213"
-		    supplier   	"Logical View::org::openmdx::base::ContextCapable"
-		    quidu      	"403F48350281"))
+		    supplier   	"Logical View::org::openmdx::base::Modifiable"
+		    quidu      	"491C2F5802BF"))
 	    class_attributes 	(list class_attribute_list
 		(object ClassAttribute "transactionTimeUnique"
 		    attributes 	(list Attribute_Set
@@ -92,8 +92,7 @@
 			    value      	(value Text "false")))
 		    quid       	"491C38430000"
 		    type       	"org::w3c::boolean"
-		    exportControl 	"Public"
-		    derived    	TRUE)
+		    exportControl 	"Public")
 		(object ClassAttribute "validTimeUnique"
 		    attributes 	(list Attribute_Set
 			(object Attribute
@@ -102,9 +101,8 @@
 			    value      	(value Text "false")))
 		    quid       	"491C384F0261"
 		    type       	"org::w3c::boolean"
-		    exportControl 	"Public"
-		    derived    	TRUE)
-		(object ClassAttribute "openmdxjdoVersion"
+		    exportControl 	"Public")
+		(object ClassAttribute "stateVersion"
 		    attributes 	(list Attribute_Set
 			(object Attribute
 			    tool       	"SPICE"
@@ -199,7 +197,7 @@
 	    zoom       	100
 	    max_height 	28350
 	    max_width  	21600
-	    origin_x   	0
+	    origin_x   	2426
 	    origin_y   	0
 	    items      	(list diagram_item_list
 		(object ClassView "Class" "Logical View::org::openmdx::base::Removable" @2
@@ -512,7 +510,7 @@
 		    ShowCompartmentStereotypes 	TRUE
 		    IncludeAttribute 	TRUE
 		    IncludeOperation 	TRUE
-		    location   	(3366, 596)
+		    location   	(3447, 656)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -524,19 +522,19 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@11
-			location   	(2604, 510)
+			location   	(2603, 532)
 			fill_color 	13434879
 			nlines     	1
-			max_width  	1525
+			max_width  	1689
 			justify    	0
 			label      	"StateCapable")
 		    stereotype 	(object ItemLabel
 			Parent_View 	@11
-			location   	(2604, 469)
+			location   	(2603, 491)
 			fill_color 	13434879
 			anchor     	10
 			nlines     	1
-			max_width  	1525
+			max_width  	1689
 			justify    	0
 			label      	"<<root>>")
 		    icon_style 	"Icon"
@@ -545,7 +543,7 @@
 		    quidu      	"491C382700DA"
 		    compartment 	(object Compartment
 			Parent_View 	@11
-			location   	(2604, 562)
+			location   	(2603, 584)
 			font       	(object Font
 			    size       	8
 			    face       	"Arial"
@@ -560,8 +558,8 @@
 			anchor     	2
 			nlines     	4
 			max_width  	709)
-		    width      	1543
-		    height     	275
+		    width      	1707
+		    height     	350
 		    annotation 	8)
 		(object ClassView "Class" "Logical View::org::openmdx::base::Aspect" @12
 		    ShowCompartmentStereotypes 	TRUE
@@ -617,7 +615,7 @@
 		    ShowCompartmentStereotypes 	TRUE
 		    IncludeAttribute 	TRUE
 		    IncludeOperation 	TRUE
-		    location   	(2784, 232)
+		    location   	(2797, 244)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -629,30 +627,30 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@14
-			location   	(2609, 158)
+			location   	(2619, 151)
 			fill_color 	13434879
 			nlines     	1
-			max_width  	351
+			max_width  	357
 			justify    	0
 			label      	"AspectCapable")
 		    stereotype 	(object ItemLabel
 			Parent_View 	@14
-			location   	(2609, 117)
+			location   	(2619, 110)
 			fill_color 	13434879
 			anchor     	10
 			nlines     	1
-			max_width  	351
+			max_width  	357
 			justify    	0
 			label      	"<<root>>")
 		    icon_style 	"Icon"
 		    line_color 	3342489
 		    fill_color 	10337791
 		    quidu      	"491C31440148"
-		    width      	369
-		    height     	250
+		    width      	375
+		    height     	288
 		    annotation 	8)
 		(object AssociationViewNew "ObjectHasAspect" @15
-		    location   	(2350, 244)
+		    location   	(2355, 266)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -664,7 +662,7 @@
 			default_color 	TRUE)
 		    label      	(object SegLabel @16
 			Parent_View 	@15
-			location   	(2350, 185)
+			location   	(2355, 207)
 			font       	(object Font
 			    size       	8
 			    face       	"Arial"
@@ -689,7 +687,7 @@
 		    roleview_list 	(list RoleViews
 			(object RoleView "aspect" @17
 			    Parent_View 	@15
-			    location   	(-407, 60)
+			    location   	(-402, 82)
 			    font       	(object Font
 				size       	8
 				face       	"Arial"
@@ -701,7 +699,7 @@
 				default_color 	TRUE)
 			    label      	(object SegLabel @18
 				Parent_View 	@17
-				location   	(2152, 203)
+				location   	(2153, 225)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -726,14 +724,14 @@
 			    client     	@15
 			    supplier   	@12
 			    vertices   	(list Points
-				(2350, 244)
-				(2101, 244))
+				(2355, 266)
+				(2101, 266))
 			    line_style 	3
-			    origin_attachment 	(2350, 244)
-			    terminal_attachment 	(2101, 244)
+			    origin_attachment 	(2355, 266)
+			    terminal_attachment 	(2101, 266)
 			    label      	(object SegLabel @19
 				Parent_View 	@17
-				location   	(2126, 298)
+				location   	(2127, 320)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -754,7 +752,7 @@
 				orientation 	0))
 			(object RoleView "core" @20
 			    Parent_View 	@15
-			    location   	(-407, 60)
+			    location   	(-402, 82)
 			    font       	(object Font
 				size       	8
 				face       	"Arial"
@@ -766,7 +764,7 @@
 				default_color 	TRUE)
 			    label      	(object SegLabel @21
 				Parent_View 	@20
-				location   	(2550, 203)
+				location   	(2559, 225)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -791,14 +789,14 @@
 			    client     	@15
 			    supplier   	@14
 			    vertices   	(list Points
-				(2350, 244)
-				(2600, 244))
+				(2355, 266)
+				(2610, 266))
 			    line_style 	3
-			    origin_attachment 	(2350, 244)
-			    terminal_attachment 	(2600, 244)
+			    origin_attachment 	(2355, 266)
+			    terminal_attachment 	(2610, 273)
 			    label      	(object SegLabel @22
 				Parent_View 	@20
-				location   	(2574, 298)
+				location   	(2584, 320)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -821,7 +819,7 @@
 		    ShowCompartmentStereotypes 	TRUE
 		    IncludeAttribute 	TRUE
 		    IncludeOperation 	TRUE
-		    location   	(3372, 232)
+		    location   	(3994, 243)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -833,19 +831,19 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@23
-			location   	(3031, 161)
+			location   	(3713, 154)
 			fill_color 	13434879
 			nlines     	1
-			max_width  	682
+			max_width  	563
 			justify    	0
 			label      	"ExtentCapable")
 		    stereotype 	(object ItemLabel
 			Parent_View 	@23
-			location   	(3031, 120)
+			location   	(3713, 113)
 			fill_color 	13434879
 			anchor     	10
 			nlines     	1
-			max_width  	682
+			max_width  	563
 			justify    	0
 			label      	"<<root>>")
 		    icon_style 	"Icon"
@@ -854,7 +852,7 @@
 		    quidu      	"403CAF5A0142"
 		    compartment 	(object Compartment
 			Parent_View 	@23
-			location   	(3031, 251)
+			location   	(3713, 244)
 			font       	(object Font
 			    size       	8
 			    face       	"Arial"
@@ -869,14 +867,14 @@
 			anchor     	2
 			nlines     	2
 			max_width  	496)
-		    width      	700
-		    height     	244
+		    width      	581
+		    height     	281
 		    annotation 	8)
-		(object ClassView "Class" "Logical View::org::openmdx::base::ContextCapable" @24
+		(object ClassView "Class" "Logical View::org::openmdx::base::Modifiable" @24
 		    ShowCompartmentStereotypes 	TRUE
 		    IncludeAttribute 	TRUE
 		    IncludeOperation 	TRUE
-		    location   	(3960, 229)
+		    location   	(3346, 242)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -888,27 +886,44 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@24
-			location   	(3769, 155)
+			location   	(3040, 154)
 			fill_color 	13434879
 			nlines     	1
-			max_width  	382
+			max_width  	612
 			justify    	0
-			label      	"ContextCapable")
+			label      	"Modifiable")
 		    stereotype 	(object ItemLabel
 			Parent_View 	@24
-			location   	(3769, 114)
+			location   	(3040, 113)
 			fill_color 	13434879
 			anchor     	10
 			nlines     	1
-			max_width  	382
+			max_width  	612
 			justify    	0
 			label      	"<<root>>")
 		    icon_style 	"Icon"
 		    line_color 	3342489
-		    fill_color 	10337791
-		    quidu      	"403F48350281"
-		    width      	400
-		    height     	250
+		    fill_color 	11777023
+		    quidu      	"491C2F5802BF"
+		    compartment 	(object Compartment
+			Parent_View 	@24
+			location   	(3040, 240)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	3
+			max_width  	618)
+		    width      	630
+		    height     	278
 		    annotation 	8)
 		(object InheritView "" @25
 		    stereotype 	TRUE
@@ -917,11 +932,11 @@
 		    client     	@11
 		    supplier   	@14
 		    vertices   	(list Points
-			(2785, 459)
-			(2785, 357))
+			(2794, 480)
+			(2794, 388))
 		    line_style 	3
-		    origin_attachment 	(2785, 459)
-		    terminal_attachment 	(2785, 357))
+		    origin_attachment 	(2794, 480)
+		    terminal_attachment 	(2794, 388))
 		(object InheritView "" @26
 		    stereotype 	TRUE
 		    line_color 	3342489
@@ -929,11 +944,11 @@
 		    client     	@11
 		    supplier   	@23
 		    vertices   	(list Points
-			(3373, 459)
-			(3373, 354))
+			(3951, 480)
+			(3951, 383))
 		    line_style 	3
-		    origin_attachment 	(3373, 459)
-		    terminal_attachment 	(3373, 354))
+		    origin_attachment 	(3951, 480)
+		    terminal_attachment 	(3951, 383))
 		(object InheritView "" @27
 		    stereotype 	TRUE
 		    line_color 	3342489
@@ -941,8 +956,8 @@
 		    client     	@11
 		    supplier   	@24
 		    vertices   	(list Points
-			(3951, 458)
-			(3951, 353))
+			(3373, 481)
+			(3373, 381))
 		    line_style 	3
-		    origin_attachment 	(3951, 458)
-		    terminal_attachment 	(3951, 353))))))
+		    origin_attachment 	(3373, 481)
+		    terminal_attachment 	(3373, 381))))))

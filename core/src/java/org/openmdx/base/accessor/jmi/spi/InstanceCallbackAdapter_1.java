@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InstanceCallbackAdapter_1.java,v 1.4 2009/05/23 10:14:15 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: InstanceCallbackAdapter_1.java,v 1.5 2009/11/05 16:22:58 hburger Exp $
  * Description: Instance Callback Adapter
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/23 10:14:15 $
+ * Date:        $Date: 2009/11/05 16:22:58 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,18 +51,22 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import javax.jdo.listener.ClearCallback;
+import javax.jdo.listener.ClearLifecycleListener;
 import javax.jdo.listener.DeleteCallback;
+import javax.jdo.listener.DeleteLifecycleListener;
+import javax.jdo.listener.InstanceLifecycleEvent;
+import javax.jdo.listener.InstanceLifecycleListener;
 import javax.jdo.listener.LoadCallback;
+import javax.jdo.listener.LoadLifecycleListener;
 import javax.jdo.listener.StoreCallback;
-
-import org.openmdx.base.event.InstanceCallbackEvent;
-import org.openmdx.base.event.InstanceCallbackListener;
-import org.openmdx.base.exception.ServiceException;
+import javax.jdo.listener.StoreLifecycleListener;
 
 /**
  * Instance Callback Adapter
  */
-class InstanceCallbackAdapter_1 implements InstanceCallbackListener {
+class InstanceCallbackAdapter_1 
+    implements LoadLifecycleListener, StoreLifecycleListener, ClearLifecycleListener, DeleteLifecycleListener
+{
 
 	/**
 	 * Constructor 
@@ -83,7 +86,7 @@ class InstanceCallbackAdapter_1 implements InstanceCallbackListener {
      * 
      * @return a new <code>InstanceCallbackListener</code> or <code>Null</code>
      */
-    static InstanceCallbackListener newInstance(
+    static InstanceLifecycleListener newInstance(
     	Object instance
     ){
     	return new InstanceCallbackAdapter_1(instance);
@@ -95,40 +98,53 @@ class InstanceCallbackAdapter_1 implements InstanceCallbackListener {
     private final Object instance;
     
     /* (non-Javadoc)
-     * @see org.openmdx.base.event.InstanceCallbackListener#postLoad(org.openmdx.base.event.InstanceCallbackEvent)
+     * @see javax.jdo.listener.LoadLifecycleListener#postLoad(javax.jdo.listener.InstanceLifecycleEvent)
      */
-    public void postLoad(InstanceCallbackEvent instanceCallback) throws ServiceException {
+    public void postLoad(InstanceLifecycleEvent event) {
         if(instance instanceof LoadCallback)((LoadCallback)this.instance).jdoPostLoad();
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.event.InstanceCallbackListener#preStore(org.openmdx.base.event.InstanceCallbackEvent)
+     * @see javax.jdo.listener.StoreLifecycleListener#postStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
-    public void preStore(InstanceCallbackEvent instanceCallback) throws ServiceException {
-        if(instance instanceof StoreCallback)((StoreCallback)this.instance).jdoPreStore();
+    public void postStore(InstanceLifecycleEvent event) {
+        // There is no post-store callback
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.event.InstanceCallbackListener#preClear(org.openmdx.base.event.InstanceCallbackEvent)
+     * @see javax.jdo.listener.StoreLifecycleListener#preStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
-    public void preClear(InstanceCallbackEvent instanceCallback) throws ServiceException {
+    public void preStore(InstanceLifecycleEvent event) {
+        if(instance instanceof StoreCallback)((StoreCallback)this.instance).jdoPreStore();
+    }
+
+
+    /* (non-Javadoc)
+     * @see javax.jdo.listener.ClearLifecycleListener#postClear(javax.jdo.listener.InstanceLifecycleEvent)
+     */
+    public void postClear(InstanceLifecycleEvent event) {
+        // There is no post-clear callback
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.listener.ClearLifecycleListener#preClear(javax.jdo.listener.InstanceLifecycleEvent)
+     */
+    public void preClear(InstanceLifecycleEvent event) {
         if(instance instanceof ClearCallback)((ClearCallback)this.instance).jdoPreClear();
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.event.InstanceCallbackListener#preDelete(org.openmdx.base.event.InstanceCallbackEvent)
+     * @see javax.jdo.listener.DeleteLifecycleListener#postDelete(javax.jdo.listener.InstanceLifecycleEvent)
      */
-    public void preDelete(InstanceCallbackEvent instanceCallback) throws ServiceException {
-        if(instance instanceof DeleteCallback)((DeleteCallback)this.instance).jdoPreDelete();
+    public void postDelete(InstanceLifecycleEvent event) {
+        // There is no post-delete callback
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.event.InstanceCallbackListener#postCreate(org.openmdx.base.event.InstanceCallbackEvent)
+     * @see javax.jdo.listener.DeleteLifecycleListener#preDelete(javax.jdo.listener.InstanceLifecycleEvent)
      */
-    public void postCreate(
-        InstanceCallbackEvent event
-    ) throws ServiceException {
-        // There is no CreateCallback
+    public void preDelete(InstanceLifecycleEvent event) {
+        if(instance instanceof DeleteCallback)((DeleteCallback)this.instance).jdoPreDelete();
     }
 
     Object getInstance(

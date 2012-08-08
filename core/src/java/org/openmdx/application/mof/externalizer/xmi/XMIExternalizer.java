@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: XMIExternalizer.java,v 1.3 2009/06/09 15:39:59 hburger Exp $
+ * Name:        $Id: XMIExternalizer.java,v 1.4 2010/04/13 14:05:44 wfro Exp $
  * Description: RoseExporterMain command-line tool
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 15:39:59 $
+ * Date:        $Date: 2010/04/13 14:05:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -158,14 +158,15 @@ public class XMIExternalizer {
             if("poseidon".equals(stXMIDialect)) {
                 System.out.println("INFO:    Gentleware Poseidon XMI 1");
                 xmiFormat = XMIImporter_1.XMI_FORMAT_POSEIDON;
-            } 
-            else if("magicdraw".equals(stXMIDialect)) {
+            } else if("magicdraw".equals(stXMIDialect)) {
                 System.out.println("INFO:    No Magic MagicDraw XMI 1");
                 xmiFormat = XMIImporter_1.XMI_FORMAT_MAGICDRAW;
-            }
-            else if("rsm".equals(stXMIDialect)) {
+            } else if("rsm".equals(stXMIDialect)) {
                 System.out.println("INFO:    IBM Rational Software Modeler XMI 2");          
                 xmiFormat = XMIImporter_1.XMI_FORMAT_RSM;
+            } else if("emf".equals(stXMIDialect)) {
+                System.out.println("INFO:    Eclipse UML2 Tools");          
+                xmiFormat = XMIImporter_1.XMI_FORMAT_EMF;
             }
 
             // pathMap

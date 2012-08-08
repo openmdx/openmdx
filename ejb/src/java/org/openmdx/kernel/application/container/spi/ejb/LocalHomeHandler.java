@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LocalHomeHandler.java,v 1.3 2009/03/11 16:03:39 hburger Exp $
+ * Name:        $Id: LocalHomeHandler.java,v 1.5 2010/04/16 12:36:39 hburger Exp $
  * Description: Local Home Handler
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/11 16:03:39 $
+ * Date:        $Date: 2010/04/16 12:36:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,7 +57,7 @@ import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBLocalObject;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.loading.Classes;
 
 /**
  * Local Home Invocation Handler
@@ -75,18 +75,16 @@ public class LocalHomeHandler<H extends EJBLocalHome>
      * 
      * @throws ClassNotFoundException
      */
-    @SuppressWarnings("unchecked")
     public LocalHomeHandler (
         Class<H> ejbLocalHomeClass,
         Class<EJBLocalObject> ejbLocalObjectClass
     ){
         this.ejbLocalObjectClass = ejbLocalObjectClass;
-        Object ejbLocalHome = Classes.newProxyInstance (
+        this.ejbLocalHome = Classes.<H>newProxyInstance (
             this,
             EJBLocalHome.class, ejbLocalHomeClass
         );
-        this.ejbLocalHome = (H) ejbLocalHome;
-        this.localObjectHandler = new LocalObjectHandler(this);
+        this.localObjectHandler = new LocalObjectHandler<H>(this);
     }
 
     /**

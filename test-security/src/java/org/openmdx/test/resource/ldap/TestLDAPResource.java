@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestLDAPResource.java,v 1.2 2009/03/12 17:47:58 hburger Exp $
+ * Name:        $Id: TestLDAPResource.java,v 1.4 2009/09/11 16:09:18 hburger Exp $
  * Description: Class Loading Test
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/12 17:47:58 $
+ * Date:        $Date: 2009/09/11 16:09:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,11 @@
  */
 package org.openmdx.test.resource.ldap;
 
-import javax.naming.spi.InitialContextFactory;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.naming.InitialContext;
+import javax.naming.spi.NamingManager;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -59,11 +63,11 @@ import junit.textui.TestRunner;
 import netscape.ldap.LDAPSearchResults;
 import netscape.ldap.LDAPv3;
 
-import org.openmdx.base.deploy.LazyDeployment;
+import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.resource.ldap.cci.ConnectionFactory;
 
 /**
- * Class Loading Test
+ * LDAP Test
  */
 public class TestLDAPResource extends TestCase {
 
@@ -107,10 +111,21 @@ public class TestLDAPResource extends TestCase {
 	 */
 	protected synchronized void setUp(
 	) throws Exception {  
-		this.ldapConnectionFactory = (ConnectionFactory) deployment.getInitialContext(
-			null
+		if(!NamingManager.hasInitialContextFactoryBuilder()) {
+			Map<String,String> resources = new HashMap<String,String>();
+			resources.put(
+				"org.openmdx.comp.env.ldap.server",
+				"eis:org.openmdx.resource.ldap.v3.LDAPConnectionFactory?ProtocolVersion=(java.lang.Integer)3&ConnectionURL=sec.cs.kent.ac.uk:389"
+			);
+			resources.put(
+				"org.openmdx.comp.env.ldap.fake",
+				"eis:org.openmdx.resource.ldap.v3.URLConnectionFactory?ProtocolVersion=(java.lang.Integer)3&ConnectionURL=xri:\\/\\/+resource\\/test\\/openmdx\\/resource\\/ldap\\/kent.ldif"
+			);
+			NonManagedInitialContextFactoryBuilder.install(resources);
+		}
+		this.ldapConnectionFactory = (ConnectionFactory) new InitialContext(
 		).lookup(
-			"ldap/" + this.getName()
+			"java:comp/env/ldap/" + this.getName()
 		);
     }
 
@@ -158,13 +173,4 @@ public class TestLDAPResource extends TestCase {
 		}
 	}
 	
-    /**
-     * 
-     */
-    protected final static InitialContextFactory deployment = new LazyDeployment(
-		"file:src/connector/openmdx-2/kent-ldap.rar file:src/connector/openmdx-2/kent-ldif.rar",
-		null,
-		"xri://@openmdx*(+lightweight)*ENTERPRISE_APPLICATION_CONTAINER"
-    );
-
 }

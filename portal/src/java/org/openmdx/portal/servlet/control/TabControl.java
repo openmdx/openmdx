@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TabControl.java,v 1.16 2008/12/07 23:44:23 wfro Exp $
+ * Name:        $Id: TabControl.java,v 1.17 2009/10/19 23:55:11 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/07 23:44:23 $
+ * Date:        $Date: 2009/10/19 23:55:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -154,6 +154,12 @@ public abstract class TabControl
         return this.paneIndex;
     }
     
+    //-------------------------------------------------------------------------
+    public Integer getTabId(
+    ) {
+        return 100*(this.getPaneIndex() + 1) + this.getTabIndex();
+    }
+        
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultPortalExtension.java,v 1.76 2009/06/09 12:50:34 hburger Exp $
+ * Name:        $Id: DefaultPortalExtension.java,v 1.92 2010/04/27 21:22:22 wfro Exp $
  * Description: DefaultEvaluator
- * Revision:    $Revision: 1.76 $
+ * Revision:    $Revision: 1.92 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:50:34 $
+ * Date:        $Date: 2010/04/27 21:22:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -97,7 +97,6 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
@@ -109,6 +108,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.FilterProperty;
 import org.openmdx.kernel.log.SysLog;
@@ -151,8 +151,28 @@ public class DefaultPortalExtension
     ) {
         return this.toS(obj).replace(" ", "&nbsp;");
     }
+
     
-    //-------------------------------------------------------------------------    
+	//-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTitle(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, short, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+     */
+    public String getTitle(
+        RefObject_1_0 refObj,
+        short locale,
+        String localeAsString,
+        ApplicationContext application
+    ) {
+    	return this.getTitle(
+    		refObj, 
+    		locale, 
+    		localeAsString,
+    		false, // asShortTitle = false
+    		application
+    	);
+    }
+
+	//-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTitle(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, short, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
      */
@@ -160,6 +180,7 @@ public class DefaultPortalExtension
         RefObject_1_0 refObj, 
         short locale,
         String localeAsString,
+        boolean asShortTitle,
         ApplicationContext application
     ) {
       if(refObj == null) {
@@ -248,10 +269,14 @@ public class DefaultPortalExtension
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getIdentityQueryFilterClause(java.lang.String)
      */
-    public String getIdentityQueryFilterClause(        
-        String qualifiedReferenceName
+    public List<Condition> getQuery(        
+    	org.openmdx.ui1.jmi1.ValuedField field,
+    	String filterValue,
+    	String queryFilterContext,
+    	int queryFilterStringParamCount,
+    	ApplicationContext application
     ) {
-        return "(" + qualifiedReferenceName.substring(qualifiedReferenceName.lastIndexOf(":") + 1) + " LIKE ?s0)";
+        return null;
     }
     
     //-------------------------------------------------------------------------    
@@ -323,8 +348,7 @@ public class DefaultPortalExtension
                 RefObject lookupObject = this.getLookupObject(
                     lookupType, 
                     context, 
-                    application,
-                    application.getPmData()
+                    application
                 );
                 Path lookupObjectIdentity = new Path(lookupObject.refMofId());
                 Map<Integer,String> filterByFeatures = new TreeMap<Integer,String>();
@@ -528,6 +552,53 @@ public class DefaultPortalExtension
     }
     
     //-------------------------------------------------------------------------
+    protected Object getValue(
+    	AttributeValue valueHolder,
+    	Object target,
+    	String featureName,
+    	ApplicationContext app
+    ) {
+    	if(valueHolder.getDataBinding() instanceof DataBinding_1_0) {
+	        return ((DataBinding_1_0)valueHolder.getDataBinding()).getValue(
+	            (RefObject)target, 
+	            featureName
+	        );
+    	}
+    	else {
+	        return ((DataBinding_2_0)valueHolder.getDataBinding()).getValue(
+	            (RefObject)target, 
+	            featureName,
+	            app
+	        );    		
+    	}
+    }
+    
+    //-------------------------------------------------------------------------
+    protected void setValue(
+    	AttributeValue valueHolder,
+    	Object target,
+    	String featureName,
+    	Object value,
+    	ApplicationContext app
+    ) {
+    	if(valueHolder.getDataBinding() instanceof DataBinding_1_0) {
+	        ((DataBinding_1_0)valueHolder.getDataBinding()).setValue(
+	            (RefObject)target,
+	            featureName,
+	            value
+	        );
+    	}
+    	else {
+	        ((DataBinding_2_0)valueHolder.getDataBinding()).setValue(
+	            (RefObject)target,
+	            featureName,
+	            value,
+	            app
+	        );    		
+    	}
+    }
+    
+    //-------------------------------------------------------------------------
     /**
      * Maps the request input to the specified object. The object must either
      * be instanceof RefObject_1_0 or Map.
@@ -536,14 +607,14 @@ public class DefaultPortalExtension
         Object target,
         Map<String,Object[]> parameterMap,
         Map<String,Attribute> fieldMap,
-        ApplicationContext application,
-        PersistenceManager pm
+        ApplicationContext app
     ) {
-        AppLog.trace("fieldMap", fieldMap);
-        AppLog.trace("parameterMap", parameterMap);
-        Model_1_0 model = application.getModel();
+    	SysLog.trace("fieldMap", fieldMap);
+    	SysLog.trace("parameterMap", parameterMap);
+        Model_1_0 model = app.getModel();
         int count = 0;
         // Data bindings require multi-pass update of object
+        Map<String,Attribute> updatedFeatures = new HashMap<String,Attribute>();
         while(count < 3) {
             // map object
             Set<String> modifiedFeatures = new HashSet<String>();
@@ -562,25 +633,25 @@ public class DefaultPortalExtension
               ) {        
                 // attribute names are of the form <name>[tabIndex]
                 // remove tabIndex to get full qualified feature name
-                String feature = ((String)key).substring(0, ((String)key).lastIndexOf("["));
+                String featureName = ((String)key).substring(0, ((String)key).lastIndexOf("["));
                 String featureTypeName = null;
                 // Lookup feature in model repository
                 try {
-                    ModelElement_1_0 featureDef = model.getElement(feature);
+                    ModelElement_1_0 featureDef = model.getElement(featureName);
                     featureTypeName = (String)model.getElement(featureDef.objGetValue("type")).objGetValue("qualifiedName");
                 }             
                 catch(Exception e) {
                     try {
                         // Fallback: lookup feature in ui repository as feature definition
-                        FeatureDefinition featureDef = application.getFeatureDefinition(feature);
+                        FeatureDefinition featureDef = app.getFeatureDefinition(featureName);
                         if(featureDef instanceof StructuralFeatureDefinition) {
                             featureTypeName = ((StructuralFeatureDefinition)featureDef).getType();
                         }
                     }
                     catch(Exception e0) {}                
                 }        
-                Attribute attribute = (Attribute)fieldMap.get(feature);
-                if(attribute != null) {        
+                Attribute feature = (Attribute)fieldMap.get(featureName);
+                if(feature != null) {        
                   // parse parameter values
                   List parameterValues = Arrays.asList((Object[])parameterMap.get(key));
                   StringTokenizer tokenizer = parameterValues.size() == 0 ? 
@@ -594,17 +665,21 @@ public class DefaultPortalExtension
                     }
                   }        
                   // accept?
-                  AttributeValue valueHolder = attribute.getValue();
+                  AttributeValue valueHolder = feature.getValue();
                   boolean accept =
                       (valueHolder != null) &&
                       valueHolder.isChangeable() &&
-                      !modifiedFeatures.contains(feature);
-                  AppLog.trace("accept feature", feature + "=" + accept);
-                  AppLog.trace("new values", newValues);        
-                  if(accept) {        
+                      !modifiedFeatures.contains(featureName);
+                  SysLog.trace("accept feature", featureName + "=" + accept);
+                  SysLog.trace("new values", newValues);        
+                  if(accept) {
+                	updatedFeatures.put(
+                		featureName, 
+                		feature
+                	);
                     // text
                     if(valueHolder instanceof TextValue) {
-                      AppLog.trace("Text value " + attribute.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));        
+                      SysLog.trace("Text value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));        
                       // single-valued
                       if(valueHolder.isSingleValued()) {
                         // cat all values into one string
@@ -614,25 +689,29 @@ public class DefaultPortalExtension
                         String mappedNewValue = multiLineString.length() == 0 ? null : multiLineString;
                         if(target instanceof RefObject) {
                           boolean isModified = !DefaultPortalExtension.areEqual(
-                              valueHolder.getDataBinding().getValue(
-                                  (RefObject)target, 
-                                  feature
-                              ),
+                        	  this.getValue(
+                        		  valueHolder, 
+                        		  target, 
+                        		  featureName, 
+                        		  app
+                        	  ),
                               mappedNewValue
                           );
-                          AppLog.trace("modify feature", feature + "=" + isModified);
+                          SysLog.trace("modify feature", featureName + "=" + isModified);
                           if(isModified) {
-                              valueHolder.getDataBinding().setValue(
-                                  (RefObject)target,
-                                  feature,
-                                  mappedNewValue
-                            );
-                            modifiedFeatures.add(feature);
+                        	  this.setValue(
+                        		  valueHolder, 
+                        		  target, 
+                        		  featureName, 
+                        		  mappedNewValue, 
+                        		  app
+                        	  );
+                        	  modifiedFeatures.add(featureName);
                           }
                         }
                         else {
                             targetAsValueMap(target).put(
-                                feature,
+                                featureName,
                                 mappedNewValue
                             );
                         }
@@ -642,17 +721,19 @@ public class DefaultPortalExtension
                         Collection<Object> values = null;
                         if(target instanceof RefObject) {
                             values = valueAsCollection(
-                            	valueHolder.getDataBinding().getValue(
-	                                (RefObject)target,
-	                                feature
-	                            )
+                            	this.getValue(
+                            		valueHolder, 
+                            		target, 
+                            		featureName, 
+                            		app
+                            	)
                             );
                         }
                         else {
-                            values = valueAsCollection(targetAsValueMap(target).get(feature));
+                            values = valueAsCollection(targetAsValueMap(target).get(featureName));
                             if(values == null) {
                                 targetAsValueMap(target).put(
-                                  feature,
+                                  featureName,
                                   values = new ArrayList<Object>()
                                 );
                             }
@@ -662,32 +743,34 @@ public class DefaultPortalExtension
                             values,
                             mappedNewValues
                         );
-                        AppLog.trace("modify feature", feature + "=" + isModified);
+                        SysLog.trace("modify feature", featureName + "=" + isModified);
                         if(isModified) {
                             if(target instanceof RefObject) {
-                                valueHolder.getDataBinding().setValue(
-                                    (RefObject)target,
-                                    feature,
-                                    mappedNewValues
-                                );                                                            
+                            	this.setValue(
+                            		valueHolder, 
+                            		target, 
+                            		featureName, 
+                            		mappedNewValues, 
+                            		app
+                            	);
                             }
                             else {
                                 values.clear();
                                 values.addAll(mappedNewValues);
                             }
-                            modifiedFeatures.add(feature);
+                            modifiedFeatures.add(featureName);
                         }
                       }
                     }
         
                     // number
                     else if(valueHolder instanceof NumberValue) {
-                      AppLog.trace("Number value " + attribute.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
+                      SysLog.trace("Number value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
         
                       // single-valued
                       if(valueHolder.isSingleValued()) {
                         try {    
-                          BigDecimal number = application.parseNumber(
+                          BigDecimal number = app.parseNumber(
                               newValues.size() == 0 ? "" : ((String)newValues.get(0)).trim()
                           );
                           if(number == null) {
@@ -699,25 +782,29 @@ public class DefaultPortalExtension
                               Object mappedNewValue = null;
                               if(target instanceof RefObject) {
                                 boolean isModified = !DefaultPortalExtension.areEqual(
-                                    valueHolder.getDataBinding().getValue(
-                                        (RefObject)target, 
-                                        feature
-                                    ),
+                                	this.getValue(
+                                		valueHolder, 
+                                		target, 
+                                		featureName, 
+                                		app
+                                	),
                                     mappedNewValue
                                 );
-                                AppLog.trace("modify feature", feature + "=" + isModified);
+                                SysLog.trace("modify feature", featureName + "=" + isModified);
                                 if(isModified) {
-                                    valueHolder.getDataBinding().setValue(
-                                        (RefObject)target,
-                                        feature,
-                                        mappedNewValue
-                                    );
-                                    modifiedFeatures.add(feature);
+                                	this.setValue(
+                                		valueHolder, 
+                                		target, 
+                                		featureName, 
+                                		mappedNewValue, 
+                                		app
+                                	);
+                                    modifiedFeatures.add(featureName);
                                 }
                               }
                               else {
                                   targetAsValueMap(target).put(
-                                      feature,
+                                      featureName,
                                       mappedNewValue
                                   );
                               }
@@ -726,25 +813,29 @@ public class DefaultPortalExtension
                               Integer mappedNewValue = new Integer(number.intValue());
                               if(target instanceof RefObject) {
                                 boolean isModified = !DefaultPortalExtension.areEqual(
-                                    valueHolder.getDataBinding().getValue(
-                                        (RefObject)target, 
-                                        feature
-                                    ),
+                                	this.getValue(
+                                		valueHolder, 
+                                		target, 
+                                		featureName, 
+                                		app
+                                	),
                                     mappedNewValue
                                 );
-                                AppLog.trace("modify feature", feature + "=" + isModified);
+                                SysLog.trace("modify feature", featureName + "=" + isModified);
                                 if(isModified) {
-                                    valueHolder.getDataBinding().setValue(
-                                        (RefObject)target,
-                                        feature,
-                                        mappedNewValue
-                                    );
-                                    modifiedFeatures.add(feature);
+                                	this.setValue(
+                                		valueHolder, 
+                                		target, 
+                                		featureName, 
+                                		mappedNewValue, 
+                                		app
+                                	);
+                                    modifiedFeatures.add(featureName);
                                 }
                               }
                               else {
                                   targetAsValueMap(target).put(
-                                      feature,
+                                      featureName,
                                       mappedNewValue
                                   );
                               }
@@ -753,25 +844,29 @@ public class DefaultPortalExtension
                               Long mappedNewValue = new Long(number.longValue());
                               if(target instanceof RefObject) {
                                   boolean isModified = !DefaultPortalExtension.areEqual(
-                                      valueHolder.getDataBinding().getValue(
-                                          (RefObject)target, 
-                                          feature
-                                      ),
+                                	  this.getValue(
+                                		  valueHolder, 
+                                		  target, 
+                                		  featureName, 
+                                		  app
+                                	  ),
                                       mappedNewValue
                                   );
-                                  AppLog.trace("modify feature", feature + "=" + isModified);
+                                  SysLog.trace("modify feature", featureName + "=" + isModified);
                                   if(isModified) {
-                                      valueHolder.getDataBinding().setValue(
-                                          (RefObject)target,
-                                          feature,
-                                          mappedNewValue
-                                      );
-                                      modifiedFeatures.add(feature);
+                                	  this.setValue(
+                                		  valueHolder, 
+                                		  target, 
+                                		  featureName, 
+                                		  mappedNewValue, 
+                                		  app
+                                	  );
+                                      modifiedFeatures.add(featureName);
                                   }
                               }
                               else {
                                   targetAsValueMap(target).put(
-                                      feature,
+                                      featureName,
                                       mappedNewValue
                                   );
                               }
@@ -780,25 +875,28 @@ public class DefaultPortalExtension
                               BigDecimal mappedNewValue = number;
                               if(target instanceof RefObject) {
                                 boolean isModified = !DefaultPortalExtension.areEqual(
-                                    valueHolder.getDataBinding().getValue(
-                                        (RefObject)target,
-                                        feature
-                                    ),
+                                	this.getValue(
+                                		valueHolder, 
+                                		target, 
+                                		featureName, 
+                                		app
+                                	),
                                     mappedNewValue
                                 );
-                                AppLog.trace("modify feature", feature + "=" + isModified);
                                 if(isModified) {
-                                    valueHolder.getDataBinding().setValue(
-                                        (RefObject)target,
-                                        feature,
-                                        mappedNewValue
-                                    );
-                                    modifiedFeatures.add(feature);
+                              	  	this.setValue(
+                              	  		valueHolder, 
+                              	  		target, 
+                              	  		featureName, 
+                              	  		mappedNewValue, 
+                              	  		app
+                              	  	);
+                                    modifiedFeatures.add(featureName);
                                 }
                               }
                               else {
                                   targetAsValueMap(target).put(
-                                      feature,
+                                      featureName,
                                       mappedNewValue
                                   );
                               }
@@ -806,50 +904,54 @@ public class DefaultPortalExtension
                           else { //if(PrimitiveTypes.SHORT.equals(featureTypeName)) {
                               Short mappedNewValue = new Short(number.shortValue());
                               if(target instanceof RefObject) {
-                                  boolean isModified = !DefaultPortalExtension.areEqual(
-                                      valueHolder.getDataBinding().getValue(
-                                          (RefObject)target,
-                                          feature
-                                      ),
+                            	  boolean isModified = !DefaultPortalExtension.areEqual(
+                            		  this.getValue(
+	                                	  valueHolder, 
+	                                	  target, 
+	                                	  featureName, 
+	                                	  app
+                            		  ),
                                       mappedNewValue
                                   );
-                                  AppLog.trace("modify feature", feature + "=" + isModified);
+                                  SysLog.trace("modify feature", featureName + "=" + isModified);
                                   if(isModified) {
-                                      valueHolder.getDataBinding().setValue(
-                                          (RefObject)target,
-                                          feature,
-                                          mappedNewValue
-                                      );
-                                      modifiedFeatures.add(feature);
+                                	  this.setValue(
+                                		  valueHolder, 
+                                		  target, 
+                                		  featureName, 
+                                		  mappedNewValue, 
+                                		  app
+                                	  );
+                                      modifiedFeatures.add(featureName);
                                   }
                               }
                               else {
                                   targetAsValueMap(target).put(
-                                      feature,
+                                      featureName,
                                       mappedNewValue
                                   );
                               }
                           }
                         }
                         catch(NumberFormatException e) {
-                          application.addErrorMessage(
-                              application.getTexts().getErrorTextCanNotEditNumber(),
-                              new String[]{attribute.getLabel(), (String)newValues.get(0), "can not parse number"}
+                          app.addErrorMessage(
+                              app.getTexts().getErrorTextCanNotEditNumber(),
+                              new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse number"}
                           );
                         }
                         catch(JmiServiceException e) {
                           e.log();
-                          application.addErrorMessage(
-                            application.getTexts().getErrorTextCanNotEditNumber(),
-                            new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                          app.addErrorMessage(
+                        	  app.getTexts().getErrorTextCanNotEditNumber(),
+                        	  new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                           );
                         }
                         catch(Exception e) {
-                          new ServiceException(e).log();
-                          application.addErrorMessage(
-                            application.getTexts().getErrorTextCanNotEditNumber(),
-                            new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
-                          );
+                        	new ServiceException(e).log();
+                        	app.addErrorMessage(
+                        	  app.getTexts().getErrorTextCanNotEditNumber(),
+                            	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+                        	);
                         }
                       }
         
@@ -858,17 +960,19 @@ public class DefaultPortalExtension
                         Collection<Object> values = null;
                         if(target instanceof RefObject) {
                             values = valueAsCollection(
-                            	valueHolder.getDataBinding().getValue(
-	                                (RefObject)target,
-	                                feature
-	                            )
+                            	this.getValue(
+                            		valueHolder, 
+                            		target, 
+                            		featureName, 
+                            		app
+                            	)
                             );
                         }
                         else {
-                            values = valueAsCollection(targetAsValueMap(target).get(feature));
+                            values = valueAsCollection(targetAsValueMap(target).get(featureName));
                             if(values == null) {
                                 targetAsValueMap(target).put(
-                                  feature,
+                                  featureName,
                                   values = new ArrayList<Object>()
                                 );
                             }
@@ -877,7 +981,7 @@ public class DefaultPortalExtension
                         for(Iterator j = newValues.iterator(); j.hasNext(); ) {
                           try {
                             String numberAsString = ((String)j.next()).trim();
-                            BigDecimal number = application.parseNumber(numberAsString);
+                            BigDecimal number = app.parseNumber(numberAsString);
                             if(number != null) {
                               if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
                                 mappedNewValues.add(
@@ -901,24 +1005,24 @@ public class DefaultPortalExtension
                               }
                             }
                             else {
-                              application.addErrorMessage(
-                                application.getTexts().getErrorTextCanNotEditNumber(),
-                                new String[]{attribute.getLabel(), (String)newValues.get(0), "can not parse number"}
-                              );
+                            	app.addErrorMessage(
+                            		app.getTexts().getErrorTextCanNotEditNumber(),
+                            		new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse number"}
+                            	);
                             }
                           }
                           catch(JmiServiceException e) {
-                            e.log();
-                            application.addErrorMessage(
-                              application.getTexts().getErrorTextCanNotEditNumber(),
-                              new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
-                            );
+                        	  e.log();
+                        	  app.addErrorMessage(
+                        		  app.getTexts().getErrorTextCanNotEditNumber(),
+                        		  new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
+                        	  );
                           }
                           catch(Exception e) {
                             new ServiceException(e).log();
-                            application.addErrorMessage(
-                              application.getTexts().getErrorTextCanNotEditNumber(),
-                              new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                            app.addErrorMessage(
+                              app.getTexts().getErrorTextCanNotEditNumber(),
+                              new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                             );
                           }
                         }
@@ -926,36 +1030,38 @@ public class DefaultPortalExtension
                           values,
                           mappedNewValues
                         );
-                        AppLog.trace("modify feature", feature + "=" + isModified);
+                        SysLog.trace("modify feature", featureName + "=" + isModified);
                         if(isModified) {
                             if(target instanceof RefObject) {
-                                valueHolder.getDataBinding().setValue(
-                                    (RefObject)target,
-                                    feature,
-                                    mappedNewValues
-                                );                                                                                            
+                          	  	this.setValue(
+                          	  		valueHolder, 
+                          	  		target, 
+                          	  		featureName, 
+                          	  		mappedNewValues, 
+                          	  		app
+                          	  	);
                             }
                             else {
                                 values.clear();
                                 values.addAll(mappedNewValues);
                             }
-                            modifiedFeatures.add(feature);
+                            modifiedFeatures.add(featureName);
                         }
                       }
                     }
         
                     // date
                     else if(valueHolder instanceof DateValue) {
-                      AppLog.trace("Date value " + attribute.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
+                      SysLog.trace("Date value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
                       SimpleDateFormat dateParser = DateValue.getLocalizedDateFormatter(
-                          feature, 
+                          featureName, 
                           true, 
-                          application
+                          app
                       );
                       SimpleDateFormat dateTimeParser = DateValue.getLocalizedDateTimeFormatter(
-                          feature, 
+                          featureName, 
                           true, 
-                          application
+                          app
                       );
                       Calendar cal = new GregorianCalendar();
         
@@ -965,26 +1071,30 @@ public class DefaultPortalExtension
                           if(newValues.size() == 0) {
                             Object mappedNewValue = null;
                             if(target instanceof RefObject) {
-                              boolean isModified = !DefaultPortalExtension.areEqual(
-                                  valueHolder.getDataBinding().getValue(
-                                      (RefObject)target,
-                                      feature
-                                  ),
-                                  mappedNewValue
-                              );
-                              AppLog.trace("modify feature", feature + "=" + isModified);
-                              if(isModified) {
-                                  valueHolder.getDataBinding().setValue(
-                                      (RefObject)target,
-                                      feature,
-                                      mappedNewValue
-                                  );
-                                  modifiedFeatures.add(feature);
-                              }
+                            	boolean isModified = !DefaultPortalExtension.areEqual(
+                            		this.getValue(
+                            			valueHolder, 
+                            			target, 
+                            			featureName, 
+                            			app
+                            		),
+                            		mappedNewValue
+                            	);
+                            	SysLog.trace("modify feature", featureName + "=" + isModified);
+                            	if(isModified) {
+                              	  	this.setValue(
+                              	  		valueHolder, 
+                              	  		target, 
+                              	  		featureName, 
+                              	  		mappedNewValue, 
+                              	  		app
+                              	  	);
+                              	  	modifiedFeatures.add(featureName);
+                            	}
                             }
                             else {
                                 targetAsValueMap(target).put(
-                                    feature,
+                                    featureName,
                                     mappedNewValue
                                 );
                             }
@@ -1000,6 +1110,14 @@ public class DefaultPortalExtension
                             }                        
                             if(mappedNewValue != null) {
                               cal.setTime(mappedNewValue);
+                              if(cal.get(GregorianCalendar.YEAR) < 100) {
+                            	  int currentYear = new GregorianCalendar().get(GregorianCalendar.YEAR);
+                            	  int year = cal.get(GregorianCalendar.YEAR);
+                            	  cal.add(
+                            		  GregorianCalendar.YEAR, 
+                            		  100 * (currentYear / 100 - (Math.abs(currentYear % 100 - year % 100) < 50 ? 0 : 1))
+                            	  );
+                              }
                               if(PrimitiveTypes.DATE.equals(featureTypeName)) {
                                 XMLGregorianCalendar mappedNewValueDate = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
                                     cal.get(Calendar.YEAR),
@@ -1008,83 +1126,92 @@ public class DefaultPortalExtension
                                     DatatypeConstants.FIELD_UNDEFINED
                                 );
                                 if(target instanceof RefObject) {
-                                  boolean isModified = !DefaultPortalExtension.areEqual(
-                                      valueHolder.getDataBinding().getValue(
-                                          (RefObject)target,
-                                          feature
-                                      ),
-                                      mappedNewValue
-                                  );
-                                  AppLog.trace("modify feature", feature + "=" + isModified);
-                                  if(isModified) {
-                                      valueHolder.getDataBinding().setValue(
-                                          (RefObject)target,
-                                          feature,
-                                          mappedNewValueDate
-                                      );
-                                      modifiedFeatures.add(feature);
-                                  }
+                                	boolean isModified = !DefaultPortalExtension.areEqual(
+	                                	this.getValue(
+	                                		valueHolder, 
+	                                		target, 
+	                                		featureName, 
+	                                		app
+	                                	),
+	                                	mappedNewValue
+                                	);
+                                	SysLog.trace("modify feature", featureName + "=" + isModified);
+                                	if(isModified) {
+	                                  	this.setValue(
+	                                  		valueHolder, 
+	                                		target, 
+	                                		featureName, 
+	                                		mappedNewValueDate, 
+	                                		app
+	                                	);
+	                                  	modifiedFeatures.add(featureName);
+                                	}
                                 }
                                 else {
                                     targetAsValueMap(target).put(
-                                        feature,
+                                        featureName,
                                         mappedNewValueDate
                                     );
                                 }
                               }
                               else if(PrimitiveTypes.DATETIME.equals(featureTypeName)) {
-                                if(target instanceof RefObject) {
-                                  boolean isModified = !DefaultPortalExtension.areEqual(
-                                      valueHolder.getDataBinding().getValue(
-                                          (RefObject)target,
-                                          feature
-                                      ),
-                                      mappedNewValue
-                                  );
-                                  AppLog.trace("modify feature", feature + "=" + isModified);
-                                  if(isModified) {
-                                      valueHolder.getDataBinding().setValue(
-                                          (RefObject)target,
-                                          feature,
+                            	  mappedNewValue = cal.getTime();
+                                  if(target instanceof RefObject) {
+	                                  boolean isModified = !DefaultPortalExtension.areEqual(
+	                                	  this.getValue(
+	                                		  valueHolder, 
+	                                		  target, 
+	                                		  featureName, 
+	                                		  app
+	                                	  ),
+	                                      mappedNewValue
+	                                  );
+	                                  SysLog.trace("modify feature", featureName + "=" + isModified);
+	                                  if(isModified) {
+	                                	  this.setValue(
+	                                		  valueHolder, 
+	                                		  target, 
+	                                		  featureName, 
+	                                		  mappedNewValue, 
+	                                		  app
+	                                	  );	                                	  
+	                                      modifiedFeatures.add(featureName);
+	                                  }
+                                  }
+                                  else {
+                                      targetAsValueMap(target).put(
+                                          featureName,
                                           mappedNewValue
                                       );
-                                      modifiedFeatures.add(feature);
                                   }
-                                }
-                                else {
-                                    targetAsValueMap(target).put(
-                                        feature,
-                                        mappedNewValue
-                                    );
-                                }
                               }
                               else {
-                                application.addErrorMessage(
-                                  application.getTexts().getErrorTextCanNotEditDate(),
-                                  new String[]{attribute.getLabel(), featureTypeName, "date type not supported"}
+                                app.addErrorMessage(
+                                  app.getTexts().getErrorTextCanNotEditDate(),
+                                  new String[]{feature.getLabel(), featureTypeName, "date type not supported"}
                                 );
                               }
                             }
                             else {
-                              application.addErrorMessage(
-                                application.getTexts().getErrorTextCanNotEditDate(),
-                                new String[]{attribute.getLabel(), (String)newValues.get(0), "can not parse date"}
+                              app.addErrorMessage(
+                                app.getTexts().getErrorTextCanNotEditDate(),
+                                new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse date"}
                               );
                             }
                           }
                         }
                         catch(JmiServiceException e) {
                           e.log();
-                          application.addErrorMessage(
-                            application.getTexts().getErrorTextCanNotEditDate(),
-                            new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                          app.addErrorMessage(
+                            app.getTexts().getErrorTextCanNotEditDate(),
+                            new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                           );
                         }
                         catch(Exception e) {
                           new ServiceException(e).log();
-                          application.addErrorMessage(
-                            application.getTexts().getErrorTextCanNotEditDate(),
-                            new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                          app.addErrorMessage(
+                            app.getTexts().getErrorTextCanNotEditDate(),
+                            new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                           );
                         }
                       }
@@ -1094,17 +1221,19 @@ public class DefaultPortalExtension
                         Collection<Object> values = null;
                         if(target instanceof RefObject) {
                             values = valueAsCollection(
-                            	valueHolder.getDataBinding().getValue(
-	                                (RefObject)target,
-	                                feature
-	                            )
+                            	this.getValue(
+                            		valueHolder, 
+                            		target, 
+                            		featureName, 
+                            		app
+                            	)
                             );
                         }
                         else {
-                            values = valueAsCollection(targetAsValueMap(target).get(feature));
+                            values = valueAsCollection(targetAsValueMap(target).get(featureName));
                             if(values == null) {
                                 targetAsValueMap(target).put(
-                                  feature,
+                                  featureName,
                                   values = new ArrayList<Object>()
                                 );
                             }
@@ -1135,31 +1264,31 @@ public class DefaultPortalExtension
                                 mappedNewValues.add(dateTime);
                               }
                               else {
-                                application.addErrorMessage(
-                                  application.getTexts().getErrorTextCanNotEditDate(),
-                                  new String[]{attribute.getLabel(), featureTypeName, "date type not supported"}
+                                app.addErrorMessage(
+                                  app.getTexts().getErrorTextCanNotEditDate(),
+                                  new String[]{feature.getLabel(), featureTypeName, "date type not supported"}
                                 );
                               }
                             }
                             else {
-                              application.addErrorMessage(
-                                application.getTexts().getErrorTextCanNotEditDate(),
-                                new String[]{attribute.getLabel(), (String)newValues.get(0), "can not parse date"}
-                              );
+                            	app.addErrorMessage(
+                            		app.getTexts().getErrorTextCanNotEditDate(),
+                            		new String[]{feature.getLabel(), (String)newValues.get(0), "can not parse date"}
+                            	);
                             }
                           }
                           catch(JmiServiceException e) {
                             e.log();
-                            application.addErrorMessage(
-                              application.getTexts().getErrorTextCanNotEditDate(),
-                              new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                            app.addErrorMessage(
+                            	app.getTexts().getErrorTextCanNotEditDate(),
+                              	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                             );
                           }
                           catch(Exception e) {
                             new ServiceException(e).log();
-                            application.addErrorMessage(
-                              application.getTexts().getErrorTextCanNotEditDate(),
-                              new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                            app.addErrorMessage(
+                            	app.getTexts().getErrorTextCanNotEditDate(),
+                              new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                             );
                           }
                         }
@@ -1167,20 +1296,22 @@ public class DefaultPortalExtension
                           values,
                           mappedNewValues
                         );
-                        AppLog.trace("modify feature", feature + "=" + isModified);
+                        SysLog.trace("modify feature", featureName + "=" + isModified);
                         if(isModified) {
                             if(target instanceof RefObject) {
-                                valueHolder.getDataBinding().setValue(
-                                    (RefObject)target,
-                                    feature,
-                                    mappedNewValues
-                                );                                                                                            
+	                          	  this.setValue(
+	                        		  valueHolder, 
+	                        		  target, 
+	                        		  featureName, 
+	                        		  mappedNewValues, 
+	                        		  app
+	                        	  );
                             }
                             else {
                                 values.clear();
                                 values.addAll(mappedNewValues);
                             }
-                            modifiedFeatures.add(feature);
+                            modifiedFeatures.add(featureName);
                         }
                       }
                     }
@@ -1188,8 +1319,7 @@ public class DefaultPortalExtension
                     // object reference
                     else if(valueHolder instanceof ObjectReferenceValue) {
                       if(!((String)key).endsWith(".Title")) {
-                        AppLog.trace("ObjRef value " + attribute.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
-        
+                    	SysLog.trace("ObjRef value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));        
                         // single-valued
                         if(valueHolder.isSingleValued()) {
                           String xri = null;
@@ -1199,7 +1329,7 @@ public class DefaultPortalExtension
                           // If set and invalid and newValues is empty report an error
                           boolean xriSetAsTitleIsInvalid = false;
                           if((titleValues != null) && (titleValues.length > 0)) {
-                            AppLog.trace("ObjRef title value", titleValues[0]);
+                        	SysLog.trace("ObjRef title value", titleValues[0]);
                             if(titleValues[0].toString().length() == 0) {
                               xri = ""; // reference removed by user
                             }
@@ -1230,10 +1360,10 @@ public class DefaultPortalExtension
                           if(xriSetAsTitleIsInvalid && newValues.size() == 0) {
                               // title N/A (object not available) and N/P (no permission) is set by show object. Ignore.
                               if(!((String)titleValues[0]).startsWith("N/A") && !((String)titleValues[0]).startsWith("N/P")) {
-                                  AppLog.trace("xri entered as title is not valid", titleValues);
-                                  application.addErrorMessage(
-                                      application.getTexts().getErrorTextInvalidObjectReference(),
-                                      new String[]{attribute.getLabel(), (String)titleValues[0]}
+                            	  SysLog.trace("xri entered as title is not valid", titleValues);
+                            	  app.addErrorMessage(
+                            		  app.getTexts().getErrorTextInvalidObjectReference(),
+                                      new String[]{feature.getLabel(), (String)titleValues[0]}
                                   );
                               }
                           }
@@ -1242,53 +1372,61 @@ public class DefaultPortalExtension
                               if((xri == null) && (newValues.size() > 0)) {
                                 xri = (String)newValues.get(0);
                               }
-                              AppLog.trace("ObjRef xri", xri);
+                              SysLog.trace("ObjRef xri", xri);
                               try {
-                                RefObject mappedNewValue = (xri == null) || "".equals(xri) ? 
+                                Object mappedNewValue = (xri == null) || "".equals(xri) ? 
                                 	null : 
-                                	(RefObject)pm.getObjectById(new Path(xri));
+                                		new Path(xri);
                                 if(target instanceof RefObject) {
-                                  boolean isModified = true;
-                                  // force modify in case the referenced object does not exist
-                                  try {
-                                    isModified = !DefaultPortalExtension.areEqual(
-                                        valueHolder.getDataBinding().getValue(
-                                            (RefObject)target,
-                                            feature
-                                        ),
-                                        mappedNewValue
-                                    );
-                                  } 
-                                  catch(Exception e) {}
-                                  AppLog.trace("modify feature", feature + "=" + isModified);
+                                	mappedNewValue = mappedNewValue == null ?
+                                		null : 
+                                			JDOHelper.getPersistenceManager(target).getObjectById(
+		                                		mappedNewValue
+		                                	);
+                                    boolean isModified = true;
+                                    // force modify in case the referenced object does not exist
+                                    try {
+	                                    isModified = !DefaultPortalExtension.areEqual(
+	                                    	this.getValue(
+	                                    		valueHolder, 
+	                                    		target, 
+	                                    		featureName, 
+	                                    		app
+	                                    	),
+	                                        mappedNewValue
+	                                    );
+                                  } catch(Exception e) {}
+                                  SysLog.trace("modify feature", featureName + "=" + isModified);
                                   if(isModified) {
-                                      valueHolder.getDataBinding().setValue(
-                                          (RefObject)target,
-                                          feature,
-                                          mappedNewValue
-                                      );
-                                      modifiedFeatures.add(feature);
+                                	  this.setValue(
+                                		  valueHolder, 
+                                		  target, 
+                                		  featureName, 
+                                		  mappedNewValue, 
+                                		  app
+                                	  );
+                                      modifiedFeatures.add(featureName);
                                   }
                                 }
                                 else {
                                     targetAsValueMap(target).put(
-                                        feature,
+                                        featureName,
                                         mappedNewValue
                                     );
                                 }
                               }
                               catch(JmiServiceException e) {
                                 e.log();
-                                application.addErrorMessage(
-                                  application.getTexts().getErrorTextCanNotEditObjectReference(),
-                                  new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                                app.addErrorMessage(
+                                	app.getTexts().getErrorTextCanNotEditObjectReference(),
+                                  new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                                 );
                               }
                               catch(Exception e) {
                                 new ServiceException(e).log();
-                                application.addErrorMessage(
-                                  application.getTexts().getErrorTextCanNotEditObjectReference(),
-                                  new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                                app.addErrorMessage(
+                                	app.getTexts().getErrorTextCanNotEditObjectReference(),
+                                	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                                 );
                               }
                           }
@@ -1304,14 +1442,14 @@ public class DefaultPortalExtension
         
                     // code
                     else if(valueHolder instanceof CodeValue) {
-                      AppLog.trace("Code value " + attribute.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
+                      SysLog.trace("Code value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
                       Map longTexts = ((CodeValue)valueHolder).getLongText(false, false);        
                       // single-valued
                       if(valueHolder.isSingleValued()) {
                         try {
                           if(longTexts == null) {
-                              AppLog.warning("Can not get ValueContainer with name", feature);
-                              System.err.println("WARNING: can not get CodeValueContainer with name " + feature + ". Add " + feature + " to the name list of a CodeValueContainer");
+                        	  SysLog.warning("Can not get ValueContainer with name", featureName);
+                              System.err.println("WARNING: can not get CodeValueContainer with name " + featureName + ". Add " + featureName + " to the name list of a CodeValueContainer");
                               longTexts = new TreeMap();
                           }
                           Short mappedNewValue = newValues.size() == 0 ? 
@@ -1320,45 +1458,49 @@ public class DefaultPortalExtension
                           if(mappedNewValue != null) {
                               if(target instanceof RefObject) {
                                   boolean isModified = !DefaultPortalExtension.areEqual(
-                                      valueHolder.getDataBinding().getValue(
-                                          (RefObject)target,
-                                          feature
-                                      ),
+                                  	  this.getValue(
+	                                	  valueHolder, 
+	                                	  target, 
+	                                	  featureName, 
+	                                	  app
+                                  	  ),
                                       mappedNewValue
                                   );
-                                  AppLog.trace("modify feature", feature + "=" + isModified);
+                                  SysLog.trace("modify feature", featureName + "=" + isModified);
                                   if(isModified) {
-                                      valueHolder.getDataBinding().setValue(
-                                          (RefObject)target,
-                                          feature,
-                                          mappedNewValue
-                                      );
-                                      modifiedFeatures.add(feature);
+                                	  this.setValue(
+                                		  valueHolder, 
+                                		  target, 
+                                		  featureName, 
+                                		  mappedNewValue, 
+                                		  app
+                                	  );
+                                      modifiedFeatures.add(featureName);
                                   }
                               }
                               else {
                                   targetAsValueMap(target).put(
-                                      feature,
+                                      featureName,
                                       mappedNewValue
                                   );
                               }
                           }
                           else {
-                        	  AppLog.warning("Unable to map code field", Arrays.asList(newValues.get(0).toString(), longTexts));
+                        	  SysLog.warning("Unable to map code field", Arrays.asList(newValues.get(0).toString(), longTexts));
                           }
                         }
                         catch(JmiServiceException e) {
                           e.log();
-                          application.addErrorMessage(
-                            application.getTexts().getErrorTextCanNotEditCode(),
-                            new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                          app.addErrorMessage(
+                        	  app.getTexts().getErrorTextCanNotEditCode(),
+                        	  new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                           );
                         }
                         catch(Exception e) {
                           new ServiceException(e).log();
-                          application.addErrorMessage(
-                            application.getTexts().getErrorTextCanNotEditCode(),
-                            new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                          app.addErrorMessage(
+                        	  app.getTexts().getErrorTextCanNotEditCode(),
+                        	  new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                           );
                         }
                       }
@@ -1368,17 +1510,19 @@ public class DefaultPortalExtension
                         Collection<Object> values = null;
                         if(target instanceof RefObject) {
                             values = valueAsCollection(
-                            	valueHolder.getDataBinding().getValue(
-	                                (RefObject)target,
-	                                feature
-	                            )
+                            	this.getValue(
+                            		valueHolder, 
+                            		target, 
+                            		featureName, 
+                            		app
+                            	)
                             );
                         }
                         else {
-                          values = valueAsCollection(targetAsValueMap(target).get(feature));
+                          values = valueAsCollection(targetAsValueMap(target).get(featureName));
                           if(values == null) {
                               targetAsValueMap(target).put(
-                                  feature,
+                                  featureName,
                                   values = new ArrayList<Object>()
                               );
                           }
@@ -1388,7 +1532,7 @@ public class DefaultPortalExtension
                           try {
                             String longText = j.next().toString();
                             Short code = (Short)longTexts.get(longText);
-                            AppLog.trace("code mapping", longText + " to code=" + code);
+                            SysLog.trace("code mapping", longText + " to code=" + code);
                             if(code != null) {
                               mappedNewValues.add(
                                 code
@@ -1397,16 +1541,16 @@ public class DefaultPortalExtension
                           }
                           catch(JmiServiceException e) {
                             e.log();
-                            application.addErrorMessage(
-                              application.getTexts().getErrorTextCanNotEditCode(),
-                              new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                            app.addErrorMessage(
+                            	app.getTexts().getErrorTextCanNotEditCode(),
+                            	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                             );
                           }
                           catch(Exception e) {
                             new ServiceException(e).log();
-                            application.addErrorMessage(
-                              application.getTexts().getErrorTextCanNotEditCode(),
-                              new String[]{attribute.getLabel(), (String)newValues.get(0), e.getMessage()}
+                            app.addErrorMessage(
+                            	app.getTexts().getErrorTextCanNotEditCode(),
+                            	new String[]{feature.getLabel(), (String)newValues.get(0), e.getMessage()}
                             );
                           }
                         }
@@ -1414,27 +1558,29 @@ public class DefaultPortalExtension
                           values,
                           mappedNewValues
                         );
-                        AppLog.trace("modify feature", feature + "=" + isModified);
+                        SysLog.trace("modify feature", featureName + "=" + isModified);
                         if(isModified) {
                             if(target instanceof RefObject) {
-                                valueHolder.getDataBinding().setValue(
-                                    (RefObject)target,
-                                    feature,
-                                    mappedNewValues
-                                );                                                                                            
+                          	  	this.setValue(
+                          	  		valueHolder, 
+                          	  		target, 
+                          	  		featureName, 
+                          	  		mappedNewValues, 
+                          	  		app
+                          	  	);
                             }
                             else {
                                 values.clear();
                                 values.addAll(mappedNewValues);
                             }
-                            modifiedFeatures.add(feature);
+                            modifiedFeatures.add(featureName);
                         }
                       }
                     }
         
                     // boolean
                     else if(valueHolder instanceof BooleanValue) {
-                      AppLog.trace("Boolean: " + attribute.getLabel() + "=" + Arrays.asList((Object[])parameterMap.get(key)));
+                      SysLog.trace("Boolean: " + feature.getLabel() + "=" + Arrays.asList((Object[])parameterMap.get(key)));
         
                       // single-valued
                       if(valueHolder.isSingleValued()) {
@@ -1443,29 +1589,33 @@ public class DefaultPortalExtension
                                 (newValues.size() > 0) &&
                                 ("true".equals(newValues.get(0)) ||
                                 "on".equals(newValues.get(0)) ||
-                                application.getTexts().getTrueText().equals(newValues.get(0)))
+                                app.getTexts().getTrueText().equals(newValues.get(0)))
                             );
                         if(target instanceof RefObject) {
-                          boolean isModified = !DefaultPortalExtension.areEqual(
-                              valueHolder.getDataBinding().getValue(
-                                  (RefObject)target,
-                                  feature
-                              ),
-                              mappedNewValue
+                        	boolean isModified = !DefaultPortalExtension.areEqual(
+                        		this.getValue(
+	                        		valueHolder, 
+	                        		target, 
+	                        		featureName, 
+	                        		app
+	                        	),
+                                mappedNewValue
                           );
-                          AppLog.trace("modify feature", feature + "=" + isModified);
+                          SysLog.trace("modify feature", featureName + "=" + isModified);
                           if(isModified) {
-                              valueHolder.getDataBinding().setValue(
-                                  (RefObject)target,
-                                  feature,
-                                  mappedNewValue
-                              );
-                              modifiedFeatures.add(feature);
+                        	  this.setValue(
+                        		  valueHolder, 
+                        		  target, 
+                        		  featureName, 
+                        		  mappedNewValue, 
+                        		  app
+                        	  );
+                              modifiedFeatures.add(featureName);
                           }
                         }
                         else {
                             targetAsValueMap(target).put(
-                                feature,
+                                featureName,
                                 mappedNewValue
                             );
                         }
@@ -1476,17 +1626,19 @@ public class DefaultPortalExtension
                         Collection<Object> values = null;
                         if(target instanceof RefObject) {
                             values = valueAsCollection(
-                            	valueHolder.getDataBinding().getValue(
-	                                (RefObject)target,
-	                                feature
-	                            )
+                            	this.getValue(
+                            		valueHolder, 
+                            		target, 
+                            		featureName, 
+                            		app
+                            	)
                             );
                         }
                         else {
-                          values = valueAsCollection(targetAsValueMap(target).get(feature));
+                          values = valueAsCollection(targetAsValueMap(target).get(featureName));
                           if(values == null) {
                               targetAsValueMap(target).put(
-                                  feature,
+                                  featureName,
                                   values = new ArrayList<Object>()
                               );
                           }
@@ -1498,7 +1650,7 @@ public class DefaultPortalExtension
                                 new Boolean(
                                     "true".equals(mappedNewValue) ||
                                     "on".equals(mappedNewValue) ||
-                                    application.getTexts().getTrueText().equals(mappedNewValue)
+                                    app.getTexts().getTrueText().equals(mappedNewValue)
                                 )
                             );
                         }
@@ -1506,48 +1658,52 @@ public class DefaultPortalExtension
                             values,
                             mappedNewValues
                         );
-                        AppLog.trace("modify feature", feature + "=" + isModified);
+                        SysLog.trace("modify feature", featureName + "=" + isModified);
                         if(isModified) {
                             if(target instanceof RefObject) {
-                                valueHolder.getDataBinding().setValue(
-                                    (RefObject)target,
-                                    feature,
-                                    mappedNewValues
-                                );                                                                                            
+                          	  this.setValue(
+                        		  valueHolder, 
+                        		  target, 
+                        		  featureName, 
+                        		  mappedNewValues, 
+                        		  app
+                        	  );
                             }
                             else {
                                 values.clear();
                                 values.addAll(mappedNewValues);
                             }
-                            modifiedFeatures.add(feature);
+                            modifiedFeatures.add(featureName);
                         }
                       }
                     }
         
                     // binary
                     else if(valueHolder instanceof BinaryValue) {
-                      AppLog.trace("Binary: " + attribute.getLabel());
-                      String fileNameInfo = application.getTempFileName("" + key, ".INFO");
+                      SysLog.trace("Binary: " + feature.getLabel());
+                      String fileNameInfo = app.getTempFileName("" + key, ".INFO");
         
                       // single-valued
                       if(valueHolder.isSingleValued()) {
         
                         // reset value to null
                         if(newValues.size() == 0) {
-                          AppLog.trace("reset to null");
+                          SysLog.trace("reset to null");
         
                           // reset bytes
                           try {
                             if(target instanceof RefObject) {
-                                valueHolder.getDataBinding().setValue(
-                                    (RefObject)target,
-                                    feature,
-                                    null
-                                );
+                          	  this.setValue(
+                        		  valueHolder, 
+                        		  target, 
+                        		  featureName, 
+                        		  null, 
+                        		  app
+                        	  );
                             }
                             else {
                                 targetAsValueMap(target).put(
-                                    feature,
+                                    featureName,
                                     null
                                 );
                             }
@@ -1556,15 +1712,17 @@ public class DefaultPortalExtension
                           // reset name
                           try {
                             if(target instanceof RefObject) {
-                                valueHolder.getDataBinding().setValue(
-                                    (RefObject)target,
-                                    feature + "Name",
-                                    null
-                                );
+	                          	  this.setValue(
+	                        		  valueHolder, 
+	                        		  target, 
+	                        		  featureName + "Name", 
+	                        		  null, 
+	                        		  app
+	                        	  );
                             }
                             else {
                                 targetAsValueMap(target).put(
-                                    feature + "Name",
+                                    featureName + "Name",
                                     null
                                 );
                             }
@@ -1573,15 +1731,17 @@ public class DefaultPortalExtension
                           // reset mimeType
                           try {
                             if(target instanceof RefObject) {
-                                valueHolder.getDataBinding().setValue(
-                                    (RefObject)target,
-                                    feature + "MimeType",
-                                    null
-                                );
+	                          	  this.setValue(
+	                        		  valueHolder, 
+	                        		  target, 
+	                        		  featureName + "MimeType", 
+	                        		  null, 
+	                        		  app
+	                        	  );
                             }
                             else {
                                 targetAsValueMap(target).put(
-                                    feature + "MimeType",
+                                    featureName + "MimeType",
                                     null
                                 );
                             }
@@ -1591,8 +1751,8 @@ public class DefaultPortalExtension
         
                         // get binary stream and store
                         else {
-                          AppLog.trace("modify feature", feature + "=true");
-                          modifiedFeatures.add(feature);
+                          SysLog.trace("modify feature", featureName + "=true");
+                          modifiedFeatures.add(featureName);
         
                           boolean uploadStreamValid = true;
                           
@@ -1609,69 +1769,75 @@ public class DefaultPortalExtension
                             // set mimeType
                             try {
                               if(target instanceof RefObject) {
-                                  valueHolder.getDataBinding().setValue(
-                                      (RefObject)target,
-                                      feature + "MimeType",
-                                      mimeType
-                                  );
+                            	  this.setValue(
+                            		  valueHolder, 
+                            		  target, 
+                            		  featureName + "MimeType", 
+                            		  mimeType, 
+                            		  app
+                            	  );
                               }
                               else {
                                   targetAsValueMap(target).put(
-                                      feature + "MimeType",
+                                      featureName + "MimeType",
                                       mimeType
                                   );
                               }
                             }
                             catch(Exception e) {
-                              AppLog.warning("can not set mimeType for " + feature);
+                              SysLog.warning("can not set mimeType for " + featureName);
                               new ServiceException(e).log();
                             }
         
                             // set name
                             try {
                               if(target instanceof RefObject) {
-                                  valueHolder.getDataBinding().setValue(
-                                      (RefObject)target,
-                                      feature + "Name",
-                                      name
-                                  );
+                            	  this.setValue(
+                            		  valueHolder, 
+                            		  target, 
+                            		  featureName + "Name", 
+                            		  name, 
+                            		  app
+                            	  );
                               }
                               else {
                                   targetAsValueMap(target).put(
-                                      feature + "Name",
+                                      featureName + "Name",
                                       name
                                   );
                               }
                             } 
                             catch(Exception e) {
-                                AppLog.warning("can not set name for " + feature);
+                            	SysLog.warning("can not set name for " + featureName);
                                 new ServiceException(e).log();
                             }
                           }
                           catch(FileNotFoundException e) {
-                              AppLog.error("can not open info of uploaded stream " + fileNameInfo);
+                        	  SysLog.error("can not open info of uploaded stream " + fileNameInfo);
                               new ServiceException(e).log();
                               uploadStreamValid = false;
                           }
                           catch(IOException e) {
-                              AppLog.error("can not read info of uploaded stream " + fileNameInfo);
+                        	  SysLog.error("can not read info of uploaded stream " + fileNameInfo);
                               new ServiceException(e).log();
                               uploadStreamValid = false;
                           }
         
                           // set bytes
-                          String location = application.getTempFileName((String)key, "");
+                          String location = app.getTempFileName((String)key, "");
                           if(uploadStreamValid) {
                               if(target instanceof RefObject) {
                                   try {
-                                      valueHolder.getDataBinding().setValue(
-                                          (RefObject)target,
-                                          feature,
-                                          org.w3c.cci2.BinaryLargeObjects.valueOf(new File(location))
-                                      );
+                                	  this.setValue(
+                                		  valueHolder, 
+                                		  target, 
+                                		  featureName, 
+                                		  org.w3c.cci2.BinaryLargeObjects.valueOf(new File(location)), 
+                                		  app
+                                	  );
                                   }
                                   catch(Exception e) {
-                                      AppLog.error("Unable to upload binary content", location);
+                                	  SysLog.error("Unable to upload binary content", location);
                                       new ServiceException(e).log();
                                   }
                               }
@@ -1688,12 +1854,12 @@ public class DefaultPortalExtension
                                       os.close();
                                       bytes = os.toByteArray();
                                       targetAsValueMap(target).put(
-                                          feature,
+                                          featureName,
                                           bytes
                                       );
                                     }
                                     catch(Exception e) {
-                                        AppLog.error("Unable to upload binary content", location);
+                                    	SysLog.error("Unable to upload binary content", location);
                                         new ServiceException(e).log();
                                     }
                               }
@@ -1703,16 +1869,16 @@ public class DefaultPortalExtension
         
                       // multi-valued
                       else {
-                        AppLog.error("multi-valued binary not supported for", feature);
+                    	 SysLog.error("multi-valued binary not supported for", featureName);
                       }
                     }
         
                     // unknown
                     else {
-                      application.addErrorMessage(
-                        application.getTexts().getErrorTextAttributeTypeNotSupported(),
-                        new String[]{attribute.getLabel(), attribute.getValue() == null ? null : attribute.getValue().getClass().getName(), "attribute type not supported"}
-                      );
+                    	app.addErrorMessage(
+                    		app.getTexts().getErrorTextAttributeTypeNotSupported(),
+                    		new String[]{feature.getLabel(), feature.getValue() == null ? null : feature.getValue().getClass().getName(), "attribute type not supported"}
+                    	);
                     }
                   }
                 }
@@ -1722,23 +1888,23 @@ public class DefaultPortalExtension
             count++;
         }
         // Validate mandatory fields
-        for(Attribute attribute: fieldMap.values()) {
+        for(Attribute feature: updatedFeatures.values()) {
             try {
                 if(
-                    attribute.getValue().getFieldDef().isMandatory && 
-                    attribute.getValue().getFieldDef().isChangeable
+                    feature.getValue().getFieldDef().isMandatory && 
+                    feature.getValue().getFieldDef().isChangeable
                 ) {
                     Object value = target instanceof RefObject ?
-                        attribute.getValue().getDataBinding().getValue((RefObject)target, attribute.getName()) :
-                        targetAsValueMap(target).get(attribute.getName());
+                        this.getValue(feature.getValue(), target, feature.getName(), app) :
+                        	targetAsValueMap(target).get(feature.getName());
                     if(
                         (value == null) || 
                         (value instanceof String && ((String)value).length() == 0) || 
                         (value instanceof Collection && ((Collection)value).isEmpty())
                     ) {
-                        application.addErrorMessage(
-                            application.getTexts().getErrorTextMandatoryField(),
-                            new String[]{attribute.getLabel()}
+                    	app.addErrorMessage(
+                    		app.getTexts().getErrorTextMandatoryField(),
+                            new String[]{feature.getLabel()}
                         );
                     }
                 }
@@ -1803,20 +1969,21 @@ public class DefaultPortalExtension
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getLookupObject(org.openmdx.model1.accessor.basic.cci.ModelElement_1_0, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext, javax.jdo.PersistenceManager)
      */
+    @Override
     public RefObject_1_0 getLookupObject(
     	ModelElement_1_0 lookupType,
     	RefObject_1_0 startFrom,
-    	ApplicationContext application,
-    	PersistenceManager pm
+    	ApplicationContext application
     ) throws ServiceException {
     	Model_1_0 model = application.getModel();
+    	PersistenceManager pm = JDOHelper.getPersistenceManager(startFrom);
     	String qualifiedNameLookupType = (String)lookupType.objGetValue("qualifiedName");
     	Map<String,Set<String>> compositionHierarchy = new HashMap<String,Set<String>>();
     	this.createCompositionHierarchy(
     		lookupType,
     		compositionHierarchy
     	);
-    	AppLog.trace("composition hierarchy", compositionHierarchy);        
+    	SysLog.trace("composition hierarchy", compositionHierarchy);        
     	RefObject_1_0 objectToShow = null;        
     	// get object to show. This is the first object which is member
     	// of the composition hierarchy of the referenced object.
@@ -1849,7 +2016,8 @@ public class DefaultPortalExtension
     			current = (RefObject_1_0)pm.getObjectById(currentIdentity);
     		}
     		catch(Exception e) {
-    			AppLog.warning("Can not get object", Arrays.asList((Object)currentIdentity, e.getMessage()));
+    			SysLog.warning("Can not get object", Arrays.asList((Object)currentIdentity, e.getMessage()));
+    			break;
     		}
     	}        
     	// If not found get root object which is in the composition hierarchy
@@ -1886,8 +2054,7 @@ public class DefaultPortalExtension
         RefObject_1_0 lookupObject = this.getLookupObject(
             lookupType, 
             startFrom, 
-            application,
-            application.getPmData()
+            application
         );
         String qualifiedNameLookupType = (String)lookupType.objGetValue("qualifiedName");        
         ObjectView view = new ShowObjectView(
@@ -1937,10 +2104,11 @@ public class DefaultPortalExtension
      * p.write(value)
      */
     public void renderTextValue(
-        HtmlPage p,
-        String value
+        ViewPort p,
+        String value,
+        boolean asWiki
     ) throws ServiceException {
-        // Map email addresses to <a href="mailto:...
+        // Map email addresses to mailto:...
         int pos = 0;
         int fromIndex = 0;
         while((pos = value.indexOf("&#64;", fromIndex)) >= 0) {
@@ -1966,7 +2134,9 @@ public class DefaultPortalExtension
                 String addressTitle = posParams > 0 ?
                     value.substring(start+1, posParams) :
                     value.substring(start+1, end);
-                String href = "<a href=\"mailto:" + address + "\">" + addressTitle + "</a>";
+                String href = asWiki ?
+                	"mailto:" + address :
+                	"<a href=\"mailto:" + address + "\">" + addressTitle + "</a>";
                 value = value.substring(0, start+1) + href + value.substring(end);
                 fromIndex = start + href.length() + 1;
             }
@@ -1976,17 +2146,22 @@ public class DefaultPortalExtension
         }
         // Map phone number to <a href="tel:...
         fromIndex = 0;
-        while((pos = value.indexOf(" +", fromIndex)) >= 0) {
-            int start = pos + 1;
+        while(
+        	((pos = value.indexOf(" +", fromIndex)) >= 0) ||
+        	(fromIndex == 0 && ((pos = value.indexOf("+")) == 0))
+        ) {
+            int start = value.charAt(pos) == '+' ? pos : pos + 1;
             int end = start;
             while(end < value.length()) {
                 char c = value.charAt(end);
-                if(!Character.isDigit(c) && (c != '+') && (c != '(') && (c != ')') && (c != '-')) break;
+                if(!Character.isDigit(c) && !Character.isWhitespace(c) && (c != '+') && (c != '(') && (c != ')') && (c != '-')) break;
                 end++;
             }
             if(end > start + 10) {
                 String address = value.substring(start, end);
-                String href =  "<a href=\"tel:" + address + "\">" + address + "</a>";
+                String href =  asWiki ?
+                	"tel:" + address :
+                   	"<a href=\"tel:" + address + "\">" + address + "</a>";                		
                 value = value.substring(0, start) + href + value.substring(end);
                 fromIndex = start + href.length();
             }
@@ -1995,35 +2170,38 @@ public class DefaultPortalExtension
             }
         }        
         // Map substrings starting with well-known protocols to <a href...
-        for(
-            Iterator i = WELL_KNOWN_PROTOCOLS.iterator();
-            i.hasNext();
-        ) {
-            String protocol = (String)i.next();
-            fromIndex = 0;
-            while((pos = value.indexOf(protocol, fromIndex)) >= 0) {
-                // protocol must start after whitespace or after closing tag
-                if((pos == 0) || Character.isWhitespace(value.charAt(pos-1)) || ('>' == value.charAt(pos-1))) {
-                    int posEnd = pos+1;
-                    while(posEnd < value.length()) {
-                        if(
-                            ('<' == value.charAt(posEnd)) || 
-                            Character.isWhitespace(value.charAt(posEnd))
-                        ) {
-                            break;
-                        }
-                        posEnd++;
-                    }
-                    String address = value.substring(pos, posEnd);
-                    String end = value.substring(posEnd);
-                    String href = "<a href=\"" + address + "\">" + address + "</a>";
-                    value = value.substring(0,pos) + href + end;
-                    fromIndex = pos + href.length();
-                }
-                else {
-                    fromIndex = pos+1;
-                }
-            }
+        // Do not need to generate HTML tags if text is postprocessed with wiki renderer
+        if(!asWiki) {
+	        for(
+	            Iterator i = WELL_KNOWN_PROTOCOLS.iterator();
+	            i.hasNext();
+	        ) {
+	            String protocol = (String)i.next();
+	            fromIndex = 0;
+	            while((pos = value.indexOf(protocol, fromIndex)) >= 0) {
+	                // protocol must start after whitespace or after closing tag
+	                if((pos == 0) || Character.isWhitespace(value.charAt(pos-1)) || ('>' == value.charAt(pos-1))) {
+	                    int posEnd = pos+1;
+	                    while(posEnd < value.length()) {
+	                        if(
+	                            ('<' == value.charAt(posEnd)) || 
+	                            Character.isWhitespace(value.charAt(posEnd))
+	                        ) {
+	                            break;
+	                        }
+	                        posEnd++;
+	                    }
+	                    String address = value.substring(pos, posEnd);
+	                    String end = value.substring(posEnd);
+	                    String href = "<a href=\"" + address + "\">" + address + "</a>";
+	                    value = value.substring(0,pos) + href + end;
+	                    fromIndex = pos + href.length();
+	                }
+	                else {
+	                    fromIndex = pos+1;
+	                }
+	            }
+	        }
         }                
         p.write(value);
     }
@@ -2054,9 +2232,8 @@ public class DefaultPortalExtension
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getDataBinding(java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
      */
-    public DataBinding_1_0 getDataBinding(
-       String dataBindingName,
-       ApplicationContext application
+    public DataBinding getDataBinding(
+       String dataBindingName
     ) {
         if(
             (dataBindingName != null) && 

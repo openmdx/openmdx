@@ -124,7 +124,9 @@ public class TomcatWebAppBuilder implements WebAppBuilder, ContextListener {
                         for (LifecycleListener listener : host.findLifecycleListeners()) {
                             if (listener instanceof HostConfig) {
                                 HostConfig hostConfig = (HostConfig) listener;
-                                deployers.put(host.getName(), hostConfig);
+                            	if(hostConfig.getConfigBaseName() != null) { 
+                            		deployers.put(host.getName(), hostConfig);
+                            	}
                             }
                         }
                     }

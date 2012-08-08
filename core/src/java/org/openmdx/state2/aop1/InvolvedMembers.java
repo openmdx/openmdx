@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InvolvedMembers.java,v 1.2 2009/01/10 02:09:17 wfro Exp $
+ * Name:        $Id: InvolvedMembers.java,v 1.3 2009/08/17 13:08:46 hburger Exp $
  * Description: Involved Members
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/10 02:09:17 $
+ * Date:        $Date: 2009/08/17 13:08:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -145,41 +145,33 @@ abstract class InvolvedMembers<O,M> implements Involved<M> {
          */
         public Iterator<M> iterator(
         ) {
-            try {                
+            return new Iterator<M>(){
+
                 /**
-                 * Create an iterator for modify access
+                 * Involved States Iterator
                  */
-                return new Iterator<M>(){
-    
-                    /**
-                     * Involved States Iterator
-                     */
-                    private final Iterator<O> states = involvedStates.getInvolved(
-                        access
-                    ).iterator(
-                    );
-                    
-                    public boolean hasNext() {
-                        return states.hasNext();
+                private final Iterator<O> states = involvedStates.getInvolved(
+                    access
+                ).iterator(
+                );
+                
+                public boolean hasNext() {
+                    return states.hasNext();
+                }
+
+                public M next() {
+                    try {
+                        return getMember(this.states.next());
+                    } catch (ServiceException exception) {
+                        throw new RuntimeServiceException(exception);
                     }
-    
-                    public M next() {
-                        try {
-                            return getMember(this.states.next());
-                        } catch (ServiceException exception) {
-                            throw new RuntimeServiceException(exception);
-                        }
-                    }
-    
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                    
-                };
-            }
-            catch(Exception e) {
-                throw new RuntimeServiceException(e);
-            }                
+                }
+
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+                
+            };
         }
         
     }

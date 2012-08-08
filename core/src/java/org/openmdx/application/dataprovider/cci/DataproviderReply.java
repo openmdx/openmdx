@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderReply.java,v 1.3 2009/06/01 15:36:57 wfro Exp $
+ * Name:        $Id: DataproviderReply.java,v 1.10 2010/03/23 09:16:10 hburger Exp $
  * Description: DataproviderReply class
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/01 15:36:57 $
+ * Date:        $Date: 2010/03/23 09:16:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,142 +50,182 @@
  */
 package org.openmdx.application.dataprovider.cci;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import javax.resource.ResourceException;
+import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
+import javax.resource.cci.Record;
 
-import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.ResultRecord;
 
-public class DataproviderReply
-    extends DataproviderContext
-{
-
-    /**
-     * Comment for <code>serialVersionUID</code>
-     */
-    private static final long serialVersionUID = 4120848863151075378L;
+/**
+ * Dataprovider Reply
+ */
+public class DataproviderReply {
 
     /**
-     * Reply to successfull requests returning no objects
-     */
-    public DataproviderReply(
-    ){
-        this.objects = new MappedRecord[]{};
-    }
-
-    /**
-     * Reply to successfull requests returning a single object
+     * Constructor 
+     *
+     * @throws ServiceException
      */
     public DataproviderReply(
-        MappedRecord object
-    ){
-        this.objects = new MappedRecord[]{
-            object
-        };
+    ) throws ServiceException {
+        this(false);
     }
-
+    
     /**
-     * Reply to successfull requests returning a collection of objects
+     * Constructor 
+     *
+     * @throws ServiceException
      */
     public DataproviderReply(
-        List<MappedRecord> objects
-    ){
-        this.objects = objects.toArray(
-            new MappedRecord[objects.size()]
-        );
+        boolean message
+    ) throws ServiceException {
+        try {
+            this.delegate = message ? 
+                Records.getRecordFactory().createMappedRecord(MessageRecord.NAME) :
+                Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
+        } catch(ResourceException e) {
+            throw new ServiceException(e);
+        }
     }
-
+    
+    
     /**
-     * Constructor for clone()
-     * 
+     * Constructor 
+     *
      * @param that
      */
     private DataproviderReply(
         DataproviderReply that
     ){
-        super(that);
-        this.objects = that.objects;
+        this.delegate = that.delegate;
     }
-    
-    
-    //------------------------------------------------------------------------
-    // Accessors
-    //------------------------------------------------------------------------
+        
+    /**
+     * Constructor 
+     *
+     * @param delegate
+     * @param clear
+     */
+    public DataproviderReply(
+        ResultRecord delegate,
+        boolean clear
+    ) {
+        if(clear) {
+            delegate.clear();
+        }
+        this.delegate = delegate;
+    }
 
     /**
-     * Get the objects list
+     * Constructor 
      *
-     * @return      a list containing objects of class DataproviderObject
+     * @param delegate
+     * @param clear
      */
+    public DataproviderReply(
+        MappedRecord delegate,
+        boolean clear
+    ) {
+        if(clear) {
+            delegate.clear();
+        }
+        this.delegate = delegate;
+    }
+    
+    /**
+     * Constructor 
+     *
+     * @param object
+     * @throws ServiceException
+     */
+    @SuppressWarnings("unchecked")
+    public DataproviderReply(
+        MappedRecord object
+    ) throws ServiceException {
+        this();
+        ((ResultRecord)this.delegate).add(object);
+    }
+
+    /**
+     * Constructor 
+     *
+     * @param objects
+     * @throws ServiceException
+     */
+    @SuppressWarnings("unchecked")
+    public DataproviderReply(
+        List<MappedRecord> objects
+    ) throws ServiceException {
+        this();
+        ((ResultRecord)this.delegate).addAll(objects);
+    }
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 4120848863151075378L;
+
+    /**
+     * The delegate
+     */
+    private final Record delegate;
+
+    @SuppressWarnings("unchecked")
     public MappedRecord[] getObjects(
-    ){
-        return this.objects;
+    ) {
+        ResultRecord delegate = (ResultRecord) this.delegate;
+        return (MappedRecord[])delegate.toArray(
+            new MappedRecord[delegate.size()]
+        );
     }
 
-    /**
-     * Get the object
-     *
-     * @return      the dataprovider object
-     */
     public MappedRecord getObject(
     ){
-        return this.objects[0];
+        return (MappedRecord)((ResultRecord)this.delegate).get(0);
     }
-
                 
-    //------------------------------------------------------------------------
-    // Extends Object
-    //------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#clone()
-     */
-    public Object clone() throws CloneNotSupportedException {
+    @Override
+    public Object clone(
+    ){
         return new DataproviderReply(this);
     }
 
-
-    //------------------------------------------------------------------------
-    // Extends DataproviderContext
-    //------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.cci.DataproviderContext#keys()
-     */
-    protected Collection<String> keys() {
-        return KEYS;
+    public void setTotal(
+        long total
+    ) {
+        ((ResultRecord)this.delegate).setTotal(total);
     }
-
-
-    /* (non-Javadoc)
-     * @see java.util.Map#get(java.lang.Object)
-     */
-    public Object get(Object key) {
-        try {
-            return "objects".equals(key) ? Records.getRecordFactory().asIndexedRecord(
-                "list", null, this.getObjects()
-            ) : super.get(key);
-        } catch (ResourceException e) {
-            throw new RuntimeServiceException(e);
-        }
-    }
-
-    //------------------------------------------------------------------------
-    // Variables
-    //------------------------------------------------------------------------
-    private MappedRecord[] objects;
-
-    private static final List<String> KEYS = Collections.unmodifiableList(
-        Arrays.asList(
-            "objects",
-            "contexts"
-        )
-    );
     
-}
+    public void setHasMore(
+        boolean hasMore
+    ) {
+        ((ResultRecord)this.delegate).setHasMore(hasMore);
+    }
+    
+    public Long getTotal(
+    ) {
+        return ((ResultRecord)this.delegate).getTotal();
+    }
+    
+    public Boolean getHasMore(
+    ) {
+        return ((ResultRecord)this.delegate).getHasMore();
+    }
+    
+    public IndexedRecord getResult(
+    ) {
+        return (IndexedRecord) this.delegate;
+    }
 
+    public MessageRecord getResponse(
+    ){
+        return (MessageRecord) this.delegate;
+    }
+
+}

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightContainerTransaction.java,v 1.1 2009/01/12 12:49:23 wfro Exp $
+ * Name:        $Id: LightweightContainerTransaction.java,v 1.2 2009/08/25 17:23:07 hburger Exp $
  * Description: LightweightContainerTransaction
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:23 $
+ * Date:        $Date: 2009/08/25 17:23:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,8 +55,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.ejb.TransactionAttributeType;
+
 import org.openmdx.kernel.application.container.spi.ejb.ContainerTransaction;
-import org.openmdx.kernel.application.container.spi.ejb.TransactionAttribute;
 import org.openmdx.kernel.application.deploy.spi.Deployment;
 import org.openmdx.kernel.collection.EnumMapping;
 
@@ -86,12 +87,12 @@ public class LightweightContainerTransaction
     /**
      * Maps TransactionAttributes to their string representation
      */
-    private final static EnumMapping mapping = new EnumMapping(TransactionAttribute.class);
+    private final static EnumMapping mapping = new EnumMapping(TransactionAttributeType.class);
     
     /* (non-Javadoc)
      * @see org.openmdx.kernel.application.container.spi.ejb.ContainerTransaction#getTransactionAttribute(java.lang.String, java.lang.String, java.lang.String[])
      */
-    public TransactionAttribute getTransactionAttribute(
+    public TransactionAttributeType getTransactionAttribute(
         String methodInterface,
         String methodName,
         String[] methodParameters
@@ -100,7 +101,7 @@ public class LightweightContainerTransaction
             //
             // Bean Managed Transactions
             //
-            return TransactionAttribute.NOT_SUPPORTED;
+            return TransactionAttributeType.NOT_SUPPORTED;
         } else {
             //
             // Container Managed Transactions
@@ -121,10 +122,10 @@ public class LightweightContainerTransaction
                             methodInterface, methodName, requestParameters, 
                             method.getMethodIntf(), method.getMethodName(), method.getMethodParams()
                         )
-                    ) return (TransactionAttribute) mapping.getKey(candidate.getTransAttribute());                
+                    ) return (TransactionAttributeType) mapping.getKey(candidate.getTransAttribute());                
                 }
             }
-            return TransactionAttribute.SUPPORTS;
+            return TransactionAttributeType.SUPPORTS;
         }
     }
 
@@ -159,12 +160,12 @@ public class LightweightContainerTransaction
     }
     
     static {
-        mapping.put(TransactionAttribute.NOT_SUPPORTED, "NotSupported");
-        mapping.put(TransactionAttribute.REQUIRED, "Required");
-        mapping.put(TransactionAttribute.SUPPORTS , "Supports");
-        mapping.put(TransactionAttribute.REQUIRES_NEW, "RequiresNew");
-        mapping.put(TransactionAttribute.MANDATORY, "Mandatory");
-        mapping.put(TransactionAttribute.NEVER, "Never");        
+        mapping.put(TransactionAttributeType.NOT_SUPPORTED, "NotSupported");
+        mapping.put(TransactionAttributeType.REQUIRED, "Required");
+        mapping.put(TransactionAttributeType.SUPPORTS , "Supports");
+        mapping.put(TransactionAttributeType.REQUIRES_NEW, "RequiresNew");
+        mapping.put(TransactionAttributeType.MANDATORY, "Mandatory");
+        mapping.put(TransactionAttributeType.NEVER, "Never");        
     }
 
 }

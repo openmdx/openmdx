@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractTransactionContext.java,v 1.1 2009/01/12 12:49:22 wfro Exp $
+ * Name:        $Id: AbstractTransactionContext.java,v 1.2 2009/08/25 17:23:05 hburger Exp $
  * Description: TransactionContext
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:22 $
+ * Date:        $Date: 2009/08/25 17:23:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,6 +51,7 @@
  */
 package org.openmdx.kernel.application.container.spi.ejb;
 
+import javax.ejb.TransactionAttributeType;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.InvalidTransactionException;
@@ -103,33 +104,33 @@ public abstract class AbstractTransactionContext {
      * @throws TransactionRequiredException 
      */
     protected void start(
-        TransactionAttribute transactionAttribute
+        TransactionAttributeType transactionAttribute
     ) throws TransactionRequiredException, InvalidTransactionException, SystemException, NotSupportedException{
         if(this.transactionManager.getStatus() == Status.STATUS_NO_TRANSACTION) {
             if(
-                transactionAttribute == TransactionAttribute.REQUIRED ||
-                transactionAttribute == TransactionAttribute.REQUIRES_NEW
+                transactionAttribute == TransactionAttributeType.REQUIRED ||
+                transactionAttribute == TransactionAttributeType.REQUIRES_NEW
             ){
                 this.transactionManager.begin();
                 this.transactionStarted = true;
             } else if(
-                transactionAttribute == TransactionAttribute.MANDATORY
+                transactionAttribute == TransactionAttributeType.MANDATORY
             ) throw new TransactionRequiredException(
                 "A method with transaction attribute Mandatory was called without a transaction context"
             );
         } else {
             if(
-                transactionAttribute == TransactionAttribute.NOT_SUPPORTED
+                transactionAttribute == TransactionAttributeType.NOT_SUPPORTED
             ) {
                 this.suspendedTransaction = transactionManager.suspend();
             } else if(
-                transactionAttribute == TransactionAttribute.REQUIRES_NEW
+                transactionAttribute == TransactionAttributeType.REQUIRES_NEW
             ) {
                 this.suspendedTransaction = this.transactionManager.suspend();
                 this.transactionManager.begin();
                 this.transactionStarted = true;
             } else if(
-                transactionAttribute == TransactionAttribute.NEVER
+                transactionAttribute == TransactionAttributeType.NEVER
             ) throw new InvalidTransactionException(
                 "A method with transaction attribute Never was called with a transaction context"
             );

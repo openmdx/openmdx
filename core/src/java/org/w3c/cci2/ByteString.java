@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ByteString.java,v 1.2 2009/01/17 19:59:19 hburger Exp $
+ * Name:        $Id: ByteString.java,v 1.3 2009/12/31 14:10:17 wfro Exp $
  * Description: ByteString 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/17 19:59:19 $
+ * Date:        $Date: 2009/12/31 14:10:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,9 +51,6 @@
 package org.w3c.cci2;
 
 import java.util.Arrays;
-
-import org.openmdx.kernel.io.Final;
-import org.openmdx.kernel.text.format.HexadecimalFormatter;
 
 /**
  * Byte String
@@ -104,37 +101,6 @@ public final class ByteString implements Final {
         this.length = length;
     }
 
-    /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = 3826766941878437515L;
-
-    /**
-     * @serial the buffer
-     */
-    private final byte[] buffer;
-
-
-    /**
-     * @serial the offset
-     */
-    private final int offset;
-    
-    /**
-     * @serial the length
-     */
-    private final int length;
-
-    /**
-     * This byte string's <code>String</code> representation.
-     */
-    private transient String string;
-    
-    /**
-     * This byte string's array representation.
-     */
-    private transient byte[] array;
-    
     /**
      * Retrieve the buffer.
      * <p><em>
@@ -199,7 +165,7 @@ public final class ByteString implements Final {
     @Override
     public String toString() {
         if(this.string == null) {
-            this.string = new HexadecimalFormatter(this.buffer, this.offset, this.length).toString(); 
+            this.string = toHexadecimalString(this.buffer, this.offset, this.length).toString(); 
         }
         return this.string;
     }
@@ -236,5 +202,68 @@ public final class ByteString implements Final {
     public int hashCode() {
         return Arrays.hashCode(asArray());
     }    
+
+    /**
+     * Convert the bytes value to a hexadecimal string
+     * 
+     * @param value to be formatted
+     * @param offset the offset in the buffer of the first byte to format.
+     * @param digits number of digits, maybe leading to trailing 0s
+     * 
+     * @return the bytes value as hexadecimal string
+     */
+    private static char[] toHexadecimalString(         
+        byte[] value,
+        int offset,
+        int digits
+    ){
+        char[] buffer = new char[digits];
+        int available = 2 * (value.length - offset);
+        int cursor = 0;
+        int end = digits;
+        if(available < digits) end = available;
+        if(offset < 0) cursor = -2 * offset;
+        if (cursor != 0 || end != digits) Arrays.fill(buffer, ' ');
+        while(cursor < end) {
+            byte b = value[offset + cursor / 2];
+            if(cursor % 2 == 0) b >>=4;
+            buffer[cursor++] = HEXADECIMAL_DIGITS[b & 0xf];
+        }
+        return buffer;
+    }
+        
+    //-----------------------------------------------------------------------
+    // Members
+    //-----------------------------------------------------------------------
+    private static final long serialVersionUID = 3826766941878437515L;
+
+    private final static char[] HEXADECIMAL_DIGITS = new char[]{
+        '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+    };
+
+    /**
+     * @serial the buffer
+     */
+    private final byte[] buffer;
+
+    /**
+     * @serial the offset
+     */
+    private final int offset;
+    
+    /**
+     * @serial the length
+     */
+    private final int length;
+
+    /**
+     * This byte string's <code>String</code> representation.
+     */
+    private transient String string;
+    
+    /**
+     * This byte string's array representation.
+     */
+    private transient byte[] array;
     
 }

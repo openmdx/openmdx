@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_vnF-4N67EdmkJO73lqONhA" name="role2">
+  <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407129D101F2PP" name="org">
+    <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407129D101F2P" name="openmdx">
+      <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D407129D101F2" name="role2">
+        <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D404ECBD702A7" name="RoleCapable" isAbstract="true">
+          <eAnnotations xmi:id="_MkV4ud65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:id="_MkV4ut65EdmrtKJSXC0_FQ" key="root"/>
+          </eAnnotations>
+          <ownedRule xmi:id="_600osJJZEd2ai_bxvzg_SA">
+            <constrainedElement xmi:type="uml:Property" href="org.openmdx.base.uml#_3C7B8A60016D4073DCBE0110"/>
+            <specification xmi:type="uml:OpaqueExpression" xmi:id="_600osZJZEd2ai_bxvzg_SA">
+              <body>isFrozen</body>
+            </specification>
+          </ownedRule>
+          <generalization xmi:id="_NocQUIJiEd2kMsf_Xt2jew">
+            <general xmi:type="uml:Class" href="org.openmdx.base.uml#_anOBsH8yEd2MQvsjduCbTg"/>
+          </generalization>
+          <ownedAttribute xmi:id="_cmwAMZJcEd2ai_bxvzg_SA" name="role" type="_3C7B8A60016D407129FD0141" isReadOnly="true" isDerived="true" association="_cmwAMJJcEd2ai_bxvzg_SA">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_kAwToZJcEd2ai_bxvzg_SA" value="1"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_kAwToJJcEd2ai_bxvzg_SA"/>
+            <qualifier xmi:id="_soio0JJcEd2ai_bxvzg_SA" name="roleName" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            </qualifier>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D407129FD0141" name="Role" isAbstract="true">
+          <eAnnotations xmi:id="_MmP9Mt65EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+            <details xmi:id="_MmP9M965EdmrtKJSXC0_FQ" key="root"/>
+          </eAnnotations>
+          <generalization xmi:id="_mM5e0Oc3EdqFRN8NA1-Qnw">
+            <general xmi:type="uml:Class" href="org.openmdx.base.uml#_wJRXcOcuEdqFRN8NA1-Qnw?base/base/View?"/>
+          </generalization>
+          <generalization xmi:id="_d8e20OfyEdq24PjqErCt0A">
+            <general xmi:type="uml:Class" href="org.openmdx.base.uml#_y_w40OfxEdq24PjqErCt0A?base/base/View?"/>
+          </generalization>
+          <generalization xmi:id="_OjTWEIJiEd2kMsf_Xt2jew">
+            <general xmi:type="uml:Class" href="org.openmdx.base.uml#_PfY_YH83Ed2MQvsjduCbTg"/>
+          </generalization>
+          <ownedAttribute xmi:id="_fSCa8Oc2EdqFRN8NA1-Qnw" name="inRole" isUnique="false" isReadOnly="true">
+            <eAnnotations xmi:id="_sieqoJI8Ed2cwPP4iruzRw" source="http://www.eclipse.org/uml2/2.0.0/UML">
+              <details xmi:id="_sieqoZI8Ed2cwPP4iruzRw" key="list"/>
+            </eAnnotations>
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="_cmwAMJJcEd2ai_bxvzg_SA" name="ObjectHasRole" memberEnd="_cmwAMZJcEd2ai_bxvzg_SA _cmwAMpJcEd2ai_bxvzg_SA">
+          <ownedEnd xmi:id="_cmwAMpJcEd2ai_bxvzg_SA" name="core" type="_3C7B8A60016D404ECBD702A7" association="_cmwAMJJcEd2ai_bxvzg_SA"/>
+        </packagedElement>
+      </packagedElement>
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.2 2009/06/01 15:41:25 wfro Exp $
+ * Name:        $Id: Model_1.java,v 1.6 2009/12/17 12:37:35 wfro Exp $
  * Description: model1 type plugin
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/01 15:41:25 $
+ * Date:        $Date: 2009/12/17 12:37:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,169 +51,37 @@
  */
 package org.openmdx.application.mof.repository.layer.type;
 
-import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.cci.DataproviderReply;
-import org.openmdx.application.dataprovider.cci.DataproviderRequest;
-import org.openmdx.application.dataprovider.cci.DataproviderRequestContexts;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.Interaction;
+
 import org.openmdx.application.dataprovider.spi.Layer_1;
-import org.openmdx.application.dataprovider.spi.Layer_1_0;
-import org.openmdx.application.mof.cci.ModelAttributes;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.naming.Path;
 
-public class Model_1 
-  extends Layer_1 {
+public class Model_1 extends Layer_1 {
 
-  //---------------------------------------------------------------------------
-  public void activate(
-    short id,
-    Configuration configuration,
-    Layer_1_0 delegation
-  ) throws ServiceException {
+    //---------------------------------------------------------------------------
+    public Model_1(
+    ) {
+    }
+
+    //---------------------------------------------------------------------------
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new LayerInteraction(connection);
+    }
     
-    super.activate(
-      id, 
-      configuration, 
-      delegation
-    );
-
-  }
-
-  //---------------------------------------------------------------------------
-  String getReferenceName(
-    DataproviderRequest request
-  ) throws ServiceException {
-    Path path = request.path();    
-    return
-      path.size() % 2 == 0 ?
-      (String)path.get(path.size()-1) :
-      (String)path.get(path.size()-2);
-  }
-
-  //---------------------------------------------------------------------------
-  void setObjectType (
-    DataproviderRequest request
-  ) throws ServiceException {
-
-    // path to authority is empty
-    if(request.path().size() == 0) {
-      request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-        0,
-        "org:openmdx:base:Authority"
-      );
+    // --------------------------------------------------------------------------
+    public class LayerInteraction extends Layer_1.LayerInteraction {
+        
+        public LayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
+        }
+                
     }
-    else {   
-      String referenceName = getReferenceName(
-        request
-      );
-      //SysLog.trace("referenceName", referenceName);
-      if("content".equals(referenceName)) {
-        request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-          0,
-          ModelAttributes.ELEMENT
-        );
-      }
-      else if("element".equals(referenceName)) {
-        request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-          0,
-          ModelAttributes.ELEMENT
-        );
-      }
-      else if("allSupertype".equals(referenceName)) {
-        request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-          0,
-          ModelAttributes.GENERALIZABLE_ELEMENT
-        );
-      }
-      else if("allFeature".equals(referenceName)) {
-        request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-          0,
-          ModelAttributes.FEATURE
-        );
-      }
-      else if("packageContent".equals(referenceName)) {
-        request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-          0,
-          ModelAttributes.ELEMENT
-        );
-      }
-      else if("lookupElement".equals(referenceName)) {
-        request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-          0,
-          ModelAttributes.ELEMENT
-        );
-      }
-      else if("resolveQualifiedName".equals(referenceName)) {
-        request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-          0,
-          ModelAttributes.ELEMENT
-        );
-      }
-      else if("findElementsByType".equals(referenceName)) {
-        request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-          0,
-          ModelAttributes.ELEMENT
-        );
-      }
-      else if("externalizePackage".equals(referenceName)) {
-        request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-          0,
-          ModelAttributes.PACKAGE
-        );
-      }
-      else if("externalizeClassifier".equals(referenceName)) {
-        request.context(DataproviderRequestContexts.OBJECT_TYPE).set(
-            0,
-            ModelAttributes.CLASSIFIER
-        );
-      }
-    }
-  }
-
-  //---------------------------------------------------------------------------
-  public DataproviderReply get(
-    ServiceHeader header,
-    DataproviderRequest request
-  ) throws ServiceException {
-
-    setObjectType(request);
-    return super.get(
-      header,
-      request
-    );
-  }
-
-  //---------------------------------------------------------------------------
-  public DataproviderReply find(
-    ServiceHeader header,
-    DataproviderRequest request
-  ) throws ServiceException {
-
-    setObjectType(request);
-    return super.find(
-      header,
-      request
-    );
-  }
-
-  //---------------------------------------------------------------------------
-  public DataproviderReply operation(
-    ServiceHeader header,
-    DataproviderRequest request
-  ) throws ServiceException {
-
-    setObjectType(request);
-    return super.operation(
-      header,
-      request
-    );
-  }
-
-  //---------------------------------------------------------------------------
-  // Variables
-  //---------------------------------------------------------------------------
-
+    
 }
 
 //--- End of File -----------------------------------------------------------

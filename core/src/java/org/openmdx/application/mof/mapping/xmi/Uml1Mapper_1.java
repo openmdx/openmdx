@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Uml1Mapper_1.java,v 1.5 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: Uml1Mapper_1.java,v 1.6 2010/04/13 17:37:55 wfro Exp $
  * Description: XMIExternalizer_1
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2010/04/13 17:37:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -88,8 +88,6 @@ public class Uml1Mapper_1
     ZipOutputStream zip
   ) throws ServiceException {
     
-    SysLog.trace("externalize");
-    
     this.model = model;
 
     long start = System.currentTimeMillis();
@@ -131,7 +129,7 @@ public class Uml1Mapper_1
     );
     
     long end = System.currentTimeMillis();
-    SysLog.info("time used to externalize XMI 1.2 (based on UML 1.4 metamodel) for MagicDraw AND Poseidon: " + (end-start) + " ms");
+    SysLog.detail("time used to externalize XMI 1.2 (based on UML 1.4 metamodel) for MagicDraw AND Poseidon: " + (end-start) + " ms");
 
   }
 

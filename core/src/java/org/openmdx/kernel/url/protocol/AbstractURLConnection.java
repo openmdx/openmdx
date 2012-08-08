@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractURLConnection.java,v 1.5 2009/03/16 16:47:13 hburger Exp $
+ * Name:        $Id: AbstractURLConnection.java,v 1.6 2009/09/08 12:47:12 hburger Exp $
  * Description: Delegating URL connection
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/16 16:47:13 $
+ * Date:        $Date: 2009/09/08 12:47:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -86,11 +86,6 @@ public abstract class AbstractURLConnection
        delegate = makeDelegateUrlConnection(makeDelegateUrl(url));
     }
 
-    /**
-     * To be prepended to the <code>java.protocol.handler.pkgs</code> system property.
-     */
-    public static final String PROTOCOL_HANDLER_PKG = AbstractURLConnection.class.getPackage().getName();
-    
     /**
      * The delegate <code>URLConnection</code>
      */

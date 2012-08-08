@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateTimeState_1.java,v 1.8 2009/03/04 12:07:22 hburger Exp $
+ * Name:        $Id: DateTimeState_1.java,v 1.11 2009/11/04 16:00:14 hburger Exp $
  * Description: Date State
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/04 12:07:22 $
+ * Date:        $Date: 2009/11/04 16:00:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,7 @@
  */
 package org.openmdx.state2.aop1;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -57,6 +58,7 @@ import javax.jdo.JDOHelper;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
+import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.state2.cci.DateTimeStateContext;
@@ -65,7 +67,7 @@ import org.openmdx.state2.spi.Order;
 /**
  * Registers the the delegates with their manager
  */
-public class DateTimeState_1 extends AbstractState_1<DateTimeStateContext> {
+public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
 
     /**
      * Constructor 
@@ -75,22 +77,26 @@ public class DateTimeState_1 extends AbstractState_1<DateTimeStateContext> {
      * @throws ServiceException
      */
     public DateTimeState_1(
-        ObjectView_1_0 viewObject,
-        boolean attachCore
+        ObjectView_1_0 self, 
+        Interceptor_1 next
     ) throws ServiceException{
-        super(viewObject, attachCore);
+        super(self, next);
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.state2.aop2.core.AbstractState_1#propagateValidTime()
      */
     @Override
-    protected void propagateValidTime(
+    protected void initialize(
+        DataObject_1_0 dataObject
     ) throws ServiceException {
         DateTimeStateContext context = (DateTimeStateContext) self.getInteractionSpec();
-        DataObject_1_0 dataObject = self.objGetDelegate();
-        dataObject.objSetValue("stateValidFrom", context.getValidFrom());
-        dataObject.objSetValue("stateInvalidFrom", context.getInvalidFrom());
+        if(dataObject.objGetValue("stateValidFrom") == null) {
+            dataObject.objSetValue("stateValidFrom", context.getValidFrom());
+        }
+        if(dataObject.objGetValue("stateInvalidFrom") == null) {
+            dataObject.objSetValue("stateInvalidFrom", context.getInvalidFrom());
+        }
     }
 
     /* (non-Javadoc)
@@ -129,7 +135,7 @@ public class DateTimeState_1 extends AbstractState_1<DateTimeStateContext> {
     protected void enableUpdate(
         Map<DataObject_1_0, BoundaryCrossing> pending
     ) throws ServiceException {
-        Map<String,DataObject_1_0> states = getStates();
+        Collection<DataObject_1_0> states = getStates();
         DateTimeStateContext context = getContext();
         for(Map.Entry<DataObject_1_0,BoundaryCrossing> e : pending.entrySet()) {
             DataObject_1_0 source = e.getKey();
@@ -141,7 +147,9 @@ public class DateTimeState_1 extends AbstractState_1<DateTimeStateContext> {
             if(boundaryCrossing.startsEarlier) {
                 predecessor = PersistenceHelper.clone(source);
                 predecessor.objSetValue("stateInvalidFrom", context.getValidFrom());
-                states.put(newPlaceHolder(), predecessor);
+                if(!predecessor.jdoIsNew()) {
+                    states.add(predecessor);
+                }
             } else {
                 predecessor = null;
             }
@@ -152,7 +160,9 @@ public class DateTimeState_1 extends AbstractState_1<DateTimeStateContext> {
             if(boundaryCrossing.endsLater) {
                 successor = PersistenceHelper.clone(source);
                 successor.objSetValue("stateValidFrom", context.getInvalidFrom());
-                states.put(newPlaceHolder(), successor);
+                if(!successor.jdoIsNew()) {
+                    states.add(successor);
+                }
             } else {
                 successor = null;
             }
@@ -162,7 +172,9 @@ public class DateTimeState_1 extends AbstractState_1<DateTimeStateContext> {
             DataObject_1_0 target = PersistenceHelper.clone(source);
             target.objSetValue("stateValidFrom", context.getValidFrom());
             target.objSetValue("stateInvalidFrom", context.getInvalidFrom());
-            states.put(newPlaceHolder(), target);
+            if(!target.jdoIsNew()) {
+                states.add(target);
+            }
             //
             // Replace states
             //

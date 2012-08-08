@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FlashBinaryValue.java,v 1.5 2009/01/13 23:48:40 wfro Exp $
+ * Name:        $Id: FlashBinaryValue.java,v 1.7 2009/11/05 18:01:17 hburger Exp $
  * Description: FlashBinaryValue 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 23:48:40 $
+ * Date:        $Date: 2009/11/05 18:01:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,7 +56,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 
 /**
  * FlashBinaryValue
@@ -88,7 +88,7 @@ public class FlashBinaryValue
     //-----------------------------------------------------------------------
     @Override
     protected void paintInPlace(
-        HtmlPage p,
+        ViewPort p,
         Action binaryValueAction,
         String label,
         String gapModifier,
@@ -97,7 +97,7 @@ public class FlashBinaryValue
         String styleModifier
     ) throws ServiceException {
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();                
-        String imageId = org.openmdx.kernel.id.UUIDs.getGenerator().next().toString();
+        String imageId = org.openmdx.kernel.id.UUIDs.newUUID().toString();
         CharSequence imageSrc = p.getEncodedHRef(binaryValueAction);
         p.write(gapModifier); 
         p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");

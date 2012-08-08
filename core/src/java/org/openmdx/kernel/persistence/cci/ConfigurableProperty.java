@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConfigurableProperty.java,v 1.6 2009/01/14 14:33:22 wfro Exp $
+ * Name:        $Id: ConfigurableProperty.java,v 1.12 2010/04/07 12:59:00 hburger Exp $
  * Description: JDO 2.0 Options
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/14 14:33:22 $
+ * Date:        $Date: 2010/04/07 12:59:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,7 @@
  */
 package org.openmdx.kernel.persistence.cci;
 
-
+import javax.jdo.Constants;
 
 /**
  * JDO 2.0 Options
@@ -63,65 +63,62 @@ public enum ConfigurableProperty {
     // Persistence Manager Factory Properties
     //------------------------------------------------------------------------
 
-    Optimistic("javax.jdo.option.Optimistic"),
-    RetainValues("javax.jdo.option.RetainValues"),
-    RestoreValues("javax.jdo.option.RestoreValues"),
-    ReadOnly("javax.jdo.option.ReadOnly"),
-    IgnoreCache("javax.jdo.option.IgnoreCache"),
-    TransactionIsolationLevel("javax.jdo.option.TransactionIsolationLevel"),
-    NontransactionalRead("javax.jdo.option.NontransactionalRead"),
-    NontransactionalWrite("javax.jdo.option.NontransactionalWrite"),
-    Multithreaded("javax.jdo.option.Multithreaded"),
-    DetachAllOnCommit("javax.jdo.option.DetachAllOnCommit"),
-    ConnectionDriverName("javax.jdo.option.ConnectionDriverName"),
-    ConnectionUserName("javax.jdo.option.ConnectionUserName"),
-    ConnectionPassword("javax.jdo.option.ConnectionPassword"),
-    ConnectionURL("javax.jdo.option.ConnectionURL"),
-    ConnectionFactoryName("javax.jdo.option.ConnectionFactoryName"),
-    ConnectionFactory2Name("javax.jdo.option.ConnectionFactory2Name"),
-    Mapping("javax.jdo.option.Mapping"),
-    CopyOnAttach("javax.jdo.option.CopyOnAttach"),
-    Name("javax.jdo.option.Name"),
-    PersistenceUnitName("javax.jdo.option.PersistenceUnitName"),
-    ServerTimeZoneID("javax.jdo.option.ServerTimeZoneID"),
+    Optimistic(Constants.PROPERTY_OPTIMISTIC),
+    RetainValues(Constants.PROPERTY_RETAIN_VALUES),
+    RestoreValues(Constants.PROPERTY_RESTORE_VALUES),
+    ReadOnly(Constants.PROPERTY_READONLY),
+    IgnoreCache(Constants.PROPERTY_IGNORE_CACHE),
+    TransactionIsolationLevel(Constants.PROPERTY_TRANSACTION_ISOLATION_LEVEL),
+    NontransactionalRead(Constants.PROPERTY_NONTRANSACTIONAL_READ),
+    NontransactionalWrite(Constants.PROPERTY_NONTRANSACTIONAL_WRITE),
+    Multithreaded(Constants.PROPERTY_MULTITHREADED),
+    DetachAllOnCommit(Constants.PROPERTY_DETACH_ALL_ON_COMMIT),
+    ConnectionDriverName(Constants.PROPERTY_CONNECTION_DRIVER_NAME),
+    ConnectionUserName(Constants.PROPERTY_CONNECTION_USER_NAME),
+    ConnectionPassword(Constants.PROPERTY_CONNECTION_PASSWORD),
+    ConnectionURL(Constants.PROPERTY_CONNECTION_URL),
+    ConnectionFactoryName(Constants.PROPERTY_CONNECTION_FACTORY_NAME),
+    ConnectionFactory2Name(Constants.PROPERTY_CONNECTION_FACTORY2_NAME),
+    Mapping(Constants.PROPERTY_MAPPING),
+    CopyOnAttach(Constants.PROPERTY_COPY_ON_ATTACH),
+    Name(Constants.PROPERTY_NAME),
+    PersistenceUnitName(Constants.PROPERTY_NAME),
+    ServerTimeZoneID(Constants.PROPERTY_SERVER_TIME_ZONE_ID),
     TransactionType("javax.persistence.TransactionType"),
 
     //------------------------------------------------------------------------
     // Optional Features
     //------------------------------------------------------------------------
 
-    TransientTransactional("javax.jdo.option.TransientTransactional"),
-    ApplicationIdentity("javax.jdo.option.ApplicationIdentity"),
-    DatastoreIdentity("javax.jdo.option.DatastoreIdentity"),
-    NonDurableIdentity("javax.jdo.option.NonDurableIdentity"),
-    ArrayList("javax.jdo.option.ArrayList"),
-    LinkedList("javax.jdo.option.LinkedList"),
-    TreeMap("javax.jdo.option.TreeMap"),
-    TreeSet("javax.jdo.option.TreeSet"),
-    Vector("javax.jdo.option.Vector"),
-    NullCollection("javax.jdo.option.NullCollection"),
-    ChangeApplicationIdentity("javax.jdo.option.ChangeApplicationIdentity"),
-    BinaryCompatibility("javax.jdo.option.BinaryCompatibility"),
-    GetDataStoreConnection("javax.jdo.option.GetDataStoreConnection"),
-    UnconstrainedQueryVariables("javax.jdo.option.UnconstrainedQueryVariables"),
+    TransientTransactional(Constants.OPTION_TRANSACTIONAL_TRANSIENT),
+    ApplicationIdentity(Constants.OPTION_APPLICATION_IDENTITY),
+    DatastoreIdentity(Constants.OPTION_DATASTORE_IDENTITY),
+    NonDurableIdentity(Constants.OPTION_NONDURABLE_IDENTITY),
+    ArrayList(Constants.OPTION_ARRAYLIST),
+    LinkedList(Constants.OPTION_LINKEDLIST),
+    TreeMap(Constants.OPTION_TREEMAP),
+    TreeSet(Constants.OPTION_TREESET),
+    Vector(Constants.OPTION_VECTOR),
+    NullCollection(Constants.OPTION_NULL_COLLECTION),
+    ChangeApplicationIdentity(Constants.OPTION_CHANGE_APPLICATION_IDENTITY),
+    BinaryCompatibility(Constants.OPTION_BINARY_COMPATIBILITY),
+    GetDataStoreConnection(Constants.OPTION_GET_DATASTORE_CONNECTION),
+    UnconstrainedQueryVariables(Constants.OPTION_UNCONSTRAINED_QUERY_VARIABLES),
 
     //------------------------------------------------------------------------
     // Standard JDO Properties
     //------------------------------------------------------------------------
 
-    PersistenceManagerFactoryClass("javax.jdo.PersistenceManagerFactoryClass"),
-    MappingCatalog("javax.jdo.mapping.Catalog"),
-    MappingSchema("javax.jdo.mapping.Schema"),
+    PersistenceManagerFactoryClass(Constants.PROPERTY_PERSISTENCE_MANAGER_FACTORY_CLASS),
+    MappingCatalog(Constants.PROPERTY_MAPPING_CATALOG),
+    MappingSchema(Constants.PROPERTY_MAPPING_SCHEMA),
 
     //------------------------------------------------------------------------
     // Vendor Specific Options
     //------------------------------------------------------------------------
 
-    AccessorFactoryClass("javax.jdo.PersistenceManagerFactoryClass"),
     ConnectionFactory("org.openmdx.jdo.ConnectionFactory"),
     ConnectionFactory2("org.openmdx.jdo.ConnectionFactory2"),
-    ContainerManaged("org.openmdx.transaction.ContainerManaged"),
-    BindingPackageSuffix("org.openmdx.base.accessor.BindingPackageSuffix"),
     ObjectIdBuilder("org.oasisopen.spi2.ObjectIdBuilder");
 
     /**

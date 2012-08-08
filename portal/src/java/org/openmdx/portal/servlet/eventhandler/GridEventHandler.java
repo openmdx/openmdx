@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GridEventHandler.java,v 1.49 2009/05/16 23:02:56 wfro Exp $
+ * Name:        $Id: GridEventHandler.java,v 1.56 2010/04/22 11:40:46 wfro Exp $
  * Description: GridEventHandler 
- * Revision:    $Revision: 1.49 $
+ * Revision:    $Revision: 1.56 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 23:02:56 $
+ * Date:        $Date: 2010/04/22 11:40:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,15 +69,16 @@ import javax.jmi.reflect.RefObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.openmdx.application.log.AppLog;
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Orders;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
-import org.openmdx.portal.servlet.HtmlPageFactory;
+import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.ViewPortFactory;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
@@ -103,16 +104,15 @@ public class GridEventHandler {
     ) throws IOException {
         if(view instanceof ShowObjectView) {
             ShowObjectView currentView = (ShowObjectView)view;
-            HtmlPage p = HtmlPageFactory.openPage(
+            ViewPort p = ViewPortFactory.openPage(
                 view,
                 request,
                 EventHandlerHelper.getWriter(request, response)
             );
             p.setProperty(
-                HtmlPage.PROPERTY_POPUP_IMAGES,
+                ViewPort.PROPERTY_POPUP_IMAGES,
                 new HashMap()
             );
-            PersistenceManager pm = currentView.getPersistenceManager();
             switch(event) {
             
                 case Action.EVENT_SELECT_REFERENCE:
@@ -135,7 +135,7 @@ public class GridEventHandler {
                         }
                     }
                     catch(Exception e) {
-                        AppLog.warning(e.getMessage(), e.getCause());
+                    	SysLog.warning(e.getMessage(), e.getCause());
                     }
                     break;
                         
@@ -160,7 +160,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
         
@@ -185,7 +185,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                         
@@ -211,7 +211,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                        
@@ -240,35 +240,74 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
     
                 case Action.EVENT_SET_COLUMN_FILTER:
                 case Action.EVENT_ADD_COLUMN_FILTER:
                     try {
-                        Object[] parameterValues = (Object[]) parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
-                        String filterValues = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);
-                        boolean addFilter = (event == Action.EVENT_ADD_COLUMN_FILTER);
-                        if ((filterValues != null) && filterValues.startsWith("+")) {
-                            filterValues = filterValues.substring(1);
-                            addFilter = true;
-                        }
-                        else if ((filterValues != null) && filterValues.startsWith("AND")) {
-                            filterValues = filterValues.substring(3);
-                            addFilter = true;
-                        }
+                    	boolean addFilter = false;
+                    	List<String> filterNames = new ArrayList<String>();
+                    	List<String> filterValues = new ArrayList<String>();
+                    	// single-field search
+                    	if(parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES) != null) {
+	                        Object[] parameterValues = (Object[])parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
+	                        String filterValue = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);
+	                        addFilter = (event == Action.EVENT_ADD_COLUMN_FILTER);
+	                        if ((filterValue != null) && filterValue.startsWith("+")) {
+	                            filterValue = filterValue.substring(1);
+	                            addFilter = true;
+	                        }
+	                        else if ((filterValue != null) && filterValue.startsWith("AND")) {
+	                            filterValue = filterValue.substring(3);
+	                            addFilter = true;
+	                        }
+	                        String filterName = Action.getParameter(parameter, Action.PARAMETER_NAME);
+	                        filterNames.add(filterName);
+	                        filterValues.add(filterValue);
+                    	}
+                    	// form-based search
+                    	else {
+                    		for(Iterator<String> i = parameterMap.keySet().iterator(); i.hasNext(); ) {
+                    			String parameterName = i.next();
+                    			if(parameterName.startsWith(WebKeys.REQUEST_PARAMETER_FILTER_VALUES + ".")) {
+                    				filterNames.add(
+                    					parameterName.substring((WebKeys.REQUEST_PARAMETER_FILTER_VALUES + ".").length())
+                    				);
+        	                        Object[] parameterValues = (Object[])parameterMap.get(parameterName);
+        	                        String filterValue = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);
+                    				filterValues.add(filterValue);
+                    			}
+                    			
+                    		}
+                    	}
                         int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                         int referenceIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_REFERENCE));
-                        String filterName = Action.getParameter(parameter, Action.PARAMETER_NAME);
                         ReferencePane[] referencePanes = currentView.getReferencePane();
                         if (paneIndex < referencePanes.length) {
                             currentView.selectReferencePane(paneIndex);
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
-                                grid.setShowRows(true);
-                                grid.setColumnFilter(filterName, filterValues, addFilter, Grid.getPageSizeParameter(parameterMap));
+                                grid.setShowRows(true);                                
+                                for(int i = 0; i < filterNames.size(); i++) {
+                                	if(filterValues.get(i) != null) {
+	                                	grid.setColumnFilter(
+	                                		filterNames.get(i), 
+	                                		filterValues.get(i), 
+	                                		addFilter, 
+	                                		Grid.getPageSizeParameter(parameterMap)
+	                                	);
+	                                	addFilter = true;
+                                	}
+                                }
+                                if(!addFilter) {
+                                	grid.setPage(
+                                		grid.getCurrentPage(), 
+                                		Grid.getPageSizeParameter(parameterMap)
+                                	);
+                                }
                                 referencePanes[paneIndex].getReferencePaneControl().paint(
                                     p,
                                     ReferencePaneControl.FRAME_CONTENT,
@@ -279,7 +318,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
         
@@ -295,7 +334,7 @@ public class GridEventHandler {
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
-                                grid.setOrder(featureName, Orders.ASCENDING, event == Action.EVENT_ADD_ORDER_ASC);
+                                grid.setOrder(featureName, Orders.ASCENDING);
                                 referencePanes[paneIndex].getReferencePaneControl().paint(
                                     p,
                                     ReferencePaneControl.FRAME_CONTENT,
@@ -306,7 +345,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
         
@@ -322,7 +361,7 @@ public class GridEventHandler {
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
-                                grid.setOrder(featureName, Orders.DESCENDING, event == Action.EVENT_ADD_ORDER_DESC);
+                                grid.setOrder(featureName, Orders.DESCENDING);
                                 referencePanes[paneIndex].getReferencePaneControl().paint(
                                     p,
                                     ReferencePaneControl.FRAME_CONTENT,
@@ -333,7 +372,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
         
@@ -349,7 +388,7 @@ public class GridEventHandler {
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
-                                grid.setOrder(featureName, Orders.ANY, event == Action.EVENT_ADD_ORDER_ANY);
+                                grid.setOrder(featureName, Orders.ANY);
                                 referencePanes[paneIndex].getReferencePaneControl().paint(
                                     p,
                                     ReferencePaneControl.FRAME_CONTENT,
@@ -360,7 +399,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                         
@@ -390,7 +429,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
     
@@ -415,7 +454,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
     
@@ -443,7 +482,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                     
@@ -457,11 +496,13 @@ public class GridEventHandler {
                             if (grid != null) {
                                 String feature = Action.getParameter(parameter, Action.PARAMETER_REFERENCE);
                                 String addRemoveMode = Action.getParameter(parameter, Action.PARAMETER_NAME);
-                                Collection values = (Collection)currentView.getRefObject().refGetValue(feature);
+                                PersistenceManager pm = application.getNewPmData();
+                                RefObject_1_0 target = (RefObject_1_0)pm.getObjectById(currentView.getRefObject().refGetPath());
+                                Collection values = (Collection)target.refGetValue(feature);
                                 // test whether all referenced objects are accessible.
                                 // If object is not accessible remove it from list.
                                 // TODO: objects may be temporarly not available. In this
-                                // case they should not be removed
+                                // case they should not be removed                                
                                 pm.currentTransaction().begin();
                                 for (Iterator i = values.iterator(); i.hasNext();) {
                                     RefObject r = (RefObject) i.next();
@@ -481,11 +522,9 @@ public class GridEventHandler {
                                     if(refPath.size() >= 5) {
                                         RefObject referencedObject = (RefObject)pm.getObjectById(refPath);
                                         if ("+".equals(addRemoveMode)) {
-                                            AppLog.trace("adding referenced object");
                                             values.add(referencedObject);
                                         }
                                         else {
-                                            AppLog.trace("removing referenced object");
                                             values.remove(referencedObject);
                                         }
                                     }
@@ -495,13 +534,14 @@ public class GridEventHandler {
                                     p,
                                     ReferencePaneControl.FRAME_CONTENT,
                                     false
-                                );                          
+                                );                  
+                                pm.close();
                             }
                         }
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
     
@@ -603,7 +643,7 @@ public class GridEventHandler {
                     }
                     catch (Exception e) {
                         ServiceException e0 = new ServiceException(e);
-                        AppLog.warning(e0.getMessage(), e0.getCause());
+                        SysLog.warning(e0.getMessage(), e0.getCause());
                     }
                     break;
                     
@@ -613,7 +653,7 @@ public class GridEventHandler {
             }
             catch (Exception e) {
                 ServiceException e0 = new ServiceException(e);
-                AppLog.warning(e0.getMessage(), e0.getCause());
+                SysLog.warning(e0.getMessage(), e0.getCause());
             }            
         }       
         return new HandleEventResult(

@@ -1,15 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObject.java,v 1.3 2009/06/02 15:00:07 wfro Exp $
+ * Name:        $Id: SlicedDbObject.java,v 1.16 2009/12/31 01:50:00 wfro Exp $
  * Description: SlicedDbObject
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/02 15:00:07 $
+ * Date:        $Date: 2009/12/31 01:50:00 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 
@@ -56,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,17 +69,18 @@ import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
+import org.w3c.cci2.SparseArray;
 
 @SuppressWarnings("unchecked")
-public class SlicedDbObject 
-extends StandardDbObject {
+public class SlicedDbObject extends StandardDbObject {
 
     //-------------------------------------------------------------------------
     public SlicedDbObject(
@@ -146,6 +147,7 @@ extends StandardDbObject {
         }        
     }
 
+    
     //---------------------------------------------------------------------------  
     @Override
     public Path getObjectReference(
@@ -162,19 +164,34 @@ extends StandardDbObject {
     }
 
     //---------------------------------------------------------------------------  
+    
+    private boolean isConvertible(
+        String segment
+    ){
+        return 
+            segment != null &&
+            segment.indexOf('/') > 0 &&
+            !segment.startsWith("("); 
+    }
+    
     @Override
     public String getObjectId(
         FastResultSet frs
     ) throws SQLException, ServiceException {
         if(this.database.configuration.normalizeObjectIds()) {
-            return this.database.configuration.buildObjectId(
-                frs.getObject(this.database.OBJECT_OID).toString()
-            );
+            String component = frs.getObject(this.database.OBJECT_OID).toString();
+//          return this.database.configuration.buildObjectId(component);
+            if(isConvertible(component)) {
+                return this.database.configuration.buildResourceIdentifier(component, false).toString();
+            } else {
+                return component;
+            }
         } else {
             return super.getObjectId(frs);
         }
     }
 
+    
     //---------------------------------------------------------------------------  
     public int getIndex(
         FastResultSet frs
@@ -254,9 +271,9 @@ extends StandardDbObject {
         if(excludeAttributes != null) {
             processedAttributes.addAll(excludeAttributes);
         }
-        ObjectHolder_2Facade facade = null;
+        Object_2Facade facade = null;
         try {
-            facade = ObjectHolder_2Facade.newInstance(object);
+            facade = Object_2Facade.newInstance(object);
         } 
         catch (ResourceException e) {
             throw new ServiceException(e);
@@ -304,8 +321,11 @@ extends StandardDbObject {
                 ) {
                     String attributeName = (String)i.next();
                     if((excludeAttributes == null || !excludeAttributes.contains(attributeName)) && (attributeName.indexOf(':') < 0)) {
-                        SparseList attributeValues = facade.attributeValues(attributeName);
-                        if(attributeValues.isEmpty()) {
+                        Object attributeValues = facade.attributeValues(attributeName);
+                        if(
+                            (attributeValues instanceof Collection && ((Collection)attributeValues).isEmpty()) ||
+                            (attributeValues instanceof SparseArray && ((SparseArray)attributeValues).isEmpty())
+                        ) {
                             String columnName = this.database.getColumnName(
                                 this.conn, 
                                 attributeName, 
@@ -320,10 +340,10 @@ extends StandardDbObject {
                             }                      
                         }
                         else {
-                            for(
-                                ListIterator j = attributeValues.populationIterator(); 
-                                j.hasNext(); 
-                            ) {
+                            ListIterator j = attributeValues instanceof SparseArray ?
+                                ((SparseArray)attributeValues).populationIterator() :
+                                    ((List)attributeValues).listIterator();
+                            while(j.hasNext()) {
                                 int valIndex = j.nextIndex();
                                 Object value = j.next();
                                 String columnName = this.database.getColumnName(
@@ -506,14 +526,14 @@ extends StandardDbObject {
                 if(this.getIndexColumn() != null) {
                     if(k > 0) statement += ", ";
                     statement += this.getIndexColumn();
-                    statementParameters.add(new Integer(index));
+                    statementParameters.add(Integer.valueOf(index));
                     k++;
                 }
                 // secondary tables require index
                 else if(processAsSecondary) {
                     if(k > 0) statement += ", ";
                     statement += this.database.OBJECT_IDX;
-                    statementParameters.add(new Integer(index));
+                    statementParameters.add(Integer.valueOf(index));
                     k++;
                 }
                 // autonum columns
@@ -579,14 +599,14 @@ extends StandardDbObject {
             throw new ServiceException(
                 ex, 
                 BasicException.Code.DEFAULT_DOMAIN,
-                "23000".equals(sqlState) || "23505".equals(sqlState) ? 
-                    BasicException.Code.DUPLICATE :
-                        BasicException.Code.MEDIA_ACCESS_FAILURE, 
-                        null,
-                        new BasicException.Parameter("path", facade.getPath()),
-                        new BasicException.Parameter("statement", currentStatement),
-                        new BasicException.Parameter("values", statementParameters),
-                        new BasicException.Parameter("types", statementParameterTypes)
+                "23000".equals(sqlState) || "23505".equals(sqlState) ? BasicException.Code.DUPLICATE : BasicException.Code.MEDIA_ACCESS_FAILURE, 
+                null,
+                new BasicException.Parameter("path", facade.getPath()),
+                new BasicException.Parameter("statement", currentStatement),
+                new BasicException.Parameter("values", statementParameters),
+                new BasicException.Parameter("types", statementParameterTypes),
+                new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
+                new BasicException.Parameter("sqlState", sqlState)
             );
         }
         finally {
@@ -644,7 +664,8 @@ extends StandardDbObject {
         List referenceIdValues,
         List objectIdColumns,
         List objectIdValues,
-        Set excludeAttributes
+        Set excludeAttributes, 
+        String lockAssertion
     ) throws ServiceException {
         PreparedStatement ps = null;
         String currentStatement = null;
@@ -657,11 +678,12 @@ extends StandardDbObject {
         if(this.excludeAttributes != null) {
             processedAttributes.addAll(this.excludeAttributes);
         }            
-        ObjectHolder_2Facade newObjectFacade = null;
-        ObjectHolder_2Facade oldObjectFacade = null;
+        SysLog.detail("Processed attributes", processedAttributes);
+        Object_2Facade newObjectFacade = null;
+        Object_2Facade oldObjectFacade = null;
         try {
-            newObjectFacade = ObjectHolder_2Facade.newInstance(newObject);
-            oldObjectFacade = ObjectHolder_2Facade.newInstance(oldObject);
+            newObjectFacade = Object_2Facade.newInstance(newObject);
+            oldObjectFacade = Object_2Facade.newInstance(oldObject);
         } 
         catch (ResourceException e) {
             throw new ServiceException(e);
@@ -709,7 +731,7 @@ extends StandardDbObject {
                 ) {
                     String attributeName = (String)i.next();
                     if(((excludeAttributes == null) || !excludeAttributes.contains(attributeName)) && attributeName.indexOf(':') < 0) {
-                        SparseList attributeValues = newObjectFacade.attributeValues(attributeName);   
+                        List attributeValues = newObjectFacade.attributeValuesAsList(attributeName);   
                         if(attributeValues.isEmpty()) {
                             String columnName = this.database.getColumnName(this.conn, attributeName, 0, false, true);
                             if(dbObjectColumns.contains(columnName)) {
@@ -720,7 +742,7 @@ extends StandardDbObject {
                         }
                         else {
                             for(
-                                ListIterator j = attributeValues.populationIterator(); 
+                                ListIterator j = attributeValues.listIterator(); 
                                 j.hasNext(); 
                             ) {
                                 int valIndex = j.nextIndex();
@@ -757,7 +779,7 @@ extends StandardDbObject {
                 ) {
                     String attributeName = (String)i.next();
                     if(((excludeAttributes == null) || !excludeAttributes.contains(attributeName)) && attributeName.indexOf(':') < 0) {
-                        SparseList attributeValues = oldObjectFacade.attributeValues(attributeName);
+                        List attributeValues = oldObjectFacade.attributeValuesAsList(attributeName);
                         if(attributeValues.isEmpty()) {
                             String columnName = this.database.getColumnName(conn, attributeName, 0, false, true);
                             if(dbObjectColumns.contains(columnName)) {
@@ -768,7 +790,7 @@ extends StandardDbObject {
                         }
                         else {
                             for(
-                                ListIterator j = attributeValues.populationIterator(); 
+                                ListIterator j = attributeValues.listIterator(); 
                                 j.hasNext(); 
                             ) {
                                 int valIndex = j.nextIndex();
@@ -830,15 +852,23 @@ extends StandardDbObject {
                     if(this.getIndexColumn() != null) {
                         if(hasClause) statement += " AND ";
                         statement += "(" + this.getIndexColumn() + " = ?)";
-                        statementParameters.add(new Integer(index));
+                        statementParameters.add(Integer.valueOf(index));
                         hasClause = true;
                     }
                     // secondary tables require index
                     else if(processAsSecondary) {
                         if(hasClause) statement += " AND ";
                         statement += "(" + this.database.OBJECT_IDX + " = ?)";
-                        statementParameters.add(new Integer(index));
+                        statementParameters.add(Integer.valueOf(index));
                         hasClause = true;                    
+                    }
+                    if(!processAsSecondary && lockAssertion != null) {
+                        String versionField = AbstractDatabase_1.getVersionField(lockAssertion);
+                        Object versionValue = AbstractDatabase_1.getVersionValue(lockAssertion, versionField);
+                        statement += getVersionClause(versionField, versionValue);
+                        if(versionValue != null) {
+                            statementParameters.add(versionValue);
+                        }
                     }
                     ps = this.database.prepareStatement(
                         this.conn, 
@@ -858,7 +888,24 @@ extends StandardDbObject {
                             i.next()
                         );               
                     }
-                    this.database.executeUpdate(ps, currentStatement, statementParameters);
+                    int rowCount = this.database.executeUpdate(ps, currentStatement, statementParameters);
+                    if(rowCount != 1){
+                        if(lockAssertion == null) {
+                            SysLog.warning("Update failed", newObjectFacade.getPath());
+                        } else {
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                                "The object has been modified since it was read",
+                                new BasicException.Parameter("path", newObjectFacade.getPath()),
+                                new BasicException.Parameter("assertion", lockAssertion), 
+                                new BasicException.Parameter("sqlStatement", currentStatement),
+                                new BasicException.Parameter("parameters", statementParameters),
+                                new BasicException.Parameter("sqlRowCount", rowCount)
+                            );
+                        }
+                    }
+
                     ps.close(); ps = null;
                 }
             }
@@ -884,7 +931,9 @@ extends StandardDbObject {
                 null,
                 new BasicException.Parameter("path", newObjectFacade.getPath()),
                 new BasicException.Parameter("statement", currentStatement),
-                new BasicException.Parameter("values", statementParameters)
+                new BasicException.Parameter("values", statementParameters),
+                new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
+                new BasicException.Parameter("sqlState", ex.getSQLState())
             );
         }
         finally {
@@ -897,10 +946,12 @@ extends StandardDbObject {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public void replaceObjectSlice(
         int index,
         MappedRecord newObject,
-        MappedRecord oldObject
+        MappedRecord oldObject, 
+        String lockAssertion
     ) throws ServiceException {
         this.replaceObjectSlice(
             index, 
@@ -910,7 +961,8 @@ extends StandardDbObject {
             this.getReferenceValues(),
             this.objectIdColumn,
             this.getObjectIdValues(),
-            null
+            null, 
+            lockAssertion
         );    
     }
 
@@ -918,16 +970,16 @@ extends StandardDbObject {
     public MappedRecord[] sliceAndNormalizeObject(
         MappedRecord object
     ) throws ServiceException {
-        ObjectHolder_2Facade facade = null;
+        Object_2Facade facade = null;
         try {
-            facade = ObjectHolder_2Facade.newInstance(object);
+            facade = Object_2Facade.newInstance(object);
         } 
         catch (ResourceException e) {
             throw new ServiceException(e);
         }
         // Add object class as attribute. This way it can be handled as a standard feature
         if(facade.getAttributeValues(SystemAttributes.OBJECT_CLASS) == null) {
-            facade.attributeValues(SystemAttributes.OBJECT_CLASS).add(
+            facade.attributeValuesAsList(SystemAttributes.OBJECT_CLASS).add(
                 facade.getObjectClass()
             );
         }
@@ -943,26 +995,18 @@ extends StandardDbObject {
                     !this.database.embeddedFeatures.containsKey(featureName) &&
                     !this.database.nonPersistentFeatures.contains(featureQualifiedName)
                 ) {
-                    String multiplicity = (String)feature.objGetValue("multiplicity");
-                    // multi-valued reference?
-                    if(this.getModel().isReferenceType(feature)) {                    
-                        ModelElement_1_0 end = getModel().getElement(
-                            feature.objGetValue("referencedEnd")
-                        );
-                        if(!end.objGetList("qualifierName").isEmpty()) {
-                            multiplicity = Multiplicities.LIST;
-                        }
-                    }
+                    String multiplicity = ModelUtils.getMultiplicity(feature);
                     if(                    
                         Multiplicities.MULTI_VALUE.equals(multiplicity) ||
                         Multiplicities.LIST.equals(multiplicity) ||
                         Multiplicities.SET.equals(multiplicity) ||
                         Multiplicities.SPARSEARRAY.equals(multiplicity)                    
                     ) {
-                        facade.clearAttributeValues(featureName + "_").add(
+                        facade.attributeValuesAsList(featureName + "_").clear();
+                        facade.attributeValuesAsList(featureName + "_").add(
                             facade.getAttributeValues(featureName) == null ? 
-                                new Integer(0) : 
-                                new Integer(facade.attributeValues(featureName).size())
+                                Integer.valueOf(0) : 
+                                Integer.valueOf(facade.attributeValuesAsList(featureName).size())
                         );
                     }
                 }
@@ -970,16 +1014,18 @@ extends StandardDbObject {
             // created_by, modified_by are derived and persistent
             if(this.getModel().isSubtypeOf(classDef, "org:openmdx:base:BasicObject")) {            
                 String featureName = SystemAttributes.CREATED_BY;
-                facade.clearAttributeValues(featureName + "_").add(
+                facade.attributeValuesAsList(featureName + "_").clear();
+                facade.attributeValuesAsList(featureName + "_").add(
                     facade.getAttributeValues(featureName) == null ? 
-                        new Integer(0) : 
-                        new Integer(facade.attributeValues(featureName).size())
+                        Integer.valueOf(0) : 
+                        Integer.valueOf(facade.attributeValuesAsList(featureName).size())
                 );
                 featureName = SystemAttributes.MODIFIED_BY;
-                facade.clearAttributeValues(featureName + "_").add(
+                facade.attributeValuesAsList(featureName + "_").clear();
+                facade.attributeValuesAsList(featureName + "_").add(
                     facade.getAttributeValues(featureName) == null ? 
-                        new Integer(0) : 
-                        new Integer(facade.attributeValues(featureName).size())
+                        Integer.valueOf(0) : 
+                        Integer.valueOf(facade.attributeValuesAsList(featureName).size())
                 );
             }
         }
@@ -990,9 +1036,9 @@ extends StandardDbObject {
          * is an indicator to ignore the attribute on object retrieval.
          */
         DbObjectConfiguration dbObjectConfiguration = this.getConfiguration();    
-        ObjectHolder_2Facade normalizedObjectFacade = null;
+        Object_2Facade normalizedObjectFacade = null;
         try {
-            normalizedObjectFacade = ObjectHolder_2Facade.newInstance(new Path(""));
+            normalizedObjectFacade = Object_2Facade.newInstance(new Path(""));
         } 
         catch (ResourceException e) {
             throw new ServiceException(e);
@@ -1002,14 +1048,14 @@ extends StandardDbObject {
         if(pathNormalizeLevel > 0) {  
             Path parentObjectPath = facade.getPath().getPrefix(facade.getPath().size()-2);    
             if(parentObjectPath.size() >= 5) {
-                normalizedObjectFacade.attributeValues(this.database.privateAttributesPrefix + "objectParent" + this.database.referenceIdAttributesSuffix).add(
+                normalizedObjectFacade.attributeValuesAsList(this.database.privateAttributesPrefix + "objectParent" + this.database.referenceIdAttributesSuffix).add(
                     this.database.getReferenceId(
                         conn, 
                         parentObjectPath, 
                         true 
                     )
                 );
-                normalizedObjectFacade.attributeValues(this.database.privateAttributesPrefix + "objectParent" + this.database.objectIdAttributesSuffix).add(
+                normalizedObjectFacade.attributeValuesAsList(this.database.privateAttributesPrefix + "objectParent" + this.database.objectIdAttributesSuffix).add(
                     parentObjectPath.getBase()
                 );
             }
@@ -1020,13 +1066,26 @@ extends StandardDbObject {
                     i.hasNext();
                 ) {
                     String attributeName = (String)i.next();
-                    List values = facade.attributeValues(attributeName);
-                    if((values.size() > 0) && (values.get(0) instanceof Path)) {
-                        for(
-                            Iterator j = values.iterator();
-                            j.hasNext();
-                        ) {
-                            Object v = j.next();
+                    Object values = facade.attributeValues(attributeName);
+                    Object firstValue = null;
+                    ListIterator valuesIterator = null;
+                    if(values instanceof SparseArray) {
+                        SparseArray v = (SparseArray)values;
+                        firstValue = v.isEmpty() ?
+                            null :
+                                v.get(v.firstKey());
+                        valuesIterator = v.populationIterator();
+                    }
+                    else if(values instanceof List) {
+                        List v = (List)values;
+                        firstValue = v.isEmpty() ?
+                            null :
+                                v.get(0);     
+                        valuesIterator = v.listIterator();
+                    }
+                    if(firstValue instanceof Path) {
+                        while(valuesIterator.hasNext()) {
+                            Object v = valuesIterator.next();
                             if(!(v instanceof Path)) {
                                 throw new ServiceException(
                                     BasicException.Code.DEFAULT_DOMAIN,
@@ -1038,28 +1097,28 @@ extends StandardDbObject {
                                 );
                             }
                             Path objectPath = (Path)v;
-                            normalizedObjectFacade.attributeValues(this.database.privateAttributesPrefix + attributeName + this.database.referenceIdAttributesSuffix).add(
+                            normalizedObjectFacade.attributeValuesAsList(this.database.privateAttributesPrefix + attributeName + this.database.referenceIdAttributesSuffix).add(
                                 this.database.getReferenceId(
                                     this.conn, 
                                     objectPath, 
                                     true
                                 )
                             );
-                            normalizedObjectFacade.attributeValues(this.database.privateAttributesPrefix + attributeName + this.database.objectIdAttributesSuffix).add(
+                            normalizedObjectFacade.attributeValuesAsList(this.database.privateAttributesPrefix + attributeName + this.database.objectIdAttributesSuffix).add(
                                 objectPath.getBase()
                             );
                             // add parent of path value
                             if(pathNormalizeLevel > 2) {
                                 Path parentPath = objectPath.getPrefix(objectPath.size()-2);
                                 if(parentPath.size() >= 5) {
-                                    normalizedObjectFacade.attributeValues(this.database.privateAttributesPrefix + attributeName + "Parent" + this.database.referenceIdAttributesSuffix).add(
+                                    normalizedObjectFacade.attributeValuesAsList(this.database.privateAttributesPrefix + attributeName + "Parent" + this.database.referenceIdAttributesSuffix).add(
                                         this.database.getReferenceId(
                                             conn, 
                                             parentPath, 
                                             true
                                         )
                                     );
-                                    normalizedObjectFacade.attributeValues(this.database.privateAttributesPrefix + attributeName + "Parent" + this.database.objectIdAttributesSuffix).add(
+                                    normalizedObjectFacade.attributeValuesAsList(this.database.privateAttributesPrefix + attributeName + "Parent" + this.database.objectIdAttributesSuffix).add(
                                         parentPath.getBase()
                                     );
                                 }
@@ -1079,29 +1138,51 @@ extends StandardDbObject {
          * Slice object
          */
         // get number of partitions
-        int maxSize = 0;
+        int nSlices = 0;
         for(
             Iterator i = facade.getValue().keySet().iterator();
             i.hasNext();
         ) {
             String attributeName = (String)i.next();
-            maxSize = java.lang.Math.max(maxSize, facade.attributeValues(attributeName).size());
+            Object values = facade.attributeValues(attributeName);
+            if(values instanceof SparseArray) {
+                SparseArray a = (SparseArray)values;
+                if(!a.isEmpty()) {
+                    nSlices = java.lang.Math.max(
+                        nSlices, 
+                        (Integer)a.lastKey() + 1
+                    );
+                } 
+            } else {
+                List l = (List)values;
+                nSlices = java.lang.Math.max(
+                    nSlices, 
+                    l.size()
+                );
+            }
         }
         // create partitioned objects
-        MappedRecord[] slices = new MappedRecord[maxSize];
+        MappedRecord[] slices = new MappedRecord[nSlices];
         for(
             Iterator i = facade.getValue().keySet().iterator();
             i.hasNext();
         ) {
-            String attributeName = (String)i.next();     
-            for(
-                int j = 0; 
-                j < facade.attributeValues(attributeName).size();
-                j++
-            ) {
+            String attributeName = (String)i.next();
+            Object values = facade.attributeValues(attributeName);
+            int lastIndex = -1;
+            if(values instanceof SparseArray) {
+                SparseArray a = (SparseArray)values;
+                if(!a.isEmpty()) {
+                    lastIndex = (Integer)a.lastKey();
+                } 
+            } else {
+                List l = (List)values;
+                lastIndex = l.size() - 1;
+            }
+            for(int j = 0; j <= lastIndex; j++) { 
                 if(slices[j] == null) {
                     try {
-                        slices[j] = ObjectHolder_2Facade.newInstance(ObjectHolder_2Facade.getPath(object)).getDelegate();
+                        slices[j] = Object_2Facade.newInstance(Object_2Facade.getPath(object)).getDelegate();
                     } 
                     catch (ResourceException e) {
                         throw new ServiceException(e);
@@ -1109,32 +1190,39 @@ extends StandardDbObject {
                 }
                 // Embedded features are mapped to slice 0
                 if(this.database.embeddedFeatures.containsKey(attributeName)) {
-                    ObjectHolder_2Facade sliceFacade = null;
+                    Object_2Facade sliceFacade = null;
                     try {
-                        sliceFacade = ObjectHolder_2Facade.newInstance(slices[0]);
+                        sliceFacade = Object_2Facade.newInstance(slices[0]);
                     } 
                     catch (ResourceException e) {
                         throw new ServiceException(e);
                     }
-                    sliceFacade.attributeValues(attributeName + "_" + j).add(
-                        facade.attributeValues(attributeName).get(j)
+                    sliceFacade.attributeValuesAsList(attributeName + "_" + j).add(
+                        facade.attributeValuesAsList(attributeName).get(j)
                     );
                 }
                 // Map to slice with corresponding index
                 else {                
-                    ObjectHolder_2Facade sliceFacade = null;
+                    Object_2Facade sliceFacade = null;
                     try {
-                        sliceFacade = ObjectHolder_2Facade.newInstance(slices[j]);
+                        sliceFacade = Object_2Facade.newInstance(slices[j]);
                     } 
                     catch (ResourceException e) {
                         throw new ServiceException(e);
                     }
-                    sliceFacade.attributeValues("objectIdx").add(
-                        new Integer(j)
+                    sliceFacade.attributeValuesAsList("objectIdx").add(
+                        Integer.valueOf(j)
                     );
-                    sliceFacade.attributeValues(attributeName).add(
-                        facade.attributeValues(attributeName).get(j)
-                    );
+                    if(values instanceof SparseArray) {
+                        sliceFacade.attributeValuesAsList(attributeName).add(
+                            ((SparseArray)values).get(j)
+                        );
+                    }
+                    else {
+                        sliceFacade.attributeValuesAsList(attributeName).add(
+                            j < ((List)values).size() ? ((List)values).get(j) :null
+                        );                        
+                    }
                 }
             }
         }

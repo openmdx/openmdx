@@ -1,0 +1,455 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- source and copyright: http://goessner.net/articles/wiky/ -->
+  <head>
+    <title>WikyBox</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="wiky.js"></script>
+    <script type="text/javascript" src="wiky.lang.js"></script>
+    <script type="text/javascript" src="wiky.math.js"></script>
+    <script type="text/javascript">
+       var output = {
+          menu: "outmnu",
+          item: 0,
+          inbox: null,
+          outbox: null,
+          init: function() {
+            this.inbox = document.getElementById("inbox");
+            this.outbox = document.getElementById("outbox");
+            this.inbox.curScroll = this.inbox.scrollTop;
+            this.toggle(0);
+          },
+          onkeyup: [
+            function() { output.outbox.innerHTML = Wiky.toHtml(output.inbox.value); output.scroll(); },
+            function() { output.outbox.innerHTML = Wiky.toHtml(output.inbox.value).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/ /g,"&nbsp;").replace(/(\r?\n)/g,"\xB6<br/>"); output.scroll(); },
+            function() { output.outbox.innerHTML = Wiky.toWiki(Wiky.toHtml(output.inbox.value)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/ /g,"&nbsp;").replace(/(\r?\n)/g,"\xB6<br/>"); output.scroll(); }
+          ],
+          toggle: function(idx) {
+            var items = document.getElementById(this.menu).getElementsByTagName("a");
+            items[this.item].className = "";
+            items[this.item=idx].className = "active";
+            this.outbox.style.fontFamily = idx==0 ? "serif" : "monospace";
+            this.inbox.onkeyup = this.inbox.onfocus = this.onkeyup[idx];
+            this.inbox.onmouseup = function(){output.scroll();}
+            this.inbox.focus();
+          },
+          scroll: function() {
+            if (this.inbox.curScroll != this.inbox.scrollTop) {
+               this.inbox.curScroll = this.inbox.scrollTop;
+               this.outbox.scrollTop = this.outbox.scrollHeight/this.inbox.scrollHeight*this.inbox.scrollTop;
+            }
+          }
+       };
+       var helpMenu = {
+          menu: "helpmnu",
+          item: 0,
+          toggle: function(idx) {
+            var items = document.getElementById(this.menu).getElementsByTagName("a");
+            document.getElementById(items[this.item].innerHTML).style.display = "none";
+            items[this.item].className = "";
+            items[this.item=idx].className = "active";
+            document.getElementById(items[this.item].innerHTML).style.display = "block";
+          }
+       };
+       function example(id) {
+          document.getElementById('inbox').value = document.getElementById(id).innerHTML
+                                                           .replace(/&amp;/g,'&')
+                                                           .replace(/&lt;/g,'<')
+                                                           .replace(/&gt;/g,'>')
+                                                           .replace(/&quot;/g,'\"');
+          window.output.inbox.focus();
+       }
+       window.onload = function() {
+         output.init();
+       }
+    </script>
+    <link rel="stylesheet" type="text/css" href="wiky.css"/>
+    <link rel="stylesheet" type="text/css" href="wiky.lang.css"/>
+    <link rel="stylesheet" type="text/css" href="wiky.math.css"/>
+    <style type="text/css">
+      body {
+        text-align: center;
+        background:snow;
+      }
+      #frame {
+        margin: 0 auto;
+        padding: 0px;
+        text-align: left;
+        width: 60em;
+        border: none;
+      }
+      #content {
+        margin: 0;
+        padding: 0px;
+        width: 40em;
+        border: none;
+        background: #eee;
+        float: left;
+      }
+      #help {
+        margin: 0;
+        padding: 0px;
+        width: 20em;
+        height: 20em;
+        border: none;
+        background: #eee;
+        float: left;
+      }
+      #help h4, #help h5 { color:#226;margin:0.3em 0 0 0;padding:0; }
+
+      #core pre, #style pre, #math pre { font-size:90%;color:#336;margin:0;padding:0 0 0 0.5em;border:none;background:inherit;font-family:monospace;white-space: pre; }
+      #math dfn, #math code { font-size:90%; }
+      #in, #out {
+        margin: 0.3em 0 0 0;
+        padding: 0px;
+        width: 40em;
+        border: none;
+        background: #eee;
+      }
+      #core, #style, #math {
+        margin: 0;
+        padding: 0.5em;
+        width: 19em;
+        border: none;
+        background: #eee;
+        display: none;
+      }
+      #core {
+        display: block;
+      }
+      .tab {
+        height: 20px;
+        margin: 0 auto;
+        padding-left: 10px;
+      }
+      .tab li {
+         margin: 0;
+         padding: 0;
+         display: inline;
+         list-style-type: none;
+      }
+      .tab a:link, .tab a:visited {
+         float: left;
+         background: #ddd;
+         font-size: 100%;
+         line-height: 14px;
+         font-weight: bold;
+         padding: 2px 10px;
+         margin-right: 4px;
+         border: 1px solid #aaa;
+         text-decoration: none;
+         color: #666;
+      }
+      .tab a:link.active, .tab a:visited.active {
+         border-bottom: 1px solid #eee;
+         background: #eee;
+         color: #000;
+      }
+      .tab a:hover {
+         background: #eee;
+	    }
+    </style>
+  </head>
+  <body> <!-- onload="javascript:try{
+    document.getElementById('inbox').value = opener.document.getElementById(opener.WIKYeditTextAreaId).value;
+    } catch(e){};" -->
+     <h2>WikyBox</h2>
+     <div id="frame">
+       <div id="content">
+         <div style="width:100%;background:snow;">
+           <ul id="outmnu" class="tab">
+             <li><a href="javascript:window.output.toggle(0);" class="active">view</a></li>
+             <li><a href="javascript:window.output.toggle(1);">html</a></li>
+             <li><a href="javascript:window.output.toggle(2);">re-wiky</a></li>
+           </ul>
+         </div>
+         <div id="out">
+           <div id="outbox" style="width:96%;height:20em;margin:0 auto;overflow:auto;font-size:90%;background:#ddd;border:1px solid black;padding-left:0.5em;"></div>
+         </div>
+         <div id="in">
+           <textarea id="inbox" rows="16" style="width:98%;background:#ffe;border:1px solid black;padding-left:0.5em;margin:0.5em;"></textarea>
+         </div>
+        <div>
+          <form method="post" action="">
+          <div style="padding:5px;">
+            <input type="submit" value="OK" onclick="opener.document.getElementById(opener.WIKYeditTextAreaId).value=document.getElementById('inbox').value;opener.win.close();return false;"><input type="submit" value="Cancel" onclick="opener.win.close();;return false;">
+          </div>
+          </form>
+        </div>
+         <!--
+         <div style="width:100%;text-align:center;">
+            Insert example text: &nbsp;
+            <button onclick="example('coreexample');">Core</button>
+            <button onclick="example('styleexample');">Style</button>
+            <button onclick="example('mathexample');">Math</button>
+         </div>
+         -->
+         <!-- <div><i>Note: Opera users must click into the text input box after selecting a new tab in order to update the view box.</i></div>  -->
+       </div>
+       <div id="help">
+         <div style="width:100%;background:snow;">
+           <ul id="helpmnu" class="tab">
+             <li><a href="javascript:window.helpMenu.toggle(0);" class="active">core</a></li>
+             <li><a href="javascript:window.helpMenu.toggle(1);">style</a></li>
+             <li><a href="javascript:window.helpMenu.toggle(2);">math</a></li>
+           </ul>
+         </div>
+         <div id="core">
+  <h5>Header</h5>
+  <pre>==h2==&para;
+===h3===&para;</pre>
+  <h5>Paragraphs</h5>
+  <pre>separated by an empty line.</pre>
+  <h5>line break</h5>
+  <pre>line\\&para; break.</pre>
+  <h5>blockquote</h5>
+  <pre>["quote"]</pre>
+  <pre>[(cite)"quote"]</pre>
+  <pre>[(cite,title)"quote"]</pre>
+  <h5>preformatted block</h5>
+  <pre>[%code block%]</pre>
+  <pre>[(lang)%code block%]</pre>
+  <h5>inline formatting</h5>
+  <pre>*<strong>strong</strong>*</pre>
+  <pre>_<em>emphasize</em>_</pre>
+  <pre>^<sup>superscript</sup>^</pre>
+  <pre>~<sub>subscript</sub>~</pre>
+  <pre>%<code>code</code>%</pre>
+  <pre>(-<del>deleted</del>-)</pre>
+  <pre>?<abbr title="Abbreviation">abbr</abbr>(Abbreviation)?</pre>
+  <h5>links</h5>
+  <pre>http://u.ri</pre>
+  <pre>[http://u.ri, title]</pre>
+  <h5>images <i>(png, gif, jpg)</i></h5>
+  <pre>uri/image.png</pre>
+  <pre>[img:uri/image.png,title]</pre>
+  <h5>definition list</h5>
+  <pre>; term: definition</pre>
+  <h5>lists</h5>
+  <pre>* unordered
+* list
+
+1. ordered
+1. list
+
+1. multi-level
+1* mixed
+1*a. list
+</pre>
+  <h5>tables</h5>
+  <pre>[| *head* |2>columns|
+ | center |left | right|]</pre>
+ <h5>shortcuts</h5>
+ <pre>
+<table style="width:60%;"><tr><td style="text-align:left;"><code>-- --- ...</code> </td><td style="text-align:center;">  </td><td style="text-align:right;"> &#8211; &#8212; &#8230;</td></tr>
+<tr><td style="text-align:left;"><code>&lt;- -&gt; &lt;-&gt;</code> </td><td style="text-align:center;">  </td><td style="text-align:right;"> &#8592; &#8594; &#8596;</td></tr></table></pre>
+         </div>
+         <div id="style">
+<h5>Styles</h5>
+<pre>{style}paragraph
+[{style}(cite, title)"quote"]
+[{style}(lang)%code block%]
+[{style}img:uri/image.png]
+[{style}|table|]
+</pre>
+ <h5>Style Properties</h5>
+<pre>{p1;p2;...;pN} or
+{p1,p2,...,pN}
+>  &#8594; left-indent
+&lt;  &#8594; right-indent
+>> &#8594; right-align
+&lt;&lt; &#8594; left-align
+=  &#8594; center-align
+_  &#8594; underline
+b  &#8594; border
+c:col &#8594; color
+C:col &#8594; background-color
+w:width &#8594; width
+
+any CSS property
+is allowed.
+</pre>
+ <h5>Style Examples</h5>
+ <pre>{>;c:red;C:#aef}
+{>>,w:40\%,b}
+{_,padding:1em}</pre>
+         </div>
+         <div id="math">
+ <h5>Math markup</h5>
+  <pre>Markup similar to LaTex.</pre>
+<table><tr><td colspan="2" style="text-align:left;"><h5>Block Formula</h5> </td></tr>
+<tr><td style="text-align:left;"><code>[$y = f(x)$]</code> </td><td style="text-align:left;"><dfn>y  =  f(x)</dfn> </td></tr>
+<tr><td style="text-align:left;"><code>[(num)$y = e^x$]</code> </td><td style="text-align:left;"><dfn>y  =  f(x)   (num)</dfn> </td></tr>
+<tr><td colspan="2" style="text-align:left;"><h5>Inline Formula</h5> </td></tr>
+<tr><td style="text-align:left;"><code>With $y = f(x)$ do</code> </td><td style="text-align:right;"> With <dfn>y  = f(x)</dfn> do</td></tr>
+<tr><td colspan="2" style="text-align:left;"><h5>Overindex, Underindex</h5> </td></tr>
+<tr><td style="text-align:left;"><code>a^2, x_{n-1}, a_{i+1}^{m+n}</code> </td><td style="text-align:right;"> <dfn>a<sup class="i">2</sup>, x<sub class="i"><!--{-->n&#8722;1<!--}--></sub>, a<span class="s"><span class="i"><!--{-->m+n<!--}--></span><span class="i"><!--{-->i+1<!--}--></span></span></dfn></td></tr>
+<tr><td colspan="2" style="text-align:left;"><h5>Overscript, Underscript</h5> </td></tr>
+<tr><td style="text-align:left;"><code>\prod^n, \int_{\phi=0}^2\pi, \sum_{i=1}^{n-1}</code> </td><td style="text-align:right;"> <dfn><span class="o"><span class="x">n</span><span class="h">&#8719;</span><span>&nbsp;</span></span>, <span class="o"><span class="x">2&#960;</span><span class="h">&#8747;</span><span class="x"><!--{-->&#966;=0<!--}--></span></span>, <span class="o"><span class="x"><!--{-->n&#8722;1<!--}--></span><span class="h">&#8721;</span><span class="x"><!--{-->i=1<!--}--></span></span></dfn></td></tr>
+<tr><td colspan="2" style="text-align:left;"><h5>Fractions</h5> </td></tr>
+<tr><td style="text-align:left;"><code>a/b, {a+b}/{c+d}, a//b, a//{b+c}</code> </td><td style="text-align:right;"> <dfn><span class="f"><span class="n">a</span><span class="d">b</span></span>, <span class="f"><span class="n"><!--{-->a+b<!--}--></span><span class="d"><!--{-->c+d<!--}--></span></span>, <sup>a</sup>&#8260;<sub>b</sub>, <sup>a</sup>&#8260;<sub><!--{-->b+c<!--}--></sub></dfn></td></tr>
+<tr><td colspan="2" style="text-align:left;"><h5>Vectors</h5> </td></tr>
+<tr><td style="text-align:left;"><code>!v = [x,y,z]</code> </td><td style="text-align:right;"> <dfn><span class="b">v</span> = <span class="lb" style="font-size:300%;">&nbsp;</span><span class="v"><span class="e">x</span><span class="e">y</span><span class="e">z</span></span><span class="rb" style="font-size:300%;">&nbsp;</span></dfn></td></tr>
+<tr><td colspan="2" style="text-align:left;"><h5>Matrices</h5> </td></tr>
+<tr><td style="text-align:left;"><code>!A = [[a,b,c][d,e,f]]</code> </td><td style="text-align:right;"> <dfn><span class="b">A</span> = <span class="lb" style="font-size:200%;">&nbsp;</span><span class="m"><span class="e">a</span><span class="e">d</span></span>
+<span class="m"><span class="e">b</span><span class="e">e</span></span>
+<span class="m"><span class="e">c</span><span class="e">f</span></span><span class="rb" style="font-size:200%;">&nbsp;</span></dfn></td></tr>
+<!-- <tr><td colspan="2" style="text-align:left;"><h5>Spaces</h5> </td></tr>
+<tr><td style="text-align:left;"><code> (&nbsp;)(&nbsp;&nbsp;)(&nbsp;&nbsp;&nbsp;)(&nbsp;&nbsp;&nbsp;&nbsp;)</code> </td><td style="text-align:right;"> <dfn>( )(  )( )( )</dfn></td></tr> --><!-- due to ie6 charset support -->
+<tr><td colspan="2" style="text-align:left;"><h5>Symbols</h5> </td></tr>
+<tr><td style="text-align:left;"><code>= -= !=</code> </td><td style="text-align:right;"> <dfn>= &#8801; &#8800;</dfn></td></tr>
+<tr><td style="text-align:left;"><code>~= ~~ ~</code> </td><td style="text-align:right;"> <dfn>&#8773; &#8776; &#8764;</dfn></td></tr>
+<tr><td><code>&gt; &lt; &gt;= &lt;=</code></td><td style="text-align:right;"> <dfn>&gt; &lt; &#8805; &#8804;</dfn></td></tr>
+<tr><td><code> * \x +- </code></td><td style="text-align:right;"> <dfn> &#183; &#215; &#177; </dfn></td></tr>
+<tr><td><code>&lt;- -&gt; &lt;-&gt;</code></td><td style="text-align:right;"> <dfn>&#8592; &#8594; &#8596;</dfn></td></tr>
+<tr><td><code>=&gt; &lt;=&gt; /O /o </code></td><td style="text-align:right;"> <dfn>&#8658; &#8660; &#216; &#248;</dfn></td></tr>
+<tr><td colspan="2" style="text-align:left;"><h5>Miscellaneous Symbols</h5> </td></tr>
+<tr><td style="text-align:left;"><code>\thetasym \upsih \piv</code> </td><td style="text-align:right;"> <dfn>&#977; &#978; &#982;</dfn></td></tr>
+<tr><td style="text-align:left;"><code>\larr \uarr \rarr \darr</code> </td><td style="text-align:right;"> <dfn>&#8592; &#8593; &#8594; &#8595; </dfn></td></tr>
+<tr><td style="text-align:left;"><code>\harr \crarr \lArr</code> </td><td style="text-align:right;"> <dfn>&#8596; &#8629; &#8656;</dfn></td></tr>
+<tr><td style="text-align:left;"><code>\uArr \rArr \dArr</code> </td><td style="text-align:right;"> <dfn>&#8657; &#8658; &#8659;</dfn></td></tr>
+<tr><td style="text-align:left;"><code>\part \exist \hArr \forall</code> </td><td style="text-align:right;"> <dfn>&#8706; &#8707; &#8660; &#8704; </dfn></td></tr>
+<tr><td style="text-align:left;"><code>\empty \nabla \isin</code> </td><td style="text-align:right;"> <dfn>&#8709; &#8711; &#8712; </dfn></td></tr>
+<tr><td style="text-align:left;"><code>\notin \ni \prod</code> </td><td style="text-align:right;"> <dfn>&#8713; &#8715; <span class="h">&#8719;</span></dfn></td></tr>
+<tr><td style="text-align:left;"><code>\lowast \radic \sum \minus</code> </td><td style="text-align:right;"> <dfn>&#8727; &#8730; <span class="h">&#8721;</span> &#8722;</dfn></td></tr>
+<tr><td style="text-align:left;"><code>\prop \infin \ang</code> </td><td style="text-align:right;"> <dfn> &#8733; &#8734; &#8736; </dfn></td></tr>
+<tr><td style="text-align:left;"><code>\and \or \cap \cup</code> </td><td style="text-align:right;"> <dfn>&#8743; &#8744; &#8745; &#8746;</dfn></td></tr>
+<tr><td style="text-align:left;"><code>\int \there4 \sim \cong</code> </td><td style="text-align:right;"> <dfn><span class="h">&#8747;</span> &#8756; &#8764; &#8773;</dfn></td></tr>
+<tr><td style="text-align:left;"><code>\asymp \ne \equiv</code> </td><td style="text-align:right;"> <dfn>&#8776; &#8800; &#8801; </dfn></td></tr>
+<tr><td style="text-align:left;"><code>\le \ge \sub</code> </td><td style="text-align:right;"> <dfn>&#8804; &#8805; &#8834;</dfn></td></tr>
+<tr><td style="text-align:left;"><code>\sup \nsub \sube</code> </td><td style="text-align:right;"> <dfn>&#8835; &#8836; &#8834;e</dfn></td></tr>
+<tr><td style="text-align:left;"><code>\supe \oplus \otimes</code> </td><td style="text-align:right;"> <dfn>&#8835;e &#8853; &#8855;</dfn></td></tr>
+<tr><td style="text-align:left;"><code>\perp \sdot</code> </td><td style="text-align:right;"> <dfn>&#8869; &#8901;</dfn></td></tr>
+<tr><td colspan="2" style="text-align:left;"><h5>Greek Letters</h5> </td></tr>
+<tr><td><code>\Alpha \Beta \Gamma \Delta \Epsilon</code></td><td style="text-align:right;"> <dfn>&#913; &#914; &#915; &#916; &#917;</dfn></td></tr>
+<tr><td><code>\Zeta \Eta \Theta \Iota \Kappa</code></td><td style="text-align:right;"> <dfn>&#918; &#919; &#920; &#921; &#922;</dfn></td></tr>
+<tr><td><code>\Lambda \Mu \Nu \Xi \Omicron</code></td><td style="text-align:right;"> <dfn>&#923; &#924; &#925; &#926; &#927;</dfn></td></tr>
+<tr><td><code>\Pi \Rho \Sigma \Tau \Upsilon</code></td><td style="text-align:right;"> <dfn>&#928; &#929; &#931; &#932; &#933;</dfn></td></tr>
+<tr><td><code>\Phi \Chi \Psi \Omega</code></td><td style="text-align:right;"> <dfn>&#934; &#935; &#936; &#937;</dfn></td></tr>
+<tr><td><code>\alpha \beta \gamma \delta \epsilon</code></td><td style="text-align:right;"> <dfn>&#945; &#946; &#947; &#948; &#949;</dfn></td></tr>
+<tr><td><code>\zeta \eta \theta \iota \kappa</code></td><td style="text-align:right;"> <dfn>&#950; &#951; &#952; &#953; &#954;</dfn></td></tr>
+<tr><td><code>\lambda \mu \nu \xi \omicron</code></td><td style="text-align:right;"> <dfn>&#955; &#956; &#957; &#958; &#959;</dfn></td></tr>
+<tr><td><code>\pi \rho \sigmaf \sigma \tau</code></td><td style="text-align:right;"> <dfn>&#960; &#961; &#962; &#963; &#964;</dfn></td></tr>
+<tr><td><code>\upsilon \phi \chi \psi \omega </code></td><td style="text-align:right;"> <dfn>&#965; &#966; &#967; &#968; &#969;</dfn></td><td>
+</td></tr></table>
+       </div>
+     </div>
+<!-- invisible -->
+<pre id="coreexample" style="display:none;">
+== Example text ==
+Multiple sentences (-with multiple words-) form a paragraph.\\ Multiple ^sentences^ with ~multiple~ words %form% a paragraph.
+Avoid \*overlapping \_inline\* code\_.
+
+The [http://w3.org, W3C] is the [img:house.png, Home] of web standards like ?HTML(Hypertext Markup Language)?.
+
+[(http://www.brainyquote.com/quotes/authors/a/albert_einstein.html,Albert Einstein)"Any man who can drive safely while kissing a pretty girl is simply not giving the kiss the attention it deserves."]
+
+[% preformatted Text
+ _    _   _   _  _   _   _
+( )  ( ) ( ) ( )/ ) ( ) ( )
+| |/\| | | | |   (   \ ^ /
+(__/\__) (_) (_)\_)   (_)
+%]
+
+[(js)%
+var pi2 = 2*Math.PI,  // useful ...
+    greeting = "hello world";
+function f(x) {
+   return x*x - 2*x + 3;
+}
+%]
+
+* a mixed
+* multilevel
+*1. list
+*1I. with
+*1I. roman
+*1Ig. and
+*1Ig. greek
+*1. letters
+
+; HTML: Hypertext Markup Language
+; XML : Extensible Markup language
+
+[| *First Column* | *Second Column* | *Third Column* |
+ |Table cell content
+
+in different paragraphs |inline _*formatting*_ and line\\
+breaks can be used |no list currently in tables |
+ | right adjusted| centered |left adjusted |
+ |2> spann two colums | [%code block%] |]
+</pre>
+<pre id="styleexample" style="display:none;">
+== Example text ==
+[{>>,c:maroon,C:#abc,w:30\%,b}(http://www.brainyquote.com/quotes/authors/a/albert_einstein.html,Albert Einstein)"Any man who can drive safely while kissing a pretty girl is simply not giving the kiss the attention it deserves."]
+
+{c:#864}Multiple sentences (-with multiple words-) form a paragraph.\\ Multiple ^sentences^ with ~multiple~ words %form% a paragraph.
+Avoid \*overlapping \_inline\* code\_.
+
+The [http://w3.org, W3C] is the [img:house.png, Home] of web standards like ?HTML(Hypertext Markup Language)?.
+
+
+
+[{C:red}% preformatted Text
+ _    _   _   _  _   _   _
+( )  ( ) ( ) ( )/ ) ( ) ( )
+| |/\| | | | |   (   \ ^ /
+(__/\__) (_) (_)\_)   (_)
+%]
+
+[{>>,b,C:#bcd,overflow:auto}(js)%
+var pi2 = 2*Math.PI,  // useful ...
+    greeting = "hello world";
+function f(x) {
+   return x*x - 2*x + 3;
+}
+%]
+
+* a mixed
+* multilevel
+*1. list
+*1I. with
+*1I. roman
+*1Ig. and
+*1Ig. greek
+*1. letters
+
+; HTML: Hypertext Markup Language
+; XML : Extensible Markup language
+
+[{=,w:60\%,b,C:green}| *First Column* | *Second Column* | *Third Column* |
+ |Table cell content
+
+in different paragraphs |inline _*formatting*_ and line\\
+breaks can be used |no list currently in tables |
+ | right adjusted| centered |left adjusted |
+ |2> spann two colums | [%code block%] |]
+</pre>
+
+<pre id="mathexample" style="display:none;">
+The equilibrium conditions for body _(2)_ are.
+
+[(1)$ \sum F_x -= A*cos\phi - B*1/2*\radic2 - 2F = 0$]
+[(2)$ \sum F_y -= -A*sin\phi + B*1/2*\radic2 - 3/2*F = 0$]
+[(3)$ \sum M_A -= A*cos\phi * d/2 - B*2d + 2F*4a = 0$]
+
+The moments of inertia for planar areas ($z = 0$) are
+
+[$I_x =\int_{A}y^2 dA ; I_y =\int_{A}x^2 dA ; I_xy = -\int_{A}xy dA$]
+
+[{>>,b,C:#bcd}"[$ax^2 + bx + c = 0$]
+[$x_{1,2} = {-b +- \radic(b^2 - 4ac)}/{2a}$]"]
+
+The differential equation of the elastic line with $0 <= x <= a$ is
+
+[${d^{2}w(x)}/{dx^2} = - {M_y(x)}/{E*I(x)}$]
+
+Applying the transformation matrix yields
+
+[$[x',y'] = [[cos\phi,-sin\phi,\Deltax][sin\phi,cos\phi,\Deltay]] \bull [x,y,1]$]
+</pre>
+
+<script type="text/javascript" language="javascript" charset="utf-8">
+    document.getElementById('inbox').value = opener.document.getElementById(opener.WIKYeditTextAreaId).value;
+</script>
+  </body>
+</html>

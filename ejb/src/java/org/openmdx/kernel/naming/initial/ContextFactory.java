@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ContextFactory.java,v 1.1 2009/01/12 12:49:25 wfro Exp $
+ * Name:        $Id: ContextFactory.java,v 1.2 2009/09/08 12:49:25 hburger Exp $
  * Description: openMDX Native Context Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:25 $
+ * Date:        $Date: 2009/09/08 12:49:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -137,16 +137,6 @@ public class ContextFactory implements javax.naming.spi.InitialContextFactory {
 		return LightweightContainer.hasInstance() ?
 		    LightweightContainer.getInstance().getProviderURL() :
 		    null;
-	}
-
-	/**
-	 * Tells whether the Naming Service's is accessible through RMI.
-	 * 
-	 * @return <code>true</code> if the Naming Service is accessible through RMI
-	 */
-	public static boolean hasProviderURL(
-	){
-		return getProviderURL() != null;		
 	}
 
 }

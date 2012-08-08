@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: NumberValue.java,v 1.45 2009/03/08 18:03:22 wfro Exp $
+ * Name:        $Id: NumberValue.java,v 1.49 2010/04/27 08:28:06 wfro Exp $
  * Description: NumberValue
- * Revision:    $Revision: 1.45 $
+ * Revision:    $Revision: 1.49 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:22 $
+ * Date:        $Date: 2010/04/27 08:28:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,13 +68,13 @@ import java.util.Map;
 
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.control.EditObjectControl;
 
 public class NumberValue
@@ -161,6 +161,7 @@ public class NumberValue
     }
   
     //-------------------------------------------------------------------------
+    @Override
     public Object getValue(
         boolean shortFormat
     ) {
@@ -179,7 +180,7 @@ public class NumberValue
                   );
               }
               else {
-                  AppLog.error(
+            	  SysLog.error(
                       "Collection contains non Number values", 
                       (this.object instanceof RefObject ? "object=" + ((RefObject)this.object).refMofId() + "; " : "" ) +  
                       "feature=" + this.fieldDef.qualifiedFeatureName + "; values=" + value + "; element=" + number + "; element class=" + (number == null ? null : number.getClass().getName())
@@ -193,7 +194,7 @@ public class NumberValue
                 return formatter.format(value);
             }
             else {
-                AppLog.error(
+            	SysLog.error(
                     "Attribute value is not a Number", 
                     (this.object instanceof RefObject ? "object=" + ((RefObject)this.object).refMofId() + "; " : "" ) + 
                     "feature=" + this.fieldDef.qualifiedFeatureName + "; value=" + value + "; value class=" + (value == null ? null : value.getClass().getName())
@@ -225,9 +226,10 @@ public class NumberValue
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         Attribute attribute,
-        HtmlPage p,
+        ViewPort p,
         String id,
         String label,
         RefObject_1_0 lookupObject,
@@ -243,11 +245,8 @@ public class NumberValue
         String stringifiedValue,
         boolean forEditing
     ) throws ServiceException {
-        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();        
-        if(label == null) {
-            label = attribute.getLabel();
-            label += label.length() == 0 ? "" : ":";        
-        }
+        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();       
+        label = this.getLabel(attribute, p, label);
         if(forEditing) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0) ? 

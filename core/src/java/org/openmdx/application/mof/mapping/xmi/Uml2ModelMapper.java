@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Uml2ModelMapper.java,v 1.3 2009/05/16 22:17:50 wfro Exp $
+ * Name:        $Id: Uml2ModelMapper.java,v 1.4 2009/11/05 17:46:23 hburger Exp $
  * Description: Uml2ModelMapper
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:50 $
+ * Date:        $Date: 2009/11/05 17:46:23 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -670,7 +669,7 @@ public class Uml2ModelMapper {
     //---------------------------------------------------------------------------
     private String createId(
     ) {
-        return "_" + UUIDConversion.toUID(UUIDs.getGenerator().next());
+        return "_" + UUIDConversion.toUID(UUIDs.newUUID());
     }
 
     //---------------------------------------------------------------------------

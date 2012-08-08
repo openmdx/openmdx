@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BinaryValue.java,v 1.43 2009/05/16 23:02:57 wfro Exp $
+ * Name:        $Id: BinaryValue.java,v 1.50 2010/04/27 08:26:41 wfro Exp $
  * Description: BinaryValue
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.50 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 23:02:57 $
+ * Date:        $Date: 2010/04/27 08:26:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,17 +71,17 @@ import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.kernel.id.UUIDs;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.w3c.cci2.BinaryLargeObject;
 
@@ -176,14 +176,14 @@ public class BinaryValue
             application
         );
         // mimeType
-        AppLog.trace("getting type for " + this.fieldDef.qualifiedFeatureName + " for", this.object);
+        SysLog.trace("getting type for " + this.fieldDef.qualifiedFeatureName + " for", this.object);
         this.mimeType = BinaryValue.getMimeType(
             object,
             fieldDef.qualifiedFeatureName,
             fieldDef.mimeType
         );
         // name
-        AppLog.trace("getting name for " + this.fieldDef.qualifiedFeatureName + " for", this.object);
+        SysLog.trace("getting name for " + this.fieldDef.qualifiedFeatureName + " for", this.object);
         this.name = this.getString(this.fieldDef.qualifiedFeatureName + "Name", false);
         if(this.name == null) {
             this.name = DEFAULT_NAME;
@@ -193,8 +193,8 @@ public class BinaryValue
             featureDef = application.getModel().getElement(this.fieldDef.qualifiedFeatureName);
         }
         catch(ServiceException e) {
-            AppLog.warning("can not get feature definition");
-            AppLog.warning(e.getMessage(), e.getCause());
+        	SysLog.warning("can not get feature definition");
+        	SysLog.warning(e.getMessage(), e.getCause());
         }
         // For features for type <<stream> binary the binary value 
         // is retrieved on-demand on EVENT_DOWNLOAD
@@ -246,15 +246,15 @@ public class BinaryValue
             else {
                 bytes = (byte[])value;
             }
-            AppLog.trace("bytes", "" + (bytes == null ? -1 : bytes.length));
+            SysLog.trace("bytes", "" + (bytes == null ? -1 : bytes.length));
             this.isNull = bytes == null;
             this.downloadAction = null;        
             // Only create temporary file if the content is not null
-            // and if it muste be prepared for download. inPlace content
+            // and if it must be prepared for download. inPlace content
             // is never downloaded
             if(!this.isNull && !this.fieldDef.isInPlace) {
                 try {
-                    location = UUIDs.getGenerator().next().toString();
+                    location = UUIDs.newUUID().toString();
                     File f = new File(
                         application.getTempFileName(location, "")
                     );
@@ -265,7 +265,7 @@ public class BinaryValue
                 }
                 catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
+                    SysLog.warning(e0.getMessage(), e0.getCause());
                 }
             }
             if(!this.isNull) {
@@ -297,6 +297,7 @@ public class BinaryValue
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public Object getValue(
         boolean shortFormat
     ) {
@@ -346,7 +347,7 @@ public class BinaryValue
      * Prepares a single stringified Value to append.
      */
     protected String getStringifiedValueInternal(
-        HtmlPage p, 
+        ViewPort p, 
         Object v,
         boolean multiLine,
         boolean forEditing,
@@ -410,8 +411,9 @@ public class BinaryValue
     }
   
     //-----------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     protected void paintInPlace(
-        HtmlPage p,
+        ViewPort p,
         Action binaryValueAction,
         String label,
         String gapModifier,
@@ -420,26 +422,35 @@ public class BinaryValue
         String styleModifier
     ) throws ServiceException {
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();                
-        Map popupImages = (Map)p.getProperty(HtmlPage.PROPERTY_POPUP_IMAGES);        
-        String imageId = org.openmdx.kernel.id.UUIDs.getGenerator().next().toString();
+        Map popupImages = (Map)p.getProperty(ViewPort.PROPERTY_POPUP_IMAGES);        
+        String imageId = org.openmdx.kernel.id.UUIDs.newUUID().toString();
         CharSequence imageSrc = p.getEncodedHRef(binaryValueAction);
         if(popupImages != null) {
             popupImages.put(imageId, imageSrc);
         }
         // Single-valued BinaryValue in place
-        p.write(gapModifier); 
-        p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
-        p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " id=\"tdImage", imageId, "\">");
-        p.write("<div class=\"valuePicture\" ", styleModifier, ">");
-        p.write(p.getImg("class=\"picture\" src=\"", imageSrc, "\" id=\"image", imageId, "\" ondblclick=\"return showImage('divImgPopUp", imageId, "', 'popUpImg", imageId, "', 'tdImage", imageId, "', this.id);\" alt=\"\""));
-        p.write("</div>");
-        p.write("</td>");                                                            
+    	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+        	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
+            p.write("       <div class=\"valueL\">");
+	        p.write(p.getImg("class=\"picture\" src=\"", imageSrc, "\" id=\"image", imageId, "\" ondblclick=\"return showImage('divImgPopUp", imageId, "', 'popUpImg", imageId, "', 'tdImage", imageId, "', this.id);\" alt=\"\""));
+	        p.write("</div>");	        
+    	}
+    	else {
+	        p.write(gapModifier); 
+	        p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+	        p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " id=\"tdImage", imageId, "\">");
+	        p.write("<div class=\"valuePicture\" ", styleModifier, ">");
+	        p.write(p.getImg("class=\"picture\" src=\"", imageSrc, "\" id=\"image", imageId, "\" ondblclick=\"return showImage('divImgPopUp", imageId, "', 'popUpImg", imageId, "', 'tdImage", imageId, "', this.id);\" alt=\"\""));
+	        p.write("</div>");
+	        p.write("</td>");
+    	}
     }
     
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         Attribute attribute,
-        HtmlPage p,
+        ViewPort p,
         String id,
         String label,
         RefObject_1_0 lookupObject,
@@ -456,11 +467,8 @@ public class BinaryValue
         boolean forEditing
     ) throws ServiceException { 
         Texts_1_0 texts = this.application.getTexts();
-        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();                
-        if(label == null) {
-            label = attribute.getLabel();
-            label += label.length() == 0 ? "" : ":";        
-        }
+        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();   
+        label = this.getLabel(attribute, p, label);
         if(forEditing) {
             String idTag = id == null ? 
                 "" : 
@@ -473,64 +481,47 @@ public class BinaryValue
             p.write("<td class=\"addon\" ", rowSpanModifier, ">");            
         }
         else {
-            if(stringifiedValue.length() == 0) {
-                super.paint(
-                    attribute,
-                    p,
-                    id, 
-                    label,
-                    lookupObject,
-                    nCols,
-                    tabIndex,
-                    gapModifier,
-                    styleModifier,
-                    widthModifier,
-                    rowSpanModifier,
-                    readonlyModifier,
-                    disabledModifier,
-                    lockedModifier,
-                    stringifiedValue,
-                    forEditing
+            HttpServletRequest request = p.getHttpServletRequest();          
+            styleModifier = "style=\"height: " + (1.2+(attribute.getSpanRow()-1)*1.5) + "em\"";
+            Action binaryValueAction = (Action)this.getValue(false);
+            Set acceptedMimeTypes = this.getAcceptedMimeTypes(request);
+            // mimeType                                     
+            boolean isAcceptedMimeType = false;
+            for(Iterator i = acceptedMimeTypes.iterator(); i.hasNext(); ) {
+                if(this.getMimeType().startsWith((String)i.next())) {
+                    isAcceptedMimeType = true;
+                    break;
+                }
+            }          
+            // In place
+            if(
+                this.isInPlace() && 
+                (binaryValueAction != null) && 
+                isAcceptedMimeType
+            ) {
+                this.paintInPlace(
+                    p, 
+                    binaryValueAction, 
+                    label, 
+                    gapModifier, 
+                    rowSpanModifier, 
+                    widthModifier, 
+                    styleModifier
                 );
             }
-            else {                                            
-                Map popupImages = (Map)p.getProperty(HtmlPage.PROPERTY_POPUP_IMAGES);
-                HttpServletRequest request = p.getHttpServletRequest();          
-                styleModifier = "style=\"height: " + (1.2+(attribute.getSpanRow()-1)*1.5) + "em\"";
-                Action binaryValueAction = (Action)this.getValue(false);
-                Set acceptedMimeTypes = this.getAcceptedMimeTypes(request);
-                // mimeType                                     
-                boolean isAcceptedMimeType = false;
-                for(Iterator i = acceptedMimeTypes.iterator(); i.hasNext(); ) {
-                    if(this.getMimeType().startsWith((String)i.next())) {
-                        isAcceptedMimeType = true;
-                        break;
-                    }
-                }          
-                // In place
-                if(
-                    this.isInPlace() && 
-                    (binaryValueAction != null) && 
-                    isAcceptedMimeType
-                ) {
-                    this.paintInPlace(
-                        p, 
-                        binaryValueAction, 
-                        label, 
-                        gapModifier, 
-                        rowSpanModifier, 
-                        widthModifier, 
-                        styleModifier
-                    );
-                }
-                // Single-valued BinaryValue as link -->
-                else {
-                    p.write(gapModifier);
-                    p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
-                    p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, ">");
-                    p.write("<div class=\"field\">", attribute.getStringifiedValue(p, false, false), "</div>");
-                    p.write("</td>");
-                }
+            // Single-valued BinaryValue as link -->
+            else {
+            	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
+	                p.write("       <div class=\"valueL\">", attribute.getStringifiedValue(p, false, false), "</div>");
+            	}
+            	else {
+	                p.write(gapModifier);
+	                p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
+	                p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, ">");
+	                p.write("<div class=\"field\">", attribute.getStringifiedValue(p, false, false), "</div>");
+	                p.write("</td>");
+            	}
             }
         }
     }

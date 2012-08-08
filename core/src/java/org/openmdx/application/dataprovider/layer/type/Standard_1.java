@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.1 2009/05/26 14:31:21 wfro Exp $
+ * Name:        $Id: Standard_1.java,v 1.4 2009/12/17 12:37:34 wfro Exp $
  * Description: Standard_1 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:21 $
+ * Date:        $Date: 2009/12/17 12:37:34 $
  * ====================================================================
  *
  * This software is published under the BSD license  as listed below.
@@ -50,11 +50,35 @@
  */
 package org.openmdx.application.dataprovider.layer.type;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.Interaction;
+
+
 /**
  * Standard_1
  */
-public class Standard_1
-    extends Strict_1
-{
-    // This class is used in standard layer configuration entries
+public class Standard_1 extends State_1 {
+    
+    public Standard_1(
+    ) {
+    }
+    
+    // --------------------------------------------------------------------------
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new LayerInteraction(connection);
+    }
+                
+    // --------------------------------------------------------------------------
+    public class LayerInteraction extends State_1.StateLayerInteraction {
+        
+        public LayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
+        }
+    }
+    
 }

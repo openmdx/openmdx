@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="ltr">
 <head>
-  <title>Features based on ActiveX Control</title>
+  <title>ActiveX Controlベースの機能</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link href="_style/colors.css" rel="stylesheet" type="text/css">
   <link href="_style/default.css" rel="stylesheet" type="text/css">
@@ -20,56 +20,56 @@
   </td>
 </tr>
 </table>
-<p>Use of features based on ActiveX controls requires that<br />
+<p>ActiveX controlベースの機能を使用するためには以下の条件が必要です。<br />
 <ul>
-  <li>your browser is <strong>capable of handling ActiveX controls</strong> (e.g. Internet Explorer on MS Windows) and</li>
-  <li>security settings are such that <strong>permission is granted to load/execute ActiveX controls</strong></p></li>
+  <li>使用しているブラウザが<strong>ActiveXコントロールを処理することができる</strong> (例: MS WindowsのInternet Explorer)</li>
+  <li>ブラウザのセキュリティ設定で<strong>ActiveXコントロールの読込み/実行が許可されている</strong></p></li>
 </ul>
-<p>Depending on the feature, certain third-party software packages might also be required:</p>
+<p>機能によっては別途サードパーティのソフトウェアが必要な場合もあります。</p>
 <table class="browserHints">
   <tbody>
   <tr>
-    <td><b>Feature</b></td>
-	<td><b>Requirement</b></td>
-  <td><strong>Additional Hints </strong></td>
+    <td><b>機能</b></td>
+	<td><b>必要環境</b></td>
+  <td><strong>追加情報 </strong></td>
   </tr>
   <tr>
-    <td>MS Word XML Merge</td>
-    <td>client-based installation of MS Word 2000 or newer</td>
-  <td><a href="#trustedsites">Trusted Sites</a>, <a href="#activexsettings">ActiveX Permissions</a></td>
+    <td>MS Word XMLマージ</td>
+    <td>client-based installation of MS Word 2000 以上</td>
+  <td><a href="#信頼済みサイト">信頼済みサイト</a>, <a href="#ActiveX設定">ActiveXの許可</a></td>
   </tr>
   <tr>
-    <td>MS Excel XML Merge </td>
-    <td>client-based installation of MS Excel 2000 or newer</td>
+    <td>MS Excel XMLマージ</td>
+    <td>client-based installation of MS Excel 2000 以上</td>
   <td>&nbsp;</td>
   </tr>
   <tr>
-    <td>XML Export to MS Outlook</td>
-    <td>client-based installation of MS Outlook 2000 or newer</td>
+    <td>MS OutlookへXMLエクスポート</td>
+    <td>client-based installation of MS Outlook 2000 以上</td>
   <td>&nbsp;</td>
   </tr>
   <tr>
-    <td>XML Import from MS Outlook</td>
-    <td>client-based installation of MS Outlook 2000 or newer </td>
+    <td>MS OutlookからXMLインポート</td>
+    <td>client-based installation of MS Outlook 2000 以上 </td>
   <td>&nbsp;</td>
   </tr>
   </tbody>
 </table>
-<a name="trustedsites"></a><p class="hh1">Trusted Sites (Internet Explorer)</p>
-<p>For security reasons we do not recommend that you enable ActiveX controls for the <strong>Internet Zone</strong>. It is better to add the site running openCRX to your <strong>Trusted sites zone</strong> or to your <strong>Local intranet zone</strong> (only if the site really is in your Intranet) and then <a href="#activexsettings">enable ActiveX controls</a> for the respective zone. Below are examples for adding the openCRX demo server (<strong><font color="#FF0000">demo.opencrx.org</font></strong>) to your Trusted sites zone and adding a local openCRX server (<strong><font color="#FF0000">10.1.1.20</font></strong>) to the Local intranet zone. </p>
+<a name="信頼済みサイト"></a><p class="hh1">信頼済みサイト (Internet Explorer)</p>
+<p>セキュリティ上、<strong>インターネット</strong>ゾーンでActiveXコントロールを有効にするのは推奨できません。 openCRXが稼動しているサイトを <strong>信頼済みサイト</strong>ゾーン、もしくは<strong>ローカル イントラネット</strong>ゾーン(サイトが実際にイントラネット環境にある場合)に追加し、その上でそれぞれのゾーンで<a href="#ActiveX設定">ActiveXコントロールを有効にする</a>のが良いでしょう。以下では例としてopenCRXデモサーバ(<strong><font color="#FF0000">demo.opencrx.org</font></strong>)を信頼済みサイトゾーンに追加し、ローカルopenCRXサーバ(<strong><font color="#FF0000">10.1.1.20</font></strong>)をローカル イントラネットゾーンに追加しています。</p>
 <p><img src="images/ie_trusted_sites.png" width="384" height="342"> <img src="images/ie_local_intranet_zone.png" width="384" height="342"></p>
-<a name="activexsettings"></a>
-<p class="hh1">ActiveX Permissions  (Internet Explorer)</p>
-<p>For security reasons we do not recommend that you enable ActiveX controls for the <strong>Internet Zone</strong>. It is better to add the site running openCRX to your <strong><a href="#trustedsites">Trusted sites zone</a></strong> or to your <strong><a href="#trustedsites">Local intranet zone</a></strong> (only if the site really is in your Intranet) and then enable ActiveX controls for the respective zone as follows:</p>
-<p class="hh1">Where to find your ActiveX security settings:</p>
+<a name="ActiveX設定"></a>
+<p class="hh1">ActiveXの許可 (Internet Explorer)</p>
+<p>セキュリティ上、<strong>インターネット</strong>ゾーンでActiveXコントロールを有効にするのは推奨できません。 openCRXが稼動しているサイトを <strong><a href="#信頼済みサイト">信頼済みサイト</a></strong> ゾーン、もしくは<strong><a href="#信頼済みサイト">ローカル イントラネット</a></strong>ゾーン(サイトが実際にイントラネット環境にある場合)に追加し、その上でそれぞれのゾーンで以下のようにActiveXコントロールを有効にするのが良いでしょう：</p>
+<p class="hh1">ActiveXセキュリティ設定を開くには:</p>
 
 <table class="activeXHints">
   <tr>
-    <td><b>Platform</b></td>
-    <td colSpan=2><b>Browser</b> &amp; <b>Version</b></td>
-    <td><b>Find ActiveX Settings in ...</b></td>
-    <td><strong>ActiveX enabled (with pop-up warnings)</strong></td>
-    <td><strong>ActiveX enabled (without pop-up warnings)</strong></td>
+    <td><b>プラットフォーム</b></td>
+    <td colSpan=2><b>ブラウザ</b> &amp; <b>バージョン</b></td>
+    <td><b>ActiveX 設定の場所</b></td>
+    <td><strong>ActiveX有効(ポップアップ警告あり)</strong></td>
+    <td><strong>ActiveX有効(ポップアップ警告なし)</strong></td>
   </tr>
   <tr>
     <td align="center">
@@ -81,8 +81,9 @@
 	  <FONT size=-1>Internet<br />Explorer</FONT>
 	</td>
     <td>6.x</td>
-    <td>Tools &gt; Internet Options &gt; Security ...<br />
-      ... Custom Levels &gt; ActiveX controls and plug-ins</td>
+    <td>ツール &gt; インターネットオプション ...<br />
+	セキュリティ &gt; レベルのカスタマイズ ...<br />
+      	ActiveXコントロールとプラグイン</td>
     <td><img src="images/ie_activex_settings_secure.png" width="352" height="666"></td>
     <td><img src="images/ie_activex_settings_convenient.png" width="352" height="666"></td>
   </tr>

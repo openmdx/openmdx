@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BinaryLargeObjects.java,v 1.12 2009/05/26 14:00:11 wfro Exp $
+ * Name:        $Id: BinaryLargeObjects.java,v 1.17 2010/03/02 18:27:36 hburger Exp $
  * Description: Binary Large Object Factory 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:00:11 $
+ * Date:        $Date: 2010/03/02 18:27:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,14 +51,12 @@
 package org.w3c.cci2;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -68,44 +66,186 @@ import java.net.URLConnection;
 public class BinaryLargeObjects {
 
     /**
-     * To avoid instantiation
+     * Constructor
      */
-    protected BinaryLargeObjects() {
-        super();
+    private BinaryLargeObjects() {
+        // To avoid instantiation
     }
 
+    /**
+     * Default capacity for stream copy
+     */
+    private final static int CAPACITY = 10000;
+
+    /**
+     * Create a <code>BinaryLargeObject</code> facade for the given byte array
+     * 
+     * @param source
+     * 
+     * @return a <code>BinaryLargeObject</code> facade for the given byte array
+     */
     public static BinaryLargeObject valueOf(
         byte[] source
     ){
-        return new ArrayLargeObject(source);
+        return new ArrayLargeObject(
+            source,
+            0,
+            source.length
+        );
+    }
+
+    /**
+     * Create a <code>BinaryLargeObject</code> facade for the given byte array
+     * 
+     * @param source
+     * @param offset
+     * @param length
+     * 
+     * @return a <code>BinaryLargeObject</code> facade for the given byte array
+     */
+    public static BinaryLargeObject valueOf(
+        byte[] source,
+        int offset,
+        int length
+    ){
+        return new ArrayLargeObject(
+            source,
+            offset,
+            length
+        );
+    }
+
+    /**
+     * Create a <code>BinaryLargeObject</code> facade for the given URL
+     * 
+     * @param source
+     * 
+     * @return a <code>BinaryLargeObject</code> facade for the given URL
+     */
+    public static BinaryLargeObject valueOf(
+        URL source
+    ){
+        return new URLLargeObject(source);
     }
     
+    /**
+     * Create a <code>BinaryLargeObject</code> facade for the given file
+     * 
+     * @param source
+     * 
+     * @return a <code>BinaryLargeObject</code> facade for the given file
+     */
+    public static BinaryLargeObject valueOf(
+        File source
+    ){
+        return new FileLargeObject(source);
+    }
+
+    /**
+     * Create a <code>BinaryLargeObject</code> facade for the given stream
+     * 
+     * @param source
+     * 
+     * @return a <code>BinaryLargeObject</code> facade for the given stream
+     */
+    public static BinaryLargeObject valueOf(
+        InputStream source
+    ){
+        return new StreamLargeObject(source);
+    }
+
+    /**
+     * Create a <code>BinaryLargeObject</code> facade for the given stream
+     * 
+     * @param source
+     * @param length
+     * 
+     * @return a <code>BinaryLargeObject</code> facade for the given stream
+     */
+    public static BinaryLargeObject valueOf(
+        InputStream source,
+        Long length
+    ){
+        return new StreamLargeObject(source, length);
+    }
+    
+    /**
+     * A negative length is converted to <code>null</code>.
+     * 
+     * @param length
+     * 
+     * @return the length as object
+     */
+    public static Long asLength(
+        long length
+    ){
+        return length < 0 ? null : Long.valueOf(length);
+    }
+
+    /**
+     * Copy an input stream's content to an output stream
+     * @param source
+     * @param position
+     * @param target
+     * 
+     * @return the number of byte written to the output stream
+     * @throws IOException
+     */
+    public static long streamCopy(
+        InputStream source,
+        long position,
+        OutputStream target
+    ) throws IOException {
+        byte[] buffer = new byte[CAPACITY];
+        long count = 0l;
+        if(position != 0l) {
+            source.skip(position);
+        }
+        int n = source.read(buffer);
+        while(n > 0) {
+            count += n;
+            target.write(buffer, 0, n);
+            n = source.read(buffer);
+        }
+        return count;
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Class ArrayLargeObject
+    //------------------------------------------------------------------------
+
     /**
      * Array BLOB
      */
     private static class ArrayLargeObject implements BinaryLargeObject {
-        
+
         /**
          * Constructor 
          *
          * @param value
+         * @param offset
+         * @param length
          */
         ArrayLargeObject(
-            final byte[] value
+            final byte[] value,
+            final int offset,
+            final int length
         ) {
             this.value = value;
+            this.offset = offset;
+            this.length = length;
         }
 
-        /**
-         * 
-         */
         private final byte[] value;
+        private final int offset;
+        private final int length;
 
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
         public InputStream getContent() {
-            return new ByteArrayInputStream(this.value);
+            return new ByteArrayInputStream(this.value, this.offset, this.length);
         }
 
         /* (non-Javadoc)
@@ -113,7 +253,7 @@ public class BinaryLargeObjects {
          */
         public Long getLength(
         ){
-            return Long.valueOf(this.value.length);
+            return Long.valueOf(this.length);
         }
 
         /* (non-Javadoc)
@@ -123,38 +263,21 @@ public class BinaryLargeObjects {
             OutputStream stream, 
             long position
         ) throws IOException {
-            int length = (int) (this.value.length - position);
-            if(length < 0) throw new EOFException(
-                "Position " + position + " is larger than the objects length " + this.value.length
+            int offset = this.offset + (int)position;
+            int length =  this.length - (int)position;
+            if (length < 0) throw new EOFException(
+                "Position " + position + " is larger than the objects length " + this.length
             );
-            stream.write(this.value, (int) position, length);
+            stream.write(this.value, offset, length);
         }
 
     }
        
+    
     //------------------------------------------------------------------------
-    private static class BinarySource_1InputStream 
-    extends ByteStringInputStream {
+    // Class URLLargeObject
+    //------------------------------------------------------------------------
 
-        public BinarySource_1InputStream(
-            ByteString bytes
-        ) {
-            super(bytes);
-        }
-
-        public long length(
-        ) {
-            return getString().length();
-        }
-
-    }
-    
-    public static BinaryLargeObject valueOf(
-        URL source
-    ){
-        return new URLLargeObject(source);
-    }
-    
     /**
      * URL BLOB
      */
@@ -231,12 +354,11 @@ public class BinaryLargeObjects {
         
     }
 
-    public static BinaryLargeObject valueOf(
-        File source
-    ){
-        return new FileLargeObject(source);
-    }
-    
+
+    //------------------------------------------------------------------------
+    // Class FileLargeObject
+    //------------------------------------------------------------------------
+
     /**
      * File BLOB
      */
@@ -291,97 +413,120 @@ public class BinaryLargeObjects {
 
     }
 
+
     //------------------------------------------------------------------------
-    public static class BinaryHolder implements Serializable  {
-    
+    // Class StreamLargeObject
+    //------------------------------------------------------------------------
+
+    /**
+     * The underlying stream may be retrieved once only
+     */
+    public static class StreamLargeObject implements BinaryLargeObject {
+        
         /**
          * Constructor 
          *
          * @param stream
+         */
+        public StreamLargeObject(
+            final InputStream stream
+        ){
+            this(stream, getLength(stream));
+        }
+
+        /**
+         * Constructor 
+         *
+         * @param stream
+         * @param length
+         */
+        StreamLargeObject(
+            final InputStream stream,
+            final Long length
+        ){
+            this.stream = stream;
+            this.length = length;
+        }
+        
+        
+        /**
+         * 
+         */
+        private InputStream stream;
+
+        /**
+         * 
+         */
+        private Long length;
+
+        /**
+         * Determine the large objetc's size
+         * 
+         * @param stream
+         * 
+         * @return the large objetc's size
+         */
+        private static Long getLength(
+            InputStream stream
+        ){
+            try {
+                return stream instanceof ByteArrayInputStream ? Long.valueOf(stream.available()) : null;
+            } catch (IOException exception) {
+                return null;
+            }
+        }
+
+        /**
+         * Provide the input stream content
+         * 
+         * @return the content
          * 
          * @throws IOException
          */
-        public BinaryHolder(
-            InputStream stream
+        protected InputStream newContent(
         ) throws IOException {
-            if(stream instanceof ByteStringInputStream) {
-                this.string = ((ByteStringInputStream)stream).getString();
+            throw new IllegalStateException("The content may be retrieved once only");
+        }
+        
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.BinaryLargeObject#getContent()
+         */
+        public InputStream getContent(
+        ) throws IOException {
+            if(this.stream == null) {
+                return newContent();
             } else {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                int b;
-                while((b = stream.read()) != -1) {
-                    out.write(b);
-                }
-                this.string = new ByteString(out.toByteArray());
+                InputStream stream = this.stream;
+                this.stream = null;
+                return stream;
             }
         }
-    
-        /**
-         * Implements <code>Serializable</code>
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
          */
-        private static final long serialVersionUID = 1300727842760003691L;
-    
-        /**
-         * The content
+        public void getContent(
+            OutputStream stream, 
+            long position
+        ) throws IOException {
+            Long length = position + streamCopy(
+                getContent(),
+                position,
+                stream
+            );
+            if(this.length == null) {
+                this.length = length;
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.LargeObject#getLength()
          */
-        private final ByteString string;
-    
-        /**
-         * Create an input stream
-         * 
-         * @return a newly created input stream
-         */
-        public BinarySource_1InputStream toStream(
-        ){
-            return new BinarySource_1InputStream(this.string);
+        public Long getLength(
+        ) throws IOException {
+            return this.length;
         }
-    
+        
     }
-
-    /**
-     * A negative length is converted to <code>null</code>.
-     * 
-     * @param length
-     * 
-     * @return the length as object
-     */
-    public static Long asLength(
-        long length
-    ){
-        return length < 0 ? null : Long.valueOf(length);
-    }
-
-    /**
-     * Copy an input stream's content to an output stream
-     * @param source
-     * @param position
-     * @param target
-     * 
-     * @return the number of byte written to the output stream
-     * @throws IOException
-     */
-    public static long streamCopy(
-        InputStream source,
-        long position,
-        OutputStream target
-    ) throws IOException {
-        byte[] buffer = new byte[CAPACITY];
-        long count = 0l;
-        if(position != 0l) {
-            source.skip(position);
-        }
-        int n = source.read(buffer);
-        while(n > 0) {
-            count += n;
-            target.write(buffer, 0, n);
-            n = source.read(buffer);
-        }
-        return count;
-    }
-
-    /**
-     * Default capacity for stream copy
-     */
-    private final static int CAPACITY = 10000;
-
+       
 }

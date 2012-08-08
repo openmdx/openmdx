@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ModelAwareFilter.java,v 1.7 2009/02/10 16:36:37 hburger Exp $
+ * Name:        $Id: ModelAwareFilter.java,v 1.8 2010/03/31 14:39:23 hburger Exp $
  * Description: Model Aware Filter
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/10 16:36:37 $
+ * Date:        $Date: 2010/03/31 14:39:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,26 +69,17 @@ public abstract class ModelAwareFilter
 
     /**
      * Constructor 
-     * 
-     * @param model 
      * @param filter
      * 
      * @exception   NullPointerException
      *              if the filter is <code>null</code>
      */
     protected ModelAwareFilter(
-        Model_1_0 model, 
         FilterProperty[] filter
     ){
         super(filter);
-        this.model = model;
     }
 
-    /**
-     * 
-     */
-    private transient Model_1_0 model;
-    
     /**
      * 
      * @param objectClass
@@ -102,9 +93,9 @@ public abstract class ModelAwareFilter
         );
     }
     
-    protected Model_1_0 getModel(
+    protected final Model_1_0 getModel(
     ) {
-        return this.model == null ? this.model = Model_1Factory.getModel() : this.model;        
+        return Model_1Factory.getModel();        
     }
 
     /**

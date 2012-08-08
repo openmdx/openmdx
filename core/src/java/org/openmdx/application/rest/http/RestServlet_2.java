@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestServlet_2.java,v 1.12 2009/06/07 22:26:59 wfro Exp $
+ * Name:        $Id: RestServlet_2.java,v 1.58 2010/04/28 12:49:02 hburger Exp $
  * Description: REST Servlet 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.58 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/07 22:26:59 $
+ * Date:        $Date: 2010/04/28 12:49:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2009, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,20 +50,23 @@
  */
 package org.openmdx.application.rest.http;
 
+import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isConnectionObjectIdentifier;
+import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isControlObjectType;
+import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isTransactionCommitIdentifier;
+import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isTransactionObjectIdentifier;
+
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
+import java.util.ListIterator;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
+import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.MappedRecord;
+import javax.resource.cci.Record;
 import javax.resource.cci.RecordFactory;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -71,1010 +74,874 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.datatype.XMLGregorianCalendar;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
 import org.openmdx.application.rest.spi.InboundConnectionFactory_2;
-import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.io.HttpHeaderFieldContent;
+import org.openmdx.base.io.HttpHeaderFieldValue;
 import org.openmdx.base.mof.cci.Multiplicities;
-import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.InteractionSpecs;
+import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.resource.spi.ResourceExceptions;
+import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.cci.RestConnectionSpec;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
-import org.openmdx.base.text.conversion.Base64;
-import org.openmdx.base.text.conversion.UUIDConversion;
-import org.openmdx.base.text.format.DateFormat;
+import org.openmdx.base.rest.spi.RestFormat;
+import org.openmdx.base.xml.stream.XMLOutputFactories;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.kernel.id.cci.UUIDGenerator;
 import org.openmdx.kernel.log.SysLog;
-import org.w3c.cci2.BinaryLargeObject;
-import org.w3c.spi2.Datatypes;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * REST Servlet
  */
 public class RestServlet_2 extends HttpServlet {
 
-    //-----------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
-    protected IndexedRecord singletonList(
-        Object value
-    ) throws ResourceException{
-        RecordFactory factory = this.connectionFactory.getRecordFactory();
-        if(factory instanceof ExtendedRecordFactory) {
-            return ((ExtendedRecordFactory)factory).singletonIndexedRecord(
-                Multiplicities.LIST,
-                null,
-                value
-            );
-        } else {
-            IndexedRecord record = factory.createIndexedRecord(
-                Multiplicities.LIST
-            );
-            record.add(value);
-            return record;
-        }
-    }
-    
-    //-----------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
-    protected MappedRecord singletonMap(
-        String key,
-        Object value
-    ) throws ResourceException{
-        RecordFactory factory = this.connectionFactory.getRecordFactory();
-        if(factory instanceof ExtendedRecordFactory) {
-            return ((ExtendedRecordFactory)factory).singletonMappedRecord(
-                Multiplicities.MAP,
-                null,
-                key,
-                value
-            );
-        } else {
-            MappedRecord record = factory.createMappedRecord(
-                Multiplicities.MAP
-            );
-            record.put(key, value);
-            return record;
-        }
-    }
-    
-    //-----------------------------------------------------------------------
+    private static final long serialVersionUID = -4403464830407956377L;
+    private final static int DEFAULT_POSITION = 0;
+    private final static int DEFAULT_SIZE = 25;
+    protected ConnectionFactory connectionFactory = null;
+
     /**
-     * Retrieve the feature definition
+     * Tells whether the session is in auto-commit mode
      * 
-     * @param typeName
-     * @param featureName
+     * @param request
      * 
-     * @return the feature definition
-     * 
-     * @throws ServiceException
+     * @return <code>true</code> if the session is in auto-commit mode
      */
-    protected ModelElement_1_0 getFeatureDef(
-        String typeName,
-        String featureName
-    ) throws ServiceException{
-        return this.model.getFeatureDef(
-            this.model.getElement(typeName),
-            featureName,
-            false
+    protected boolean isAutoCommitting(
+        HttpServletRequest request
+    ){
+        return Boolean.TRUE.equals(
+            request.getSession(true).getAttribute("org.openmdx.rest.AutoCommit")
         );
     }
-    
-    //-----------------------------------------------------------------------
+
     /**
-     * Retrieve the feature type
+     * Tells whether the values shall be retained
      * 
-     * @param featureDef feature definition
+     * @param request
      * 
-     * @return the feature type
-     * 
-     * @throws ServiceException
+     * @return <code>true</code> if the values shall be retained
      */
-    protected String getFeatureType(
-        ModelElement_1_0 featureDef
-    ) throws ServiceException{
-        return featureDef == null ? PrimitiveTypes.STRING : (String) this.model.getElementType(
-            featureDef
-        ).objGetValue(
-            "qualifiedName"
-        );
+    protected boolean isRetainValues(
+        HttpServletRequest request
+    ){
+        String interactionVerb = request.getHeader("interaction-verb");
+        return interactionVerb == null || Integer.parseInt(interactionVerb) != InteractionSpec.SYNC_SEND;
     }
     
-    //-----------------------------------------------------------------------
-    protected Interaction getInteraction(
-        HttpServletRequest req 
+    /**
+     * Retrieve the connection associated with the current session
+     * 
+     * @param request
+     * 
+     * @return the connection associated with the current session
+     * 
+     * @throws ServletException
+     */
+    protected Connection getConnection(
+        HttpServletRequest request
     ) throws ServletException {
         try {
-            String key = Connection.class.getName();
-            HttpSession session = req.getSession(true);
-            Connection connection = (Connection)req.getSession().getAttribute(key);
+            HttpSession session = request.getSession(true);
+            Connection connection = (Connection)session.getAttribute(Connection.class.getName());
             if(connection == null) {
-                req.getSession().setAttribute(
-                    key, 
+                session.setAttribute(
+                    "org.openmdx.rest.AutoCommit",
+                    Boolean.TRUE
+                );
+                session.setAttribute(
+                    Connection.class.getName(), 
                     connection = this.connectionFactory.getConnection(
-                        InboundConnectionFactory_2.newConnectionSpec(
-                            req.getRemoteUser(), 
+                        new RestConnectionSpec(
+                            request.getRemoteUser(), 
                             session.getId()
                         )
                     )
                 );
             }
-            return connection.createInteraction();
+            return connection;
         } catch (ResourceException exception) {
-            throw new ServletException(
-                "Interaction acquisition failure",
-                exception
+            throw Throwables.log(
+                new ServletException(
+                    "Connection could not be established",
+                    exception
+                )
             );
         }
     }
 
-    //-----------------------------------------------------------------------
-    protected void closeInteraction(
-        Interaction interaction
+    /**
+     * Retrieve an interaction associated with the current connection
+     * 
+     * @param req
+     * 
+     * @return an interaction associated with the current connection
+     * 
+     * @throws ServletException
+     */
+    protected Interaction getInteraction(
+        HttpServletRequest req
     ) throws ServletException {
+        Connection connection = getConnection(req);
         try {
-            interaction.close();
+            return connection.createInteraction();
         } catch (ResourceException exception) {
-            throw new ServletException(
-                "Interaction close failure",
-                exception
+            throw Throwables.log(
+                new ServletException(
+                    "Interaction could not be created",
+                    exception
+                )
             );
         }
     }
-    
-    //------------------------------------------------------------------------
-    protected XMLReader getXMLReader(
-        DefaultHandler handler        
-    ) throws ServiceException {        
-        XMLReader reader = xmlReaders.get();
-        reader.setContentHandler(handler);
-        return reader;
-    }
-    
-    //-----------------------------------------------------------------------
-    protected String getHRef(
-        HttpServletRequest req,
-        String ref
+
+    /**
+     * Extract the XRI from the URL
+     * 
+     * @param request
+     * 
+     * @return the requets's XRI
+     */
+    private Path getXri(
+        HttpServletRequest request 
     ) {
-       StringBuffer requestUrl = req.getRequestURL();
-       String path = requestUrl.substring(0, requestUrl.indexOf(req.getServletPath()));
-       String href = path + "/" + ref;
-       return href;
-    }
-    
-    //-----------------------------------------------------------------------
-    protected String getHRef(
-        HttpServletRequest req,
-        Path identity
-    ) {
-        String ref = identity.toXRI();
-        return this.getHRef(req, ref.substring(15));
-    }
-    
-    //-----------------------------------------------------------------------
-    protected Path getXri(
-        HttpServletRequest req 
-    ) {
-       String uri = req.getServletPath().substring(1);
+        String uri = request.getServletPath().substring(1);
         return new Path(
-            uri.startsWith("@openmdx") ? uri : "xri:@openmdx*" + uri
+            uri.startsWith("@openmdx") ? uri : 
+            uri.startsWith("!") ? "xri://@openmdx" + uri :
+            "xri://@openmdx*" + uri
+        );
+    }
+
+    /**
+     * Map an openMDX exception code to a HTTP status code
+     * 
+     * @param exceptionCode an openMDX exception code
+     * 
+     * @return the corresponding HTTP status code
+     */
+    private static int toStatusCode(
+        int exceptionCode
+    ){
+        return
+            exceptionCode == BasicException.Code.NOT_FOUND ? HttpServletResponse.SC_NOT_FOUND :
+            exceptionCode == BasicException.Code.AUTHORIZATION_FAILURE ? HttpServletResponse.SC_FORBIDDEN :
+            exceptionCode == BasicException.Code.CONCURRENT_ACCESS_FAILURE ? HttpServletResponse.SC_PRECONDITION_FAILED :
+            exceptionCode == BasicException.Code.ILLEGAL_STATE ? HttpServletResponse.SC_CONFLICT :
+            exceptionCode == BasicException.Code.NOT_IMPLEMENTED ? HttpServletResponse.SC_NOT_IMPLEMENTED :
+            HttpServletResponse.SC_BAD_REQUEST;
+    }
+    
+    /**
+     * Exception handler
+     * 
+     * @param request 
+     * @param resp
+     * @param exception
+     */
+    protected void handleException(
+        HttpServletRequest request,
+        HttpServletResponse response, 
+        ResourceException exception
+    ) {
+        BasicException exceptionStack = BasicException.toExceptionStack(exception);
+        while(
+            exceptionStack.getExceptionCode() == BasicException.Code.GENERIC && 
+            exceptionStack.getCause() != null
+        ) {
+            exceptionStack = exceptionStack.getCause();
+        }
+        SysLog.detail("Resource Exception", exceptionStack);
+        response.setStatus(toStatusCode(exceptionStack.getExceptionCode()));
+        RestFormat.format(
+            new ServletTarget(request, response), 
+            exceptionStack
+        );
+    }
+
+    /**
+     * Exception handler
+     * 
+     * @param request 
+     * @param response
+     * @param exception
+     */
+    protected void handleException(
+        HttpServletRequest request, 
+        HttpServletResponse response, 
+        Exception exception
+    ) {
+        BasicException exceptionStack = BasicException.toExceptionStack(exception);
+        SysLog.error("Internal Server Error", exceptionStack);
+        request.getSession().removeAttribute(Connection.class.getName());
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        RestFormat.format(
+            new ServletTarget(request, response), 
+            exceptionStack
         );
     }
     
-    //-----------------------------------------------------------------------
-    protected void printValue(
-        int indent,
-        String tag,
-        HttpServletRequest req,
-        PrintWriter pw,
-        Object value
-    ) throws IOException {
-        if(value == null) {
-            // not present --> value == null
-        } 
-        else if(value instanceof Path) {
-            pw.print(INDENTS[indent]);
-            pw.print("<");
-            pw.print(tag);
-            pw.print(" href=\"");
-            pw.print(this.getHRef(req, (Path)value));
-            pw.println("\">");
-            pw.print(((Path)value).toXRI());
-            pw.print("</");                
-            pw.print(tag);
-            pw.println(">");
-        }
-        else {
-            pw.print(INDENTS[indent]);
-            pw.print("<");
-            pw.print(tag);
-            pw.print(">");
-            if(value instanceof String) {
-                pw.print("<![CDATA[");
-                pw.print(value.toString());
-                pw.print("]]>");
-            }
-            else if(value instanceof Date) {
-                pw.print(DateFormat.getInstance().format((Date)value));                    
-            }
-            else if(value instanceof byte[]) {
-                pw.print(Base64.encode((byte[])value));
-            }
-            else if(value instanceof BinaryLargeObject) {
-                BinaryLargeObject lob = (BinaryLargeObject)value;
-                Base64.encode(lob.getContent(), pw);
-            }
-            else if(value instanceof XMLGregorianCalendar) {
-                XMLGregorianCalendar cal = (XMLGregorianCalendar)value;
-                pw.print(cal.getYear());                    
-                pw.print(cal.getMonth() < 10 ? "0" + cal.getMonth(): cal.getMonth());                    
-                pw.print(cal.getDay() < 10 ? "0" + cal.getDay() : cal.getDay());                    
-            }
-            else {
-                pw.print(value.toString());
-            }
-            pw.print("</");                
-            pw.print(tag);
-            pw.println(">");
-        }
-    }
-    
-    //-----------------------------------------------------------------------
-    protected void printRecord(
-        int indent,
-        HttpServletRequest req,
-        PrintWriter pw,
-        MappedRecord record,
-        String id,
-        String href
-    ) throws IOException {
-        String tag = record.getRecordName().replace(':', '.');
-        pw.print(INDENTS[indent]);
-        pw.print("<");
-        pw.print(tag);
-        pw.print(" id=\"");
-        pw.print(id);
-        pw.print("\" href=\"");
-        pw.print(href);
-        pw.println("\">");
-        for(Object e : record.entrySet()) {
-            Map.Entry<?,?> entry = (Map.Entry<?,?>) e;
-            String feature = (String)entry.getKey();
-            Object value = entry.getValue();
-            try {
-                if(value instanceof Collection<?>) {
-                    Collection<?> values = (Collection<?>)value;
-                    // not present --> collection is empty
-                    if(values.isEmpty()) {
-                        pw.print(INDENTS[indent+1]);
-                        pw.print("<");
-                        pw.print(feature);
-                        pw.println(" />");
-                    } 
-                    else {
-                        pw.print(INDENTS[indent+1]);
-                        pw.print("<");
-                        pw.print(feature);
-                        pw.println(">");
-                        for(Object v : values) try {
-                            this.printValue(
-                                indent+2,
-                                "_item",
-                                req,
-                                pw,
-                                v
-                            );
-                        } 
-                        catch(Exception exception) {
-                            if(SysLog.isTraceOn()) SysLog.trace(
-                                "Collection element print failure", 
-                                new ServiceException(
-                                    exception,
-                                    BasicException.Code.DEFAULT_DOMAIN,
-                                    BasicException.Code.PROCESSING_FAILURE,
-                                    "Unable to retrieve feature value",
-                                    new BasicException.Parameter("href", href),
-                                    new BasicException.Parameter("feature", feature)
-                                )
-                           );
-                        }
-                        pw.print(INDENTS[indent+1]);
-                        pw.print("</");
-                        pw.print(feature);
-                        pw.println(">");
-                    }
-                }
-                else {
-                    this.printValue(
-                        indent+1,
-                        feature,
-                        req,
-                        pw,
-                        value
-                    );
-                }                
-            } 
-            catch(Exception exception) {
-                if(SysLog.isTraceOn()) SysLog.trace(
-                    "Collection element print failure", 
-                    new ServiceException(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.PROCESSING_FAILURE,
-                        "Unable to retrieve feature value",
-                        new BasicException.Parameter("href", href),
-                        new BasicException.Parameter("feature", feature)
-                    )
-               );
-            }
-        }
-        pw.print(INDENTS[indent]);
-        pw.print("</");
-        pw.print(tag);
-        pw.println(">");
-    }
-
-    //-----------------------------------------------------------------------
-    protected MappedRecord newValueRecord(
-        HttpServletRequest req
-    ) throws ServiceException {
-        RecordHandler handler = new RecordHandler();
-        try {
-            this.getXMLReader(handler).parse(
-                new InputSource(req.getInputStream())
-            );
-            return handler.getValues();
-        } catch(Exception e) {
-            throw new ServiceException(e);
-        }
-    }
-
-    //-----------------------------------------------------------------------
-    protected String uuidAsString(
-    ) {
-        return UUIDConversion.toUID(this.uuidGenerator.next());
-    }
-
-    //-----------------------------------------------------------------------
-    protected void handleException(
-        Exception e,
-        Interaction interaction,
-        HttpServletResponse resp,
-        boolean isLocalTransaction
-    ) {
-        ServiceException e0 = new ServiceException(e);
-        if(isLocalTransaction) {
-           try {
-               interaction.getConnection().getLocalTransaction().rollback();
-           } catch(Exception e1) {}
-        }
-        if(e0.getExceptionCode() == BasicException.Code.NOT_FOUND) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);                
-        }
-        else if(e0.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE) {
-            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);                
-        }
-        else {
-            e0.log();
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }        
-    }
-    
-    //-----------------------------------------------------------------------
+    /**
+     * Servlet initialization
+     * 
+     * @param config servlet configuration
+     * 
+     * @exception ServletExcetpion
+     */
     @Override
     public void init(
         ServletConfig config
     ) throws ServletException {
         super.init(config);
         try {
-            try {
-                this.model = Model_1Factory.getModel();
-            }
-            catch(Exception e) {
-                System.out.println("Can not initialize model repository " + e.getMessage());
-                System.out.println(new ServiceException(e).getCause());
-            }
+            String entityManagerFactoryName = config.getInitParameter("entity-manager-factory-name");
             this.connectionFactory = InboundConnectionFactory_2.newInstance(
-                "java:comp/env/ejb/EntityManagerFactory"
+                entityManagerFactoryName == null ? "EntityManagerFactory" : entityManagerFactoryName
             );
-        }
-        catch(Exception e) {
-            new ServiceException(e).log();
-            throw new ServletException(e);            
+        } catch(Exception exception) {
+            throw Throwables.log(
+                new ServletException(exception)
+            );            
         }
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Re-fetch objects afert auto-commit
+     * 
+     * @param interaction
+     * @param reply the list to be updated
+     * 
+     * @throws ResourceException
+     */
+    @SuppressWarnings(
+        {"unchecked", "cast"}
+    )
+    private void reFetch(
+        Interaction interaction,
+        IndexedRecord reply
+    ) throws ResourceException {
+        for(
+            ListIterator i = ((IndexedRecord)reply).listIterator();
+            i.hasNext();
+        ){
+            Object oldObject = i.next();
+            if(oldObject instanceof Record) {
+                Record oldRecord = (Record) oldObject;
+                if(Object_2Facade.isDelegate(oldRecord)) {
+                    Path xri = Object_2Facade.getPath((MappedRecord) oldRecord);
+                    RecordFactory factory = this.connectionFactory.getRecordFactory();
+                    IndexedRecord newRequest;
+                    if(factory instanceof ExtendedRecordFactory) {
+                        newRequest = ((ExtendedRecordFactory)factory).singletonIndexedRecord(
+                            Multiplicities.LIST,
+                            null,
+                            xri
+                        );
+                    } else {
+                        newRequest = factory.createIndexedRecord(
+                            Multiplicities.LIST
+                        );
+                        newRequest.add(xri);
+                    }
+                    Record newReply = interaction.execute(
+                        InteractionSpecs.getRestInteractionSpecs(true).GET,
+                        newRequest
+                    );
+                    if(newReply instanceof IndexedRecord) {
+                        IndexedRecord newResultRecord = (IndexedRecord) newReply;
+                        if(!newResultRecord.isEmpty()) {
+                            i.set(newResultRecord.get(0));
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    /**
+     * Execution
+     * 
+     * @param interaction
+     * @param autoCommit
+     * @param reFetchAfterAutoCommit
+     * @param interactionSpec
+     * @param input
+     * 
+     * @return the reply
+     * 
+     * @throws ResourceException
+     */
+    protected Record execute(
+        Interaction interaction,
+        boolean autoCommit,
+        boolean reFetchAfterAutoCommit,
+        RestInteractionSpec interactionSpec, 
+        Record input
+    ) throws ResourceException {
+        if(autoCommit) {
+            LocalTransaction transaction = interaction.getConnection().getLocalTransaction(); 
+            transaction.begin();
+            try {
+                Record reply = interaction.execute(
+                    interactionSpec, 
+                    input
+                );                
+                transaction.commit();
+                if(reFetchAfterAutoCommit && reply instanceof IndexedRecord) {
+                    reFetch(interaction, (IndexedRecord)reply);
+                }
+                return reply; 
+            } catch (ResourceException exception) {
+                transaction.rollback();
+                throw exception;
+            }
+        } else {
+            return interaction.execute(
+                interactionSpec, 
+                input
+            );                
+        }
+    }
+    
+    /**
+     * REST DELETE Request
+     * 
+     * @param request the HTTP Request
+     * @param response the HTTP Response
+     *  
+     * @exception ServletException
+     * @exception IOException
+     */
     @Override
     protected void doDelete(
-        HttpServletRequest req, 
-        HttpServletResponse resp
+        HttpServletRequest request, 
+        HttpServletResponse response
     ) throws ServletException, IOException {
-        Interaction interaction = this.getInteraction(req);
-        InteractionSpecs interactionSpecs = this.interactionSpecs;
+        prepare(request, response);
+        Interaction interaction = getInteraction(request);
         try {
-            Path xri = this.getXri(req);
-            LocalTransaction transaction = interaction.getConnection().getLocalTransaction();
-            transaction.begin();
-            interaction.execute(
-                interactionSpecs.DELETE,
-                singletonList(
-                    xri.toXRI()
-                )
-            );
-            transaction.commit();
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-        }
-        catch(Exception e) {
+            Path xri = this.getXri(request);
+            if(request.getContentType() == null) {
+                execute(  
+                    interaction,
+                    !isTransactionObjectIdentifier(xri) && isAutoCommitting(request), 
+                    false, 
+                    InteractionSpecs.getRestInteractionSpecs(false).DELETE, 
+                    Query_2Facade.newInstance(xri).getDelegate()
+                );
+            } else {
+                MappedRecord object = RestFormat.parseRequest(
+                    RestFormat.asSource(request),
+                    xri
+                );
+                execute(  
+                    interaction,
+                    !isControlObjectType(object.getRecordName()) && isAutoCommitting(request), 
+                    false, 
+                    InteractionSpecs.getRestInteractionSpecs(false).DELETE, 
+                    object
+                );
+            }
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
+        } catch(ResourceException exception) {
             this.handleException(
-                e,
-                interaction, 
-                resp, 
-                true
+                request,
+                response, 
+                exception
+            );
+        } catch(Exception exception) {
+            this.handleException(
+                request, 
+                response, 
+                exception
             );
         } finally {
-            closeInteraction(interaction);
+            try {
+                interaction.close();
+            } catch (ResourceException exception) {
+                Throwables.log(exception);
+            }
         }
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * HTTP GET Request
+     * 
+     * @param request the HTTP Request
+     * @param response the HTTP Response
+     *  
+     * @exception ServletException
+     * @exception IOException
+     */
+    @SuppressWarnings("unchecked")
     @Override
     protected void doGet(
-        HttpServletRequest req, 
-        HttpServletResponse resp
+        HttpServletRequest request, 
+        HttpServletResponse response
     ) throws ServletException, IOException {
-        Interaction interaction = this.getInteraction(req);
-        InteractionSpecs interactionSpecs = this.interactionSpecs;
-        // Reads are non-transactional. If a unit of work is active then
-        // the read is executed within the current unit of work
+        prepare(request, response);
+        Interaction interaction = getInteraction(request);
         try {
-            Path xri = this.getXri(req);
-            resp.setContentType("text/xml");
-            resp.setCharacterEncoding("UTF-8");
-            PrintWriter pw = resp.getWriter();
-            pw.println("<?xml version=\"1.0\"?>");
+            Path xri = this.getXri(request);
+            boolean autoCommit = this.isAutoCommitting(request);
+            InteractionSpec get = InteractionSpecs.getRestInteractionSpecs(
+                !autoCommit && this.isRetainValues(request)
+            ).GET;
             // Object
             if(xri.size() % 2 == 1) {
-                IndexedRecord input = singletonList(xri.toXRI());
+                if(xri.containsWildcard()) {
+                    throw new UnsupportedOperationException("WILDCARD");//  TODO
+                } else {
+                    IndexedRecord input;
+                    RecordFactory factory = this.connectionFactory.getRecordFactory();
+                    if(factory instanceof ExtendedRecordFactory) {
+                        input = ((ExtendedRecordFactory)factory).singletonIndexedRecord(
+                            Multiplicities.LIST,
+                            null,
+                            xri
+                        );
+                    } else {
+                        input = factory.createIndexedRecord(
+                            Multiplicities.LIST
+                        );
+                        input.add(xri);
+                    }
+                    IndexedRecord output = (IndexedRecord) interaction.execute(
+                        get, 
+                        input
+                    );
+                    if(output == null) {
+                        response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
+                    }  else if(output.isEmpty()) {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);                    
+                    } else {
+                        RestFormat.format(
+                            new ServletTarget(request, response), 
+                            Object_2Facade.newInstance((MappedRecord)output.get(0))
+                        );
+                        response.setStatus(HttpServletResponse.SC_OK);                    
+                    }
+                }
+            } else {
+                //
+                // Collection
+                //
+                MappedRecord input;
+                if(request.getHeader("interaction-verb") == null) {
+                    Query_2Facade inputFacade = Query_2Facade.newInstance();
+                    String queryType = request.getParameter("queryType");
+                    String query = request.getParameter("query"); 
+                    inputFacade.setPath(xri);
+                    inputFacade.setQueryType(
+                        queryType == null ? (String)Model_1Factory.getModel().getTypes(xri.getChild(":*"))[2].objGetValue("qualifiedName") : queryType
+                    );
+                    inputFacade.setQuery(query);
+                    String position = request.getParameter("position");
+                    inputFacade.setPosition(
+                        position == null ? Integer.valueOf(DEFAULT_POSITION) : Integer.valueOf(position)
+                    );
+                    String size = request.getParameter("size");
+                    inputFacade.setSize(
+                        Integer.valueOf(size == null ? DEFAULT_SIZE : Integer.parseInt(size))
+                    );
+                    String[] groups = request.getParameterValues("groups"); 
+                    if(groups != null) {
+                        inputFacade.setGroup(
+                            Sets.asSet(groups)
+                        );
+                    }
+                    input = inputFacade.getDelegate();
+                } else {
+                    input = RestFormat.parseRequest(
+                        RestFormat.asSource(request),
+                        null
+                    );
+                }
                 IndexedRecord output = (IndexedRecord) interaction.execute(
-                    interactionSpecs.GET, 
+                    get, 
                     input
                 );
                 if(output == null) {
-                    resp.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
-                } 
-                else if(output.isEmpty()) {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);                    
-                } 
-                else {
-                    this.printRecord(
-                        0, 
-                        req, 
-                        pw, 
-                        ObjectHolder_2Facade.newInstance((MappedRecord)output.get(0)).getValue(),
-                        xri.getBase(),
-                        this.getHRef(req, xri)
+                    response.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
+                } else {
+                    RestFormat.format(
+                        new ServletTarget(request, response), 
+                        xri, 
+                        output
                     );
-                    resp.setStatus(HttpServletResponse.SC_OK);                    
+                    response.setStatus(HttpServletResponse.SC_OK);
                 }
             }
-            // Collection
-            else {
-                Query_2Facade inputFacade = Query_2Facade.newInstance();
-                String queryType = req.getParameter("queryType");
-                String query = req.getParameter("query"); 
-                inputFacade.setPath(xri);
-                inputFacade.setQueryType(
-                    queryType == null ? (String)this.model.getTypes(xri.getChild(":*"))[2].objGetValue("qualifiedName") : queryType
-                );
-                inputFacade.setQuery(query);
-                String position = req.getParameter("position");
-                inputFacade.setPosition(
-                    position == null ? Integer.valueOf(DEFAULT_POSITION) : Integer.valueOf(position)
-                );
-                String size = req.getParameter("size");
-                int limit = size == null ? DEFAULT_SIZE : Integer.parseInt(size);
-                inputFacade.setSize(Integer.valueOf(limit + 1));
-                IndexedRecord output = (IndexedRecord) interaction.execute(
-                    interactionSpecs.GET, 
-                    inputFacade.getDelegate()
-                );
-                if(output == null) {
-                    resp.setStatus(HttpServletResponse.SC_NO_CONTENT);                    
-                } 
-                else {
-                    String feature = xri.getBase();
-                    pw.print("<");
-                    pw.print(feature);
-                    pw.print(" href=\"");
-                    pw.print(this.getHRef(req, xri));
-                    pw.println("\">");
-                    pw.print(INDENTS[1]);
-                    // query
-                    pw.print("<query><![CDATA[");
-                    pw.println(query);
-                    pw.println("]]></query>");
-                    // position
-                    pw.print(INDENTS[1]);
-                    pw.print("<position>");
-                    pw.print(inputFacade.getPosition());
-                    pw.println("</position>");
-                    // size
-                    pw.print(INDENTS[1]);
-                    pw.print("<size>");
-                    pw.print(limit);
-                    pw.println("</size>");
-                    // resultSet
-                    pw.print(INDENTS[1]);                    
-                    pw.println("<resultSet>");
-                    int count = 0;
-                    boolean hasMore = false;
-                    ResultSet: for(Object o : output){
-                        if(++count > limit){
-                            hasMore = true;
-                            break ResultSet;
-                        }
-                        ObjectHolder_2Facade outputFacade = ObjectHolder_2Facade.newInstance((MappedRecord) o); 
-                        Path objectId = outputFacade.getPath();
-                        this.printRecord(
-                            2, 
-                            req, 
-                            pw, 
-                            outputFacade.getValue(), 
-                            objectId.getBase(), 
-                            getHRef(req, objectId)
-                        );
-                    }
-                    pw.print(INDENTS[1]);
-                    pw.println("</resultSet>");
-                    pw.print(INDENTS[1]);
-                    pw.print("<hasMore>");
-                    pw.print(hasMore);
-                    pw.println("</hasMore>");
-                    pw.print("</");
-                    pw.print(feature);
-                    pw.println(">");
-                    resp.setStatus(HttpServletResponse.SC_OK);
-                }
-            }
-        } catch(Exception e) {
+        } catch(ResourceException exception) {
             this.handleException(
-                e, 
-                interaction, 
-                resp, 
-                false
+                request, 
+                response, 
+                exception
             );
-            req.getSession().removeAttribute(Connection.class.getName());
+        } catch(Exception exception) {
+            this.handleException(
+                request, 
+                response, exception
+            );
         } finally {
-            closeInteraction(interaction);
+            try {
+                interaction.close();
+            } catch (ResourceException exception) {
+                Throwables.log(exception);
+            }
         }
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * HTTP POST Request
+     * 
+     * @param request the HTTP Request
+     * @param response the HTTP Response
+     *  
+     * @exception ServletException
+     * @exception IOException
+     */
+    @SuppressWarnings("unchecked")
     @Override
     protected void doPost(
-        HttpServletRequest req, 
-        HttpServletResponse resp
+        HttpServletRequest request, 
+        HttpServletResponse response
     ) throws ServletException, IOException {
-        Interaction interaction = this.getInteraction(req);
-        InteractionSpecs interactionSpecs = this.interactionSpecs;
-        try {
-            LocalTransaction transaction = interaction.getConnection().getLocalTransaction();
-            Path xri = this.getXri(req);
-            if(xri.size() % 2 == 0) {
-                xri.add(this.uuidAsString());
-            }
-            transaction.begin();
-            MappedRecord valueRecord = newValueRecord(req);
-            boolean operation = this.model.isStructureType(valueRecord.getRecordName());
-            MappedRecord input = singletonMap(
-                xri.toXRI(),
-                valueRecord
-            );
-            IndexedRecord output = (IndexedRecord) interaction.execute(
-                operation ? interactionSpecs.INVOKE : interactionSpecs.CREATE, 
-                input
-            );
-            transaction.commit();
-            if(output == null || output.isEmpty()) {
-                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-            } 
-            else {
-                resp.setContentType("text/xml");
-                resp.setCharacterEncoding("UTF-8");
-                PrintWriter pw = resp.getWriter();
-                pw.println("<?xml version=\"1.0\"?>");                                    
-                for(Object o : output){
-                    MappedRecord record = (MappedRecord) o;
-                    if(operation) {
-                        this.printRecord(
-                            0, 
-                            req, 
-                            pw, 
-                            record,
-                            "result",
-                            this.getHRef(req, uuidAsString())
-                        );
-                    } 
-                    else {
-                        this.printRecord(
-                            0, 
-                            req, 
-                            pw, 
-                            ObjectHolder_2Facade.newInstance(record).getValue(),
-                            xri.getBase(),
-                            this.getHRef(req, xri)
-                        );
-                    }
+        prepare(request, response);
+        Path xri = this.getXri(request);
+        if(isConnectionObjectIdentifier(xri)) {
+            HttpSession session = request.getSession(true);
+            Connection connection = (Connection)session.getAttribute(Connection.class.getName());
+            if(connection == null) {
+                String userName = request.getParameter("UserName");
+                String password;
+                if(userName == null) {
+                    userName = request.getRemoteUser();
+                    password = session.getId();
+                } else {
+                    password = request.getParameter("Password");
                 }
-                resp.setStatus(HttpServletResponse.SC_OK);
-            }
-        } catch(Exception e) {
-            this.handleException(
-                e, 
-                interaction, 
-                resp, 
-                true
-            );
-        } finally {
-            closeInteraction(interaction);
-        }
-    }
-
-    //-----------------------------------------------------------------------
-    @Override
-    protected void doPut(
-        HttpServletRequest req, 
-        HttpServletResponse resp
-    ) throws ServletException, IOException {
-        Interaction interaction = this.getInteraction(req);
-        InteractionSpecs interactionSpecs = this.interactionSpecs;
-        try {
-            LocalTransaction transaction = interaction.getConnection().getLocalTransaction();
-            transaction.begin();
-            MappedRecord valueRecord = this.newValueRecord(req);
-            ObjectHolder_2Facade facade = ObjectHolder_2Facade.newInstance();
-            facade.setValue(valueRecord);
-            facade.setPath(this.getXri(req));
-// TODO     facade.setVersion(version);
-            IndexedRecord output = (IndexedRecord) interaction.execute(
-                interactionSpecs.PUT, 
-                facade.getDelegate()
-            );
-            transaction.commit();
-            if(output == null || output.isEmpty()) {
-                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-            } 
-            else {
-                resp.setContentType("text/xml");
-                resp.setCharacterEncoding("UTF-8");
-                PrintWriter pw = resp.getWriter();
-                pw.println("<?xml version=\"1.0\"?>");                                    
-                for(Object o : output){
-                    ObjectHolder_2Facade objectHolder = ObjectHolder_2Facade.newInstance((MappedRecord) o);
-                    Path objectId = objectHolder.getPath();
-                    this.printRecord(
-                        0, 
-                        req, 
-                        pw, 
-                        objectHolder.getValue(),
-                        objectId.getBase(),
-                        this.getHRef(req, objectId)
+                try {
+                    session.setAttribute(
+                        "org.openmdx.rest.AutoCommit",
+                        Boolean.FALSE
+                    );
+                    session.setAttribute(
+                        Connection.class.getName(), 
+                        connection = this.connectionFactory.getConnection(
+                            new RestConnectionSpec(
+                                userName, 
+                                password
+                            )
+                        )
+                    );
+                } catch (ResourceException exception) {
+                    handleException(
+                        request,
+                        response, 
+                        exception
+                    );
+                } catch (Exception exception) {
+                    handleException(
+                        request, 
+                        response, exception
                     );
                 }
-                resp.setStatus(HttpServletResponse.SC_OK);
+            } else {
+                handleException(
+                    request, 
+                    response, 
+                    ResourceExceptions.initHolder(
+                        new ResourceException(
+                            "This session has already established a connection",
+                            BasicException.newEmbeddedExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ILLEGAL_STATE,
+                                new BasicException.Parameter(
+                                    "AutoCommit",
+                                    isAutoCommitting(request)
+                                )
+                            )
+                        )
+                    )
+                );
             }
-        } 
-        catch(Exception e) {
-            this.handleException(
-                e, 
-                interaction, 
-                resp, 
-                true
-            );
-        } 
-        finally {
-            closeInteraction(interaction);
+        } else {
+            Interaction interaction = getInteraction(request);
+            try {
+                MappedRecord value = RestFormat.parseRequest(
+                    RestFormat.asSource(request),
+                    xri
+                ); 
+                if(Object_2Facade.isDelegate(value)) {
+                    MappedRecord input;
+                    if(xri.equals(Object_2Facade.getPath(value))) {
+                        input = value;
+                    } else {
+                        RecordFactory factory = this.connectionFactory.getRecordFactory();
+                        if(factory instanceof ExtendedRecordFactory) {
+                            input = ((ExtendedRecordFactory)factory).singletonMappedRecord(
+                                Multiplicities.MAP,
+                                null,
+                                xri,
+                                value
+                            );
+                        } else {
+                            input = factory.createMappedRecord(Multiplicities.MAP);
+                            input.put(xri, value);
+                        }
+                    }
+                    IndexedRecord output = (IndexedRecord) execute(
+                        interaction,
+                        !isTransactionObjectIdentifier(xri) && isAutoCommitting(request),
+                        true, 
+                        InteractionSpecs.getRestInteractionSpecs(isRetainValues(request)).CREATE, 
+                        input
+                    );
+                    if(output == null || output.isEmpty()) {
+                        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                    } else {
+                        ServletTarget target = new ServletTarget(request, response);
+                        for(Object record : output){
+                            RestFormat.format(
+                                target, 
+                                Object_2Facade.newInstance((MappedRecord) record)
+                            );
+                        }
+                        response.setStatus(HttpServletResponse.SC_OK);
+                    }
+                } else {
+                    MappedRecord input = this.connectionFactory.getRecordFactory().createMappedRecord(MessageRecord.NAME);
+                    if(input instanceof MessageRecord) {
+                        ((MessageRecord)input).setPath(xri);
+                        ((MessageRecord)input).setBody(value);
+                    } else {
+                         input.put("path", xri);
+                         input.put("body", value);
+                    }
+                    MappedRecord output = (MappedRecord) execute(  
+                        interaction,
+                        !isTransactionCommitIdentifier(xri) && isAutoCommitting(request), 
+                        false, 
+                        InteractionSpecs.getRestInteractionSpecs(true).INVOKE, 
+                        input
+                    );   
+                    if(output == null || output.isEmpty()) {
+                        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                    } else {
+                        MessageRecord reply;
+                        if(output instanceof MessageRecord) {
+                            reply = (MessageRecord) output;
+                        } else {
+                            reply = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
+                            reply.setPath(xri);
+                            reply.setBody(value);
+                        }
+                        RestFormat.format(
+                            new ServletTarget(request, response), 
+                            reply
+                        );
+                        response.setStatus(HttpServletResponse.SC_OK);
+                    }
+                }
+            } catch(ResourceException exception) {
+                this.handleException(
+                    request, 
+                    response, 
+                    exception
+                );
+            } catch(Exception exception) {
+                this.handleException(
+                    request, 
+                    response, exception
+                );
+            } finally {
+                try {
+                    interaction.close();
+                } catch (ResourceException exception) {
+                    Throwables.log(exception);
+                }
+            }
         }
     }
 
-    //-----------------------------------------------------------------------
-    // Members
-    //-----------------------------------------------------------------------    
-    private static final long serialVersionUID = -4403464830407956377L;
-    protected static final String[] INDENTS = {"", "\t", "\t\t", "\t\t\t"};
-    private static final ThreadLocal<XMLReader> xmlReaders = new ThreadLocal<XMLReader>() {
-        protected synchronized XMLReader initialValue() {
-            try {
-                SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-                XMLReader reader = parser.getXMLReader();
-                reader.setFeature("http://xml.org/sax/features/namespaces", true);
-                reader.setFeature("http://xml.org/sax/features/validation", false);
-                return reader;
+    /**
+     * HTTP PUT Request
+     * 
+     * @param request the HTTP Request
+     * @param response the HTTP Response
+     *  
+     * @exception ServletException
+     * @exception IOException
+     */
+    @Override
+    protected void doPut(
+        HttpServletRequest request, 
+        HttpServletResponse response
+    ) throws ServletException, IOException {
+        prepare(request, response);
+        Interaction interaction = getInteraction(request);
+        try {
+            IndexedRecord output = (IndexedRecord) execute(  
+                interaction,
+                isAutoCommitting(request), 
+                true, 
+                InteractionSpecs.getRestInteractionSpecs(isRetainValues(request)).PUT, 
+                RestFormat.parseRequest(
+                    RestFormat.asSource(request),
+                    this.getXri(request)
+                )
+            );
+            if(output == null || output.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            } else {
+                ServletTarget target = new ServletTarget(request, response);
+                for(Object record : output) {
+                    RestFormat.format(
+                        target, 
+                        Object_2Facade.newInstance((MappedRecord) record)
+                    );
+                }
+                response.setStatus(HttpServletResponse.SC_OK);
             }
-            catch(Exception e) {
-                new ServiceException(e).log();
-                return null;
+        } catch(ResourceException exception) {
+            this.handleException(
+                request, 
+                response, 
+                exception
+            );
+        } catch(Exception exception) {
+            this.handleException(
+                request, 
+                response, exception
+            );
+        } finally {
+            try {
+                interaction.close();
+            } catch (ResourceException exception) {
+                Throwables.log(exception);
             }
         }
-    };
-    static final DateFormat secondFormat = DateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ssz");
-    static final DateFormat millisecondFormat = DateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSz");
-    static final DateFormat dateFormat = DateFormat.getInstance("yyyy-MM-dd");
-    static final DateFormat localSecondFormat = DateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss",null,true);
-    static final DateFormat localMillisecondFormat = DateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSS",null,true);
-    
-    private boolean retainValues = true;
-    private final int DEFAULT_POSITION = 0;
-    private final int DEFAULT_SIZE = 25;
-    protected Model_1_0 model = null;
-    protected ConnectionFactory connectionFactory = null;
-    private final InteractionSpecs interactionSpecs = InteractionSpecs.newRestInteractionSpecs(
-        null, // ignorable principal chain
-        this.retainValues
-    );
-    protected final UUIDGenerator uuidGenerator = UUIDs.getGenerator();
+    }
 
-    //------------------------------------------------------------------------
     /**
-     * Content handler which maps an XML encoded values to JCA records
+     * Set response content type and encoding
+     * 
+     * @param request
+     * @param response
      */
-    class RecordHandler extends DefaultHandler {
-
+    protected void prepare(
+        HttpServletRequest request, 
+        HttpServletResponse response
+    ){
+        //
+        // Use accept headers
+        //
+        String characterEncoding = new HttpHeaderFieldValue(
+            request.getHeaders("Accept-Charset")
+        ).getPreferredContent(
+            "UTF-8"
+        ).getValue(
+        );
+        HttpHeaderFieldValue acceptType = new HttpHeaderFieldValue(request.getHeaders("Accept"));
+        for(HttpHeaderFieldContent candidate : acceptType){
+            String mimeType = candidate.getValue();
+            if(XMLOutputFactories.isSupported(mimeType)) {
+                response.setContentType(mimeType);
+                response.setCharacterEncoding(candidate.getParameterValue("charset", characterEncoding));
+                return;
+            }
+        }
+        //
+        // Fallback: reply similar to request
+        //
+        String contentType = request.getContentType();
+        if(contentType != null) {
+            HttpHeaderFieldContent requestType = new HttpHeaderFieldContent(contentType);
+            String mimeType = requestType.getValue();
+            if(XMLOutputFactories.isSupported(mimeType)) {
+                response.setContentType(mimeType);
+                response.setCharacterEncoding(requestType.getParameterValue("charset", characterEncoding));
+                return;
+            }
+        }
+        //
+        // Last resort
+        //
+        response.setContentType("text/xml"); 
+        // Note that our default encoding is "UTF-8" even for "text/xml" as 
+        // opposed to the RFC 3023 specification which requires "US-ASCII" as
+        // default encoding for "text/xml"! 
+        response.setCharacterEncoding(characterEncoding); 
+    }
+    
+    
+    //------------------------------------------------------------------------
+    // Class ServletTarget
+    //------------------------------------------------------------------------
+    
+    /**
+     * Servlet Output Target
+     */
+    static class ServletTarget extends RestFormat.Target {
+        
         /**
          * Constructor 
          *
-         * @param recordFactory
+         * @param request
+         * @param response
+         * 
+         * @throws ServiceException
          */
-        protected RecordHandler(
+        ServletTarget(
+            HttpServletRequest request,
+            HttpServletResponse response
         ) {
+            super(RestFormat.getBase(request));
+            this.response = response;
         }
 
         /**
-         * 
+         * The underlying HTTP response
          */
-        private MappedRecord values = null;
-        
-        /**
-         * 
-         */
-        private final StringBuilder stringifiedValue = new StringBuilder();
+        private final HttpServletResponse response;
 
-        /**
-         * Retrieve the interaction's input record
-         * 
-         * @return the interaction's input record
+        /* (non-Javadoc)
+         * @see org.openmdx.application.rest.http.RestFormat.Target#newWriter()
          */
-        MappedRecord getValues(
-        ){
-            return this.values;
-        }
-
-        protected ModelElement_1_0 getFeatureDef(
-            String featureName
-        ) throws ServiceException{
-            return RestServlet_2.this.getFeatureDef(
-                this.values.getRecordName(),
-                featureName
-            );
-        }
-        
         @Override
-        public void characters(
-            char[] ch, 
-            int start, 
-            int length
-        ) throws SAXException {
-            this.stringifiedValue.append(
-                ch, 
-                start, 
-                length
-            );
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public void endElement(
-            String uri, 
-            String localName, 
-            String name
-        ) throws SAXException {
+        protected XMLStreamWriter newWriter(
+        ) throws XMLStreamException {
             try {
-                // Object
-                if(name.indexOf('.') > 0) {
-                    // fully qualified class name
+                String mimeType = this.response.getContentType();
+                XMLOutputFactory xmlOutputFactory = RestFormat.getOutputFactory(mimeType);
+                if(("application/vnd.openmdx.wbxml".equals(mimeType))) {
+                    String characterEncoding = this.response.getCharacterEncoding();
+                    return characterEncoding == null ? xmlOutputFactory.createXMLStreamWriter(
+                        this.response.getOutputStream()
+                    ) : xmlOutputFactory.createXMLStreamWriter(
+                        this.response.getOutputStream(),
+                        characterEncoding
+                    );
+                } else {
+                    return xmlOutputFactory.createXMLStreamWriter(
+                        this.response.getWriter()
+                    );
                 }
-                // Feature
-                else {
-                    String featureName = name;
-                    ModelElement_1_0 featureDef = getFeatureDef(featureName);
-                    String featureType = getFeatureType(featureDef);
-                    if(
-                        !SystemAttributes.OBJECT_CLASS.equals(featureName) &&
-                        !SystemAttributes.CREATED_AT.equals(featureName) &&
-                        !SystemAttributes.MODIFIED_AT.equals(featureName) &&
-                        !SystemAttributes.CREATED_BY.equals(featureName) &&
-                        !SystemAttributes.MODIFIED_BY.equals(featureName)
-                    ) {
-                        // Map value
-                        java.lang.Object newValue = null;
-                        if(PrimitiveTypes.STRING.equals(featureType) || "string".equals(featureType)) {
-                            newValue = this.stringifiedValue.toString();
-                        }
-                        else if(PrimitiveTypes.SHORT.equals(featureType) || "short".equals(featureType)) {
-                            newValue = new Short(this.stringifiedValue.toString().trim());
-                        }
-                        else if(PrimitiveTypes.LONG.equals(featureType) || "long".equals(featureType)) {
-                            newValue = new Long(this.stringifiedValue.toString().trim());
-                        }
-                        else if(PrimitiveTypes.INTEGER.equals(featureType) || "integer".equals(featureType)) {
-                            newValue = new Integer(this.stringifiedValue.toString().trim());
-                        }
-                        else if(PrimitiveTypes.DECIMAL.equals(featureType) || "decimal".equals(featureType)) {
-                            newValue = new BigDecimal(this.stringifiedValue.toString().trim());
-                        }
-                        else if(PrimitiveTypes.BOOLEAN.equals(featureType) || "boolean".equals(featureType)) {
-                            newValue = new Boolean(this.stringifiedValue.toString().trim());
-                        }
-                        else if(PrimitiveTypes.OBJECT_ID.equals(featureType)) {
-                            newValue = this.stringifiedValue.toString();
-                        }
-                        else if(PrimitiveTypes.DATETIME.equals(featureType) || "dateTime".equals(featureType)) {
-                            String v = this.stringifiedValue.toString().trim();
-                            // Convert time zone from ISO 8601 to SimpleDateFormat 
-                            int timePosition = v.indexOf('T');
-                            if(v.endsWith("Z")){ 
-                                v = v.substring(0, v.length() - 1) + "GMT+00:00";
-                            } 
-                            else {
-                                int timeZonePosition = v.lastIndexOf('-');
-                                if(timeZonePosition < timePosition) timeZonePosition = v.lastIndexOf('+');
-                                if(
-                                    (timeZonePosition > timePosition) &&
-                                    !v.regionMatches(true, timeZonePosition-3, "GMT", 0, 3)
-                                ) {
-                                    v = v.substring(
-                                        0, 
-                                        timeZonePosition
-                                    ) + "GMT" + v.substring(
-                                        timeZonePosition
-                                    );
-                                }
-                            }        
-                            int timeLength = v.length() - timePosition - 1;
-                            newValue = v.indexOf('.', timePosition) == -1 ? 
-                                (timeLength == 8 ? RestServlet_2.localSecondFormat.parse(v) : RestServlet_2.secondFormat.parse(v)) : 
-                                (timeLength == 12 ? RestServlet_2.localMillisecondFormat.parse(v) : RestServlet_2.millisecondFormat.parse(v));
-                        }
-                        else if(PrimitiveTypes.DATE.equals(featureType) || "date".equals(featureType)) {
-                            String v = this.stringifiedValue.toString().trim();
-                            newValue = Datatypes.create(
-                                XMLGregorianCalendar.class,
-                                DateFormat.getInstance().format(RestServlet_2.dateFormat.parse(v)).substring(0, 8)
-                            );
-                        }
-                        else if(PrimitiveTypes.BINARY.equals(featureType)) {
-                            newValue = Base64.decode(this.stringifiedValue.toString());
-                        }              
-                        else if((featureType != null) && RestServlet_2.this.model.isClassType(featureType)) {
-                            newValue = new Path(this.stringifiedValue.toString());
-                        }                        
-                        else {
-                            newValue = this.stringifiedValue.toString();
-                        }
-                        // Modify feature
-                        String multiplicity = (String)featureDef.objGetValue("multiplicity");
-                        if (
-                            Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-                            Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
-                        ) {
-                            this.values.put(featureName, newValue);
-                        } 
-                        else if(
-                            Multiplicities.LIST.equals(multiplicity) ||
-                            Multiplicities.SET.equals(multiplicity)
-                        ) {
-                            IndexedRecord target = (IndexedRecord)this.values.get(featureName);
-                            if(target == null) {
-                                this.values.put(
-                                    featureName,
-                                    target = RestServlet_2.this.connectionFactory.getRecordFactory().createIndexedRecord(multiplicity)
-                                );
-                            }
-                            target.add(newValue);
-                        } 
-                        else {
-                            SysLog.warning("Unsupported multiplicity, feature ignored", multiplicity);
-                        }
-                    }
-                }
-            }
-            catch(Exception e) {
-                throw new SAXException(e);
-            }            
-        }
-
-        protected String getLocationString(
-            SAXParseException ex
-        ) {
-            StringBuilder str = new StringBuilder();
-            String systemId = ex.getSystemId();
-            if(systemId != null) {
-                int index = systemId.lastIndexOf('/');
-                if(index != -1) 
-                    systemId = systemId.substring(index + 1);
-                str.append(systemId);
-            }
-            str.append(
-                ':'
-            ).append(
-                ex.getLineNumber()
-            ).append(
-                ':'
-            ).append(
-                ex.getColumnNumber()
-            );
-            return str.toString();
-        }
-        
-        @Override
-        public void error(
-            SAXParseException e
-        ) throws SAXException {
-            BasicException.log(null);
-            throw Throwables.log(
-                BasicException.initHolder(
-                    new SAXException(
-                        "XML parse error",
-                        BasicException.newEmbeddedExceptionStack(
-                            e, 
-                            BasicException.Code.DEFAULT_DOMAIN, 
-                            BasicException.Code.PROCESSING_FAILURE,
-                            new BasicException.Parameter("message", e.getMessage()),
-                            new BasicException.Parameter("location", this.getLocationString(e))
-                        )
-                    )
-                )
-            );
-        }
-
-        @Override
-        public void startDocument(
-        ) throws SAXException {
-            this.stringifiedValue.setLength(0);
-        }
-
-        @Override
-        public void startElement(
-            String uri,
-            String localName,
-            String name,
-            Attributes attributes
-        ) throws SAXException {
-            this.stringifiedValue.setLength(0);
-            if(name.indexOf('.') > 0) try {
-                // Begin object or struct
-                this.values = RestServlet_2.this.connectionFactory.getRecordFactory().createMappedRecord(
-                    name.replace('.', ':')
-                );
-            } catch (ResourceException exception) {
-                throw new SAXException(exception);
+            } catch (IOException exception) {
+                throw toXMLStreamException(exception);
             }
         }
         

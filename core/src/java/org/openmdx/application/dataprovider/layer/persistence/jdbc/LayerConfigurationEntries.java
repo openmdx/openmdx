@@ -2,8 +2,8 @@
  * ==================================================================== Project:
  * openmdx, http://www.openmdx.org/ Name: $Id: LayerConfigurationEntries.java,v
  * 1.37 2006/11/17 16:55:57 hburger Exp $ Description: Generated constants for
- * LayerConfigurationEntries Revision: $Revision: 1.1 $ Owner: OMEX AG,
- * Switzerland, http://www.omex.ch Date: $Date: 2009/05/26 14:31:21 $
+ * LayerConfigurationEntries Revision: $Revision: 1.4 $ Owner: OMEX AG,
+ * Switzerland, http://www.omex.ch Date: $Date: 2009/12/02 10:35:33 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -54,22 +54,22 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
    // Avoid instantiation
   }
 
-
   /**
-     * FORCE_CREATE forces creation of missing references if true. Allows to
-     * create objects which do not have no parents.
-     */
-  static public final String FORCE_CREATE = "forceCreate";
-
-
-
+   * The precision used for date/time values since <code>1970-01-01T00:00:00Z</code> 
+   * <em>(defaults to <code>MICROSECONDS</code>).</em>
+   * <p>
+   * The precision used for date/time values before <code>1970-01-01T00:00:00Z</code> is
+   * <code>MILLISECONDS</code>.
+   * 
+   * @see java.util.concurrent.TimeUnit
+   */
+  static public final String DATE_TIME_PRECISION = "dateTimePrecision";
+  
   /**
      * OPTIMIZED_TYPE list of optimized types. Objects with matching paths are
      * stored in optimized tables (attributes in separate rows).
      */
   static public final String OPTIMIZED_TYPE = "optimizedType";
-
-
 
   /**
      * OPTIMIZED_TABLE list of optimized tables. For each optimizedType there
@@ -78,48 +78,11 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
      */
   static public final String OPTIMIZED_TABLE = "optimizedTable";
 
-
-
-  /**
-     * CONNECTION_URL jdbc url which is used to connect to database
-     */
-  static public final String CONNECTION_URL = "connectionUrl";
-
-
-
-  /**
-     * If MODEL_DRIVEN is set to true, the plugin uses model information to
-     * optimize SQL statements. Model information can be useful in case of find
-     * operations to determine the multiplicity of filter attributes. In case of
-     * 0..1 or 1..1 multiplicity queries can typically be optimized.
-     */
-  static public final String MODEL_DRIVEN = "modelDriven";
-
-
-
-  /**
-     * @deprecated COLUMN_NAME_LONG defines the corresponding long column name
-     *             for a configured COLUMN_NAME_SHORT.
-     */
-  static public final String COLUMN_NAME_LONG = "columnNameLong";
-
-
-
-  /**
-     * @deprecated COLUMN_NAME_SHORT defines the corresponding short column name
-     *             for a configured COLUMN_NAME_LONG.
-     */
-  static public final String COLUMN_NAME_SHORT = "columnNameShort";
-
-
-
   /**
      * COLUMN_NAME_FROM defines the corresponding 'from' column name for a
      * (from-column-name,to-column-name) mapping.
      */
   static public final String COLUMN_NAME_FROM = "columnNameFrom";
-
-
 
   /**
      * COLUMN_NAME_TO defines the corresponding 'to' column name for a
@@ -312,16 +275,6 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
   static public final String PATH_NORMALIZE_LEVEL = "pathNormalizeLevel";
 
   /**
-     * SUPPORTS_SQL_SEQUENCE is set to true, if database supports SQL sequences
-     * for autoincrement columns. Default value is true.
-     * 
-     * @deprecated the sequence type is auto-detected from now on. The option is
-     *             not required any more.
-     */
-  static public final String SUPPORTS_SQL_SEQUENCE = "supportsSqlSequence";
-
-
-  /**
      * ALLOWS_SQL_SEQUENCE_FALLBACK is set to true, if plugin is allowed to
      * fallback to supportSqlSequence=false mode automatically. Default value is
      * false.
@@ -342,64 +295,6 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
    * Tells whether object ids are able to handle paths
    */
   static public final String USE_NORMALIZED_OBJECT_IDS = "normalizeObjectIds";
-  
-  /**
-     * Returns the smallest defined integer constant or Integer.MAX_VALUE if no
-     * integer constant is defined.
-     * 
-     * @return an int
-     */
-  static public int min()
-  {
-  return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.min();  // delegate
-  }
-
-
-
-  /**
-     * Returns the biggest defined integer constant or Integer.MIN_VALUE if no
-     * integer constant is defined.
-     * 
-     * @return an int
-     */
-  static public int max()
-  {
-  return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.max();  // delegate
-  }
-
-
-
-  /**
-     * Returns a string representation of the passed code
-     * 
-     * @param code
-     *            a code to be stringified
-     * @return a stringified code
-     */
-  static public String toString(int code)
-  {
-      return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.toString(code);  // delegate
-  }
-
-
-
-  /**
-     * Returns the code of the passed code's string representation. The string
-     * representation is case insensitive.
-     * 
-     * @exception throws
-     *                an <code>IllegalArgumentException</code> if the
-     *                stringified code cannot be resolved
-     * @param code
-     *            a stringified code
-     * @return a code
-     */
-  static public int fromString(String code)
-  {  
-
-    return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.fromString(code);  // delegate
-  }
-
   
   /**
     * SINGLE_VALUE_ATTRIBUTE allows to define single-valued attributes for
@@ -849,11 +744,4 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
   static public final String RESULT_SET_TYPE_SCROLL_INSENSITIVE = "scrollInsensitive";
   static public final String RESULT_SET_TYPE_SCROLL_SENSITIVE = "scrollSensitive";
 
-  /**
-   * If set to true object caching at unit of work level is enabled. If enabled, retrieved
-   * objects (get and find operations) are cached. The cache is cleared at the beginning of
-   * a unit of work. 
-   */
-  static public final String USE_OBJECT_CACHE = "useObjectCache";
-  
 }

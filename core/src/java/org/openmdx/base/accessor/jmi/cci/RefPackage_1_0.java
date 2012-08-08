@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1_0.java,v 1.30 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: RefPackage_1_0.java,v 1.38 2010/04/19 11:19:44 hburger Exp $
  * Description: RefPackage 1.0 Interface
- * Revision:    $Revision: 1.30 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2010/04/19 11:19:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,20 +51,21 @@
  */
 package org.openmdx.base.accessor.jmi.cci;
 
+import java.util.UUID;
+
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
 import javax.resource.cci.InteractionSpec;
-import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.AttributeSpecifier;
-import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Filter;
 import org.w3c.cci2.Container;
 
 /**
@@ -91,45 +92,27 @@ public interface RefPackage_1_0 extends RefPackage {
   );
     
   /**
-   * Get object with the given id. This operation is equivalent to
-   * <pre>
-   *   Object_1_0 object = refPackage.refObjectFactory().getObject(
-   *     new Path(identity)
-   *   );
-   *   RefObject refObject = (RefRootPackage_1)refPackage.refOutermostPackage()).marshal(object);
-   * </pre>
-   * 
-   * @param refMofId unique id of RefObject.
-   * 
-   * @return RefObject
-   */
-  public RefObject refObject(
-    String refMofId
-  );
-  
-  /**
-   * Get object with the given object id. This operation is equivalent to
-   * <pre>
-   *   Object_1_0 object = refPackage.refObject(objectId.toResourceIdentifier());
-   * </pre>
-   * 
-   * @param refMofId unique id of RefObject.
+   * Get object with the given object id. 
+   *  
+   * @param objectId unique id of RefObject.
    * 
    * @return RefObject
    */
   RefObject refObject(
     Path objectId
   );
-    
-  /**
-   *  
-   */
-  public RefFilter_1_0 refCreateFilter(
-    String filterForClass,
-    FilterProperty[] filterProperties,
-    AttributeSpecifier[] attributeSpecifiers
-  );
 
+  /**
+   * Get object with the given object id. 
+   *  
+   * @param transientObjectId transient id of RefObject.
+   * 
+   * @return RefObject
+   */
+  RefObject refObject(
+    UUID transientObjectId
+  );
+  
   /**
    * Retrieves the JDO Persistence Manager delegating to this package.
    * 
@@ -138,26 +121,22 @@ public interface RefPackage_1_0 extends RefPackage {
   PersistenceManager_1_0 refPersistenceManager(
   );
 
-   /**
-    * Create a filter
+  /**
+    * Create a query
     * 
     * @param filterClassName
-    * @param filterProperties
-    * @param attributeSpecifiers
-    * @param delegateFilter
-    * @param delegateQuantor
-    * @param delegateName
+    * @param subclasses 
+    * @param filter
+    *
+    * @return a new query
     * 
-    * @return a filter
+    * @exception ServiceException
     */
-   RefFilter_1_0 refCreateFilter(
+   RefQuery_1_0 refCreateQuery(
        String filterClassName,
-       FilterProperty[] filterProperties,
-       AttributeSpecifier[] attributeSpecifiers,
-       RefFilter_1_0 delegateFilter, 
-       Short delegateQuantor, 
-       String delegateName
-   );
+       boolean subclasses, 
+       Filter filter 
+   ) throws ServiceException;
 
    /**
     * Create a structure proxy based on the record name
@@ -169,19 +148,6 @@ public interface RefPackage_1_0 extends RefPackage {
     */
    public RefStruct refCreateStruct(
        Record record
-   );
-
-   /**
-    * Create a structure proxy without accessing the delegate
-    * 
-    * @param structName
-    * @param delegate
-    * 
-    * @return the structure proxy without accessing the delegate
-    */
-   RefStruct refCreateStruct(
-       String structName,
-       MappedRecord delegate
    );
 
    /**
@@ -215,6 +181,11 @@ public interface RefPackage_1_0 extends RefPackage {
    RefPackage_1_0 refPackage(
        InteractionSpec viewContext
    );
+
+   /**
+    * Asserts that the associated persistence manager is open
+    */
+   void assertOpen();
 
 }
 

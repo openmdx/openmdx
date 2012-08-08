@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Control.java,v 1.25 2009/03/08 18:03:24 wfro Exp $
+ * Name:        $Id: Control.java,v 1.27 2009/09/25 12:02:37 wfro Exp $
  * Description: Control
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:24 $
+ * Date:        $Date: 2009/09/25 12:02:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -76,10 +76,10 @@ import javax.jmi.reflect.RefObject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.codehaus.groovy.runtime.InvokerHelper;
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.ViewPort;
 
 public abstract class Control
     implements Serializable {
@@ -136,7 +136,7 @@ public abstract class Control
     
     //-------------------------------------------------------------------------
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing
     ) throws ServiceException {
@@ -187,14 +187,14 @@ public abstract class Control
             }
         }
         catch(Exception e) {
-            AppLog.warning("Script exception", e);
+        	SysLog.warning("Script exception", e);
             new ServiceException(e).log();
         }
     }
   
     //-------------------------------------------------------------------------
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing
     ) throws ServiceException {
         this.paint(

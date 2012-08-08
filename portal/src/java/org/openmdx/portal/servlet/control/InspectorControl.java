@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: InspectorControl.java,v 1.13 2009/01/13 23:48:41 wfro Exp $
+ * Name:        $Id: InspectorControl.java,v 1.14 2009/06/16 17:08:26 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 23:48:41 $
+ * Date:        $Date: 2009/06/16 17:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,10 +65,10 @@ import java.util.Set;
 
 import javax.jmi.reflect.RefStruct;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 
 //---------------------------------------------------------------------------
@@ -92,10 +92,10 @@ public abstract class InspectorControl
       this.inspector = inspector;
       
       // Inspector
-      AppLog.detail("inspector valid", "" + (inspector != null));
+      SysLog.detail("inspector valid", "" + (inspector != null));
       
       // Attribute pane
-      AppLog.detail("Preparing attribute pane");
+      SysLog.detail("Preparing attribute pane");
       org.openmdx.ui1.jmi1.AttributePane paneAttr = null;
       for(Iterator i = inspector.getMember().iterator(); i.hasNext();) {
           Object pane = i.next();

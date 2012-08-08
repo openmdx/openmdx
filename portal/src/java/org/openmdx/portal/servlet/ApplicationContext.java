@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ApplicationContext.java,v 1.88 2009/06/09 12:50:34 hburger Exp $
+ * Name:        $Id: ApplicationContext.java,v 1.107 2010/04/27 21:22:22 wfro Exp $
  * Description: ApplicationContext
- * Revision:    $Revision: 1.88 $
+ * Revision:    $Revision: 1.107 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:50:34 $
+ * Date:        $Date: 2010/04/27 21:22:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -81,104 +81,79 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.control.Control;
-import org.openmdx.portal.servlet.control.ControlFactory;
 import org.openmdx.portal.servlet.control.EditInspectorControl;
 import org.openmdx.portal.servlet.control.ShowInspectorControl;
 import org.openmdx.portal.servlet.texts.TextsFactory;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
-import org.openmdx.portal.servlet.view.LayoutFactory;
 import org.openmdx.security.realm1.jmi1.Principal;
 
 public final class ApplicationContext
     implements Serializable {
   
     //-------------------------------------------------------------------------
-    public ApplicationContext(
-        String applicationName,
-        String locale,
-        String timezone,
-        ControlFactory controlFactory,
-        String sessionId,
-        String loginPrincipal,
-        String userRole,
-        Path loginRealmIdentity,
-        List retrieveByPathPatterns,
-        String userHomeIdentity,
-        String[] rootObjectIdentities,
-        PortalExtension_1_0 portalExtension,
-        HtmlEncoder_1_0 httpEncoder,
-        Map filters,
-        Codes codes,
-        LayoutFactory layoutFactory,
-        File tempDirectory,
-        String tempFilePrefix,
-        String quickAccessorsReference,
-        Map mimeTypeImpls,
-        String exceptionDomain,
-        String filterCriteriaField,
-        String[] filterValuePatterns,
-        PersistenceManagerFactory pmfData,
-        RoleMapper_1_0 roleMapper,
-        Model_1_0 model
+	public ApplicationContext(
+	) {	
+	}
+	
+    //-------------------------------------------------------------------------
+    public void apply(
+    	ApplicationContextConfiguration configuration
     ) throws ServiceException {
-        this.applicationName = applicationName;
-        this.controlFactory = controlFactory;
-        this.loginPrincipal = loginPrincipal;
-        this.retrieveByPathPatterns = retrieveByPathPatterns;
-        this.userHomeIdentity = userHomeIdentity;
-        this.rootObjectIdentities = rootObjectIdentities;
-        this.portalExtension = portalExtension;
-        this.htmlEncoder = httpEncoder;
-        this.filters = filters;
-        this.codes = codes;
-        this.layoutFactory = layoutFactory;
-        this.tempDirectory = tempDirectory;
-        this.tempFilePrefix = tempFilePrefix;
-        this.quickAccessorsReference = quickAccessorsReference;
-        this.mimeTypeImpls = mimeTypeImpls;
-        this.exceptionDomain = exceptionDomain;
-        this.filterCriteriaField = filterCriteriaField;
-        this.filterValuePattern = filterValuePatterns;
-        this.pmfData = pmfData;
-        this.errorMessages = new ArrayList<String>();
+    	this.configuration = configuration;
+        this.currentViewPortType = configuration.getViewPortType();
         this.userRoles = new ArrayList<String>();
-        this.userRoles.add(this.loginPrincipal);
-        this.roleMapper = roleMapper;
-        this.model = model;
-        if(this.loginPrincipal == null) {
+        String loginPrincipal = configuration.getLoginPrincipal();
+        String userRole = configuration.getUserRole();
+        if(loginPrincipal == null) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.AUTHORIZATION_FAILURE, 
                 "Login principal is null. Can not create application context"
             );          
         }
+        this.userRoles.add(loginPrincipal);
+        int posSegmentSeparator; 
+        if((posSegmentSeparator = loginPrincipal.indexOf("\\")) > 0) {
+        	String segmentName = loginPrincipal.substring(0, posSegmentSeparator);
+        	loginPrincipal = loginPrincipal.substring(posSegmentSeparator + 1);
+        	if(userRole == null) {
+        		userRole = loginPrincipal + "@" + segmentName;
+        	}
+        }
+        this.currentLoginPrincipal = loginPrincipal;
         this.currentUserRole = userRole == null ?
-            this.loginPrincipal :
+            this.currentLoginPrincipal :
             userRole;
+        PersistenceManager pm = null;
         try {
-            this.createPmData();
+	        pm = this.createPersistenceManager(
+	            configuration.getPmfData(),
+	            this.currentUserRole
+	        );
         }
         catch(ServiceException e) {
             throw new ServiceException(
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.AUTHORIZATION_FAILURE, 
-                "Can not initialize connection to dataproviders"
+                BasicException.Code.ACTIVATION_FAILURE, 
+                "Can not initialize persistence manager"
             );
         }
         // Get user roles if security is enabled
+        Path loginRealmIdentity = configuration.getLoginRealmIdentity();
         if(loginRealmIdentity != null) {
             org.openmdx.security.realm1.jmi1.Realm loginRealm = null;
             try {
-                loginRealm = (org.openmdx.security.realm1.jmi1.Realm)this.pmData.getObjectById(loginRealmIdentity);
+                loginRealm = (org.openmdx.security.realm1.jmi1.Realm)pm.getObjectById(loginRealmIdentity);
             }
             catch(Exception e) {
                 throw new ServiceException(
@@ -189,20 +164,20 @@ public final class ApplicationContext
                     new BasicException.Parameter("realm", loginRealmIdentity)
                 );
             }
-            if(roleMapper.checkPrincipal(loginRealm, this.loginPrincipal, this.pmData) == null) {
+            if(configuration.getRoleMapper().checkPrincipal(loginRealm, loginPrincipal, pm) == null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.AUTHORIZATION_FAILURE, 
                     "Unable to login. Principal is not registered or disabled",
                     new BasicException.Parameter("realm", loginRealmIdentity),                          
-                    new BasicException.Parameter("principal", this.loginPrincipal)
+                    new BasicException.Parameter("principal", loginPrincipal)
                 );
             }
             try {
-                this.userRoles = roleMapper.getUserInRoles(
+                this.userRoles = configuration.getRoleMapper().getUserInRoles(
                     loginRealm,
-                    this.loginPrincipal,
-                    this.pmData
+                    loginPrincipal,
+                    pm
                 );
             }
             catch(Exception e) {
@@ -212,7 +187,7 @@ public final class ApplicationContext
                     BasicException.Code.PROCESSING_FAILURE, 
                     "Unable to login. Can not get roles of principal",
                     new BasicException.Parameter("realm", loginRealmIdentity),                          
-                    new BasicException.Parameter("principal", this.loginPrincipal)
+                    new BasicException.Parameter("principal", loginPrincipal)
                 );
             }
             // Check whether userRole exists and is a qualified name
@@ -233,13 +208,14 @@ public final class ApplicationContext
                     BasicException.Code.AUTHORIZATION_FAILURE, 
                     "Unable to login. Principal does not have any assigned roles",
                     new BasicException.Parameter("realm", loginRealmIdentity),                          
-                    new BasicException.Parameter("principal", this.loginPrincipal)
+                    new BasicException.Parameter("principal", loginPrincipal)
                 );
             }
         }
+        pm.close();
         try {
             this.createPmControl(false);
-            this.resetPmData();
+            this.createPmData();
         }
         catch(ServiceException e) {
             throw new ServiceException(
@@ -248,7 +224,7 @@ public final class ApplicationContext
                 BasicException.Code.PROCESSING_FAILURE, 
                 "Can not refresh application context",
                 new BasicException.Parameter("realm", loginRealmIdentity),                          
-                new BasicException.Parameter("principal", this.loginPrincipal)
+                new BasicException.Parameter("principal", loginPrincipal)
             );
         }      
         // Update login date for current principal
@@ -286,7 +262,7 @@ public final class ApplicationContext
         }
         else {
             this.setCurrentLocale(
-                locale == null ? "en_US" : locale
+                configuration.getLocale() == null ? "en_US" : configuration.getLocale()
             );
         }
         // Init TimeZone
@@ -297,7 +273,7 @@ public final class ApplicationContext
         }
         else {
             this.setCurrentTimeZone(
-                timezone == null ? TimeZone.getDefault().getID() : timezone
+                configuration.getTimezone() == null ? TimeZone.getDefault().getID() : configuration.getTimezone()
             );
         }
         // Init Perspective
@@ -391,20 +367,21 @@ public final class ApplicationContext
     ) {
         // Retrieve root objects
         List<Object> rootObjects = new ArrayList<Object>();
+        String[] rootObjectIdentities = this.configuration.getRootObjectIdentities();
         for(
-                int i = 0; 
-                i < this.rootObjectIdentities.length; 
-                i++
+            int i = 0; 
+            i < rootObjectIdentities.length; 
+            i++
         ) {
-            Path mappedIdentity = this.mapIdentity(this.rootObjectIdentities[i]);
+            Path mappedIdentity = this.mapIdentity(rootObjectIdentities[i]);
             try {
                 rootObjects.add(
                     pmData.getObjectById(mappedIdentity)
                 );
             }
             catch(Exception e) {
-                AppLog.info("Can not get root object", "object.xri=" + mappedIdentity + "; message=" + e.getMessage());
-                AppLog.detail(e.getMessage(), e.getCause());              
+                SysLog.info("Can not get root object", "object.xri=" + mappedIdentity + "; message=" + e.getMessage());
+                SysLog.detail(e.getMessage(), e.getCause());              
             }
         }
         this.rootObjects = (RefObject_1_0[])rootObjects.toArray(new RefObject_1_0[rootObjects.size()]);      
@@ -416,13 +393,14 @@ public final class ApplicationContext
     ) {
         this.userHome = null;      
         try {
-            if(this.userHomeIdentity != null) {
-                Path mappedIdentity = this.mapIdentity(this.userHomeIdentity);
+        	String userHomeIdentity = this.configuration.getUserHomeIdentity();
+            if(userHomeIdentity != null) {
+                Path mappedIdentity = this.mapIdentity(userHomeIdentity);
                 this.userHome = (RefObject_1_0)pmData.getObjectById(mappedIdentity);
             }
         }
         catch(Exception e) {
-            AppLog.warning("can not get user home object. Skipping");
+        	SysLog.warning("can not get user home object. Skipping");
         }      
     }
   
@@ -431,22 +409,23 @@ public final class ApplicationContext
     private void loadQuickAccessors(
     ) {
         Map<String,QuickAccessor> quickAccessors = new TreeMap<String,QuickAccessor>();    
-        if(this.quickAccessorsReference != null) {
+        String quickAccessorsReference = this.configuration.getQuickAccessorsReference();
+        if(quickAccessorsReference != null) {
             List<Path> quickAccessorsReferences = new ArrayList<Path>();
             // Quick accessors of segment admin
             quickAccessorsReferences.add(
                 this.mapIdentity(
-                    this.quickAccessorsReference,
-                    this.roleMapper.getAdminPrincipal(this.currentSegment),
+                    quickAccessorsReference,
+                    this.configuration.getRoleMapper().getAdminPrincipal(this.currentSegment),
                     false
                 )
             );
             // Quick accessors of current user
-            Path quickAccessorsReference = this.mapIdentity(
-                this.quickAccessorsReference
+            Path quickAccessorsReferenceIdentity = this.mapIdentity(
+                quickAccessorsReference
             );
             if(!quickAccessorsReferences.contains(quickAccessorsReference)) {
-                quickAccessorsReferences.add(quickAccessorsReference);
+                quickAccessorsReferences.add(quickAccessorsReferenceIdentity);
             }
             int ii = 0;
             for(
@@ -454,15 +433,15 @@ public final class ApplicationContext
                 i.hasNext();
                 ii++
             ) {
-                quickAccessorsReference = (Path)i.next();
+            	quickAccessorsReferenceIdentity = (Path)i.next();
                 RefObject_1_0 parent = null;
                 try {
                     parent = (RefObject_1_0)this.pmData.getObjectById(
-                      quickAccessorsReference.getParent()
+                    	quickAccessorsReferenceIdentity.getParent()
                     );
                     if(parent != null) {
                       for(
-                        Iterator j = ((Collection)parent.refGetValue(quickAccessorsReference.getBase())).iterator();
+                        Iterator j = ((Collection)parent.refGetValue(quickAccessorsReferenceIdentity.getBase())).iterator();
                         j.hasNext();
                       ) {
                         try {
@@ -505,43 +484,44 @@ public final class ApplicationContext
                             if(name == null) {
                                 name = new ObjectReference(target, this).getTitle();
                             }           
+                            int matchingRootObjectIdentity = -1;
+                            String[] rootObjectIdentities = this.configuration.getRootObjectIdentities();
                             if(target != null) {
-                                int matchingRootObjectIdentity = -1;
-                                for(int k = 0; k < this.rootObjectIdentities.length; k++) {
-                                    Path rootObjectPattern = this.mapIdentityAsPattern(this.rootObjectIdentities[k]);
+                                for(int k = 0; k < rootObjectIdentities.length; k++) {
+                                    Path rootObjectPattern = this.mapIdentityAsPattern(rootObjectIdentities[k]);
                                     if(target.refGetPath().isLike(rootObjectPattern)) {
                                         matchingRootObjectIdentity = k;
                                         break;
                                     }                                    
                                 }
-                                quickAccessors.put(
-                                    ii + ":" + name + ":" + quickAccessor.refMofId(), // Order accessors by (parent, name, accessor)
-                                    new QuickAccessor(
-                                        matchingRootObjectIdentity >= 0 
-                                            ? this.mapIdentity(this.rootObjectIdentities[matchingRootObjectIdentity]) 
-                                            : target.refGetPath(),
-                                        name,
-                                        description == null ? name : description,
-                                        iconKey,
-                                        actionType,
-                                        actionName,
-                                        actionParams
-                                    )
-                                );
                             }
+                            quickAccessors.put(
+                                ii + ":" + name + ":" + quickAccessor.refMofId(), // Order accessors by (parent, name, accessor)
+                                new QuickAccessor(
+                                    matchingRootObjectIdentity >= 0 ? 
+                                    	this.mapIdentity(rootObjectIdentities[matchingRootObjectIdentity]) : 
+                                    	target == null ? null : target.refGetPath(),
+                                    name,
+                                    description == null ? name : description,
+                                    iconKey,
+                                    actionType,
+                                    actionName,
+                                    actionParams
+                                )
+                            );
                         }
                         catch(Exception e) {
                           ServiceException e0 = new ServiceException(e);
-                          AppLog.info("Can not get quick accessors", e.getMessage());
-                          AppLog.detail(e0.getMessage(), e0.getCause());
+                          SysLog.info("Can not get quick accessors", e.getMessage());
+                          SysLog.detail(e0.getMessage(), e0.getCause());
                         }
                       }
                   }
                 }
                 catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning("Can not get quick accessor container", e.getMessage());
-                    AppLog.detail(e0.getMessage(), e0.getCause());     
+                    SysLog.warning("Can not get quick accessor container", e.getMessage());
+                    SysLog.detail(e0.getMessage(), e0.getCause());     
                 }
             }
         }
@@ -580,25 +560,29 @@ public final class ApplicationContext
     private void storeSettings(
     ) {
         if(this.userHome != null) {
+            PersistenceManager pm = JDOHelper.getPersistenceManager(this.userHome);
             try {                  
                 ByteArrayOutputStream bs = new ByteArrayOutputStream();
+                if(this.settings == null) {
+                	this.settings = new Properties();
+                }
                 this.settings.store(
                     bs,
                     "settings of user " + this.userHome.refMofId() 
                 );
                 bs.close();
-
-                this.pmControl.currentTransaction().begin();
+                pm.currentTransaction().begin();
                 this.userHome.refSetValue(
                     "settings",
                     bs.toString("UTF-8")
                 );
-                this.pmControl.currentTransaction().commit();
+                pm.currentTransaction().commit();
             }
             catch(Exception e) {
-                AppLog.warning("Can not store user settings. Skipping", e.getMessage());    
+            	SysLog.warning("Unable to store user settings for " + this.userHome.refMofId() + ". Ignoring.");
+            	new ServiceException(e).log();
                 try {
-                    this.pmControl.currentTransaction().rollback();
+                    pm.currentTransaction().rollback();
                 } 
                 catch(Exception e0) {}
             }
@@ -621,7 +605,7 @@ public final class ApplicationContext
                 }
             }
             catch(Exception e) {
-                AppLog.warning("can not get settings from user home. Init with empty settings", e);              
+            	SysLog.warning("can not get settings from user home. Init with empty settings", e);              
             }
         }
     }
@@ -629,7 +613,7 @@ public final class ApplicationContext
     //-------------------------------------------------------------------------
     public String getApplicationName(
     ) {
-        return this.applicationName;
+        return this.configuration.getApplicationName();
     }
 
     //-------------------------------------------------------------------------
@@ -668,8 +652,8 @@ public final class ApplicationContext
                         iconKey =  this.getIconKey(rootObjectClass);
                     }
                     catch(ServiceException e) {
-                        AppLog.detail("can not get icon key", rootObjectClass);
-                        AppLog.detail(e.getMessage(), e.getCause());
+                    	SysLog.detail("can not get icon key", rootObjectClass);
+                    	SysLog.detail(e.getMessage(), e.getCause());
                     }
                     // EVENT_SELECT_OBJECT action for root object
                     actions.add(
@@ -735,8 +719,8 @@ public final class ApplicationContext
                         }
                     }
                     catch(ServiceException e) {
-                        AppLog.detail("can not get inspector", rootObjectClass);
-                        AppLog.detail(e.getMessage(), e.getCause());
+                    	SysLog.detail("can not get inspector", rootObjectClass);
+                    	SysLog.detail(e.getMessage(), e.getCause());
                     }
                 }
             }
@@ -751,19 +735,19 @@ public final class ApplicationContext
     //-------------------------------------------------------------------------
     public UiContext getUiContext(
     ) {
-        return this.controlFactory.getUiContext();
+        return this.configuration.getControlFactory().getUiContext();
     }
 
     //-------------------------------------------------------------------------
     public PortalExtension_1_0 getPortalExtension(
     ) {
-        return this.portalExtension;
+        return this.configuration.getPortalExtension();
     }
 
     //-------------------------------------------------------------------------
     public HtmlEncoder_1_0 getHtmlEncoder(
     ) {
-        return this.htmlEncoder;
+        return this.configuration.getHttpEncoder();
     }
 
     //-------------------------------------------------------------------------
@@ -831,13 +815,13 @@ public final class ApplicationContext
     public Filters getFilters(
         String forReference
     ) {
-        return (Filters)this.filters.get(forReference);
+        return (Filters)this.configuration.getFilters().get(forReference);
     }
   
     //-------------------------------------------------------------------------
     public Codes getCodes(
     ) {
-        return this.codes;
+        return this.configuration.getCodes();
     }
 
     //-------------------------------------------------------------------------
@@ -845,7 +829,7 @@ public final class ApplicationContext
         String forClass,
         boolean forEditing
     ) {      
-        return this.layoutFactory.getLayout(
+        return this.configuration.getLayoutFactory().getLayout(
             this.currentLocaleAsString,
             forClass,
             forEditing
@@ -861,7 +845,7 @@ public final class ApplicationContext
     //-------------------------------------------------------------------------
     public TextsFactory getTextsFactory(
     ) {
-        return this.controlFactory.getTextsFactory();
+        return this.configuration.getControlFactory().getTextsFactory();
     }
 
     //-------------------------------------------------------------------------
@@ -877,6 +861,9 @@ public final class ApplicationContext
         String[] availableIDs = TimeZone.getAvailableIDs();
         if(Arrays.asList(availableIDs).contains(id) || id.startsWith("GMT")) {
             this.currentTimeZone = id;
+        }
+        else if(this.currentTimeZone == null) {
+        	this.currentTimeZone = "UTC";
         }
         // Save in settings
         this.getSettings().setProperty(
@@ -944,7 +931,7 @@ public final class ApplicationContext
     //-------------------------------------------------------------------------
     public String getLoginPrincipalId(
     ) {
-        return this.loginPrincipal;
+        return this.configuration.getLoginPrincipal();
     }
 
     //-------------------------------------------------------------------------
@@ -959,6 +946,19 @@ public final class ApplicationContext
         return this.userRoles;
     }
 
+    //-------------------------------------------------------------------------
+    public ViewPort.Type getCurrentViewPortType(
+    ) {
+    	return this.currentViewPortType;
+    }
+
+    //-------------------------------------------------------------------------
+    public void setCurrentViewPortType(
+    	ViewPort.Type viewPortType
+    ) {
+    	this.currentViewPortType = viewPortType;
+    }
+    
     //-------------------------------------------------------------------------
     public void addErrorMessage(
         String message,
@@ -992,7 +992,7 @@ public final class ApplicationContext
     //-------------------------------------------------------------------------
     public File getTempDirectory(
     ) {
-        return this.tempDirectory;
+        return this.configuration.getTempDirectory();
     }
   
     //-------------------------------------------------------------------------
@@ -1007,19 +1007,21 @@ public final class ApplicationContext
                 fileName += name.charAt(i);
             }
         }
-        return this.tempDirectory.getPath() + File.separator + this.tempFilePrefix + "-" + fileName + extension;
+        return 
+        	this.configuration.getTempDirectory().getPath() + 
+        	File.separator + this.configuration.getTempFilePrefix() + "-" + fileName + extension;
     }
   
     //-------------------------------------------------------------------------
     public String getExceptionDomain(
     ) {
-        return this.exceptionDomain;
+        return this.configuration.getExceptionDomain();
     }
 
     //-------------------------------------------------------------------------
     public String getFilterCriteriaField(
     ) {
-        return this.filterCriteriaField;
+        return this.configuration.getFilterCriteriaField();
     }
   
     //-------------------------------------------------------------------------
@@ -1033,8 +1035,8 @@ public final class ApplicationContext
         // Remove segment name from qualified role name
         String strippedRole = userRole.indexOf("@") >= 0 ? userRole.substring(0, userRole.indexOf("@")) : userRole;
         principalChain.add(strippedRole);
-        if(!this.loginPrincipal.equals(strippedRole)) {
-            principalChain.add(this.loginPrincipal);
+        if(!this.currentLoginPrincipal.equals(strippedRole)) {
+            principalChain.add(this.currentLoginPrincipal);
         }
         return pmf.getPersistenceManager(
             principalChain.toString(), 
@@ -1066,7 +1068,7 @@ public final class ApplicationContext
     public PersistenceManager createPmData(
     ) throws ServiceException {
         this.pmData = this.createPersistenceManager(
-            this.pmfData,
+            this.configuration.getPmfData(),
             this.currentUserRole
         );
         this.pmDataReloadedAt = new Date();
@@ -1092,7 +1094,7 @@ public final class ApplicationContext
         boolean loadControlObjects
     ) throws ServiceException {
         this.pmControl = this.createPersistenceManager(
-            this.pmfData,
+            this.configuration.getPmfData(),
             this.currentUserRole
         );
         if(loadControlObjects) {
@@ -1131,11 +1133,20 @@ public final class ApplicationContext
     }
   
     //-------------------------------------------------------------------------
-    public PersistenceManager getPmData(
+    private PersistenceManager getPmData(
     ) {
         return this.pmData;
     }
 
+    //-------------------------------------------------------------------------
+    public PersistenceManager getNewPmData(
+    ) {
+    	return this.pmData.getPersistenceManagerFactory().getPersistenceManager(
+    		UserObjects.getPrincipalChain(this.pmData).toString(),
+    		null
+    	);
+    }
+    
     //-------------------------------------------------------------------------
     public Date getPmDataReloadedAt(
     ) {
@@ -1151,7 +1162,7 @@ public final class ApplicationContext
     //-------------------------------------------------------------------------
     public Map getMimeTypeImpls(
     ) {
-        return this.mimeTypeImpls;
+        return this.configuration.getMimeTypeImpls();
     }
 
     //-------------------------------------------------------------------------
@@ -1159,7 +1170,25 @@ public final class ApplicationContext
     ) {
         return this.settings;
     }
-  
+
+    //-------------------------------------------------------------------------
+    public Properties getUserSettings(
+    	Path userHomeIdentity
+    ) {
+        Properties settings = new Properties();
+		try {
+			RefObject_1_0 userHomeAdmin = (RefObject_1_0)this.getPmData().getObjectById(userHomeIdentity);
+	        if(userHomeAdmin.refGetValue("settings") != null) {
+	            settings.load(
+	                new ByteArrayInputStream(
+	                    ((String)userHomeAdmin.refGetValue("settings")).getBytes("UTF-8")
+	                )
+	            );
+	        }
+		} catch(Exception e) {}
+		return settings;
+    }
+    
     //-------------------------------------------------------------------------
     public Path getObjectRetrievalIdentity(
         RefObject_1_0 object
@@ -1167,8 +1196,8 @@ public final class ApplicationContext
         Path retrievalIdentity = object.refGetPath();
         Path path = object.refGetPath();
         for(
-                Iterator i = this.retrieveByPathPatterns.iterator();
-                i.hasNext();
+            Iterator i = this.configuration.getRetrieveByPathPatterns().iterator();
+            i.hasNext();
         ) {
             Path pattern = (Path)i.next();
             if(path.isLike(pattern)) {
@@ -1205,13 +1234,13 @@ public final class ApplicationContext
     //-------------------------------------------------------------------------
     public RoleMapper_1_0 getRoleMapper(
     ) {
-        return this.roleMapper;
+        return this.configuration.getRoleMapper();
     }
 
     //-------------------------------------------------------------------------
     public Model_1_0 getModel(
     ) {
-        return this.model;
+        return this.configuration.getModel();
     }
   
     //-------------------------------------------------------------------------
@@ -1223,7 +1252,7 @@ public final class ApplicationContext
      */
     public String[] getFilterValuePattern(
     ) {
-        return this.filterValuePattern;
+        return this.configuration.getFilterValuePatterns();
     }
 
     //-------------------------------------------------------------------------
@@ -1261,7 +1290,7 @@ public final class ApplicationContext
             }
             catch(Exception e) {
                 ServiceException e0 = new ServiceException(e);
-                AppLog.warning(e0.getMessage(), e0.getCause());
+                SysLog.warning(e0.getMessage(), e0.getCause());
                 return null;
             }
         }
@@ -1273,9 +1302,11 @@ public final class ApplicationContext
     //-------------------------------------------------------------------------
     public Path getUserHomeIdentity(
     ) {
-        return this.mapIdentity(
-            this.userHomeIdentity
-        );
+        return this.configuration.getUserHomeIdentity() == null ?
+        	null : 
+        		this.mapIdentity(
+		            this.configuration.getUserHomeIdentity()
+		        );
     }
     
     //-------------------------------------------------------------------------
@@ -1308,7 +1339,7 @@ public final class ApplicationContext
         Class<?> controlClass,
         Object... parameter
     ) throws ServiceException {
-        return this.controlFactory.createControl(
+        return this.configuration.getControlFactory().createControl(
             id,
             this.getCurrentLocaleAsString(),
             this.getCurrentLocaleAsIndex(),
@@ -1321,7 +1352,7 @@ public final class ApplicationContext
         String id,
         String forClass
     ) throws ServiceException {
-        return this.controlFactory.createShowInspectorControl(
+        return this.configuration.getControlFactory().createShowInspectorControl(
             id,
             this.getCurrentPerspective(),
             this.getCurrentLocaleAsString(),
@@ -1336,7 +1367,7 @@ public final class ApplicationContext
         String id,
         String forClass
     ) throws ServiceException {
-        return this.controlFactory.createEditInspectorControl(
+        return this.configuration.getControlFactory().createEditInspectorControl(
             id,
             this.getCurrentPerspective(),
             this.getCurrentLocaleAsString(),
@@ -1351,7 +1382,7 @@ public final class ApplicationContext
         org.openmdx.ui1.jmi1.ValuedField customizedField,
         Object object        
     ) throws ServiceException {
-        return this.controlFactory.getAttributeValueFactory().getAttributeValue(
+        return this.configuration.getControlFactory().getAttributeValueFactory().getAttributeValue(
             customizedField,
             object,
             this
@@ -1414,7 +1445,26 @@ public final class ApplicationContext
         }
         return featureDefinition;
     }
-    
+
+    //-------------------------------------------------------------------------
+    public String getWildcardFilterValue(
+        String filterValue
+    ) {
+        if(!filterValue.endsWith(this.getFilterValuePattern()[2])) {
+            filterValue += this.getFilterValuePattern()[2];
+        }
+        if(
+            !filterValue.startsWith(this.getFilterValuePattern()[0]) ||
+            (this.getFilterValuePattern()[0].length() == 0)
+        ) {
+            if(!filterValue.startsWith(this.getFilterValuePattern()[1])) {
+                filterValue = this.getFilterValuePattern()[1] + filterValue;
+            }
+            filterValue = this.getFilterValuePattern()[0] + filterValue;
+        }  
+        return filterValue.replace("%", ".*");
+    }
+      
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
@@ -1423,44 +1473,26 @@ public final class ApplicationContext
     public static final String PROPERTY_LOCALE_NAME = "Locale.Name";
     public static final String PROPERTY_TIMEZONE_NAME = "TimeZone.Name";
     public static final String PROPERTY_PERSPECTIVE_ID = "Perspective.ID";
-  
-    private final String loginPrincipal;
-    private final ControlFactory controlFactory;
-    private final String applicationName;
-    private final PortalExtension_1_0 portalExtension;
-    private final HtmlEncoder_1_0 htmlEncoder;
-    private final List retrieveByPathPatterns;
-    private final String userHomeIdentity;
+
+    private ApplicationContextConfiguration configuration;
     private RefObject_1_0 userHome = null;
     private RefObject_1_0[] rootObjects = null;
     private final Map<Integer,Action[]> rootObjectActions = new HashMap<Integer,Action[]>();
-    private final String[] rootObjectIdentities;
-    private final Map filters;
-    private final Codes codes;
-    private final LayoutFactory layoutFactory;
-    private final List<String> errorMessages;
+    private final List<String> errorMessages = new ArrayList<String>(); 
     private QuickAccessor[] quickAccessors = null;
-    private final File tempDirectory;
-    private final String tempFilePrefix;
-    private final String quickAccessorsReference;
-    private final String exceptionDomain;
-    private final String filterCriteriaField;
-    private final Map mimeTypeImpls;
     private Properties settings = new Properties();
     private List<String> userRoles;
+    private String currentLoginPrincipal;
     private String currentUserRole;
-    private final RoleMapper_1_0 roleMapper;
-    private final String[] filterValuePattern;
-    private PersistenceManagerFactory pmfData;
     private PersistenceManager pmData; // package managing data objects
     private Date pmDataReloadedAt;
     private PersistenceManager pmControl; // package managing control objects
-    private final Model_1_0 model;
     
     private String currentLocaleAsString = null;
     private String currentTimeZone = null;
     private String currentSegment = "Standard";
     private int currentPerspective = 0;
+    private ViewPort.Type currentViewPortType = null;
   
 }
 

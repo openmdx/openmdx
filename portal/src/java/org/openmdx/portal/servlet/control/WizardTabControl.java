@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardTabControl.java,v 1.11 2009/02/11 12:57:20 wfro Exp $
+ * Name:        $Id: WizardTabControl.java,v 1.14 2009/10/21 17:16:46 wfro Exp $
  * Description: WizardTabControl
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/11 12:57:20 $
+ * Date:        $Date: 2009/10/21 17:16:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,7 +62,7 @@ import java.net.URLEncoder;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.wizards.WizardDefinition;
 
@@ -108,6 +108,16 @@ public class WizardTabControl
     }
 
     //-----------------------------------------------------------------------
+    @Override
+    public String getQualifiedOperationName(
+    ) {
+    	String qualifiedOperationName = super.getQualifiedOperationName();
+    	return qualifiedOperationName == null ?
+    		this.wizardDefinition.getName() :
+    			qualifiedOperationName;
+    }
+
+	//-----------------------------------------------------------------------
     public String getToolTip(
     ) {
         return (this.labels != null) && (this.wizardDefinition.getToolTip() == null) ? 
@@ -116,16 +126,23 @@ public class WizardTabControl
     }
 
     //-----------------------------------------------------------------------
+    public boolean isInplace(
+    ) {
+        String targetType = this.wizardDefinition.getTargetType();
+    	return "_inplace".equals(targetType);
+    }
+    
+    //-----------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p, 
+        ViewPort p, 
         String frame, 
         boolean forEditing
     ) throws ServiceException {
         ShowObjectView view = (ShowObjectView)p.getView();      
         ApplicationContext app = view.getApplicationContext();
         if(frame == null) {
-            int operationIndex = 100*(this.getPaneIndex() + 1) + this.getTabIndex();        
+            Integer tabId = this.getTabId();        
             String objectXri = view.getObjectReference().getObject().refMofId();     
             String encodedObjectXri = objectXri;
             try {
@@ -134,25 +151,24 @@ public class WizardTabControl
             catch(UnsupportedEncodingException e) {}
             if(app.getPortalExtension().isEnabled(this.getName(), view.getRefObject(), app)) {
                 if(this.wizardDefinition.getOpenParameter().length() > 0) {
-                    p.write("    <li><a href=\"#\" onclick=\"javascript:window.open('.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");                    
+                    p.write("    <li><a href=\"#\" onclick=\"javascript:window.open('.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');\" id=\"op", Integer.toString(tabId), "Trigger\">", this.getOperationName(), "...</a></li>");                    
                 }
                 else {
-                    String targetType = this.wizardDefinition.getTargetType();
                     String parameters = null;
                     String operationName = super.getOperationName();
                     if((operationName != null) && operationName.indexOf("?") > 0) {
                         parameters = operationName.substring(operationName.indexOf("?") + 1);
                     }                    
-                    if("_inplace".equals(targetType)) {
-                        p.write("    <li><a href=\"#\" onclick=\"javascript:new Ajax.Updater('UserDialog', '.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "', {evalScripts: true});\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");
+                    if(this.isInplace()) {
+                        p.write("    <li><a href=\"#\" onclick=\"javascript:new Ajax.Updater('UserDialog', '.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "', {evalScripts: true});\" id=\"op", Integer.toString(tabId), "Trigger\">", this.getOperationName(), "...</a></li>");
                     }
                     else {
-                        p.write("    <li><a href=\".", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");                        
+                        p.write("    <li><a href=\".", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"op", Integer.toString(tabId), "Trigger\">", this.getOperationName(), "...</a></li>");                        
                     }
                 }
             }
             else {
-                p.write("    <li><a href=\"#\" id=\"opTab", Integer.toString(operationIndex), "\"><span>", this.getName(), "</span></a></li>");                
+                p.write("    <li><a href=\"#\" id=\"op", Integer.toString(tabId), "Trigger\"><span>", this.getName(), "</span></a></li>");                
             }
         }
     }

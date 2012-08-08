@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ValidatingDocumentBuilder.java,v 1.6 2009/03/31 17:05:18 hburger Exp $
+ * Name:        $Id: ValidatingDocumentBuilder.java,v 1.7 2009/10/23 11:36:22 hburger Exp $
  * Description: Validating Document Builder 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:05:18 $
+ * Date:        $Date: 2009/10/23 11:36:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -176,7 +176,8 @@ public class ValidatingDocumentBuilder {
             url.openStream(),
             null, // encoding 
             true, // byteOrderMarkAware 
-            true //boolean xmlDeclarationAware
+            true, // xmlDeclarationAware
+            true // popagateClode
         );
         char[] charArray = new char[READ_AHEAD_LIMIT];
         int l = in.read(charArray);

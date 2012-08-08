@@ -1,5 +1,5 @@
-Release Name: openMDX/Portal 2.5.0
-Release Date: 2009-06-14
+Release Name: openMDX/Portal 2.6.0
+Release Date: 2010-05-01
 
 ---------------------------------------------------------------------
 Notes:
@@ -7,7 +7,7 @@ Notes:
   This software is published under the BSD license
   as listed below.
   
-  Copyright (c) 2006-2009, OMEX AG, Switzerland
+  Copyright (c) 2006-2010, OMEX AG, Switzerland
   All rights reserved.
   
   Redistribution and use in source and binary forms, with or without 
@@ -49,18 +49,39 @@ Notes:
 Changes:
 
 0.    SUMMARY
-      * Refactoring and clean-up
+      * Clean up
       * Bug fixes
-                     
-                        
+                                          
+==============================================================================
+Version 2.6.0                                                       2010-05-01
+==============================================================================
+
 1.    NEW FEATURES
-      none
-                        
+      
+      CR20006361
+      Application-specific ApplicationContext. The option 
+      'applicationContextClassName' allows to configure a user-defined
+      ApplicationContext class. The user-defined class must be a subclass of
+      org.openmdx.portal.servlet.ApplicationContext.
+                                    
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
-      none
       
+      CR10009198
+      PortalExtension: getDataBinding(). The signature of getDataBinding() has changed. 
+      The parameter ApplicationContext app is removed because data bindings must not 
+      depend on the application context. The new interface DataBinding_2_0 has been 
+      added to support data bindings where the application context is passed as 
+      parameter for setValue(), getValue(). 
+      
+      CR20018907
+      Portal: Ajax-based login.
+      Login.jsp now first invokes the protected ./jsp/GetPath.jsp. The session 
+      is not authenticated if GetPath returns the redirect URL to the Login page. 
+      In this case the Login form is displayed. If GetPath returns the non-redirected 
+      URL, Login.jsp forwards to the ObjectInspectorServlet without displaying 
+      the login form. As a consequence /jsp/* must be protected in web.xml. 
             
 2.1.  FIXED BUGS
       none
@@ -71,4 +92,4 @@ Changes:
 2.3   REMOVED FEATURES
       none
 
----------------------------------------------------------------------
+---

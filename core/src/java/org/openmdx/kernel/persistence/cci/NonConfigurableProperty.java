@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: NonConfigurableProperty.java,v 1.3 2009/01/14 14:29:28 wfro Exp $
+ * Name:        $Id: NonConfigurableProperty.java,v 1.4 2009/10/12 10:34:10 hburger Exp $
  * Description: JDO 2.0 Non-Configurable Properties
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/14 14:29:28 $
+ * Date:        $Date: 2009/10/12 10:34:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,8 @@
  */
 package org.openmdx.kernel.persistence.cci;
 
+import javax.jdo.Constants;
+
 
 
 /**
@@ -61,8 +63,8 @@ public enum NonConfigurableProperty {
     // JDO Standard Properties
     //------------------------------------------------------------------------
 
-    VendorName("VendorName"),
-    VersionNumber("VersionNumber");
+    VendorName(Constants.NONCONFIGURABLE_PROPERTY_VENDOR_NAME),
+    VersionNumber(Constants.NONCONFIGURABLE_PROPERTY_VERSION_NUMBER);
     //------------------------------------------------------------------------
     // Vendor Specific Properties
     //------------------------------------------------------------------------

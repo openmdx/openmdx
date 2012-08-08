@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardDefinitionFactory.java,v 1.24 2009/06/05 11:49:57 wfro Exp $
+ * Name:        $Id: WizardDefinitionFactory.java,v 1.25 2009/06/16 17:08:27 wfro Exp $
  * Description: WizardDefinitionFactory 
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/05 11:49:57 $
+ * Date:        $Date: 2009/06/16 17:08:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,9 +66,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.kernel.log.SysLog;
 
 public class WizardDefinitionFactory
 implements Serializable {
@@ -93,7 +93,7 @@ implements Serializable {
             return null;
         }
         else {
-            AppLog.info("Unsupported wizard definition format. Supported formats are [.jsp]", path);
+        	SysLog.info("Unsupported wizard definition format. Supported formats are [.jsp]", path);
             return null;
         }
     }
@@ -106,7 +106,7 @@ implements Serializable {
         this.allDefinitions = reports;
         this.customizedDefinitions = new HashMap<String,Set<String>>();
         this.model = model;
-        AppLog.info("loaded wizards=" + this.allDefinitions.keySet());
+        SysLog.info("loaded wizards=" + this.allDefinitions.keySet());
     }
 
     //-------------------------------------------------------------------------

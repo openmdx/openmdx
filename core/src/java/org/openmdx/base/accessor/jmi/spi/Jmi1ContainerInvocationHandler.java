@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.13 2009/05/26 12:40:30 hburger Exp $
+ * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.16 2010/01/06 17:16:36 wfro Exp $
  * Description: ContainerInvocationHandler 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 12:40:30 $
+ * Date:        $Date: 2010/01/06 17:16:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import javax.jmi.reflect.RefBaseObject;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
+import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.kernel.log.LoggerFactory;
@@ -222,14 +223,26 @@ public class Jmi1ContainerInvocationHandler
                     } 
                     else if("refGetAll".equals(methodName)) {
                         Object predicate = this.marshaller.unmarshal(args[0]);
-                        return this.marshaller.marshal(
-                            predicate instanceof AnyTypePredicate ? ReferenceDef.getAll.invoke(
+                        Object value;
+                        if(predicate instanceof AnyTypePredicate){
+                            value = ReferenceDef.getAll.invoke(
                                 this.cciDelegate, 
                                 predicate
-                            ) : ((RefContainer)this.cciDelegate).refGetAll(
+                            ); 
+                        } else if (predicate instanceof RefQuery_1_0) {
+                            value = ((RefContainer)this.cciDelegate).refGetAll(
+                                ((RefQuery_1_0)predicate).refGetFilter()
+                            );
+                        } else if (this.cciDelegate instanceof RefContainer) {
+                            value = ((RefContainer)this.cciDelegate).refGetAll(
                                 predicate
-                            )
-                        );
+                            );
+                        } else {
+                            throw new IllegalArgumentException(
+                                "Unsupported container/filter combination"
+                            );
+                        }
+                        return this.marshaller.marshal(value);
                     } 
                     else if("refRemoveAll".equals(methodName)) {
                         Object predicate = this.marshaller.unmarshal(args[0]);
@@ -262,6 +275,19 @@ public class Jmi1ContainerInvocationHandler
                 new JmiServiceException(throwable.getCause()) :
                 throwable;
         }
+    }
+
+    /**
+     * Provide the container's add() arguments
+     * 
+     * @param containerClass
+     * 
+     * @return the container's add() arguments
+     */
+    public static Class<?>[] getAddArguments(
+        Class<? extends RefContainer> containerClass
+    ){
+        return ReferenceDef.getInstance(containerClass).add.getParameterTypes();
     }
     
     

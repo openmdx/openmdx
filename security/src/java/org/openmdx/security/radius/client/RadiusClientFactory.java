@@ -1,14 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusClientFactory.java,v 1.6 2005/06/14 21:18:17 hburger Exp $
+ * Project:     openMDX/Security, http://www.openmdx.org/
+ * Name:        $Id: RadiusClientFactory.java,v 1.7 2010/03/11 18:50:58 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/14 21:18:17 $
+ * Date:        $Date: 2010/03/11 18:50:58 $
  * ====================================================================
  *
- * Copyright (C) 2004  OMEX AG
+ * Copyright (C) 2004-2010  OMEX AG
  *
  * * This library is free software; you can redistribute it and/or
  *   modify it under the terms of the GNU Lesser General Public
@@ -44,17 +44,18 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  * 
  * This library BASED on Java Radius Client 2.0.0
- * (http://http://jradius-client.sourceforge.net/),
+ * (http://jradius-client.sourceforge.net/),
  * but it's namespace and content has been MODIFIED by OMEX AG
  * in order to integrate it into the openMDX framework.
  */
 package org.openmdx.security.radius.client;
 
 import java.net.InetAddress;
+import java.util.logging.Logger;
 
 import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusClient;
 
@@ -68,12 +69,14 @@ public class RadiusClientFactory implements PoolableObjectFactory {
 
     /**
      * Constructor
+     * 
      * @param hostNames The Radius Server's Host Name
      * @param authenticationPorts The Radius Server's Authentication Port
      * @param accountingPorts The Radius Server's Accounting Port
      * @param sharedSecret The Radius Protocol's Shared Secret 
      * @param socketTimeout The Radius Client's Socket Timeout
-     * @param trace defines whether the radius requests should be traced
+     * @param logger the logger must not be <code>null</code>
+     * @param trace tells whether the radius requests are traced
      * @param nasAddress the NAS IP Address; the NAS Identifier is used in case of null
      */
     public RadiusClientFactory(
@@ -82,7 +85,8 @@ public class RadiusClientFactory implements PoolableObjectFactory {
         int[] accountingPorts,
         String sharedSecret, 
         long socketTimeout,
-        boolean trace, 
+        Logger logger,
+        boolean trace,
         InetAddress nasAddress
     ) {
         this.hostNames = hostNames;
@@ -90,6 +94,7 @@ public class RadiusClientFactory implements PoolableObjectFactory {
         this.accountingPorts = accountingPorts;
         this.sharedSecret = sharedSecret;
         this.socketTimeout = socketTimeout;
+        this.logger = logger;
         this.trace = trace;
         this.nasAddress = nasAddress;
     }
@@ -120,7 +125,12 @@ public class RadiusClientFactory implements PoolableObjectFactory {
     private final long socketTimeout;
     
     /**
-     * Defines whether the radius requests should be traced.
+     * The logger for trace and failure messages
+     */
+    private final Logger logger;
+    
+    /**
+     * Tells whether the Radius requests are traced
      */
     private final boolean trace;
     
@@ -144,6 +154,7 @@ public class RadiusClientFactory implements PoolableObjectFactory {
             this.accountingPorts,
             this.sharedSecret,
             (int)this.socketTimeout, 
+            this.logger, 
             this.trace, 
             this.nasAddress
         );
@@ -159,7 +170,9 @@ public class RadiusClientFactory implements PoolableObjectFactory {
      * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
      */
     public boolean validateObject(Object obj) {
-        return obj instanceof RadiusClient;
+        return 
+        	obj instanceof RadiusClient &&
+        	((RadiusClient)obj).isValid();
     }
 
     /* (non-Javadoc)

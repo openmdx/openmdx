@@ -1,7 +1,7 @@
 
 (object Petal
-    version    	45
-    _written   	"Rose 7.6.0109.2314"
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
     charSet    	0)
 
 (object Class_Category "openmdx"
@@ -25,10 +25,10 @@
 	    is_loaded  	FALSE
 	    file_name  	"$curdir\\openmdx\\base.cat"
 	    quid       	"3FB3D5A50029")
-	(object Class_Category "lock1"
+	(object Class_Category "audit2"
 	    is_unit    	TRUE
 	    is_loaded  	FALSE
-	    file_name  	"$curdir\\openmdx\\lock1.cat"
+	    file_name  	"$curdir\\openmdx\\audit2.cat"
 	    quid       	"3FF13E19007A")
 	(object Class_Category "preferences1"
 	    is_unit    	TRUE
@@ -130,7 +130,7 @@
 		    quidu      	"3FF13E0E02A5"
 		    width      	300
 		    height     	180)
-		(object CategoryView "Logical View::org::openmdx::lock1" @4
+		(object CategoryView "Logical View::org::openmdx::audit2" @4
 		    location   	(1432, 842)
 		    font       	(object Font
 			size       	8
@@ -148,7 +148,7 @@
 			nlines     	2
 			max_width  	288
 			justify    	0
-			label      	"lock1")
+			label      	"audit2")
 		    icon_style 	"Icon"
 		    line_color 	3342489
 		    fill_color 	13434879

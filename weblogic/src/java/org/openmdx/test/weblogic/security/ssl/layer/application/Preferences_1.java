@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Preferences_1.java,v 1.5 2009/01/06 13:13:37 wfro Exp $
+ * Name:        $Id: Preferences_1.java,v 1.6 2009/07/06 11:14:48 hburger Exp $
  * Description: Preferences_1 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 13:13:37 $
+ * Date:        $Date: 2009/07/06 11:14:48 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,31 +52,10 @@
 
 package org.openmdx.test.weblogic.security.ssl.layer.application;
 
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
-import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.cci.DataproviderObject;
-import org.openmdx.application.dataprovider.cci.DataproviderReply;
-import org.openmdx.application.dataprovider.cci.DataproviderRequest;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.spi.Layer_1;
-import org.openmdx.application.dataprovider.spi.Layer_1_0;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.naming.Path;
-import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.security.ExecutionContext;
-import org.openmdx.kernel.security.resource.ConnectionFactory;
 
 /**
- * Preferences_1
- *
+ * TODO Preferences_1
  */
 public class Preferences_1
     extends Layer_1
@@ -88,141 +67,141 @@ public class Preferences_1
     public Preferences_1() {
     }
 
-    private Context pkiContext;
-    private Map<String, Object> pkiProviders;
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
-     */
-    public void activate(
-        short id, 
-        Configuration configuration, 
-        Layer_1_0 delegation
-    ) throws Exception, ServiceException {
-        super.activate(id, configuration, delegation);
-        this.pkiContext = (Context) new InitialContext().lookup("java:comp/env/pki");
-        this.pkiProviders = new HashMap<String, Object>();
-    }
-    
-    private final ConnectionFactory getConnectionFactory(
-        String segment
-    ) throws ServiceException {
-        Object connectionFactory;
-        if(this.pkiProviders.containsKey(segment)) {
-            connectionFactory = this.pkiProviders.get(segment);
-        } else try {
-            this.pkiProviders.put(
-                segment, 
-                connectionFactory = pkiContext.lookup(segment)
-            );
-        } catch (NamingException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_FOUND,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("jndiName", "java:comp/env/pki/" + segment)                    
-                },
-                "Key store connection factory acquisition failed"
-            ).log();
-        }
-        return (ConnectionFactory) connectionFactory;
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#deactivate()
-     */
-    public void deactivate(
-    ) throws Exception, ServiceException {
-        this.pkiContext = null;
-        this.pkiProviders = null;
-        super.deactivate();
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#get(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
-     */
-    @SuppressWarnings("unchecked")
-    public DataproviderReply get(
-        ServiceHeader header, 
-        DataproviderRequest request
-    ) throws ServiceException {
-        if(request.path().isLike(PKI_SEGMENT_PATTERN)) {
-            try {
-                Object connection = getConnectionFactory(request.path().getBase()).getConnection();
-                DataproviderObject segment = new DataproviderObject(
-                    request.path(),
-                    SEGMENT_INSTANCE_OF[0],
-                    Arrays.asList(SEGMENT_INSTANCE_OF),
-                    null,
-                    null
-                );
-                segment.values("description").add(connection.getClass().getName());
-                return new DataproviderReply(segment);
-            } catch (GeneralSecurityException exception) {
-                throw new ServiceException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.MEDIA_ACCESS_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("jndiName", "java:comp/env/pki/" + request.path().getBase())                    
-                    },
-                    "Key store connection factory acquisition failed"
-                ).log();
-            }
-        } else if (request.path().isLike(PKI_PREFERENCES_PATTERN)) {
-            String jndiName = "java:comp/env/pki/" + request.path().get(4);
-            try {
-                Object connection = getConnectionFactory(request.path().get(4)).getConnection();
-                if(connection instanceof ExecutionContext) {
-                    DataproviderObject preferences = new DataproviderObject(
-                        request.path(),
-                        PREFERENCES_INSTANCE_OF[0],
-                        Arrays.asList(PREFERENCES_INSTANCE_OF),
-                        null,
-                        null
-                    );
-                    ExecutionContext context = (ExecutionContext)connection;
-                    preferences.values("absolutePath").add("execution/context");
-                    preferences.values("description").add(context.toString());
-                    return new DataproviderReply(preferences);
-                } else {
-                    return super.get(header, request);
-                }
-            } catch (GeneralSecurityException exception) {
-                throw new ServiceException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.MEDIA_ACCESS_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("jndiName", jndiName)                    
-                    },
-                    "Key store connection factory acquisition failed"
-                ).log();
-            }
-        } else {
-            return super.get(header, request);
-        }
-    }
-
-    private final Path PKI_SEGMENT_PATTERN = new Path(
-        "xri:@openmdx*org:openmdx:preferences1/provider/JKS/segment/:*"
-    );
-    
-    private final static String[] SEGMENT_INSTANCE_OF = new String[]{
-        "org:openmdx:preferences1:Segment",
-        "org:openmdx:base:Segment",
-        "org:openmx:base:ContextCapable",
-        "org:openmdx:compatbility:view1:ViewCapable"
-    };
-
-    private final Path PKI_PREFERENCES_PATTERN = new Path(
-        "xri:@openmdx*org:openmdx:preferences1/provider/JKS/segment/:*/preferences/:*"
-    );
-
-    private final static String[] PREFERENCES_INSTANCE_OF = new String[]{
-        "org:openmdx:preferences1:Preferences",
-        "org:openmdx:generic1:PropertySet"
-    };
+//    private Context pkiContext;
+//    private Map<String, Object> pkiProviders;
+//    
+//    /* (non-Javadoc)
+//     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
+//     */
+//    public void activate(
+//        short id, 
+//        Configuration configuration, 
+//        Layer_1_0 delegation
+//    ) throws Exception, ServiceException {
+//        super.activate(id, configuration, delegation);
+//        this.pkiContext = (Context) new InitialContext().lookup("java:comp/env/pki");
+//        this.pkiProviders = new HashMap<String, Object>();
+//    }
+//    
+//    private final ConnectionFactory getConnectionFactory(
+//        String segment
+//    ) throws ServiceException {
+//        Object connectionFactory;
+//        if(this.pkiProviders.containsKey(segment)) {
+//            connectionFactory = this.pkiProviders.get(segment);
+//        } else try {
+//            this.pkiProviders.put(
+//                segment, 
+//                connectionFactory = pkiContext.lookup(segment)
+//            );
+//        } catch (NamingException exception) {
+//            throw new ServiceException(
+//                exception,
+//                BasicException.Code.DEFAULT_DOMAIN,
+//                BasicException.Code.NOT_FOUND,
+//                new BasicException.Parameter[]{
+//                    new BasicException.Parameter("jndiName", "java:comp/env/pki/" + segment)                    
+//                },
+//                "Key store connection factory acquisition failed"
+//            ).log();
+//        }
+//        return (ConnectionFactory) connectionFactory;
+//    }
+//
+//    /* (non-Javadoc)
+//     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#deactivate()
+//     */
+//    public void deactivate(
+//    ) throws Exception, ServiceException {
+//        this.pkiContext = null;
+//        this.pkiProviders = null;
+//        super.deactivate();
+//    }
+//
+//    /* (non-Javadoc)
+//     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#get(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
+//     */
+//    @SuppressWarnings("unchecked")
+//    public DataproviderReply get(
+//        ServiceHeader header, 
+//        DataproviderRequest request
+//    ) throws ServiceException {
+//        if(request.path().isLike(PKI_SEGMENT_PATTERN)) {
+//            try {
+//                Object connection = getConnectionFactory(request.path().getBase()).getConnection();
+//                DataproviderObject segment = new DataproviderObject(
+//                    request.path(),
+//                    SEGMENT_INSTANCE_OF[0],
+//                    Arrays.asList(SEGMENT_INSTANCE_OF),
+//                    null,
+//                    null
+//                );
+//                segment.values("description").add(connection.getClass().getName());
+//                return new DataproviderReply(segment);
+//            } catch (GeneralSecurityException exception) {
+//                throw new ServiceException(
+//                    exception,
+//                    BasicException.Code.DEFAULT_DOMAIN,
+//                    BasicException.Code.MEDIA_ACCESS_FAILURE,
+//                    new BasicException.Parameter[]{
+//                        new BasicException.Parameter("jndiName", "java:comp/env/pki/" + request.path().getBase())                    
+//                    },
+//                    "Key store connection factory acquisition failed"
+//                ).log();
+//            }
+//        } else if (request.path().isLike(PKI_PREFERENCES_PATTERN)) {
+//            String jndiName = "java:comp/env/pki/" + request.path().get(4);
+//            try {
+//                Object connection = getConnectionFactory(request.path().get(4)).getConnection();
+//                if(connection instanceof ExecutionContext) {
+//                    DataproviderObject preferences = new DataproviderObject(
+//                        request.path(),
+//                        PREFERENCES_INSTANCE_OF[0],
+//                        Arrays.asList(PREFERENCES_INSTANCE_OF),
+//                        null,
+//                        null
+//                    );
+//                    ExecutionContext context = (ExecutionContext)connection;
+//                    preferences.values("absolutePath").add("execution/context");
+//                    preferences.values("description").add(context.toString());
+//                    return new DataproviderReply(preferences);
+//                } else {
+//                    return super.get(header, request);
+//                }
+//            } catch (GeneralSecurityException exception) {
+//                throw new ServiceException(
+//                    exception,
+//                    BasicException.Code.DEFAULT_DOMAIN,
+//                    BasicException.Code.MEDIA_ACCESS_FAILURE,
+//                    new BasicException.Parameter[]{
+//                        new BasicException.Parameter("jndiName", jndiName)                    
+//                    },
+//                    "Key store connection factory acquisition failed"
+//                ).log();
+//            }
+//        } else {
+//            return super.get(header, request);
+//        }
+//    }
+//
+//    private final Path PKI_SEGMENT_PATTERN = new Path(
+//        "xri:@openmdx*org:openmdx:preferences1/provider/JKS/segment/:*"
+//    );
+//    
+//    private final static String[] SEGMENT_INSTANCE_OF = new String[]{
+//        "org:openmdx:preferences1:Segment",
+//        "org:openmdx:base:Segment",
+//        "org:openmx:base:ContextCapable",
+//        "org:openmdx:compatbility:view1:ViewCapable"
+//    };
+//
+//    private final Path PKI_PREFERENCES_PATTERN = new Path(
+//        "xri:@openmdx*org:openmdx:preferences1/provider/JKS/segment/:*/preferences/:*"
+//    );
+//
+//    private final static String[] PREFERENCES_INSTANCE_OF = new String[]{
+//        "org:openmdx:preferences1:Preferences",
+//        "org:openmdx:generic1:PropertySet"
+//    };
 
 }

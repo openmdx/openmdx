@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: PasscodeCallbackHandler.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
+ * Name:        $Id: PasscodeCallbackHandler.java,v 1.3 2010/03/13 20:15:40 hburger Exp $
  * Description: Passcode Callback Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:20 $
+ * Date:        $Date: 2010/03/13 20:15:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -45,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.security.auth.callback;
 
@@ -101,7 +101,6 @@ public class PasscodeCallbackHandler
      * @param password the user's password
      * @param passcode the user's passcode
      * @param context the passcode provider's context
-     * @param client TODO
      */
     public PasscodeCallbackHandler(
         String username,
@@ -163,9 +162,7 @@ public class PasscodeCallbackHandler
     		password,
     		PasscodeCallbackHandler.toPasscode(pin, tokencode),
     		context,
-    		tokencode == null ? 
-    			ZERO : 
-    			new Integer(tokencode.length())
+    		Integer.valueOf(tokencode == null ? 0 : tokencode.length())
     	);
     }
     
@@ -193,8 +190,6 @@ public class PasscodeCallbackHandler
      * @serial
      */
     private final Integer tokencodeLength;
-    
-    private static final Integer ZERO = new Integer(0);
     
     /**
      * Calculates the passcode
@@ -235,8 +230,7 @@ public class PasscodeCallbackHandler
 	) throws IOException, UnsupportedCallbackException {
     	if(PasscodeCallbackHandler.matches(callback.getPrompt(),StandardCallbackPrompts.USERNAME)) {
 	        callback.setName(this.username);
-    	} 
-    	else {
+    	} else {
     		this.unsupported(callback, callback.getPrompt());
     	}
 	}
@@ -246,18 +240,13 @@ public class PasscodeCallbackHandler
 	) throws IOException, UnsupportedCallbackException {
     	if(PasscodeCallbackHandler.matches(callback.getPrompt(),StandardCallbackPrompts.PASSWORD)) {
 	        callback.setPassword(this.password);
-    	} 
-    	else if(
-    		this.tokencodeLength!= null &&
-    		PasscodeCallbackHandler.matches(callback.getPrompt(),StandardCallbackPrompts.PIN)
-    	) {
+    	} else if(this.tokencodeLength!= null && PasscodeCallbackHandler.matches(callback.getPrompt(),StandardCallbackPrompts.PIN)) {
 	        callback.setPassword(
 	        	this.passcode == null || this.passcode.length() == this.tokencodeLength.intValue() ?
 	        		null :
         			this.passcode.substring(0, this.passcode.length() - this.tokencodeLength.intValue()).toCharArray()
 	        );
-		} 
-    	else {
+		} else {
     		this.unsupported(callback, callback.getPrompt());
 		}
 	}
@@ -267,21 +256,15 @@ public class PasscodeCallbackHandler
 	) throws IOException, UnsupportedCallbackException {
         if(StandardCallbackPrompts.PASSCODE.equals(callback.getPrompt())){
             callback.setText(this.passcode);
-        } 
-        else if(
-        	this.tokencodeLength != null &&
-        	StandardCallbackPrompts.TOKENCODE.equals(callback.getPrompt())
-        ){
+        } else if(this.tokencodeLength != null && StandardCallbackPrompts.TOKENCODE.equals(callback.getPrompt())){
             callback.setText(
-            	this.passcode == null || this.passcode.length() < this.tokencodeLength.intValue() ?
-            		null :
-            		this.passcode.substring(this.passcode.length() - this.tokencodeLength.intValue())
+            	this.passcode == null || this.passcode.length() < this.tokencodeLength.intValue() ?	
+            	    null : 
+            	    this.passcode.substring(this.passcode.length() - this.tokencodeLength.intValue())
             );
-        } 
-        else if (StandardCallbackPrompts.CONTEXT.equals(callback.getPrompt())){
+        } else if (StandardCallbackPrompts.CONTEXT.equals(callback.getPrompt())){
             callback.setText(this.context);
-		} 
-        else {
+		} else {
         	this.unsupported(callback, callback.getPrompt());
 		}
 	}

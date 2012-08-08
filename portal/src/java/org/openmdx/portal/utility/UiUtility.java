@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiUtility.java,v 1.16 2009/06/13 18:48:08 wfro Exp $
+ * Name:        $Id: UiUtility.java,v 1.22 2010/04/27 08:30:36 wfro Exp $
  * Description: UiUtility
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2009/06/13 18:48:08 $
+ * Date:        $Date: 2010/04/27 08:30:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,10 +75,10 @@ import javax.resource.cci.MappedRecord;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openmdx.application.dataprovider.importer.XmlImporter;
+import org.openmdx.application.xml.Importer;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.portal.text.conversion.XMLWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -224,13 +224,13 @@ public class UiUtility {
       String segmentName = "Standard";
       if(!elementDefinitions.isEmpty()) {
           MappedRecord obj = elementDefinitions.values().iterator().next();
-          Path objPath = ObjectHolder_2Facade.getPath(obj);
+          Path objPath = Object_2Facade.getPath(obj);
           providerName = objPath.get(2);
           segmentName = objPath.get(4);
       }
       String s = null;
       s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-          "<org.openmdx.base.Authority xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" name=\"org:openmdx:ui1\" xsi:noNamespaceSchemaLocation=\"xri:+resource/org/openmdx/ui1/xmi/ui1.xsd\">\n" +
+          "<org.openmdx.base.Authority xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" name=\"org:openmdx:ui1\" xsi:noNamespaceSchemaLocation=\"xri://+resource/org/openmdx/ui1/xmi1/ui1.xsd\">\n" +
           "  <_object/>\n" + 
           "  <_content>\n" +
           "    <provider>\n" +
@@ -248,9 +248,9 @@ public class UiUtility {
           i.hasNext(); 
       ) {
           MappedRecord element = i.next();
-          ObjectHolder_2Facade elementFacade;
+          Object_2Facade elementFacade;
           try {
-	          elementFacade = ObjectHolder_2Facade.newInstance(element);
+	          elementFacade = Object_2Facade.newInstance(element);
           }
           catch (ResourceException e) {
         	  throw new ServiceException(e);
@@ -265,9 +265,9 @@ public class UiUtility {
               // write only if either label or toolTip for specified locale exists
               if(
                   allLocales || 
-                  ((elementFacade.attributeValues("label").get(localeIndex) != null) && !"".equals(elementFacade.attributeValues("label").get(localeIndex))) ||
-                  ((elementFacade.attributeValues("shortLabel").get(localeIndex) != null) && !"".equals(elementFacade.attributeValues("shortLabel").get(localeIndex))) ||
-                  ((elementFacade.attributeValues("toolTip").get(localeIndex) != null) && !"".equals(elementFacade.attributeValues("toolTip").get(localeIndex)))
+                  ((elementFacade.attributeValuesAsList("label").size() > localeIndex) && (elementFacade.attributeValuesAsList("label").get(localeIndex) != null) && !"".equals(elementFacade.attributeValuesAsList("label").get(localeIndex))) ||
+                  ((elementFacade.attributeValuesAsList("shortLabel").size() > localeIndex) && (elementFacade.attributeValuesAsList("shortLabel").get(localeIndex) != null) && !"".equals(elementFacade.attributeValuesAsList("shortLabel").get(localeIndex))) ||
+                  ((elementFacade.attributeValuesAsList("toolTip").size() > localeIndex) && (elementFacade.attributeValuesAsList("toolTip").get(localeIndex) != null) && !"".equals(elementFacade.attributeValuesAsList("toolTip").get(localeIndex)))
               ) {
                   boolean isNested = false;
                   if("org:openmdx:ui1:AlternateElementDefinition".equals(elementDefinitionType)) {
@@ -304,8 +304,8 @@ public class UiUtility {
                       j < endIndex + 1;
                       j++
                   ) {
-                      String label = elementFacade.attributeValues("label").size() > j
-                          ? (String)elementFacade.attributeValues("label").get(j)
+                      String label = elementFacade.attributeValuesAsList("label").size() > j
+                          ? (String)elementFacade.attributeValuesAsList("label").get(j)
                           : "";
                       if(!"".equals(label)) {
                           String indent = isNested ? "      " : "";        
@@ -337,8 +337,8 @@ public class UiUtility {
                       j < endIndex + 1;
                       j++
                   ) {
-                      String shortLabel = elementFacade.attributeValues("shortLabel").size() > j
-                          ? (String)elementFacade.attributeValues("shortLabel").get(j)
+                      String shortLabel = elementFacade.attributeValuesAsList("shortLabel").size() > j
+                          ? (String)elementFacade.attributeValuesAsList("shortLabel").get(j)
                           : "";
                       if(!"".equals(shortLabel)) {
                           String indent = isNested ? "      " : "";
@@ -370,8 +370,8 @@ public class UiUtility {
                       j < endIndex + 1;
                       j++
                   ) {
-                      String toolTip = elementFacade.attributeValues("toolTip").size() > j
-                          ? (String)elementFacade.attributeValues("toolTip").get(j)
+                      String toolTip = elementFacade.attributeValuesAsList("toolTip").size() > j
+                          ? (String)elementFacade.attributeValuesAsList("toolTip").get(j)
                           : "";
                       if(!"".equals(toolTip)) {
                           String indent = isNested ? "      " : "";
@@ -448,15 +448,12 @@ public class UiUtility {
   ) throws ServiceException {
       Map<Path,MappedRecord> elementDefinitions = new LinkedHashMap<Path,MappedRecord>();
       if(file.exists()) {
-          XmlImporter importer = new XmlImporter(
-            elementDefinitions,
-            false
-          );
           System.out.println("loading " + file);
           try {
-            importer.process(
-              new String[]{file.getAbsolutePath()}
-            );
+        	  Importer.importObjects(
+        		  Importer.asTarget(elementDefinitions),
+        		  Importer.asSource(file)
+        	  );
           }
           catch(ServiceException e) {
             e.log();
@@ -476,32 +473,32 @@ public class UiUtility {
             // merge entry
             if(mergedElementDefinitions.get(key) != null) {
               MappedRecord mergedElementDefinition = mergedElementDefinitions.get(key);
-              String mergedElementDefinitionType = ObjectHolder_2Facade.getObjectClass(mergedElementDefinition);
+              String mergedElementDefinitionType = Object_2Facade.getObjectClass(mergedElementDefinition);
               if(
                 "org:openmdx:ui1:ElementDefinition".equals(mergedElementDefinitionType) ||
                 "org:openmdx:ui1:AlternateElementDefinition".equals(mergedElementDefinitionType) ||
                 "org:openmdx:ui1:AdditionalElementDefinition".equals(mergedElementDefinitionType)
               ) {
                   MappedRecord elementDefinition = elementDefinitions.get(key);
-                  ObjectHolder_2Facade elementDefinitionFacade = ObjectHolder_2Facade.newInstance(elementDefinition);
-                  ObjectHolder_2Facade mergedElementDefinitionFacade = ObjectHolder_2Facade.newInstance(mergedElementDefinition);
+                  Object_2Facade elementDefinitionFacade = Object_2Facade.newInstance(elementDefinition);
+                  Object_2Facade mergedElementDefinitionFacade = Object_2Facade.newInstance(mergedElementDefinition);
                   if(elementDefinitionFacade.getAttributeValues("label") != null) {
-                	  mergedElementDefinitionFacade.attributeValues("label").add(
-                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValues("label").size() > 0)
+                	  mergedElementDefinitionFacade.attributeValuesAsList("label").add(
+                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValuesAsList("label").size() > 0)
                         ? elementDefinitionFacade.attributeValue("label")
                         : "" // empty string as default
                     );
                   }
                   if(mergedElementDefinitionFacade.getAttributeValues("shortLabel") != null) {
-                	  mergedElementDefinitionFacade.attributeValues("shortLabel").add(
-                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValues("shortLabel").size() > 0)
+                	  mergedElementDefinitionFacade.attributeValuesAsList("shortLabel").add(
+                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValuesAsList("shortLabel").size() > 0)
                         ? elementDefinitionFacade.attributeValue("shortLabel")
                         : "" // empty string as default
                     );
                   }
                   if(mergedElementDefinitionFacade.getAttributeValues("toolTip") != null) {
-                	  mergedElementDefinitionFacade.attributeValues("toolTip").add(
-                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValues("toolTip").size() > 0)
+                	  mergedElementDefinitionFacade.attributeValuesAsList("toolTip").add(
+                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValuesAsList("toolTip").size() > 0)
                         ? elementDefinitionFacade.attributeValue("toolTip")
                         : ""  // empty string as default
                     );
@@ -533,15 +530,12 @@ public class UiUtility {
       File templateFile,
       Map<Path,MappedRecord> elementDefinitions
   ) throws ServiceException {          
-      XmlImporter importer = new XmlImporter(
-          elementDefinitions,
-          false
-      );
       System.out.println("loading " + templateFile);
       try {
-          importer.process(
-              new String[]{templateFile.getAbsolutePath()}
-          );
+    	  Importer.importObjects(
+    		  Importer.asTarget(elementDefinitions),
+    		  Importer.asSource(templateFile)
+    	  );
       }
       catch(ServiceException e) {
           e.log();
@@ -556,9 +550,9 @@ public class UiUtility {
           org.w3c.dom.Document mergedElementDefinitions = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
           for(Iterator<MappedRecord> i = elementDefinitions.values().iterator(); i.hasNext(); ) {
               MappedRecord elementDefinition = i.next();
-              ObjectHolder_2Facade elementDefinitionFacade;
+              Object_2Facade elementDefinitionFacade;
               try {
-	              elementDefinitionFacade = ObjectHolder_2Facade.newInstance(elementDefinition);
+	              elementDefinitionFacade = Object_2Facade.newInstance(elementDefinition);
               }
               catch (ResourceException e) {
             	  throw new ServiceException(e);
@@ -599,9 +593,9 @@ public class UiUtility {
                       shortLabel = (String)mergedElementDefinition.get(locales.get(j) + "_ShortLabel");
                       toolTip = (String)mergedElementDefinition.get(locales.get(j) + "_ToolTip");
                   }
-                  elementDefinitionFacade.attributeValues("label").add(label == null ? "" : label);
-                  elementDefinitionFacade.attributeValues("shortLabel").add(shortLabel == null ? "" : shortLabel);
-                  elementDefinitionFacade.attributeValues("toolTip").add(toolTip == null ? "" : toolTip);
+                  elementDefinitionFacade.attributeValuesAsList("label").add(label == null ? "" : label);
+                  elementDefinitionFacade.attributeValuesAsList("shortLabel").add(shortLabel == null ? "" : shortLabel);
+                  elementDefinitionFacade.attributeValuesAsList("toolTip").add(toolTip == null ? "" : toolTip);
               }
           }
       }
@@ -632,9 +626,9 @@ public class UiUtility {
           j.hasNext(); 
       ) {
           MappedRecord entry = j.next();
-          ObjectHolder_2Facade entryFacade;
+          Object_2Facade entryFacade;
           try {
-	          entryFacade = ObjectHolder_2Facade.newInstance(entry);
+	          entryFacade = Object_2Facade.newInstance(entry);
           }
           catch (ResourceException e) {
         	  throw new ServiceException(e);
@@ -657,7 +651,7 @@ public class UiUtility {
               for(int k = 0; k < locales.size(); k++) {
                   s = "      <" + locales.get(k) + ">";
                   w.write(s, 0, s.length());
-                  s = (String)entryFacade.attributeValues("label").get(k);
+                  s = (String)entryFacade.attributeValuesAsList("label").get(k);
                   if(s == null) s = "";
                   fw.write(s, 0, s.length());
                   s = "</" + locales.get(k) + ">\n";
@@ -673,7 +667,7 @@ public class UiUtility {
               for(int k = 0; k < locales.size(); k++) {
                   s = "      <" + locales.get(k) + ">";
                   w.write(s, 0, s.length());
-                  s = (String)entryFacade.attributeValues("shortLabel").get(k);
+                  s = (String)entryFacade.attributeValuesAsList("shortLabel").get(k);
                   if(s == null) s = "";
                   fw.write(s, 0, s.length());
                   s = "</" + locales.get(k) + ">\n";
@@ -689,7 +683,7 @@ public class UiUtility {
               for(int k = 0; k < locales.size(); k++) {
                   s = "      <" + locales.get(k) + ">";
                   w.write(s, 0, s.length());
-                  s = (String)entryFacade.attributeValues("toolTip").get(k);
+                  s = (String)entryFacade.attributeValuesAsList("toolTip").get(k);
                   if(s == null) s = "";
                   fw.write(s, 0, s.length());
                   s = "</" + locales.get(k) + ">\n";
@@ -732,59 +726,63 @@ public class UiUtility {
       for(int u = 0; u < en_US_files.length; u++) {
           Map elementDefinitions = new LinkedHashMap();          
           File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + en_US_files[u].getName());
-          if("table".equals(this.format)) {
-              this.readAsTable(
-                  file,
-                  en_US_files[u],
-                  elementDefinitions
-              );
+          if(file.exists()) {
+	          if("table".equals(this.format)) {
+	              this.readAsTable(
+	                  file,
+	                  en_US_files[u],
+	                  elementDefinitions
+	              );
+	          }
+	          else {
+	              this.readAsSchema(
+	                  file, 
+	                  elementDefinitions, 
+	                  -1
+	              );              
+	          }	         
+	          // split and store as XML
+	          for(int j = 1; j < locales.size(); j++) { // never write en_US                  
+	              String outFileName = targetDir.getAbsolutePath() + File.separatorChar + locales.get(j) + File.separatorChar + en_US_files[u].getName(); 
+	              try {
+	                  File outFile = new File(outFileName);
+	                  if(outFile.exists()) {
+	                      File renamed = new File(outFile.getParent() + File.separatorChar + ".#" + outFile.getName());
+	                      if(!outFile.renameTo(renamed)) {
+	                          System.out.println("WARNING: Can not move file " + outFile.getAbsolutePath() + " to " + renamed.getAbsolutePath() + ". Skipping");
+	                          continue;
+	                      }
+	                  }
+	                  else if(!outFile.getParentFile().exists()) {
+	                      if(!outFile.getParentFile().mkdir()) {
+	                          System.out.println("WARNING: Can not create directory " + outFile.getParentFile().getAbsolutePath() + ". Skipping");
+	                          continue;                      
+	                      }
+	                  }
+	                  System.out.println("Writing file " + outFileName);
+	                  Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
+	                  Writer fw = new XMLWriter(w);
+	                  this.writeAsSchema(
+	                      w, 
+	                      fw, 
+	                      elementDefinitions, 
+	                      j
+	                  );
+	                  w.close();
+	              }
+	              catch(FileNotFoundException e) {
+	                  System.err.println("Can not create file " + outFileName);
+	              }
+	              catch(UnsupportedEncodingException e) {
+	                  System.err.println("Can not create file with encoding UTF-8 " + outFileName);
+	              }
+	              catch(IOException e) {
+	                  System.err.println("Error writing to file " + outFileName);
+	              }
+	          }
           }
           else {
-              this.readAsSchema(
-                  file, 
-                  elementDefinitions, 
-                  -1
-              );              
-          }
-         
-          // split and store as XML
-          for(int j = 1; j < locales.size(); j++) { // never write en_US                  
-              String outFileName = targetDir.getAbsolutePath() + File.separatorChar + locales.get(j) + File.separatorChar + en_US_files[u].getName(); 
-              try {
-                  File outFile = new File(outFileName);
-                  if(outFile.exists()) {
-                      File renamed = new File(outFile.getParent() + File.separatorChar + ".#" + outFile.getName());
-                      if(!outFile.renameTo(renamed)) {
-                          System.out.println("WARNING: can not move file " + outFile.getAbsolutePath() + " to " + renamed.getAbsolutePath() + ". Skipping");
-                          continue;
-                      }
-                  }
-                  else if(!outFile.getParentFile().exists()) {
-                      if(!outFile.getParentFile().mkdir()) {
-                          System.out.println("WARNING: can not create directory " + outFile.getParentFile().getAbsolutePath() + ". Skipping");
-                          continue;                      
-                      }
-                  }
-                  System.out.println("writing file " + outFileName);
-                  Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
-                  Writer fw = new XMLWriter(w);
-                  this.writeAsSchema(
-                      w, 
-                      fw, 
-                      elementDefinitions, 
-                      j
-                  );
-                  w.close();
-              }
-              catch(FileNotFoundException e) {
-                  System.err.println("can not create file " + outFileName);
-              }
-              catch(UnsupportedEncodingException e) {
-                  System.err.println("can not create file with encoding UTF-8 " + outFileName);
-              }
-              catch(IOException e) {
-                  System.err.println("error writing to file " + outFileName);
-              }
+        	  System.out.println("File does not exist. Skipping " + file.getAbsolutePath());
           }
       }
   }

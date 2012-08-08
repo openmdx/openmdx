@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationTabControl.java,v 1.40 2009/04/30 11:48:40 wfro Exp $
+ * Name:        $Id: OperationTabControl.java,v 1.52 2009/11/05 18:03:15 hburger Exp $
  * Description: OperationTabControl
- * Revision:    $Revision: 1.40 $
+ * Revision:    $Revision: 1.52 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/30 11:48:40 $
+ * Date:        $Date: 2009/11/05 18:03:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,12 +60,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.Attribute;
@@ -116,6 +116,12 @@ public class OperationTabControl
         return this.operationName;
     }
 
+    //-------------------------------------------------------------------------
+    public String getQualifiedOperationName(
+    ) {
+    	return this.operationName;
+    }
+    
     //-------------------------------------------------------------------------
     public String getIconKey(
     ) {
@@ -180,7 +186,7 @@ public class OperationTabControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {
@@ -192,8 +198,7 @@ public class OperationTabControl
 
         // Operation menues
         if(frame == null) {
-            int operationIndex = 100*(this.getPaneIndex() + 1) + this.getTabIndex();
-            String operationId = Integer.toString(operationIndex);
+            String operationId = Integer.toString(this.getTabId());
             Action invokeOperationAction = this.getInvokeOperationAction(
                 view,
                 application
@@ -280,217 +285,222 @@ public class OperationTabControl
                             p.write("<table class=\"opFieldGroup\">");
                             int nCols = attributes.length;
                             int nRows = nCols > 0 ? attributes[0].length : 0;
-                            int tabIndex = 1;
+                            int index = 1;
+                            int fieldIndex = operationIndex*100 + index;       
                             for(int v = 0; v < nRows; v++) {
                                 p.write("<tr>");
                                 for(int u = 0; u < nCols; u++) {
                                     Attribute attribute = attributes[u][v];
-                                    String rowSpanModifier = attribute == null
-                                        ? ""
-                                        : attribute.getSpanRow() > 1 ? "rowspan=\"" + attribute.getSpanRow() + "\"" : "";
-                                        if(attribute == null) {
-                                            p.write("<td class=\"label\"></td>");
-                                            p.write("<td class=\"valueEmpty\">&nbsp;</td>");
+                                    String rowSpanModifier = attribute == null ? 
+                                    	"" : 
+                                    	attribute.getSpanRow() > 1 ? "rowspan=\"" + attribute.getSpanRow() + "\"" : "";
+                                    if(attribute == null) {
+                                        p.write("<td class=\"label\"></td>");
+                                        p.write("<td class=\"valueEmpty\">&nbsp;</td>");
+                                    }
+                                    else if(attribute.isEmpty()) {
+                                        p.write("<td class=\"label\"></td>");
+                                    }
+                                    else {
+                                        String label = attribute.getLabel();
+                                        label += label.length() == 0 ? "" : ":";
+                                        AttributeValue valueHolder = attribute.getValue();
+                                        String fieldName = valueHolder.getName();                       
+                                        String fieldId = fieldName + "[" + fieldIndex + "]";
+                                        String stringifiedValue = "#ERR";
+                                        try {
+                                            stringifiedValue = attribute.getStringifiedValue(
+                                                p, 
+                                                true, 
+                                                false
+                                            );
+                                        } 
+                                        catch (Exception e) {
+                                            ServiceException e0 = new ServiceException(e);
+                                            SysLog.warning(e0.getMessage(), e0.getCause());
                                         }
-                                        else if(attribute.isEmpty()) {
-                                            p.write("<td class=\"label\"></td>");
-                                        }
-                                        else {
-                                            String label = attribute.getLabel();
-                                            label += label.length() == 0 ? "" : ":";
-                                            AttributeValue valueHolder = attribute.getValue();
-                                            String stringifiedValue = "#ERR";
-                                            try {
-                                                stringifiedValue = attribute.getStringifiedValue(
-                                                    p, 
-                                                    true, 
+                                        p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
+                                        // single-valued
+                                        if(valueHolder.isSingleValued()) {
+                                            if(valueHolder instanceof CodeValue) {
+                                                SortedMap longTextsT = application.getCodes().getLongText(
+                                                    fieldName, 
+                                                    application.getCurrentLocaleAsIndex(), 
+                                                    false, 
                                                     false
                                                 );
-                                            } 
-                                            catch (Exception e) {
-                                                ServiceException e0 = new ServiceException(e);
-                                                AppLog.warning(e0.getMessage(), e0.getCause());
+                                                p.write("<td>");
+                                                p.write("  <select class=\"valueL\" name=\"", fieldId, "\" tabindex=\"", Integer.toString(index), "\">");
+                                                for(Iterator options = longTextsT.entrySet().iterator(); options.hasNext(); ) {
+                                                    Map.Entry option = (Map.Entry)options.next();
+                                                    String selectedModifier = option.getKey().equals(valueHolder.getValue(false)) ? "selected" : "";
+                                                    p.write("<option ", selectedModifier, " value=\"", option.getKey().toString(), "\">", option.getKey().toString());
+                                                }
+                                                p.write("  </select>");
+                                                p.write("</td>");
+                                                p.write("<td class=\"addon\"></td>");
                                             }
-                                            String field = valueHolder.getName();                       
-                                            p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
-                                            // single-valued
-                                            if(valueHolder.isSingleValued()) {
-                                                if(valueHolder instanceof CodeValue) {
-                                                    SortedMap longTextsT = application.getCodes().getLongText(
-                                                        field, 
-                                                        application.getCurrentLocaleAsIndex(), 
-                                                        false, 
-                                                        false
-                                                    );
-                                                    p.write("<td>");
-                                                    p.write("  <select class=\"valueL\" name=\"", field, "[", Integer.toString(tabIndex), "]", "\" tabindex=\"", Integer.toString(tabIndex), "\">");
-                                                    for(Iterator options = longTextsT.entrySet().iterator(); options.hasNext(); ) {
-                                                        Map.Entry option = (Map.Entry)options.next();
-                                                        String selectedModifier = option.getKey().equals(valueHolder.getValue(false)) ? "selected" : "";
-                                                        p.write("<option ", selectedModifier, " value=\"", option.getKey().toString(), "\">", option.getKey().toString());
-                                                    }
-                                                    p.write("  </select>");
-                                                    p.write("</td>");
-                                                    p.write("<td class=\"addon\"></td>");
+                                            else if(valueHolder instanceof DateValue) {
+                                                DateValue dateValue = (DateValue)valueHolder;
+                                                p.write("<td ", rowSpanModifier, ">");
+                                                p.write("<input type=\"text\" class=\"valueR\" id=\"cal_field", Integer.toString(fieldIndex), "\" name=\"", fieldId, "\" tabindex=\"", Integer.toString(index), "\" value=\"", stringifiedValue, "\">");
+                                                p.write("</td>");
+                                                p.write("<td class=\"addon\" ", rowSpanModifier, ">");
+                                                if(dateValue.isDate()) {                                          
+                                                    String calendarFormat = DateValue.getCalendarFormat(dateValue.getLocalizedDateFormatter(true));                                          
+                                                    p.write(p.getImg("class=\"popUpButton\" id=\"cal_trigger" + fieldIndex + "\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/"), "cal", p.getImgType(), "\""));
+                                                    p.write("<script language=\"javascript\" type=\"text/javascript\">");
+                                                    p.write("  Calendar.setup({");
+                                                    p.write("    inputField   : \"cal_field" + fieldIndex, "\",");
+                                                    p.write("    ifFormat     : \"" + calendarFormat + "\",");
+                                                    p.write("    timeFormat   : \"24\",");
+                                                    p.write("    button       : \"cal_trigger", Integer.toString(fieldIndex), "\",");
+                                                    p.write("    align        : \"Tl\",");
+                                                    p.write("    singleClick  : true,");
+                                                    p.write("    showsTime    : false");
+                                                    p.write("  });");
+                                                    p.write("</script>");
                                                 }
-                                                else if(valueHolder instanceof DateValue) {
-                                                    DateValue dateValue = (DateValue)valueHolder;
-                                                    int calId = operationIndex*100 + tabIndex;
-                                                    p.write("<td ", rowSpanModifier, ">");
-                                                    p.write("<input type=\"text\" class=\"valueR\" id=\"cal_field" + calId, "\" name=\"", field, "[" + tabIndex, "]", "\" tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\">");
-                                                    p.write("</td>");
-                                                    p.write("<td class=\"addon\" ", rowSpanModifier, ">");
-                                                    if(dateValue.isDate()) {                                          
-                                                        String calendarFormat = DateValue.getCalendarFormat(dateValue.getLocalizedDateFormatter(true));                                          
-                                                        p.write(p.getImg("class=\"popUpButton\" id=\"cal_trigger" + calId + "\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/"), "cal", p.getImgType(), "\""));
-                                                        p.write("<script language=\"javascript\" type=\"text/javascript\">");
-                                                        p.write("  Calendar.setup({");
-                                                        p.write("    inputField   : \"cal_field" + calId, "\",");
-                                                        p.write("    ifFormat     : \"" + calendarFormat + "\",");
-                                                        p.write("    timeFormat   : \"24\",");
-                                                        p.write("    button       : \"cal_trigger" + calId, "\",");
-                                                        p.write("    align        : \"Tl\",");
-                                                        p.write("    singleClick  : true,");
-                                                        p.write("    showsTime    : false");
-                                                        p.write("  });");
-                                                        p.write("</script>");
-                                                    }
-                                                    else {
-                                                        String calendarFormat = DateValue.getCalendarFormat(dateValue.getLocalizedDateTimeFormatter(true));                                          
-                                                        p.write(p.getImg("class=\"popUpButton\" id=\"cal_trigger" + calId + "\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/"), "cal", p.getImgType(), "\""));
-                                                        p.write("<script language=\"javascript\" type=\"text/javascript\">");
-                                                        p.write("  Calendar.setup({");
-                                                        p.write("    inputField   : \"cal_field" + calId, "\",");
-                                                        p.write("    ifFormat     : \"" + calendarFormat + "\",");
-                                                        p.write("    timeFormat   : \"24\",");
-                                                        p.write("    button       : \"cal_trigger" + calId, "\",");
-                                                        p.write("    align        : \"Tl\",");
-                                                        p.write("    singleClick  : true,");
-                                                        p.write("    showsTime    : true");
-                                                        p.write(" });");
-                                                        p.write("</script>");
-                                                    }
-                                                    p.write("</td>");
+                                                else {
+                                                    String calendarFormat = DateValue.getCalendarFormat(dateValue.getLocalizedDateTimeFormatter(true));                                          
+                                                    p.write(p.getImg("class=\"popUpButton\" id=\"cal_trigger" + fieldIndex + "\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/"), "cal", p.getImgType(), "\""));
+                                                    p.write("<script language=\"javascript\" type=\"text/javascript\">");
+                                                    p.write("  Calendar.setup({");
+                                                    p.write("    inputField   : \"cal_field", Integer.toString(fieldIndex), "\",");
+                                                    p.write("    ifFormat     : \"" + calendarFormat + "\",");
+                                                    p.write("    timeFormat   : \"24\",");
+                                                    p.write("    button       : \"cal_trigger", Integer.toString(fieldIndex), "\",");
+                                                    p.write("    align        : \"Tl\",");
+                                                    p.write("    singleClick  : true,");
+                                                    p.write("    showsTime    : true");
+                                                    p.write(" });");
+                                                    p.write("</script>");
                                                 }
-                                                else if(valueHolder instanceof ObjectReferenceValue) {
-                                                    ObjectReference objectReference = null;
-                                                    try {
-                                                        objectReference = (ObjectReference)valueHolder.getValue(false);
-                                                    } 
-                                                    catch (Exception e) {}
-                                                    Autocompleter_1_0 autocompleter = ((ObjectReferenceValue)valueHolder).getAutocompleter(
-                                                        view.getLookupObject()
-                                                    );
-                                                    // Find object
-                                                    p.write("<td>");
-                                                    if(autocompleter == null) {
-                                                        p.write("  <input type=\"text\" class=\"valueL\" name=\"", field, "[" + tabIndex, "].Title\" tabindex=\"" + tabIndex, "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\">");
-                                                        p.write("  <input type=\"hidden\" class=\"valueLLocked\" name=\"", field, "[" + tabIndex, "]", "\" value=\"", (objectReference == null ? "" : objectReference.refMofId()), "\">");
+                                                p.write("</td>");
+                                            }
+                                            else if(valueHolder instanceof ObjectReferenceValue) {
+                                                ObjectReference objectReference = null;
+                                                try {
+                                                    objectReference = (ObjectReference)valueHolder.getValue(false);
+                                                } 
+                                                catch (Exception e) {}
+                                                Autocompleter_1_0 autocompleter = ((ObjectReferenceValue)valueHolder).getAutocompleter(
+                                                    view.getLookupObject()
+                                                );
+                                                // Find object
+                                                p.write("<td>");
+                                                if(autocompleter == null) {
+                                                    p.write("  <input type=\"text\" class=\"valueL\" name=\"", fieldId, ".Title\" tabindex=\"", Integer.toString(index), "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\">");
+                                                    p.write("  <input type=\"hidden\" class=\"valueLLocked\" name=\"", fieldId, "\" value=\"", (objectReference == null ? "" : objectReference.refMofId()), "\">");
+                                                }
+                                                // Show drop-down with selectable lookup values
+                                                else {
+                                                    autocompleter.paint(
+                                                        p,
+                                                        fieldId,
+                                                        index,
+                                                        fieldName,
+                                                        valueHolder,
+                                                        false,
+                                                        null,
+                                                        "class=\"autocompleterInput\"",
+                                                        "class=\"valueL valueAC\"",
+                                                        null
+                                                    );                                          
+                                                }
+                                                p.write("</td>");
+                                                String lookupId = org.openmdx.kernel.id.UUIDs.newUUID().toString();
+                                                Action findObjectAction = view.getFindObjectAction(
+                                                    fieldName, 
+                                                    lookupId
+                                                );
+                                                p.write("<td class=\"addon\">");
+                                                if(
+                                                    (autocompleter == null) || 
+                                                    !autocompleter.hasFixedSelectableValues()
+                                                ) {
+                                                    p.write("  ", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" onclick=\"javascript:OF.findObject(", p.getEvalHRef(findObjectAction), ", document.forms['", formId, "'].elements['", fieldId, ".Title'], document.forms['", formId, "'].elements['", fieldId, "'], '", lookupId, "');\""));
+                                                }
+                                                p.write("</td>");
+                                            }
+                                            else if(valueHolder instanceof BinaryValue) {
+                                                p.write("<td>");
+                                                p.write("  <input type=\"file\" class=\"valueL\" name=\"", fieldId, "\" tabindex=\"", Integer.toString(index), "\">");
+                                                p.write("</td>");
+                                                p.write("<td class=\"addon\"></td>");
+                                            }
+                                            else if(valueHolder instanceof BooleanValue) {
+                                                // if checked sends (true,false). If not checked sends (false). The hidden field
+                                                // guarantees that always a value is sent.
+                                                String checkedModifier = "true".equals(stringifiedValue) ? "checked" : "";
+                                                p.write("<td ", rowSpanModifier, ">");
+                                                p.write("  <input name=\"", fieldId, ".false\" type=\"hidden\" class=\"valueL", "\" value=\"false\">");
+                                                p.write("  <input name=\"", fieldId, ".true\" type=\"checkbox\" ", checkedModifier, " tabindex=\"", Integer.toString(index), "\" value=\"true\">");
+                                                p.write("</td>");
+                                                p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");                                                	
+                                            }
+                                            else {
+                                                p.write("<td ", rowSpanModifier, ">");
+                                                if(attribute.getSpanRow() > 1) {
+                                                	String id = "T" + Integer.toString(fieldIndex);
+                                                    if(attribute.getSpanRow() > 4) {                                                    	
+                                                    	p.write("  <table><tr>");
+                                                        p.write("    <td><div onclick=\"javascript:loadHTMLedit('", id, "', '", p.getResourcePathPrefix(), "');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/html"), p.getImgType(), "\" border=\"0\" alt=\"html\" title=\"\""), "</div></td>");
+                                                        p.write("    <td style=\"width:100%;\"><div onclick=\"javascript:loadWIKYedit('", id, "','./');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/wiki"), p.getImgType(), "\" border=\"0\" alt=\"wiki\" title=\"\""), "</div></td>");                             
+                                                        p.write("    <td><div onclick=\"javascript:$('", id, "').value=Wiky.toWiki($('", id, "').value);\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/htmltowiki"), p.getImgType(), "\" border=\"0\" alt=\"html &gt; wiki\" title=\"\""), "</div></td>");
+                                                        p.write("  </tr></table>");
                                                     }
-                                                    // Show drop-down with selectable lookup values
-                                                    else {
+                                                    p.write("<textarea id=\"", id, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" class=\"string\" name=\"", fieldId, "\" tabindex=\"", Integer.toString(index), "\" style=\"width:100%;\" >", stringifiedValue, "</textarea>");
+                                                }
+                                                else {
+                                                    Autocompleter_1_0 autocompleter = application.getPortalExtension().getAutocompleter(
+                                                        application, 
+                                                        view.getLookupObject(), 
+                                                        fieldName
+                                                    );
+                                                    // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
+                                                    // Show drop-down instead of input field
+                                                    if(autocompleter != null) {
                                                         autocompleter.paint(
                                                             p,
                                                             null,
-                                                            tabIndex,
-                                                            field,
+                                                            fieldIndex,
+                                                            fieldName,
                                                             valueHolder,
                                                             false,
                                                             null,
                                                             "class=\"autocompleterInput\"",
                                                             "class=\"valueL valueAC\"",
                                                             null
-                                                        );                                          
-                                                    }
-                                                    p.write("</td>");
-                                                    String lookupId = org.openmdx.kernel.id.UUIDs.getGenerator().next().toString();
-                                                    Action findObjectAction = view.getFindObjectAction(
-                                                        field, 
-                                                        lookupId
-                                                    );
-                                                    p.write("<td class=\"addon\">");
-                                                    if(
-                                                        (autocompleter == null) || 
-                                                        !autocompleter.hasFixedSelectableValues()
-                                                    ) {
-                                                        p.write("  ", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" onclick=\"javascript:OF.findObject(", p.getEvalHRef(findObjectAction), ", document.forms['", formId, "'].elements['", field, "[" + tabIndex, "]", ".Title'], document.forms['", formId, "'].elements['", field, "[", Integer.toString(tabIndex), "]", "'], '", lookupId, "');\""));
-                                                    }
-                                                    p.write("</td>");
-                                                }
-                                                else if(valueHolder instanceof BinaryValue) {
-                                                    p.write("<td>");
-                                                    p.write("  <input type=\"file\" class=\"valueL\" name=\"", field, "[" + tabIndex, "]", "\" tabindex=\"" + tabIndex, "\">");
-                                                    p.write("</td>");
-                                                    p.write("<td class=\"addon\"></td>");
-                                                }
-                                                else if(valueHolder instanceof BooleanValue) {
-                                                    // if checked sends (true,false). If not checked sends (false). The hidden field
-                                                    // guarantees that always a value is sent.
-                                                    String checkedModifier = "true".equals(stringifiedValue) ? "checked" : "";
-                                                    p.write("<td ", rowSpanModifier, ">");
-                                                    p.write("  <input name=\"", field, "[" + tabIndex, "].false\" type=\"hidden\" class=\"valueL", "\" value=\"false\">");
-                                                    p.write("  <input name=\"", field, "[" + tabIndex, "].true\" type=\"checkbox\" ", checkedModifier, " tabindex=\"" + tabIndex, "\" value=\"true\">");
-                                                    p.write("</td>");
-                                                    p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");                                                	
-                                                }
-                                                else {
-                                                    p.write("<td ", rowSpanModifier, ">");
-                                                    if(attribute.getSpanRow() > 1) {
-                                                        int htmlId = operationIndex*100 + tabIndex;
-                                                        if(attribute.getSpanRow() > 4) {
-                                                            p.write("<div onclick=\"javascript:loadHTMLedit('T", Integer.toString(htmlId), "');\"", p.getOnMouseOver("javascript:this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/"), "html", p.getImgType(), "\" border=\"0\" alt=\"o\" title=\"\""), "</div>");
-                                                        }
-                                                        p.write("<textarea id=\"T", Integer.toString(htmlId), "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" class=\"string\" name=\"", field, "[", Integer.toString(tabIndex), "]", "\" tabindex=\"", Integer.toString(tabIndex), "\" style=\"width:100%;\" >", stringifiedValue, "</textarea>");
-                                                    }
-                                                    else {
-                                                        Autocompleter_1_0 autocompleter = application.getPortalExtension().getAutocompleter(
-                                                            application, 
-                                                            view.getLookupObject(), 
-                                                            field
                                                         );
-                                                        // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
-                                                        // Show drop-down instead of input field
-                                                        if(autocompleter != null) {
-                                                            autocompleter.paint(
-                                                                p,
-                                                                null,
-                                                                tabIndex,
-                                                                field,
-                                                                valueHolder,
-                                                                false,
-                                                                null,
-                                                                "class=\"autocompleterInput\"",
-                                                                "class=\"valueL valueAC\"",
-                                                                null
-                                                            );
-                                                        }
-                                                        else {                                                        
-                                                            String inputType = valueHolder instanceof TextValue
-                                                            ? ((TextValue)valueHolder).isPassword() ? "password" : "text"
-                                                                : "text";                                     
-                                                            int maxLength = valueHolder instanceof TextValue
-                                                            ? ((TextValue)valueHolder).getMaxLength()
-                                                                : Integer.MAX_VALUE;
-                                                            String maxLengthModifier = (maxLength == Integer.MAX_VALUE)
-                                                            ? ""
-                                                                : "maxlength=\"" + maxLength + "\"";
-                                                            p.write("<input type=\"", inputType, "\" class=\"valueL\" tabindex=\"" + tabIndex, "\" name=\"", field, "[" + tabIndex, "]", "\" ", maxLengthModifier, " value=\"", stringifiedValue, "\">");
-                                                        }
                                                     }
-                                                    p.write("</td>");
-                                                    p.write("<td class=\"addon\"></td>");
+                                                    else {                                                        
+                                                        String inputType = valueHolder instanceof TextValue ? 
+                                                        	((TextValue)valueHolder).isPassword() ? "password" : "text" : 
+                                                        	"text";                                     
+                                                        int maxLength = valueHolder instanceof TextValue ? 
+                                                        	((TextValue)valueHolder).getMaxLength() : 
+                                                        	Integer.MAX_VALUE;
+                                                        String maxLengthModifier = (maxLength == Integer.MAX_VALUE) ? 
+                                                        	"" : 
+                                                        	"maxlength=\"" + maxLength + "\"";
+                                                        p.write("<input type=\"", inputType, "\" class=\"valueL\" tabindex=\"", Integer.toString(index), "\" name=\"", fieldId, "\" ", maxLengthModifier, " value=\"", stringifiedValue, "\">");
+                                                    }
                                                 }
-                                            }                              
-                                            // multi-valued
-                                            else {
-                                                p.write("<td ", rowSpanModifier, ">");
-                                                p.write("  <textarea class=\"multiString\" name=\"", field, "[" + tabIndex, "]", "\" rows=\"" + attribute.getSpanRow(), "\" cols=\"20\" tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
                                                 p.write("</td>");
                                                 p.write("<td class=\"addon\"></td>");
                                             }
-
-                                            tabIndex++;
+                                        }                              
+                                        // multi-valued
+                                        else {
+                                            p.write("<td ", rowSpanModifier, ">");
+                                            p.write("  <textarea class=\"multiString\" name=\"", fieldId, "\" rows=\"" + attribute.getSpanRow(), "\" cols=\"20\" tabindex=\"", Integer.toString(index), "\">", stringifiedValue, "</textarea>");
+                                            p.write("</td>");
+                                            p.write("<td class=\"addon\"></td>");
                                         }
+                                        index++;
+                                        fieldIndex++;
+                                    }
                                 }
                                 p.write("</tr>");
                             }

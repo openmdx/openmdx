@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LayoutFactory.java,v 1.10 2009/01/13 02:16:09 wfro Exp $
+ * Name:        $Id: LayoutFactory.java,v 1.11 2009/06/16 17:08:26 wfro Exp $
  * Description: TextsFactory
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:16:09 $
+ * Date:        $Date: 2009/06/16 17:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,8 +63,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.kernel.log.SysLog;
 
 public class LayoutFactory
   implements Serializable {
@@ -84,7 +84,7 @@ public class LayoutFactory
           );
       }
       this.model = model;
-      AppLog.info("loaded layouts=" + this.layouts.keySet());
+      SysLog.info("loaded layouts=" + this.layouts.keySet());
   }
   
   //-------------------------------------------------------------------------
@@ -144,8 +144,8 @@ public class LayoutFactory
           }
       }
       catch(Exception e) {
-          AppLog.warning("Can not get layout", e.getMessage());
-          AppLog.detail(e.getMessage(), e.getCause());
+    	  SysLog.warning("Can not get layout", e.getMessage());
+    	  SysLog.detail(e.getMessage(), e.getCause());
       }
       return forEditing 
          ? DEFAULT_EDIT_LAYOUT

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CompositeObjectDataBinding.java,v 1.16 2009/04/07 19:29:13 hburger Exp $
+ * Name:        $Id: CompositeObjectDataBinding.java,v 1.20 2010/04/16 13:16:16 hburger Exp $
  * Description: CompositeObjectDataBinding 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/07 19:29:13 $
+ * Date:        $Date: 2010/04/16 13:16:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,13 +74,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
-import org.omg.mof.spi.Identifier;
-import org.openmdx.application.log.AppLog;
+import org.omg.mof.spi.Names;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.text.conversion.UUIDConversion;
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.kernel.id.cci.UUIDGenerator;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.DataBinding_1_0;
 import org.w3c.spi2.Datatypes;
@@ -170,7 +168,7 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
     //-----------------------------------------------------------------------
     protected String uuidAsString(
     ) {
-        return UUIDConversion.toUID(uuidGenerator.next());
+        return UUIDConversion.toUID(UUIDs.newUUID());
     }
     
     //-----------------------------------------------------------------------
@@ -223,12 +221,11 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
         Map<String,String> queryParameters = this.getQueryParameters(parameterMode);
         String queryType = queryParameters.get("type").replace('.', ':');
         try {
-            String packageName = queryType.substring(0, queryType.lastIndexOf(':'));
-            String className = queryType.substring(queryType.lastIndexOf(':') + 1);
-            Class<?> queryClass = Classes.getApplicationClass(
-                packageName.replace(':', '.') + ".jmi1." + Identifier.CLASS_PROXY_NAME.toIdentifier(className)
+            query = pm.newQuery(
+            	Classes.getApplicationClass(
+            		Names.toClassName(queryType, Names.JMI1_PACKAGE_SUFFIX)
+            	)
             );
-            query = pm.newQuery(queryClass);
         }
         catch(Exception e) {
             SysLog.warning("Unable to create query for ", queryType);
@@ -430,7 +427,7 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
             }
         }
         catch(Exception e) {
-            AppLog.detail("Unable to get composite object. Can not get value", Arrays.asList(object.refMofId(), qualifiedFeatureName, e.getMessage()));
+        	SysLog.detail("Unable to get composite object. Can not get value", Arrays.asList(object.refMofId(), qualifiedFeatureName, e.getMessage()));
             return null;
         }
     }
@@ -492,7 +489,7 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
                     );
                 }
                 catch(Exception e) {
-                    AppLog.warning("Unable to create composite object. Can not set value", Arrays.asList(object.refMofId(), qualifiedFeatureName, e.getMessage()));
+                	SysLog.warning("Unable to create composite object. Can not set value", Arrays.asList(object.refMofId(), qualifiedFeatureName, e.getMessage()));
                 }
             }                
             if(composite != null) {
@@ -518,15 +515,13 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
             }
         }
         catch(Exception e) {
-            AppLog.warning("Unable to get composite object. Can not set value", Arrays.asList(object.refMofId(), qualifiedFeatureName, e.getMessage()));
+        	SysLog.warning("Unable to get composite object. Can not set value", Arrays.asList(object.refMofId(), qualifiedFeatureName, e.getMessage()));
         }
     }
 
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    protected static final UUIDGenerator uuidGenerator = UUIDs.getGenerator();
-    
     protected final String queryString;
     protected final boolean zeroAsNull;
     

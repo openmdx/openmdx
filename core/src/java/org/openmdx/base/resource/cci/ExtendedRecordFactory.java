@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtendedRecordFactory.java,v 1.8 2009/05/07 13:13:05 hburger Exp $
+ * Name:        $Id: ExtendedRecordFactory.java,v 1.10 2010/03/17 16:30:26 hburger Exp $
  * Description: Java Connector Architecture: Initialized Record Factory
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/07 13:13:05 $
+ * Date:        $Date: 2010/03/17 16:30:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,106 +50,22 @@
  */
 package org.openmdx.base.resource.cci;
 
-import java.util.List;
-import java.util.Map;
-
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.RecordFactory;
 
 /**
- * The ExtendedRecordFactory interface is used for creating initialized
- * MappedRecord and IndexedRecord instances.
+ * The ExtendedRecordFactory interface is used for creating 
+ * <code>MappedRecord</code> and <code>IndexedRecord</code> instances wrapping 
+ * the given data.
  */
-public interface ExtendedRecordFactory 
-	extends RecordFactory
-{
+public interface ExtendedRecordFactory extends RecordFactory {
 
   //--------------------------------------------------------------------------
   // MappedRecord Factory
   //--------------------------------------------------------------------------
 
-  /**
-   * Creates a MappedRecord with the given name and short description.  
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta 
-   *            information (stored in the metadata repository) for a specific
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or null.
-   *
-   * @exception ResourceException
-   *            Failed to create an initialized MappedRecord.
-   *            Example error cases are:<ul>
-   *            <li>Invalid specification of record name</li>
-   *            <li>Resource adapter internal error</li>
-   *            <li>Failed to access metadata repository</li>
-   *            </ul>
-   */
-  MappedRecord createMappedRecord(
-    String recordName,
-    String recordShortDescription
-  ) throws ResourceException;
-  	
-  /**
-   * Creates a MappedRecord with the given name, short description and
-   * content.  
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta 
-   *            information (stored in the metadata repository) for a specific
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or null.
-   * @param     content
-   *            The content to be copied into the record instance.
-   *
-   * @exception ResourceException
-   *            Failed to create an initialized MappedRecord.
-   *            Example error cases are:<ul>
-   *            <li>Invalid specification of record name</li>
-   *            <li>Resource adapter internal error</li>
-   *            <li>Failed to access metadata repository</li>
-   *            </ul>
-   */
-  MappedRecord createMappedRecord(
-    String recordName,
-    String recordShortDescription,
-    Map<?,?> content
-  ) throws ResourceException;
-  	
-  /**
-   * Creates a MappedRecord with the given name, short description and
-   * content.  
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta
-   *            information (stored in the metadata repository) for a specific 
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or null.
-   * @param     keys
-   *            The keys of the mapped record
-   * @param     values
-   *            The values of the mapped record sorted according to the keys
-   *
-   * @exception ResourceException
-   *            Failed to create an initialized MappedRecord.
-   *            Example error cases are:<ul>
-   *            <li>Invalid specification of record name</li>
-   *            <li>Resource adapter internal error</li>
-   *            <li>Failed to access metadata repository</li>
-   *            </ul>
-   */
-  MappedRecord createMappedRecord(
-    String recordName,
-    String recordShortDescription,
-    List<?> keys,
-    List<?> values
-  ) throws ResourceException;
-  	
   /**
    * Creates a MappedRecord with the given name, short description and
    * content.  
@@ -178,8 +94,8 @@ public interface ExtendedRecordFactory
   MappedRecord asMappedRecord(
     String recordName,
     String recordShortDescription,
-    Object keys,
-    Object values
+    Object[] keys,
+    Object[] values
   ) throws ResourceException;
   	
   /**
@@ -209,58 +125,6 @@ public interface ExtendedRecordFactory
   // IndexedRecord Factory
   //--------------------------------------------------------------------------
 
-  /**
-   * Creates an IndexedRecord with the given name and short description.  
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta 
-   *            information (stored in the metadata repository) for a specific
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or null.
-   * @param     values
-   *            The values of the indexed record.
-   *
-   * @exception ResourceException
-   *            Failed to create an initialized IndexedRecord.
-   *            Example error cases are:<ul>
-   *            <li>Invalid specification of record name</li>
-   *            <li>Resource adapter internal error</li>
-   *            <li>Failed to access metadata repository</li>
-   *            </ul>
-   */
-  IndexedRecord createIndexedRecord(
-    String recordName,
-    String recordShortDescription
-  ) throws ResourceException;
-    
-  /**
-   * Creates an IndexedRecord with the given name, short description and
-   * content.  
-   *
-   * @param     recordName
-   *            The name of the record acts as a pointer to the meta 
-   *            information (stored in the metadata repository) for a specific
-   *            record type. 
-   * @param     recordShortDescription
-   *            The short description of the Record; or null.
-   * @param     values
-   *            The values of the indexed record.
-   *
-   * @exception ResourceException
-   *            Failed to create an initialized IndexedRecord.
-   *            Example error cases are:<ul>
-   *            <li>Invalid specification of record name</li>
-   *            <li>Resource adapter internal error</li>
-   *            <li>Failed to access metadata repository</li>
-   *            </ul>
-   */
-  IndexedRecord createIndexedRecord(
-    String recordName,
-    String recordShortDescription,
-    List<?> values
-  ) throws ResourceException;
-    
   /**
    * Creates an IndexedRecord with the given name, description and content.  
    * <p>

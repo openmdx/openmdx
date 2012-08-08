@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RequestedObject.java,v 1.6 2009/06/09 15:39:58 hburger Exp $
+ * Name:        $Id: RequestedObject.java,v 1.11 2010/04/13 17:45:06 wfro Exp $
  * Description: Request Object
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 15:39:58 $
+ * Date:        $Date: 2010/04/13 17:45:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,21 +60,23 @@ import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 
 
 /**
- * This eimplementation delegates to the AbstractReply's first object. 
+ * This implementation delegates to the AbstractReply's first object. 
  */
 @SuppressWarnings("unchecked")
 public class RequestedObject
-implements DataproviderReplyListener, Serializable, MappedRecord
+    implements DataproviderReplyListener, Serializable, ObjectRecord
 {
 
     private static final long serialVersionUID = 3257565088054654263L;
 
-    protected MappedRecord getObject(
+    protected ObjectRecord getObject(
     ) {
         if (this.object == null) {
             throw new RuntimeServiceException(
@@ -91,6 +93,12 @@ implements DataproviderReplyListener, Serializable, MappedRecord
     }
 
     //------------------------------------------------------------------------
+    public ServiceException getException(
+    ) {
+        return this.exception;
+    }
+    
+    //------------------------------------------------------------------------
     // Implements DataproviderReplyListener
     //------------------------------------------------------------------------
 
@@ -100,7 +108,12 @@ implements DataproviderReplyListener, Serializable, MappedRecord
     public void onReply(
         DataproviderReply reply
     ){
-        this.object = reply.getObject();
+        MappedRecord[] objects = reply.getObjects();
+        if(objects.length > 0) {
+            this.object = (ObjectRecord)objects[0];
+        } else {
+            this.object = null;
+        }
         this.exception = null;
     }
 
@@ -142,7 +155,7 @@ implements DataproviderReplyListener, Serializable, MappedRecord
     /**
      * The object if the request succeeds; null otherwise.
      */
-    protected MappedRecord object = null;
+    protected ObjectRecord object = null;
 
     /**
      * The exception if the request fails; null otherwise.
@@ -276,11 +289,59 @@ implements DataproviderReplyListener, Serializable, MappedRecord
     public Object clone(
     ) throws CloneNotSupportedException {
         try {
-            return ObjectHolder_2Facade.cloneObject(this.getObject());
+            return Object_2Facade.cloneObject(this.getObject());
         }
         catch(Exception e) {
             throw new RuntimeServiceException(e);
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.ObjectRecord#getPath()
+     */
+    @Override
+    public Path getPath() {
+        return this.getObject().getPath();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.ObjectRecord#getValue()
+     */
+    @Override
+    public MappedRecord getValue() {
+        return this.getObject().getValue();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.ObjectRecord#getVersion()
+     */
+    @Override
+    public Object getVersion() {
+        return this.getObject().getVersion();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.ObjectRecord#setPath(org.openmdx.base.naming.Path)
+     */
+    @Override
+    public void setPath(Path path) {
+        this.getObject().setPath(path);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.ObjectRecord#setValue(javax.resource.cci.MappedRecord)
+     */
+    @Override
+    public void setValue(MappedRecord value) {
+        this.getObject().setValue(value);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.resource.cci.ObjectRecord#setVersion(java.lang.Object)
+     */
+    @Override
+    public void setVersion(Object version) {
+        this.getObject().setVersion(version);
     }
 
 }

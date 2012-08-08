@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalExtension_1_0.java,v 1.28 2009/05/01 23:40:44 wfro Exp $
+ * Name:        $Id: PortalExtension_1_0.java,v 1.36 2010/04/27 21:22:22 wfro Exp $
  * Description: Evaluator_1_0
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/01 23:40:44 $
+ * Date:        $Date: 2010/04/27 21:22:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,7 @@ import javax.jmi.reflect.RefStruct;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.FilterProperty;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.control.Control;
@@ -73,18 +74,36 @@ import org.openmdx.portal.servlet.view.ObjectView;
 public interface PortalExtension_1_0 {
 
     /**
-     * Evaluates the title obj the object refObj.
+     * Evaluates the title obj the object refObj. Same as getTitle() with asShortTitle=true.
      * 
      * @param refObj object to evaluate the title
      * @param locale locale index. Can be used to lookup code texts
      * @param localeAsString the locale name
-     * @param application TODO
+     * @param application application context
      * @return evaluated object title
      */
     public String getTitle(
         RefObject_1_0 refObj,
         short locale,
         String localeAsString,
+        ApplicationContext application
+    );
+
+    /**
+     * Evaluates the title obj the object refObj.
+     * 
+     * @param refObj object to evaluate the title
+     * @param locale locale index. Can be used to lookup code texts
+     * @param localeAsString the locale name
+     * @param asShortTitle true for object title in short form
+     * @param application application context
+     * @return evaluated object title
+     */
+    public String getTitle(
+        RefObject_1_0 refObj,
+        short locale,
+        String localeAsString,
+        boolean asShortTitle,
         ApplicationContext application
     );
 
@@ -136,12 +155,18 @@ public interface PortalExtension_1_0 {
      * Return query filter clause which must be performed when a user issues a 
      * find on the object identity. 
      * 
-     * @param qualifiedReferenceName qualified reference name
-     * @return identity query. The query must have exactly one string parameter,
-     *         e.g. (title LIKE ?s0).
+     * @param field return the query for field
+     * @param filterValue field is queried for this value.
+     * @param queryFilterContext use this context for query filters
+     * @param queryFilterStringParamCount use this count for string parameters for query filters
+     * @return list of conditions. 
      */
-    public String getIdentityQueryFilterClause(        
-        String qualifiedReferenceName
+    public List<Condition> getQuery(        
+    	org.openmdx.ui1.jmi1.ValuedField field,
+        String filterValue,
+        String queryFilterContext,
+        int queryFilterStringParamCount,
+        ApplicationContext application
     );
     
     public int getGridPageSize(
@@ -211,8 +236,7 @@ public interface PortalExtension_1_0 {
         Object target,
         Map<String,Object[]> parameterMap,
         Map<String,Attribute> fieldMap,
-        ApplicationContext application,
-        PersistenceManager pm
+        ApplicationContext application
     );
     
     /**
@@ -221,8 +245,7 @@ public interface PortalExtension_1_0 {
     public RefObject_1_0 getLookupObject(
         ModelElement_1_0 lookupType,
         RefObject_1_0 startFrom,
-        ApplicationContext application,
-        PersistenceManager pm
+        ApplicationContext application
     ) throws ServiceException;
 
     /**
@@ -248,15 +271,16 @@ public interface PortalExtension_1_0 {
     /**
      * Renders the text of a text value field. E.g. an implementation can replace
      * text macros such as 'activity:#<activity number>' with a href of the corresponding
-     * SELECT_OBJECT action.
+     * SELECT_OBJECT action. If isWiki is true then use wiki tags for rendering.
      *  
      * @return preprocessed text
      */
     public void renderTextValue(
-        HtmlPage p,
-        String value
+        ViewPort p,
+        String value,
+        boolean asWiki
     ) throws ServiceException;
- 
+
     /**
      * Get date style for given feature
      * @param qualifiedFeatureName null or qualified name of feature for which date style is returned. 
@@ -278,9 +302,8 @@ public interface PortalExtension_1_0 {
     /**
      * Get data binding with given name 
      */
-    public DataBinding_1_0 getDataBinding(
-        String dataBindingName,
-        ApplicationContext application
+    public DataBinding getDataBinding(
+        String dataBindingName
     );
     
     /**

@@ -4,6 +4,138 @@
                     =====================================
 
 ==============================================================================
+Version 2.6.0                                                       2010-05-01
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20006361
+      Application-specific ApplicationContext. The option 
+      'applicationContextClassName' allows to configure a user-defined
+      ApplicationContext class. The user-defined class must be a subclass of
+      org.openmdx.portal.servlet.ApplicationContext.
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR10009198
+      PortalExtension: getDataBinding(). The signature of getDataBinding() has changed. 
+      The parameter ApplicationContext app is removed because data bindings must not 
+      depend on the application context. The new interface DataBinding_2_0 has been 
+      added to support data bindings where the application context is passed as 
+      parameter for setValue(), getValue(). 
+      
+      CR20018907
+      Portal: Ajax-based login.
+      Login.jsp now first invokes the protected ./jsp/GetPath.jsp. The session 
+      is not authenticated if GetPath returns the redirect URL to the Login page. 
+      In this case the Login form is displayed. If GetPath returns the non-redirected 
+      URL, Login.jsp forwards to the ObjectInspectorServlet without displaying 
+      the login form. As a consequence /jsp/* must be protected in web.xml. 
+            
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.5.3                                                       2009-10-16
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR10008432
+      Add GUI mode which is optimized for mobile browsers. Currently tested
+      and supported is Safari for iPhone and desktop browsers.
+      
+      CR20018858
+      Portal: DashboardControl. DashboardControl and wizard which 
+      allows to manage dashlets.             
+                              
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none      
+            
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.5.2                                                       2009-09-14
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR10008773
+      PortalExtension: queries for customized feature definitions. The method
+      PortalExtension_1_0.getQuery() allows to specify user-defined queries.
+      The method takes as parameter the field and the filter value. Identity
+      columns for example require user-defined queries. 
+            
+      CR10008709
+      Favorites with xri of current object. Favorites which are invoked on the 
+      current object can be defined as follows:
+      1. Set favorite's reference to null. The favorite's reference is then
+         set to current object.
+      2. The macro $XRI is replaced with the XRI of the currently selected object.
+         Example:
+         window.location.href='./wizards/en_US/CreateWorkAndExpenseRecord.jsp?xri=$XRI'; 
+                                     
+      CR10007844
+      Portal: support for Wiki tags. Text fields are rendered client-side using
+      Wiky. For more information about features and supported Wiki tags
+      see http://goessner.net/articles/wiky/. 
+                              
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none      
+            
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.5.1                                                       2009-07-22
+==============================================================================
+
+1.    NEW FEATURES
+      none
+                              
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none      
+            
+2.1.  FIXED BUGS
+      
+      CR10008678
+      Bug in Portal / ApplicationContext. PersistenceManager pmData is initialized with
+      wrong principal / user role in case a user has multiple principals.
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
 Version 2.4.0                                                       2009-02-28
 ==============================================================================
 

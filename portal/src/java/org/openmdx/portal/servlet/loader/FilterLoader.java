@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FilterLoader.java,v 1.28 2009/06/09 12:50:34 hburger Exp $
+ * Name:        $Id: FilterLoader.java,v 1.33 2010/01/24 17:38:46 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:50:34 $
+ * Date:        $Date: 2010/01/24 17:38:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +64,6 @@ import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -73,6 +73,7 @@ import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantors;
 import org.openmdx.base.text.conversion.JavaBeans;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.Filters;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
@@ -105,6 +106,7 @@ public class FilterLoader
         UiContext uiContext,
         Model_1_0 model
     ) throws ServiceException {
+    	String consolePrefix = new Date() + "  ";
         Filters filters = (Filters)filterMap.get(
             qualifiedReferenceName
         );
@@ -155,8 +157,8 @@ public class FilterLoader
                     org.openmdx.ui1.jmi1.AssertableInspector inspector =
                         (org.openmdx.ui1.jmi1.AssertableInspector)assertableInspectors.get(inspectorQualifiedName);
                     if(inspector == null) {
-                        AppLog.warning("No inspector found for", inspectorQualifiedName);
-                        System.out.println("WARNING: no inspector found for " + inspectorQualifiedName);
+                    	SysLog.warning("No inspector found for", inspectorQualifiedName);
+                        System.out.println(consolePrefix + "WARNING: no inspector found for " + inspectorQualifiedName);
                     } 
                     else {
                     	String iconKey = inspector.getIconKey();
@@ -207,19 +209,19 @@ public class FilterLoader
         UiContext uiContext,
         Map filterStore
     ) throws ServiceException {
-
+    	String messagePrefix = new Date() + "  ";
         boolean resetSession = false;
         long crc = this.getCRCForResourcePath(
             this.context,
             "/WEB-INF/config/filters/"
         );
         if(crc != filterCRC) {
-
             // load filters from config
             filterStore.clear();
             Set reourcePaths = this.context.getResourcePaths("/WEB-INF/config/filters/");
             if(reourcePaths != null) {
-                System.out.println("Loading /WEB-INF/config/filters/");
+            	System.out.println(messagePrefix + "Loading /WEB-INF/config/filters/");
+                SysLog.info("Loading /WEB-INF/config/filters/");
                 Set filterResources = new TreeSet(reourcePaths);
                 for(
                     Iterator i = filterResources.iterator(); 
@@ -256,12 +258,14 @@ public class FilterLoader
                                 }
                             }
                             catch(Exception e) {
-                                System.out.println(e.getMessage());
+                            	new ServiceException(e).log();
+                                System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                             }
                         }
                     }
                     catch(Exception e) {
-                        System.out.println(e.getMessage());
+                    	new ServiceException(e).log();
+                        System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                     }
                 }
             }
@@ -272,16 +276,16 @@ public class FilterLoader
                 i.hasNext(); 
             ) {
                 ModelElement_1_0 element = (ModelElement_1_0)i.next();
-                if(this.model.isClassType(element)) {
+                if(element.isClassType()) {
                     // Default filters for all modeled features
                     for(
                         Iterator j = ((Map)element.objGetValue("allFeature")).values().iterator(); 
                         j.hasNext(); 
                     ) {
                         ModelElement_1_0 feature = (ModelElement_1_0)j.next();
-                        if(this.model.isReferenceType(feature) && !this.model.referenceIsStoredAsAttribute(feature)) {                            
+                        if(feature.isReferenceType() && !this.model.referenceIsStoredAsAttribute(feature)) {                            
                             String qualifiedReferenceName = element.objGetValue("qualifiedName") + ":" + feature.objGetValue("name");
-                            ModelElement_1_0 referencedType = this.model.getElement(feature.objGetValue("type"));                            
+                            ModelElement_1_0 referencedType = this.model.getDereferencedType(feature.objGetValue("type"));                            
                             this.createDefaultFilters(
                                 qualifiedReferenceName, 
                                 referencedType, 
@@ -321,7 +325,8 @@ public class FilterLoader
             }
             this.filterCRC = crc;
             resetSession = true;
-            System.out.println("Loaded filters #" + filterStore.keySet().size());
+            System.out.println(messagePrefix + "Done (" + filterStore.keySet().size() + " filters)");
+            SysLog.info("Done", filterStore.keySet().size());
         }
         return resetSession;
     }

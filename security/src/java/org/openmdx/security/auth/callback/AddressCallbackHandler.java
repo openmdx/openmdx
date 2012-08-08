@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AddressCallbackHandler.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
+ * Name:        $Id: AddressCallbackHandler.java,v 1.3 2010/03/05 13:26:09 hburger Exp $
  * Description: Address Callback Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:20 $
+ * Date:        $Date: 2010/03/05 13:26:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,6 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.openmdx.kernel.security.authentication.callback.AddressCallback;
 
 /**
  * Address Callback Handler

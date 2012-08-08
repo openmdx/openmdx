@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectTitleControl.java,v 1.3 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: EditObjectTitleControl.java,v 1.4 2009/09/25 12:02:37 wfro Exp $
  * Description: ObjectTitleControl
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/09/25 12:02:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,7 +62,7 @@ package org.openmdx.portal.servlet.control;
 import java.io.Serializable;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.view.ObjectView;
 
 public class EditObjectTitleControl
@@ -85,7 +85,7 @@ public class EditObjectTitleControl
     //---------------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {

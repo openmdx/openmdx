@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UniqueValue.java,v 1.2 2009/02/25 11:10:35 hburger Exp $
+ * Name:        $Id: UniqueValue.java,v 1.3 2010/01/21 17:37:53 hburger Exp $
  * Description: Unique
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/25 11:10:35 $
+ * Date:        $Date: 2010/01/21 17:37:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,7 @@ package org.openmdx.state2.aop1;
 
 import javax.jdo.spi.PersistenceCapable;
 
-import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.accessor.spi.ExceptionHelper;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -95,11 +95,8 @@ final class UniqueValue<T> {
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE,
-                        new BasicException.Parameter(
-                            "values",
-                            this.value instanceof PersistenceCapable ? PersistenceHelper.getCurrentObjectId(this.value) : this.value, 
-                            value instanceof PersistenceCapable ? PersistenceHelper.getCurrentObjectId(value) : value
-                        )
+                        this.value instanceof PersistenceCapable ? ExceptionHelper.newObjectIdParameter("old", this.value) : new BasicException.Parameter("old", this.value),
+                        value instanceof PersistenceCapable ? ExceptionHelper.newObjectIdParameter("new", value) : new BasicException.Parameter("new", value)
                     )
                 )
             );

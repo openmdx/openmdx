@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencedObjectDataBinding.java,v 1.3 2009/04/07 19:29:13 hburger Exp $
+ * Name:        $Id: ReferencedObjectDataBinding.java,v 1.4 2009/11/05 18:04:11 hburger Exp $
  * Description: ReferencedObjectDataBinding 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/07 19:29:13 $
+ * Date:        $Date: 2009/11/05 18:04:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,8 +59,6 @@ import java.util.Collection;
 
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.kernel.id.cci.UUIDGenerator;
 import org.openmdx.portal.servlet.DataBinding_1_0;
 
 /**
@@ -167,9 +165,4 @@ public class ReferencedObjectDataBinding implements DataBinding_1_0 {
         }
     }
 
-    //-----------------------------------------------------------------------
-    // Members
-    //-----------------------------------------------------------------------
-    protected static final UUIDGenerator uuidGenerator = UUIDs.getGenerator();
-        
 }

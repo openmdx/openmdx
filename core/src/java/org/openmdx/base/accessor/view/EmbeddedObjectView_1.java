@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EmbeddedObjectView_1.java,v 1.12 2009/06/09 12:45:17 hburger Exp $
+ * Name:        $Id: EmbeddedObjectView_1.java,v 1.16 2010/03/31 14:37:26 hburger Exp $
  * Description: Embedded Object
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:17 $
+ * Date:        $Date: 2010/03/31 14:37:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,6 @@ import java.util.SortedMap;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
-import javax.jdo.PersistenceManager;
 import javax.jdo.listener.DeleteCallback;
 import javax.jdo.listener.LoadCallback;
 import javax.jdo.listener.StoreCallback;
@@ -69,11 +68,11 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
+import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.AbstractDataObject_1;
 import org.openmdx.base.accessor.spi.DelegatingObject_1;
-import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -133,7 +132,7 @@ public abstract class EmbeddedObjectView_1
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objMove(org.openmdx.base.collection.FilterableMap, java.lang.String)
      */
     public void objMove(
-        FilterableMap<String, DataObject_1_0> there, 
+        Container_1_0 there, 
         String criteria
     ) throws ServiceException {
         throw new ServiceException(
@@ -234,15 +233,8 @@ public abstract class EmbeddedObjectView_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.view.ObjectView_1_0#getModel()
      */
-    public Model_1_0 getModel() {
-        DataObject_1_0 delegate;
-        try {
-            delegate = this.getDelegate();
-            if(delegate instanceof ObjectView_1_0) {
-                return ((ObjectView_1_0)delegate).getModel();
-            }
-        } catch (ServiceException ignorable) {
-        }
+    @Override
+    public final Model_1_0 getModel() {
         return Model_1Factory.getModel();
     }
 
@@ -293,11 +285,11 @@ public abstract class EmbeddedObjectView_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.Object_1_5#getFactory()
      */
-    public PersistenceManager jdoGetPersistenceManager(
+    public DataObjectManager_1_0 jdoGetPersistenceManager(
     ) {
         try {
             DataObject_1_0 delegate = this.getDelegate();
-            return JDOHelper.getPersistenceManager(delegate);
+            return (DataObjectManager_1_0) JDOHelper.getPersistenceManager(delegate);
         }
         catch(Exception e) {
             throw new JDOUserException(

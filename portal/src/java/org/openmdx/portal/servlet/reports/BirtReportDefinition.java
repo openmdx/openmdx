@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BirtReportDefinition.java,v 1.7 2008/08/12 16:38:08 wfro Exp $
+ * Name:        $Id: BirtReportDefinition.java,v 1.8 2009/06/16 17:08:27 wfro Exp $
  * Description: Reports
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:08 $
+ * Date:        $Date: 2009/06/16 17:08:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,8 +67,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.xml.sax.SAXException;
 
 public class BirtReportDefinition
@@ -144,7 +144,7 @@ public class BirtReportDefinition
                                     }
                                     parameterProperty = parameterProperty.getNextSibling();
                                 } 
-                                AppLog.info("scalar parameter " + parameterProperties);
+                                SysLog.info("scalar parameter " + parameterProperties);
                                 parameters.add(
                                     new Parameter(
                                         (String)parameterProperties.get("name"),
@@ -161,7 +161,7 @@ public class BirtReportDefinition
                     }
                     reportElement = reportElement.getNextSibling();
                 }
-                AppLog.info("report " + reportProperties);
+                SysLog.info("report " + reportProperties);
                 if(reportProperties.get("title") != null) {
                     this.label = (String)reportProperties.get("title");
                 }

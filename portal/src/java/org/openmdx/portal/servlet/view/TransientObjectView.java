@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TransientObjectView.java,v 1.2 2009/01/30 13:52:03 wfro Exp $
+ * Name:        $Id: TransientObjectView.java,v 1.4 2010/04/27 12:21:06 wfro Exp $
  * Description: FormView 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/30 13:52:03 $
+ * Date:        $Date: 2010/04/27 12:21:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,12 +56,18 @@
 package org.openmdx.portal.servlet.view;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+
+import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.attribute.Attribute;
@@ -74,17 +80,62 @@ public class TransientObjectView
     public TransientObjectView(
         Object object,
         ApplicationContext application,
-        RefObject_1_0 lookupObject
+        RefObject_1_0 lookupObject,
+        PersistenceManager pm
     ) {
         super(
-            UUIDs.getGenerator().next().toString(),
+            UUIDs.newUUID().toString(),
             null,
-            object,
+            marshalObject(object, pm),
             application
         );
         this.lookupObject = lookupObject;
     }
 
+    //-------------------------------------------------------------------------
+    /**
+     * Convert attribute values instanceof of Path to corresponding object.
+     */
+    protected static Object marshalObject(
+    	Object object,
+    	PersistenceManager pm
+    ) {
+    	if(object instanceof Map) {
+    		Map<String,Object> source = (Map<String,Object>)object;
+    		Map<String,Object> target = new HashMap<String,Object>();
+    		for(String feature: source.keySet()) {
+    			Object value = source.get(feature);
+    			target.put(
+    				feature,
+    				marshalValue(value, pm)
+    			);
+    		} 
+    		return target;
+    	} else {
+    		return object;
+    	}
+    }
+    
+    //-------------------------------------------------------------------------
+    protected static Object marshalValue(
+    	Object value,
+    	PersistenceManager pm
+    ) {
+    	if(value instanceof Path) {
+    		return pm.getObjectById((Path)value);
+    	} else if(value instanceof Collection) {
+    		List<Object> values = new ArrayList<Object>();
+    		for(Object v: (Collection)value) {
+    			values.add(
+    				marshalValue(v, pm)
+    			);
+    		}
+    		return values;
+    	} else {
+    		return value;
+    	}
+    }
+    
     //-------------------------------------------------------------------------
     public String getType(
     ) {

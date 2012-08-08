@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmlns:uml2tools.notation="http://www.eclipse.org/mdt/uml2tools/gmf/notation/ext/2008" xmi:id="_8jy24EenEd-8Kob7ZR6raA" type="UMLClass" measurementUnit="Pixel">
+  <children xmi:type="notation:Shape" xmi:id="_8knWQEenEd-8Kob7ZR6raA" type="2014" fontName="Arial" fontHeight="11" lineColor="2763429">
+    <children xmi:type="notation:DecorationNode" xmi:id="_8knWQkenEd-8Kob7ZR6raA" type="5020"/>
+    <children xmi:type="notation:DecorationNode" xmi:id="_8knWQ0enEd-8Kob7ZR6raA" type="5041"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_8knWREenEd-8Kob7ZR6raA" type="7032" collapsed="true">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_8knWRUenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_8knWRkenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="_8knWR0enEd-8Kob7ZR6raA"/>
+    </children>
+    <element xmi:type="uml:Model" href="../test.openmdx.clock1.uml#_riP6UN7EEdmkJO73lqONhA"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_8knWQUenEd-8Kob7ZR6raA"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_8knWSEenEd-8Kob7ZR6raA" type="2002" fontName="Arial" fontHeight="11" lineColor="2763429">
+    <children xmi:type="notation:DecorationNode" xmi:id="_8knWS0enEd-8Kob7ZR6raA" type="5004"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_8knWTEenEd-8Kob7ZR6raA" type="7010">
+      <styles xmi:type="notation:TitleStyle" xmi:id="_8knWTUenEd-8Kob7ZR6raA" showTitle="true"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_8knWTkenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_8knWT0enEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="_8knWUEenEd-8Kob7ZR6raA"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_8knWUUenEd-8Kob7ZR6raA" type="7011">
+      <styles xmi:type="notation:TitleStyle" xmi:id="_8kn9UEenEd-8Kob7ZR6raA" showTitle="true"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_8kn9UUenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_8kn9UkenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="_8kn9U0enEd-8Kob7ZR6raA"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_8kn9VEenEd-8Kob7ZR6raA" type="7012">
+      <styles xmi:type="notation:TitleStyle" xmi:id="_8kn9VUenEd-8Kob7ZR6raA" showTitle="true"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_8kn9VkenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_8kn9V0enEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="_8kn9WEenEd-8Kob7ZR6raA"/>
+    </children>
+    <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_8knWSUenEd-8Kob7ZR6raA"/>
+    <element xmi:type="uml:Package" href="../test.openmdx.clock1.uml#_3C7B8A60016D40F55E5800B8PP"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_8knWSkenEd-8Kob7ZR6raA" y="108"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="__jrvcEenEd-8Kob7ZR6raA" type="2001" fontName="Arial" fontHeight="11" fillColor="13369343" lineColor="2763429">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="__j0SUEenEd-8Kob7ZR6raA" source="Shortcut">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="__j0SUUenEd-8Kob7ZR6raA" key="modelID" value="UMLClass"/>
+    </eAnnotations>
+    <children xmi:type="notation:DecorationNode" xmi:id="__jsWgEenEd-8Kob7ZR6raA" type="5003">
+      <styles xmi:type="notation:FontStyle" xmi:id="__jwA4EenEd-8Kob7ZR6raA" bold="true"/>
+    </children>
+    <children xmi:type="notation:DecorationNode" xmi:id="__js9kEenEd-8Kob7ZR6raA" type="5019"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="__js9kUenEd-8Kob7ZR6raA" type="7001">
+      <styles xmi:type="notation:TitleStyle" xmi:id="__js9kkenEd-8Kob7ZR6raA" showTitle="true"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="__js9k0enEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="__js9lEenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="__js9lUenEd-8Kob7ZR6raA"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="__js9lkenEd-8Kob7ZR6raA" type="7002">
+      <styles xmi:type="notation:TitleStyle" xmi:id="__js9l0enEd-8Kob7ZR6raA" showTitle="true"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="__js9mEenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="__js9mUenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="__js9mkenEd-8Kob7ZR6raA"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="__js9m0enEd-8Kob7ZR6raA" type="7003">
+      <styles xmi:type="notation:TitleStyle" xmi:id="__js9nEenEd-8Kob7ZR6raA" showTitle="true"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="__js9nUenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="__js9nkenEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="__js9n0enEd-8Kob7ZR6raA"/>
+    </children>
+    <styles xmi:type="notation:CanonicalStyle" xmi:id="__jrvcUenEd-8Kob7ZR6raA"/>
+    <element xmi:type="uml:Class" href="../test.openmdx.clock1.uml#_3C7B8A60016D40F55F15031D"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="__jrvckenEd-8Kob7ZR6raA" x="324" y="36"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_AJ6pAEeoEd-8Kob7ZR6raA" type="2001" fontName="Arial" fontHeight="11" fillColor="15053796" lineColor="2763429">
+    <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_AKGPMEeoEd-8Kob7ZR6raA" source="Shortcut">
+      <details xmi:type="ecore:EStringToStringMapEntry" xmi:id="_AKGPMUeoEd-8Kob7ZR6raA" key="modelID" value="UMLClass"/>
+    </eAnnotations>
+    <children xmi:type="notation:DecorationNode" xmi:id="_AJ6pA0eoEd-8Kob7ZR6raA" type="5003">
+      <styles xmi:type="notation:FontStyle" xmi:id="_AKAvoEeoEd-8Kob7ZR6raA" bold="true"/>
+    </children>
+    <children xmi:type="notation:DecorationNode" xmi:id="_AJ6pBEeoEd-8Kob7ZR6raA" type="5019"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_AJ6pBUeoEd-8Kob7ZR6raA" type="7001">
+      <styles xmi:type="notation:TitleStyle" xmi:id="_AJ6pBkeoEd-8Kob7ZR6raA" showTitle="true"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_AJ6pB0eoEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_AJ6pCEeoEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="_AJ7QEEeoEd-8Kob7ZR6raA"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_AJ7QEUeoEd-8Kob7ZR6raA" type="7002">
+      <styles xmi:type="notation:TitleStyle" xmi:id="_AJ7QEkeoEd-8Kob7ZR6raA" showTitle="true"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_AJ7QE0eoEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_AJ7QFEeoEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="_AJ7QFUeoEd-8Kob7ZR6raA"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_AJ7QFkeoEd-8Kob7ZR6raA" type="7003">
+      <styles xmi:type="notation:TitleStyle" xmi:id="_AJ7QF0eoEd-8Kob7ZR6raA" showTitle="true"/>
+      <styles xmi:type="notation:SortingStyle" xmi:id="_AJ7QGEeoEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_AJ7QGUeoEd-8Kob7ZR6raA"/>
+      <styles xmi:type="notation:CanonicalStyle" xmi:id="_AJ7QGkeoEd-8Kob7ZR6raA"/>
+    </children>
+    <styles xmi:type="notation:CanonicalStyle" xmi:id="_AJ6pAUeoEd-8Kob7ZR6raA"/>
+    <element xmi:type="uml:Class" href="../test.openmdx.clock1.uml#_3C7B8A60016D40F560B70043"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_AJ6pAkeoEd-8Kob7ZR6raA" x="324" y="180"/>
+  </children>
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_8jy24UenEd-8Kob7ZR6raA"/>
+  <styles xmi:type="uml2tools.notation:U2TDiagramCanonicalStyle" xmi:id="_8jy24kenEd-8Kob7ZR6raA"/>
+  <styles xmi:type="notation:FilteringStyle" xmi:id="_8jy240enEd-8Kob7ZR6raA"/>
+  <element xmi:type="uml:Model" href="../test.openmdx.clock1.uml#_riP6UN7EEdmkJO73lqONhA"/>
+</notation:Diagram>

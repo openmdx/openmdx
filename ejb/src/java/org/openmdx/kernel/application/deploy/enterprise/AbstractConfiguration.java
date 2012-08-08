@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractConfiguration.java,v 1.1 2009/01/12 12:49:22 wfro Exp $
+ * Name:        $Id: AbstractConfiguration.java,v 1.3 2010/03/05 16:40:37 hburger Exp $
  * Description: Abstract Configuration
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:22 $
+ * Date:        $Date: 2010/03/05 16:40:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,8 +53,8 @@ package org.openmdx.kernel.application.deploy.enterprise;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.openmdx.kernel.application.configuration.Report;
-import org.openmdx.kernel.environment.cci.VersionNumber;
+import org.openmdx.kernel.application.deploy.spi.Report;
+import org.openmdx.kernel.application.deploy.spi.VersionNumber;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: CompositeGrid.java,v 1.21 2009/02/20 22:05:43 wfro Exp $
+ * Name:        $Id: CompositeGrid.java,v 1.25 2010/03/28 00:49:52 wfro Exp $
  * Description: CompositeGrid
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2009/02/20 22:05:43 $
+ * Date:        $Date: 2010/03/28 00:49:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,10 +61,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.jdo.PersistenceManager;
+
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.application.log.AppLog;
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.DataBinding_1_0;
+import org.openmdx.portal.servlet.DataBinding_2_0;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.control.GridControl;
 
@@ -86,15 +91,32 @@ implements Serializable {
     }
 
     //-------------------------------------------------------------------------
-    private Collection getAllObjects(
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Collection<RefObject_1_0> getAllObjects(
+    	PersistenceManager pm
     ) {
-        Collection allObjects = (Collection)this.dataBinding.getValue(
-            this.view.getObjectReference().getObject(), 
-            this.getGridControl().getObjectContainer().getReferenceName()
-        );
-        return allObjects == null
-        ? Collections.EMPTY_LIST
-            : allObjects;
+    	Collection<RefObject_1_0> allObjects = null;
+    	RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(
+    		this.view.getObjectReference().getObject().refGetPath()
+    	);
+    	if(this.dataBinding instanceof DataBinding_1_0) {
+	        allObjects = (Collection<RefObject_1_0>)((DataBinding_1_0)this.dataBinding).getValue(
+	            parent, 
+	            this.getGridControl().getObjectContainer().getReferenceName()
+	        );
+    	}
+    	else {
+	        allObjects = (Collection<RefObject_1_0>)((DataBinding_2_0)this.dataBinding).getValue(
+	            parent, 
+	            this.getGridControl().getObjectContainer().getReferenceName(),
+	            this.view.getApplicationContext()
+	        );    		
+    	}
+    	if(allObjects == null) {
+    		allObjects = Collections.emptyList();
+    	}
+    	return allObjects;
     }
 
     //-------------------------------------------------------------------------
@@ -107,23 +129,34 @@ implements Serializable {
     }
 
     //-------------------------------------------------------------------------
-    protected List<?> getFilteredObjects(
+    @SuppressWarnings("unchecked")
+    @Override
+    protected List<RefObject_1_0> getFilteredObjects(
+    	PersistenceManager pm,
         Filter filter
     ) {
-        Collection allObjects = this.getAllObjects();
-        List filteredObjects = null;
+        Collection allObjects = this.getAllObjects(pm);
+        List<RefObject_1_0> filteredObjects = null;
         if(filter == null) {
-            filteredObjects = ((RefContainer)allObjects).refGetAll(null);
+            filteredObjects = allObjects instanceof RefContainer ?
+            	((RefContainer)allObjects).refGetAll(null) :
+            	allObjects instanceof List ?
+            		(List)allObjects :
+            		Collections.EMPTY_LIST;
         }
         else {
             try {
                 try {
-                    filteredObjects = ((RefContainer)allObjects).refGetAll(filter);
+                    filteredObjects = allObjects instanceof RefContainer ?
+                    	((RefContainer)allObjects).refGetAll(filter) :
+                    	allObjects instanceof List ?
+                    		(List)allObjects :
+                    		Collections.EMPTY_LIST;
                 }
                 catch(UnsupportedOperationException e) {}
                 if(filteredObjects == null) {
-                    filteredObjects = new ArrayList<Object>(
-                            ((RefContainer)allObjects).refGetAll(filter)
+                    filteredObjects = new ArrayList(
+                    	((RefContainer)allObjects).refGetAll(filter)
                     );
                 }
             }
@@ -139,7 +172,7 @@ implements Serializable {
                     new BasicException.Parameter("filter", filter),
                     new BasicException.Parameter("principal", this.view.getApplicationContext().getLoginPrincipalId())
                 );
-                AppLog.warning(e0.getMessage(), e0.getCause());
+                SysLog.warning(e0.getMessage(), e0.getCause());
             }
         }
         return filteredObjects;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractFilter.java,v 1.10 2009/05/29 17:04:09 hburger Exp $
+ * Name:        $Id: AbstractFilter.java,v 1.13 2010/01/26 15:43:30 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/29 17:04:09 $
+ * Date:        $Date: 2010/01/26 15:43:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,7 +51,6 @@
 package org.openmdx.base.query;
 
 import java.io.Serializable;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
@@ -60,6 +59,7 @@ import javax.resource.ResourceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.url.protocol.XRI_1Protocols;
 
 
@@ -127,16 +127,15 @@ public abstract class AbstractFilter implements Selector, Serializable {
      * 
      * @param candidate
      * @param attribute
-     * @return an iterator for the values
-     *         or null in case of failure
+     * @return an iterator for the values, never <code>null</code>
      * 
-     * @exception   ClassCastException
-     *              If the filter is not applicable to the candidate
+     * @exception   Exception
+     *              in case of failure
      */
-    protected abstract Iterator<?> getValues(
+    protected abstract Iterator<?> getValuesIterator(
         Object candidate,
         String attribute
-    );
+    ) throws Exception;
 
     /**
      * 
@@ -149,10 +148,38 @@ public abstract class AbstractFilter implements Selector, Serializable {
     private Pattern_1_0[] pattern;
 
     /**
+     * Test two values for equality in the context of a filter
      * 
+     * @param candidate the candidate to be compared with the filter value
+     * @param filterValue the filter value
+     * 
+     * @return <code>true</code> if the two values are considered to be equal 
+     * in the context of a filter
      */
-    private static Comparator<Object> comparator = LenientPathComparator.getInstance();    
+    protected boolean equal(
+        Object candidate,
+        Object filterValue
+    ){
+        return 
+            LenientPathComparator.isComparable(candidate) ? compare(candidate,filterValue) == 0 :
+            candidate.equals(filterValue);
+    }
 
+    /**
+     * Compare two values in the context of a filter
+     * 
+     * @param candidate the candidate to be compared with the filter value
+     * @param filterValue the filter value
+     * 
+     * @return the result of the comparisom
+     */
+    protected int compare(
+        Object candidate,
+        Object filterValue
+    ){
+        return LenientPathComparator.getInstance().compare(candidate, filterValue);
+    }
+    
     /**
      * 
      */
@@ -182,11 +209,9 @@ public abstract class AbstractFilter implements Selector, Serializable {
             FilterProperty property = this.filter[propertyIndex];
             Iterator<?> iterator;
             try {
-                iterator = getValues(candidate, property.name());
+                iterator = getValuesIterator(candidate, property.name());
             } catch (Exception exception) {
-                iterator = null;
-            }
-            if(iterator == null) {
+                Throwables.log(exception);
                 return false;
             }
             while (iterator.hasNext()){
@@ -213,8 +238,8 @@ public abstract class AbstractFilter implements Selector, Serializable {
 
                     case FilterOperators.IS_OUTSIDE: {
                         if(
-                                comparator.compare(raw,property.getValue(0)) < 0 ||
-                                comparator.compare(raw,property.getValue(1)) > 0
+                            compare(raw,property.getValue(0)) < 0 ||
+                            compare(raw,property.getValue(1)) > 0
                         ){
                             thereExists = true;
                         } else {
@@ -225,8 +250,8 @@ public abstract class AbstractFilter implements Selector, Serializable {
 
                     case FilterOperators.IS_BETWEEN: {
                         if(
-                                comparator.compare(raw,property.getValue(0)) >= 0 &&
-                                comparator.compare(raw,property.getValue(1)) <= 0
+                            compare(raw,property.getValue(0)) >= 0 &&
+                            compare(raw,property.getValue(1)) <= 0
                         ){
                             thereExists = true;
                         } else {
@@ -237,7 +262,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
 
                     case FilterOperators.IS_LESS_OR_EQUAL: {                
                         if(
-                                comparator.compare(raw,property.getValue(0)) <= 0
+                            compare(raw,property.getValue(0)) <= 0
                         ){
                             thereExists = true;
                         } else {
@@ -248,7 +273,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
 
                     case FilterOperators.IS_GREATER: {
                         if(
-                                comparator.compare(raw,property.getValue(0)) > 0
+                            compare(raw,property.getValue(0)) > 0
                         ){
                             thereExists = true;
                         } else {
@@ -259,7 +284,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
 
                     case FilterOperators.IS_LESS: {
                         if(
-                                comparator.compare(raw,property.getValue(0)) < 0
+                            compare(raw,property.getValue(0)) < 0
                         ){
                             thereExists = true;
                         } else {
@@ -270,7 +295,7 @@ public abstract class AbstractFilter implements Selector, Serializable {
 
                     case FilterOperators.IS_GREATER_OR_EQUAL: {
                         if(
-                                comparator.compare(raw,property.getValue(0)) >= 0
+                            compare(raw,property.getValue(0)) >= 0
                         ){
                             thereExists = true;
                         } else {
@@ -282,14 +307,11 @@ public abstract class AbstractFilter implements Selector, Serializable {
                     case FilterOperators.IS_NOT_IN: {
                         boolean test = true;
                         IsNotIn: for(
-                                int setIndex = 0, setSize = property.getValues().length;
-                                setIndex < setSize;
-                                setIndex++
+                            int setIndex = 0, setSize = property.getValues().length;
+                            setIndex < setSize;
+                            setIndex++
                         ) {
-                            boolean equal =  raw instanceof Comparable<?> || raw instanceof Number ? 
-                                comparator.compare(raw,property.getValue(setIndex)) == 0 :
-                                    raw.equals(property.getValue(setIndex)); 
-                            if(equal) {
+                            if(equal(raw, property.getValue(setIndex))) {
                                 test = false;
                                 break IsNotIn;
                             }
@@ -305,14 +327,11 @@ public abstract class AbstractFilter implements Selector, Serializable {
                     case FilterOperators.IS_IN: {
                         boolean test = false;
                         IsIn: for(
-                                int setIndex = 0, setSize = property.getValues().length;
-                                setIndex < setSize;
-                                setIndex++
+                            int setIndex = 0, setSize = property.getValues().length;
+                            setIndex < setSize;
+                            setIndex++
                         ) {
-                            boolean equal = raw instanceof Comparable <?>|| raw instanceof Number ? 
-                                comparator.compare(raw,property.getValue(setIndex)) == 0 :
-                                    raw.equals(property.getValue(setIndex));
-                            if(equal) {
+                            if(equal(raw, property.getValue(setIndex))) {
                                 test = true;
                                 break IsIn;
                             }
@@ -328,13 +347,14 @@ public abstract class AbstractFilter implements Selector, Serializable {
                     case FilterOperators.SOUNDS_LIKE: {
                         boolean test = false;
                         String encoded = Soundex.getInstance().encode((String)raw);
-                        for(
-                                int setIndex = 0, setSize = property.getValues().length;
-                                setIndex < setSize;
-                                setIndex++
+                        SoundsLike: for(
+                            int setIndex = 0, setSize = property.getValues().length;
+                            setIndex < setSize;
+                            setIndex++
                         ){
                             if(encoded.equals(Soundex.getInstance().encode((String)property.getValue(setIndex)))) {
                                 test = true;
+                                break SoundsLike;
                             }
                         } 
                         if(test){
@@ -349,9 +369,9 @@ public abstract class AbstractFilter implements Selector, Serializable {
                         boolean test = true;
                         String encoded = Soundex.getInstance().encode((String)raw);
                         SoundsUnlike: for(
-                                int setIndex = 0, setSize = property.getValues().length;
-                                setIndex < setSize;
-                                setIndex++
+                            int setIndex = 0, setSize = property.getValues().length;
+                            setIndex < setSize;
+                            setIndex++
                         ) {
                             if(encoded.equals(Soundex.getInstance().encode((String)property.getValue(setIndex)))) {
                                 test = false;

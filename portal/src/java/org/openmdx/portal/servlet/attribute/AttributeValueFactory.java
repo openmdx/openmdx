@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValueFactory.java,v 1.28 2009/05/16 23:02:56 wfro Exp $
+ * Name:        $Id: AttributeValueFactory.java,v 1.29 2009/06/16 17:08:26 wfro Exp $
  * Description: AttributeMapper
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 23:02:56 $
+ * Date:        $Date: 2009/06/16 17:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,7 +62,6 @@ import java.util.Map;
 
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
@@ -71,6 +70,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
 
 public final class AttributeValueFactory
@@ -119,7 +119,7 @@ public final class AttributeValueFactory
         fieldIdentity = field.refGetPath();
     }
     
-    AppLog.trace("mapping field", field);
+    SysLog.trace("mapping field", field);
 
     Model_1_0 model = null;
     ModelElement_1_0 classDef = null;

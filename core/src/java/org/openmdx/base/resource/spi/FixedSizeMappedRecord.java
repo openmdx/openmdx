@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FixedSizeMappedRecord.java,v 1.17 2009/06/01 15:43:50 wfro Exp $
+ * Name:        $Id: FixedSizeMappedRecord.java,v 1.18 2010/01/17 13:34:48 wfro Exp $
  * Description: JCA: Fixed-size MappedRecord implementation
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/01 15:43:50 $
+ * Date:        $Date: 2010/01/17 13:34:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -86,14 +86,13 @@ final class FixedSizeMappedRecord
     FixedSizeMappedRecord(
         String recordName,
         String recordShortDescription,
-        Object keys,
-        Object values
+        Object[] keys,
+        Object[] values
     ){
-    	super(keys,values);
+    	super(keys, values);
         this.name = recordName;
         this.shortDescription = recordShortDescription;
     }
-
 
     //------------------------------------------------------------------------
     // Implements Serializable

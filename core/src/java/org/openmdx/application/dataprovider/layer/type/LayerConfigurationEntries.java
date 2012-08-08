@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.1 2009/05/26 14:31:22 wfro Exp $
- * Description: Generated constants for LayerConfigurationEntries
- * Revision:    $Revision: 1.1 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: LayerConfigurationEntries.java,v 1.4 2009/12/14 14:47:52 wfro Exp $
+ * Description: TYPE layer configuration entries
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:22 $
+ * Date:        $Date: 2009/12/14 14:47:52 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.dataprovider.layer.type;
 
@@ -57,17 +56,11 @@ package org.openmdx.application.dataprovider.layer.type;
  * constants identifying the configuration entries of the
  * dataprovider's type layer.
  */
-
-
-
-
 public class LayerConfigurationEntries extends org.openmdx.application.dataprovider.cci.SharedConfigurationEntries {
 
-  
   protected LayerConfigurationEntries() {
    // Avoid instantiation
   }
-
 
   /**
    * GENERIC_TYPE_PATH allows to specify a list of paths. Objects at one
@@ -78,73 +71,21 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
   static public final String GENERIC_TYPE_PATH = "genericTypePath";
 
   /**
-   * Tells whether the replies should be verified.
+   * org::openmdx::state2::StateCapable::validTimeUnique value
+   * <p><em>
+   * Note:<br>
+   * This value is not stored in the database but configured for the provider.
+   * </em>
    */
-  static public final String VERIFY_REPLY = "verifyReply";
-
+  static public final String VALID_TIME_UNIQUE = "validTimeUnique";
+  
   /**
-   * ALLOW_ENUMERATION_OF_CHILDREN allows to return the children's paths
-   * as part of their parent object to inform the client about the complete 
-   * set of children belonging to a given reference.
+   * org::openmdx::state2::StateCapable::transactionTimeUnique value
+   * <p><em>
+   * Note:<br>
+   * This value is not stored in the database but configured for the provider.
+   * </em>
    */
-  static public final String ALLOW_ENUMERATION_OF_CHILDREN = "allowEnumerationOfChildren";
-
-  /**
-   * Returns the smallest defined integer constant or
-   * Integer.MAX_VALUE if no integer constant is defined.
-   *
-   * @return an int
-   */
-  static public int min()
-  {
-  return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.min();  // delegate
-  }
-
-
-
-  /**
-   * Returns the biggest defined integer constant or
-   * Integer.MIN_VALUE if no integer constant is defined.
-   *
-   * @return an int
-   */
-  static public int max()
-  {
-  return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.max();  // delegate
-  }
-
-
-
-  /**
-   * Returns a string representation of the passed code
-   *
-   * @param code  a code to be stringified
-   * @return a stringified code
-   */
-  static public String toString(int code)
-  {
-      return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.toString(code);  // delegate
-  }
-
-
-
-  /**
-   * Returns the code of the passed code's string representation.
-   * The string representation is case insensitive.
-   *
-   * @exception  throws an <code>IllegalArgumentException</code> 
-   *             if the stringified code cannot be resolved
-   * @param code a stringified code
-   * @return a code
-   */
-  static public int fromString(String code)
-  {  
-
-    return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.fromString(code);  // delegate
-  }
-
-
+  static public final String TRANSACTION_TIME_UNIQUE = "transactionTimeUnique";
 
 }
-
-// end-of-file

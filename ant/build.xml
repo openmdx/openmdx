@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.30 2008/07/28 17:45:58 hburger Exp $
+= Name:        $Id: build.xml,v 1.31 2010/01/09 00:41:18 wfro Exp $
 = Description: openMDX/Ant Build File
-= Revision:    $Revision: 1.30 $
-= Date:        $Date: 2008/07/28 17:45:58 $
-= Copyright:   (c) 2003-2004 OMEX AG
+= Revision:    $Revision: 1.31 $
+= Date:        $Date: 2010/01/09 00:41:18 $
+= Copyright:   (c) 2003-2010 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -62,15 +62,13 @@
 	<import file="etc/ant/build-library.xml"/>
 
 	<!-- Slash separated platform list, the last entry being the default -->
-	<antcontrib:var name="project.platform.list" value="jre-1.5"/>
-	<antcontrib:var name="build.target.platform" value="jre-1.5"/>
+	<property name="project.platform.list" value="jre-1.6"/>
 
 	<!-- Included Ant Projects -->
 	<import file="etc/ant/build-properties.xml"/>
 
 	<path id="project.lib.classpath">
-		<pathelement location="${openmdx.home}/apache/jre-1.5/ant/lib/ant.jar"/>
-		<!-- pathelement location="${openmdx.home}/apache/jre-1.5/contribution/lib/ant-contrib.jar"/ -->
+		<pathelement location="${openmdx.home}/apache/${build.target.platform}/ant/lib/ant.jar"/>
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>
@@ -199,23 +197,6 @@ ${build.dir}/doc/api/index.html
 	</target>
 
 	<target name="prepare">
-<!--
-		<get 
-			dest="lib/dl.jar" 
-			src="jar:http://www.jayasoft.org/downloads/ivy/ivy-1.1-bin.zip!/lib/ivy-1.1/ivy-1.1.jar"
-			verbose="true"
-			usetimestamp="true"
-		/>
-		<dl:configure />
-		<dl:retrieve conf="weblogic-8"/>
--->
-		<ivy:configure />
-		<ivy:resolve conf="weblogic-8" />
-		<echo>ivy.organisation = ${ivy.organisation}</echo>
-		<echo>ivy.module = ${ivy.module}</echo>
-		<echo>ivy.revision = ${ivy.revision}</echo>
-		<echo>ivy.resolved.configurations = ${ivy.resolved.configurations}</echo>
-		<ivy:retrieve conf="weblogic-8" pattern="build/ivy/[organisation]-[module].[artifact].[ext]"/>
 	</target>
 	
 </project>

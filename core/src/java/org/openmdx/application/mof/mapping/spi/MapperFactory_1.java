@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapperFactory_1.java,v 1.2 2009/04/03 13:14:00 hburger Exp $
+ * Name:        $Id: MapperFactory_1.java,v 1.4 2010/04/16 09:48:32 hburger Exp $
  * Description: MapperFactory_1
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/03 13:14:00 $
+ * Date:        $Date: 2010/04/16 09:48:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,7 +60,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
 import org.openmdx.application.mof.mapping.cci.MappingTypes;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.loading.Classes;
 
 /**
  * MapperFactory_1
@@ -90,7 +90,7 @@ public class MapperFactory_1 {
                 MappingTypes.JMI1.equals(format) ||
                 MappingTypes.JPA3.equals(format)
             ) {
-                return (Mapper_1_0) Classes.getApplicationClass(
+                return Classes.<Mapper_1_0>getApplicationClass(
                     org.openmdx.application.mof.mapping.java.Mapper_1.class.getName()
                 ).getConstructor(
                     MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION
@@ -102,7 +102,7 @@ public class MapperFactory_1 {
             } else if(
                 format.startsWith(MappingTypes.JPA3 + ':')
             ) {
-                return (Mapper_1_0) Classes.getApplicationClass(
+                return Classes.<Mapper_1_0>getApplicationClass(
                     org.openmdx.application.mof.mapping.java.Mapper_1.class.getName()
                 ).getConstructor(
                     MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION
@@ -112,14 +112,13 @@ public class MapperFactory_1 {
                     "java"            
                 );
             } else {
-                return (Mapper_1_0) Classes.getApplicationClass(
+                return Classes.<Mapper_1_0>getApplicationClass(
                     MappingTypes.XMI1.equals(format) || MappingTypes.XMI_OPENMDX_1.equals(format) ? org.openmdx.application.mof.mapping.xmi.XMIMapper_1.class.getName() :
                     MappingTypes.UML_OPENMDX_1.equals(format) ? org.openmdx.application.mof.mapping.xmi.Uml1Mapper_1.class.getName() :
                     MappingTypes.UML2_OPENMDX_1.equals(format) ? org.openmdx.application.mof.mapping.xmi.Uml2Mapper_1.class.getName() :
                     MappingTypes.TOGETHER_OPENMDX_1.equals(format) ? org.openmdx.application.mof.mapping.together.TogetherMapper_1.class.getName() :
                     format
                 ).getConstructor(
-                    NO_ARGUMENTS
                 ).newInstance();
             }
         } catch(ClassNotFoundException e) {
@@ -143,6 +142,4 @@ public class MapperFactory_1 {
         String.class // fileExtension
     };
   
-    final static private Class[] NO_ARGUMENTS = new Class[]{};
-
 }

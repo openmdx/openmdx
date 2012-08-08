@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StandardDbObject.java,v 1.1 2009/05/26 14:31:20 wfro Exp $
+ * Name:        $Id: StandardDbObject.java,v 1.5 2010/01/04 23:42:05 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:20 $
+ * Date:        $Date: 2010/01/04 23:42:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -99,9 +99,9 @@ extends DbObject {
         this.objectIdValues = new ArrayList();
         DbObjectConfiguration typeConfiguration = this.getConfiguration();
         if(
-                (typeConfiguration != null) && 
-                (typeConfiguration.getObjectIdPattern() != null) &&
-                (this.getObjectId() != null)
+            (typeConfiguration != null) && 
+            (typeConfiguration.getObjectIdPattern() != null) &&
+            (this.getObjectId() != null)
         ) {
             Matcher matcher = typeConfiguration.getObjectIdPatternMatcher().matcher(this.getObjectId());
             if(matcher.matches()) {
@@ -116,7 +116,8 @@ extends DbObject {
                     )
                 );
             }
-        } else {
+        } 
+        else {
             this.objectIdValues.add(
                 this.database.getObjectId(
                     this.getObjectId()
@@ -141,7 +142,15 @@ extends DbObject {
         String objectIdClause = "";
         for(int i = 0; i < this.getObjectIdColumn().size(); i++) {
             objectIdClause += i == 0 ? "" : " AND ";
-            objectIdClause += "(v." + this.getObjectIdColumn().get(i) + " = ?)";
+            String objectIdValue = i < this.getObjectIdValues().size() ?
+                this.getObjectIdValues().get(i) :
+                    null;
+            if(objectIdValue != null && objectIdValue.indexOf("%") >= 0) {
+                objectIdClause += "(v." + this.getObjectIdColumn().get(i) + " LIKE ?)";
+            }
+            else {
+                objectIdClause += "(v." + this.getObjectIdColumn().get(i) + " = ?)";                
+            }
         } 
         this.objectIdClause = objectIdClause;
 
@@ -230,6 +239,7 @@ extends DbObject {
                 this.getConfiguration().getDbObjectForUpdate2()
             );
         }
+        List statementParameters = null;
         try {
 
             // Object (only if dbObject (=table) is configured)
@@ -238,7 +248,7 @@ extends DbObject {
                             (type.size() == accessPath.size() && accessPath.isLike(type))) &&
                             (this.getConfiguration().getDbObjectForUpdate1().length() > 0)
             ) {
-                List statementParameters = new ArrayList();
+                statementParameters = new ArrayList();
                 String selectReferenceIdsClause = this.database.getSelectReferenceIdsClause(
                     conn, 
                     this.getReference(), 
@@ -281,7 +291,7 @@ extends DbObject {
                             (this.getConfiguration().getDbObjectForUpdate1() != null) &&
                             (this.getConfiguration().getDbObjectForUpdate1().length() > 0)        
             ) {
-                List statementParameters = new ArrayList();
+                statementParameters = new ArrayList();
                 String selectReferenceIdsClause = this.database.getSelectReferenceIdsClause(
                     conn, 
                     accessPath.getDescendant(type.getSuffix(accessPath.size())),
@@ -319,7 +329,11 @@ extends DbObject {
                 BasicException.Code.MEDIA_ACCESS_FAILURE, 
                 null,
                 new BasicException.Parameter("path", accessPath),
-                new BasicException.Parameter("statement", currentStatement)
+                new BasicException.Parameter("statement", currentStatement),
+                new BasicException.Parameter("parameters", statementParameters),
+                new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
+                new BasicException.Parameter("sqlState", ex.getSQLState())
+
             );
         }
         catch(ServiceException e) {
@@ -481,7 +495,7 @@ extends DbObject {
         return
         new FilterProperty(
             p.quantor(),
-            this.database.getAttributeName(
+            this.database.getFeatureName(
                 (String)this.getObjectIdColumn().get(0)
             ),
             p.operator(),

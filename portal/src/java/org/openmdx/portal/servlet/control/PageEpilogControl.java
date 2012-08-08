@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PageEpilogControl.java,v 1.72 2009/04/23 09:59:10 wfro Exp $
+ * Name:        $Id: PageEpilogControl.java,v 1.76 2009/10/14 08:32:27 wfro Exp $
  * Description: PageEpilogControl 
- * Revision:    $Revision: 1.72 $
+ * Revision:    $Revision: 1.76 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/23 09:59:10 $
+ * Date:        $Date: 2009/10/14 08:32:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,11 +61,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.view.EditObjectView;
@@ -93,12 +93,12 @@ public class PageEpilogControl
     //-----------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {
         
-        AppLog.detail("> paint");        
+    	SysLog.detail("> paint");        
         
         View view = p.getView();
         ApplicationContext app = view.getApplicationContext();
@@ -112,22 +112,7 @@ public class PageEpilogControl
             true, 
             app
         );        
-        boolean editMode = view instanceof EditObjectView;
-        
-        int currentChartId = p.getProperty(HtmlPage.PROPERTY_CHART_ID) != null
-            ? ((Integer)p.getProperty(HtmlPage.PROPERTY_CHART_ID)).intValue()
-            : 0;
-        int nActiveTab = p.getProperty(HtmlPage.PROPERTY_N_ACTIVE_TAB) != null
-            ? ((Integer)p.getProperty(HtmlPage.PROPERTY_N_ACTIVE_TAB)).intValue()
-            : 0;
-          
-        if(!editMode) {
-            if(currentChartId > 0) {
-                p.write("<script language=\"javascript\" type=\"text/javascript\" src=\"javascript/diagram.js\"></script>");
-                p.write("<script language=\"javascript\" type=\"text/javascript\" src=\"javascript/chart.js\"></script>");
-            }
-        }
-        
+        boolean editMode = view instanceof EditObjectView;        
         // Init scripts
         p.write("<script language=\"javascript\" type=\"text/javascript\">");
         
@@ -561,29 +546,12 @@ public class PageEpilogControl
         p.write("      templateRow.style.display = 'none';");
         p.write("    }");
         
-        // Does page contains charts?
-        if(!editMode) {
-            if(currentChartId > 0) {
-                p.write("pageHasCharts = true;");             
-            }
-            else {
-                p.write("pageHasCharts = false;");            
-            }
-        }
-
-        // window.onresize
-        p.write("window.onresize=function() {  // is called from guicontrol.js showPanel()");
-        for(int i = 0; i < currentChartId; i++) {
-            p.write("    displayChart" + i, "();");
-        }
-        p.write("}");
-        
         // dateSelected
         p.write("function dateSelected(calendar, date) {");
         p.write("  if (calendar.dateClicked) {");
         p.write("  };");
         p.write("}");
-        List calendarIds = (List)p.getProperty(HtmlPage.PROPERTY_CALENDAR_IDS);
+        List calendarIds = (List)p.getProperty(ViewPort.PROPERTY_CALENDAR_IDS);
         if(calendarIds != null) {
             for(Iterator i = calendarIds.iterator(); i.hasNext(); ) {
                 String calendarId = (String)i.next();
@@ -609,7 +577,6 @@ public class PageEpilogControl
                 int paneIndex = referencePane.getReferencePaneControl().getPaneIndex();
                 String paneId = Integer.toString(paneIndex);
                 boolean isGroupTabActive = false;
-                int lastGroupTabIndex = 0;
                 int nGridControl = referencePane.getReferencePaneControl().getGridControl().length;
                 for(int j = 0; j < nGridControl; j++) {
                     ReferencePaneControl gridTab = referencePane.getReferencePaneControl();
@@ -626,7 +593,6 @@ public class PageEpilogControl
                     // Prolog hidden tabs
                     if(!isGroupTabActive && isGroupTab) {
                         isGroupTabActive = true;
-                        lastGroupTabIndex = j;
                     }
                     // Add tab
                     // Get content for selected grid
@@ -649,14 +615,12 @@ public class PageEpilogControl
         }
         p.write("");
         p.write("function initPage() {");
-        if(currentChartId > 0) {
-            p.write("  window.onresize();");
-        }
         if(view.getMacro() != null) {
             Object[] macro = view.getMacro();
             Number actionType = (Number)macro[0];
             String actionName = (String)macro[1];
             if(actionType.intValue() == Action.MACRO_TYPE_JAVASCRIPT) {
+                actionName = actionName.replaceAll("$" + View.REQUEST_ID_TEMPLATE, view.getRequestId());
                 actionName = actionName.replaceAll(View.REQUEST_ID_TEMPLATE, view.getRequestId());
                 if(view instanceof ShowObjectView) {
                 	actionName = actionName.replaceAll(View.CURRENT_OBJECT_XRI_TEMPLATE, ((ShowObjectView)view).getRefObject().refMofId());
@@ -668,7 +632,7 @@ public class PageEpilogControl
         p.write("}");
         p.write("</script>");
         // Generate div for each popup image
-        Map popupImages= (Map)p.getProperty(HtmlPage.PROPERTY_POPUP_IMAGES);
+        Map popupImages= (Map)p.getProperty(ViewPort.PROPERTY_POPUP_IMAGES);
         if(popupImages != null) {
             for(Iterator i = popupImages.keySet().iterator(); i.hasNext(); ) {
                 String imageId = (String)i.next();
@@ -677,7 +641,7 @@ public class PageEpilogControl
                 p.write("  ", p.getImg("class=\"popUpImg\" id=\"popUpImg", imageId, "\" src=\"", imageSrc, "\" alt=\"\""), "</div>");
             }
         }
-        AppLog.detail("< paint");        
+        SysLog.detail("< paint");        
     }
 
     //-----------------------------------------------------------------------

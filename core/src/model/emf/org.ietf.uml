@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_IAJMQLeAEdueCKP_VeXehw" name="ietf">
+  <packagedElement xmi:type="uml:Package" xmi:id="_Szs1cLeAEdueCKP_VeXehwP" name="org">
+    <packagedElement xmi:type="uml:Package" xmi:id="_Szs1cLeAEdueCKP_VeXehw" name="ietf">
+      <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_AcxsALeBEdueCKP_VeXehw" name="UUID"/>
+      <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_Cv2h4LeBEdueCKP_VeXehw" name="OID"/>
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

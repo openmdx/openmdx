@@ -34,13 +34,13 @@ import java.util.Set;
  * But, you might want that loophole, so this class is kept simple.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.1 $ $Date: 2009/05/26 12:40:49 $
+ * @version $Revision: 1.2 $ $Date: 2009/09/14 11:50:48 $
  * 
  * @author Daniel Rall
  * @author Stephen Colebourne
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractMapDecorator implements Map {
+abstract class AbstractMapDecorator implements Map {
 
     /** The map to decorate */
     protected transient Map map;
@@ -59,7 +59,7 @@ public abstract class AbstractMapDecorator implements Map {
      * @param map  the map to decorate, must not be null
      * @throws IllegalArgumentException if the collection is null
      */
-    public AbstractMapDecorator(Map map) {
+    protected AbstractMapDecorator(Map map) {
         if (map == null) {
             throw new IllegalArgumentException("Map must not be null");
         }

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractConnectionFactory.java,v 1.7 2009/03/12 17:12:30 hburger Exp $
+ * Name:        $Id: AbstractConnectionFactory.java,v 1.9 2010/03/05 13:24:13 hburger Exp $
  * Description: Managed LDAP Connection Factory
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/12 17:12:30 $
+ * Date:        $Date: 2010/03/05 13:24:13 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,70 +48,48 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.resource.ldap.v3;
 
-import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Set;
 
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
 import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.SecurityException;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
 import org.openmdx.kernel.resource.spi.ShareableConnectionManager;
+import org.openmdx.resource.ldap.spi.AbstractManagedConnectionFactory;
 import org.openmdx.resource.ldap.spi.ConnectionFactory;
 import org.openmdx.resource.ldap.spi.ManagedConnection;
 
 /**
  * Managed LDAP Connection Factory
  */
-@SuppressWarnings("serial")
-public abstract class AbstractConnectionFactory
-    implements ManagedConnectionFactory {
+public abstract class AbstractConnectionFactory extends AbstractManagedConnectionFactory {
+
+	/**
+     * Constructor
+     */
+    protected AbstractConnectionFactory() {
+	    super();
+    }
+
+	/**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 4843002483599509129L;
 
 	/**
 	 * Default LDAP protocol version
 	 */
 	protected static int DEFAULT_PROTOCOL_VERSION = 2;
 	
-	/**
-     * 
-     */
-    private Object identity = null;
-    
-    /**
-     * 
-     */
-    private PrintWriter logWriter;
-    
-    /**
-     * 'ConnectionURL' property, e.g.<ul>
-     * <li>"directory.knowledge.com"
-     * <li>"199.254.1.2"
-     * <li>"directory.knowledge.com:1050 people.catalog.com 199.254.1.2"
-     * </ul>
-     */
-    private String connectionURL;
-    
-    /**
-     * The distinguished name
-     */
-    private String userName;
-    
-    /**
-     * The LDAP password
-     */
-    private String password;
-
     /**
      * The LDAP protocol version
      */
-    private int protocolVersion = AbstractConnectionFactory.DEFAULT_PROTOCOL_VERSION;
+    private int protocolVersion = DEFAULT_PROTOCOL_VERSION;
     
     /**
      * The resource adapter's internal connection manager
@@ -125,11 +102,12 @@ public abstract class AbstractConnectionFactory
     public final Object createConnectionFactory(
     ) throws ResourceException {
         if(this.connectionManager == null) {
+            String password = super.getPassword();
             this.connectionManager = new ShareableConnectionManager(
                 Collections.singleton(
                     new PasswordCredential(
-                        this.userName,
-                        (this.password == null ? "" : this.password).toCharArray()
+                        super.getUserName(),
+                        (password == null ? "" : password).toCharArray()
                     )
                 )
             );
@@ -146,14 +124,6 @@ public abstract class AbstractConnectionFactory
         return connectionManager == null ?
         	this.createConnectionFactory() :
             new ConnectionFactory(this, connectionManager);
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#getLogWriter()
-     */
-    public final PrintWriter getLogWriter(
-    ) throws ResourceException {
-        return this.logWriter;
     }
 
     /* (non-Javadoc)
@@ -177,63 +147,6 @@ public abstract class AbstractConnectionFactory
         return null;
     }
     
-	/**
-     * 
-     * @param subject
-     * @return
-     * @throws ResourceException
-     */
-    protected PasswordCredential getCredential(
-        Subject subject
-    ) throws ResourceException{
-        Set<?> credentials = subject == null ? Collections.EMPTY_SET : subject.getPrivateCredentials(
-            PasswordCredential.class
-        );
-        switch(credentials.size()) {
-            case 0: 
-                return null;
-            case 1:
-            	return (PasswordCredential) credentials.iterator().next();
-           default:
-               throw this.log(
-                   new SecurityException(
-                       "There is more than one " +   
-                       PasswordCredential.class.getName() +
-                       " instance among the subject's private credentials"
-                   )
-               );
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#setLogWriter(java.io.PrintWriter)
-     */
-    public final void setLogWriter(
-        PrintWriter logWriter
-    ) throws ResourceException {
-        this.logWriter = logWriter;
-    }
-
-    /**
-     * Retrieve connectionURL.
-     *
-     * @return Returns the connectionURL.
-     */
-    public final String getConnectionURL() {
-        return this.connectionURL;
-    }
-    
-    /**
-     * Set connectionURL.
-     * 
-     * @param connectionURL The connectionURL to set.
-     */
-    public final void setConnectionURL(
-        String connectionURL
-    ) {
-        this.connectionURL = connectionURL;
-    }
-    
     public Integer getProtocolVersion() {
 		return this.protocolVersion;
 	}
@@ -242,114 +155,5 @@ public abstract class AbstractConnectionFactory
 	public void setProtocolVersion(Integer protocolVersion) {
 		this.protocolVersion = protocolVersion;
 	}
-
-	/**
-     * Log and return an exception
-     * 
-     * @param an exception
-     * 
-     * @return the exception
-     */
-    protected final ResourceException log(
-        ResourceException exception
-    ){
-        try {
-            PrintWriter logWriter = this.getLogWriter();
-            if(logWriter != null) exception.printStackTrace(logWriter);
-        } 
-        catch (Exception ignore) {
-            // Ensure that the original exception will be available
-        }
-        return exception;
-    }
-
-    /**
-     * Set password.
-     * 
-     * @param password The password to set.
-     */
-    public final void setPassword(
-        String password
-    ) {
-        this.password = password;
-    }
-    
-    /**
-     * Retrieve password.
-     *
-     * @return Returns the password.
-     */
-    protected final String getPassword() {
-        return this.password;
-    }    
-
-    /**
-     * Retrieve userName.
-     *
-     * @return Returns the userName.
-     */
-    public final String getUserName() {
-        return this.userName;
-    }
-    
-    /**
-     * Set userName.
-     * 
-     * @param userName The userName to set.
-     */
-    public final void setUserName(
-        String userName 
-    ) {
-        this.userName = userName;
-    }
-
-    
-    //------------------------------------------------------------------------
-    // Extends Object
-    //------------------------------------------------------------------------
-
-    /**
-     * 
-     * @return
-     */
-    private Object getIdentity(){
-        if(this.identity == null) this.identity = this.connectionURL == null ?
-            new Object() :
-        this.userName == null && this.password == null ?
-            this.connectionURL : new StringBuilder(
-                this.connectionURL
-            ).append(
-                '|'
-            ).append(
-                this.userName == null ? "" : this.userName
-            ).append(
-                '|'
-            ).append(
-                this.password == null ? "" : this.password
-            ).toString();
-        return this.identity;
-    }
-
-    //------------------------------------------------------------------------
-    // Extends AbstractManagedConnectionFactory
-    //------------------------------------------------------------------------
-    
-    /**
-     * Overriding equals() is required.
-     */
-    public boolean equals(Object that) {
-        return 
-            that != null && 
-            this.getClass().equals(that.getClass()) &&
-            this.getIdentity().equals(((AbstractConnectionFactory)that).getIdentity());
-    }
-
-    /**
-     * Overriding hashCode() is required.
-     */
-    public int hashCode(
-    ) {
-        return this.getIdentity().hashCode();
-    }
 
 }

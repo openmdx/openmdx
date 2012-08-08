@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Model_1Factory.java,v 1.10 2009/06/09 12:45:19 hburger Exp $
+ * Name:        $Id: Model_1Factory.java,v 1.14 2010/04/16 09:56:07 hburger Exp $
  * Description: Model_1Factory
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:19 $
+ * Date:        $Date: 2010/04/16 09:56:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2009, OMEX AG, Switzerland
+ * Copyright (c) 2006-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,7 +52,6 @@ package org.openmdx.base.mof.spi;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -60,7 +59,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.LoggerFactory;
 
 /**
@@ -68,46 +67,72 @@ import org.openmdx.kernel.log.LoggerFactory;
  */
 public class Model_1Factory {
 
-    public static synchronized Model_1_0 getModel(
+    /**
+     * The volatile singleton holder allows lazy synchronization
+     */
+    private static volatile Model_1_0 model;
+
+    /**
+     * Retrieve the MOF repository
+     * 
+     * @return the singleton
+     */
+    public static Model_1_0 getModel(
     ) {
-        if(model == null) try {
-            Class<?> modelClass = Classes.getApplicationClass("org.openmdx.application.mof.repository.accessor.Model_1");
-            Method getInstanceMethod = modelClass.getMethod("getInstance");
-            model = (Model_1_0) getInstanceMethod.invoke(null);
-            List<String> modelPackages = new ArrayList<String>();
-            for(
-            	Enumeration<URL> resources = Classes.getResources("META-INF/openmdxmof.properties");
-            	resources.hasMoreElements();
-            ) {
-                URL resource = resources.nextElement();
-                BufferedReader in = new BufferedReader(new InputStreamReader(resource.openStream()));
-                String line;
-                while((line = in.readLine()) != null) {
-                	line = line.trim();
-                	if(
-                	    line.length() > 0 && 
-                	    !line.startsWith("#") && 
-                	    !line.startsWith("!") &&
-                	    !modelPackages.contains(line) 
-                	) {
-	                    modelPackages.add(line);
-                	}
+        if(Model_1Factory.model == null) {
+            synchronized(Model_1Factory.class) {
+                if(Model_1Factory.model == null) try {
+                    List<String> modelPackages = new ArrayList<String>();
+                    for(
+                    	Enumeration<URL> resources = Classes.getResources("META-INF/openmdxmof.properties");
+                    	resources.hasMoreElements();
+                    ) {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(resources.nextElement().openStream()));
+                        for(
+                            String line;
+                            (line = in.readLine()) != null;
+                        ) {
+                        	line = line.trim();
+                        	if(
+                        	    line.length() > 0 && 
+                        	    !line.startsWith("#") && 
+                        	    !line.startsWith("!") &&
+                        	    !modelPackages.contains(line) 
+                        	) {
+        	                    modelPackages.add(line);
+                        	}
+                        }
+                        in.close();
+                    }
+                    Model_1_0 model = (Model_1_0) Classes.getApplicationClass(
+                        "org.openmdx.application.mof.repository.accessor.Model_1"
+                    ).getMethod(
+                        "getInstance"
+                    ).invoke(
+                        null
+                    );
+                    model.addModels(modelPackages);
+                    Model_1Factory.model = model;
+                }  catch(Exception e) {
+                    LoggerFactory.getLogger().log(
+                        Level.SEVERE,
+                        "Model acquisition failure",
+                        e
+                    );
                 }
-                in.close();
             }
-            model.addModels(modelPackages);
-        } catch(Exception e) {
-            LoggerFactory.getLogger().log(
-                Level.SEVERE,
-                "Model acquisition failure",
-                e
-            );
         }
-        return model;
+        return Model_1Factory.model;
     }
     
-    private static Model_1_0 model;
+    /**
+     * Tells whether the MOF repository is already prepared
+     * 
+     * @return <code>true</code> if the model is loaded
+     */
+    public static boolean isLoaded(
+    ) {
+        return Model_1Factory.model != null;
+    }
     
 }
-
-//--- End of File -----------------------------------------------------------

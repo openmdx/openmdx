@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestFunction.java,v 1.6 2009/05/15 00:26:38 hburger Exp $
+ * Name:        $Id: RestFunction.java,v 1.8 2010/02/16 18:39:10 hburger Exp $
  * Description: REST Functions
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/15 00:26:38 $
+ * Date:        $Date: 2010/02/16 18:39:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,7 +63,7 @@ import org.openmdx.base.persistence.cci.Queries;
  * to interactions belonging to either <em>remote</em> or <em>local</em> connections.<br>
  * The return record<ul>
  * <li>is <code>null</code> in case of {@link InteractionSpec#SYNC_SEND}<br>
- * <li>is an indexed record containing either <code>org:openmdx:kernel:ObjectHolder</code> 
+ * <li>is an indexed record containing either <code>org:openmdx:kernel:Object</code> 
  * records or operation results.
  * </ul>
  * <li><b>Output Record</b><br>
@@ -75,10 +75,10 @@ import org.openmdx.base.persistence.cci.Queries;
  * i.e. it can even be <code>null</code>
  * <li>must be an indexed record in case of {@link InteractionSpec#SYNC_SEND}<br>
  * which is modified by <code>add()</code> operations for either
- * <code>org:openmdx:kernel:ObjectHolder</code> records or operation results.
+ * <code>org:openmdx:kernel:Object</code> records or operation results.
  * </ul>
  * <li><b>Object Holder</b><br>
- * Each <code>org:openmdx:kernel:ObjectHolder</code> holder has the following structure:<ul>
+ * Each <code>org:openmdx:kernel:Object</code> holder has the following structure:<ul>
  * <li><code>objectId</code>, the object's resource identifier (an XRI 2 string)
  * <li><code>version</code>, the object's version (an opaque byte[])
  * <li><code>value</code>, some or all of the object's features (a mapped record)  
@@ -103,7 +103,7 @@ public enum RestFunction {
      * <li>The objects are identified by the XRI 2 string representations of their 
      * object ids.
      * </ul>
-     * <li>An <code>org:openmdx:kernel:ObjectHolder</code> input record identifies a 
+     * <li>An <code>org:openmdx:kernel:Object</code> input record identifies a 
      * verification request.<ul>
      * <li><code>objectId</code>, the object's resource identifier (an XRI 2 string)
      * <li><code>version</code>, the object's version to be verified.
@@ -123,11 +123,11 @@ public enum RestFunction {
      * <li><code>size</code>, the maximal number of elements to be returned (a number value) 
      * <li><code>parameters</code>, the parameters (an indexed or mapped record)
      * </ul>
-     * <li>An indexed input record identifies a toch request.<ul>
+     * <li>An indexed input record identifies a touch request.<ul>
      * <li>The objects are identified by the XRI 2 string representations of their 
      * object ids.
      * </ul>
-     * <li>An <code>org:openmdx:kernel:ObjectHolder</code> input record identifies 
+     * <li>An <code>org:openmdx:kernel:Object</code> input record identifies 
      * an update request.<ul>
      * <li><code>objectId</code>, the object's resource identifier (an XRI 2 string)
      * <li><code>version</code>, the object's version to be verified.
@@ -151,7 +151,7 @@ public enum RestFunction {
      * <li>The objects are identified by the XRI 2 string representations of their 
      * object ids.
      * </ul>
-     * <li>An <code>org:openmdx:kernel:ObjectHolder</code> input record identifies a 
+     * <li>An <code>org:openmdx:kernel:Object</code> input record identifies a 
      * verified delete request.<ul>
      * <li><code>objectId</code>, the object's resource identifier (an XRI 2 string)
      * <li><code>version</code>, the object's version to be verified.

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MetaData_2.java,v 1.3 2009/03/31 17:05:17 hburger Exp $
+ * Name:        $Id: MetaData_2.java,v 1.6 2010/04/13 17:37:55 wfro Exp $
  * Description: Meta Data Provider
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:05:17 $
+ * Date:        $Date: 2010/04/13 17:37:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -82,7 +82,7 @@ import org.openmdx.application.mof.mapping.java.metadata.JoinMetaData;
 import org.openmdx.application.mof.mapping.java.metadata.MetaData_2_0;
 import org.openmdx.application.mof.mapping.java.metadata.PackageMetaData;
 import org.openmdx.application.mof.mapping.java.metadata.Visibility;
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.xml.EntityMapper;
@@ -109,10 +109,10 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
         File baseDirectory = base == null ? null : new File(base);
         if(base == null) {
             this.baseDirectory = null;
-            this.logger.info("No base directory specified for .openmdxjdo files");
+            this.logger.log(Level.FINE, "No base directory specified for .openmdxjdo files");
         } else if (baseDirectory.exists()) {
             this.baseDirectory = baseDirectory;
-            this.logger.log(Level.INFO, "The base directory specified for .openmdxjdo files is {0}", this.baseDirectory);
+            this.logger.log(Level.FINE, "The base directory specified for .openmdxjdo files is {0}", this.baseDirectory);
         } else {
             this.baseDirectory = null;
             this.logger.log(Level.WARNING, "The base directory {0} for .openmdxjdo files does not exist", base);
@@ -315,7 +315,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                 if(ignore) {
                     logger.log(Level.FINER, 
                         "{0} accepts extension only in package.openmdxjdo, " +
-                        "that's why the {1} extension {2} for target {3} is not set to '{4}' but ignored",
+                        "that's why the {1} extension {2} for target {3} is not set to \"{4}\" but ignored",
                         new Object[]{element.getTagName(), vendor, key, target.toXMLFormat(), value}
                     );
                 } else {
@@ -335,7 +335,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                     }
                     vendorSpecificExtensions.put(key, value);
                     logger.log(Level.FINER, 
-                        "{0} has its {1} extension {2} set to '{4}' for target {4}",
+                        "{0} has its {1} extension {2} set to \"{4}\" for target {4}",
                         new Object[]{element.getTagName(), vendor, key, value, target.toXMLFormat()}
                     );
                 }
@@ -373,12 +373,12 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                 this.directory = directory.exists() ? directory : null;
                 try {
                     if(this.directory == null) {
-                        logger.log(Level.INFO,"There is no .openmdxjdo directory {0} for package {1}", new Object[]{directory, name});
+                        logger.log(Level.FINE,"There is no .openmdxjdo directory {0} for package {1}", new Object[]{directory, name});
                     } else {
-                        logger.log(Level.INFO,"The .openmdxjdo directory for package {0} is {1}", new Object[]{name, directory});
+                        logger.log(Level.FINE,"The .openmdxjdo directory for package {0} is {1}", new Object[]{name, directory});
                         File file = new File(directory, "package.openmdxjdo");
                         if(file.exists()) {
-                            logger.log(Level.INFO,
+                            logger.log(Level.FINE,
                                 "The .openmdxjdo file for package {0} is {1}", 
                                 new Object[]{name, file}
                             );
@@ -396,7 +396,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         }
                         if(documentSource != null) {
                             documentLocation = XRI_2Protocols.RESOURCE_PREFIX + documentPath;
-                            logger.log(Level.INFO,
+                            logger.log(Level.FINE,
                                 "Found .openmdxjdo resource for package {0}", 
                                 name
                             );
@@ -426,7 +426,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                     );
                 } else {
                     logger.log(Level.WARNING,
-                        ".openmdxjdo document {0} has type '{1}' instead of 'openmdxjdo'", 
+                        ".openmdxjdo document {0} has type \"{1}\" instead of \"openmdxjdo\"", 
                         new Object[]{documentLocation, openmdxjdoElement.getTagName()}
                     );
                     this.tablePrefix = null;
@@ -512,7 +512,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         File file = new File(directory, documentName);
                         if(file.exists()) {
                             logger.log(
-                                Level.INFO,
+                                Level.FINE,
                                 "The .openmdxjdo file for class {0}.{1} is {2}", 
                                 new Object[]{Package.this.name, name, file}
                             );
@@ -533,7 +533,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                             System.out.println("INFO:    Loading meta data for " + Package.this.name + "." + name);
                             documentLocation = XRI_2Protocols.RESOURCE_PREFIX + documentPath;
                             logger.log(
-                                Level.INFO,
+                                Level.FINE,
                                 "Found .openmdxjdo resource for class {0}.{1}", 
                                 new Object[]{Package.this.name, name}
                             );
@@ -551,7 +551,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         } else {
                             logger.log(
                                 Level.WARNING,
-                                ".openmdxjdo document {0} has type '{1}' instead of 'openmdxjdo'", 
+                                ".openmdxjdo document {0} has type \"{1}\" instead of \"openmdxjdo\"", 
                                 new Object[]{documentLocation, openmdxjdoElement.getTagName()}
                             );
                             return;
@@ -593,7 +593,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                     } 
                     else {
                         logger.log(
-                            Level.INFO,
+                            Level.FINE,
                             "An openmdxjdo document for class {0}.{1} exists neither as file nor as resource", 
                             new Object[]{Package.this.name, name}
                         );

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObjectManager_1.java,v 1.5 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: DataObjectManager_1.java,v 1.55 2010/04/28 11:13:32 hburger Exp $
  * Description: Data Object Manager
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.55 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2010/04/28 11:13:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,10 @@
  */
 package org.openmdx.base.accessor.rest;
 
+import static org.openmdx.base.persistence.cci.Queries.ASPECT_QUERY;
+
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -59,7 +62,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -68,13 +71,17 @@ import javax.jdo.FetchGroup;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalInternalException;
+import javax.jdo.JDOFatalUserException;
+import javax.jdo.JDOHelper;
+import javax.jdo.JDOObjectNotFoundException;
+import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserException;
 import javax.jdo.ObjectState;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
-import javax.jdo.Transaction;
 import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
+import javax.jdo.listener.InstanceLifecycleEvent;
 import javax.jdo.listener.InstanceLifecycleListener;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -85,79 +92,124 @@ import javax.resource.cci.MappedRecord;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
+import org.openmdx.base.accessor.rest.spi.VirtualObjects_2_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
-import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.aop0.PlugIn_1_0;
+import org.openmdx.base.collection.Registry;
+import org.openmdx.base.collection.ConcurrentWeakRegistry;
+import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.CachingMarshaller;
+import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.spi.AspectObjectAcessor;
+import org.openmdx.base.persistence.spi.InstanceLifecycleListenerRegistry;
+import org.openmdx.base.persistence.spi.PersistenceManagers;
+import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.StandardFetchGroup;
 import org.openmdx.base.persistence.spi.StandardFetchPlan;
+import org.openmdx.base.persistence.spi.SharedObjects.Aspects;
+import org.openmdx.base.query.Selector;
 import org.openmdx.base.resource.InteractionSpecs;
-import org.openmdx.base.resource.spi.TransactionManager;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
-import org.openmdx.compatibility.state1.spi.StateCapables;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 
 /**
  * A Data Object Manager 1.x implementation
  */
-public class DataObjectManager_1
-    extends CachingMarshaller
-    implements DataObjectManager_1_0
-{
+public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
 
     /**
      * Constructor 
      *
+     * @param factory
+     * @param proxy 
      * @param principalChain
      * @param connection
-     * @param optimisticTransaction
-     * 
+     * @param connection2 
+     * @param plugIns 
+     * @param optimalFetchSize
+     * @param cacheThreshold
      * @throws ResourceException 
      */
-    DataObjectManager_1(
+    public DataObjectManager_1(
         PersistenceManagerFactory factory,
+        boolean proxy,
         List<String> principalChain,
         Connection connection,
-        TransactionManager optimisticTransaction
-    ) {
+        Connection connection2,
+        PlugIn_1_0[] plugIns, 
+        Integer optimalFetchSize, 
+        Integer cacheThreshold
+    ) throws ResourceException {
+        super();
         this.factory = factory;
-        this.interactionSpecs = InteractionSpecs.newRestInteractionSpecs(
-            principalChain, 
-            false // retainValues
+        this.proxy = proxy;
+        this.interactionSpecs = InteractionSpecs.getRestInteractionSpecs(
+            factory.getRetainValues()
         );
+        this.principalChain = principalChain;
         this.connection = connection;
-        this.optimisticTransaction = optimisticTransaction;
-        if(MULTITHREADED) {
-            this.unitOfWork = null;
-            this.unitsOfWork = new ConcurrentHashMap<Thread,UnitOfWork_1>();
+        this.connection2 = connection2;
+        this.optimalFetchSize = optimalFetchSize == null ? OPTIMAL_FETCH_SIZE_DEFAULT : optimalFetchSize.intValue();
+        this.cacheThreshold = cacheThreshold == null ? CACHE_THRESHOLD_DEFAULT : cacheThreshold.intValue();
+        this.workContext = new HashMap<Object,Object>();
+        if(plugIns == null){
+            this.plugIns = NO_PLUG_INS;
         } else {
-            this.unitOfWork = newUnitOfWork();
-            this.unitsOfWork = null;
+            for(PlugIn_1_0 plugIn : this.plugIns = plugIns) {
+                if(plugIn instanceof InstanceLifecycleListener) {
+                    this.addInstanceLifecycleListener(
+                        (InstanceLifecycleListener) plugIn, 
+                        (Class<?>[])null
+                    );
+                }
+            }
         }
+        setMultithreaded(factory.getMultithreaded());
+        setCopyOnAttach(factory.getCopyOnAttach());
+        setDetachAllOnCommit(factory.getDetachAllOnCommit());
+        setIgnoreCache(factory.getIgnoreCache());
     }
-
+    
+    /**
+     * Tells, whether the data objects are proxies or not
+     */
+    private final boolean proxy;
+    
+    /**
+     * 
+     */
+    private static final PlugIn_1_0[] NO_PLUG_INS = {};
+    
     /**
      * The persistence manager's factory
      */
     private final PersistenceManagerFactory factory;
-    
-    /**
-     * Tells whether the connection is multi-threaded.
-     */
-    private static final boolean MULTITHREADED = true;  
 
     /**
      * 
      */
-    private static final boolean DETACH_ALL_ON_COMMIT = false;
+    private final static int OPTIMAL_FETCH_SIZE_DEFAULT = 64;
     
     /**
      * 
+     */
+    private final static int CACHE_THRESHOLD_DEFAULT = 256;
+    
+    /**
+     * Restricted value for <code>DetachAllOnCommit</code>
+     */
+    private static final boolean DETACH_ALL_ON_COMMIT = false;
+    
+    /**
+     * Restricted value for <code>CopyOnAttach</code>
+     */
+    private static final boolean COPY_ON_ATTACH = true;
+    
+    /**
+     * Restricted value for <code>IgnoreCache</code>
      */
     private static final boolean IGNORE_CACHE = false;
     
@@ -166,6 +218,36 @@ public class DataObjectManager_1
      */
     final InteractionSpecs interactionSpecs;
 
+    /**
+     * 
+     */
+    final List<String> principalChain;
+    
+    /**
+     * The work context is shared among all persistence manager layers.
+     */
+    final Map<Object,Object> workContext;
+    
+    /**
+     * The optimal fetch size is usually set in the persistence manager factory EJB configuration
+     */
+    private final int optimalFetchSize;
+
+    /**
+     * The cache threshold value is usually set in the persistence manager factory EJB configuration
+     */
+    private final int cacheThreshold;
+
+    /**
+     * Maps an object id to its data object
+     */
+    private final Registry<Path,DataObject_1> persistentRegistry = new ConcurrentWeakRegistry<Path, DataObject_1>();
+    
+    /**
+     * Maps a transactional object id to its data object
+     */
+    private final Registry<UUID,DataObject_1> transientRegistry = new ConcurrentWeakRegistry<UUID, DataObject_1>();
+    
     /**
      * The underlying REST connection
      */
@@ -176,22 +258,135 @@ public class DataObjectManager_1
 
         public Object getNativeConnection(
         ){
-            return connection;
+            return connection2 != null && currentTransaction().getInteraction() == null ?
+                connection2 :
+                connection;
         }
-
     };
 
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3977865059621680436L;
+
+    /**
+     * Unit of work for a single-threaded data object manager
+     */ 
+    private UnitOfWork_1 unitOfWork;
+
+    /**
+     * Units of work for a multi-threaded data object managers
+     */ 
+    private ConcurrentMap<Thread,UnitOfWork_1> unitsOfWork;
+    
+    /**
+     * This connection has transaction policy <code>Mandatory</code>
+     */
+    Connection connection;
+
+    /**
+     * This connection has transaction policy <code>RequiresNew</code>
+     */
+    Connection connection2;
+
+    /**
+     * Non-transactional or unique interaction
+     */
+    private Interaction interaction;
+
+    /**
+     * The persistence manager's fetch groups
+     */
+    private final Map<String,Map<Class<?>,FetchGroup>> fetchGroups = new HashMap<String,Map<Class<?>,FetchGroup>>();
+
+    /**
+     * The persistence manager's fetch plan
+     */
+    private final FetchPlan fetchPlan = StandardFetchPlan.newInstance(null);
+
+    /**
+     * The Apsect Specific Context instance 
+     */
+    protected final AspectObjectDispatcher aspectSpecificContexts = new AspectObjectDispatcher();
+    
+    /**
+     * The task identifier may be set by an application
+     */
+    protected Object taskIdentifier = null;
+    
+    /**
+     * The plug-ins
+     */
+    private final PlugIn_1_0[] plugIns;
+    
+    /**
+     * 
+     */
+    private final InstanceLifecycleListenerRegistry instanceLifecycleListeners = new InstanceLifecycleListenerRegistry();
+    
+    /**
+     * This object is shared among all <code>PersistenceManager</code>s in the stack.
+     */
+    private final SharedObjects.Accessor sharedObjects = new SharedObjects.Accessor(){
+
+        public Aspects aspectObjects() {
+            return DataObjectManager_1.this.aspectSpecificContexts;
+        }
+
+        public List<String> getPrincipalChain() {
+            return DataObjectManager_1.this.principalChain;
+        }
+
+        public Object getTaskIdentifier() {
+            return DataObjectManager_1.this.taskIdentifier;
+        }
+
+        public void setTaskIdentifier(
+            Object taskIdentifier
+        ) {
+            DataObjectManager_1.this.taskIdentifier = taskIdentifier;
+        }
+
+        public Object getPlugInObject(
+            Object key
+        ){
+            return DataObjectManager_1.this.getPlugInObject(key);
+        }
+
+        public String getUnitOfWorkIdentifier() {
+            return DataObjectManager_1.this.currentTransaction().getUnitOfWorkIdentifier();
+        }
+        
+    };
+        
+    /**
+     * Provide the plug-ins
+     * 
+     * @return the plug-ins
+     */
+    PlugIn_1_0[] getPlugIns(){
+        return this.plugIns;
+    }
+    
     /**
      * Retrieve a non-transactional interaction
      * 
      * @return a non-transactional interaction
      * @throws ResourceException 
      */
-    public Interaction getInteraction2(
+    public Interaction getInteraction(
     ) throws ResourceException{
-        return this.interaction2 == null ? 
-            this.interaction2 = this.connection.createInteraction() : 
-            this.interaction2;
+        Interaction transactionalInteraction = currentTransaction().getInteraction();
+        if(transactionalInteraction == null) {
+            if(this.interaction == null) {
+                this.interaction = (
+                    this.connection2 == null ? this.connection : this.connection2
+               ).createInteraction();
+            }
+            return this.interaction;
+        } else {
+            return transactionalInteraction;
+        }
     }
 
     /**
@@ -203,26 +398,11 @@ public class DataObjectManager_1
         return this.interactionSpecs;
     }
 
-    /**
-     * Unit of work factory method
-     * 
-     * @return a new unit of work
-     */
-    protected UnitOfWork_1 newUnitOfWork(
-    ){
-        return new UnitOfWork_1(
-            this,
-            this.connection,
-            this.optimisticTransaction, 
-            this.aspectSpecificContexts
-        );
-    }
-
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_5#isMultithreaded()
      */
     public boolean getMultithreaded() {
-        return MULTITHREADED;
+        return this.unitOfWork == null;
     }
 
     /**
@@ -230,11 +410,8 @@ public class DataObjectManager_1
      *
      * @return Returns the model.
      */
-    final Model_1_0 getModel() {
-        if(this.model == null) {
-            this.model = Model_1Factory.getModel();
-        }
-        return this.model;
+    public final Model_1_0 getModel() {
+        return Model_1Factory.getModel();
     }
 
     /* (non-Javadoc)
@@ -248,33 +425,118 @@ public class DataObjectManager_1
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }    
 
-    //------------------------------------------------------------------------
-    // Implements ObjectFactory_1_1
-    //------------------------------------------------------------------------
-
-    public void evictAll(
-    ){
-        for(
-            Iterator<?> i = this.mapping.values().iterator();
-            i.hasNext();
-        ){
-            Object o = i.next();
-            if(o instanceof Evictable) {
-                ((Evictable)o).evict();
+    /**
+     * Tells whether the data objects are proxies or not
+     * 
+     * @return <code>true</code> if the data objects are proxies
+     */
+    boolean isProxy(){
+        return this.proxy;
+    }
+    
+    /**
+     * Tells whether the values of transactional objects shall be retained 
+     * after the completion of a unit of work or after flushing
+     * 
+     * @return <code>true</code> if the values of transactional objects shall 
+     * be retained
+     */
+    boolean isRetainValues(){
+        return this.factory.getRetainValues();
+    }
+    
+    /**
+     * Fire an instance callback
+     *
+     * @param type
+     * @param lenient exceptions are logged rather than thrown if 
+     * <code>lenient</code> is <code>true</code>
+     * @throws ServiceException 
+     * 
+     * @throws ServiceException
+     */
+    void fireInstanceCallback (
+        DataObject_1_0 source,
+        int type,
+        boolean lenient
+    ) throws ServiceException{ 
+        if(!source.objIsInaccessible()) try {
+            source.objGetClass(); // avoid lazy loading
+            switch(type) {
+                case InstanceLifecycleEvent.CREATE:
+                    this.instanceLifecycleListeners.postCreate(
+                        new InstanceLifecycleEvent(source, type)
+                    );
+                    break;
+                case InstanceLifecycleEvent.LOAD:
+                    this.instanceLifecycleListeners.postLoad(
+                        new InstanceLifecycleEvent(source, type)
+                    );
+                    break;
+                case InstanceLifecycleEvent.STORE:
+                    this.instanceLifecycleListeners.preStore(
+                        new InstanceLifecycleEvent(source, type)
+                    );
+                    break;
+                case InstanceLifecycleEvent.CLEAR:
+                    this.instanceLifecycleListeners.preClear(
+                        new InstanceLifecycleEvent(source, type)
+                    );
+                    break;
+                case InstanceLifecycleEvent.DELETE:
+                    this.instanceLifecycleListeners.preDelete(
+                        new InstanceLifecycleEvent(source, type)
+                    );
+                    break;
+            }
+        } catch (RuntimeException exception) {
+            if(lenient) {
+                Throwables.log(exception);
+            } else {
+                throw new ServiceException(exception);
             }
         }
     }
 
-    public void clear(
+    /**
+     * Cache an object under its transient id
+     * 
+     * @param transientObjectId
+     * @param object
+     * 
+     * @return <code>null</code> if the object has been added to the cache
+     */
+    DataObject_1 putIfAbsent(
+        UUID transientObjectId,
+        DataObject_1 object
     ){
-        if(MULTITHREADED) {
-            this.unitsOfWork.clear();
-        }
-        super.clear();
+        return this.transientRegistry.putIfAbsent(
+            transientObjectId,
+            object
+        );
     }
 
+    /**
+     * Cache an object under its id
+     * 
+     * @param objectId
+     * @param object
+     * 
+     * @return <code>null</code> if the object has been added to the cache
+     */
+    DataObject_1 putIfAbsent(
+        Path objectId,
+        DataObject_1 object
+    ){
+        return this.persistentRegistry.putIfAbsent(
+            objectId,
+            object
+        );
+    }
+         
+    
     //------------------------------------------------------------------------
-    // Implements PersistenceManager
+    // Implements ObjectFactory_1_1
     //------------------------------------------------------------------------
 
     /* (non-Javadoc)
@@ -285,19 +547,42 @@ public class DataObjectManager_1
     }
 
     /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getManagedObjects()
+     */
+    @Override
+    public Set<?> getManagedObjects() {
+        return this.transientRegistry.values();
+    }
+
+    @Override
+    public void evictAll(
+    ){
+        for(Object pc : this.persistentRegistry.values()) {
+            ((Evictable)pc).evict();
+        }
+    }
+
+    /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#currentTransaction()
      */
-    public Transaction currentTransaction(
+    public UnitOfWork_1 currentTransaction(
     ) {
-        try {
-            return this.getUnitOfWork();
-        }
-        catch(Exception e) {
-            throw new JDOUserException(
-                "Unable to get transaction",
-                e,
-                this
-            );
+        if(this.unitOfWork == null) {
+            Thread thread = Thread.currentThread();
+            UnitOfWork_1 unitOfWork = this.unitsOfWork.get(thread);
+            if(unitOfWork == null) {
+                this.unitsOfWork.put(
+                    thread, 
+                    unitOfWork = new UnitOfWork_1 (
+                        this,
+                        this.connection,
+                        this.aspectSpecificContexts
+                    )
+                );
+            }
+            return unitOfWork;
+        } else {
+            return this.unitOfWork;
         }
     }
 
@@ -308,7 +593,7 @@ public class DataObjectManager_1
         Object pc
     ) {
         try {
-            ((DataObject_1)pc).objRemove();
+            ((DataObject_1)pc).objRemove(true);
         }
         catch(Exception e) {
             throw new JDOUserException(
@@ -339,7 +624,22 @@ public class DataObjectManager_1
      * @see javax.jdo.PersistenceManager#flush()
      */
     public void flush() {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        UnitOfWork_1 unitOfWork = currentTransaction();
+        try {
+            unitOfWork.flush(false);
+        } catch (ServiceException exception) {
+            unitOfWork.setRollbackOnly();
+            throw BasicException.initHolder(
+                new JDOUserException(
+                    "Flushing failed, unit or work has been marked rollback-only",
+                    BasicException.newEmbeddedExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ROLLBACK
+                    )
+                )
+            );
+        }
     }
 
     /* (non-Javadoc)
@@ -370,11 +670,12 @@ public class DataObjectManager_1
         return IGNORE_CACHE;
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object, boolean)
-     */
-    public Object getObjectById(Object oid, boolean validate) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+    public int getOptimalFetchSize() {
+        return this.optimalFetchSize;
+    }
+
+    public int getCacheThreshold() {
+        return this.cacheThreshold;
     }
 
     /* (non-Javadoc)
@@ -433,7 +734,7 @@ public class DataObjectManager_1
      * @see javax.jdo.PersistenceManager#getCopyOnAttach()
      */
     public boolean getCopyOnAttach() {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        return COPY_ON_ATTACH;
     }
 
     /* (non-Javadoc)
@@ -476,19 +777,52 @@ public class DataObjectManager_1
     }
 
     /* (non-Javadoc)
-     * @see javax.jdo.PersistenceManager#getManagedObjects()
-     */
-    @SuppressWarnings("unchecked")
-    public Set getManagedObjects() {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
-    }
-
-    /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet)
      */
-    @SuppressWarnings("unchecked")
-    public Set getManagedObjects(EnumSet<ObjectState> arg0) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+    public Set<?> getManagedObjects(
+        final EnumSet<ObjectState> states
+    ) {
+        boolean transactional = false, nonTransactional = false;
+        for(ObjectState state : states) {
+            switch(state) {
+                case TRANSIENT: 
+                case HOLLOW_PERSISTENT_NONTRANSACTIONAL:
+                    nonTransactional = true;
+                    break;
+                case TRANSIENT_CLEAN:
+                case TRANSIENT_DIRTY:
+                case PERSISTENT_NEW:
+                case PERSISTENT_CLEAN:
+                case PERSISTENT_DIRTY:
+                case PERSISTENT_DELETED:
+                case PERSISTENT_NEW_DELETED:
+                    transactional = true;
+                    break;
+                case PERSISTENT_NONTRANSACTIONAL_DIRTY:
+                    throw new JDOUnsupportedOptionException(
+                        "Unsupported optional state: " + ObjectState.PERSISTENT_NONTRANSACTIONAL_DIRTY
+                    );
+                case DETACHED_CLEAN:
+                case DETACHED_DIRTY:
+                    break; // detach not yet supported
+            }
+        }
+        if(transactional || nonTransactional) {
+            return Sets.subSet(
+                nonTransactional ? this.transientRegistry.values() : currentTransaction().getMembers(),
+                new Selector (){
+
+                    public boolean accept(Object candidate) {
+                        return
+                            candidate instanceof DataObject_1_0 &&
+                            states.contains(JDOHelper.getObjectState(candidate));
+                    }
+                    
+                }
+            );
+        } else {
+            return Collections.EMPTY_SET; // unused states only
+        }
     }
 
     /* (non-Javadoc)
@@ -496,7 +830,7 @@ public class DataObjectManager_1
      */
     @SuppressWarnings("unchecked")
     public Set getManagedObjects(Class... arg0) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        throw new UnsupportedOperationException("Unsupported because all objects are instances of the DataObject_1_0");
     }
 
     /* (non-Javadoc)
@@ -504,7 +838,7 @@ public class DataObjectManager_1
      */
     @SuppressWarnings("unchecked")
     public Set getManagedObjects(EnumSet<ObjectState> arg0, Class... arg1) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        throw new UnsupportedOperationException("Unsupported because all objects are instances of the DataObject_1_0");
     }
 
     /* (non-Javadoc)
@@ -549,11 +883,31 @@ public class DataObjectManager_1
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
-    /* (non-Javadoc)
-     * @see javax.jdo.PersistenceManager#makePersistent(java.lang.Object)
+    /**
+     * Make persistent supports attach copy only
+     * 
+     * @param pc the data object to be attached
+     * 
+     * @exception NullPointerException if pc is <code>null</code>
+     * @exception ClassCastException if pc is not an instance of <code>DataObject_1_0</code>
      */
-    public <T> T makePersistent(T arg0) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T makePersistent(T pc) {
+        DataObject_1_0 source = (DataObject_1_0) pc;
+        if(this.getCopyOnAttach() && source.jdoIsDetached()) {
+            DataObject_1 target = getObjectById(source.jdoGetObjectId());
+            if(target.jdoIsDirty()) {
+                throw new JDOUserException(
+                    "This object has already been modified in the current transaction",
+                    pc
+                );
+            }
+            target.digest = source.jdoGetVersion();
+            return (T) target;
+        } else {
+            throw new UnsupportedOperationException("The data object manager supports CopyOnAttach only");
+        }
     }
 
     /* (non-Javadoc)
@@ -576,9 +930,13 @@ public class DataObjectManager_1
     @SuppressWarnings("unchecked")
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
-        Class... classes) {
-        // TODO Auto-generated method stub
-
+        Class... classes
+    ) {
+        if(classes == null || classes.length == 0) {
+            this.instanceLifecycleListeners.addInstanceLifecycleListener(listener);
+        } else {
+            throw new JDOUnsupportedOptionException("The data object manager expects the classes argument to be null");
+        } 
     }
 
     /* (non-Javadoc)
@@ -605,8 +963,10 @@ public class DataObjectManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#setCopyOnAttach(boolean)
      */
-    public void setCopyOnAttach(boolean arg0) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+    public void setCopyOnAttach(boolean flag) {
+        if(flag != COPY_ON_ATTACH) throw new JDOUnsupportedOptionException(
+            "The current implementation restricts copyOnAttach to " + COPY_ON_ATTACH
+        );
     }
 
     /* (non-Javadoc)
@@ -659,8 +1019,7 @@ public class DataObjectManager_1
      * @see javax.jdo.PersistenceManager#refreshAll(java.lang.Object[])
      */
     public void refreshAll(Object... pcs) {
-        // TODO Auto-generated method stub
-
+        PersistenceManagers.refreshAll(this, pcs);
     }
 
     /* (non-Javadoc)
@@ -703,11 +1062,33 @@ public class DataObjectManager_1
      * @see javax.jdo.PersistenceManager#getUserObject(java.lang.Object)
      */
     public Object getUserObject(Object key) {
-        return 
-            AspectObjectAcessor.class == key ? this.aspectSpecificContexts :
-            null;
+        return SharedObjects.isKey(key) ? this.sharedObjects : getPlugInObject(key);
     }
 
+    /**
+     * Retrieve the plug-in provided user objects
+     * 
+     * @param key the user object's key
+     * 
+     * @return the plug-in provided user object
+     */
+    protected Object getPlugInObject(
+        Object key
+    ){
+        if(key == VirtualObjects_2_0.class) {
+            Object nativeConnection = this.jdoConnection.getNativeConnection();
+            return nativeConnection instanceof VirtualObjects_2_0 ? nativeConnection : null;
+        } else {
+            for(PlugIn_1_0 plugIn : DataObjectManager_1.this.plugIns) {
+                Object userObject = plugIn.getUserObject(key);
+                if(userObject != null) {
+                    return userObject;
+                }
+            }
+        }
+        return null;
+    }
+    
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeNontransactional(java.lang.Object)
      */
@@ -768,7 +1149,7 @@ public class DataObjectManager_1
      * @see javax.jdo.PersistenceManager#makeTransient(java.lang.Object)
      */
     public void makeTransient(Object pc) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        this.persistentRegistry.values().remove(pc);
     }
 
     /* (non-Javadoc)
@@ -806,7 +1187,19 @@ public class DataObjectManager_1
      */
     @SuppressWarnings("unchecked")
     public Query newNamedQuery(Class cls, String queryName) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        if(ASPECT_QUERY.equals(queryName)) {
+            return new Aspect_1(this);
+        } else throw BasicException.initHolder(
+            new IllegalArgumentException(
+                "Unsupported query name",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    new BasicException.Parameter("actual", queryName),
+                    new BasicException.Parameter("supported", ASPECT_QUERY)
+                )
+            )
+        );
     }
 
     /* (non-Javadoc)
@@ -915,17 +1308,22 @@ public class DataObjectManager_1
     public void refresh(
         Object pc
     ) {
-        try {
-            if(pc instanceof DataObject_1) {
-                ((DataObject_1)pc).objRefresh();
+        if(pc instanceof DataObject_1) {
+            DataObject_1 dataObject = (DataObject_1) pc;
+            if(dataObject.jdoIsPersistent() && !dataObject.jdoIsNew()) try {
+                dataObject.unconditionalEvict();
+                Container_1 container = dataObject.getContainer(true);
+                if(container != null) {
+                    container.evict();
+                }
+                dataObject.unconditionalLoad();
+            } catch(ServiceException e) {
+                throw new JDOUserException(
+                    "Unable to refresh object",
+                    e,
+                    this
+                );                
             }
-        }
-        catch(ServiceException e) {
-            throw new JDOUserException(
-                "Unable to refresh object",
-                e,
-                this
-            );                
         }
     }
 
@@ -933,7 +1331,10 @@ public class DataObjectManager_1
      * @see javax.jdo.PersistenceManager#refreshAll()
      */
     public void refreshAll() {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        UnitOfWork_1 unitOfWork = currentTransaction();
+        refreshAll(
+            unitOfWork.isActive() ? unitOfWork.getMembers() : this.persistentRegistry.values()
+        );
     }
 
     /* (non-Javadoc)
@@ -941,22 +1342,23 @@ public class DataObjectManager_1
      */
     @SuppressWarnings("unchecked")
     public void refreshAll(Collection pcs) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        PersistenceManagers.refreshAll(this, pcs);
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refreshAll(javax.jdo.JDOException)
      */
     public void refreshAll(JDOException jdoe) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        PersistenceManagers.refreshAll(this, jdoe);
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#removeInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener)
      */
     public void removeInstanceLifecycleListener(
-        InstanceLifecycleListener listener) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        InstanceLifecycleListener listener
+    ) {
+        this.instanceLifecycleListeners.removeInstanceLifecycleListener(listener);
     }
 
     /* (non-Javadoc)
@@ -1007,7 +1409,7 @@ public class DataObjectManager_1
      * @see javax.jdo.PersistenceManager#setDetachAllOnCommit(boolean)
      */
     public void setDetachAllOnCommit(boolean flag) {
-        if(flag != DETACH_ALL_ON_COMMIT) throw new UnsupportedOperationException(
+        if(flag != DETACH_ALL_ON_COMMIT) throw new JDOUnsupportedOptionException(
             "The current implementation restricts detachAllOnCommit to " + DETACH_ALL_ON_COMMIT
         );
     }
@@ -1016,7 +1418,7 @@ public class DataObjectManager_1
      * @see javax.jdo.PersistenceManager#setIgnoreCache(boolean)
      */
     public void setIgnoreCache(boolean flag) {
-        if(flag != IGNORE_CACHE) throw new UnsupportedOperationException(
+        if(flag != IGNORE_CACHE) throw new JDOUnsupportedOptionException(
             "The current implementation restricts ignoreCache to " + IGNORE_CACHE
         );
     }
@@ -1025,11 +1427,21 @@ public class DataObjectManager_1
      * @see javax.jdo.PersistenceManager#setMultithreaded(boolean)
      */
     public void setMultithreaded(boolean flag) {
-        if(flag != MULTITHREADED) throw new UnsupportedOperationException(
-            "The current implementation restricts multithreaded to " + MULTITHREADED
-        );
-        
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        if(flag) {
+            this.unitOfWork = null;
+            if(this.unitsOfWork == null) {
+                this.unitsOfWork = new ConcurrentHashMap<Thread, UnitOfWork_1>();
+            }
+        } else {
+            this.unitsOfWork = null;
+            if(this.unitOfWork == null) {
+                this.unitOfWork = new UnitOfWork_1 (
+                    this,
+                    this.connection,
+                    this.aspectSpecificContexts
+                );
+            }
+        }
     }
 
     /* (non-Javadoc)
@@ -1043,7 +1455,7 @@ public class DataObjectManager_1
      * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getFeatureReplacingObjectById(java.lang.Object, java.lang.String)
      */
     public Object getFeatureReplacingObjectById(
-        Object objectId,
+        UUID objectId,
         String featureName
     ) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
@@ -1065,7 +1477,10 @@ public class DataObjectManager_1
         if(!isClosed()) {
             // TODO ?   this.connection.close();
             this.connection = null;
-            clear();      
+            this.connection2 = null;
+            this.instanceLifecycleListeners.close();
+            this.transientRegistry.close();
+            this.persistentRegistry.close();
         }
     }
 
@@ -1086,89 +1501,122 @@ public class DataObjectManager_1
         );  
     }
 
-    /**
-     * Return the unit of work associated with the current basic accessor.
-     *
-     * @return  the unit of work
-     * @throws ServiceException 
-     * @throws ServiceException 
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object, boolean)
      */
-    UnitOfWork_1 getUnitOfWork(
-    ) throws ServiceException{
-        this.validateState();
-        if(MULTITHREADED) {
-            Thread thread = Thread.currentThread();
-            UnitOfWork_1 unitOfWork = this.unitsOfWork.get(thread);
-            if(unitOfWork == null) {
-                this.unitsOfWork.put(
-                    thread,
-                    unitOfWork = newUnitOfWork()
-                );
-            }
-            return unitOfWork;
-        } 
-        else {
-            return this.unitOfWork;
-        }
+    public DataObject_1 getObjectById(
+        Object oid
+    ) {
+        return getObjectById(oid, true);
     }
 
-    /**
-     * Get an object from the object factory.
-     * <p>
-     * If an object with the given access path is already in the cache it is
-     * returned, otherwise a new object is returned.
-     *
-     * @param       accessPath
-     *              Access path of object to be retrieved.
-     *
-     * @return      A persistent object
-     *
-     * @exception   ServiceException    ILLEGAL_STATE
-     *              if the object factory is closed
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object, boolean)
      */
-    public Object getObjectById(
-        Object accessPath
+    public DataObject_1 getObjectById(
+        Object objectId, 
+        boolean validate
     ) {
-        try {
-            validateState();
-            return accessPath == null ?
-                null :
-                    accessPath instanceof Path ?
-                        ((DataObject_1)this.marshal(accessPath)) :
-                            ((DataObject_1)this.marshal(new Path(accessPath.toString())));
-        }
-        catch(Exception e) {
-            throw new JDOUserException(
-                "Unable to get object",
-                e,
-                this
+        if(objectId instanceof UUID) {
+            return this.transientRegistry.get((UUID)objectId);
+        } else if(objectId instanceof Path) {
+            Path xri = (Path) objectId;
+            try {
+                DataObject_1 object = this.persistentRegistry.get(xri);
+                if(object == null) {
+                    Path id = new Path(xri);
+                    for(
+                        int i = id.size();
+                        i > 6;
+                    ){
+                        id.remove(--i);
+                        id.remove(--i);
+                        DataObject_1_0 anchestor = this.persistentRegistry.get(id);
+                        if(
+                            anchestor != null &&
+                            anchestor.jdoIsNew()
+                        ) {
+                            throw BasicException.initHolder(
+                                new JDOObjectNotFoundException(
+                                    "There exists no object with the given id while one of its anchestors is new",
+                                    BasicException.newEmbeddedExceptionStack(
+                                        BasicException.Code.DEFAULT_DOMAIN,
+                                        BasicException.Code.NOT_FOUND,
+                                        new BasicException.Parameter("xri", xri.toXRI())
+                                    )
+                                )
+                            );
+                        }
+                    }
+                    object = new DataObject_1(
+                        this,
+                        xri,
+                        null, // transientObjectId
+                        null // objectClass
+                    );
+                    DataObject_1 newObject = validate ? object.assertObjectIsAccessible(false) : object;
+                    if(object == newObject) {
+                        DataObject_1 concurrent = this.persistentRegistry.putIfAbsent(xri, object); 
+                        if(concurrent != null) {
+                            object = concurrent;
+                        }
+                    } else {
+                        this.persistentRegistry.put(xri, object = newObject);
+                    }
+                } else if(validate) {
+                    object.assertObjectIsAccessible(false);
+                }
+                return object;
+            } catch(ServiceException exception) {
+                throw exception.getExceptionCode() == BasicException.Code.NOT_FOUND ? new JDOObjectNotFoundException(
+                    "Requested object not found in the data store",
+                    exception
+                ) : new JDOUserException(
+                    "Unable to retrieve the requested object from the data store",
+                    exception
+                );
+            } catch(JDOException exception) {
+                throw exception;
+            } catch(RuntimeException exception) {
+                throw new JDOUserException(
+                    "Unable to get object",
+                    exception
+                );
+            }
+        } else {
+            throw BasicException.initHolder(
+                objectId == null ? new JDOFatalUserException(
+                    "Null Object Id",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("expected", Path.class.getName())
+                    )
+                ) :  new JDOFatalUserException(
+                    "Unsupported Object Id Class",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_SUPPORTED,
+                        new BasicException.Parameter("expected", Path.class.getName()),
+                        new BasicException.Parameter("actual", objectId.getClass().getName())
+                    )
+                )
             );
         }
     }
 
-    /**
-     * Create an object
-     *
-     * @param       objectClass
-     *              The model class of the object to be created
-     *
-     * @return      an object
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObjectManager_1_0#putInstance(java.lang.String)
      */
     public DataObject_1_0 newInstance(
-        String objectClass
-    ) throws ServiceException{
+        String objectClass, 
+        UUID transientObjectId
+    ) throws ServiceException {
         validateState();
-        if(getModel().isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable")){
-            Path transientObjectId = StateCapables.newTransientObjectId();
-            DataObject_1 object = new DataObject_1(objectClass, this, transientObjectId);
-            super.cacheObject(transientObjectId, object);  
-            return object;
-        } else {
-            return new DataObject_1(objectClass, this, null);
-        }
+        return new DataObject_1(this, null, transientObjectId, objectClass);
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements ReplyListener
     //------------------------------------------------------------------------
@@ -1178,8 +1626,8 @@ public class DataObjectManager_1
      */
     public DataObject_1_0 receive(MappedRecord record) {
         try {
-            ObjectHolder_2Facade facade = ObjectHolder_2Facade.newInstance(record);
-            DataObject_1 dataObject = (DataObject_1) getObjectById(facade.getPath());
+            Object_2Facade facade = Object_2Facade.newInstance(record);
+            DataObject_1 dataObject = getObjectById(facade.getPath(), false);
             dataObject.postLoad(record);
             return dataObject;
         } catch (Exception exception) {
@@ -1201,20 +1649,23 @@ public class DataObjectManager_1
      */
     void invalidate(
         Path accessPath, 
-        boolean makeInaccessable
+        boolean makeNonTransactional
     ) throws ServiceException {
         if(isClosed()) return;
-        ((DataObject_1)marshal(accessPath.getPrefix(accessPath.size() - 2))).setExistence(
-            accessPath, 
-            false
-        );
-        for (
-            Iterator<Entry<Object, Object>> i = super.mapping.entrySet().iterator();
+        DataObject_1 parent = (DataObject_1)marshal(accessPath.getPrefix(accessPath.size() - 2)); 
+        if(parent != null) {
+            parent.setExistence(
+                accessPath, 
+                false
+            );
+        }
+        for(
+            Iterator<?> i = this.persistentRegistry.values().iterator();
             i.hasNext();
         ){
-            Map.Entry<?,?> e = i.next();
-            if (((Path)e.getKey()).startsWith(accessPath)){
-                ((DataObject_1)e.getValue()).invalidate(makeInaccessable);
+            DataObject_1 pc = (DataObject_1) i.next();
+            if(pc.jdoIsPersistent() && pc.jdoGetObjectId().startsWith(accessPath)){
+                pc.invalidate(makeNonTransactional);
                 i.remove();
             }
         }
@@ -1224,62 +1675,26 @@ public class DataObjectManager_1
      * @see org.openmdx.compatibility.base.dataprovider.transport.spi.Manager_1_0#move(org.openmdx.compatibility.base.naming.Path, org.openmdx.compatibility.base.naming.Path)
      */
     void move(
-        Path path,
-        Path newValue
+        UUID transientObjectId,
+        Path objectId
     ){
-        if(isClosed()){
-            path.setTo(newValue);   
-        } else {
-            Object object = super.mapping.remove(path);
-            path.setTo(newValue);
-            if(object != null) cacheObject(path, object);
+        if(!isClosed()){
+            DataObject_1 object = this.transientRegistry.get(transientObjectId);
+            if(object != null) {
+                this.persistentRegistry.putIfAbsent(objectId, object);
+            }
         }
     }
 
     boolean containsKey(
         Path path
     ){
-        return mapping.containsKey(path);
+        return this.persistentRegistry.get(path) != null;
     }
 
     //------------------------------------------------------------------------
     // Extends CachingMarshaller
     //------------------------------------------------------------------------
-
-    /**
-     * Marshals path objects to Object_1_0 objects.
-     *
-     * @param  source    The object to be marshalled
-     * 
-     * @return           The marshalled object
-     * 
-     * @exception        ServiceException
-     *                   Object can't be marshalled
-     */
-    protected Object createMarshalledObject (
-        Object source
-    ) throws ServiceException {
-        Path objectId = (Path) source;
-        Path id = new Path(objectId);
-        Parents: for(
-            int i = id.size();
-            i > 6;
-        ){
-            id.remove(--i);
-            id.remove(--i);
-            DataObject_1_0 p = (DataObject_1_0) this.mapping.get(id);
-            if(p == null) {
-                break Parents;
-            }
-            if(p.jdoIsNew()) {
-                return null;
-            }
-        }
-        return new DataObject_1(
-            objectId,
-            this
-        );
-    }
 
     /**
      * Marshals an object
@@ -1291,11 +1706,12 @@ public class DataObjectManager_1
      * @exception        ServiceException
      *                   DATA_CONVERSION: Object can't be marshalled
      */
+    @Override
     public Object marshal (
         Object source
     ) throws ServiceException{
         validateState();
-        return source instanceof Path ? super.marshal(source) : source;
+        return source instanceof Path ? getObjectById(source, false) : source;
     }
 
     /**
@@ -1308,6 +1724,7 @@ public class DataObjectManager_1
      * @exception       ServiceException
      *                  Object can't be unmarshalled
      */
+    @Override
     public Object unmarshal (
         Object source
     ) throws ServiceException{
@@ -1321,9 +1738,7 @@ public class DataObjectManager_1
                     DataObject_1_0 core = (DataObject_1_0) object.objGetValue("core");
                     if(core != null) {
                         Path corePath = core.jdoGetObjectId(); 
-                        if(!StateCapables.isCoreObject(corePath)) {
-                            return corePath;
-                        }
+                        return corePath;
                     }
                 }
             }
@@ -1335,103 +1750,48 @@ public class DataObjectManager_1
 
 
     //------------------------------------------------------------------------
-    // Class members
-    //------------------------------------------------------------------------
-
-    /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = 3977865059621680436L;
-
-    /**
-     *  
-     */
-    private Model_1_0 model = null;
-
-    /**
-     *
-     */ 
-    private UnitOfWork_1 unitOfWork;
-
-    /**
-     *
-     */ 
-    private ConcurrentMap<Thread,UnitOfWork_1> unitsOfWork; 
-
-    /**
-     *
-     */
-    Connection connection;
-
-    /**
-     * Non-transactional interaction
-     */
-    private Interaction interaction2;
-
-    /**
-     * 
-     */
-    private final TransactionManager optimisticTransaction;
-
-    /**
-     * The persistence manager's fetch groups
-     */
-    private final Map<String,Map<Class<?>,FetchGroup>> fetchGroups = new HashMap<String,Map<Class<?>,FetchGroup>>();
-
-    /**
-     * The persistence manager's fetch plan
-     */
-    private final FetchPlan fetchPlan = new StandardFetchPlan();
-
-    /**
-     * The Apsect Specific Context instance 
-     */
-    private final AspectObjectDispatcher aspectSpecificContexts = new AspectObjectDispatcher();
-
-    //------------------------------------------------------------------------
     // Class AspectObjectDispatcher
     //------------------------------------------------------------------------
 
     /**
      * Aspect Object Dispatcher
      */
-    class AspectObjectDispatcher implements AspectObjectAcessor {
+    class AspectObjectDispatcher implements SharedObjects.Aspects {
 
         /**
          * Retrueve the object's state
          * 
-         * @param objectId
+         * @param transactionalObjectId
          * @param optional
          * 
          * @return the object's state
          */
         private TransactionalState_1 getState(
-            Object objectId,
+            Object transactionalObjectId,
             boolean optional
         ){
-            DataObject_1 dataObject = (DataObject_1) getObjectById(objectId);
+            DataObject_1 dataObject = getObjectById(transactionalObjectId, false);
             if(dataObject == null) throw BasicException.initHolder(
                 new JDOFatalInternalException(
-                    AspectObjectAcessor.class.getSimpleName() + " access failure: Data object not found",
+                    "Aspect object access failure: Data object not found",
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
-                        new BasicException.Parameter("objectId", objectId)
+                        new BasicException.Parameter("objectId", transactionalObjectId)
                     )
                 )
             );
             try {
                 return dataObject.getState(optional);
-            } 
-            catch (ServiceException exception) {
+            } catch (JDOException exception) {
                 throw BasicException.initHolder(
                     new JDOFatalInternalException(
-                        AspectObjectAcessor.class.getSimpleName() + " access failure: Transactional state inaccessable",
+                        "Aspect object access failure: Transactional state inaccessable",
                         BasicException.newEmbeddedExceptionStack(
                             exception,
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.ILLEGAL_STATE,
-                            new BasicException.Parameter("objectId", objectId)
+                            new BasicException.Parameter("objectId", transactionalObjectId)
                         )
                     )
                 );
@@ -1442,24 +1802,19 @@ public class DataObjectManager_1
          * @see org.openmdx.base.persistence.spi.AspectSpecificContexts#get(java.lang.Object, java.lang.Class)
          */
         public Object get(
-            Object objectId, 
+            UUID transactionalObjectId, 
             Class<?> aspect
         ) {
-            try {
-                UnitOfWork_1 unitOfWork = DataObjectManager_1.this.getUnitOfWork();
-                if(unitOfWork.isActive()) {
-                    TransactionalState_1 state = this.getState(objectId, true);
-                    return state == null ? null : state.getContext(aspect);
-                }
-                else {
-                    Map<Class<?>,Object> contexts = this.sharedContexts.get(objectId);
-                    return contexts == null ?
-                        null :
-                        contexts.get(aspect);
-                }
+            UnitOfWork_1 unitOfWork = DataObjectManager_1.this.currentTransaction();
+            if(unitOfWork.isActive()) {
+                TransactionalState_1 state = this.getState(transactionalObjectId, true);
+                return state == null ? null : state.getContext(aspect);
             }
-            catch(Exception e) {
-                throw new RuntimeServiceException(e);
+            else {
+                Map<Class<?>,Object> contexts = this.sharedContexts.get(transactionalObjectId);
+                return contexts == null ?
+                    null :
+                    contexts.get(aspect);
             }
         }
 
@@ -1467,31 +1822,26 @@ public class DataObjectManager_1
          * @see org.openmdx.base.persistence.spi.AspectSpecificContexts#put(java.lang.Object, java.lang.Class, java.lang.Object)
          */
         public void put(
-            Object objectId, 
+            UUID transactionalObjectId, 
             Class<?> aspect, 
             Object context
         ) {
-            try {
-                UnitOfWork_1 unitOfWork = DataObjectManager_1.this.getUnitOfWork();
-                if(unitOfWork.isActive()) {
-                    this.getState(objectId, false).setContext(aspect, context);
-                }
-                else {
-                    Map<Class<?>,Object> contexts = this.sharedContexts.get(objectId);
-                    if(contexts == null) {
-                        this.sharedContexts.putIfAbsent(
-                            objectId,
-                            contexts = new IdentityHashMap<Class<?>,Object>()
-                        );
-                    }
-                    contexts.put(
-                        aspect,
-                        context
+            UnitOfWork_1 unitOfWork = DataObjectManager_1.this.currentTransaction();
+            if(unitOfWork.isActive()) {
+                this.getState(transactionalObjectId, false).setContext(aspect, context);
+            }
+            else {
+                Map<Class<?>,Object> contexts = this.sharedContexts.get(transactionalObjectId);
+                if(contexts == null) {
+                    this.sharedContexts.putIfAbsent(
+                        transactionalObjectId,
+                        contexts = new IdentityHashMap<Class<?>,Object>()
                     );
                 }
-            }
-            catch(Exception e) {
-                throw new RuntimeServiceException(e);
+                contexts.put(
+                    aspect,
+                    context
+                );
             }
         }
 
@@ -1499,26 +1849,21 @@ public class DataObjectManager_1
          * @see org.openmdx.base.persistence.spi.AspectSpecificContexts#remove(java.lang.Object, java.lang.Class)
          */
         public void remove(
-            Object objectId, 
+            UUID objectId, 
             Class<?> aspect
         ) {
-            try {
-                UnitOfWork_1 unitOfWork = DataObjectManager_1.this.getUnitOfWork();
-                if(unitOfWork.isActive()) {
-                    TransactionalState_1 state = getState(objectId, true);
-                    if(state != null) {
-                        state.removeContext(aspect);
-                    }
-                }
-                else {
-                    Map<Class<?>,Object> contexts = this.sharedContexts.get(objectId);
-                    if(contexts != null) {
-                        contexts.remove(aspect);
-                    }
+            UnitOfWork_1 unitOfWork = DataObjectManager_1.this.currentTransaction();
+            if(unitOfWork.isActive()) {
+                TransactionalState_1 state = getState(objectId, true);
+                if(state != null) {
+                    state.removeContext(aspect);
                 }
             }
-            catch(Exception e) {
-                throw new RuntimeServiceException(e);
+            else {
+                Map<Class<?>,Object> contexts = this.sharedContexts.get(objectId);
+                if(contexts != null) {
+                    contexts.remove(aspect);
+                }
             }
         }
 
@@ -1531,7 +1876,7 @@ public class DataObjectManager_1
         //-------------------------------------------------------------------
         // Members
         //-------------------------------------------------------------------
-        private ConcurrentMap<Object,Map<Class<?>,Object>> sharedContexts = new ConcurrentHashMap<Object,Map<Class<?>,Object>>();
+        private ConcurrentMap<UUID,Map<Class<?>,Object>> sharedContexts = new ConcurrentHashMap<UUID,Map<Class<?>,Object>>();
     }
 
 }

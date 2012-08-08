@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Container.java,v 1.2 2009/04/02 16:51:32 hburger Exp $
+ * Name:        $Id: Container.java,v 1.3 2010/01/03 03:33:40 hburger Exp $
  * Description: Container 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/02 16:51:32 $
+ * Date:        $Date: 2010/01/03 03:33:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,8 +81,7 @@ public interface Container<E>
     );
 
     /**
-     * This method should only be used to remove an object itself from a transient
-     * container.
+     * This method should only be used to remove a transient object from its container.
      * <p>
      * <em>Note:<br>
      * It can never be used to remove an object by specifying its qualifier!

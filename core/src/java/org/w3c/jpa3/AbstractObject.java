@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractObject.java,v 1.4 2009/03/03 15:21:42 hburger Exp $
- * Description: Object Relational Mapping 
- * Revision:    $Revision: 1.4 $
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: AbstractObject.java,v 1.16 2010/04/09 10:38:24 wfro Exp $
+ * Description: JPA AbstractObject 
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/03 15:21:42 $
+ * Date:        $Date: 2010/04/09 10:38:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2007, OMEX AG, Switzerland
+ * Copyright (c) 2006-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,21 +52,17 @@ package org.w3c.jpa3;
 
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
-import java.util.AbstractMap;
 import java.util.AbstractSet;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -74,265 +70,113 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
-import javax.jdo.Query;
 
-import org.oasisopen.jdo2.Identifiable;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.CharacterLargeObject;
-import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 
 /**
  * Object Relational Mapping
  */
-@SuppressWarnings("serial")
-public abstract class AbstractObject
-    extends Identifiable
-    implements Serializable 
-{
+public abstract class AbstractObject implements Serializable {
 
     /**
-     * Retrieve the slices.
-     * <p>
-     * This method must be overridden by the first subclass with multivalued attributes.
-     * 
-     * @return Returns the openmdxjdo$arrays.
+     * Constructor 
      */
-    protected <E extends Slice> SortedMap<Integer,E> openmdxjdoGetSlices(
+    protected AbstractObject(
     ){
-    	return null;
-    }
-
-    /**
-     * Create a new map instance
-     * 
-     * @return a map instance
-     */
-    protected <T> Map<String,T> openmdxjdoNewMap(
-    ){
-        return new HashMap<String,T>();
+        super();
     }
     
     /**
-     * Create a new array slice instance
-     * <p>
-     * This method must be overridden by all subclasses with multivalued attributes.
-     * 
-     * @return a new array slice instance
+     * Implements <code>Serializable</code>
      */
-    protected Slice openmdxjdoNewSlice(
-        int index
+    private static final long serialVersionUID = -1472728633796611343L;
+
+    /**
+     * The object's state
+     */
+    transient ObjectState openmdxjdoState = ObjectState.TRANSIENT;
+
+    /**
+     * @serial Opaque value to support optimistic locking
+     */
+    transient Object openmdxjdoVersion;
+    
+    /**
+     * Retrieve the <code>openmdxjdoIdentity</code> field value
+     * 
+     * @return the <code>openmdxjdoIdentity</code> field value
+     */
+    protected abstract String getOpenmdxjdoIdentity();
+
+    /**
+     * Replace the <code>openmdxjdoIdentity</code> field value
+     * 
+     * @param identity the <code>openmdxjdoIdentity</code> field value
+     */
+    protected abstract void setOpenmdxjdoIdentity(
+        String identity
+    );
+    
+    /**
+     * Mark the object as dirty
+     */
+    public void openmdxjdoMakeDirty(
     ){
-        return null;
+        if(this.openmdxjdoState == ObjectState.DETACHED_CLEAN) {
+            this.openmdxjdoState = ObjectState.DETACHED_DIRTY;
+        }
     }
     
     /**
-     * Create a set view for a given field
-     * @param field the collection's field id
+     * Replace a collection's content
      * 
-     * @return the requested <code>Set</code>
-     * 
-     * @exception java.lang.IllegalArgumentException
-     *            in case of an invalid field id
-     */
-    protected <E> Set<E> openmdxjdoGetSet(int field) {
-        return new SlicedSet<E>(field);
-    }
-
-    /**
-     * Create a list view for a given field
-     * @param field the <code>List</code>'s field id
-     * 
-     * @return the requested <code>List</code>
-     * 
-     * @exception java.lang.IllegalArgumentException
-     *            in case of an invalid field id
-     */
-    protected <E> List<E> openmdxjdoGetList(int field) {
-        return new SlicedList<E>(field);
-    }
-
-    /**
-     * Replace the values of a given Collection.
-     * 
-     * @param <E>
-     * @param collection the Collection to be modified
-     * @param array the value to be added
+     * @param target
+     * @param source
      */
     @SuppressWarnings("unchecked")
-    protected final <E> void openmdxjdoSetCollection(
-        Collection<E> collection,
-        Object array
+    protected final static <E> void openmdxjdoSetCollection(
+        Collection<E> target,
+        Object source
     ) {
-        collection.clear();
-        for(
-            int index = 0, length = Array.getLength(array);
-            index < length;
-            index++
-        ){
-            collection.add(
-                (E)Array.get(array, index)
-            );
+        target.clear();
+        if(source != null) {
+            for(
+                int index = 0, length = Array.getLength(source);
+                index < length;
+                index++
+            ){
+                target.add(
+                    (E)Array.get(source, index)
+                );
+            }
         }
     }
 
     /**
-     * Replace the values of a given SparseArray.
+     * Replace a sparse arrays's content
      * 
-     * @param <E>
-     * @param array the SparseArray to be modified
-     * @param value the value(s) to be added
+     * @param target
+     * @param source
      */
-    protected final <E> void openmdxjdoSetArray(
-        SparseArray<E> array,
-        Map<Integer, ? extends E> value
+    protected final static <E> void openmdxjdoSetArray(
+        SparseArray<E> target,
+        Map<Integer, ? extends E> source
     ) {
-        array.clear();
-        array.putAll(value);
+        target.clear();
+        if(source != null) {
+            target.putAll(source);
+        }
     }
         
     /**
-     * Create a sparse array view for a given field
-     * @param field the collection's field id
-     * 
-     * @return the requested sparse array
-     * 
-     * @exception java.lang.IllegalArgumentException
-     *            in case of an invalid field id
-     */
-    protected final <E> SparseArray<E> openmdxjdoGetSparseArray(
-        int field
-    ) {
-        return SortedMaps.asSparseArray(
-            new SlicedMap<E>(field)
-        );
-    }
-
-    /**
-     * Retrieve a multivalued attribute's cardinality
-     * 
-     * @param field the attributes's field id
-     * 
-     * @return the cardinality of the corresponding attribute
-     * 
-     * @exception java.lang.IllegalArgumentException
-     *            in case of an invalid field id
-     */
-    protected int openmdxjdoGetSize(int field) {
-        throw new IllegalArgumentException(
-            "There is no multivalued attribute with index " + field
-        );
-    }
-
-    /**
-     * Set a multivalued attribute's cardinality
-     * 
-     * @param field the attributes's field id
-     * @param size the multivalued attribute's cardinality
-     * 
-     * @exception java.lang.IllegalArgumentException
-     *            in case of an invalid field id
-     */
-    protected void openmdxjdoSetSize(int field, int size) {
-        throw new IllegalArgumentException(
-            "There is no multivalued attribute with index " + field
-        );
-    }
-
-    /**
-     * Retrieve a value of a multivalued attribute
-     * 
-     * @param field
-     * @param index
-     * 
-     * @return the requested value 
-     * 
-     * @throws NullPointerException if the calling class does not support 
-     * multivalued attributes, i.e. if <code>openmdxjdoGetSlices()</code> 
-     * has not been overridden properly.
-     */
-    final Object openmdxjdoGetValue(int field, int index) {
-        Slice slice = openmdxjdoGetSlices().get(index);
-        return slice == null ? null : slice.getValue(field);
-    }
-
-    /**
-     * Set a value of a multivalued attribute
-     * 
-     * @param field
-     * @param index
-     * @param value
-     * 
-     * @return the previous value
-     * 
-     * @throws NullPointerException if the calling class does not support 
-     * multivalued attributes, i.e. if <code>openmdxjdoGetSlices()</code> or 
-     * <code>openmdxjdoNewSlice()</code> has not been overridden properly.
-     */
-    final Object openmdxjdoSetValue(
-		int field, 
-		int index, 
-		Object value
-   ) {
-        SortedMap<Integer, Slice> slices = openmdxjdoGetSlices(); 
-        Slice slice = slices.get(index);
-        if(value != null && slice == null) {
-            slices.put(
-                index, 
-                slice = openmdxjdoNewSlice(index)
-            );
-        }
-        if(slice == null) {
-            return null;
-        } else {
-            Object old = slice.getValue(field);
-            slice.setValue(field, value);
-            return old;
-        }
-    }
-
-    /**
-     * Navigate through a containment reference
-     * 
-     * @param objectClass
-     * @param queryName
-     * @param mixinParent
-     * @param parent
-     * 
-     * @return the set of children
-     */
-    protected static final <T> Collection<T> openmdxjdoGetObjectsByParent(
-        Class<T> objectClass, String queryName,
-        boolean mixinParent,  Object parent
-    ){
-        return new ResultSet<T>(
-            JDOHelper.getPersistenceManager(parent).newNamedQuery(objectClass, queryName),
-            mixinParent ? openmdxjdoGetObjectId(parent) : parent
-        );
-    }
-
-    /**
-     * Validate elements to be added
-     * 
-     * @param element
-     * 
-     * @exception NullPointerException if the element is 
-     * <code>null</code>
-     */
-    protected static final void openmdxjdoValidateElement(Object element){
-        if(element == null) throw new NullPointerException(
-            "Elements may not be null"
-        );
-    }
-    
-    /**
-     * Convert a binary large object to a byte array
+     * Converts a binary large object into a byte array
      * 
      * @param largeObject
      * 
-     * @return the large object's content
+     * @return the large object's byte[] representation
      */
     protected static final byte[] openmdxjdoToArray(
         BinaryLargeObject largeObject
@@ -360,11 +204,11 @@ public abstract class AbstractObject
     }
     
     /**
-     * Convert a character large object to a character array
+     * Converts a character large object into a character array
      * 
      * @param largeObject
      * 
-     * @return the large object's content
+     * @return the large object's char[] representation
      */
     protected static final char[] openmdxjdoToArray(
         CharacterLargeObject largeObject
@@ -390,169 +234,991 @@ public abstract class AbstractObject
             );
         }
     }
+
+    
+    //------------------------------------------------------------------------
+    // Implements <code>Serializable</code>
+    //------------------------------------------------------------------------
     
     /**
-     * Creates a class name
+     * Serialize transient field
      * 
-     * @param components the class' components
+     * @param out serialization stream
      * 
-     * @return an unmodifiable list containing the components
+     * @throws IOException
      */
-    protected static final List<String> openmdxjdoClassName(
-        String... components
-    ){
-        return Collections.unmodifiableList(Arrays.asList(components));
+    private void writeObject(
+        ObjectOutputStream out
+    ) throws IOException {
+        out.writeObject(this.openmdxjdoState); 
+        out.writeObject(this.openmdxjdoVersion); 
     }
+
+    /**
+     * De-serialize transient field
+     * 
+     * @param in de-serialization stream
+     * 
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void readObject(
+        java.io.ObjectInputStream in
+    ) throws IOException, ClassNotFoundException {
+        this.openmdxjdoState = (ObjectState) in.readObject();
+        this.openmdxjdoVersion = in.readObject();
+    }
+
+
+    //------------------------------------------------------------------------
+    // Class SlicedSet
+    //------------------------------------------------------------------------
     
     /**
-     * Slice base class
+     * Sliced Set
      */
-    @SuppressWarnings("serial")
-    public static class Slice
-        implements Serializable
-    {
+    protected abstract static class SlicedSet<E,S> extends AbstractSet<E> {
 
         /**
          * Constructor 
+         *
+         * @param slices
          */
-        protected Slice(
+        protected SlicedSet(
+           SortedMap<Integer,S> slices 
         ) {
+            this.slices = slices;
         }
 
         /**
-         * Retrieve the number of fields in a given class and their superclasses.
-         * 
-         * @return the number of fields in a given class and their superclasses
+         * The slice holder
          */
-        protected static int openmdxjdoFieldCount(){
-            return 0;
+        private final SortedMap<Integer,S> slices;
+        
+
+        /**
+         * Create a slice
+         * 
+         * @param index the index of the slice
+         * 
+         * @return a new slice
+         */
+        protected abstract S newSlice(
+            int index
+        );
+        
+        /**
+         * Retrieve the value at the given index
+         * 
+         * @param slice the source
+         * 
+         * @return the requested value
+         */
+        protected abstract E getValue(
+            S slice
+        );
+        
+        /**
+         * Propagate a value to the given slice
+         * 
+         * @param slice the target
+         * @param value the value
+         */
+        protected abstract void setValue(
+            S slice,
+            E value
+        );    
+        
+        /* (non-Javadoc)
+         * @see java.util.List#size()
+         */
+        @Override
+        public abstract int size();
+
+        /**
+         * Propagate the size
+         * 
+         * @param size
+         */
+        protected abstract void setSize(
+            int size
+        );
+
+        /**
+         * Retrieve the requested slice
+         * 
+         * @param index
+         * 
+         * @return a (maybe newly created) slice
+         */
+        S getSlice(
+            int index
+        ){
+            Integer key = Integer.valueOf(index);
+            S slice = this.slices.get(key);
+            if(slice == null) {
+                this.slices.put(
+                    key,
+                    slice = newSlice(index)
+                );
+            }
+            return slice;
         }
         
         /**
-         * Retrieve a slice field value 
+         * Assert that the value is not <code>null</code>
          * 
-         * @param field the field's id
+         * @param value the value to be tested
          * 
-         * @return the slice field value
-         * 
-         * @exception java.lang.IllegalArgumentException
-         *            in case of an invalid field id
+         * @throws <code>nullPointerException</code> if the value is <code>null</code>
          */
-        protected Object getValue(
-            int field
-        ){
-            throw new IllegalArgumentException(
-                "There is no field with index " + field
-            );
-        }
-
-        /**
-         * Set a slice field
-         * 
-         * @param field the slice field's id
-         * @param value the new value
-         * 
-         * @exception java.lang.IllegalArgumentException
-         *            in case of an invalid field id
-         */
-        protected void setValue(
-            int field, 
+        protected static void validateValue(
             Object value
         ){
-            throw new IllegalArgumentException(
-                "There is no field with index " + field
-            );
+            if(value == null) {
+                throw new NullPointerException("The value must not be null");
+            }
+        }
+        
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#iterator()
+         */
+        @Override
+        public Iterator<E> iterator() {
+            
+            return new Iterator<E>() {
+    
+                int next = 0;
+                int current = -1;
+
+                @Override
+                public final boolean hasNext() {
+                    return this.next < size();
+                }
+    
+                @Override
+                public final E next() {
+                    if(this.next >= size()) {
+                        throw new NoSuchElementException();
+                    } else {
+                        return getValue(getSlice(current = next++));
+                    }
+                }
+    
+                @Override
+                public final void remove() {
+                    if(this.current < 0) {
+                        throw new IllegalStateException();
+                    } else {
+                        int size = size() - 1;
+                        E e = null;
+                        for(
+                            int i = size;
+                            i >= this.current;
+                            i--
+                        ) {
+                            S s = getSlice(i);
+                            E o = getValue(s);
+                            setValue(s, e);
+                            e = o;
+                        }
+                        this.next = this.current;
+                        this.current = -1;
+                        setSize(size);
+                    }
+                }
+                
+            };
+            
+        }
+    
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#add(java.lang.Object)
+         */
+        @Override
+        public final boolean add(E o) {
+            validateValue(o);
+            boolean add = !contains(o);
+            int size = size();
+            if(add) {
+                setValue(getSlice(size), o);
+                setSize(++size);
+            }
+            return add;
+        }
+    
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#clear()
+         */
+        @Override
+        public final void clear() {
+            for(
+                int i = size() - 1;
+                i >= 0;
+                i--
+            ){
+                setValue(getSlice(i), null);
+            }
+            setSize(0);
+        }
+    
+    }
+    
+    
+    //------------------------------------------------------------------------
+    // Class SlicedList
+    //------------------------------------------------------------------------
+    
+    /**
+     * Sliced List
+     */
+    protected abstract static class SlicedList<E,S> extends AbstractList<E> {
+
+        /**
+         * Constructor 
+         *
+         * @param slices
+         */
+        protected SlicedList(
+           SortedMap<Integer,S> slices 
+        ) {
+            this.slices = slices;
         }
 
         /**
-         * Abstract Slice ObjectId Class
+         * The slice holder
          */
-        public abstract static class AbstractObjectId
-            implements Serializable 
-        {
+        private final SortedMap<Integer,S> slices;
+        
+        /**
+         * Create a slice
+         * 
+         * @param index the index of the slice
+         * 
+         * @return a new slice
+         */
+        protected abstract S newSlice(
+            int index
+        );
+                
+        /**
+         * Retrieve the value at the given index
+         * 
+         * @param slice the source
+         * 
+         * @return the requested value
+         */
+        protected abstract E getValue(
+            S slice
+        );
+        
+        /**
+         * Propagate a value to the given slice
+         * 
+         * @param slice the target
+         * @param value the value
+         */
+        protected abstract void setValue(
+            S slice,
+            E value
+        );    
+        
+        /* (non-Javadoc)
+         * @see java.util.List#size()
+         */
+        @Override
+        public abstract int size();
 
-            /**
-             * Constructor 
-             */
-            protected AbstractObjectId(
-            ){
-            }
+        /**
+         * Propagate the size
+         * 
+         * @param size
+         */
+        protected abstract void setSize(
+            int size
+        );
 
-            protected static int openmdxjdoIndex(
-                String sliceIdentity
-            ){
-                int separator = sliceIdentity.lastIndexOf(FRAGEMENT_DELIMITER);
-                return Integer.parseInt(
-                    sliceIdentity.substring(separator + 1)
+        /**
+         * Retrieve the requested slice
+         * 
+         * @param index
+         * 
+         * @return a (maybe newly created) slice
+         */
+        private S getSlice(
+            int index
+        ){
+            Integer key = Integer.valueOf(index);
+            S slice = this.slices.get(key);
+            if(slice == null) {
+                this.slices.put(
+                    key,
+                    slice = newSlice(index)
                 );
             }
-
-            protected static String openmdxjdoIdentity(
-                Class<?> sliceClass,
-                String sliceIdentity
-            ){
-//              int separator = sliceIdentity.lastIndexOf(FRAGEMENT_DELIMITER);
-                throw new UnsupportedOperationException("TODO: JDO-->JPA identity mapping");
-//                return new StringIdentity(
-//                    sliceClass,
-//                    sliceIdentity.substring(0, separator)
-//                );
+            return slice;
+        }
+        
+        /**
+         * Assert that the value is not <code>null</code>
+         * 
+         * @param value the value to be tested
+         * 
+         * @throws <code>nullPointerException</code> if the value is <code>null</code>
+         */
+        protected static void validateValue(
+            Object value
+        ){
+            if(value == null) {
+                throw new NullPointerException("The value must not be null");
             }
-            
-            protected abstract int openmdxjdoIndex();
+        }
 
-            protected abstract String openmdxjdoIdentity();
-            
-            /* (non-Javadoc)
-             * @see java.lang.Object#toString()
-             */
-            @Override
-            public final String toString() {
-                return new StringBuilder(
-                    openmdxjdoIdentity().toString()
-                ).append(
-                    FRAGEMENT_DELIMITER
-                ).append(
-                    openmdxjdoIndex()
-                ).toString();
+        /**
+         * Validate the given index
+         * 
+         * @param index
+         * @param size
+         * @param extendable <code>true</code> if size is a valid index value
+         */
+        protected void validateIndex(
+            int index,
+            int size,
+            boolean extendable
+        ){
+            if(extendable ? index > size : index >= size) {
+                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
             }
-
-            /* (non-Javadoc)
-             * @see java.lang.Object#hashCode()
-             */
-            @Override
-            public final int hashCode() {
-                return openmdxjdoIdentity().hashCode() ^ openmdxjdoIndex();
+        }
+        
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#get(int)
+         */
+        @Override
+        public final E get(int index) {
+            int size = size();
+            validateIndex(index, size, false);
+            return getValue(getSlice(index));
+        }
+    
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#add(int, java.lang.Object)
+         */
+        @Override
+        public final void add(int index, E element) {
+            int size = size();
+            validateValue(element);
+            validateIndex(index, size, true);
+            E e = element;
+            for(
+                int i = index;
+                i <= size;
+                i++
+            ) {
+                S s = getSlice(i);
+                E o = getValue(s);
+                setValue(s, e);
+                e = o;
             }
-
-            /* (non-Javadoc)
-             * @see java.lang.Object#equals(java.lang.Object)
-             */
-            @Override
-            public final boolean equals(
-                Object other
-            ){
-                if(other.getClass() == this.getClass()) {
-                    AbstractObjectId that = (AbstractObjectId)other;
-                    return 
-                        this.openmdxjdoIndex() == that.openmdxjdoIndex() && 
-                        this.openmdxjdoIdentity().equals(that.openmdxjdoIdentity());
-                } else {
-                    return false;
+            setSize(size + 1);
+        }
+    
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#set(int, java.lang.Object)
+         */
+        @Override
+        public final E set(int index, E element) {
+            int size = size();
+            validateValue(element);
+            validateIndex(index, size, false);
+            S s = getSlice(index);
+            E o = getValue(s);
+            setValue(s, element);
+            setSize(size); // make dirty
+            return o;
+        }
+        
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#removeRange(int, int)
+         */
+        @Override
+        protected final void removeRange(int fromIndex, int toIndex) {
+            if(fromIndex < toIndex){
+                int oldSize = size();
+                validateIndex(fromIndex, oldSize, false);
+                validateIndex(toIndex, oldSize, true);
+                int count = toIndex - fromIndex;
+                int newSize = oldSize - count;
+                for(
+                   int i = fromIndex;
+                   i < oldSize;
+                   i++
+                ){
+                    setValue(
+                        getSlice(i),
+                        i < newSize ? getValue(getSlice(i + count)) : null
+                    );
                 }
+                setSize(newSize);
             }
-            
-            /**
-             * Separates the main object's JDO object id from the index index
-             */
-            private static final char FRAGEMENT_DELIMITER = '#';
-            
         }
         
     }
+
     
+    //------------------------------------------------------------------------
+    // Class SlicedMap
+    //------------------------------------------------------------------------
+
     /**
-     * EmbeddedList
+     * Sliced Map
+     */
+    protected abstract static class SlicedMap<E,S> implements SortedMap<Integer,E> {
+
+        /**
+         * Constructor 
+         *
+         * @param slices
+         */
+        protected SlicedMap(
+           SortedMap<Integer,S> slices 
+        ) {
+            this.slices = slices;
+        }
+
+        /**
+         * The slice holder
+         */
+        protected final SortedMap<Integer,S> slices;
+        
+        /**
+         * Create a slice
+         * 
+         * @param index the index of the slice
+         * 
+         * @return a new slice
+         */
+        protected abstract S newSlice(
+            int index
+        );
+                
+        /**
+         * Retrieve the value at the given index
+         * 
+         * @param slice the source
+         * 
+         * @return the requested value
+         */
+        protected abstract E getValue(
+            S slice
+        );
+        
+        /**
+         * Propagate a value to the given slice
+         * 
+         * @param slice the target
+         * @param value the value
+         */
+        protected abstract void setValue(
+            S slice,
+            E value
+        );    
+        
+        /* (non-Javadoc)
+         * @see java.util.List#size()
+         */
+        @Override
+        public abstract int size();
+
+        /**
+         * Propagate the size
+         * 
+         * @param size
+         */
+        protected abstract void setSize(
+            int size
+        );
+
+        /**
+         * Decrease the size
+         */
+        protected void decrease(){
+            setSize(size() - 1);
+        }
+
+        /**
+         * Increase the size
+         */
+        protected void increase(){
+            setSize(size() - 1);
+        }
+
+        /**
+         * Make dirty
+         */
+        protected void touch(){
+            setSize(size());
+        }
+        
+       /* (non-Javadoc)
+         * @see java.util.SortedMap#comparator()
+         */
+        @Override
+        public Comparator<? super Integer> comparator() {
+            return null;
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.SortedMap#entrySet()
+         */
+        @Override
+        public Set<java.util.Map.Entry<Integer, E>> entrySet() {
+            return new AbstractSet<Entry<Integer,E>>() {
+
+                @Override
+                public Iterator<Map.Entry<Integer, E>> iterator() {
+                    return new Iterator<Entry<Integer,E>>() {
+
+                        private final Iterator<Map.Entry<Integer, S>> delegate = SlicedMap.this.slices.entrySet().iterator();
+                        Map.Entry<Integer, S> current = null;
+                        private Map.Entry<Integer, S> prefetched = null;
+                        
+                        @Override
+                        public boolean hasNext() {
+                            while(this.prefetched == null && this.delegate.hasNext()) {
+                                Map.Entry<Integer, S> candidate = this.delegate.next();
+                                if(getValue(candidate.getValue()) != null) {
+                                    this.prefetched = candidate;
+                                }
+                            }
+                            return this.prefetched != null;
+                        }
+                        
+                        @Override
+                        public Map.Entry<Integer, E> next() {
+                            if(hasNext()) {
+                                this.current = this.prefetched;
+                                this.prefetched = null;
+                                return new Map.Entry<Integer, E>(){
+
+                                    @Override
+                                    public Integer getKey() {
+                                        return current.getKey();
+                                    }
+
+                                    @Override
+                                    public E getValue() {
+                                        return SlicedMap.this.getValue(current.getValue());
+                                    }
+
+                                    @Override
+                                    public E setValue(E value) {
+                                        if(value == null) {
+                                            remove();
+                                            return null;
+                                        } else if(current == null) {
+                                            throw new IllegalStateException("No current element");
+                                        } else {
+                                            E old = getValue(); 
+                                            SlicedMap.this.setValue(current.getValue(), value);
+                                            current = null;
+                                            return old;
+                                        }
+                                    }
+                                    
+                                };
+                            } else {
+                                throw new NoSuchElementException();
+                            }
+                        }
+
+                        @Override
+                        public void remove() {
+                            if(this.current == null) {
+                                throw new IllegalStateException("No current element");
+                            } else {
+                                SlicedMap.this.setValue(this.current.getValue(), null);
+                                decrease();
+                                this.current = null;
+                            }
+                        }
+                        
+                    };
+                }
+
+                @Override
+                public int size() {
+                    return SlicedMap.this.size();
+                }
+                
+            };
+          
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.SortedMap#firstKey()
+         */
+        @Override
+        public Integer firstKey() {
+            Iterator<Map.Entry<Integer, E>> entries = entrySet().iterator();
+            if(entries.hasNext()) {
+                return entries.next().getKey();
+            } else {
+                throw new NoSuchElementException("The map is empty");
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.SortedMap#headMap(java.lang.Object)
+         */
+        @Override
+        public SortedMap<Integer, E> headMap(Integer toKey) {
+            final SlicedMap<E,S> delegate = this;
+            
+            return new SlicedMap<E,S>(
+                delegate.slices.headMap(toKey)
+            ){
+
+                @Override
+                protected E getValue(S slice) {
+                    return delegate.getValue(slice);
+                }
+
+                @Override
+                protected S newSlice(int index) {
+                    return delegate.newSlice(index);
+                }
+
+                @Override
+                protected void setSize(int size) {
+                    throw new UnsupportedOperationException("The view is unmodifiable at the moement");
+                }
+
+                @Override
+                protected void setValue(S slice, E value) {
+                    throw new UnsupportedOperationException("The view is unmodifiable at the moement");
+                }
+
+                @Override
+                public int size() {
+                    //
+                    // a view should not store its size
+                    //
+                    int count = 0;
+                    for(@SuppressWarnings("unused") Map.Entry<Integer,E> e: entrySet()) {
+                        count++;
+                    }
+                    return count;
+                }
+                
+            };
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.SortedMap#keySet()
+         */
+        @Override
+        public Set<Integer> keySet() {
+            final Set<Map.Entry<Integer, E>> entries = entrySet();
+            return new AbstractSet<Integer>(){
+
+                @Override
+                public Iterator<Integer> iterator() {
+                    final Iterator<Map.Entry<Integer, E>> delegate = entries.iterator();
+                    return new Iterator<Integer>(){
+
+                        @Override
+                        public boolean hasNext() {
+                            return delegate.hasNext();
+                        }
+
+                        @Override
+                        public Integer next() {
+                            return delegate.next().getKey();
+                        }
+
+                        @Override
+                        public void remove() {
+                            delegate.remove();
+                        }
+                        
+                    };
+                }
+
+                @Override
+                public int size() {
+                    return entries.size();
+                }
+                
+            };
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.SortedMap#lastKey()
+         */
+        @Override
+        public Integer lastKey() {
+            Iterator<Map.Entry<Integer, E>> entries = entrySet().iterator();
+            Map.Entry<Integer, E> cursor = null;
+            while(entries.hasNext()) {
+                cursor = entries.next();
+            }
+            if(cursor == null) {
+                throw new NoSuchElementException("The map is empty");
+            } else {
+                return cursor.getKey();
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.SortedMap#subMap(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public SortedMap<Integer, E> subMap(Integer fromKey, Integer toKey) {
+            final SlicedMap<E,S> delegate = this;
+            
+            return new SlicedMap<E,S>(
+                delegate.slices.subMap(fromKey, toKey)
+            ){
+
+                @Override
+                protected E getValue(S slice) {
+                    return delegate.getValue(slice);
+                }
+
+                @Override
+                protected S newSlice(int index) {
+                    return delegate.newSlice(index);
+                }
+
+                @Override
+                protected void setSize(int size) {
+                    throw new UnsupportedOperationException("The view is unmodifiable at the moement");
+                }
+
+                @Override
+                protected void setValue(S slice, E value) {
+                    throw new UnsupportedOperationException("The view is unmodifiable at the moement");
+                }
+
+                @Override
+                public int size() {
+                    //
+                    // a view should not store its size
+                    //
+                    int count = 0;
+                    for(@SuppressWarnings("unused") Map.Entry<Integer,E> e: entrySet()) {
+                        count++;
+                    }
+                    return count;
+                }
+                
+            };
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.SortedMap#tailMap(java.lang.Object)
+         */
+        @Override
+        public SortedMap<Integer, E> tailMap(Integer fromKey) {
+            final SlicedMap<E,S> delegate = this;
+            
+            return new SlicedMap<E,S>(
+                delegate.slices.tailMap(fromKey)
+            ){
+
+                @Override
+                protected E getValue(S slice) {
+                    return delegate.getValue(slice);
+                }
+
+                @Override
+                protected S newSlice(int index) {
+                    return delegate.newSlice(index);
+                }
+
+                @Override
+                protected void setSize(int size) {
+                    throw new UnsupportedOperationException("The view is unmodifiable at the moement");
+                }
+
+                @Override
+                protected void setValue(S slice, E value) {
+                    throw new UnsupportedOperationException("The view is unmodifiable at the moement");
+                }
+
+                @Override
+                public int size() {
+                    //
+                    // a view should not store its size
+                    //
+                    int count = 0;
+                    for(@SuppressWarnings("unused") Map.Entry<Integer,E> e: entrySet()) {
+                        count++;
+                    }
+                    return count;
+                }
+                
+            };
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.SortedMap#values()
+         */
+        @Override
+        public Collection<E> values() {
+            final Set<Map.Entry<Integer, E>> entries = entrySet();
+            return new AbstractCollection<E>(){
+
+                @Override
+                public Iterator<E> iterator() {
+                    final Iterator<Map.Entry<Integer, E>> delegate = entries.iterator();
+                    return new Iterator<E>(){
+
+                        @Override
+                        public boolean hasNext() {
+                            return delegate.hasNext();
+                        }
+
+                        @Override
+                        public E next() {
+                            return delegate.next().getValue();
+                        }
+
+                        @Override
+                        public void remove() {
+                            delegate.remove();
+                        }
+                        
+                    };
+                }
+
+                @Override
+                public int size() {
+                    return entries.size();
+                }
+                
+            };
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#clear()
+         */
+        @Override
+        public void clear() {
+            for(Map.Entry<Integer,S> e : this.slices.entrySet()) {
+                setValue(e.getValue(), null);
+            }
+            setSize(0);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#containsKey(java.lang.Object)
+         */
+        @Override
+        public boolean containsKey(Object key) {
+            return get(key) != null;
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#containsValue(java.lang.Object)
+         */
+        @Override
+        public boolean containsValue(Object value) {
+            if(value != null) {
+                for(Map.Entry<Integer,S> e : this.slices.entrySet()) {
+                    if(value.equals(getValue(e.getValue()))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#get(java.lang.Object)
+         */
+        @Override
+        public E get(Object key) {
+            S slice = this.slices.get(key);
+            return slice == null ? null : getValue(slice);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#isEmpty()
+         */
+        @Override
+        public boolean isEmpty() {
+            return size() == 0;
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#put(java.lang.Object, java.lang.Object)
+         */
+        @Override
+        public E put(Integer key, E value) {
+            if(value == null) {
+                return remove(key);
+            } else {
+                S slice = this.slices.get(key);
+                if(slice == null) {
+                    this.slices.put(
+                        key,
+                        slice = newSlice(key.intValue())
+                    );
+                    setValue(slice, value);
+                    increase();
+                    return null;
+                } else {
+                    E old = getValue(slice);
+                    setValue(slice, value);
+                    if(old == null) {
+                        increase();
+                    } else {
+                        touch();
+                    }
+                    return old;
+                }
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#putAll(java.util.Map)
+         */
+        @Override
+        public void putAll(Map<? extends Integer, ? extends E> m) {
+            for(Map.Entry<? extends Integer, ? extends E> e : m.entrySet()) {
+                put(e.getKey(), e.getValue());
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Map#remove(java.lang.Object)
+         */
+        @Override
+        public E remove(Object key) {
+            S slice = this.slices.get(key);
+            if(slice == null) {
+                return null;
+            } else {
+                E e = getValue(slice);
+                if(e != null) {
+                    setValue(slice, null);
+                    decrease();
+                }
+                return e;
+            }
+        }       
+        
+    }
+    
+    
+    //------------------------------------------------------------------------
+    // Class EmbeddedList
+    //------------------------------------------------------------------------
+
+    /**
+     * Embedded List
      */
     abstract protected static class EmbeddedList<E> extends AbstractList<E> {
         
@@ -651,6 +1317,14 @@ public abstract class AbstractObject
             return capacity;
         }
      
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#isEmpty()
+         */
+        @Override
+        public boolean isEmpty() {
+            return capacity == 0 || get(0) == null;
+        }
+
         /**
          * The number of embedded fields
          */
@@ -658,8 +1332,13 @@ public abstract class AbstractObject
         
     }
     
+    
+    //------------------------------------------------------------------------
+    // Class EmbeddedSet
+    //------------------------------------------------------------------------
+
     /**
-     * EmbeddedSet
+     * Embedded Set
      */
     abstract protected static class EmbeddedSet<E> extends AbstractSet<E> {
         
@@ -720,6 +1399,14 @@ public abstract class AbstractObject
             return this.delegate.size();
         }
 
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#isEmpty()
+         */
+        @Override
+        public boolean isEmpty() {
+            return this.delegate.isEmpty();
+        }
+
         /**
          * Delegate
          */
@@ -759,569 +1446,214 @@ public abstract class AbstractObject
 
     }
 
+    
+    //------------------------------------------------------------------------
+    // Class AbstractStateInterrogation
+    //------------------------------------------------------------------------
+    
     /**
-     * SlicedList
+     * Replicate to avoid javax.jdo dependency. OpenJPA requires ObjectState
+     * to be public.
      */
-    private class SlicedSet<E> extends AbstractSet<E> {
-    
-        /**
-         * Constructor 
-         * @param field
-         */
-        SlicedSet(
-            final int field
-        ) {
-            this.field = field;
-        }
-    
-        /**
-         * The <code>Set</code>'s field id
-         */
-        final int field;
-        
-        /* (non-Javadoc)
-         * @see java.util.AbstractCollection#iterator()
-         */
-        @Override
-        public Iterator<E> iterator() {
-            
-            return new Iterator<E>() {
-    
-                int next = 0;
-                int current = -1;
-                int size = AbstractObject.this.openmdxjdoGetSize(field);
-                
-                public final boolean hasNext() {
-                    return next < size;
-                }
-    
-                @SuppressWarnings("unchecked")
-                public final E next() {
-                    E element = (E) AbstractObject.this.openmdxjdoGetValue(field, current = next++);
-                    if(element == null) throw new NoSuchElementException();
-                    return element;
-                }
-    
-                public final void remove() {
-                    if(current < 0) throw new IllegalStateException();
-                    Object o = null;
-                    for(
-                        int i = size - 1;
-                        i >= current;
-                        i--
-                    ) {
-                        o = AbstractObject.this.openmdxjdoSetValue(field, i, o);
-                    }
-                    next = current;
-                    current = -1;
-                    AbstractObject.this.openmdxjdoSetSize(field, --size);
-                }
-                
-            };
-            
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.AbstractCollection#add(java.lang.Object)
-         */
-        @Override
-        public final boolean add(E o) {
-            AbstractObject.openmdxjdoValidateElement(o);
-            boolean add = contains(o);
-            int size = AbstractObject.this.openmdxjdoGetSize(field);
-            if(add) {
-                AbstractObject.this.openmdxjdoSetValue(field, size, o);
-            }
-            AbstractObject.this.openmdxjdoSetSize(field, ++size);
-            return add;
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.AbstractCollection#clear()
-         */
-        @Override
-        public final void clear() {
-            for(
-                int i = AbstractObject.this.openmdxjdoGetSize(this.field);
-                i >= 0;
-                i--
-            ){
-                AbstractObject.this.openmdxjdoSetValue(this.field, i, null);
-            }
-            AbstractObject.this.openmdxjdoSetSize(this.field, 0);
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.AbstractCollection#size()
-         */
-        @Override
-        public final int size() {
-            return AbstractObject.this.openmdxjdoGetSize(this.field);
-        }
-        
+    public static enum ObjectState {
+        TRANSIENT,
+        DETACHED_CLEAN,
+        DETACHED_DIRTY
     }
 
-    /**
-     * SlicedList
-     */
-    private class SlicedList<E> extends AbstractList<E> {
     
-        /**
-         * Constructor 
-         * @param field
-         */
-        SlicedList(
-            final int field
-        ) {
-            this.field = field;
-        }
-    
-        /**
-         * The <code>List</code>'s field id
-         */
-        private final int field;
-        
-        /* (non-Javadoc)
-         * @see java.util.AbstractList#get(int)
-         */
-        @SuppressWarnings("unchecked")
-        @Override
-        public final E get(int index) {
-            return (E) AbstractObject.this.openmdxjdoGetValue(this.field, index);
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.AbstractCollection#size()
-         */
-        @Override
-        public final int size() {
-            return AbstractObject.this.openmdxjdoGetSize(this.field);
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.AbstractList#add(int, java.lang.Object)
-         */
-        @Override
-        public final void add(int index, E element) {
-            AbstractObject.openmdxjdoValidateElement(element);
-            int size = validateIndexAndReturnSize (index, true); 
-            Object current = element;
-            for(
-                int i = index;
-                current != null;
-                i++
-            ) {
-                current = AbstractObject.this.openmdxjdoSetValue(this.field, i++, current);
-            }
-            AbstractObject.this.openmdxjdoSetSize(this.field, size + 1);
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.AbstractList#remove(int)
-         */
-        @SuppressWarnings("unchecked")
-        @Override
-        public final E remove(int index) {
-            int size = validateIndexAndReturnSize (index, false);
-            Object element = null;
-            for(
-                int i = size - 1;
-                i >= index;
-                i--
-            ) {
-                element = AbstractObject.this.openmdxjdoSetValue(this.field, i, element);
-            }
-            AbstractObject.this.openmdxjdoSetSize(this.field, size - 1);
-            return (E) element;
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.AbstractList#set(int, java.lang.Object)
-         */
-        @SuppressWarnings("unchecked")
-        @Override
-        public final E set(int index, E element) {
-            AbstractObject.openmdxjdoValidateElement(element);
-            validateIndexAndReturnSize (index, false);
-            return (E) AbstractObject.this.openmdxjdoSetValue(this.field, index, element);
-        }
-        
-        /* (non-Javadoc)
-         * @see java.util.AbstractList#removeRange(int, int)
-         */
-        @Override
-        protected final void removeRange(int fromIndex, int toIndex) {
-            int count = toIndex - fromIndex;
-            int oldSize = AbstractObject.this.openmdxjdoGetSize(field);
-            int newSize = oldSize - count;
-            for(
-               int i = fromIndex;
-               i < oldSize;
-               i++
-            ){
-                AbstractObject.this.openmdxjdoSetValue(
-                    this.field,
-                    i,
-                    i < newSize ? AbstractObject.this.openmdxjdoGetValue(this.field, i + count) : null
-                );
-            }
-            AbstractObject.this.openmdxjdoSetSize(this.field, newSize);
-        }
-        
-        /**
-         * Validate the index 
-         * 
-         * @param index
-         * @param sizeIsAcceptable
-         * 
-         * @throws IndexOutOfBoundsException if the index is less than 0
-         * or greater than maximum.
-         */
-        private final int validateIndexAndReturnSize(
-            final int index,
-            final boolean sizeIsAcceptable
-        ){
-            int size = AbstractObject.this.openmdxjdoGetSize(field);
-            int maximum = sizeIsAcceptable ? size : size - 1;
-            if (index  < 0 || index > maximum) throw new IndexOutOfBoundsException(
-                "Index: "+index+", Size: "+size
-            );
-            return size;
-        }
-    
-    }
+    //------------------------------------------------------------------------
+    // Class AbstractStateInterrogation
+    //------------------------------------------------------------------------
 
     /**
-     * Sliced Map
+     * Abstract State Interrogation
      */
-    private class SlicedMap<E> 
-        extends AbstractMap<Integer,E> 
-        implements SortedMap<Integer,E> 
-    {
-    
+    public static class AbstractStateAccessor {
+ 
         /**
          * Constructor 
-         * @param field
          */
-        SlicedMap(
-            final int field
-        ) {
-            this(
-                AbstractObject.this.openmdxjdoGetSlices(), 
-                field, 
-                false
-            );
+        protected AbstractStateAccessor(){
+            super();
         }
-    
+
         /**
-         * Constructor 
-         * @param delegate
-         * @param field
-         * @param view
+         * This method retrieves the JPA identity, a <code>String</code>
+         *  
+         * @param pc
+         * 
+         * @return the JPA identity if pc is an instance of<code>AbstractObject</code>
          */
-        private SlicedMap(
-            final SortedMap<Integer, Slice> delegate,
-            final int field,
-            final boolean view
-        ) {
-            this.delegate = delegate;
-            this.field = field;
-            this.view = view;
+        public String getObjectId(Object pc) {
+            return pc instanceof AbstractObject ? ((AbstractObject)pc).getOpenmdxjdoIdentity() : null;
         }
-        
+
         /**
-         * The <code>Map</code>'s field id
+         * Retrieve the object's version
+         * 
+         * @param pc
+         * 
+         * @return the version if pc is an instance of<code>AbstractObject</code>
+         * </ul>
          */
-        final int field;
-    
+        public Object getVersion(Object pc) {
+            return pc instanceof AbstractObject ? ((AbstractObject)pc).openmdxjdoVersion : null; 
+        }
+
         /**
-         * The slices backing this map.
+         * A transient or detached object is never deleted
+         * 
+         * @param pc
+         * 
+         * @return<ul>
+         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
+         * <li>FALSE</code> if pc is an instance of<code>AbstractObject</code>
+         * </ul>
          */
-        final SortedMap<Integer, Slice> delegate;
-        
+        public Boolean isDeleted(Object pc) {
+            return pc instanceof AbstractObject ? Boolean.FALSE : null; 
+        }
+
         /**
-         * <code>view</code> is <code>true</code> for headMaps,
-         * tailMaps and subMaps.
+         * Tells whether the object is detached
+         * 
+         * @param pc
+         * 
+         * @return<ul>
+         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
+         * <li><code>FALSE</code> if pc is transient
+         * <li><code>TRUE</code> if pc is detached-clean or detached-dirty
+         * </ul>
          */
-        private final boolean view;
-        
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#size()
-         */
-        @Override
-        public final int size() {
-            if(this.view) {
-                int size = 0;
-                for(Slice m : this.delegate.values()) {
-                    if(m.getValue(this.field) != null) {
-                        size++;
-                    }
-                }
-                return size;
-            } else {
-                return AbstractObject.this.openmdxjdoGetSize(this.field);
-            }
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#entrySet()
-         */
-        @Override
-        public Set<java.util.Map.Entry<Integer, E>> entrySet() {
-            
-            return new AbstractSet<java.util.Map.Entry<Integer, E>>() {
-    
-                
-                @Override
-                public Iterator<Map.Entry<Integer, E>> iterator() {
-                    return new Iterator<Map.Entry<Integer, E>>() {
-    
-                        int size = SlicedMap.this.size();
-                        int step = 0;
-                        Map.Entry<Integer, Slice> current = null;
-                        
-                        Iterator<Map.Entry<Integer, Slice>> delegate = SlicedMap.this.delegate.entrySet().iterator();
-                        
-                        public final boolean hasNext() {
-                            return this.step < this.size;
-                        }
-    
-                        private final Slice nextSlice() {
-                            Slice slice;
-                            do {
-                                slice = (this.current = this.delegate.next()).getValue();
-                            } while (slice.getValue(field) == null);
-                            step++;
-                            return slice;
-                        }
-                        
-                        @SuppressWarnings("unchecked")
-                        public final Map.Entry<Integer, E> next() {
-                            final Slice slice = nextSlice();
-                            return new Map.Entry<Integer, E>() {
-    
-                                public final Integer getKey() {
-                                    return current.getKey();
-                                }
-    
-                                public final E getValue() {
-                                    return (E) slice.getValue(field);
-                                }
-    
-                                public final E setValue(E value) {
-                                    AbstractObject.openmdxjdoValidateElement(value);
-                                    Object old = getValue();
-                                    slice.setValue(field, value);
-                                    return (E) old;
-                                }
-                                
-                            };
-                        }
-    
-                        public final void remove() {
-                            if(current == null) throw new IllegalStateException();
-                            current.getValue().setValue(field, null);
-                            current = null;
-                        }
-                        
-                    };
-                }
-    
-                @Override
-                public final int size() {
-                    return SlicedMap.this.size();
-                }                    
-                
-            };
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.SortedMap#comparator()
-         */
-        public final Comparator<? super Integer> comparator() {
-            return this.delegate.comparator();
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.SortedMap#firstKey()
-         */
-        public final Integer firstKey() {
-            for(Map.Entry<Integer, Slice> entry : this.delegate.entrySet()) {
-                if(entry.getValue().getValue(field) != null) {
-                    return entry.getKey();
-                }
-            }
-            throw new NoSuchElementException();
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.SortedMap#headMap(java.lang.Object)
-         */
-        public final SortedMap<Integer, E> headMap(Integer toKey) {
-            return new SlicedMap<E>(
-                this.delegate.headMap(toKey),
-                this.field,
-                true
-            );
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.SortedMap#lastKey()
-         */
-        public final Integer lastKey() {
-            Integer key = null;
-            for(Map.Entry<Integer, Slice> entry : this.delegate.entrySet()) {
-                if(entry.getValue().getValue(field) != null) {
-                    key = entry.getKey();
-                }
-            }
-            if(key == null) throw new NoSuchElementException();
-            return key;
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.SortedMap#subMap(java.lang.Object, java.lang.Object)
-         */
-        public final SortedMap<Integer, E> subMap(Integer fromKey, Integer toKey) {
-            return new SlicedMap<E>(
-                this.delegate.subMap(fromKey, toKey),
-                this.field,
-                true
-            );
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.SortedMap#tailMap(java.lang.Object)
-         */
-        public final SortedMap<Integer, E> tailMap(Integer fromKey) {
-            return new SlicedMap<E>(
-                this.delegate.tailMap(fromKey),
-                this.field,
-                true
-            );
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
-         */
-        @SuppressWarnings("unchecked")
-        @Override
-        public final E put(Integer key, E value) {
-            AbstractObject.openmdxjdoValidateElement(value); // a SparseArray invokes remove(Integer) for null values
-            E oldValue = (E) AbstractObject.this.openmdxjdoSetValue(field, key, value);
-            if(view && oldValue == null) {
-                AbstractObject.this.openmdxjdoSetSize(
-                    this.field,
-                    AbstractObject.this.openmdxjdoGetSize(this.field) + 1
-                );
-            }
-            return oldValue;
-        }
-    
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#remove(java.lang.Object)
-         */
-        @SuppressWarnings("unchecked")
-        @Override
-        public final E remove(Object key) {
-            if(key instanceof Integer) {
-                E oldValue = (E) AbstractObject.this.openmdxjdoSetValue(field, (Integer)key, null);
-                if(view && oldValue != null) {
-                    AbstractObject.this.openmdxjdoSetSize(
-                        this.field,
-                        AbstractObject.this.openmdxjdoGetSize(this.field) - 1
-                    );
-                }
-                return oldValue;
+        public Boolean isDetached(Object pc) {
+            if(pc instanceof AbstractObject) {
+                ObjectState state = ((AbstractObject)pc).openmdxjdoState; 
+                return Boolean.valueOf(state == ObjectState.DETACHED_CLEAN || state == ObjectState.DETACHED_DIRTY);
             } else {
                 return null;
             }
         }
-                
-    }
-    
-    /**
-     * Wrap a collection as set
-     */
-    private static class ResultSet<E> 
-        extends AbstractCollection<E> 
-        implements Closeable
-    {
 
         /**
-         * Constructor 
-         *
-         * @param query
-         * @param parent
+         * Tells whether the object is dirty
+         * 
+         * @param pc
+         * 
+         * @return<ul>
+         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
+         * <li><code>FALSE</code> if pc is transient or detached
+         * <li><code>TRUE</code> if pc is detached-dirty
+         * </ul>
          */
-        ResultSet(
-            Query query,
-            Object parent
-        ){
-            this.query = query;
-            this.parent = parent;
+        public Boolean isDirty(Object pc) {
+            return pc instanceof AbstractObject ? Boolean.valueOf(((AbstractObject)pc).openmdxjdoState == ObjectState.DETACHED_DIRTY): null; 
         }
 
         /**
+         * A transient or detached object is never new
          * 
-         */
-        private Query query;
-
-        /**
+         * @param pc
          * 
+         * @return<ul>
+         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
+         * <li>FALSE</code> if pc is an instance of<code>AbstractObject</code>
+         * </ul>
          */
-        private Object parent;
-
-        /**
-         * 
-         */
-        private Collection<E> delegate = null;
-
-        /**
-         * 
-         * @return the query result list
-         */
-        @SuppressWarnings("unchecked")
-        private final Collection<E> getDelegate(
-        ){
-            if(this.delegate == null) {
-                if(this.query == null) throw new IllegalStateException(
-                    "This result set has already been closed"
-                );
-                this.delegate = (Collection<E>) this.query.execute(this.parent);
-            } 
-            return this.delegate;
-        }
-        
-        /* (non-Javadoc)
-         * @see java.util.AbstractCollection#iterator()
-         */
-        @Override
-        public Iterator<E> iterator() {
-            return this.getDelegate().iterator();
+        public Boolean isNew(Object pc) {
+            return pc instanceof AbstractObject ? Boolean.FALSE : null; 
         }
 
-        /* (non-Javadoc)
-         * @see java.util.AbstractCollection#size()
+        /**
+         * A transient or detached object is never persistent
+         * 
+         * @param pc
+         * 
+         * @return<ul>
+         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
+         * <li>FALSE</code> if pc is an instance of<code>AbstractObject</code>
+         * </ul>
          */
-        @Override
-        public int size() {
-            return this.getDelegate().size();
+        public Boolean isPersistent(Object pc) {
+            return pc instanceof AbstractObject ? Boolean.FALSE : null; 
         }
 
-        /* (non-Javadoc)
-         * @see java.io.Closeable#close()
+        /**
+         * A transient or detached object is never transactional
+         * 
+         * @param pc
+         * 
+         * @return<ul>
+         * <li><code>null</code> if pc is not an instance of<code>AbstractObject</code>
+         * <li>FALSE</code> if pc is an instance of<code>AbstractObject</code>
+         * </ul>
          */
-        public void close(
-        ) throws IOException {
-            if(this.delegate != null) {
-                this.query.close(this.delegate);
-                this.delegate = null;
+        public Boolean isTransactional(Object pc) {
+            return pc instanceof AbstractObject ? Boolean.FALSE : null; 
+        }
+
+        /**
+         * Mark the instance as dirty
+         * 
+         * @param pc
+         * @param fieldName
+         * 
+         * @return <code>true</code> if pc is an instance of <code>AbstractObject</code> 
+         */
+        public boolean makeDirty(Object pc, String fieldName) {
+            if(pc instanceof AbstractObject) {
+                ((AbstractObject)pc).openmdxjdoMakeDirty();
+                return true;
+            } else {
+                return false;
             }
-            this.query = null;
-            this.parent = null;
-        }        
+        }
         
+        /**
+         * Set a detached or transient object's identity
+         *  
+         * @param pc
+         * @param openmdxjdoIdentity
+         * 
+         * @throw ClassCastException if pc is not an instance of <code>AbstractObject</code>
+         */
+        protected static void setObjectId(
+            Object pc,
+            String openmdxjdoIdentity
+        ){
+            AbstractObject target = (AbstractObject) pc;
+            target.setOpenmdxjdoIdentity(openmdxjdoIdentity);
+        }
+
+        /**
+         * Set a detached object's state and version
+         *  
+         * @param pc
+         * @param openmdxjdoVersion
+         * 
+         * @throw ClassCastException if pc is not an instance of <code>AbstractObject</code>
+         */
+        protected static void setVersion(
+            Object pc,
+            Object openmdxjdoVersion
+        ){
+            AbstractObject target = (AbstractObject) pc;
+            target.openmdxjdoState = ObjectState.DETACHED_CLEAN;
+            target.openmdxjdoVersion = openmdxjdoVersion;
+        }
+
     }
-    
+
+    static {
+        try {
+            //
+            // Delegate to other package to avoid direct jdo.bundle dependency
+            //
+            Class.forName("org.w3c.spi.StateAccessor");
+        } catch (Exception ignore) {
+            // Accept missing JDO support
+        }
+
+    }
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReference.java,v 1.35 2009/06/09 12:50:34 hburger Exp $
+ * Name:        $Id: ObjectReference.java,v 1.38 2009/10/13 13:14:41 wfro Exp $
  * Description: ObjectReference 
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:50:34 $
+ * Date:        $Date: 2009/10/13 13:14:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,13 +60,13 @@ import java.util.regex.Pattern;
 
 import javax.jdo.JDOHelper;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.view.ViewMode;
 import org.openmdx.ui1.layer.application.Ui_1;
 
@@ -107,55 +107,63 @@ public class ObjectReference
 	    }
     }
     
-  //-------------------------------------------------------------------------
-  public String getTitleEscapeQuote(
-  ) {
-      return Pattern.compile("'").matcher(this.getTitle()).replaceAll("\\'");
-  }
+    //-------------------------------------------------------------------------
+    public String getTitleEscapeQuote(
+    ) {
+        return Pattern.compile("'").matcher(this.getTitle()).replaceAll("\\'");
+    }
   
-  //-------------------------------------------------------------------------
-  public String getTitle(
-  ) {
-      if(this.exception != null) {
-          if(this.exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
-              return TITLE_PREFIX_NOT_ACCESSIBLE + " (" + this.exception.getCause().getParameter("object.mof.id") + ")";
-          }
-          else if(this.exception.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE) {
-              return TITLE_PREFIX_NO_PERMISSION + " (" + this.exception.getCause().getParameter("object.mof.id") + ")";              
-          }
-          else {
-              return this.exception.getMessage();
-          }
-      }
-      else if(this.object == null) {
-          return "";
-      }
-      else {
-	      String title = "";
-	      try {
-    	      RefObject_1_0 refObj = this.object;
-    	      title = this.application.getPortalExtension().getTitle(
-    	          refObj,
-                  this.application.getCurrentLocaleAsIndex(),
-                  this.application.getCurrentLocaleAsString(),
-    	          this.application
-    	      );
-              // Replace newlines by blank
-              title = title.replace('\n', ' ');
-              // Replace " by &quot;
-              int pos = 0;
-              while((pos = title.indexOf('"')) >= 0) {
-                  title = title.substring(0, pos) + "&quot;" + title.substring(pos + 1); 
-              }
-	      }
-	      catch(Exception e) {
-	          this.exception = new ServiceException(e);
-	          AppLog.detail(e.getMessage(), e.getCause());
-	          return this.getTitle();
-	      }
-	    return title;
-      }
-  }
+    //-------------------------------------------------------------------------
+    public String getTitle(
+    ) {
+    	return this.getTitle(false);
+    }
+	 
+    //-------------------------------------------------------------------------
+    public String getTitle(
+    	boolean asShortTitle
+    ) {
+    	if(this.exception != null) {
+    		if(this.exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
+    			return TITLE_PREFIX_NOT_ACCESSIBLE + " (" + this.exception.getCause().getParameter("object.mof.id") + ")";
+    		}
+    		else if(this.exception.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE) {
+    			return TITLE_PREFIX_NO_PERMISSION + " (" + this.exception.getCause().getParameter("object.mof.id") + ")";              
+    		}
+    		else {
+    			return this.exception.getMessage();
+    		}
+    	}
+    	else if(this.object == null) {
+    		return "";
+    	}
+    	else {
+    		String title = "";
+    		try {
+    			RefObject_1_0 refObj = this.object;
+    			title = this.application.getPortalExtension().getTitle(
+    				refObj,
+    				this.application.getCurrentLocaleAsIndex(),
+    				this.application.getCurrentLocaleAsString(),
+    				asShortTitle,
+    				this.application
+    			);
+    			// Replace newlines by blank
+    			title = title.replace('\n', ' ');
+    			// Replace " by &quot;
+    			int pos = 0;
+    			while((pos = title.indexOf('"')) >= 0) {
+    				title = title.substring(0, pos) + "&quot;" + title.substring(pos + 1); 
+    			}
+    		}
+    		catch(Exception e) {
+    			this.exception = new ServiceException(e);
+    			SysLog.detail(e.getMessage(), e.getCause());
+    			return this.getTitle();
+    		}
+    		return title;
+    	}
+    }
 
     //-------------------------------------------------------------------------
     public RefObject_1_0 getObject(
@@ -172,7 +180,7 @@ public class ObjectReference
                 this.application.getLabel(this.object.refClass().refMofId());
         }
         catch(ServiceException e) {
-            AppLog.warning(e.getMessage(), e.getCause());
+        	SysLog.warning(e.getMessage(), e.getCause());
             return null;
         }
     }
@@ -186,7 +194,7 @@ public class ObjectReference
                 this.application.getIconKey(this.object.refClass().refMofId());
         }
         catch(ServiceException e) {
-            AppLog.warning(e.getMessage(), e.getCause());
+        	SysLog.warning(e.getMessage(), e.getCause());
             return null;
         }
     }
@@ -204,7 +212,7 @@ public class ObjectReference
                 this.application.getBackColor(this.object.refClass().refMofId());
         }
         catch(ServiceException e) {
-            AppLog.warning(e.getMessage(), e.getCause());
+        	SysLog.warning(e.getMessage(), e.getCause());
             return null;
         }
     }
@@ -222,7 +230,7 @@ public class ObjectReference
                 this.application.getColor(this.object.refClass().refMofId());
         }
         catch(ServiceException e) {
-            AppLog.warning(e.getMessage(), e.getCause());
+        	SysLog.warning(e.getMessage(), e.getCause());
             return null;
         }
     }
@@ -299,7 +307,7 @@ public class ObjectReference
           new Action.Parameter[]{
               new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refMofId())
           },
-          this.getTitle(),
+          this.getTitle(true),
           this.getIconKey(),
           true
       );

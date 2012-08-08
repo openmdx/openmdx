@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1PackageInvocationHandler.java,v 1.25 2009/01/27 00:10:59 wfro Exp $
+ * Name:        $Id: Jmi1PackageInvocationHandler.java,v 1.32 2010/04/19 11:25:21 hburger Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/27 00:10:59 $
+ * Date:        $Date: 2010/04/19 11:25:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,17 +54,17 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.omg.mof.spi.Identifier;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.ComparableTypePredicate;
@@ -81,65 +81,12 @@ import org.w3c.cci2.StringTypePredicate;
 public class Jmi1PackageInvocationHandler implements InvocationHandler {
     
     //-----------------------------------------------------------------------
-    public static class RefPackage_1Proxy extends RefPackage_1 {
-        
-        public RefPackage_1Proxy(
-            String qualifiedPackageName,
-            javax.jmi.reflect.RefPackage outermostPackage,
-            javax.jmi.reflect.RefPackage immediatePackage        
-        ) {
-            super(
-                outermostPackage, 
-                immediatePackage
-            );
-            this.qualifiedPackageName = qualifiedPackageName;
-        }
-
-        private static final long serialVersionUID = 5484412877112463153L;
-        private final String qualifiedPackageName;
-        
-        public String refMofId(
-        ) {
-            return this.qualifiedPackageName; 
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
-        @Override
-        public boolean equals(Object obj) {
-            return 
-                obj instanceof RefPackage_1Proxy && 
-                this.qualifiedPackageName.equals(
-                    ((RefPackage_1Proxy)obj).qualifiedPackageName
-                );
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#hashCode()
-         */
-        @Override
-        public int hashCode() {
-            return this.qualifiedPackageName.hashCode();
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        @Override
-        public String toString() {
-            return "RefPackage " + this.qualifiedPackageName;
-        }
-        
-    }
-    
-    //-----------------------------------------------------------------------
     public Jmi1PackageInvocationHandler(
         String qualifiedPackageName,
         javax.jmi.reflect.RefPackage outermostPackage,
         javax.jmi.reflect.RefPackage immediatePackage
     ) {
-        this.delegation = new RefPackage_1Proxy(
+        this.delegation = new RefPackage_1(
             qualifiedPackageName,
             outermostPackage, 
             immediatePackage
@@ -154,7 +101,7 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
         String qualifiedCciName = qualifiedPackageName + ":" + cciName;
         String qualifiedMofName = qualifiedMofNames.get(qualifiedCciName);
         if(qualifiedMofName == null) {
-            Model_1_0 model = this.delegation.refModel();
+            Model_1_0 model = Model_1Factory.getModel();
             for(
                 Iterator<ModelElement_1_0> i = model.getContent().iterator(); 
                 i.hasNext(); 
@@ -167,7 +114,7 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                     elementName.equals(cciName) &&
                     qualifiedElementName.substring(0, qualifiedElementName.lastIndexOf(":")).equals(qualifiedPackageName)
                 ) {
-                    qualifiedMofNames.put(
+                    qualifiedMofNames.putIfAbsent(
                         qualifiedCciName, 
                         qualifiedMofName = qualifiedElementName
                     );
@@ -180,10 +127,8 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.NOT_FOUND, 
                 "model element not found with qualified cci name.",
-                new BasicException.Parameter [] {
-                  new BasicException.Parameter("package.name", qualifiedPackageName),
-                  new BasicException.Parameter("cci.name", cciName)
-                }
+                new BasicException.Parameter("package.name", qualifiedPackageName),
+                new BasicException.Parameter("cci.name", cciName)
             );
         }
         return qualifiedMofName;
@@ -222,86 +167,89 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                 return false;
             }
         } 
-        else if("refClass".equals(methodName) && args.length == 1) {
-            //
-            // RefClass
-            //
-            return this.delegation.refClass(
-                (String)args[0], // qualifiedClassName
-                (RefPackage_1_0)proxy
-            );
-        } 
-        else if(
-            declaringClass == Jmi1Package_1_0.class ||    
-            methodName.startsWith("ref") && 
-            (method.getName().length() > 3) &&
-            Character.isUpperCase(methodName.charAt(3))
-        ) {
-            return "refOutermostPackage".equals(methodName) ? 
-                this.delegation.refOutermostPackage() : 
-                method.invoke(this.delegation, args);
-        } 
-        else if(methodName.startsWith("get")) {
-            //
-            // Getters
-            //
-            String cciName = method.getName().substring(3);
-            String qualifiedPackageName = this.delegation.refMofId();
-            return this.delegation.refClass(
-                this.getQualifiedMofName(
-                    qualifiedPackageName.substring(0, qualifiedPackageName.lastIndexOf(":")), 
-                    cciName
-                ),
-                (RefPackage_1_0)proxy
-            );            
-        } 
-        else if(methodName.startsWith("create")) {
-            // 
-            // Creators
-            //
-            Class<?> returnType = method.getReturnType();
-            String cciName = method.getName().substring(6);
-            String qualifiedPackageName = this.delegation.refMofId();   
-            if(RefStruct_1_0.class.isAssignableFrom(returnType)) {
+        else {
+            this.delegation.assertOpen();
+            if("refClass".equals(methodName) && args.length == 1) {
                 //
-                // Structs
+                // RefClass
                 //
-                List<Object> iargs = new ArrayList<Object>();
-                if(args != null) {
-                    for(int i = 0; i < args.length; i++) {
-                        iargs.add(args[i]);
-                    }
-                }
-                return this.delegation.refCreateStruct(
-                    this.getQualifiedMofName(
-                        qualifiedPackageName.substring(0, qualifiedPackageName.lastIndexOf(":")),
-                        cciName
-                    ), 
-                    iargs
+                return this.delegation.refClass(
+                    (String)args[0], // qualifiedClassName
+                    (Jmi1Package_1_0)proxy
                 );
             } 
             else if(
-                //
-                // Queries
-                //
-                AnyTypePredicate.class.isAssignableFrom(returnType) ||
-                ComparableTypePredicate.class.isAssignableFrom(returnType) ||
-                MatchableTypePredicate.class.isAssignableFrom(returnType) ||
-                MultivaluedFeaturePredicate.class.isAssignableFrom(returnType) ||
-                PartiallyOrderedTypePredicate.class.isAssignableFrom(returnType) ||
-                ResourceIdentifierTypePredicate.class.isAssignableFrom(returnType) ||
-                StringTypePredicate.class.isAssignableFrom(returnType)
+                declaringClass == Jmi1Package_1_0.class ||    
+                methodName.startsWith("ref") && 
+                (method.getName().length() > 3) &&
+                Character.isUpperCase(methodName.charAt(3))
             ) {
-                return this.delegation.refCreateFilter(
+                return "refOutermostPackage".equals(methodName) ? 
+                    this.delegation.refOutermostPackage() : 
+                    method.invoke(this.delegation, args);
+            } 
+            else if(methodName.startsWith("get")) {
+                //
+                // Getters
+                //
+                String cciName = method.getName().substring(3);
+                String qualifiedPackageName = this.delegation.refMofId();
+                return this.delegation.refClass(
                     this.getQualifiedMofName(
-                        qualifiedPackageName.substring(0, qualifiedPackageName.lastIndexOf(":")),
-                        cciName.endsWith("Query") 
-                            ? cciName.substring(0, cciName.length() - "Query".length()) 
-                            : cciName
+                        qualifiedPackageName.substring(0, qualifiedPackageName.lastIndexOf(":")), 
+                        cciName
+                    ),
+                    (Jmi1Package_1_0)proxy
+                );            
+            } 
+            else if(methodName.startsWith("create")) {
+                // 
+                // Creators
+                //
+                Class<?> returnType = method.getReturnType();
+                String cciName = method.getName().substring(6);
+                String qualifiedPackageName = this.delegation.refMofId();   
+                if(RefStruct_1_0.class.isAssignableFrom(returnType)) {
+                    //
+                    // Structs
+                    //
+                    List<Object> iargs = new ArrayList<Object>();
+                    if(args != null) {
+                        for(int i = 0; i < args.length; i++) {
+                            iargs.add(args[i]);
+                        }
+                    }
+                    return this.delegation.refCreateStruct(
+                        this.getQualifiedMofName(
+                            qualifiedPackageName.substring(0, qualifiedPackageName.lastIndexOf(":")),
+                            cciName
                         ), 
-                    null, 
-                    null
-                );
+                        iargs
+                    );
+                } 
+                else if(
+                    //
+                    // Queries
+                    //
+                    AnyTypePredicate.class.isAssignableFrom(returnType) ||
+                    ComparableTypePredicate.class.isAssignableFrom(returnType) ||
+                    MatchableTypePredicate.class.isAssignableFrom(returnType) ||
+                    MultivaluedFeaturePredicate.class.isAssignableFrom(returnType) ||
+                    PartiallyOrderedTypePredicate.class.isAssignableFrom(returnType) ||
+                    ResourceIdentifierTypePredicate.class.isAssignableFrom(returnType) ||
+                    StringTypePredicate.class.isAssignableFrom(returnType)
+                ) {
+                    return this.delegation.refCreateQuery(
+                        this.getQualifiedMofName(
+                            qualifiedPackageName.substring(0, qualifiedPackageName.lastIndexOf(":")),
+                            cciName.endsWith("Query") 
+                                ? cciName.substring(0, cciName.length() - "Query".length()) 
+                                : cciName
+                        ),
+                        true, // subclasses 
+                        null
+                    );
+                }
             }
         }        
         throw new UnsupportedOperationException(methodName);
@@ -311,6 +259,6 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
     // Members
     //-----------------------------------------------------------------------
     protected final RefPackage_1 delegation;
-    protected final static Map<String,String> qualifiedMofNames = new HashMap<String,String>();
+    protected final static ConcurrentMap<String,String> qualifiedMofNames = new ConcurrentHashMap<String,String>();
     
 }

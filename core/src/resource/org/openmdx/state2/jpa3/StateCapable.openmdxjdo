@@ -6,9 +6,9 @@
 <openmdxjdo>
 	<package name="org.openmdx.state2.jpa3">
 		<class name="StateCapable">
-			<field name="openmdxjdoVersion" visibility="spi">
-				<column name="OBJECT__STATE_NUMBER"/>
-			</field>
+			<field name="transactionTimeUnique" visibility="cci" persistence-modifier="none"/>
+			<field name="validTimeUnique" visibility="cci" persistence-modifier="none"/>
+			<field name="stateVersion" visibility="none"  persistence-modifier="persistent"/>
 		</class>
 	</package>
 </openmdxjdo>

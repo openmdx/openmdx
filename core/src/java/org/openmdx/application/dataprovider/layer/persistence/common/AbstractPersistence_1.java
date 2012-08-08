@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractPersistence_1.java,v 1.1 2009/05/26 14:31:22 wfro Exp $
+ * Name:        $Id: AbstractPersistence_1.java,v 1.3 2010/01/10 23:05:37 wfro Exp $
  * Description: Abstract persistence layer
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:22 $
+ * Date:        $Date: 2010/01/10 23:05:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,12 +52,17 @@
 package org.openmdx.application.dataprovider.layer.persistence.common;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Database_1 implements a OO-to-Relational mapping and makes DataproviderObjects
@@ -70,17 +75,19 @@ import org.openmdx.base.exception.ServiceException;
  * start logging JDBC calls: DriverManager.setLogStream(System.out);
  */
 
-abstract public class AbstractPersistence_1
-extends OperationAwareLayer_1 
-{
+abstract public class AbstractPersistence_1 extends OperationAwareLayer_1 {
 
+    public AbstractPersistence_1(
+    ) {
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
      */
     public void activate(
         short id, 
         Configuration configuration,
-        Layer_1_0 delegation
+        Layer_1 delegation
     ) throws ServiceException {
         super.activate(
             id, 
@@ -105,6 +112,32 @@ extends OperationAwareLayer_1
         );
     }
 
+    //---------------------------------------------------------------------------
+    public Set<String> getAllSubtypes(
+        String qualifiedTypeName
+    ) throws ServiceException {
+        if(qualifiedTypeName == null) return null;
+        ModelElement_1_0 classDef = getModel().getDereferencedType(qualifiedTypeName);
+        if(classDef == null) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE, 
+                "class not found",
+                new BasicException.Parameter("type", qualifiedTypeName)
+            );
+        }
+        if("org:openmdx:base:BasicObject".equals(qualifiedTypeName)) {
+            return null;
+        } 
+        else {
+            Set<String> allSubtypes = new HashSet<String>();
+            for(Object path : classDef.objGetList("allSubtype")) {
+                allSubtypes.add(((Path)path).getBase());
+            }
+            return allSubtypes;
+        }
+    }
+    
     /**
      * Defines the large objects' default buffer size
      */

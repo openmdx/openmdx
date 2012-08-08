@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="ltr">
 <head>
-  <title>openCRX - Advanced Search</title>
+  <title>openCRX - усовершенствованный поиск</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link href="_style/colors.css" rel="stylesheet" type="text/css">
   <link href="_style/default.css" rel="stylesheet" type="text/css" />
@@ -11,7 +11,7 @@
 <body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
 <table class="objectTitle">
   <tr>
-    <td>Advanced Search</td>
+    <td>Усовершенствованный поиск</td>
 	<td>
 		<script>
 		  <!--
@@ -22,71 +22,66 @@
   </tr>
 </table>
 
- <div class="hh2">Advanced Search Made Easy</div>
- <div class="normal">You can increase the accuracy of your searches by adding
-     operators that fine-tune your keywords and numbers. All the options
-     listed on this page can be entered directly into the  search box.</div>
- <div class="hh2">The basics</div> 
- <div class="normal">You can enter a word/number or an expression, e.g. <strong>'Miller'</strong>, <strong>'> 500'</strong> or <strong>'>=
-   Smith'</strong>, and then</div>
+ <div class="hh2">Усовершенствованный поиск стал легче</div>
+ <div class="normal">Вы можете увеличить точность своих поисковых запросов, добавляя
+     операторы, которые уточняют запросы с ключевыми словами и числами. Все опции
+     перечисленные на этой странице могут быть введены непосредственно в окно поиска.</div>
+ <div class="hh2">Основы</div> 
+ <div class="normal">Вы можете ввести слово/число или выражение, например, <strong>'Miller'</strong>, <strong>'> 500'</strong> или <strong>'>=
+   Smith'</strong>, после чего</div>
  <table cellpadding="0" cellspacing="10">
    <tr valign="top">
-     <td>&#8226; click on a <strong>column header</strong> to search objects
-       with matching value(s) in that particular attribute (<strong>all objects</strong> are
-       searched regardless of currently set filters and already existing search
-       results will be lost)</td>
+     <td>&#8226; кликнуть по <strong>заголовку колонки</strong> для поиска объектов
+       соответствующих значениям этого атрибута (<strong>все объекты</strong> ищутся 
+       независимо от установленного текущего набора фильтров и существующие результаты поиска будут потеряны)</td>
 	 <td bgcolor="#CCCCCC"><strong>New Search</strong><br />
 	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
    </tr>
    <tr valign="top">
-     <td>&#8226; click on the <strong>[+] button</strong> to search objects with
-       matching value(s) in that particular attribute (<strong>only objects contained
-       in the previous search or filter</strong> are
-       searched, i.e. 'adding' this search will return a more restricted result
-       set)</td>
-	 <td bgcolor="#CCCCCC"><strong>Add Condition</strong><br />
+     <td>&#8226; кликнуть по <strong>кнопке [+]</strong> для поиска объектов
+       соответствующих значениям этого атрибута (<strong>только объекты, содержащиеся в результатах
+       предыдущего поиска в соответствии с набором фильтров</strong> будут найдены,
+       например, 'добавление' этого поиска вернет более ограниченный набор результатов)</td>
+	 <td bgcolor="#CCCCCC"><strong>Добавить условие</strong><br />
 	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
    </tr>
 </table>
- <div class="hh2">Operators</div>
- <div class="normal">The following operators are supported (please note, however,
-   that some database systems do not support all operators):</div>
+ <div class="hh2">Операторы</div>
+ <div class="normal">Поддерживаются следующие операторы (заметим, однако, что не все базы данных поддерживают все операторы):</div>
  <ul>
- <li>sounds like (<strong>*</strong>)</li>
- <li>like (<strong>%</strong>), default operator for string searches</li>
- <li>equal (<strong>=</strong>), default operator for boolean, number, and code
-   searches</li>
- <li>not equal (<strong><></strong>, <strong>!</strong>=)</li>
- <li>less (<strong><</strong>)</li>
- <li>less or equal (<strong><=</strong>)</li>
- <li>greater (<strong>></strong>)</li>
- <li>greater or equal <strong>(>=</strong>)</li>
+ <li>похож [sounds like] (<strong>*</strong>)</li>
+ <li>подобен [like] (<strong>%</strong>), оператор по умолчанию для строковых запросов</li>
+ <li>равен [equal] (<strong>=</strong>), оператор по умолчанию для boolean, number, и code
+   запросов</li>
+ <li>не равен [not equal] (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>меньше (<strong><</strong>)</li>
+ <li>меньше или равен (<strong><=</strong>)</li>
+ <li>больше (<strong>></strong>)</li>
+ <li>больше или равен <strong>(>=</strong>)</li>
  </ul>
- <div class="hh2">&quot;AND&quot; Searches</div>
- <div class="normal">To retrieve objects that match more than one condition at the same time,
-   use an ampersand &quot;<strong>&amp;</strong>&quot; between conditions. For example, to search for objects
-   with values between 500 and 1000 (i.e. greater than 500 and less than 1000), just type: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
- <div class="hh2">&quot;OR&quot; Searches</div>
-<div class="normal">To retrieve objects that include
-       either word A or word B, use a semicolon &quot;<strong>;</strong>&quot; between terms. For example,
-     to search for contacts named 'Smith' OR 'Miller', just type: <strong>'= Smith; Miller'</strong></div>
- <div class="hh2">Combining Searches</div>
- <div class="normal">You can combine searches virtually without limits. For example, to search
-   for objects with
-   values less than '1000', but different from '500' and different from '600',
-   just
-   type: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
- <div class="normal">The parsing rules for combined searches are as follows:</div>
+ <div class="hh2">&quot;AND&quot; запросы</div>
+ <div class="normal">чтобы найти объекты, которые соответствуют больше чем одному условию одновременно,
+   используйте амперсанд &quot;<strong>&amp;</strong>&quot; между условиями. Например, чтобы найти объекты
+   со значениями между 500 и 1000 (т.е. больше чем 500 и меньше 1000), просто наберите: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">&quot;OR&quot; запросы</div>
+ <div class="normal">Чтобы найти  объекты, которые включают
+       или слово A или слово B, используйте точку с запятой &quot;<strong>;</strong>&quot; между значениями. Например,
+     чтобы найти контакты с именами 'Smith' ИЛИ 'Miller', просто наберите: <strong>'= Smith; Miller'</strong></div>
+ <div class="hh2">Сложные запросы</div>
+ <div class="normal">Вы можете объединить запросы фактически без ограничений. Например, чтобы найти
+   объекты со значениями меньше чем '1000', но отличающиеся от '500' и от '600',
+   просто наберите: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">Правила синтаксического анализа для сложных запросов следующие:</div>
  <ul>
    <li>searchExpr ::= filterValue { & filterValue }<br />
-   (--> string tokenizer with <strong>&</strong> as separator)</li>
+   (--> разбивщик строк с <strong>&</strong> как разделителем)</li>
    <li>filterValue ::= [operator] value { ; value }<br />
-   (--> string tokenizer with <strong>;</strong> as separator)</li>
+   (--> разбивщик строк с <strong>;</strong> как разделителем)</li>
  </ul>
- <div class="hh2">Wildcard Searches</div>
+ <div class="hh2">Поиск по маске</div>
  <div class="normal">
-   <p>Some DBs allow you to initiate wildcard searches. If supported, you can for example search for all contacts with names containing 'ller' (e.g. Miller, Mueller, etc.) by typing: <strong>'%%ller'<br />
-   WARNING:</strong> wildcard searches can be very time-consuming if the DB is not tuned (full table scans)! </p>
+   <p>Ряд баз данных допускают поиск по маске. В этом случае, Вы можете выполнять поиск по всем контактам с именами, содержащими 'ller' (например, Miller, Mueller, и т.д.) набрав: <strong>'%%ller'<br />
+   ВНИМАНИЕ:</strong> поиск по маске может потребовать много времени, если БД специально не оптимизирована (потребуется полный перебор таблицы)! </p>
  </div>
 </body>
 </html>

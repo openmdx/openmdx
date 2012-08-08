@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestAspects.java,v 1.3 2009/04/07 19:55:16 hburger Exp $
+ * Name:        $Id: TestAspects.java,v 1.4 2009/09/15 14:01:20 hburger Exp $
  * Description: Test Aspects 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/07 19:55:16 $
+ * Date:        $Date: 2009/09/15 14:01:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
 import javax.resource.ResourceException;
 
@@ -72,7 +73,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openmdx.application.dataprovider.deployment.Deployment_1;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 
@@ -90,15 +90,16 @@ public class TestAspects {
     /**
      * Deployment Configuration
      */
-    protected static final Deployment_1 accessorFactory = new Deployment_1(
-        true, // IN_PROCESS_LIGHTWEIGHT_CONTAINER
-        "file:../test-core/src/connector/openmdx-2/oracle-10g.rar", // CONNECTOR_URL
-        "file:../test-core/src/ear/test-aspect.ear", // APPLICATION_URL
-        false, // LOG_DEPLOYMENT_DETAILS
-        "test/openmdx/aspect/EntityManagerFactory", // ENTITY_MANAGER_FACTORY_JNDI_NAME
-        "test/openmdx/aspect/Gateway", // GATEWAY_JNDI_NAME
-        "test:openmdx:base" // MODEL
-    );
+    protected static final PersistenceManagerFactory accessorFactory = null; 
+//    new Deployment_1(
+//        true, // IN_PROCESS_LIGHTWEIGHT_CONTAINER
+//        "file:../test-core/src/connector/openmdx-2/oracle-10g.rar", // CONNECTOR_URL
+//        "file:../test-core/src/ear/test-aspect.ear", // APPLICATION_URL
+//        false, // LOG_DEPLOYMENT_DETAILS
+//        "test/openmdx/aspect/EntityManagerFactory", // ENTITY_MANAGER_FACTORY_JNDI_NAME
+//        "test/openmdx/aspect/Gateway", // GATEWAY_JNDI_NAME
+//        "test:openmdx:base" // MODEL
+//    );
     
     /**
      * Persistence Manager used by each test
@@ -120,9 +121,10 @@ public class TestAspects {
     
     @Before
     public void acquirePersistenceManager() throws ResourceException{
-        this.persistenceManager = principalName == null ? accessorFactory.getEntityManager(
-        ) : accessorFactory.getEntityManager(
-            principalName
+        this.persistenceManager = principalName == null ? accessorFactory.getPersistenceManager(
+        ) : accessorFactory.getPersistenceManager(
+            principalName,
+            null
         );
     }
 

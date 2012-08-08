@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jdoconfig xmlns="http://java.sun.com/xml/ns/jdo/jdoconfig"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://java.sun.com/xml/ns/jdo/jdoconfig"
+>
+
+	<!-- Clock -->
+    <persistence-manager-factory 
+    	name="test-Clock-EntityManagerFactory"
+    	class="org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_1"
+    	connection-factory-name="jdo:test-Clock-DataManagerFactory"
+    />
+    <persistence-manager-factory 
+    	name="test-Clock-DataManagerFactory"
+    	class="org.openmdx.base.accessor.rest.DataManagerFactory_1"
+    >
+        <property name="org.openmdx.jdo.DataManager.xriPattern[0]" value="xri://@openmdx*test.openmdx.clock1/provider/Java/($...)"/>
+        <property name="org.openmdx.jdo.DataManager.restPlugIn[0]" value="test.openmdx.clock1.jdo.DataManagerPlugIn"/>
+        <property name="test.openmdx.clock1.jdo.DataManagerPlugIn.class" value="org.openmdx.application.dataprovider.kernel.EmbeddedDataprovider_1"/>
+        <property name="test.openmdx.clock1.jdo.DataManagerPlugIn.configuration" value="xri://+resource/META-INF/clock1DataManagerPlugIn.properties"/>
+    </persistence-manager-factory>
+
+	<!-- Main -->
+    <persistence-manager-factory 
+    	name="test-Main-EntityManagerFactory"
+    	class="org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_1"
+    	connection-factory-name="jdo:test-Main-DataManagerFactory"
+    >
+        <property name="org.openmdx.jdo.EntityManager.plugIn[0]" value="test.openmdx.app1.jdo.EntityManagerPlugIn"/>
+        <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.modelPackage[0]" value="test:openmdx:app1"/>
+        <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.packageImpl[0]" value="test.openmdx.app1.aop2"/>
+        <property name="test.openmdx.app1.jdo.EntityManagerPlugIn.userObject[0]" value="PriceCalculator"/>
+        <property name="PriceCalculator.class" value="test.openmdx.app1.aop2.PriceCalculator"/>
+        <property name="PriceCalculator.duration" value="(java.lang.Long)1000"/>
+        <property name="org.openmdx.jdo.ViewManager.plugIn[0]" value="org.openmdx.audit2.PlugIn"/>
+        <property name="org.openmdx.jdo.ViewManager.plugIn[1]" value="org.openmdx.base.PlugIn"/>
+        <property name="org.openmdx.audit2.PlugIn.class" value="org.openmdx.audit2.aop1.PlugIn_1"/>
+        <property name="org.openmdx.base.PlugIn.class" value="org.openmdx.base.aop1.PlugIn_1"/>
+    </persistence-manager-factory>
+    <persistence-manager-factory 
+    	name="test-Main-DataManagerFactory"
+    	class="org.openmdx.base.accessor.rest.DataManagerFactory_1"
+    	connection-factory-name="java:comp/env/jdbc/DataSource"
+    >
+        <property name="org.openmdx.jdo.DataManager.plugIn[0]" value="org.openmdx.audit2.PlugIn"/>
+        <property name="org.openmdx.jdo.DataManager.plugIn[1]" value="org.openmdx.base.PlugIn"/>
+        <property name="org.openmdx.jdo.DataManager.virtualObjectPlugIn" value="org.openmdx.virtual.PlugIn"/>
+        <property name="org.openmdx.jdo.DataManager.xriPattern[0]" value="xri://@openmdx*test.openmdx.app1/($...)"/>
+        <property name="org.openmdx.jdo.DataManager.xriPattern[1]" value="xri://@openmdx*org.openmdx.audit2/($...)"/>
+        <property name="org.openmdx.jdo.DataManager.restPlugIn[0]" value="test.openmdx.app1.PlugIn"/>
+        <property name="org.openmdx.jdo.DataManager.restPlugIn[1]" value="test.openmdx.audit2.PlugIn"/>
+        <property name="test.openmdx.app1.PlugIn.class" value="org.openmdx.application.dataprovider.kernel.EmbeddedDataprovider_1"/>
+        <property name="test.openmdx.app1.PlugIn.configuration" value="xri://+resource/META-INF/app1RestPlugIn.properties"/>
+        <property name="test.openmdx.audit2.PlugIn.class" value="org.openmdx.application.dataprovider.kernel.EmbeddedDataprovider_1"/>
+        <property name="test.openmdx.audit2.PlugIn.configuration" value="xri://+resource/META-INF/audit2RestPlugIn.properties"/>
+        <property name="org.openmdx.audit2.PlugIn.class" value="org.openmdx.audit2.aop0.PlugIn_1"/>
+        <property name="org.openmdx.audit2.PlugIn.auditSegment" value="xri://@openmdx*org.openmdx.audit2/provider/Audit/segment/JmiJdbc"/>
+        <property name="org.openmdx.audit2.PlugIn.auditPattern[0]" value="xri://@openmdx*test.openmdx.app1/provider/Audit/($...)"/>
+        <property name="org.openmdx.audit2.PlugIn.dataPattern[0]" value="xri://@openmdx*test.openmdx.app1/provider/JmiJdbc/($...)"/>
+        <property name="org.openmdx.audit2.PlugIn.modifiedFeaturePersistent" value="(java.lang.Boolean)false"/>
+        <property name="org.openmdx.audit2.PlugIn.audit1Persistence" value="(java.lang.Boolean)true"/>
+        <property name="org.openmdx.base.PlugIn.class" value="org.openmdx.base.aop0.PlugIn_1"/>
+        <property name="org.openmdx.virtual.PlugIn.class" value="org.openmdx.base.accessor.rest.spi.VirtualObjects_2"/>
+        <property name="org.openmdx.virtual.PlugIn.finalPattern[0]" value="xri://@openmdx*($..)"/>
+        <property name="org.openmdx.virtual.PlugIn.finalPattern[1]" value="xri://@openmdx*($..)/provider/($..)"/>
+        <property name="org.openmdx.virtual.PlugIn.finalClass[0]" value="org:openmdx:base:Authority"/>
+        <property name="org.openmdx.virtual.PlugIn.finalClass[1]" value="org:openmdx:base:Provider"/>
+    </persistence-manager-factory>
+
+	<!-- Datatypes -->
+    <persistence-manager-factory 
+    	name="test-Datatypes-EntityManagerFactory"
+    	class="org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_1"
+    	connection-factory-name="jdo:test-Datatypes-DataManagerFactory"
+    />
+    <persistence-manager-factory 
+    	name="test-Datatypes-DataManagerFactory"
+    	class="org.openmdx.base.accessor.rest.DataManagerFactory_1"
+    	connection-factory-name="java:comp/env/jdbc/DataSource"
+    >
+        <property name="org.openmdx.jdo.DataManager.xriPattern[0]" value="xri://@openmdx*test.openmdx.datatypes1/provider/Persistent/segment/Default/($...)"/>
+        <property name="org.openmdx.jdo.DataManager.restPlugIn[0]" value="test.openmdx.datatypes1.jdo.DefaultPlugIn"/>
+        <property name="test.openmdx.datatypes1.jdo.DefaultPlugIn.class" value="org.openmdx.application.dataprovider.kernel.EmbeddedDataprovider_1"/>
+        <property name="test.openmdx.datatypes1.jdo.DefaultPlugIn.configuration" value="xri://+resource/META-INF/datatypes1DefaultPlugIn.properties"/>
+        <property name="org.openmdx.jdo.DataManager.xriPattern[1]" value="xri://@openmdx*test.openmdx.datatypes1/provider/Persistent/segment/Numeric/($...)"/>
+        <property name="org.openmdx.jdo.DataManager.restPlugIn[1]" value="test.openmdx.datatypes1.jdo.NumericPlugIn"/>
+        <property name="test.openmdx.datatypes1.jdo.NumericPlugIn.class" value="org.openmdx.application.dataprovider.kernel.EmbeddedDataprovider_1"/>
+        <property name="test.openmdx.datatypes1.jdo.NumericPlugIn.configuration" value="xri://+resource/META-INF/datatypes1NumericPlugIn.properties"/>
+        <property name="org.openmdx.jdo.DataManager.xriPattern[2]" value="xri://@openmdx*test.openmdx.datatypes1/provider/Persistent/segment/Native/($...)"/>
+        <property name="org.openmdx.jdo.DataManager.restPlugIn[2]" value="test.openmdx.datatypes1.jdo.NativePlugIn"/>
+        <property name="test.openmdx.datatypes1.jdo.NativePlugIn.class" value="org.openmdx.application.dataprovider.kernel.EmbeddedDataprovider_1"/>
+        <property name="test.openmdx.datatypes1.jdo.NativePlugIn.configuration" value="xri://+resource/META-INF/datatypes1NativePlugIn.properties"/>
+    </persistence-manager-factory>
+
+</jdoconfig>

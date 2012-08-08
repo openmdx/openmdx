@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Base64.java,v 1.8 2008/10/08 17:39:40 wfro Exp $
+ * Name:        $Id: Base64.java,v 1.9 2010/02/18 14:31:43 hburger Exp $
  * Description: BASE64 encode/decode
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/08 17:39:40 $
+ * Date:        $Date: 2010/02/18 14:31:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -316,7 +316,7 @@ public class Base64 {
             rest -= 3;
             output += 4;
             if (output % 76 == 0)
-                writer.write("\n");
+                writer.write('\n');
         }
         if (rest == 1) {
             int i = data[rindex]&0xff;

@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: show-Default.jsp,v 1.78 2009/03/06 10:49:40 wfro Exp $
+ * Name:        $Id: show-Default.jsp,v 1.92 2009/10/21 14:52:50 wfro Exp $
  * Description: Default.jsp
- * Revision:    $Revision: 1.78 $
+ * Revision:    $Revision: 1.92 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/06 10:49:40 $
+ * Date:        $Date: 2009/10/21 14:52:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,17 +65,17 @@ org.openmdx.portal.servlet.texts.*
 	ApplicationContext app = (ApplicationContext)session.getValue(WebKeys.APPLICATION_KEY);
 	ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_SHOW);
 	ShowObjectView view = (ShowObjectView)viewsCache.getView(request.getParameter(Action.PARAMETER_REQUEST_ID));
-	PaintScope paintScope = PaintScope.valueOf(request.getParameter(Action.PARAMETER_SCOPE));
 	Texts_1_0 texts = app.getTexts();
 	ShowInspectorControl inspectorControl = view.getShowInspectorControl();
-	HtmlPage p = HtmlPageFactory.openPage(
+	ViewPort p = ViewPortFactory.openPage(
 		view,
 		request,
 		out
 	);
 
-	// PaintScope.FULL
-	if(paintScope == PaintScope.FULL) {
+	// ViewPort.Type.STANDARD
+	if(p.getViewPortType() == ViewPort.Type.STANDARD) {
+
 		// Set header
 		response.setHeader(
 			"Cache-Control",
@@ -165,11 +165,17 @@ org.openmdx.portal.servlet.texts.*
 		operationResults.addControl(inspectorControl.getOperationPaneControl(), OperationPaneControl.FRAME_RESULTS);
 
 		// Errors
-		Control errors =	view.createControl(null, ShowErrorsControl.class);
+		Control errors = view.createControl(null, ShowErrorsControl.class);
 
 		// Attributes
 		Control attributes = inspectorControl.getAttributePaneControl();
 
+		// Dashboard
+		Control dashboard = view.createControl(
+			"Dashboard",
+			DashboardControl.class
+		);
+		
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="<%= texts.getDir() %>">
@@ -211,6 +217,9 @@ org.openmdx.portal.servlet.texts.*
 	<link rel="stylesheet" type="text/css" href="_style/ssf.css" >
 	<link rel="stylesheet" type="text/css" href="_style/n2default.css" >
 	<link rel="stylesheet" type="text/css" href="javascript/yui/build/assets/skins/sam/container.css" >
+	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.css" >
+	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.lang.css" >
+	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.math.css" >
 	<link rel='shortcut icon' href='images/favicon.ico' />
 <%
 	prolog.paint(p, PagePrologControl.FRAME_POST_PROLOG, false);
@@ -280,11 +289,15 @@ org.openmdx.portal.servlet.texts.*
 		</div> <!-- header -->
 		<div id="content-wrap">
 			<div id="<%= app.getPanelState("Header") == 0 ? "content" : "contentNH" %>">
-				<div id="UserDialog"></div>
+				<div id="UserDialog"><div id="UserDialogWait" class="hidden" /></div></div>
 <%@ include file="../../../../show-header.html" %>
 <%
 				errors.paint(p, false);
 				operationResults.paint(p, false);
+				// No dashboards in lookup mode
+				if(view.getLookupType() == null) {
+					dashboard.paint(p, false);
+				}
 				p.flush();
 %>
 				<div id="aPanel">
@@ -310,7 +323,7 @@ org.openmdx.portal.servlet.texts.*
 			</div> <!-- content -->
 		</div> <!-- content-wrap -->
 <%@ include file="../../../../show-footer-noscroll.html" %>
-	<div> <!-- wrap -->
+	</div> <!-- wrap -->
 </div> <!-- container -->
 
 <%
@@ -321,18 +334,105 @@ org.openmdx.portal.servlet.texts.*
 </html>
 <%
 	}
-	// PaintScope.ATTRIBUTE_PANE
-	else if(paintScope == PaintScope.ATTRIBUTE_PANE) {
-		view.getAttributePane().getAttributePaneControl().paint(
-			p,
-			false
+
+	// ViewPort.Type.MOBILE
+	else if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+
+		// Set header
+		response.setHeader(
+			"Cache-Control",
+			"max-age=" + Integer.MAX_VALUE
+		);
+		response.setHeader(
+			"Pragma",
+			""
+		);
+		// Attributes
+		Control attributes = inspectorControl.getAttributePaneControl();
+
+%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<%
+	String title = view.getObjectReference().getTitle();
+	if(title == null) {
+	    title = "#ERR";
+	}
+	else {
+	    while(title.startsWith("<") && title.indexOf("/>") > 0) {
+	        title = title.substring(title.indexOf("/>") + 2);
+	    }
+	}
+%>
+  <title><%= app.getApplicationName() + " - " + title + (title.length() == 0 ? "" : " - ") + view.getObjectReference().getLabel() %></title>
+  <meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <meta name="apple-touch-fullscreen" content="YES" /> 
+  <style type="text/css" media="screen">@import "./_style/ssf.css";</style>
+  <style type="text/css" media="screen">@import "./_style/mobile/iui.css";</style>
+  <style type="text/css" media="screen">@import "./_style/mobile/opencrx-iui.css";</style>
+  <script type="text/javascript" src="javascript/portal-all.js"></script>
+  <script type="application/x-javascript">      
+      addEventListener(
+	"load", 
+	function() {
+	  setTimeout(updateLayout, 0);
+	}, 
+	false
+      );  
+      function updateLayout(
+      ) {
+	window.scrollTo(0, 1);
+      }      
+  </script>
+</head>
+<body orient="landscape">
+    <div class="toolbar" style="font-size:17px;font-weight:bold;color:#dddddd;">
+      <div style="width:90%">
+<%
+		NavigationControl.paintBreadcrum(
+		  p,
+		  false
+		);
+		NavigationControl.paintToggleViewPort(
+		  p,
+		  false
 		);
 		p.flush();
-		p.close(false);
 %>
-	<script language="javascript" type="text/javascript">
+      </div>
+    </div>
+<%
+    attributes.paint(p, false);
+    p.flush();
+    ReferencePaneControl[] referencePaneControls = inspectorControl.getReferencePaneControl();
+    for(int i = 0; i < referencePaneControls.length; i++) {
+		referencePaneControls[i].paint(
+		    p,
+		    ReferencePaneControl.FRAME_VIEW,
+		    false // forEditing
+		);
+    }
+    p.flush();
+%>
+</body>
+</html>
+<%
+	}
+	
+	// ViewPort.Type.EMBEDDED
+	else if(p.getViewPortType() == ViewPort.Type.EMBEDDED) {
+	  view.getAttributePane().getAttributePaneControl().paint(
+		  p,
+		  false
+	  );
+	  p.flush();
+	  p.close(false);
+%>
+	  <script language="javascript" type="text/javascript">
 		//alert('postLoad show');
-	</script>
+	  </script>
 <%
 	}
 %>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PagePrologControl.java,v 1.27 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: PagePrologControl.java,v 1.29 2009/09/25 12:02:38 wfro Exp $
  * Description: PagePrologControl
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,9 +60,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.ViewPort;
 
 public class PagePrologControl
     extends Control
@@ -84,24 +84,24 @@ public class PagePrologControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {        
-        AppLog.detail("> paint");
+    	SysLog.detail("> paint");
         if(FRAME_PRE_PROLOG.equals(frame)) {
             p.setProperty(
-                HtmlPage.PROPERTY_POPUP_IMAGES,
+                ViewPort.PROPERTY_POPUP_IMAGES,
                 new HashMap()
             );
             p.setProperty(
-                HtmlPage.PROPERTY_CALENDAR_IDS,
+                ViewPort.PROPERTY_CALENDAR_IDS,
                 new ArrayList()
             );        
         }
         else if(FRAME_POST_PROLOG.equals(frame)) {
         }
-        AppLog.detail("< paint");        
+        SysLog.detail("< paint");        
     }
 
     //-------------------------------------------------------------------------

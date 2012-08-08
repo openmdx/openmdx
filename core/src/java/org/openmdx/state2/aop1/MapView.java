@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MapView.java,v 1.2 2009/01/10 12:12:12 wfro Exp $
+ * Name:        $Id: MapView.java,v 1.3 2009/09/17 13:21:05 hburger Exp $
  * Description: SortedMapView 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/10 12:12:12 $
+ * Date:        $Date: 2009/09/17 13:21:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -315,6 +315,14 @@ public class MapView implements SortedMap<Integer,Object> {
             public int size() {
                 return MapView.this.size();
             }
+
+            /* (non-Javadoc)
+             * @see java.util.AbstractCollection#isEmpty()
+             */
+            @Override
+            public boolean isEmpty() {
+                return MapView.this.isEmpty();
+            }
             
         }  : this.entries;
     }
@@ -429,6 +437,14 @@ public class MapView implements SortedMap<Integer,Object> {
             @Override
             public int size() {
                 return MapView.this.size();
+            }
+
+            /* (non-Javadoc)
+             * @see java.util.AbstractCollection#isEmpty()
+             */
+            @Override
+            public boolean isEmpty() {
+                return MapView.this.isEmpty();
             }
             
         } : this.values;

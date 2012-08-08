@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectView.java,v 1.19 2009/05/26 12:41:16 wfro Exp $
+ * Name:        $Id: ObjectView.java,v 1.25 2010/04/27 12:21:06 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 12:41:16 $
+ * Date:        $Date: 2010/04/27 12:21:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,11 +62,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openmdx.application.log.AppLog;
+import javax.jdo.JDOHelper;
+import javax.jdo.PersistenceManager;
+import javax.jmi.reflect.RefStruct;
+
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ObjectReference;
@@ -83,8 +88,32 @@ public abstract class ObjectView
     public ObjectView(
         String id,
         String containerElementId,
-        RefObject_1_0 object,
-        ApplicationContext application,
+        Path objectIdentity,
+        ApplicationContext app,
+        Map<Path,Action> historyActions,
+        String lookupType,
+        Map restrictToElements
+    ) {    	
+        this(
+            id,
+            containerElementId,
+            // Get a new persistence manager for each view. This results
+            // in more DB round-trips, however different views do not
+            // interfere with each other.
+            app.getNewPmData().getObjectById(objectIdentity),
+            app,
+            historyActions,
+            lookupType,
+            restrictToElements
+        );
+    }
+
+    //-------------------------------------------------------------------------
+    public ObjectView(
+        String id,
+        String containerElementId,
+        Object object,
+        ApplicationContext app,
         Map<Path,Action> historyActions,
         String lookupType,
         Map restrictToElements
@@ -93,11 +122,11 @@ public abstract class ObjectView
             id,
             containerElementId,
             object,
-            application
+            app
         );
         this.objectReference = new ObjectReference(
-            object,
-            application
+            (RefObject_1_0)this.object,
+            app
         );
         this.historyActions = historyActions;
         this.lookupType = lookupType;
@@ -120,10 +149,10 @@ public abstract class ObjectView
                     this.inspector = this.application.getInspector(forClass);
                 }
                 catch(ServiceException e) {
-                    AppLog.warning(e.getMessage(), e.getCause());              
+                	SysLog.warning(e.getMessage(), e.getCause());              
                 }
                 if(this.inspector == null) {
-                    AppLog.warning("can not get inspector for object " + (this.object == null ? null : this.objectReference.getObject().refMofId()));      
+                	SysLog.warning("can not get inspector for object " + (this.object == null ? null : this.objectReference.getObject().refMofId()));      
                 }
             }
         }
@@ -143,21 +172,65 @@ public abstract class ObjectView
     }
   
     //-------------------------------------------------------------------------
+    public void close(
+    ) {
+    	if(this.object instanceof RefObject_1_0) {
+    		try {
+	    	    this.inspectorControl = null;
+	    	    this.inspector = null;    
+	    	    this.objectReference = null;
+	    	    this.attributePane = null;
+	    		PersistenceManager pm = JDOHelper.getPersistenceManager(this.object);
+	    		pm.close();
+	    		this.object = null;
+    		} catch(Exception e) {}
+    	}
+    }
+  
+    //-------------------------------------------------------------------------
+    public void structToMap(
+    	RefStruct from,
+    	Map to,
+    	ModelElement_1_0 structDef
+    ) throws ServiceException {
+    	PersistenceManager pm = JDOHelper.getPersistenceManager(this.getObjectReference().getObject());
+    	for(Iterator i = ((Map)structDef.objGetValue("field")).values().iterator(); i.hasNext(); ) {
+    		ModelElement_1_0 field = (ModelElement_1_0)i.next();
+    		String fieldName = (String)field.objGetValue("qualifiedName");
+    		try {
+    			Object value = from.refGetValue(fieldName);
+    			if(value instanceof RefObject_1_0) {
+    				to.put(
+    					fieldName,
+    					pm.getObjectById(((RefObject_1_0)value).refGetPath())
+    				);
+    			} else {
+    				to.put(
+    					fieldName,
+    					value
+    				);        		  
+    			}
+    		}
+    		catch(Exception e) {
+    			to.put(fieldName, null);
+    		}
+    	}
+    }
+    
+    //-------------------------------------------------------------------------
     public Action[] getSelectParentAction(
     ) {
         RefObject_1_0 object = this.getRefObject();
         List selectParentActions = new ArrayList();
         if((object != null) && (object.refMofId() != null)) {
+        	PersistenceManager pm = JDOHelper.getPersistenceManager(object);
             Path p = new Path(object.refMofId());
             // Starting from segment
             ObjectReference parentReference = null;
             for(int i = 5; i <= p.size(); i+=2) {
                 try {
-                    // Get parent selectors from control package. Getting parent selectors from
-                    // the data package would result in roundtrips because each view gets a new 
-                    // data package and therefore parent selectors would be never cached 
                     ObjectReference reference = new ObjectReference(
-                        (RefObject_1_0)this.application.getPmControl().getObjectById(p.getPrefix(i)),
+                        (RefObject_1_0)pm.getObjectById(p.getPrefix(i)),
                         this.application
                     );
                     if(parentReference != null) {
@@ -174,7 +247,7 @@ public abstract class ObjectView
                 catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
                     if(e0.getExceptionCode() != BasicException.Code.AUTHORIZATION_FAILURE) {
-                        AppLog.warning("can not get parent", e);
+                    	SysLog.warning("can not get parent", e);
                     }
                 }
             }
@@ -230,18 +303,16 @@ public abstract class ObjectView
         boolean refreshData
     ) throws ServiceException {
         if(refreshData) {
-            this.application.resetPmData();
-            this.pm = this.application.getPmData();
-            RefObject_1_0 object = this.getRefObject();
-            if(this.object != null) {
-                this.object = this.getPersistenceManager().getObjectById(
-                    object.refGetPath()
-                );
+        	if(this.getRefObject() != null) {        		
+        		RefObject_1_0 object = (RefObject_1_0)this.application.getNewPmData().getObjectById(
+        			this.getRefObject().refGetPath()
+        		);
+        		this.object = object;
                 this.objectReference = new ObjectReference(
                     object,
                     this.application
                 );
-            }
+        	}
         }
     }
   

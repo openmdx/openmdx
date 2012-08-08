@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ConnectorDeploymentDescriptor.java,v 1.1 2009/01/12 12:49:22 wfro Exp $
+ * Name:        $Id: ConnectorDeploymentDescriptor.java,v 1.2 2009/09/07 13:03:03 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:22 $
+ * Date:        $Date: 2009/09/07 13:03:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,7 +53,7 @@ package org.openmdx.kernel.application.deploy.enterprise;
 
 import java.net.URL;
 
-import org.openmdx.kernel.application.configuration.Report;
+import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Connector;
 import org.openmdx.kernel.application.deploy.spi.Deployment.ResourceAdapter;
 import org.w3c.dom.Element;

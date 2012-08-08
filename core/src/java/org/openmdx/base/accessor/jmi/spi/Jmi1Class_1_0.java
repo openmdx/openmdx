@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1Class_1_0.java,v 1.3 2009/06/09 12:45:17 hburger Exp $
+ * Name:        $Id: Jmi1Class_1_0.java,v 1.5 2010/04/19 11:21:52 hburger Exp $
  * Description: Jmi1Class 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:17 $
+ * Date:        $Date: 2010/04/19 11:21:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,13 +52,10 @@
 
 package org.openmdx.base.accessor.jmi.spi;
 
-import java.util.Set;
-
 import javax.jdo.JDOFatalUserException;
 import javax.jmi.reflect.RefClass;
 
 import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectInvocationHandler.StandardMarshaller;
-import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
  * Jmi1Class
@@ -66,13 +63,6 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
  */
 public interface Jmi1Class_1_0 extends RefClass {
         
-    /**
-     * Returns the set of features which are recognized as having no implementations. 
-     * The set is not managed by users of a RefClass_1_1 implementation and not by
-     * the implementation itself.
-     */
-    Set<ModelElement_1_0> refFeaturesHavingNoImpl();
-    
     /**
      * Convert a model class name to the corresponding delegate class
      * 
@@ -91,18 +81,22 @@ public interface Jmi1Class_1_0 extends RefClass {
     boolean isTerminal();
 
     /**
-     * Retrieve the feature mapper which maps the class features 
-     * to the corresponding instance level interface methods.
-     * 
-     * @return this Jmi1Class' instance feature mapper
-     */
-    FeatureMapper getFeatureMapper();
-
-    /**
      * Retrievve the corresponding marshaller.
      * 
      * @return this Jmi1Class' marshaller
      */
     StandardMarshaller getMarshaller();
     
+    /**
+     * Retrieve the outermost package
+     * 
+     * @return the outermost package
+     */
+    Jmi1Package_1_0 refOutermostPackage();
+    
+    /**
+     * Asserts that the associated persistence manager is open
+     */
+    void assertOpen();
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Loader.java,v 1.10 2008/11/11 23:22:35 wfro Exp $
+ * Name:        $Id: Loader.java,v 1.11 2009/10/28 13:26:57 wfro Exp $
  * Description: Loader
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 23:22:35 $
+ * Date:        $Date: 2009/10/28 13:26:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,6 +65,7 @@ import java.util.zip.CRC32;
 
 import javax.servlet.ServletContext;
 
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 
 public class Loader {
@@ -129,7 +130,7 @@ public class Loader {
     ServletContext context,
     String resourcePath
   ) {
-    System.out.println("Inspecting " + resourcePath);
+    SysLog.info("Inspecting " + resourcePath);
     Set resources = context.getResourcePaths(resourcePath);
     CRC32 crc = new CRC32();
     if(resources != null) {

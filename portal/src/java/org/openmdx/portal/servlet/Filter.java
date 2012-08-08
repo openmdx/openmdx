@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.11 2009/03/08 18:03:19 wfro Exp $
+ * Name:        $Id: Filter.java,v 1.12 2009/06/16 17:08:26 wfro Exp $
  * Description: Filter
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:19 $
+ * Date:        $Date: 2009/06/16 17:08:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,10 +62,10 @@ import java.util.List;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.resource.Records;
+import org.openmdx.kernel.log.SysLog;
 
 public class Filter 
 extends org.openmdx.base.query.Filter
@@ -118,7 +118,7 @@ implements Serializable {
             }
         }
         if(hasDuplicates) {
-            AppLog.warning("Filter has duplicate order specifiers [name=" + name + "; context=" + Arrays.asList(context) + "]", Arrays.asList(orderSpecifier));
+        	SysLog.warning("Filter has duplicate order specifiers [name=" + name + "; context=" + Arrays.asList(context) + "]", Arrays.asList(orderSpecifier));
         }
         return (OrderSpecifier[])specifiers.toArray(new OrderSpecifier[specifiers.size()]);
     }

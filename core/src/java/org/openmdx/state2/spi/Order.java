@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Order.java,v 1.4 2009/05/25 10:13:10 hburger Exp $
+ * Name:        $Id: Order.java,v 1.6 2009/12/31 14:10:17 wfro Exp $
  * Description: ValidTimes 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/25 10:13:10 $
+ * Date:        $Date: 2009/12/31 14:10:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,8 +56,8 @@ import java.util.Date;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
-import org.w3c.spi.ImmutableDatatype;
 
 /**
  * Valid Times
@@ -172,8 +172,8 @@ public class Order {
         XMLGregorianCalendar d1,
         XMLGregorianCalendar d2
     ){
-        boolean i1 = d1 instanceof ImmutableDatatype;
-        boolean i2 = d2 instanceof ImmutableDatatype;
+        boolean i1 = d1 instanceof ImmutableDatatype<?>;
+        boolean i2 = d2 instanceof ImmutableDatatype<?>;
         return 
             i1 == i2 ? d1.compare(d2) :
             i1 ? ((XMLGregorianCalendar)d1.clone()).compare(d2) :
@@ -192,8 +192,8 @@ public class Order {
         XMLGregorianCalendar d1,
         XMLGregorianCalendar d2
     ){
-        boolean i1 = d1 instanceof ImmutableDatatype;
-        boolean i2 = d2 instanceof ImmutableDatatype;
+        boolean i1 = d1 instanceof ImmutableDatatype<?>;
+        boolean i2 = d2 instanceof ImmutableDatatype<?>;
         return 
             d1 == d2 ? true :
             d1 == null || d2 == null ? false :

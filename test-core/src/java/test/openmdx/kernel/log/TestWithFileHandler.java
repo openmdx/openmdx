@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestWithFileHandler.java,v 1.1 2009/04/01 13:34:45 hburger Exp $
+ * Name:        $Id: TestWithFileHandler.java,v 1.2 2009/09/15 14:01:20 hburger Exp $
  * Description: TestStandardFileHander 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/01 13:34:45 $
+ * Date:        $Date: 2009/09/15 14:01:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,7 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 /**
- * Test Standard File Hander
+ * Test Default File Handler
  */
 public class TestWithFileHandler
     extends AbstractFileHandlerTest

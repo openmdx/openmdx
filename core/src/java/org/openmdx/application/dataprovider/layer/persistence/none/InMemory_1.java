@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InMemory_1.java,v 1.3 2009/06/02 13:19:06 wfro Exp $
+ * Name:        $Id: InMemory_1.java,v 1.14 2010/02/19 15:20:51 wfro Exp $
  * Description: InMemory_1 class
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/02 13:19:06 $
+ * Date:        $Date: 2010/02/19 15:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,6 +60,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,37 +70,82 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.IndexedRecord;
+import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
 import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
-import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.application.dataprovider.layer.persistence.common.AbstractIterator;
 import org.openmdx.application.dataprovider.layer.persistence.common.AbstractPersistence_1;
-import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.Directions;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.Orders;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
+import org.w3c.cci2.SparseArray;
 
 /**
  * An in-memory data store
  */
 @SuppressWarnings("unchecked")
-public class InMemory_1
-extends AbstractPersistence_1 {
+public class InMemory_1 extends AbstractPersistence_1 {
 
+    // --------------------------------------------------------------------------
+    public InMemory_1(
+    ) {
+    }
+    
+    // --------------------------------------------------------------------------
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new InMemoryLayerInteraction(connection);
+    }
+            
+    // --------------------------------------------------------------------------
+    private static class InMemoryIterator {
+
+        private static final long serialVersionUID = 3905236814703769655L;
+        private final AttributeSpecifier[] attributeSpecifier;
+        private final FilterProperty[] attributeFilter;
+
+        //---------------------------------------------------------------------------
+        InMemoryIterator(
+          FilterProperty[] attributeFilter,
+          AttributeSpecifier[] attributeSpecifier
+        ) { 
+          this.attributeFilter = attributeFilter;
+          this.attributeSpecifier = attributeSpecifier;
+        }
+       
+          /**
+           */
+          FilterProperty[] getAttributeFilter() {
+              return attributeFilter;
+          }
+          
+          /**
+           */
+          AttributeSpecifier[] getAttributeSpecifier() {
+              return attributeSpecifier;
+          }
+
+      }
+    
     /**
      * Large object holders
      */
@@ -221,7 +267,7 @@ extends AbstractPersistence_1 {
      *        if referenceMustExist is true while the reference 
      *        does not exist
      */
-    private Map<String,MappedRecord> getReference(
+    protected Map<String,MappedRecord> getReference(
         Path path,
         boolean referenceMustExist
     ) throws ServiceException {
@@ -247,10 +293,11 @@ extends AbstractPersistence_1 {
     //------------------------------------------------------------------------
 
     //------------------------------------------------------------------------
+    @Override
     public void activate(
         short id,
         Configuration configuration,
-        Layer_1_0 delegation
+        Layer_1 delegation
     ) throws ServiceException {
         super.activate(
             id, 
@@ -266,7 +313,7 @@ extends AbstractPersistence_1 {
         synchronized(InMemory_1.referenceMaps) {
             this.referenceMap = (Map)InMemory_1.referenceMaps.get(namespaceId);
             if (this.referenceMap == null) {
-                List storageFolder = configuration.values(LayerConfigurationEntries.STORAGE_FOLDER);
+                SparseArray<?> storageFolder = configuration.values(LayerConfigurationEntries.STORAGE_FOLDER);
                 if(storageFolder.size() == 0) {        
                     SysLog.detail("Create namespace", namespaceId);
                     InMemory_1.referenceMaps.put(
@@ -300,6 +347,7 @@ extends AbstractPersistence_1 {
      *  }
      * </pre>   
      */
+    @Override
     public void deactivate(
     ) throws Exception, ServiceException {
     }
@@ -320,7 +368,7 @@ extends AbstractPersistence_1 {
      *
      * @return  a copy of the object containing the requested attributes.
      */
-    private MappedRecord replyObject(
+    protected MappedRecord replyObject(
         MappedRecord source,
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
@@ -328,8 +376,8 @@ extends AbstractPersistence_1 {
         switch (attributeSelector) {
             case AttributeSelectors.NO_ATTRIBUTES:
                 try {
-                    return ObjectHolder_2Facade.newInstance(
-                        ObjectHolder_2Facade.getPath(source)
+                    return Object_2Facade.newInstance(
+                        Object_2Facade.getPath(source)
                     ).getDelegate();
                 }
                 catch(Exception e) {
@@ -339,7 +387,7 @@ extends AbstractPersistence_1 {
             case AttributeSelectors.ALL_ATTRIBUTES: {
                 MappedRecord target;
                 try {
-                    target = ObjectHolder_2Facade.cloneObject(source);
+                    target = Object_2Facade.cloneObject(source);
                 } 
                 catch (ResourceException e) {
                     throw new ServiceException(e);
@@ -349,7 +397,7 @@ extends AbstractPersistence_1 {
             case AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES: {
                 MappedRecord target;
                 try {
-                    target = ObjectHolder_2Facade.cloneObject(source);
+                    target = Object_2Facade.cloneObject(source);
                 } 
                 catch (ResourceException e) {
                     throw new ServiceException(e);
@@ -366,7 +414,7 @@ extends AbstractPersistence_1 {
                 attributes.add(SystemAttributes.CREATED_BY);
                 attributes.add(SystemAttributes.MODIFIED_AT);
                 attributes.add(SystemAttributes.MODIFIED_BY);
-                ObjectHolder_2Facade.getValue(target).keySet().retainAll(attributes);
+                Object_2Facade.getValue(target).keySet().retainAll(attributes);
                 return target;
             }
             default:
@@ -379,49 +427,6 @@ extends AbstractPersistence_1 {
                         AttributeSelectors.toString(attributeSelector)
                     )
                 );          
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    /**
-     * Get the object specified by the requests's path 
-     *
-     * @param request   the request, an in out parameter
-     *
-     * @exception ServiceException  on failure
-     */
-    public DataproviderReply get(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        synchronized(this.referenceMap){
-            Path path = ObjectHolder_2Facade.getPath(request.object());;
-            MappedRecord source = this.getReference(
-                path,
-                true
-            ).get(
-                path.getBase()
-            );
-            if(source == null) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_FOUND,
-                    "Object \u00ab" + path + "\u00bb not found",
-                    new BasicException.Parameter("path",path)
-                );
-            }
-            try {
-                return new DataproviderReply(
-                    this.replyObject(
-                        ObjectHolder_2Facade.cloneObject(source),
-                        request.attributeSelector(),
-                        request.attributeSpecifier()
-                    )
-                );
-            }
-            catch(Exception e) {
-                throw new ServiceException(e);
-            }
         }
     }
 
@@ -441,7 +446,7 @@ extends AbstractPersistence_1 {
      *           0 if a.attribute == b.attribute;
      *           1 if a.attribute > b.attribute
      */
-    private int compare(
+    protected int compare(
         MappedRecord a,
         MappedRecord b,
         String attribute,
@@ -453,26 +458,32 @@ extends AbstractPersistence_1 {
             int equal = 0;
             int result = 0;
             if(SystemAttributes.OBJECT_IDENTITY.equals(attribute)) {
-                return ObjectHolder_2Facade.getPath(a).compareTo(ObjectHolder_2Facade.getPath(b));
+                return Object_2Facade.getPath(a).compareTo(Object_2Facade.getPath(b));
             }
             else if(SystemAttributes.OBJECT_CLASS.equals(attribute)) {
-                return ObjectHolder_2Facade.getObjectClass(a).compareTo(ObjectHolder_2Facade.getObjectClass(b));
+                return Object_2Facade.getObjectClass(a).compareTo(Object_2Facade.getObjectClass(b));
             }
-            ObjectHolder_2Facade aFacade = ObjectHolder_2Facade.newInstance(a);
-            ObjectHolder_2Facade bFacade = ObjectHolder_2Facade.newInstance(b);
-            SparseList aValue = aFacade.getAttributeValues(attribute);
-            SparseList bValue = bFacade.getAttributeValues(attribute);
+            Object_2Facade aFacade = Object_2Facade.newInstance(a);
+            Object_2Facade bFacade = Object_2Facade.newInstance(b);
+            Object aValues = aFacade.getAttributeValues(attribute);
+            int aSize = aValues instanceof SparseArray ?
+                ((SparseArray)aValues).size() :
+                    ((List)aValues).size();
+            Object bValues = bFacade.getAttributeValues(attribute);                
+            int bSize = bValues instanceof SparseArray ?
+                ((SparseArray)bValues).size() :
+                    ((List)bValues).size();
             // a
             if(
-                (aValue == null) || 
-                (aValue.size() <= index)
+                (aValues == null) || 
+                (aSize <= index)
             ) {
                 result = aLarger;
             }
             // b
             if(
-                (bValue == null) || 
-                (bValue.size() <= index)
+                (bValues == null) || 
+                (bSize <= index)
             ) {
                 if(result == aLarger) {
                     return equal;
@@ -482,42 +493,99 @@ extends AbstractPersistence_1 {
             if(result == aLarger) {
                 return aLarger;
             }
-            if(aValue.get(0) instanceof Comparable){
-                return ((Comparable)aValue.get(index)).compareTo(
-                    bValue.get(index)
-                );
-            }
-            else {
-                return -1; // not sorted
-            }
+            Object aValue = aValues instanceof SparseArray ?
+                ((SparseArray)aValues).get(index) :
+                    ((List)aValues).get(index);
+            Object bValue = bValues instanceof SparseArray ?
+                ((SparseArray)bValues).get(index) :
+                    ((List)bValues).get(index);
+            return ((Comparable)aValue).compareTo(bValue);
         }
         catch(Exception e) {
             throw new ServiceException(e);
         }
     }
 
-    //-------------------------------------------------------------------------
-    /**
-     * Get the objects specified by the references and filter properties
-     *
-     * @param request   the request, an in out parameter
-     *
-     * @exception ServiceException  on failure
-     */
-    public DataproviderReply find(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        synchronized(this.referenceMap){
-            InMemoryIterator specification = 
-                request.operation() == DataproviderOperations.ITERATION_START ?
-                    new InMemoryIterator(
-                        request.attributeFilter(),
-                        request.attributeSpecifier()
-                    ) :
-                    (InMemoryIterator)AbstractIterator.deserialize(
-                        (byte[])request.context(DataproviderReplyContexts.ITERATOR).get(0)
+    // --------------------------------------------------------------------------
+    public class InMemoryLayerInteraction extends OperationAwareLayer_1.LayerInteraction {
+        
+        public InMemoryLayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
+        }
+            
+        //-------------------------------------------------------------------------
+        /**
+         * Get the object specified by the requests's path 
+         *
+         * @param request   the request, an in out parameter
+         *
+         * @exception ServiceException  on failure
+         */
+        @Override
+        public boolean get(
+            RestInteractionSpec ispec,
+            Query_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);
+            
+            synchronized(InMemory_1.this.referenceMap){
+                Path path = Object_2Facade.getPath(request.object());;
+                MappedRecord source = InMemory_1.this.getReference(
+                    path,
+                    true
+                ).get(
+                    path.getBase()
+                );
+                if(source == null) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_FOUND,
+                        "Object \u00ab" + path + "\u00bb not found",
+                        new BasicException.Parameter("path",path)
                     );
+                }
+                try {
+                    reply.getResult().add(
+                        InMemory_1.this.replyObject(
+                            Object_2Facade.cloneObject(source),
+                            request.attributeSelector(),
+                            request.attributeSpecifier()
+                        )
+                    );
+                    return true;
+                }
+                catch(Exception e) {
+                    throw new ServiceException(e);
+                }
+            }
+        }
+
+        //-------------------------------------------------------------------------
+        /**
+         * Get the objects specified by the references and filter properties
+         *
+         * @param request   the request, an in out parameter
+         *
+         * @exception ServiceException  on failure
+         */
+        @Override
+        public boolean find(
+            RestInteractionSpec ispec,
+            Query_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);
+            
+            synchronized(InMemory_1.this.referenceMap){
+                InMemoryIterator specification = new InMemoryIterator(
+                    request.attributeFilter(),
+                    request.attributeSpecifier()
+                );
                 final List sortersList = new ArrayList();
                 for (int i=0; i<specification.getAttributeSpecifier().length; i++) {
                     AttributeSpecifier specifier = specification.getAttributeSpecifier()[i];
@@ -529,7 +597,31 @@ extends AbstractPersistence_1 {
                 sortersList.toArray(new AttributeSpecifier[sortersList.size()]);
                 MappedRecordFilter filter;
                 try {
-                    filter = new MappedRecordFilter(specification.getAttributeFilter());
+                    List<FilterProperty> attributeFilter = new ArrayList<FilterProperty>(
+                        Arrays.asList(specification.getAttributeFilter())
+                    );
+                    FilterProperty objectClassFilterProperty = null;
+                    for(Iterator<FilterProperty> i = attributeFilter.iterator(); i.hasNext(); ) {
+                        FilterProperty p = i.next();
+                        if(SystemAttributes.OBJECT_INSTANCE_OF.equals(p.name()) && !p.values().isEmpty()) {
+                            Set<String> allSubtypes = InMemory_1.this.getAllSubtypes((String)p.getValue(0));
+                            if(allSubtypes != null) {
+                                objectClassFilterProperty = new FilterProperty(
+                                    p.quantor(),
+                                    SystemAttributes.OBJECT_CLASS,
+                                    p.operator(),
+                                    allSubtypes.toArray()
+                                );
+                            }
+                            i.remove();
+                        }
+                    }
+                    if(objectClassFilterProperty != null) {
+                        attributeFilter.add(objectClassFilterProperty);
+                    }
+                    filter = new MappedRecordFilter(
+                        attributeFilter.toArray(new FilterProperty[attributeFilter.size()])
+                    );
                 }   
                 catch (RuntimeException exception){
                     throw new ServiceException(
@@ -553,7 +645,7 @@ extends AbstractPersistence_1 {
                     }
                 }
                 else {
-                    Map<String,MappedRecord> unfilteredMap = this.referenceMap.get(
+                    Map<String,MappedRecord> unfilteredMap = InMemory_1.this.referenceMap.get(
                         request.path()
                     );
                     unfiltered = unfilteredMap == null
@@ -562,7 +654,7 @@ extends AbstractPersistence_1 {
                 }
                 int replySize = java.lang.Math.min(
                     request.size(),
-                    this.batchSize
+                    InMemory_1.this.batchSize
                 );
                 int replyPosition = request.position();
                 if(request.direction() == Directions.DESCENDING) {
@@ -584,7 +676,7 @@ extends AbstractPersistence_1 {
                                     (objects.size() < replySize)
                                 ) {
                                     objects.add(
-                                        this.replyObject(
+                                        InMemory_1.this.replyObject(
                                             object,
                                             request.attributeSelector(),
                                             specification.getAttributeSpecifier()
@@ -599,7 +691,7 @@ extends AbstractPersistence_1 {
                                 for (int pos = 0; pos < sortedObjects.size() && !added; pos++) {
                                     int diff = 0;
                                     for (int i=0; i<sorters.length && diff == 0 && !added; i++) {
-                                        diff = this.compare(sortedObjects.get(pos), object, sorters[i].name(), sorters[i].position());
+                                        diff = InMemory_1.this.compare(sortedObjects.get(pos), object, sorters[i].name(), sorters[i].position());
                                         if ((diff > 0 && sorters[i].order() == Directions.ASCENDING)
                                                 ||
                                                 (diff < 0 && sorters[i].order() == Directions.DESCENDING)
@@ -628,7 +720,7 @@ extends AbstractPersistence_1 {
                         o.hasNext() && objects.size() < replySize;
                     ) {
                         objects.add(
-                            this.replyObject(
+                            InMemory_1.this.replyObject(
                                 o.next(),
                                 request.attributeSelector(),
                                 specification.getAttributeSpecifier()
@@ -637,244 +729,204 @@ extends AbstractPersistence_1 {
                     }
                 }
                 // reply
-                DataproviderReply reply = new DataproviderReply(objects);
+                reply.getResult().addAll(objects);
                 boolean hasMore = request.position() + objects.size() < position;
-                if(request.operation() == DataproviderOperations.ITERATION_START){
-                    reply.context(DataproviderReplyContexts.ITERATOR).set(
-                        0,
-                        AbstractIterator.serialize(specification)
+                if(!hasMore) {
+                    reply.setTotal(
+                        new Integer(position)
                     );
-                    reply.context(DataproviderReplyContexts.ATTRIBUTE_SELECTOR).set(
-                        0,
-                        new Short(request.attributeSelector())
-                    );
-                    if(!hasMore) {
-                        reply.context(DataproviderReplyContexts.TOTAL).set(
-                            0,
-                            new Integer(position)
-                        );
-                    }
                 }
-                reply.context(DataproviderReplyContexts.HAS_MORE).set(
-                    0,
+                reply.setHasMore(
                     hasMore
                 );
-                return reply;     
+                return true;
+            }
         }
-    }
-
-    //-------------------------------------------------------------------------
-    /**
-     * Create a new object
-     *
-     * @param request   the request, an in out parameter
-     *
-     * @exception ServiceException  in case of failure
-     */
-    public DataproviderReply create(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        synchronized(this.referenceMap){
-            Path path = request.path();
-            Map<String,MappedRecord> container = this.getReference(path, false);
-            if(container == null) {
-                this.referenceMap.put(
-                    path.getParent(),
-                    container = new HashMap(INITIAL_REFERENCE_MAP_CAPACITY)
-                ); // createReferencesOnDemand
-            }
-            String objectId = path.getBase();
-            if(container.containsKey(objectId)) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.DUPLICATE,
-                    "Object \u00ab" + path + "\u00bb already exists",
-                    new BasicException.Parameter("path",path)
-                );
-            }
-            try {
-                container.put(
-                    objectId,
-                    ObjectHolder_2Facade.cloneObject(request.object())
-                );
-                return new DataproviderReply(
-                    this.replyObject(
-                        request.object(),
-                        request.attributeSelector(),
-                        request.attributeSpecifier()
-                    )
-                );
-            } 
-            catch (Exception exception) {
-                Error assertionFailure = BasicException.initHolder(
-                    new Error(
-                        "Compression/decompression failure",
-                        BasicException.newEmbeddedExceptionStack(
-                            exception,
-                            BasicException.Code.DEFAULT_DOMAIN, 
-                            BasicException.Code.ASSERTION_FAILURE
+    
+        //-------------------------------------------------------------------------
+        /**
+         * Create a new object
+         *
+         * @param request   the request, an in out parameter
+         *
+         * @exception ServiceException  in case of failure
+         */
+        @Override
+        public boolean create(
+            RestInteractionSpec ispec,
+            Object_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);
+            synchronized(InMemory_1.this.referenceMap){
+                Path path = request.path();
+                Map<String,MappedRecord> container = InMemory_1.this.getReference(path, false);
+                if(container == null) {
+                    InMemory_1.this.referenceMap.put(
+                        path.getParent(),
+                        container = new HashMap(INITIAL_REFERENCE_MAP_CAPACITY)
+                    ); // createReferencesOnDemand
+                }
+                String objectId = path.getBase();
+                if(container.containsKey(objectId)) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.DUPLICATE,
+                        "Object \u00ab" + path + "\u00bb already exists",
+                        new BasicException.Parameter("path",path)
+                    );
+                }
+                try {
+                    container.put(
+                        objectId,
+                        Object_2Facade.cloneObject(request.object())
+                    );
+                    if(reply.getResult() != null) {
+                        reply.getResult().add(
+                            InMemory_1.this.replyObject(
+                                request.object(),
+                                request.attributeSelector(),
+                                request.attributeSpecifier()
+                            )
+                        );
+                    }
+                    return true;
+                } 
+                catch (Exception exception) {
+                    Error assertionFailure = BasicException.initHolder(
+                        new Error(
+                            "Compression/decompression failure",
+                            BasicException.newEmbeddedExceptionStack(
+                                exception,
+                                BasicException.Code.DEFAULT_DOMAIN, 
+                                BasicException.Code.ASSERTION_FAILURE
+                            )
                         )
-                    )
+                    );
+                    SysLog.error(
+                        assertionFailure.getMessage(), 
+                        assertionFailure.getCause()
+                    );
+                    throw assertionFailure;
+                }     
+            }
+        }   
+    
+        //-------------------------------------------------------------------------
+        /**
+         * Removes an object including its descendents
+         *
+         * @param request   the request, an in out parameter
+         *
+         * @exception ServiceException  in case of failure
+         */
+        @Override
+        public boolean delete(
+            RestInteractionSpec ispec,
+            Object_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);
+            synchronized(InMemory_1.this.referenceMap){
+                DataproviderRequest getRequest = new DataproviderRequest(
+                    input.getDelegate(),
+                    DataproviderOperations.OBJECT_RETRIEVAL,
+                    AttributeSelectors.NO_ATTRIBUTES,
+                    null
                 );
-                SysLog.error(
-                    assertionFailure.getMessage(), 
-                    assertionFailure.getCause()
+                try {
+                    this.get(
+                        getRequest.getInteractionSpec(),
+                        Query_2Facade.newInstance(getRequest.object()),
+                        super.newDataproviderReply().getResult()
+                    );
+                } catch (ResourceException e) {
+                    throw new ServiceException(e);
+                } // to throw NOT_FOUND if necessary
+                Path path = request.path();     
+                Map<String,MappedRecord> reference = InMemory_1.this.getReference(
+                    path, 
+                    false
                 );
-                throw assertionFailure;
-            }     
-        }
-    }   
-
-    //-------------------------------------------------------------------------
-    /**
-     * Removes an object including its descendents
-     *
-     * @param request   the request, an in out parameter
-     *
-     * @exception ServiceException  in case of failure
-     */
-    public DataproviderReply remove(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        synchronized(this.referenceMap){
-            this.get(
-                header,
-                request
-            ); // to throw NOT_FOUND if necessary
-            Path path = request.path();     
-            Map<String,MappedRecord> reference = getReference(
-                path, 
-                false
-            );
-            MappedRecord source = reference == null ? null :
-                reference.remove(path.getBase());
-            for(
-                Iterator iterator = referenceMap.keySet().iterator();
-                iterator.hasNext();
-            ) {
-                Path r = (Path)iterator.next();
-                if(r.startsWith(path)) {
-                    SysLog.trace("removing reference", "" + r + " containing " + ((Map)referenceMap.get(r)).size() + " objects");
-                    iterator.remove();
-                }
-                else {
-                    SysLog.trace("not removing", r);
-                }
-            } 
-            return source == null ?
-                new DataproviderReply() :
-                    new DataproviderReply(
-                        this.replyObject(
+                MappedRecord source = reference == null ? null :
+                    reference.remove(path.getBase());
+                for(
+                    Iterator iterator = referenceMap.keySet().iterator();
+                    iterator.hasNext();
+                ) {
+                    Path r = (Path)iterator.next();
+                    if(r.startsWith(path)) {
+                        SysLog.trace("removing reference", "" + r + " containing " + ((Map)referenceMap.get(r)).size() + " objects");
+                        iterator.remove();
+                    }
+                    else {
+                        SysLog.trace("not removing", r);
+                    }
+                } 
+                if(source != null) {
+                    reply.getResult().add(
+                        InMemory_1.this.replyObject(
                             source,
                             request.attributeSelector(),
                             request.attributeSpecifier()
                         )
-                    ); 
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0#set(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
-     */
-    public DataproviderReply set(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        synchronized(this.referenceMap){
-            Path path = request.path();
-            Map reference = this.getReference(path, false);
-            boolean isNew = reference == null ? 
-                true : 
-                reference.get(path.getBase()) == null ? 
-                    true : 
-                    false;
-            if(isNew) {
-                try {
-                    ObjectHolder_2Facade facade = ObjectHolder_2Facade.newInstance(request.object());
-                    facade.attributeValues(SystemAttributes.CREATED_AT).addAll(
-                        facade.attributeValues(SystemAttributes.MODIFIED_AT)
-                    );
-                    return this.create(
-                        header, 
-                        request
                     );
                 }
-                catch(Exception e) {
-                    throw new ServiceException(e);
+                return true;
+            }
+        }
+    
+        //-------------------------------------------------------------------------
+        @Override
+        public boolean put(
+            RestInteractionSpec ispec,
+            Object_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);
+            
+            synchronized(InMemory_1.this.referenceMap){
+                MappedRecord source = request.object();            
+                Path path = Object_2Facade.getPath(source);
+                Map<String,MappedRecord> container = InMemory_1.this.getReference(
+                    path, 
+                    true
+                );
+                MappedRecord target = container.get(path.getBase());
+                if(target == null) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_FOUND,
+                        "Object \u00ab" + path + "\u00bb not found",
+                        new BasicException.Parameter("path",path)
+                    );
                 }
-            }
-            else {
-                return this.replace(
-                    header, 
-                    request
+                container.put(
+                    path.getBase(),
+                    source
                 );
+                reply.getResult().add(
+                    InMemory_1.this.replyObject(
+                        target,
+                        request.attributeSelector(),
+                        request.attributeSpecifier()
+                    )
+                ); 
+                return true;
             }
         }
+        
     }
-
-    //-------------------------------------------------------------------------
-    public DataproviderReply replace(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        synchronized(this.referenceMap){
-            MappedRecord source = request.object();            
-            Path path = ObjectHolder_2Facade.getPath(source);
-            Map<String,MappedRecord> container = this.getReference(
-                path, 
-                true
-            );
-            MappedRecord target = container.get(path.getBase());
-            if(target == null) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_FOUND,
-                    "Object \u00ab" + path + "\u00bb not found",
-                    new BasicException.Parameter("path",path)
-                );
-            }
-            container.put(
-                path.getBase(),
-                source
-            );
-            return new DataproviderReply(
-                this.replyObject(
-                    target,
-                    request.attributeSelector(),
-                    request.attributeSpecifier()
-                )
-            ); 
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    /**
-     * Modifies some of an object's attributes' values leaving the others
-     * unchanged.
-     *
-     * @param request   the request, an in out parameter
-     *
-     * @exception ServiceException  in case of failure
-     */
-    public DataproviderReply modify(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        return this.replace(
-            header, 
-            request
-        );
-    }
-
+    
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
-    private static int INITIAL_REFERENCE_MAP_CAPACITY = 213;
-    private static final Map referenceMaps = new HashMap();
-    private Map<Path,Map<String,MappedRecord>> referenceMap = null;
-    private int batchSize = Integer.MAX_VALUE;
+    protected static int INITIAL_REFERENCE_MAP_CAPACITY = 213;
+    protected static final Map referenceMaps = new HashMap();
+    protected Map<Path,Map<String,MappedRecord>> referenceMap = null;
+    protected int batchSize = Integer.MAX_VALUE;
 
 }

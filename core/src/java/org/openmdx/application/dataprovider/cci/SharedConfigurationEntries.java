@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SharedConfigurationEntries.java,v 1.6 2009/06/01 15:36:57 wfro Exp $
+ * Name:        $Id: SharedConfigurationEntries.java,v 1.8 2009/12/14 14:56:58 hburger Exp $
  * Description: Generated constants for SharedConfigurationEntries
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/01 15:36:57 $
+ * Date:        $Date: 2009/12/14 14:56:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -106,26 +106,14 @@ public class SharedConfigurationEntries {
   
   
   /**
-   * The DATAPROVIDER_CONNECTION configuration entry  
-   * <p>
-   * <p>
-   * Each DATAPROVIDER_CONNECTION entry requires a matching {@link 
-   * org.openmdx.application.dataprovider.cci.SharedConfigurationEntries#DELEGATION_PATH 
-   * org.openmdx.compatibility.base.dataprovider.transport.dispatching.Plugin_1 
-   * Plugin_1}.
+   * Key for a JCA <code>ConnectionFactory</code> instance  
    */
-  static public final String DATAPROVIDER_CONNECTION = "dataprovider";
+  static public final String DATAPROVIDER_CONNECTION_FACTORY = "dataprovider";
 
   
   
   /**
    * The DELEGATION_PATH configuration entry.
-   * <p>
-   * Each {@link 
-   * org.openmdx.application.dataprovider.cci.SharedConfigurationEntries#DATAPROVIDER_CONNECTION 
-   * DATAPROVIDER_CONNECTION} entry requires a matching DELEGATION_PATH entry 
-   * org.openmdx.compatibility.base.dataprovider.transport.dispatching.Plugin_1 
-   * Plugin_1}.
    */
   static public final String DELEGATION_PATH = "delegationPath";
 
@@ -170,23 +158,6 @@ public class SharedConfigurationEntries {
     
 
   
-  /**
-   * Flag telling whether values for<ol>
-   * <li><code>org::w3c::date</code>
-   * <li><code>org::w3c::dateTime</code>
-   * <li><code>org::w3c::duration</code>
-   * </ol>should be represented by to their corresponding XML datatypes<ol>
-   * <li><code>javax.xml.XMLGregorianCalendar</code>
-   * <li><code>javax.xml.XMLGregorianCalendar</code>
-   * <li><code>javax.xml.Duration</code>
-   * </ol>
-   * <p>
-   * The default value is <code>false</code>.
-   */
-  static public final String XML_DATATYPES = "xmlDatatypes";
-
-
-
   /**
    * Defines whether a given layer is bypassed by lenient requests.
    * 

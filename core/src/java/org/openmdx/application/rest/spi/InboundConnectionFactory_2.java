@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: InboundConnectionFactory_2.java,v 1.9 2009/06/08 17:10:15 hburger Exp $
+ * Name:        $Id: InboundConnectionFactory_2.java,v 1.21 2009/12/30 10:49:34 hburger Exp $
  * Description: Inbound REST Connection Factory
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/08 17:10:15 $
+ * Date:        $Date: 2009/12/30 10:49:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,7 @@
  */
 package org.openmdx.application.rest.spi;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.jdo.JDOException;
@@ -59,22 +58,21 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
 import javax.naming.NamingException;
 import javax.naming.Reference;
+import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 import javax.resource.cci.ConnectionSpec;
 import javax.resource.cci.ResourceAdapterMetaData;
 
-import org.openmdx.application.persistence.ejb.Jmi1AccessorFactory_2;
 import org.openmdx.base.Version;
 import org.openmdx.base.accessor.rest.InboundConnection_2;
-import org.openmdx.base.persistence.cci.EntityManagerFactory;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 
 /**
  * Inbound REST Connection Factory
@@ -84,12 +82,15 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     /**
      * Constructor 
      *
-     * @param connectionFactoryName
+     * @param overrides configuration overrides
+     * @param entityManagerFactoryName name used for entity manager lookup
      */
     private InboundConnectionFactory_2(
-        Map<?,?> properties
+        Map<?,?> overrides,
+        String entityManagerFactoryName
     ){
-        this.configuration = properties;
+        this.overrides = overrides;
+        this.entityManagerFactoryName = entityManagerFactoryName;
     }
 
     /**
@@ -102,10 +103,12 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
      */
     private Reference reference;
 
+    private final String entityManagerFactoryName;
+    
     /**
      * @serial The connection factory configuration
      */
-    private final Map<?,?> configuration;
+    private final Map<?,?> overrides;
     
     /**
      * The persistence manager factory
@@ -118,11 +121,11 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     private final ResourceAdapterMetaData metaData = new ResourceAdapterMetaData(){
 
         public String getAdapterName() {
-            return "openMDX/REST inbound";
+            return "openMDX/REST";
         }
 
         public String getAdapterShortDescription() {
-            return "openMDX/2 Inbound REST Resource Adapter";
+            return "openMDX/2 REST Resource Adapter";
         }
 
         public String getAdapterVendorName() {
@@ -147,7 +150,7 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
         }
 
         public boolean supportsExecuteWithInputAndOutputRecord() {
-            return true;
+            return true; 
         }
 
         public boolean supportsExecuteWithInputRecordOnly() {
@@ -168,7 +171,10 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     protected PersistenceManagerFactory getPersistenceManagerFactory(
     ) throws ResourceException {
         if(this.persistenceManagerFactory == null) try {
-            this.persistenceManagerFactory =  JDOHelper.getPersistenceManagerFactory(this.configuration);
+            this.persistenceManagerFactory =  JDOHelper.getPersistenceManagerFactory(
+                this.overrides,
+                this.entityManagerFactoryName
+            );
         } catch (JDOException exception) {
             throw ResourceExceptions.initHolder(
                 new ResourceException(
@@ -186,80 +192,17 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     
     /**
      * Create a new REST dispatcher
-     * 
-     * @param entityManagerFactory the entity manager factory instance
-     */
-    public static ConnectionFactory newInstance(
-        EntityManagerFactory entityManagerFactory
-    ){
-        Map<String,Object> properties = new HashMap<String,Object>();
-        properties.put(
-            ConfigurableProperty.ConnectionFactory.qualifiedName(), 
-            entityManagerFactory
-        );
-        properties.put(
-            ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(), 
-            Jmi1AccessorFactory_2.class
-        );
-        return new InboundConnectionFactory_2(properties);
-    }
-
-    /**
-     * Create a new REST dispatcher
-     * 
      * @param entityManagerFactory the entity manager factory JNDI name
      */
     public static ConnectionFactory newInstance(
         String entityManagerFactoryName
     ){
-        Map<String,String> properties = new HashMap<String,String>();
-        properties.put(
-            ConfigurableProperty.ConnectionFactoryName.qualifiedName(), 
+        return new InboundConnectionFactory_2(
+            Collections.EMPTY_MAP,
             entityManagerFactoryName
         );
-        properties.put(
-            ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(), 
-            Jmi1AccessorFactory_2.class.getName()
-        );
-        return new InboundConnectionFactory_2(properties);
     }
 
-    /**
-     * Create a new REST dispatcher
-     * 
-     * @param entityManagerFactory the entity manager factory JNDI name
-     */
-    public static ConnectionFactory newInstance(
-        String entityManagerFactoryName,
-        List<String> principalChain
-    ){
-        if(principalChain == null || principalChain.isEmpty()) {
-            return newInstance(entityManagerFactoryName);
-        } else {
-            Map<String,String> properties = new HashMap<String,String>();
-            properties.put(
-                ConfigurableProperty.ConnectionFactoryName.qualifiedName(), 
-                entityManagerFactoryName
-            );
-            properties.put(
-                ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(), 
-                Jmi1AccessorFactory_2.class.getName()
-            );
-            properties.put(
-                ConfigurableProperty.ConnectionUserName.qualifiedName(), 
-                principalChain.toString()
-            );
-            return new InboundConnectionFactory_2(properties);
-        }
-    }
-    
-    public static ConnectionSpec newConnectionSpec(
-        String user,
-        String password
-    ){
-        return new InboundConnectionSpec(user, password);
-    }
-    
     /* (non-Javadoc)
      * @see javax.resource.Referenceable#setReference(javax.naming.Reference)
      */
@@ -283,7 +226,8 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     public Connection getConnection(
     ) throws ResourceException {
         return new InboundConnection_2(
-            getPersistenceManagerFactory().getPersistenceManager()
+            null, // REST ConnectionSpec
+            this.getPersistenceManagerFactory().getPersistenceManager()
         );
     }
 
@@ -294,23 +238,30 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     public Connection getConnection(
         ConnectionSpec properties
     ) throws ResourceException {
-        InboundConnectionSpec connectionSpec;
         if(properties == null) {
             return getConnection();
-        } else try {
-            connectionSpec = (InboundConnectionSpec) properties;
-        } catch (ClassCastException exception) {
-            throw new ResourceException(
-                "Unsupported connection spec: " + properties.getClass().getName(),
-                exception
+        } else if (properties instanceof RestConnectionSpec) {
+            RestConnectionSpec connectionSpec = (RestConnectionSpec) properties;
+            return new InboundConnection_2(
+                connectionSpec, 
+                getPersistenceManagerFactory().getPersistenceManager(
+                    connectionSpec.getUserName(),
+                    connectionSpec.getPassword()
+                )
+            );
+        } else {
+            throw ResourceExceptions.initHolder(
+                new NotSupportedException(
+                    "Unsupported connection spec",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("expected", RestConnectionSpec.class.getName()),
+                        new BasicException.Parameter("actual", properties.getClass().getName())
+                    )
+                )
             );
         }
-        return new InboundConnection_2(
-            getPersistenceManagerFactory().getPersistenceManager(
-                connectionSpec.getUser(),
-                connectionSpec.getPassword()
-            )
-        );
     }
 
 
@@ -329,61 +280,6 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     public ExtendedRecordFactory getRecordFactory(
     ) throws ResourceException {
         return Records.getRecordFactory();
-    }
-
-    //------------------------------------------------------------------------
-    // Class InboundConnectionSpec
-    //------------------------------------------------------------------------
-    
-    /**
-     * Inbound Connection Spec
-     */
-    static class InboundConnectionSpec implements ConnectionSpec {
-
-        /**
-         * Constructor 
-         *
-         * @param user
-         * @param password
-         */
-        InboundConnectionSpec(
-            String user,
-            String password
-        ){
-            this.user = user;
-            this.password = password;
-        }
-        
-        /**
-         * 
-         */
-        private final String user;
-        
-        /**
-         * 
-         */
-        private final String password;
-
-        
-        /**
-         * Retrieve user.
-         *
-         * @return Returns the user.
-         */
-        String getUser() {
-            return this.user;
-        }
-
-        
-        /**
-         * Retrieve password.
-         *
-         * @return Returns the password.
-         */
-        String getPassword() {
-            return this.password;
-        }
-        
     }
 
 }

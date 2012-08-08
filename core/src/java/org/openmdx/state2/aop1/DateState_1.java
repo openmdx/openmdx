@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateState_1.java,v 1.11 2009/05/16 22:17:49 wfro Exp $
+ * Name:        $Id: DateState_1.java,v 1.14 2009/11/04 16:00:14 hburger Exp $
  * Description: Date State
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:49 $
+ * Date:        $Date: 2009/11/04 16:00:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,11 @@
  */
 package org.openmdx.state2.aop1;
 
+import static org.openmdx.base.accessor.cci.SystemAttributes.CREATED_AT;
+import static org.openmdx.base.accessor.cci.SystemAttributes.CREATED_BY;
+import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_AT;
+import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_BY;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,7 +71,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
-import org.openmdx.base.aop1.Removable_1;
+import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -82,7 +87,7 @@ import org.w3c.spi.DatatypeFactories;
  * Registers the the delegates with their manager
  */
 public class DateState_1
-    extends AbstractState_1<DateStateContext> 
+    extends BasicState_1<DateStateContext> 
 {
 
     /**
@@ -92,10 +97,10 @@ public class DateState_1
      * @throws ServiceException
      */
     public DateState_1(
-        ObjectView_1_0 self,
-        boolean attachCore
+        ObjectView_1_0 self, 
+        Interceptor_1 next
     ) throws ServiceException{
-        super(self, attachCore);
+        super(self, next);
     }
 
     /**
@@ -105,8 +110,8 @@ public class DateState_1
 
     private static final List<String> IGNORABLE_ATTRIBUTES = Arrays.asList(
         "stateValidFrom", "stateValidTo",
-        SystemAttributes.CREATED_AT, SystemAttributes.CREATED_BY,
-        SystemAttributes.REMOVED_AT, SystemAttributes.REMOVED_BY
+        CREATED_AT, CREATED_BY,
+        REMOVED_AT, REMOVED_BY
     );
         
     
@@ -118,12 +123,16 @@ public class DateState_1
      * @see org.openmdx.state2.aop2.core.AbstractState_1#propagateValidTime()
      */
     @Override
-    protected void propagateValidTime(
+    protected void initialize(
+        DataObject_1_0 dataObject
     ) throws ServiceException {
         DateStateContext context = (DateStateContext) self.getInteractionSpec();
-        DataObject_1_0 dataObject = self.objGetDelegate();
-        dataObject.objSetValue("stateValidFrom", context.getValidFrom());
-        dataObject.objSetValue("stateValidTo", context.getValidTo());
+        if(dataObject.objGetValue("stateValidFrom") == null) {
+            dataObject.objSetValue("stateValidFrom", context.getValidFrom());
+        }
+        if(dataObject.objGetValue("stateValidTo") == null) {
+            dataObject.objSetValue("stateValidTo", context.getValidTo());
+        }
     }
 
     /* (non-Javadoc)
@@ -166,7 +175,7 @@ public class DateState_1
     protected void enableUpdate(
         Map<DataObject_1_0,BoundaryCrossing> pending
     ) throws ServiceException {
-        Map<String,DataObject_1_0> states = getStates();
+        Collection<DataObject_1_0> states = getStates();
         DateStateContext context = getContext();
         XMLGregorianCalendar validFrom;
         XMLGregorianCalendar validTo;
@@ -184,7 +193,9 @@ public class DateState_1
                         validFrom = context.getValidFrom()
                     )
                 );
-                states.put(newPlaceHolder(), predecessor);
+                if(!predecessor.jdoIsNew()) {
+                    states.add(predecessor);
+                }
             } else {
                 validFrom = NULL;
             }
@@ -199,7 +210,9 @@ public class DateState_1
                         validTo = context.getValidTo()
                     )
                 );
-                states.put(newPlaceHolder(), successor);
+                if(!successor.jdoIsNew()) {
+                    states.add(successor);
+                }
             } else {
                 validTo = NULL;
             }
@@ -213,15 +226,16 @@ public class DateState_1
             if(validTo != NULL) {
                 target.objSetValue("stateValidTo", validTo);
             }
-            states.put(newPlaceHolder(), target);
+            if(!target.jdoIsNew()) {
+                states.add(target);
+            }
             //
             // Replace states
             //
             if(source.jdoIsPersistent()) {
                 invalidate(source);
-            } 
-            else {
-                states.values().remove(source);
+            } else {
+                states.remove(source);
             }
         }
     }
@@ -232,7 +246,7 @@ public class DateState_1
         if(state.jdoIsNew()) {
             JDOHelper.getPersistenceManager(state).deletePersistent(state);
         } else {
-            state.objSetValue(SystemAttributes.REMOVED_AT, Removable_1.IN_THE_FUTURE);
+            state.objSetValue(REMOVED_AT, IN_THE_FUTURE);
         }
     }
     
@@ -299,9 +313,9 @@ public class DateState_1
     @Override
     protected void reduceStates(
     ) throws ServiceException {
-        Map<String,DataObject_1_0> states = getStates();
+        Collection<DataObject_1_0> states = getStates();
         SortedSet<DataObject_1_0> active = new TreeSet<DataObject_1_0>(StateComparator.getInstance());
-        for(DataObject_1_0 state : states.values()){
+        for(DataObject_1_0 state : states){
             if(!state.jdoIsDeleted() && state.objGetValue(SystemAttributes.REMOVED_AT) == null) {
                 active.add(state);
             }

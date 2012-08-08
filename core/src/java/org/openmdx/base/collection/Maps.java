@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Maps.java,v 1.2 2009/05/26 12:40:49 wfro Exp $
+ * Name:        $Id: Maps.java,v 1.3 2009/09/14 11:50:49 hburger Exp $
  * Description: Maps 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 12:40:49 $
+ * Date:        $Date: 2009/09/14 11:50:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,7 +51,6 @@
 package org.openmdx.base.collection;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -67,19 +66,9 @@ public class Maps {
     }
 
     /**
-     * Create a concurrent hash set
-     * 
-     * @param <T>
-     * 
-     * @return a newly created concurrent hash set
+     * A <code>NULL</code> value for maps not allowing <code>null</code> as value.
      */
-    @SuppressWarnings("unchecked")
-    public static <T> Set<T> newConcurrentHashSet(){
-        return MapBackedSet.decorate(
-            new ConcurrentHashMap<T,Object>(),
-            NULL
-        );
-    }
+    public static final Object NULL = new Object();
 
     /**
      * Create a concurrent hash set
@@ -95,10 +84,5 @@ public class Maps {
             NULL
         );
     }
-    
-    /**
-     * A <code>NULL</code> value for maps not allowing <code>null</code> as value.
-     */
-    public static final Object NULL = new Object();
 
 }

@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Logoff.jsp,v 1.7 2007/11/15 18:53:36 wfro Exp $
+ * Name:        $Id: Logoff.jsp,v 1.8 2009/09/10 15:53:28 wfro Exp $
  * Description: LoginFailed.jsp
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/15 18:53:36 $
+ * Date:        $Date: 2009/09/10 15:53:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,7 +74,9 @@ request.setCharacterEncoding("UTF-8");
       System.out.println(new Date() + ": Logoff: removing application context");
       request.getSession().removeAttribute("ObjectInspectorServlet.ApplicationContext");
   }
-
+  if(request.getSession().getAttribute("processingLogin") != null) {
+    request.getSession().setAttribute("processingLogin", "false");
+  }
   System.out.println(new Date() + ": Logoff: requestURL=" + request.getRequestURL());
   String locale = request.getParameter("locale");
   if(locale == null) {
@@ -88,7 +90,11 @@ request.setCharacterEncoding("UTF-8");
   session.invalidate();
   // NO session management beyond this point.
   // Otherwise WebSphere 5 fails
-  response.sendRedirect("Login?locale=" + locale + (timezone == null ? "" : "&timezone=" + URLEncoder.encode(timezone)));  
+  response.sendRedirect(
+	"Login.jsp?locale=" + locale + 
+	(timezone == null ? "" : "&timezone=" + URLEncoder.encode(timezone)) +
+    ("&loginFailed=false")	
+  );  
 %>
 </body>
 </html>

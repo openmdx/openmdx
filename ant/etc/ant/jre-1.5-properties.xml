@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.5-properties.xml,v 1.47 2009/03/31 17:21:58 wfro Exp $
+= Name:        $Id: jre-1.5-properties.xml,v 1.48 2009/09/18 16:55:44 wfro Exp $
 = Description: JRE 5.0 Platform Properties
-= Revision:    $Revision: 1.47 $
-= Date:        $Date: 2009/03/31 17:21:58 $
+= Revision:    $Revision: 1.48 $
+= Date:        $Date: 2009/09/18 16:55:44 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -139,7 +139,9 @@
 		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-10/lib/ojdbc14.jar"/>
 		<pathelement location="${openmdx.home}/opt/oracle/${build.java.platform}/oracle-10/lib/orai18n.jar"/>
 	</path>
-
+	<path id="postgresql.jdbc.lib">
+		<pathelement location="${openmdx.home}/opt/postgresql/${build.java.platform}/postgresql-8/lib/postgresql-8.3.jdbc3.jar"/>
+	</path>
 	<path id="openmdx.bootstrap.bin">
 	    <path refid="java2.enterprise.lib"/>
 	    <path refid="java2.extension.lib"/>

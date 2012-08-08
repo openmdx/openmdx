@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Names.java,v 1.1 2009/01/13 02:11:10 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Names.java,v 1.4 2010/04/16 09:46:36 hburger Exp $
  * Description: Names 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:11:10 $
+ * Date:        $Date: 2010/04/16 09:46:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,8 +48,9 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.omg.mof.spi;
+
+import org.openmdx.base.exception.ServiceException;
 
 /**
  * Names
@@ -62,100 +63,83 @@ public class Names extends AbstractNames {
     }
 
     /**
-     * Append a namespace element
+     * Retrieve the Java class name for a given model class name 
+     * <p>
+     * This method uses toIdentifier() for all components
      * 
-     * @param target
-     * @param source
+     * @param qualifiedName
+     * @param bindingPackageSuffix
+     * 
+     * @return the requested class
+     * @throws ServiceException 
+     * 
+     * @see Names.getClass(String,String)
+     * 
+     * @exception ServiceException if the class can not be found on on the class path
      */
-    public static StringBuffer openmdx1NamespaceElement(
-        StringBuffer target,
-        String source
+    public static String toClassName(
+        String qualifiedName,
+        String bindigPackageSuffix
     ){
+        String[] modelClass = qualifiedName.split(":");
+        StringBuilder nameBuilder = new StringBuilder();
+        int iLimit = modelClass.length - 1;
         for(
-            int i = 0, iLimit = source.length();
+            int i = 0;
             i < iLimit;
             i++
-         ){
-            char c = source.charAt(i);
-            if(isNotSignificant(c)) {
-                target.append('_');
-            } else {
-                target.append(
-                    i == 0 && Character.isUpperCase(c) ? Character.toLowerCase(c) : c
-                );
-            }
+        ) {
+            nameBuilder.append(
+                Identifier.PACKAGE_NAME.toIdentifier(modelClass[i])
+            ).append(
+                '.'
+            );
         }
-        return target;
+        return nameBuilder.append(
+            bindigPackageSuffix
+        ).append(
+            '.'
+        ).append(
+            Identifier.CLASS_PROXY_NAME.toIdentifier(modelClass[iLimit])
+        ).toString();
     }
-
+        
     /**
-     * Append a namespace element
+     * Retrieve the Java package name for a given refMofId
+     * <p>
+     * This method uses toIdentifier() for all components and leaves out the last component
      * 
-     * @param target
-     * @param source
+     * @param refMofId
+     * @param bindingPackageSuffix
+     * 
+     * @return the requested class
+     * @throws ServiceException 
+     * 
+     * @see Names.getClass(String,String)
+     * 
+     * @exception ServiceException if the class can not be found on on the class path
      */
-    public static StringBuffer openmdx1PackageName(
-        StringBuffer target,
-        String source
+    public static String toPackageName(
+        String refMofId,
+        String bindingPackageSuffix
     ){
-        boolean start = true;
+        String[] modelPackage = refMofId.split(":");
+        StringBuilder nameBuilder = new StringBuilder();
+        int iLimit = modelPackage.length - 1;
         for(
-            int i = 0, iLimit = source.length();
+            int i = 0;
             i < iLimit;
             i++
-        ){
-            char c = source.charAt(i);
-            if(isNotSignificant(c)) {
-                target.append('_');
-            } else {
-                target.append(
-                    start && Character.isUpperCase(c) ? Character.toLowerCase(c) : c
-                );
-            }
-            start = false;
+        ) {
+            nameBuilder.append(
+                Identifier.PACKAGE_NAME.toIdentifier(modelPackage[i])
+            ).append(
+                '.'
+            );
         }
-        return target.append("Package");
+        return nameBuilder.append(bindingPackageSuffix).toString();
     }
-    
-    /**
-     * Evaluate accesor name
-     */ 
-    public static String openmdx1AccessorName (
-        String featureName,
-        boolean forQuery,
-        boolean forBoolean
-    ){        
-        if(forQuery) {
-            if(
-                forBoolean
-            ) {
-                if(
-                    featureName.startsWith("is")
-                 ) {
-                    return featureName;
-                } else {
-                    return "is" + capitalize(featureName);
-                }
-            } else {
-                return "get" + capitalize(featureName);
-            }  
-        } else {
-            if(
-                forBoolean
-            ) {
-                if(
-                    featureName.startsWith("is")
-                 ) {
-                    return "set" + featureName.substring(2);
-                } else {
-                    return "set" + capitalize(featureName);
-                }
-            } else {
-                return "set" + capitalize(featureName);
-            }  
-        }
-    }
-
+        
     /**
      * openMDX 2 CCI package suffix
      */ 

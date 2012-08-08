@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LenientDatatypeComparator.java,v 1.3 2009/02/18 12:47:21 hburger Exp $
+ * Name:        $Id: LenientDatatypeComparator.java,v 1.7 2010/01/26 15:43:30 hburger Exp $
  * Description: Lenient Datatype Comparator
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/18 12:47:21 $
+ * Date:        $Date: 2010/01/26 15:43:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,6 +59,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.ImmutableDate;
 import org.w3c.spi2.Datatypes;
 
 
@@ -68,29 +69,14 @@ import org.w3c.spi2.Datatypes;
 public class LenientDatatypeComparator extends LenientNumberComparator {
 
     /**
-     * Factory for a LenientNumberComparator using the default CharSequence comparator
-     * 
-     * @return  a lenient comparator using the default CharSequence comparator
-     */
-    public static Comparator<Object> getInstance(
-    ){
-        return LenientDatatypeComparator.instance;
-    }
-
-    /**
      * Use specific CharSequence comparator
      */
-    public LenientDatatypeComparator(
+    protected LenientDatatypeComparator(
         Comparator<Object> charSequenceComparator
     ) {
         super(charSequenceComparator);
     }
-
-    /**
-     * 
-     */
-    private static final Comparator<Object> instance = new LenientDatatypeComparator(null);
-
+    
 
     //------------------------------------------------------------------------
     // Implements Comparator
@@ -132,11 +118,18 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
             );
         }
         if (first instanceof XMLGregorianCalendar) {
-            XMLGregorianCalendar left = (XMLGregorianCalendar) first;
+            XMLGregorianCalendar left;
             XMLGregorianCalendar right;
             if(second instanceof XMLGregorianCalendar) {
-                right = (XMLGregorianCalendar) second;
+                if(first.getClass() == second.getClass()) {
+                    left = (XMLGregorianCalendar) first;
+                    right = (XMLGregorianCalendar) second;
+                } else {
+                    left = first instanceof ImmutableDate ? ((ImmutableDate)first).clone() : (XMLGregorianCalendar)first;
+                    right = second instanceof ImmutableDate ? ((ImmutableDate)second).clone() : (XMLGregorianCalendar)second;
+                }
             } else if (second instanceof CharSequence){
+                left = (XMLGregorianCalendar) first;
                 right = Datatypes.create(XMLGregorianCalendar.class, second.toString());
             } else throw new RuntimeServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,

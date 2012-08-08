@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Queries.java,v 1.2 2009/06/02 16:37:35 hburger Exp $
+ * Name:        $Id: Queries.java,v 1.4 2009/08/06 10:46:25 hburger Exp $
  * Description: OPENMDXQL Queries
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/02 16:37:35 $
+ * Date:        $Date: 2009/08/06 10:46:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,7 +51,6 @@
 package org.openmdx.base.persistence.cci;
 
 import javax.jdo.PersistenceManager;
-import javax.jdo.Query;
 
 /**
  * Queries
@@ -73,11 +72,15 @@ public class Queries {
     public static final String OPENMDXQL = "javax.jdo.query.OPENMDXQL";
 
     /**
-     * The string constant used as the first argument to
-     * {@link Query#addExtension(String,Object)} to tell whether the the 
-     * entire collection shall be loaded into the cache in order to evaluate 
-     * queries locally.
+     * A string constant used as the second argument to
+     * {@link PersistenceManager#newNamedQuery(Class,String)} to identify a
+     * query retrieving a core object's aspects.
+     * <p>
+     * The query's execution arguments are<ol>
+     * <li>the aspect class' MOF identifier
+     * <li>the core object
+     * </ol>
      */
-    public static final String FORCE_CACHE = "org.openmdx.query.ForceCache";
-
+    public static final String ASPECT_QUERY = "org.openmdx.query.Aspect";
+    
 }

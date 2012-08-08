@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightHomeFactory.java,v 1.1 2009/01/12 12:49:23 wfro Exp $
+ * Name:        $Id: LightweightHomeFactory.java,v 1.3 2010/04/16 10:02:59 hburger Exp $
  * Description: Lightweight Home Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:23 $
+ * Date:        $Date: 2010/04/16 10:02:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,12 +58,12 @@ import javax.ejb.EJBLocalObject;
 import javax.ejb.SessionBean;
 import javax.transaction.TransactionManager;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.application.container.spi.ejb.ContainerTransaction;
 import org.openmdx.kernel.application.container.spi.ejb.ContextSwitcher;
 import org.openmdx.kernel.application.container.spi.ejb.HomeConfiguration;
 import org.openmdx.kernel.application.container.spi.ejb.HomeHandler;
 import org.openmdx.kernel.application.container.spi.ejb.LocalHomeHandler;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
 
 /**
@@ -189,11 +189,10 @@ public class LightweightHomeFactory {
      * 
      * @throws ClassNotFoundException
      */
-    @SuppressWarnings("unchecked")
     private static <T> Class<T> getClass(
          String name
     ) throws ClassNotFoundException{
-        return name == null ? null : (Class<T>)Classes.getApplicationClass(name);
+        return name == null ? null : Classes.<T>getApplicationClass(name);
     }
 
     

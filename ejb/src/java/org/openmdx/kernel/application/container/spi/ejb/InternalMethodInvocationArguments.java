@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InternalMethodInvocationArguments.java,v 1.4 2009/04/28 14:07:06 hburger Exp $
+ * Name:        $Id: InternalMethodInvocationArguments.java,v 1.6 2009/12/31 14:12:35 wfro Exp $
  * Description: Value Holder
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/28 14:07:06 $
+ * Date:        $Date: 2009/12/31 14:12:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,9 +63,9 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.io.Final;
+import org.openmdx.kernel.loading.Classes;
+import org.w3c.cci2.Final;
 
 /**
  * Allows to pass values to a remote object

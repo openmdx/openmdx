@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractMapper.java,v 1.5 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: AbstractMapper.java,v 1.6 2010/01/28 18:14:44 hburger Exp $
  * Description: JMITemplate 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2010/01/28 18:14:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -130,7 +130,25 @@ public abstract class AbstractMapper
             featureDef.getQualifiedTypeName(),
             collectionClass,
             returnValue,
-            featureUsage
+            featureUsage, 
+            ""
+        );
+    }
+    
+    // -----------------------------------------------------------------------
+    protected String getMapType(
+        StructuralFeatureDef featureDef, 
+        String collectionClass, 
+        Boolean returnValue,
+        TypeMode featureUsage,
+        String elementType
+    ) throws ServiceException {
+        return this.getFeatureType(
+            featureDef.getQualifiedTypeName(),
+            collectionClass,
+            returnValue,
+            featureUsage, 
+            "," + elementType
         );
     }
 
@@ -144,10 +162,10 @@ public abstract class AbstractMapper
         String type = featureDef.getQualifiedTypeName();
         return 
             Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ? (
-                this.model.isPrimitiveType(type) ? this.getObjectType(type) : getFeatureType(type, null, returnValue, featureUsage) 
+                this.model.isPrimitiveType(type) ? this.getObjectType(type) : getFeatureType(type, null, returnValue, featureUsage, "") 
             ) :
             Multiplicities.SINGLE_VALUE.equals(multiplicity) ? ( 
-                this.model.isPrimitiveType(type) ? this.getType(type) : getFeatureType(type, null, returnValue, featureUsage) 
+                this.model.isPrimitiveType(type) ? this.getType(type) : getFeatureType(type, null, returnValue, featureUsage, "") 
             ) :
             Multiplicities.LIST.equals(multiplicity) ? this.getType(featureDef, "java.util.List", returnValue, featureUsage) :
             Multiplicities.SET.equals(multiplicity) ? this.getType(featureDef, "java.util.Set", returnValue, featureUsage) :
@@ -164,7 +182,8 @@ public abstract class AbstractMapper
         String qualifiedTypeName, 
         String collectionClass, 
         Boolean returnValue,
-        TypeMode featureUsage
+        TypeMode featureUsage, 
+        String amendment
     ) throws ServiceException {
         boolean multiValued = collectionClass != null;
         if(this.model.isPrimitiveType(qualifiedTypeName)) {
@@ -172,7 +191,7 @@ public abstract class AbstractMapper
             return (
                getFormat() == Format.JPA3 && Boolean.TRUE.equals(returnValue) ? "final " : ""
             ) + (
-               multiValued ? collectionClass + '<' + javaType + '>' : javaType
+               multiValued ? collectionClass + '<' + javaType + amendment + '>' : javaType
             );
         } else if(returnValue == null) {
             ClassDef classDef = this.getClassDef(qualifiedTypeName);
@@ -182,19 +201,24 @@ public abstract class AbstractMapper
                 getFormat() == Format.JPA3 && this.model.isStructureType(qualifiedTypeName) ? Format.CCI2 : format,
                 featureUsage
             ); 
-            return multiValued ? qualified(collectionClass,qualifiedTypeName,false) + '<' + javaType + '>' : javaType;
+            return multiValued ? qualified(collectionClass,qualifiedTypeName,false) + '<' + javaType + amendment + '>' : javaType;
         } else {
             String javaType = this.interfaceType(
                 qualifiedTypeName, 
                 org.openmdx.application.mof.mapping.java.metadata.Visibility.CCI, 
                 multiValued ? false : returnValue
             );
-            return 
-                returnValue ? "<T extends " + javaType + "> " + (
+            if(returnValue.booleanValue()) {
+                return "<T extends " + javaType + "> " + (
                     multiValued ? qualified(collectionClass,qualifiedTypeName,true) + "<T>" : "T"
-                ) :
-                multiValued ? qualified(collectionClass,qualifiedTypeName,false) + "<? extends " + javaType + '>' :
-                javaType; 
+                ); 
+            } else if (multiValued) {
+                return "".equals(amendment) ? 
+                    qualified(collectionClass,qualifiedTypeName,false) + "<? extends " + javaType + '>' :
+                    qualified(collectionClass,qualifiedTypeName,false) + "<" + javaType + amendment + '>';
+            } else {
+                return javaType;
+            }
         }
     }
     
@@ -897,7 +921,7 @@ public abstract class AbstractMapper
     ) {
         this.pw.println("//////////////////////////////////////////////////////////////////////////////");
         this.pw.println("//");
-        this.pw.println("// Name: $Id: AbstractMapper.java,v 1.5 2009/06/09 12:45:18 hburger Exp $");
+        this.pw.println("// Name: $Id: AbstractMapper.java,v 1.6 2010/01/28 18:14:44 hburger Exp $");
         this.pw.println("// Generated by: openMDX Java Mapper");
         this.pw.println("// Date: " + new Date().toString());
         this.pw.println("//");

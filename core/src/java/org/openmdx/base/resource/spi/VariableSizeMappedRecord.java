@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: VariableSizeMappedRecord.java,v 1.15 2009/06/03 15:42:38 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: VariableSizeMappedRecord.java,v 1.19 2010/02/16 18:39:30 hburger Exp $
  * Description: JCA: variable-size MappedRecord implementation
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/03 15:42:38 $
+ * Date:        $Date: 2010/02/16 18:39:30 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license  as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.resource.spi;
 
@@ -59,12 +58,13 @@ import java.util.Set;
 
 import javax.resource.cci.MappedRecord;
 
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 
 /**
  * Java Connector Architecture:
- * An variable-size MappedRecord implementation. Only keys of type string are supported.
+ * An variable-size MappedRecord implementation. Only keys of type string and Integers in the range [-128..127] are supported.
  */
 @SuppressWarnings("unchecked")
 class VariableSizeMappedRecord 
@@ -168,7 +168,33 @@ class VariableSizeMappedRecord
     private Object normalizeKey(
         Object key
     ) {
-        return ((String)key).intern();
+        if(key instanceof String) {
+            return ((String)key).intern();
+        } else if (key instanceof Integer) {
+            Integer i = ((Integer) key).intValue();
+            if(i < -128 || i > 127) throw BasicException.initHolder(
+                new RuntimeException(
+                    "Inappropriate key value",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("supported-range", -128, 127),
+                        new BasicException.Parameter("actual-value", i)
+                    )
+                ) 
+            );
+            return Integer.valueOf(i);
+        } else throw BasicException.initHolder(
+            new RuntimeException(
+                "Inappropriate key class",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_PARAMETER,
+                    new BasicException.Parameter("supported", String.class.getName(), Integer.class.getName()),
+                    new BasicException.Parameter("actual", key == null ? null : key.getClass().getName())
+                )
+            )
+        );
     }
     
     //--------------------------------------------------------------------------
@@ -371,14 +397,7 @@ class VariableSizeMappedRecord
      */
     public int hashCode(
     ){
-        int h = 0;
-        for(
-            Iterator i = entrySet().iterator();
-            i.hasNext();
-        ){
-            h += i.next().hashCode();
-        }
-        return h;
+        return this.values.hashCode();
     }
 
     /**
@@ -411,69 +430,6 @@ class VariableSizeMappedRecord
     ){
         return IndentingFormatter.toString(this);
     }
-
-    /**
-     * Returns a multi-line string representation of this MappedRecord.
-     * <p>
-     * The string representation consists of the record name, follwed by the
-     * optional short description enclosed in parenthesis (" (...)"), followed 
-     * by a colon and the mappings enclosed in braces (": {...}"). Each
-     * key-value mapping is rendered as the key followed by an equals sign ("=")
-     * followed by the associated value written on a separate line and indented
-     * while embedded lines are indented as well.
-     *
-     * @return   a multi-line String representation of this Record.
-     */
-    static String toString(
-        MappedRecord source
-    ){
-        StringBuilder result = new StringBuilder(
-            source.getRecordName()
-        );
-        String recordShortDescription=source.getRecordShortDescription();
-        if(
-            recordShortDescription!=null
-        ) result.append(
-            " ("
-        ).append(
-            recordShortDescription
-        ).append(
-            ')'
-        );
-        result.append(
-            ": {"
-        );
-        boolean empty=true;
-        for(
-            Iterator i=source.entrySet().iterator();
-            i.hasNext();
-        ){
-            Map.Entry e=(Map.Entry)i.next();
-            int j= result.append(
-                "\n\t"
-            ).length();
-            result.append(
-                e.getKey()
-            ).append(
-                '='
-            ).append(
-                e.getValue()
-            );
-            while(
-                j<result.length()
-            )if(
-                result.charAt(j++)=='\n'
-            ) result.insert(
-                j++,
-                '\t'
-            );
-            empty=false;
-        }
-        return result.append(
-            empty?"}":"\n}"
-        ).toString();
-    }
-
 
     //--------------------------------------------------------------------------
     // Instance members

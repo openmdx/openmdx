@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowErrorsControl.java,v 1.16 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: ShowErrorsControl.java,v 1.18 2009/09/25 12:02:38 wfro Exp $
  * Description: ReferencePaneRenderer
  * Revision:    $AttributePaneRenderer: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,10 +59,10 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.attribute.DateValue;
 
 public class ShowErrorsControl
@@ -85,11 +85,11 @@ public class ShowErrorsControl
     //---------------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {
-        AppLog.detail("> paint");        
+    	SysLog.detail("> paint");        
         ApplicationContext app = p.getApplicationContext();
         if(app.getErrorMessages().size() > 0) {
            p.write("<table class=\"tableError\">");
@@ -116,7 +116,7 @@ public class ShowErrorsControl
            p.write("  </tr>");
            p.write("</table>");
         }        
-        AppLog.detail("< paint");
+        SysLog.detail("< paint");
     }
 
     //---------------------------------------------------------------------------------

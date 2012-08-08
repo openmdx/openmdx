@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_onrIQB1_EdyPsfP_gjYckQ" name="datastore1">
+  <packagedElement xmi:type="uml:Package" xmi:id="_SeNosB19EdyPsfP_gjYckQPPP" name="org">
+    <packagedElement xmi:type="uml:Package" xmi:id="_SeNosB19EdyPsfP_gjYckQPP" name="openmdx">
+      <packagedElement xmi:type="uml:Package" xmi:id="_SeNosB19EdyPsfP_gjYckQP" name="compatibility">
+        <packagedElement xmi:type="uml:Package" xmi:id="_SeNosB19EdyPsfP_gjYckQ" name="datastore1">
+          <packagedElement xmi:type="uml:Class" xmi:id="_wS5ZcB19EdyPsfP_gjYckQ" name="QueryFilter">
+            <generalization xmi:id="_TSP4QB1-EdyPsfP_gjYckQ">
+              <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D403F322B0061"/>
+            </generalization>
+            <ownedAttribute xmi:id="_46_QoB19EdyPsfP_gjYckQ" name="clause">
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_B9J0sB1-EdyPsfP_gjYckQ" name="booleanParam">
+              <eAnnotations xmi:id="_GhEEwB1-EdyPsfP_gjYckQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+                <details xmi:id="_GhEEwR1-EdyPsfP_gjYckQ" key="list"/>
+              </eAnnotations>
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_-DQyAB19EdyPsfP_gjYckQ" name="stringParam">
+              <eAnnotations xmi:id="_EfufIB1-EdyPsfP_gjYckQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+                <details xmi:id="_EfufIR1-EdyPsfP_gjYckQ" key="list"/>
+              </eAnnotations>
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="__g1jQB19EdyPsfP_gjYckQ" name="integerParam">
+              <eAnnotations xmi:id="_FCvsoB1-EdyPsfP_gjYckQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+                <details xmi:id="_FCvsoR1-EdyPsfP_gjYckQ" key="list"/>
+              </eAnnotations>
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_vfZ1EB1_EdyPsfP_gjYckQ" name="decimalParam">
+              <eAnnotations xmi:id="_y24HMB1_EdyPsfP_gjYckQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+                <details xmi:id="_y24HMR1_EdyPsfP_gjYckQ" key="list"/>
+              </eAnnotations>
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B631E003C"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_AYuNgB1-EdyPsfP_gjYckQ" name="dateParam">
+              <eAnnotations xmi:id="_Fi7okB1-EdyPsfP_gjYckQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+                <details xmi:id="_Fi7okR1-EdyPsfP_gjYckQ" key="list"/>
+              </eAnnotations>
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63230061"/>
+            </ownedAttribute>
+            <ownedAttribute xmi:id="_BL-2cB1-EdyPsfP_gjYckQ" name="dateTimeParam">
+              <eAnnotations xmi:id="_GBnvsB1-EdyPsfP_gjYckQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+                <details xmi:id="_GBnvsR1-EdyPsfP_gjYckQ" key="list"/>
+              </eAnnotations>
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B630802BB"/>
+            </ownedAttribute>
+          </packagedElement>
+        </packagedElement>
+      </packagedElement>
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

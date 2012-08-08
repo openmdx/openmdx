@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Throwables.java,v 1.13 2009/03/31 17:05:16 hburger Exp $
+ * Name:        $Id: Throwables.java,v 1.14 2009/10/08 14:04:50 hburger Exp $
  * Description: Throwables
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:05:16 $
+ * Date:        $Date: 2009/10/08 14:04:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -86,7 +86,7 @@ public class Throwables {
             Level.WARNING,
             exceptionStack.getDescription(), 
             exceptionStack
-         ); // TODO make location aware
+         );
         return throwable;
     }
 

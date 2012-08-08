@@ -348,6 +348,9 @@ img {
   padding-right:8px;
   cursor:pointer;
 }
+#toggleViewPort {
+  float:right;height:20px;width:150px;
+}
 #alertBox {
   text-align:right;
   color:#888;
@@ -455,6 +458,9 @@ img {
 }
 .loading * {
 	visibility:hidden;
+}
+.udwait {
+  height:30px;
 }
 .wait {
   background-color:#FFFFFF;
@@ -1264,22 +1270,26 @@ textarea {
   font-weight: bold;
   width: 100%;
   word-wrap: normal;
+  overflow: auto;
 }
 textarea.stringLocked {
   width: 100%;
   margin: 0px -1px 0px 0px;
   white-space: nowrap;
   word-wrap: normal;
+  overflow: auto;
 }
 textarea.multiString {
   width: 100%;
   margin: 0px -1px 0px 0px;
   word-wrap: normal;
+  overflow: auto;
 }
 textarea.multiStringLocked {
   width: 100%;
   margin: 0px -1px 0px 0px;
   word-wrap: normal;
+  overflow: auto;
 }
 .valuePicture {
   text-decoration: none;
@@ -1434,7 +1444,7 @@ form #inspector {
 .menuOpPanelActions {
   margin:0;
   padding:0;
-  width: 240px;
+  width: 180px;
 }
 .menuOpPanel {
   margin:0;
@@ -1469,7 +1479,32 @@ form #inspector {
 .filterInput {
   width: 239px;
 }
+.filterAttr tr td {
+  vertical-align:top;
+}
+.filterAttr label {
+  position: absolute;
+  margin: 9px 0 0 6px;
+}
+.filterAttr input {
+  box-sizing: border-box;
+  margin: 2px 0 0 0;
+  padding: 5px 5px 5px 150px;
+  font-size: 16px;
+  font-weight: normal;
+}
+.filterAttr .abutton:hover {
+  cursor: pointer;
+}
 .filterButtons {
+  vertical-align:top;
+  /*
+  width: 140px;
+  */
+}
+.filterGap {
+  float:left;
+  width:35px;
 }
 .lookupTable {
   position:relative;
@@ -1826,7 +1861,7 @@ div.autocomplete ul li {
 |  fieldset layout
 + ----------------------------------------------------------------------------*/
 fieldset{
-	margin: 10px;
+	margin: 1px 5px 3px 5px;
 	padding: 2px;
 	-moz-border-radius: 10px;
 	border: 1.5px solid #DDD;

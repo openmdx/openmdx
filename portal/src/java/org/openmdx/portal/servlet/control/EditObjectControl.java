@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectControl.java,v 1.43 2008/11/12 10:36:53 wfro Exp $
+ * Name:        $Id: EditObjectControl.java,v 1.45 2009/11/05 18:03:14 hburger Exp $
  * Description: EditObjectControl
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.45 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 10:36:53 $
+ * Date:        $Date: 2009/11/05 18:03:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,7 @@ import java.util.Iterator;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.View;
@@ -96,7 +96,7 @@ public class EditObjectControl
     
     //-------------------------------------------------------------------------
     public static void paintEditPopups(
-        HtmlPage p        
+        ViewPort p        
     ) throws ServiceException {
         ApplicationContext application = p.getApplicationContext();
         Texts_1_0 texts = application.getTexts();
@@ -227,7 +227,7 @@ public class EditObjectControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p, 
+        ViewPort p, 
         String frame,
         boolean forEditing    
     ) throws ServiceException {
@@ -269,7 +269,7 @@ public class EditObjectControl
                 if(showQualifier) {
                     p.write("        <span class=\"qualifierText\">", texts.getQualifierText(), "</span><br />");
                 }
-                p.write("        <input class=\"qualifier\" type=\"", (showQualifier ? "text" : "hidden"), "\" name=\"qualifier\" value=\"", org.openmdx.base.text.conversion.UUIDConversion.toUID(org.openmdx.kernel.id.UUIDs.getGenerator().next()), "\">");
+                p.write("        <input class=\"qualifier\" type=\"", (showQualifier ? "text" : "hidden"), "\" name=\"qualifier\" value=\"", org.openmdx.base.text.conversion.UUIDConversion.toUID(org.openmdx.kernel.id.UUIDs.newUUID()), "\">");
                 p.write("      </td>");
                 p.write("    </tr>");
             }

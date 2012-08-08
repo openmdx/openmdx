@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DataLoader.java,v 1.19 2009/06/01 16:34:18 wfro Exp $
+ * Name:        $Id: DataLoader.java,v 1.26 2009/12/17 14:41:56 wfro Exp $
  * Description: DataLoader
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/01 16:34:18 $
+ * Date:        $Date: 2009/12/17 14:41:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -73,12 +74,13 @@ import javax.servlet.ServletContext;
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.dataprovider.cci.JmiHelper;
-import org.openmdx.application.dataprovider.importer.XmlImporter;
+import org.openmdx.application.xml.Importer;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 
 public class DataLoader
@@ -98,10 +100,13 @@ public class DataLoader
   }
     
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     synchronized public void loadData(
         String location
     ) throws ServiceException {
-        System.out.println("Loading data");      
+    	String messagePrefix = new Date() + "  ";
+        System.out.println(messagePrefix + "Loading data");
+        SysLog.info("Loading data");
         List dirs = this.getDirectories("/WEB-INF/config/" + location + "/");
         // Iterate all data directories. Each directory my contain
         // segment-specific data files
@@ -117,24 +122,22 @@ public class DataLoader
                 for(Iterator j = resourcePaths.iterator(); j.hasNext(); ) {        
                     String path = (String)j.next();
                     Map<Path,MappedRecord> data = new LinkedHashMap<Path,MappedRecord>();
-                    XmlImporter importer = new XmlImporter(
-                        data,
-                        false
-                    );
                     if(!path.endsWith("/")) {
-                        System.out.println("Loading " + path);
+                        SysLog.info("Loading " + path);
                         try {
-                            importer.process(
-                                new String[]{context.getResource(path).toString()}
-                            );
+                        	Importer.importObjects(
+                        		Importer.asTarget(data),
+                        		Importer.asSource(context.getResource(path))
+                        	);
                         }
                         catch(ServiceException e) {
                             e.log();
-                            System.out.println("STATUS: " + e.getMessage());
+                            System.out.println(messagePrefix + "STATUS: " + e.getMessage());
                         }
                     }
                     // storing data
-                    System.out.println("Storing " + data.size() + " objects");
+                    SysLog.info("Loading " + data.size() + " objects from " + path);
+                    System.out.println(messagePrefix + "Loading " + data.size() + " objects from " + path);
                     PersistenceManager store = this.pmf.getPersistenceManager(
                         this.getAdminPrincipal(dir),
                         null
@@ -151,7 +154,7 @@ public class DataLoader
                             kk++
                         ) {
                             if((kk > 0) && (kk % 100 == 0)) {
-                                System.out.println("Stored " + kk);
+                                SysLog.info("Stored " + kk);
                             }
                             MappedRecord entry = k.next();
                             // create new entries, update existing
@@ -159,7 +162,7 @@ public class DataLoader
                                 RefObject_1_0 existing = null;
                                 try {
                                     existing = (RefObject_1_0)store.getObjectById(
-                                        ObjectHolder_2Facade.getPath(entry)
+                                        Object_2Facade.getPath(entry)
                                     );
                                 }
                                 catch(Exception e) {}
@@ -168,22 +171,15 @@ public class DataLoader
                                         existing.refGetPath(), 
                                         existing
                                     );                                    
-                                    boolean modified = JmiHelper.toRefObject(
+                                    JmiHelper.toRefObject(
                                         entry,
                                         existing,
                                         loadedObjects, // object cache
-                                        store,
-                                        true, // replace values
-                                        true // remove trailing empty string
-                                    );
-                                    if(modified) {
-                                        if("bootstrap".equals(location)) {
-                                            System.out.println("Updating " + existing.refGetPath());
-                                        }
-                                    }
+                                        null // ignorable features
+                                    ); // modified is no longer determined by toRefObject()
                                 }
                                 else {
-                                    String qualifiedClassName = ObjectHolder_2Facade.getObjectClass(entry);
+                                    String qualifiedClassName = Object_2Facade.getObjectClass(entry);
                                     String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
                                     RefObject_1_0 newEntry = (RefObject_1_0)((org.openmdx.base.jmi1.Authority)store.getObjectById(
                                         Authority.class,
@@ -194,11 +190,9 @@ public class DataLoader
                                         entry,
                                         newEntry,
                                         loadedObjects, // object cache
-                                        store,
-                                        true, // replace values
-                                        true // remove trailing empty string
+                                        null // ignorable features
                                     );
-                                    Path entryPath = ObjectHolder_2Facade.getPath(entry);
+                                    Path entryPath = Object_2Facade.getPath(entry);
                                     Path parentIdentity = entryPath.getParent().getParent();
                                     RefObject_1_0 parent = null;
                                     try {
@@ -218,7 +212,7 @@ public class DataLoader
                                         );
                                     }                                    
                                     if("bootstrap".equals(location)) {
-                                        System.out.println("Creating " + entryPath);
+                                        SysLog.info("Creating " + entryPath);
                                     }
                                     loadedObjects.put(
                                     	entryPath, 
@@ -229,7 +223,7 @@ public class DataLoader
                             }
                             catch(Exception e) {
                                 new ServiceException(e).log();
-                                System.out.println("STATUS: " + e.getMessage() + " (for more info see log)");
+                                System.out.println(messagePrefix + "STATUS: " + e.getMessage() + " (for more info see log)");
                             }
                         }
                         store.currentTransaction().commit();
@@ -241,7 +235,8 @@ public class DataLoader
                 throw new ServiceException(e);
             }
         }
-        System.out.println("Done");         
+        SysLog.info("Done");
+        System.out.println(messagePrefix + "Done");         
     }
 
     //-------------------------------------------------------------------------

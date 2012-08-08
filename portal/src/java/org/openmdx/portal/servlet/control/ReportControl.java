@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportControl.java,v 1.31 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: ReportControl.java,v 1.33 2009/09/25 12:02:37 wfro Exp $
  * Description: UiBasedOperationPaneControl class
- * Revision:    $Revision: 1.31 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/09/25 12:02:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,9 +57,9 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.reports.ReportDefinition;
 
 //-----------------------------------------------------------------------------
@@ -96,11 +96,11 @@ public class ReportControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {
-        AppLog.detail("> paint");
+    	SysLog.detail("> paint");
        
         // Report menu entries
         if(frame == null) {
@@ -128,7 +128,7 @@ public class ReportControl
                 );
             }
         }   
-        AppLog.detail("< paint");
+        SysLog.detail("< paint");
         
     }
 

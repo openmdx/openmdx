@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PopulationMap.java,v 1.1 2009/01/05 13:47:16 wfro Exp $
+ * Name:        $Id: PopulationMap.java,v 1.4 2009/12/30 19:09:51 wfro Exp $
  * Description: Population Map 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:47:16 $
+ * Date:        $Date: 2009/12/30 19:09:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,8 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.w3c.cci2.SparseArray;
+
 /**
  * Population Map
  */
@@ -82,7 +84,7 @@ public class PopulationMap<V>
      * @param delegate
      */
     public PopulationMap(
-        SparseList<V> delegate
+        SparseArray<V> delegate
     ) {
         this.delegate = delegate;
     }
@@ -90,7 +92,7 @@ public class PopulationMap<V>
     /**
      * The delegate unless getDelegate() is overridden by a sub-class.
      */
-    private SparseList<V> delegate;
+    private SparseArray<V> delegate;
 
     /**
      * The entry set
@@ -102,12 +104,12 @@ public class PopulationMap<V>
      * 
      * @return
      */
-    protected SparseList<V> getDelegate(){
+    protected SparseArray<V> getDelegate(){
         return this.delegate;
     }
     
     protected void setDelegate(
-        SparseList<V> delegate
+        SparseArray<V> delegate
     ){
         this.delegate = delegate;
     }
@@ -121,11 +123,19 @@ public class PopulationMap<V>
     }
 
     /* (non-Javadoc)
+     * @see java.util.AbstractMap#isEmpty()
+     */
+    @Override
+    public boolean isEmpty() {
+        return entrySet().isEmpty();
+    }
+
+    /* (non-Javadoc)
      * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
      */
     @Override
     public V put(Integer key, V value) {
-        return getDelegate().set(key.intValue(), value);
+        return getDelegate().put(key.intValue(), value);
     }
 
     /* (non-Javadoc)
@@ -139,7 +149,7 @@ public class PopulationMap<V>
      * @see java.util.SortedMap#firstKey()
      */
     public Integer firstKey() {
-        return Integer.valueOf(getDelegate().firstIndex());
+        return Integer.valueOf(0);
     }
 
     /* (non-Javadoc)
@@ -153,7 +163,7 @@ public class PopulationMap<V>
      * @see java.util.SortedMap#lastKey()
      */
     public Integer lastKey() {
-        return Integer.valueOf((getDelegate().lastIndex()));
+        return Integer.valueOf((getDelegate().size() - 1));
     }
 
     /* (non-Javadoc)
@@ -193,7 +203,7 @@ public class PopulationMap<V>
          */
         @Override
         public int size() {
-            return getDelegate().population().size();
+            return getDelegate().size();
         }
 
         /* (non-Javadoc)
@@ -353,6 +363,14 @@ public class PopulationMap<V>
         }
 
         /* (non-Javadoc)
+         * @see java.util.AbstractMap#isEmpty()
+         */
+        @Override
+        public boolean isEmpty() {
+            return entrySet().isEmpty();
+        }
+
+        /* (non-Javadoc)
          * @see java.util.SortedMap#comparator()
          */
         public Comparator<? super Integer> comparator() {
@@ -493,13 +511,27 @@ public class PopulationMap<V>
                         i.next();
                     }
                 }
-                while(i.hasNext()) {
+                for(;i.hasNext();i.next()) {
                     if(to != null && i.nextIndex() >= to){
                         return s;
                     }
                     s++;
                 }
                 return s;
+            }
+
+            /* (non-Javadoc)
+             * @see java.util.AbstractCollection#isEmpty()
+             */
+            @Override
+            public boolean isEmpty() {
+                ListIterator<?> i = getDelegate().populationIterator();
+                if(from != null) {
+                    while(i.hasNext() && i.nextIndex() < from) {
+                        i.next();
+                    }
+                }
+                return i.hasNext() && i.nextIndex() < to;
             }
             
         }

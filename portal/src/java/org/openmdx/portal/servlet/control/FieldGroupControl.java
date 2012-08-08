@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FieldGroupControl.java,v 1.45 2009/06/03 15:33:43 wfro Exp $
+ * Name:        $Id: FieldGroupControl.java,v 1.49 2009/09/29 13:43:42 wfro Exp $
  * Description: FieldGroupControl
- * Revision:    $Revision: 1.45 $
+ * Revision:    $Revision: 1.49 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/03 15:33:43 $
+ * Date:        $Date: 2009/09/29 13:43:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,15 +65,15 @@ import javax.jdo.JDOHelper;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.UiContext;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.BinaryValue;
 import org.openmdx.portal.servlet.attribute.TextValue;
 import org.openmdx.portal.servlet.view.EditObjectView;
-import org.openmdx.portal.servlet.view.TransientObjectView;
 import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.view.TransientObjectView;
 import org.openmdx.portal.servlet.view.View;
 import org.openmdx.portal.servlet.view.ViewMode;
 
@@ -168,9 +168,24 @@ public class FieldGroupControl
         );
         for(Iterator i = inspector.getMember().iterator(); i.hasNext(); ) {
             Object pane = i.next();
-            if (pane instanceof org.openmdx.ui1.jmi1.AttributePane) {
+            if(pane instanceof org.openmdx.ui1.jmi1.AttributePane) {
                 org.openmdx.ui1.jmi1.AttributePane paneAttr = (org.openmdx.ui1.jmi1.AttributePane)pane;
                 for(Iterator j = paneAttr.getMember().iterator(); j.hasNext(); ) {
+                    org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab)j.next();
+                    for(Iterator k = tab.getMember().iterator(); k.hasNext(); ) {
+                        org.openmdx.ui1.jmi1.FieldGroup fieldGroup = (org.openmdx.ui1.jmi1.FieldGroup)k.next();
+                        for(Iterator l = fieldGroup.getMember().iterator(); l.hasNext(); ) {
+                            org.openmdx.ui1.jmi1.ValuedField field = (org.openmdx.ui1.jmi1.ValuedField)l.next();
+                            if(field.getFeatureName().equals(featureName)) {
+                                return field;
+                            }
+                        }
+                    }
+                }
+            }          
+            else if (pane instanceof org.openmdx.ui1.jmi1.OperationPane) {
+            	org.openmdx.ui1.jmi1.OperationPane paneOp = (org.openmdx.ui1.jmi1.OperationPane)pane;
+                for(Iterator j = paneOp.getMember().iterator(); j.hasNext(); ) {
                     org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab)j.next();
                     for(Iterator k = tab.getMember().iterator(); k.hasNext(); ) {
                         org.openmdx.ui1.jmi1.FieldGroup fieldGroup = (org.openmdx.ui1.jmi1.FieldGroup)k.next();
@@ -309,7 +324,7 @@ public class FieldGroupControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {
@@ -326,135 +341,197 @@ public class FieldGroupControl
         int nCols = attributes.length;
         int nRows = nCols > 0 ? attributes[0].length : 0;
         if((nCols > 0) && (nRows > 0)) {
-            int fieldGroupId = p.getProperty(HtmlPage.PROPERTY_FIELD_GROUP_ID) != null ? 
-                ((Integer)p.getProperty(HtmlPage.PROPERTY_FIELD_GROUP_ID)).intValue() : 
+            int fieldGroupId = p.getProperty(ViewPort.PROPERTY_FIELD_GROUP_ID) != null ? 
+                ((Integer)p.getProperty(ViewPort.PROPERTY_FIELD_GROUP_ID)).intValue() : 
                 1000;
-            p.write("<div class=\"fieldGroupName\">", htmlEncoder.encode(this.getName(), false), "</div>");
-            p.write("<table class=\"fieldGroup\">");
-            for(int v = 0; v < nRows; v++) {
-                p.write("<tr>");
+        	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+        		String fieldGroupName = this.getName();
+        		if(fieldGroupName != null && fieldGroupName.length() > 0) {
+        			p.write("      <h2>", htmlEncoder.encode(this.getName(), false), "</h2>");
+        	    }
+            	p.write("      <fieldset>");    
                 for(int u = 0; u < nCols; u++) {                  
-                  Attribute attribute = attributes[u][v];
-                  int tabIndex = fieldGroupId + 100*(u+1) + v;
-                  StringBuilder rowSpanModifier = new StringBuilder();
-                  if((attribute != null) && (attribute.getSpanRow() > 1)) {
-                      rowSpanModifier.append(
-                      	"rowspan=\""
-                      ).append(
-                    	attribute.getSpanRow()
-                      ).append(
-                        "\""
-                      );
-                  }
-                  StringBuilder gapModifier = new StringBuilder();
-                  if(u > 0) {
-                      gapModifier.append(
-                    	  "<td class=\"gap\" "
-                      ).append(
-                    	  rowSpanModifier
-                      ).append(
-                    	  "></td>"
-                      );
-                  }
-                  StringBuilder widthModifier = new StringBuilder();
-                  if(v == 0) {
-                	  widthModifier.append(
-                		"width=\""
-                	  ).append(
-                		100/nCols
-                	  ).append(
-                		"%\""
-                	  ); 
-                  }
-                  if(attribute == null) {
-                    if(!forEditing) {
-                        p.write(gapModifier.toString());
-                    }
-                    p.write("<td class=\"label\"></td>");
-                    if(forEditing) {
-                        p.write("<td class=\"valueEmpty\">&nbsp;</td>");
-                        p.write("<td class=\"addon\"></td>");
-                    }
-                    else {
-                        p.write("<td class=\"valueEmpty\" ", widthModifier.toString(), ">&nbsp;</td>");                        
-                    }
-                  }
-                  else if(attribute.isEmpty()) {
-                    p.write("<td class=\"label\"></td>");
-                  }
-                  else {
-                    AttributeValue valueHolder = attribute.getValue();
-                    String stringifiedValue = attribute.getStringifiedValue(
-                       p, 
-                       forEditing, 
-                       false
-                    );
-                    stringifiedValue = valueHolder instanceof TextValue ? 
-                        ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue : 
-                        stringifiedValue;
-
-                    // styles
-                    String color = valueHolder.getColor();
-                    String backColor = valueHolder.getBackColor();
-                    // A field is modifiable if it is enabled and changeable. BinaryValues are
-                    // not modifiable if the view is embedded.
-                    boolean isModifiable = 
-                        valueHolder.isEnabled() && 
-                        valueHolder.isChangeable() && 
-                        (viewMode != ViewMode.EMBEDDED || !(valueHolder instanceof BinaryValue));
-                    String readonlyModifier = isModifiable ? "" : "readonly";
-                    String disabledModifier = isModifiable ? "" : "disabled";                    
-                    String lockedModifier = isModifiable ? "" : "Locked";
-                    StringBuilder styleModifier = new StringBuilder("style=\"");
-                    if(color != null) {
-                        styleModifier.append(
-                        	"color:"
-                        ).append(
-                        	color
-                        ).append(
-                        	";"
-                        );
-                    }
-                    if(backColor != null) {
-                        styleModifier.append(
-                        	"background-color:"
-                        ).append(
-                        	backColor
-                        ).append(
-                        	";"
-                        );
-                    }
-                    valueHolder.paint(
-                        attribute,
-                        p,
-                        null, // default id
-                        null, // default label
-                        view instanceof TransientObjectView ? 
-                            ((TransientObjectView)view).getLookupObject() :
-                            view instanceof ObjectView ? 
-                                ((ObjectView)view).getLookupObject() :
-                                null,
-                        nCols,
-                        tabIndex,
-                        gapModifier.toString(),
-                        styleModifier.toString(),
-                        widthModifier.toString(),
-                        rowSpanModifier.toString(),
-                        readonlyModifier,
-                        disabledModifier,
-                        lockedModifier,
-                        stringifiedValue,
-                        forEditing
-                    );
-                  }
-                }
-                p.write("</tr>");
-            }
-            p.write("</table>");
-            p.setProperty(
-                HtmlPage.PROPERTY_FIELD_GROUP_ID,
-                new Integer(fieldGroupId + 1000)
-            );            
+                	for(int v = 0; v < nRows; v++) {
+	                  Attribute attribute = attributes[u][v];
+	                  int tabIndex = fieldGroupId + 100*(u+1) + v;               
+	                  if(attribute == null || attribute.isEmpty()) {
+	                	  // skip
+	                  }
+	                  else {
+	                    AttributeValue valueHolder = attribute.getValue();
+	                    String stringifiedValue = attribute.getStringifiedValue(
+	                       p, 
+	                       forEditing, 
+	                       false
+	                    );
+	                    stringifiedValue = valueHolder instanceof TextValue ? 
+	                        ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue : 
+	                        stringifiedValue;	
+	                    boolean isModifiable = 
+	                        valueHolder.isEnabled() && 
+	                        valueHolder.isChangeable() && 
+	                        (viewMode != ViewMode.EMBEDDED || !(valueHolder instanceof BinaryValue));
+	                    String readonlyModifier = isModifiable ? "" : "readonly";
+	                    String disabledModifier = isModifiable ? "" : "disabled";                    
+	                    String lockedModifier = isModifiable ? "" : "Locked";
+	                    StringBuilder styleModifier = new StringBuilder("style=\"");
+	                    p.write("      <div class=\"row\">");	                    
+	                    valueHolder.paint(
+	                        attribute,
+	                        p,
+	                        null, // default id
+	                        null, // default label
+	                        view instanceof TransientObjectView ? 
+	                            ((TransientObjectView)view).getLookupObject() :
+	                            view instanceof ObjectView ? 
+	                                ((ObjectView)view).getLookupObject() :
+	                                null,
+	                        nCols,
+	                        tabIndex,
+	                        "",
+	                        styleModifier.toString(),
+	                        "",
+	                        "",
+	                        readonlyModifier,
+	                        disabledModifier,
+	                        lockedModifier,
+	                        stringifiedValue,
+	                        forEditing
+	                    );
+	                    p.write("      </div>");
+	                  }
+	                }
+	            }
+            	p.write("      </fieldset>");
+        	}
+        	else {
+	            p.write("<div class=\"fieldGroupName\">", htmlEncoder.encode(this.getName(), false), "</div>");
+	            p.write("<table class=\"fieldGroup\">");
+	            for(int v = 0; v < nRows; v++) {
+	                p.write("<tr>");
+	                for(int u = 0; u < nCols; u++) {                  
+	                  Attribute attribute = attributes[u][v];
+	                  int tabIndex = fieldGroupId + 100*(u+1) + v;
+	                  StringBuilder rowSpanModifier = new StringBuilder();
+	                  if((attribute != null) && (attribute.getSpanRow() > 1)) {
+	                      rowSpanModifier.append(
+	                      	"rowspan=\""
+	                      ).append(
+	                    	attribute.getSpanRow()
+	                      ).append(
+	                        "\""
+	                      );
+	                  }
+	                  StringBuilder gapModifier = new StringBuilder();
+	                  if(u > 0) {
+	                      gapModifier.append(
+	                    	  "<td class=\"gap\" "
+	                      ).append(
+	                    	  rowSpanModifier
+	                      ).append(
+	                    	  "></td>"
+	                      );
+	                  }
+	                  StringBuilder widthModifier = new StringBuilder();
+	                  if(v == 0) {
+	                	  widthModifier.append(
+	                		"width=\""
+	                	  ).append(
+	                		100/nCols
+	                	  ).append(
+	                		"%\""
+	                	  ); 
+	                  }
+	                  if(attribute == null) {
+	                    if(!forEditing) {
+	                        p.write(gapModifier.toString());
+	                    }
+	                    p.write("<td class=\"label\"></td>");
+	                    if(forEditing) {
+	                        p.write("<td class=\"valueEmpty\">&nbsp;</td>");
+	                        p.write("<td class=\"addon\"></td>");
+	                    }
+	                    else {
+	                        p.write("<td class=\"valueEmpty\" ", widthModifier.toString(), ">&nbsp;</td>");                        
+	                    }
+	                  }
+	                  else if(attribute.isEmpty()) {
+	                    p.write("<td class=\"label\"></td>");
+	                  }
+	                  else {
+	                    AttributeValue valueHolder = attribute.getValue();
+	                    String stringifiedValue = attribute.getStringifiedValue(
+	                       p, 
+	                       forEditing, 
+	                       false
+	                    );
+	                    stringifiedValue = valueHolder instanceof TextValue ? 
+	                        ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue : 
+	                        stringifiedValue;
+	
+	                    // styles
+	                    String color = valueHolder.getColor();
+	                    String backColor = valueHolder.getBackColor();
+	                    // A field is modifiable if it is enabled and changeable. BinaryValues are
+	                    // not modifiable if the view is embedded.
+	                    boolean isModifiable = 
+	                        valueHolder.isEnabled() && 
+	                        valueHolder.isChangeable() && 
+	                        (viewMode != ViewMode.EMBEDDED || !(valueHolder instanceof BinaryValue));
+	                    String readonlyModifier = isModifiable ? "" : "readonly";
+	                    String disabledModifier = isModifiable ? "" : "disabled";                    
+	                    String lockedModifier = isModifiable ? "" : "Locked";
+	                    StringBuilder styleModifier = new StringBuilder("style=\"");
+	                    if(color != null) {
+	                        styleModifier.append(
+	                        	"color:"
+	                        ).append(
+	                        	color
+	                        ).append(
+	                        	";"
+	                        );
+	                    }
+	                    if(backColor != null) {
+	                        styleModifier.append(
+	                        	"background-color:"
+	                        ).append(
+	                        	backColor
+	                        ).append(
+	                        	";"
+	                        );
+	                    }
+	                    valueHolder.paint(
+	                        attribute,
+	                        p,
+	                        null, // default id
+	                        null, // default label
+	                        view instanceof TransientObjectView ? 
+	                            ((TransientObjectView)view).getLookupObject() :
+	                            view instanceof ObjectView ? 
+	                                ((ObjectView)view).getLookupObject() :
+	                                null,
+	                        nCols,
+	                        tabIndex,
+	                        gapModifier.toString(),
+	                        styleModifier.toString(),
+	                        widthModifier.toString(),
+	                        rowSpanModifier.toString(),
+	                        readonlyModifier,
+	                        disabledModifier,
+	                        lockedModifier,
+	                        stringifiedValue,
+	                        forEditing
+	                    );
+	                  }
+	                }
+	                p.write("</tr>");
+	            }
+	            p.write("</table>");
+	            p.setProperty(
+	                ViewPort.PROPERTY_FIELD_GROUP_ID,
+	                new Integer(fieldGroupId + 1000)
+	            );
+        	}
         }
     }
   

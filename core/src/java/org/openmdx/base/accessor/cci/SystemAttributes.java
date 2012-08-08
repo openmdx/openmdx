@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SystemAttributes.java,v 1.2 2009/06/01 15:42:40 wfro Exp $
+ * Name:        $Id: SystemAttributes.java,v 1.5 2010/01/21 17:11:57 hburger Exp $
  * Description: Generated constants for SystemAttributes
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/01 15:42:40 $
+ * Date:        $Date: 2010/01/21 17:11:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -76,8 +76,6 @@ public class SystemAttributes {
      */
     static public final String OBJECT_INSTANCE_OF = "object_instanceof";
 
-    static public final String VERSION = "openmdxjdoVersion";
-    
     //------------------------------------------------------------------------
     // ExtentCapable
     //------------------------------------------------------------------------

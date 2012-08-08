@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Action.java,v 1.39 2009/03/08 18:03:20 wfro Exp $
+ * Name:        $Id: Action.java,v 1.41 2009/09/25 17:20:03 wfro Exp $
  * Description: Action
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:20 $
+ * Date:        $Date: 2009/09/25 17:20:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -480,7 +480,7 @@ public final class Action
     public static final String PARAMETER_FORMAT = "format";
     public static final String PARAMETER_SIZE = "size";
     public static final String PARAMETER_MODE = "mode";
-    public static final String PARAMETER_SCOPE = "scope";
+    public static final String PARAMETER_VIEW_PORT = "viewport";
     public static final String PARAMETER_FILTER_BY_FEATURE = "filterByFeature";
     public static final String PARAMETER_FILTER_BY_TYPE = "filterByType";
     public static final String PARAMETER_FILTER_OPERATOR = "filterOperator";
@@ -535,6 +535,7 @@ public final class Action
     public final static int EVENT_OBJECT_GET_ATTRIBUTES = 45;
     public final static int EVENT_SET_ROLE = 47;
     public final static int EVENT_SELECT_PERSPECTIVE = 48;
+    public final static int EVENT_SELECT_VIEWPORT = 49;
     
     //-----------------------------------------------------------------------
     // Macro types

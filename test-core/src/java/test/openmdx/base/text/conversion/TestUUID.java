@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestUUID.java,v 1.2 2009/05/04 13:50:53 hburger Exp $
+ * Name:        $Id: TestUUID.java,v 1.3 2009/11/06 16:35:00 hburger Exp $
  * Description: TestUUID 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/04 13:50:53 $
+ * Date:        $Date: 2009/11/06 16:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
 
+import org.ietf.jgss.Oid;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.base.text.format.UUIDFormatter;
@@ -90,6 +92,14 @@ public class TestUUID {
         "36ad9c81-8975-11d8-9472-0010c61b123a",
         "36ad9c82-8975-11d8-9472-0010c61b123a",
         "36ad9c83-8975-11d8-9472-0010c61b123a"
+    };
+
+    final static private String[] OBJECT_ID_UUID = {
+        "3878a220-0f81-11dc-804a-0002a5d5c51b" // sunrise
+    };
+    
+    final static private String[] OBJECT_ID_DOT = {
+        "2.25.75063131677434771150912906774302803227" // sunrise
     };
 
     final static private InternalUUIDProvider provider = new InternalUUIDProvider();
@@ -187,7 +197,7 @@ public class TestUUID {
     }
 
     /**
-     * Test uuidgen sequntial UUID
+     * Test uuidgen sequential UUID
      */
     @Test
     public void testUuidgenSequentialUUID(
@@ -224,6 +234,33 @@ public class TestUUID {
         }
     }
 
+    /**
+     * Test UUID based OID
+     */
+    @Test
+    public void testOID(
+    ) throws Exception {
+        for(int i = 0; i < OBJECT_ID_UUID.length; i++){
+            UUID uuid = UUID.fromString(OBJECT_ID_UUID[i]);
+            assertEquals("OID", OBJECT_ID_DOT[i],  UUIDConversion.toOID(uuid));
+        }
+    }
+
+    /**
+     * Test UUID based Oid
+     * <p>
+     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6418433 seems not to be resolved completely
+     */
+    @Test
+    @Ignore 
+    public void testOid(
+    ) throws Exception {
+        for(int i = 0; i < OBJECT_ID_UUID.length; i++){
+            UUID uuid = UUID.fromString(OBJECT_ID_UUID[i]);
+            assertEquals("Oid", new Oid(OBJECT_ID_DOT[i]), UUIDConversion.toOid(uuid));
+        }
+    }
+    
     /**
      * Log a UUID
      * 

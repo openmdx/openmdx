@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeUtility.java,v 1.16 2009/06/13 18:48:08 wfro Exp $
+ * Name:        $Id: CodeUtility.java,v 1.21 2010/04/21 14:49:49 wfro Exp $
  * Description: CodeUtility
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/13 18:48:08 $
+ * Date:        $Date: 2010/04/21 14:49:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,10 +78,10 @@ import javax.resource.cci.MappedRecord;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openmdx.application.dataprovider.importer.XmlImporter;
+import org.openmdx.application.xml.Importer;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.portal.text.conversion.XMLWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -167,14 +167,11 @@ public class CodeUtility {
       for(int u = 0; u < en_US_files.length; u++) {
           // read files containing locale-specific texts and add to en_US
           Map<Path,MappedRecord> codes = new LinkedHashMap<Path,MappedRecord>();
-          XmlImporter importer = new XmlImporter(
-              codes,
-              false
-          );
-          System.out.println("loading " + en_US_files[u]);
+          System.out.println("Loading " + en_US_files[u]);
           try {
-              importer.process(
-                  new String[]{en_US_files[u].getAbsolutePath()}
+              Importer.importObjects(
+            	  Importer.asTarget(codes),
+            	  Importer.asSource(en_US_files[u])
               );
           }
           catch(ServiceException e) {
@@ -183,182 +180,189 @@ public class CodeUtility {
           }
           catch(Exception e) {
               new ServiceException(e).log();
-              System.out.println("STATUS: " + e.getMessage());
+              System.out.println("STATUS: " + e.getMessage());          
           }
+          // Load merged file
           File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + en_US_files[u].getName());
-          try {
-              System.out.println("loading " + file.getAbsolutePath());
-              org.w3c.dom.Document mergedCodes = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
-              for(Iterator<MappedRecord> i = codes.values().iterator(); i.hasNext(); ) {
-                  MappedRecord code = i.next();
-                  ObjectHolder_2Facade codeFacade;
-                  try {
-	                  codeFacade = ObjectHolder_2Facade.newInstance(code);
-                  }
-                  catch (ResourceException e) {
-                	  throw new ServiceException(e);
-                  }
-                  Map mergedCode = 
-                      this.lookupCode(
-                          mergedCodes, 
-                          codeFacade.getPath().getParent().getParent().getBase(), 
-                          codeFacade.getPath().getBase()
-                      );
-                  for(int j = 1; j < locale.size(); j++) { // skip en_US
-                      String shortText = (String)mergedCode.get(locale.get(j) + "_short");
-                      String longText = (String)mergedCode.get(locale.get(j) + "_long");
-                      codeFacade.attributeValues("shortText").add(shortText == null ? "" : shortText);
-                      codeFacade.attributeValues("longText").add(longText == null ? "" : longText);
-                  }
-              }
+          if(file.exists()) {
+	          try {
+	              System.out.println("Loading " + file.getAbsolutePath());
+	              org.w3c.dom.Document mergedCodes = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
+	              for(Iterator<MappedRecord> i = codes.values().iterator(); i.hasNext(); ) {
+	                  MappedRecord code = i.next();
+	                  Object_2Facade codeFacade;
+	                  try {
+		                  codeFacade = Object_2Facade.newInstance(code);
+	                  }
+	                  catch (ResourceException e) {
+	                	  throw new ServiceException(e);
+	                  }
+	                  Map mergedCode = 
+	                      this.lookupCode(
+	                          mergedCodes, 
+	                          codeFacade.getPath().getParent().getParent().getBase(), 
+	                          codeFacade.getPath().getBase()
+	                      );
+	                  for(int j = 1; j < locale.size(); j++) { // skip en_US
+	                      String shortText = (String)mergedCode.get(locale.get(j) + "_short");
+	                      String longText = (String)mergedCode.get(locale.get(j) + "_long");
+	                      codeFacade.attributeValuesAsList("shortText").add(shortText == null ? "" : shortText);
+	                      codeFacade.attributeValuesAsList("longText").add(longText == null ? "" : longText);
+	                  }
+	              }
+	          }
+	          catch(ParserConfigurationException e) {
+	              System.err.println("ParserConfigurationException: Can not load file " + file.getAbsolutePath());
+	          }
+	          catch(SAXException e) {
+	              System.err.println("SAXException: Can not load file " + file.getAbsolutePath());
+	          }
+	          catch(IOException e) {
+	              System.err.println("IOException: Can not load file " + file.getAbsolutePath());
+	          }
+	         
+	          // split and store codes as XML
+	          for(int j = 1; j < locale.size(); j++) { // never write base locale 0                  
+	              String outFileName = targetDir.getAbsolutePath() + File.separatorChar + locale.get(j) + File.separatorChar + en_US_files[u].getName(); 
+	              try {
+	                  File outFile = new File(outFileName);
+	                  if(outFile.exists()) {
+	                      File renamed = new File(outFile.getParent() + File.separatorChar + ".#" + outFile.getName());
+	                      if(!outFile.renameTo(renamed)) {
+	                          System.out.println("WARNING: Can not move file " + outFile.getAbsolutePath() + " to " + renamed.getAbsolutePath() + ". Skipping");
+	                          continue;
+	                      }
+	                  }
+	                  else if(!outFile.getParentFile().exists()) {
+	                      if(!outFile.getParentFile().mkdir()) {
+	                          System.out.println("WARNING: Can not create directory " + outFile.getParentFile().getAbsolutePath() + ". Skipping");
+	                          continue;                      
+	                      }
+	                  }
+	                  System.out.println("writing file " + outFileName);
+	                  Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
+	                  Writer fw = new XMLWriter(w);
+	                  String providerName ="CRX"; // default
+	                  String segmentName = "Standard"; // default
+	                  if(codes.size() > 0) {
+	                      MappedRecord obj = codes.values().iterator().next();
+	                      Path objPath = Object_2Facade.getPath(obj);
+	                      providerName = objPath.get(2);
+	                      segmentName = objPath.get(4);
+	                  }
+	                  String s = null;
+	                  s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+	                      "<org.openmdx.base.Authority xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" name=\"org:opencrx:kernel:code1\" xsi:noNamespaceSchemaLocation=\"xri://+resource/org/opencrx/kernel/code1/xmi1/code1.xsd\">\n" +
+	                      "  <_object/>\n" + 
+	                      "  <_content>\n" +
+	                      "    <provider>\n" +
+	                      "      <org.openmdx.base.Provider qualifiedName=\"" + providerName + "\" _operation=\"null\">\n" +
+	                      "        <_object/>\n" +
+	                      "        <_content>\n" +
+	                      "          <segment>\n" +
+	                      "            <org.opencrx.kernel.code1.Segment qualifiedName=\"" + segmentName + "\" _operation=\"null\">\n" +
+	                      "              <_object/>\n" +
+	                      "              <_content>\n" +
+	                      "                <valueContainer>\n";
+	                  w.write(s, 0, s.length());
+	                  boolean firstContainer = true;
+	                  for(Iterator<MappedRecord> i = codes.values().iterator(); i.hasNext(); ) {
+	                      MappedRecord element = i.next();
+	                      Object_2Facade elementFacade;
+	                      try {
+		                      elementFacade = Object_2Facade.newInstance(element);
+	                      }
+	                      catch (ResourceException e) {
+	                    	  throw new ServiceException(e);
+	                      }
+	                      if("org:opencrx:kernel:code1:CodeValueContainer".equals(elementFacade.getObjectClass())) {
+	                          if(!firstContainer) {
+	                              s = "                      </entry>\n" +
+	                                  "                    </_content>\n" +
+	                                  "                  </org.opencrx.kernel.code1.CodeValueContainer>\n";
+	                              w.write(s, 0, s.length());
+	                          }
+	                          s = "                  <org.opencrx.kernel.code1.CodeValueContainer name=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
+	                              "                    <_object/>\n" +
+	                              "                    <_content>\n" +
+	                              "                      <entry>\n";
+	                          w.write(s, 0, s.length());
+	                          firstContainer = false;
+	                      }
+	                      else if("org:opencrx:kernel:code1:CodeValueEntry".equals(elementFacade.getObjectClass())) {
+	                          // only write if there are texts
+	                          if(
+	                            ((elementFacade.attributeValuesAsList("shortText").size() > j) && (((String)elementFacade.attributeValuesAsList("shortText").get(j)).length() > 0)) ||
+	                            ((elementFacade.attributeValuesAsList("longText").size() > j) && (((String)elementFacade.attributeValuesAsList("longText").get(j)).length() > 0))
+	                          ) {                          
+	                              String shortText = elementFacade.attributeValuesAsList("shortText").size() > j
+	                                ? (String)elementFacade.attributeValuesAsList("shortText").get(j)
+	                                : "";
+	                              String longText = elementFacade.attributeValuesAsList("longText").size() > j
+	                                ? (String)elementFacade.attributeValuesAsList("longText").get(j)
+	                                : "";
+	                              s = "                        <org.opencrx.kernel.code1.CodeValueEntry code=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
+	                                  "                          <_object>\n";
+	                              w.write(s, 0, s.length());
+	                              if(shortText.length() > 0) {
+	                                  s = "                            <shortText>\n" +
+	                                      "                              <_item>";
+	                                  w.write(s, 0, s.length());
+	                                  s = shortText;
+	                                  fw.write(s, 0, s.length());
+	                                  s = "</_item>\n" +
+	                                      "                            </shortText>\n";
+	                                  w.write(s, 0, s.length());
+	                              }
+	                              if(longText.length() > 0) {
+	                                  s = "                            <longText>\n" +
+	                                      "                              <_item>";
+	                                  w.write(s, 0, s.length());
+	                                  s = longText;
+	                                  fw.write(s, 0, s.length());
+	                                  s = "</_item>\n" +
+	                                      "                            </longText>\n";
+	                                  w.write(s, 0, s.length());
+	                              }
+	                              s = "                          </_object>\n" +
+	                                  "                          <_content/>\n" +
+	                                  "                        </org.opencrx.kernel.code1.CodeValueEntry>\n";
+	                              w.write(s, 0, s.length());
+	                          }
+	                      }
+	                  }
+	                  if(!firstContainer) {
+	                      s = "                      </entry>\n" +
+	                          "                    </_content>\n" +
+	                          "                  </org.opencrx.kernel.code1.CodeValueContainer>\n";
+	                      w.write(s, 0, s.length());
+	                  }
+	                  s = "                </valueContainer>\n" +
+	                      "              </_content>\n" +
+	                      "            </org.opencrx.kernel.code1.Segment>\n" +
+	                      "          </segment>\n" +
+	                      "        </_content>\n" +
+	                      "      </org.openmdx.base.Provider>\n" +
+	                      "    </provider>\n" +
+	                      "  </_content>\n" +
+	                      "</org.openmdx.base.Authority>\n";
+	                  w.write(s, 0, s.length());
+	                  w.close();
+	              }
+	              catch(FileNotFoundException e) {
+	                  System.err.println("Can not create file " + outFileName);
+	              }
+	              catch(UnsupportedEncodingException e) {
+	                  System.err.println("Can not create file with encoding UTF-8 " + outFileName);
+	              }
+	              catch(IOException e) {
+	                  System.err.println("Error writing to file " + outFileName);
+	              }
+	          }
           }
-          catch(ParserConfigurationException e) {
-              System.err.println("ParserConfigurationException: can not load file " + file.getAbsolutePath());
-          }
-          catch(SAXException e) {
-              System.err.println("SAXException: can not load file " + file.getAbsolutePath());
-          }
-          catch(IOException e) {
-              System.err.println("IOException: can not load file " + file.getAbsolutePath());
-          }
-         
-          // split and store codes as XML
-          for(int j = 1; j < locale.size(); j++) { // never write base locale 0                  
-              String outFileName = targetDir.getAbsolutePath() + File.separatorChar + locale.get(j) + File.separatorChar + en_US_files[u].getName(); 
-              try {
-                  File outFile = new File(outFileName);
-                  if(outFile.exists()) {
-                      File renamed = new File(outFile.getParent() + File.separatorChar + ".#" + outFile.getName());
-                      if(!outFile.renameTo(renamed)) {
-                          System.out.println("WARNING: can not move file " + outFile.getAbsolutePath() + " to " + renamed.getAbsolutePath() + ". Skipping");
-                          continue;
-                      }
-                  }
-                  else if(!outFile.getParentFile().exists()) {
-                      if(!outFile.getParentFile().mkdir()) {
-                          System.out.println("WARNING: can not create directory " + outFile.getParentFile().getAbsolutePath() + ". Skipping");
-                          continue;                      
-                      }
-                  }
-                  System.out.println("writing file " + outFileName);
-                  Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
-                  Writer fw = new XMLWriter(w);
-                  String providerName ="CRX"; // default
-                  String segmentName = "Standard"; // default
-                  if(codes.size() > 0) {
-                      MappedRecord obj = codes.values().iterator().next();
-                      Path objPath = ObjectHolder_2Facade.getPath(obj);
-                      providerName = objPath.get(2);
-                      segmentName = objPath.get(4);
-                  }
-                  String s = null;
-                  s = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                      "<org.openmdx.base.Authority xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" name=\"org:opencrx:kernel:code1\" xsi:noNamespaceSchemaLocation=\"xri:+resource/org/opencrx/kernel/code1/xmi/code1.xsd\">\n" +
-                      "  <_object/>\n" + 
-                      "  <_content>\n" +
-                      "    <provider>\n" +
-                      "      <org.openmdx.base.Provider qualifiedName=\"" + providerName + "\" _operation=\"null\">\n" +
-                      "        <_object/>\n" +
-                      "        <_content>\n" +
-                      "          <segment>\n" +
-                      "            <org.opencrx.kernel.code1.Segment qualifiedName=\"" + segmentName + "\" _operation=\"null\">\n" +
-                      "              <_object/>\n" +
-                      "              <_content>\n" +
-                      "                <valueContainer>\n";
-                  w.write(s, 0, s.length());
-                  boolean firstContainer = true;
-                  for(Iterator<MappedRecord> i = codes.values().iterator(); i.hasNext(); ) {
-                      MappedRecord element = i.next();
-                      ObjectHolder_2Facade elementFacade;
-                      try {
-	                      elementFacade = ObjectHolder_2Facade.newInstance(element);
-                      }
-                      catch (ResourceException e) {
-                    	  throw new ServiceException(e);
-                      }
-                      if("org:opencrx:kernel:code1:CodeValueContainer".equals(elementFacade.getObjectClass())) {
-                          if(!firstContainer) {
-                              s = "                      </entry>\n" +
-                                  "                    </_content>\n" +
-                                  "                  </org.opencrx.kernel.code1.CodeValueContainer>\n";
-                              w.write(s, 0, s.length());
-                          }
-                          s = "                  <org.opencrx.kernel.code1.CodeValueContainer name=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
-                              "                    <_object/>\n" +
-                              "                    <_content>\n" +
-                              "                      <entry>\n";
-                          w.write(s, 0, s.length());
-                          firstContainer = false;
-                      }
-                      else if("org:opencrx:kernel:code1:CodeValueEntry".equals(elementFacade.getObjectClass())) {
-                          // only write if there are texts
-                          if(
-                            ((elementFacade.attributeValues("shortText").size() > j) && (((String)elementFacade.attributeValues("shortText").get(j)).length() > 0)) ||
-                            ((elementFacade.attributeValues("longText").size() > j) && (((String)elementFacade.attributeValues("longText").get(j)).length() > 0))
-                          ) {                          
-                              String shortText = elementFacade.attributeValues("shortText").size() > j
-                                ? (String)elementFacade.attributeValues("shortText").get(j)
-                                : "";
-                              String longText = elementFacade.attributeValues("longText").size() > j
-                                ? (String)elementFacade.attributeValues("longText").get(j)
-                                : "";
-                              s = "                        <org.opencrx.kernel.code1.CodeValueEntry code=\"" + elementFacade.getPath().getBase() + "\" _operation=\"create\">\n" +
-                                  "                          <_object>\n";
-                              w.write(s, 0, s.length());
-                              if(shortText.length() > 0) {
-                                  s = "                            <shortText>\n" +
-                                      "                              <_item>";
-                                  w.write(s, 0, s.length());
-                                  s = shortText;
-                                  fw.write(s, 0, s.length());
-                                  s = "</_item>\n" +
-                                      "                            </shortText>\n";
-                                  w.write(s, 0, s.length());
-                              }
-                              if(longText.length() > 0) {
-                                  s = "                            <longText>\n" +
-                                      "                              <_item>";
-                                  w.write(s, 0, s.length());
-                                  s = longText;
-                                  fw.write(s, 0, s.length());
-                                  s = "</_item>\n" +
-                                      "                            </longText>\n";
-                                  w.write(s, 0, s.length());
-                              }
-                              s = "                          </_object>\n" +
-                                  "                          <_content/>\n" +
-                                  "                        </org.opencrx.kernel.code1.CodeValueEntry>\n";
-                              w.write(s, 0, s.length());
-                          }
-                      }
-                  }
-                  if(!firstContainer) {
-                      s = "                      </entry>\n" +
-                          "                    </_content>\n" +
-                          "                  </org.opencrx.kernel.code1.CodeValueContainer>\n";
-                      w.write(s, 0, s.length());
-                  }
-                  s = "                </valueContainer>\n" +
-                      "              </_content>\n" +
-                      "            </org.opencrx.kernel.code1.Segment>\n" +
-                      "          </segment>\n" +
-                      "        </_content>\n" +
-                      "      </org.openmdx.base.Provider>\n" +
-                      "    </provider>\n" +
-                      "  </_content>\n" +
-                      "</org.openmdx.base.Authority>\n";
-                  w.write(s, 0, s.length());
-                  w.close();
-              }
-              catch(FileNotFoundException e) {
-                  System.err.println("can not create file " + outFileName);
-              }
-              catch(UnsupportedEncodingException e) {
-                  System.err.println("can not create file with encoding UTF-8 " + outFileName);
-              }
-              catch(IOException e) {
-                  System.err.println("error writing to file " + outFileName);
-              }
+          // Skip if merged file does not exist
+          else {
+              System.out.println("File does not exist. Skipping " + file.getAbsolutePath());        	  
           }
       }
   }
@@ -390,15 +394,12 @@ public class CodeUtility {
               File file =  new File(sourceDir.getAbsolutePath() + File.separatorChar + locale.get(i) + File.separatorChar + en_US_files[u].getName());
               Map<Path,MappedRecord> codes = new HashMap<Path,MappedRecord>();
               if(file.exists()) {
-                  XmlImporter importer = new XmlImporter(
-                    codes,
-                    false
-                  );
                   System.out.println("loading " + file);
                   try {
-                    importer.process(
-                      new String[]{file.getAbsolutePath()}
-                    );
+                	  Importer.importObjects(
+                		  Importer.asTarget(codes),
+                		  Importer.asSource(file)
+                	  );
                   }
                   catch(ServiceException e) {
                     e.log();
@@ -418,20 +419,20 @@ public class CodeUtility {
                     // merge entry
                     if(mergedCodes.get(key) != null) {
                       MappedRecord mergedCodeEntry = mergedCodes.get(key);
-                      ObjectHolder_2Facade mergedCodeEntryFacade = ObjectHolder_2Facade.newInstance(mergedCodeEntry);
+                      Object_2Facade mergedCodeEntryFacade = Object_2Facade.newInstance(mergedCodeEntry);
                       if("org:opencrx:kernel:code1:CodeValueEntry".equals(mergedCodeEntryFacade.getObjectClass())) {
                           MappedRecord codeEntry = codes.get(key);
-                          ObjectHolder_2Facade codeEntryFacade = ObjectHolder_2Facade.newInstance(codeEntry);
+                          Object_2Facade codeEntryFacade = Object_2Facade.newInstance(codeEntry);
                           if(mergedCodeEntryFacade.getAttributeValues("shortText") != null) {
-                        	  mergedCodeEntryFacade.attributeValues("shortText").add(
-                              (codeEntryFacade != null) && (codeEntryFacade.attributeValues("shortText").size() > 0) ? 
+                        	  mergedCodeEntryFacade.attributeValuesAsList("shortText").add(
+                              (codeEntryFacade != null) && (codeEntryFacade.attributeValuesAsList("shortText").size() > 0) ? 
                             	  codeEntryFacade.attributeValue("shortText") : 
                             	  "" // empty string as default
                             );
                           }
                           if(mergedCodeEntryFacade.getAttributeValues("longText") != null) {
-                        	  mergedCodeEntryFacade.attributeValues("longText").add(
-                              (codeEntryFacade != null) && (codeEntryFacade.attributeValues("longText").size() > 0) ? 
+                        	  mergedCodeEntryFacade.attributeValuesAsList("longText").add(
+                              (codeEntryFacade != null) && (codeEntryFacade.attributeValuesAsList("longText").size() > 0) ? 
                             	  codeEntryFacade.attributeValue("longText") : 
                             	  ""  // empty string as default
                             );
@@ -441,7 +442,7 @@ public class CodeUtility {
                     // add if it does not exist. Only add for locale=0 (en_US)
                     else if(i == 0) {
                         MappedRecord entry = codes.get(key);
-                        if("org:opencrx:kernel:code1:CodeValueContainer".equals(ObjectHolder_2Facade.getObjectClass(entry))) {
+                        if("org:opencrx:kernel:code1:CodeValueContainer".equals(Object_2Facade.getObjectClass(entry))) {
                             codeValueContainers.add(entry);
                         }
                         else {                         
@@ -508,14 +509,14 @@ public class CodeUtility {
               w.write(s, 0, s.length());
               for(Iterator<MappedRecord> i = codeValueContainers.iterator(); i.hasNext(); ) {
                   MappedRecord codeValueContainer = i.next();
-                  Path codeValueContainerPath = ObjectHolder_2Facade.getPath(codeValueContainer);
+                  Path codeValueContainerPath = Object_2Facade.getPath(codeValueContainer);
                   s = "  <CodeValueContainer name=\"" + codeValueContainerPath.getBase() + "\">\n";
                   w.write(s, 0, s.length());
                   for(Iterator<MappedRecord> j = sortedCodes.values().iterator(); j.hasNext(); ) {
                       MappedRecord entry = j.next();
-                      ObjectHolder_2Facade entryFacade;
+                      Object_2Facade entryFacade;
                       try {
-	                      entryFacade = ObjectHolder_2Facade.newInstance(entry);
+	                      entryFacade = Object_2Facade.newInstance(entry);
                       }
                       catch (ResourceException e) {
                     	  throw new ServiceException(e);
@@ -527,14 +528,14 @@ public class CodeUtility {
                               // shortText
                               s = "      <" + locale.get(k) + "_short>";
                               w.write(s, 0, s.length());
-                              s = (String)entryFacade.attributeValues("shortText").get(k);
+                              s = (String)entryFacade.attributeValuesAsList("shortText").get(k);
                               fw.write(s, 0, s.length());
                               s = "</" + locale.get(k) + "_short>\n";
                               w.write(s, 0, s.length());
                               // longText
                               s = "      <" + locale.get(k) + "_long>";
                               w.write(s, 0, s.length());
-                              s = (String)entryFacade.attributeValues("longText").get(k);
+                              s = (String)entryFacade.attributeValuesAsList("longText").get(k);
                               fw.write(s, 0, s.length());
                               s = "</" + locale.get(k) + "_long>\n";
                               w.write(s, 0, s.length());

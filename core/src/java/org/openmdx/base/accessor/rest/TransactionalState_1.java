@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TransactionalState_1.java,v 1.1 2009/05/16 22:17:45 wfro Exp $
+ * Name:        $Id: TransactionalState_1.java,v 1.6 2010/01/18 18:02:24 hburger Exp $
  * Description: Transactional State Implementation 1 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:45 $
+ * Date:        $Date: 2010/01/18 18:02:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,13 +68,18 @@ import org.openmdx.base.accessor.rest.DataObject_1.Operation;
 /**
  * Transactional State Implementation 1
  */
-final class TransactionalState_1 {
+public final class TransactionalState_1 {
 
     /**
      * @serial
      */
     private Set<String> dirtyFeatures = null;
 
+    /**
+     * Dirty features have been flushed
+     */
+    private boolean dirtyFeaturesFlushed;
+    
     /**
      * @serial
      */
@@ -85,6 +90,11 @@ final class TransactionalState_1 {
      */
     private boolean lifeCycleEventPending = false;
 
+    /**
+     * @serial
+     */
+    private boolean flushed = false;
+    
     /**
      *
      */
@@ -114,7 +124,31 @@ final class TransactionalState_1 {
      * An efficient way to return an empty operation queue.
      */
     private static final Queue<Operation> NO_OPERATIONS = new EmptyQueue<Operation>();
+    
+    /**
+     * Tells whether the data object is out of sync with its "remote" counterpart
+     * 
+     * @return <code>true</code> if the data object is out of sync with its 
+     * "remote" counterpart
+     */
+    final boolean isOutOfSync(
+    ){
+        return this.lifeCycleEventPending || (
+            this.dirtyFeatures != null && !this.dirtyFeatures.isEmpty()
+        );
+    }
 
+    /**
+     * Tells whether there is a life cycle event pending or a feature dirty
+     * 
+     * @return <code>false</code> unless a life cycle event is pending 
+     * or a feature is dirty
+     */
+    final boolean isDirty(
+    ){
+        return this.dirtyFeaturesFlushed || isOutOfSync();
+    }
+    
     /**
      * Retrieve lifeCycleEventPending.
      *
@@ -125,14 +159,35 @@ final class TransactionalState_1 {
     }
     
     /**
-     * Set lifeCycleEventPending.
-     * 
-     * @param lifeCycleEventPending The lifeCycleEventPending to set.
+     * Set Life-Cycle-Event pending.
+     * @param lifeCycleEventPending TODO
      */
-    final void setLifeCycleEventPending(boolean lifeCycleEventPending) {
+    final void setLifeCycleEventPending(
+        boolean lifeCycleEventPending
+    ) {
         this.lifeCycleEventPending = lifeCycleEventPending;
     }
 
+    final boolean isFlushed(){
+        return this.flushed;
+    }
+
+    final void setFlushed(
+        boolean flushed
+    ){
+        this.flushed = flushed;
+    }
+    
+    final void setDirtyFeaturesFlushed(
+    ){
+        if(this.dirtyFeatures == null) {
+            this.dirtyFeaturesFlushed = false;
+        } else {
+            this.dirtyFeaturesFlushed = !this.dirtyFeatures.isEmpty();
+            this.dirtyFeatures.clear();
+        }
+    }
+    
     /**
      * Retrieve prepared.
      *
@@ -189,17 +244,13 @@ final class TransactionalState_1 {
      * 
      * @return the set of dirty features
      */
-    final Set<String> dirtyFeatures(
+    public final Set<String> dirtyFeatures(
         boolean readOnly
     ){
-        if(this.dirtyFeatures == null) {
-            if(readOnly) {
-                return Collections.emptySet();
-            } else {
-                this.dirtyFeatures = new HashSet<String>();
-            }
-        }
-        return this.dirtyFeatures;
+        return 
+            this.dirtyFeatures != null ? this.dirtyFeatures :
+            readOnly ? Collections.<String>emptySet() :
+            (this.dirtyFeatures = new HashSet<String>());
     }
 
     /**
@@ -286,7 +337,7 @@ final class TransactionalState_1 {
     /**
      * Retrieve the aspects to to be made persistent together with this object
      * 
-     * @param readOnly 
+     * @param aspectClass 
      * 
      * @return the aspect map, never <code>null</code>
      */
@@ -332,7 +383,8 @@ final class TransactionalState_1 {
         }
         if(this.dirtyFeatures != null) {
             this.dirtyFeatures.clear();
-        }    
+        }
+        this.dirtyFeaturesFlushed = false;
         if(this.contexts != null) {
             this.contexts.clear();
         }

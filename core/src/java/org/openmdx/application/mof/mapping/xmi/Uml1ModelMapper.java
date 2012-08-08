@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Uml1ModelMapper.java,v 1.5 2009/06/04 14:46:12 hburger Exp $
+ * Name:        $Id: Uml1ModelMapper.java,v 1.6 2010/04/13 18:07:28 wfro Exp $
  * Description: write XML schema (XSD)
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/04 14:46:12 $
+ * Date:        $Date: 2010/04/13 18:07:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.cci.Stereotypes;
-import org.openmdx.kernel.log.SysLog;
+import org.openmdx.base.text.conversion.XMLEncoder;
 
 /**
  * This class writes MOF model elements to a given PrintStream using the OMG's
@@ -1004,36 +1004,7 @@ public class Uml1ModelMapper {
   private String toHTMLString(
     String input
   ) {
-    if(input.length() == 0) {
-      return new String();
-    } else {
-      StringBuffer sb = new StringBuffer();
-      for(int i = 0; i < input.length(); i++)
-      {
-        char ch = input.charAt(i);
-        
-        if('<' == ch) { sb.append("&lt;"); }
-        else if('>' == ch) { sb.append("&gt;"); }
-        else if('\'' == ch) { sb.append("&apos;"); }
-        else if('"' == ch) { sb.append("&quot;"); }
-        else if('&' == ch) { sb.append("&amp;"); }
-        else if(8217 == ch) { sb.append("&#8217;"); }
-        else if(228 == ch) { sb.append("&#228;"); }
-        else if(246 == ch) { sb.append("&#246;"); }
-        else if(252 == ch) { sb.append("&#252;"); }
-        else if(196 == ch) { sb.append("&#196;"); }
-        else if(214 == ch) { sb.append("&#214;"); }
-        else if(220 == ch) { sb.append("&#220;"); }
-        else if (ch >= 0x007F)
-        {
-        	// ignore non UTF-8 character because this character can cause 
-        	// Poseidon to crash when importing an XMI file
-        	SysLog.warning("ignoring non UTF-8 character &#" + (long)ch + "; in string \"" + input + "\"");
-        }
-        else { sb.append(ch); }
-      }
-      return sb.toString();
-    }
+      return XMLEncoder.encode(input);
   }
 
   //---------------------------------------------------------------------------

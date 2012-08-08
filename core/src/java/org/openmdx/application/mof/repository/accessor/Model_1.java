@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.14 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: Model_1.java,v 1.44 2010/04/16 09:52:08 hburger Exp $
  * Description: MOF repository accessor
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2010/04/16 09:52:08 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,11 +52,11 @@ package org.openmdx.application.mof.repository.accessor;
 
 import java.io.InputStream;
 import java.io.Reader;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -68,28 +67,30 @@ import java.util.SortedMap;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
+import javax.xml.datatype.Duration;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.omg.mof.spi.AbstractNames;
-import org.omg.mof.spi.Names;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.application.dataprovider.cci.RequestCollection;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.dataprovider.importer.XmlImporter;
 import org.openmdx.application.dataprovider.spi.Layer_1;
-import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelConstraints;
 import org.openmdx.application.mof.cci.ModelExceptions;
 import org.openmdx.application.mof.mapping.xmi.XMINames;
+import org.openmdx.application.xml.spi.DataproviderTarget;
+import org.openmdx.application.xml.spi.ImportHelper;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
@@ -100,14 +101,17 @@ import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Directions;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
-import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.w3c.cci2.LargeObject;
 import org.w3c.cci2.SparseArray;
+import org.w3c.spi2.Datatypes;
+import org.xml.sax.InputSource;
 
 /**
  * Helper class to access MOF repository. The class adds utility 
@@ -155,7 +159,7 @@ public class Model_1 implements Model_1_0 {
     ) throws ServiceException {
         synchronized(this.repository) {
             if(!this.isSetup) {
-                this.channel = new RequestCollection(
+                this.channel = new DataproviderRequestProcessor(
                     new ServiceHeader(),
                     this.repository
                 );
@@ -171,8 +175,8 @@ public class Model_1 implements Model_1_0 {
     static class Model_1Provider extends Layer_1 {
 
         //-----------------------------------------------------------------------    
-        public Model_1Provider(
-            List<Layer_1_0> delegates
+        public Model_1Provider(            
+            List<Layer_1> delegates
         ) throws Exception {
             this.delegates = delegates;
             this.activate(
@@ -183,9 +187,10 @@ public class Model_1 implements Model_1_0 {
         }
 
         //-----------------------------------------------------------------------
+        @Override
         public void deactivate(
         ) throws Exception {
-            for(Iterator<Layer_1_0> i = this.delegates.iterator(); i.hasNext(); ) {
+            for(Iterator<Layer_1> i = this.delegates.iterator(); i.hasNext(); ) {
                 (i.next()).deactivate();
             }          
         }
@@ -193,7 +198,7 @@ public class Model_1 implements Model_1_0 {
         //-----------------------------------------------------------------------
         // Variables
         //-----------------------------------------------------------------------
-        private final List<Layer_1_0> delegates;
+        private final List<Layer_1> delegates;
     }
 
     //-------------------------------------------------------------------------
@@ -201,48 +206,54 @@ public class Model_1 implements Model_1_0 {
      * Constructs an in-memory MOF repository consisting of the MOF Model_1 
      * application and the InMemory_1 persistence plugin.
      */
-    public static Layer_1_0 createRepository(
+    public static Dataprovider_1_0 createRepository(
         String storageFolder
     ) throws ServiceException {
         try {
             Configuration configuration = new Configuration();
-            configuration.values("namespaceId").add("model1");
+            configuration.values("namespaceId").put(
+                0,
+                "model1"
+            );
             Configuration persistenceConfiguration = new Configuration(configuration);
             if(storageFolder != null) {
-                persistenceConfiguration.values("storageFolder").add(storageFolder);
+                persistenceConfiguration.values("storageFolder").put(
+                    0,
+                    storageFolder
+                );
             }
-            Layer_1_0 persistencePlugin = (Layer_1_0)Classes.getApplicationClass(
+            Layer_1 persistencePlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.dataprovider.layer.persistence.none.InMemory_1.class.getName()
             ).newInstance();
             persistencePlugin.activate((short)0, persistenceConfiguration, null);
-            Layer_1_0 modelPlugin = (Layer_1_0)Classes.getApplicationClass(
+            Layer_1 modelPlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.mof.repository.layer.model.Model_1.class.getName()
             ).newInstance();
             modelPlugin.activate((short)1, configuration, persistencePlugin);
-            Layer_1_0 applicationPlugin = (Layer_1_0)Classes.getApplicationClass(
+            Layer_1 applicationPlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.mof.repository.layer.application.Model_1.class.getName()
             ).newInstance();
             applicationPlugin.activate((short)2, configuration, modelPlugin);
-            Layer_1_0 typePlugin = (Layer_1_0)Classes.getApplicationClass(
+            Layer_1 typePlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.mof.repository.layer.type.Model_1.class.getName()
             ).newInstance();
             typePlugin.activate((short)3, configuration, applicationPlugin);
-            Layer_1_0 interceptionPlugin = (Layer_1_0)Classes.getApplicationClass(
+            Layer_1 interceptionPlugin = Classes.<Layer_1>getApplicationClass(
                 org.openmdx.application.dataprovider.layer.interception.Standard_1.class.getName()
             ).newInstance();
             Configuration interceptionConfiguration = new Configuration(configuration);
-            interceptionConfiguration.values("propagateSet").add(Boolean.TRUE);
+            interceptionConfiguration.values("propagateSet").put(
+                0,
+                Boolean.TRUE
+            );
             interceptionPlugin.activate((short)4, interceptionConfiguration, typePlugin);
-
             return new Model_1Provider(
                 Arrays.asList(
-                    new Layer_1_0[]{
-                        interceptionPlugin,
-                        typePlugin,
-                        applicationPlugin,
-                        modelPlugin,
-                        persistencePlugin
-                    }
+                    interceptionPlugin,
+                    typePlugin,
+                    applicationPlugin,
+                    modelPlugin,
+                    persistencePlugin
                 )
             );
         }
@@ -383,17 +394,14 @@ public class Model_1 implements Model_1_0 {
                     if(this.cache.get(qualifiedModelName) == null) {
                         if(!importing) {
                             // beginImport
-                            MappedRecord params;
                             try {
-                                params = ObjectHolder_2Facade.newInstance(
-                                    PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport"),
-                                    "org:openmdx:base:Void"
-                                ).getDelegate();
-                            } 
-                            catch (ResourceException e) {
+                                MessageRecord params = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
+                                params.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport"));
+                                params.setBody(null);
+                                this.channel.addOperationRequest(params);
+                            } catch (ResourceException e) {
                                 throw new ServiceException(e);
                             }
-                            this.channel.addOperationRequest(params);
                             importing = true;
                         }        
                         // load model from XMI resource
@@ -402,14 +410,13 @@ public class Model_1 implements Model_1_0 {
                             XMINames.XMI_PACKAGE_SUFFIX
                         ).replace('.', '/') + '/' + modelName + "_edit.xml";
                         SysLog.detail("loading model " + modelName + " from " + xmlResource);
-
-                        // import elements
-                        new XmlImporter(
-                            new ServiceHeader(),
-                            this.repository
-                        ).process(
-                            xmlResource
-                        );        
+                        // Avoid org.openmdx.application.xml.Importer references 
+                        // for bootstrap dependency reasons!
+                        ImportHelper.importObjects(
+                            new DataproviderTarget(this.channel),
+                            ImportHelper.asSource(new InputSource(xmlResource)), 
+                            null // errorHandler
+                        ); 
                         isDirty = true;
                     }  
                     // add to model to loaded models  
@@ -419,22 +426,20 @@ public class Model_1 implements Model_1_0 {
             if(isDirty) {
                 if(importing) {
                     // endImport
-                    MappedRecord params;
                     try {
-                        params = ObjectHolder_2Facade.newInstance(
-                            PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport"),
-                            "org:openmdx:base:Void"
-                        ).getDelegate();
-                    } 
-                    catch (ResourceException e) {
+                        MessageRecord params = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
+                        params.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport"));
+                        params.setBody(null);
+                        this.channel.addOperationRequest(params);
+                    }  catch (ResourceException e) {
                         throw new ServiceException(e);
                     }
-                    this.channel.addOperationRequest(params);
                 }    
                 // retrieve imported and merged models and update cache    
                 this.refreshCache();
                 this.refreshAssociationDefs();
                 this.structuralFeatureDefMap.clear();
+                this.sharedAssociations.clear();
             }
         }
     }
@@ -660,12 +665,10 @@ public class Model_1 implements Model_1_0 {
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ASSERTION_FAILURE, 
             "values expected to be in [Collectin|Map]",
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("multiplicity", multiplicity),
-                new BasicException.Parameter("values", values),
-                new BasicException.Parameter("values class", (values == null) ? "null" : values.getClass().getName()),
-                new BasicException.Parameter("context", validationContext)
-            }
+            new BasicException.Parameter("multiplicity", multiplicity),
+            new BasicException.Parameter("values", values),
+            new BasicException.Parameter("values class", (values == null) ? "null" : values.getClass().getName()),
+            new BasicException.Parameter("context", validationContext)
         );      
         // Verify multiplicity
         if(
@@ -692,19 +695,17 @@ public class Model_1 implements Model_1_0 {
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
                 "stream values restricted to stream and optional length",
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("multiplicity", multiplicity),
-                    new BasicException.Parameter("values class", values == null ? null : values.getClass().getName()),
-                    new BasicException.Parameter("context", validationContext)
-                }
+                new BasicException.Parameter("multiplicity", multiplicity),
+                new BasicException.Parameter("values class", values == null ? null : values.getClass().getName()),
+                new BasicException.Parameter("context", validationContext)
             );      
         }
         // Verify collection and multiplicity type.
         // MULTI_VALUE is valid for openMDX compatibility
         if(
-            (Multiplicities.SET.equals(multiplicity) && !(values instanceof Set<?> || values instanceof SparseList<?>)) ||
+            (Multiplicities.SET.equals(multiplicity) && !(values instanceof Set<?> || values instanceof List<?>)) ||
             ((Multiplicities.LIST.equals(multiplicity) || Multiplicities.MULTI_VALUE.equals(multiplicity)) && !(values instanceof List<?>)) ||
-            (Multiplicities.SPARSEARRAY.equals(multiplicity) && !(values instanceof SortedMap<?,?> || values instanceof SparseArray<?> || values instanceof SparseList<?>)) 
+            (Multiplicities.SPARSEARRAY.equals(multiplicity) && !(values instanceof SortedMap<?,?> || values instanceof SparseArray<?>)) 
         ) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -777,7 +778,7 @@ public class Model_1 implements Model_1_0 {
         else if(this.isPrimitiveType(type)) {
             if(
                 (value instanceof Boolean) && 
-                "org:w3c:boolean".equals(typeName)
+                PrimitiveTypes.BOOLEAN.equals(typeName)
             ) {
                 return;
             }
@@ -794,29 +795,53 @@ public class Model_1 implements Model_1_0 {
                 return;
             }
             else if(
+                (value instanceof Date) && 
+                PrimitiveTypes.DATETIME.equals(typeName)
+            ) {
+                return;
+            }
+            else if(
                 (value instanceof String) && 
                 PrimitiveTypes.DATETIME.equals(typeName)
             ) {
                 try {
-                    DateFormat.getInstance().parse((String)value);
-                    return;
-                } 
-                catch(ParseException e) {
+                    Datatypes.create(Date.class, (String)value);
+                } catch(IllegalArgumentException e) {
                     throw new ServiceException(e);
                 }
+                return;
+            }
+            else if(
+                (value instanceof XMLGregorianCalendar) && 
+                PrimitiveTypes.DATE.equals(typeName)
+            ) {
+                return;
             }
             else if(
                 (value instanceof String) && 
                 PrimitiveTypes.DATE.equals(typeName)
             ) {
-                if(((String)value).length() > 8) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.PARSE_FAILURE, 
-                        "date must be of format YYYYMMDD",
-                        new BasicException.Parameter("value", value),
-                        new BasicException.Parameter("context", validationContext)
-                    );
+                try {
+                    Datatypes.create(XMLGregorianCalendar.class, (String)value);
+                } catch(IllegalArgumentException e) {
+                    throw new ServiceException(e);
+                }
+                return;
+            }
+            else if(
+                (value instanceof Duration) && 
+                PrimitiveTypes.DURATION.equals(typeName)
+            ) {
+                return;
+            }
+            else if(
+                (value instanceof String) && 
+                PrimitiveTypes.DURATION.equals(typeName)
+            ) {
+                try {
+                    Datatypes.create(Duration.class, (String)value);
+                } catch(IllegalArgumentException e) {
+                    throw new ServiceException(e);
                 }
                 return;
             }
@@ -891,9 +916,9 @@ public class Model_1 implements Model_1_0 {
         else if(this.isStructureType(type)) {
             Set<String> fieldNames;
             if(value instanceof MappedRecord) {
-                ObjectHolder_2Facade valueFacade;
+                Object_2Facade valueFacade;
                 try {
-                    valueFacade = ObjectHolder_2Facade.newInstance((MappedRecord)value);
+                    valueFacade = Object_2Facade.newInstance((MappedRecord)value);
                 } 
                 catch (ResourceException e) {
                     throw new ServiceException(e);
@@ -959,7 +984,7 @@ public class Model_1 implements Model_1_0 {
                         try {
                             fieldValue = value instanceof Structure_1_0 ? 
                                 ((Structure_1_0)value).objGetValue(fieldName) : 
-                                ObjectHolder_2Facade.newInstance((MappedRecord)value).getAttributeValues(fieldName);
+                                Object_2Facade.newInstance((MappedRecord)value).getAttributeValues(fieldName);
                         } 
                         catch (ResourceException e) {
                             throw new ServiceException(e);
@@ -1004,9 +1029,9 @@ public class Model_1 implements Model_1_0 {
                 attributeNames = new TreeSet<String>(((DataObject_1_0)value).objDefaultFetchGroup());
             }
             else if(value instanceof MappedRecord) {
-                ObjectHolder_2Facade valueFacade;
+                Object_2Facade valueFacade;
                 try {
-                    valueFacade = ObjectHolder_2Facade.newInstance((MappedRecord)value);
+                    valueFacade = Object_2Facade.newInstance((MappedRecord)value);
                 } 
                 catch (ResourceException e) {
                     throw new ServiceException(e);
@@ -1092,15 +1117,12 @@ public class Model_1 implements Model_1_0 {
                         else if(Multiplicities.SPARSEARRAY.equals(featureMultiplicity)) {
                             attributeValue = object.objGetSparseArray(attributeName);
                         } 
-                        else if(Multiplicities.STREAM.equals(featureMultiplicity)) {
-                            attributeValue = object.objGetLargeObject(attributeName);
-                        } 
                         else {
                             attributeValue = object.objGetValue(attributeName);                      
                             if(
                                 enforceRequired && 
                                 Multiplicities.SINGLE_VALUE.equals(featureMultiplicity) &&
-                                (attributeValue == null)
+                                attributeValue == null
                             ) {
                                 throw new ServiceException(
                                     BasicException.Code.DEFAULT_DOMAIN,
@@ -1115,9 +1137,9 @@ public class Model_1 implements Model_1_0 {
                         }
                     } 
                     else if (value instanceof MappedRecord) {
-                        SparseList<?> genericValue;
+                        Object genericValue;
                         try {
-                            genericValue = ObjectHolder_2Facade.newInstance((MappedRecord)value).getAttributeValues(attributeName);
+                            genericValue = Object_2Facade.newInstance((MappedRecord)value).getAttributeValues(attributeName);
                         } 
                         catch (ResourceException e) {
                             throw new ServiceException(e);
@@ -1126,7 +1148,7 @@ public class Model_1 implements Model_1_0 {
                         if(
                             enforceRequired && 
                             Multiplicities.SINGLE_VALUE.equals(featureMultiplicity) &&
-                            (attributeValue == null || genericValue.isEmpty())
+                            (attributeValue == null || ((List)genericValue).isEmpty())
                         ) {
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
@@ -1216,7 +1238,7 @@ public class Model_1 implements Model_1_0 {
             ) {
                 MappedRecord modelPackage = i.next(); 
                 List<MappedRecord> elementDefs = this.channel.addFindRequest(
-                    ObjectHolder_2Facade.getPath(modelPackage).getChild("element"),
+                    Object_2Facade.getPath(modelPackage).getChild("element"),
                     null,
                     AttributeSelectors.ALL_ATTRIBUTES,
                     null, 
@@ -1230,7 +1252,7 @@ public class Model_1 implements Model_1_0 {
                 ) {
                     MappedRecord elementDef = j.next();
                     cache.put(
-                        ObjectHolder_2Facade.getPath(elementDef).getBase(),
+                        Object_2Facade.getPath(elementDef).getBase(),
                         new ModelElement_1(elementDef, this)
                     ); 
                 }
@@ -1271,10 +1293,8 @@ public class Model_1 implements Model_1_0 {
                             BasicException.Code.DEFAULT_DOMAIN, 
                             BasicException.Code.NOT_FOUND, 
                             "element is member of container but was not found in model. Probably the model is inconsistent.",
-                            new BasicException.Parameter [] {
-                                new BasicException.Parameter("container", element.jdoGetObjectId()),
-                                new BasicException.Parameter("element", contentElementPath.getBase())
-                            }
+                            new BasicException.Parameter("container", element.jdoGetObjectId()),
+                            new BasicException.Parameter("element", contentElementPath.getBase())
                         );
                     }
                     ModelElement_1_0 contentElement = cache.get(
@@ -1443,9 +1463,7 @@ public class Model_1 implements Model_1_0 {
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.NOT_FOUND, 
                 "element not found in model package",
-                new BasicException.Parameter [] {
-                    new BasicException.Parameter("element", element)
-                }
+                new BasicException.Parameter("element", element)
             );
         }
         return e;
@@ -1477,6 +1495,43 @@ public class Model_1 implements Model_1_0 {
         return packageNamePackage.equals(packageNameType);
     }
 
+    //---------------------------------------------------------------------------
+    /**
+     * Tells whether the given XRI contains a shared association
+     * 
+     * @param xri the XRI to be analyzed
+     * 
+     * @return <code>true</code> if the given XRI contains a shared association 
+     * @throws ServiceException 
+     */
+    public boolean containsSharedAssociation(
+        Path xri
+    ) throws ServiceException{
+        int size = xri.size();
+        if(size <= 5) {
+            return false;
+        } else {
+            Path key = xri.getPrefix(1);
+            for(int i = 1; i < size; i+=2){
+                key.add(xri.get(i));
+            }
+            Boolean sharedAssociation = this.sharedAssociations.get(key);
+            if(sharedAssociation == null) {
+                Boolean parentIsShared = this.sharedAssociations.get(key.getParent());
+                if(parentIsShared == null ? containsSharedAssociation(xri.getPrefix(size - 2)) : parentIsShared.booleanValue()) {
+                    sharedAssociation = Boolean.TRUE;
+                } else {
+                    Path reference = size % 2 == 0 ? xri : xri.getParent();
+                    ModelElement_1_0 referenceType = this.getReferenceType(reference);
+                    ModelElement_1_0 referencedEnd = this.getElement(referenceType.objGetValue("referencedEnd"));
+                    sharedAssociation = "shared".equals(referencedEnd.objGetValue("aggregation"));
+                }
+                this.sharedAssociations.put(key, sharedAssociation);
+            }
+            return sharedAssociation;
+        }
+    }
+    
     //---------------------------------------------------------------------------
     public ModelElement_1_0 getFeatureDef(
         ModelElement_1_0 classifierDef,
@@ -1562,56 +1617,63 @@ public class Model_1 implements Model_1_0 {
         boolean includeDerived,
         boolean attributesOnly
     ) throws ServiceException {
-        Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>> allStructuralFeatureDefs = (Map)structuralFeatureDefMap.get(classDef.jdoGetObjectId());
+        Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>> allStructuralFeatureDefs = (Map)this.structuralFeatureDefMap.get(classDef.jdoGetObjectId());
         if(allStructuralFeatureDefs == null) {
-            structuralFeatureDefMap.put(
-                (Path)classDef.jdoGetObjectId(),
-                allStructuralFeatureDefs = new HashMap<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>()
-            );
-        }
-        Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>> structuralFeatureDefsIncludeSubtypes = (Map)allStructuralFeatureDefs.get(Boolean.valueOf(includeSubtypes));
-        if(structuralFeatureDefsIncludeSubtypes == null) {
-            allStructuralFeatureDefs.put(
-                Boolean.valueOf(includeSubtypes),
-                structuralFeatureDefsIncludeSubtypes = new HashMap<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>()
-            );
-        }
-        Map<Boolean,Map<String,ModelElement_1_0>> structuralFeatureDefsIncludeDerived = (Map<Boolean,Map<String,ModelElement_1_0>>)structuralFeatureDefsIncludeSubtypes.get(Boolean.valueOf(includeDerived));
-        if(structuralFeatureDefsIncludeDerived == null) {
-            structuralFeatureDefsIncludeSubtypes.put(
-                Boolean.valueOf(includeDerived),
-                structuralFeatureDefsIncludeDerived = new HashMap<Boolean,Map<String,ModelElement_1_0>>()
-            );
-        }
-        Map<String,ModelElement_1_0> structuralFeatureDefs = (Map<String,ModelElement_1_0>)structuralFeatureDefsIncludeDerived.get(Boolean.valueOf(attributesOnly));
-        if(structuralFeatureDefs == null) {
-            Map<String,ModelElement_1_0> featureDefs = (Map<String,ModelElement_1_0>)classDef.objGetValue(
-                includeSubtypes ? "allFeatureWithSubtype" : "allFeature"
-            );
-            structuralFeatureDefs = new HashMap<String,ModelElement_1_0>();
-            for(
-                Iterator<ModelElement_1_0> i = featureDefs.values().iterator();
-                i.hasNext();
-            ) {
-                ModelElement_1_0 featureDef = i.next();
-                if(
-                    this.isAttributeType(featureDef) || 
-                    (this.isReferenceType(featureDef) && (!attributesOnly || this.referenceIsStoredAsAttribute(featureDef)))          
-                ) {
-                    Boolean isDerived = (Boolean)featureDef.objGetValue("isDerived");
-                    if(includeDerived || (isDerived == null) || !isDerived.booleanValue()) {
-                        structuralFeatureDefs.put(
-                            (String)featureDef.objGetValue("name"),
-                            featureDef
+            allStructuralFeatureDefs = new HashMap<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>();
+            for(int ii = 0; ii < 2; ii++) {
+                boolean bIncludeSubtypes = ii == 0; 
+                Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>> structuralFeatureDefsIncludeSubtypes = new HashMap<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>();
+                allStructuralFeatureDefs.put(
+                    bIncludeSubtypes,
+                    structuralFeatureDefsIncludeSubtypes
+                );
+                for(int jj = 0; jj < 2; jj++) {
+                    boolean bIncludeDerived = jj == 0;
+                    Map<Boolean,Map<String,ModelElement_1_0>> structuralFeatureDefsIncludeDerived = new HashMap<Boolean,Map<String,ModelElement_1_0>>();
+                    structuralFeatureDefsIncludeSubtypes.put(
+                        bIncludeDerived,
+                        structuralFeatureDefsIncludeDerived
+                    );
+                    for(int kk = 0; kk < 2; kk++) {
+                        boolean bAttributesOnly = kk == 0; 
+                        Map<String,ModelElement_1_0> featureDefs = (Map<String,ModelElement_1_0>)classDef.objGetValue(
+                            bIncludeSubtypes ? "allFeatureWithSubtype" : "allFeature"
+                        );
+                        Map<String,ModelElement_1_0> structuralFeatureDefs = new HashMap<String,ModelElement_1_0>();
+                        for(
+                            Iterator<ModelElement_1_0> i = featureDefs.values().iterator();
+                            i.hasNext();
+                        ) {
+                            ModelElement_1_0 featureDef = i.next();
+                            if(
+                                this.isAttributeType(featureDef) || 
+                                (this.isReferenceType(featureDef) && (!bAttributesOnly || this.referenceIsStoredAsAttribute(featureDef)))          
+                            ) {
+                                Boolean isDerived = (Boolean)featureDef.objGetValue("isDerived");
+                                if(bIncludeDerived || (isDerived == null) || !isDerived.booleanValue()) {
+                                    structuralFeatureDefs.put(
+                                        (String)featureDef.objGetValue("name"),
+                                        featureDef
+                                    );
+                                }
+                            }
+                        }          
+                        structuralFeatureDefsIncludeDerived.put(
+                            bAttributesOnly,
+                            structuralFeatureDefs
                         );
                     }
                 }
-            }          
-            structuralFeatureDefsIncludeDerived.put(
-                Boolean.valueOf(attributesOnly),
-                structuralFeatureDefs
+            }
+            this.structuralFeatureDefMap.putIfAbsent(
+                (Path)classDef.jdoGetObjectId(),
+                allStructuralFeatureDefs
             );
+            allStructuralFeatureDefs = (Map)this.structuralFeatureDefMap.get(classDef.jdoGetObjectId());            
         }
+        Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>> structuralFeatureDefsIncludeSubtypes = (Map)allStructuralFeatureDefs.get(includeSubtypes);
+        Map<Boolean,Map<String,ModelElement_1_0>> structuralFeatureDefsIncludeDerived = (Map<Boolean,Map<String,ModelElement_1_0>>)structuralFeatureDefsIncludeSubtypes.get(includeDerived);
+        Map<String,ModelElement_1_0> structuralFeatureDefs = (Map<String,ModelElement_1_0>)structuralFeatureDefsIncludeDerived.get(attributesOnly);
         return structuralFeatureDefs;
     }
 
@@ -1691,9 +1753,7 @@ public class Model_1 implements Model_1_0 {
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.NOT_FOUND, 
                     "element not found in repository. Can not dereference type",
-                    new BasicException.Parameter [] {
-                        new BasicException.Parameter("element", element)
-                    }
+                    new BasicException.Parameter("element", element)
                 );
             }
             if(modelElement.isAliasType()) {
@@ -1705,9 +1765,7 @@ public class Model_1 implements Model_1_0 {
                         ModelExceptions.MODEL_DOMAIN,
                         ModelExceptions.CIRCULAR_ALIAS_TYPE_DEFINITION, 
                         ModelConstraints.CIRCULAR_TYPE_DEPENCENCY_NOT_ALLOWED,
-                        new BasicException.Parameter [] {
-                            new BasicException.Parameter("element", originalElement)
-                        }
+                        new BasicException.Parameter("element", originalElement)
                     );
                 }
                 visitedElements.add(modelElement);
@@ -2060,29 +2118,13 @@ public class Model_1 implements Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    public boolean isRoled(
-        ModelElement_1_0 classDef
-    ) throws ServiceException {
-        ModelElement_1_0 superClass = null;
-        boolean isRole = false;
-        for(
-            Iterator<?> i = classDef.objGetList("allSupertype").iterator();
-            i.hasNext() && !isRole;
-        ) {
-            superClass = this.getDereferencedType(i.next());
-            isRole = superClass.objGetList("stereotype").contains(Stereotypes.ROLE);
-        }
-        return isRole;
-    }  
-
-    //-------------------------------------------------------------------------
     public boolean objectIsSubtypeOf(
         Object object,
         Object type
     ) throws ServiceException {
         String typeName = (String)this.getElement(type).objGetValue("qualifiedName");
         String objectClass = object instanceof MappedRecord ?
-            ObjectHolder_2Facade.getObjectClass((MappedRecord)object) :
+            Object_2Facade.getObjectClass((MappedRecord)object) :
             object instanceof DataObject_1_0 ?
                 ((DataObject_1_0)object).objGetClass() :
                 null;
@@ -2164,7 +2206,6 @@ public class Model_1 implements Model_1_0 {
         }
         //javaPackageName
         StringBuffer javaPackageName = new StringBuffer();
-        boolean openmdx1 = packageSuffix.length() != 4;
         for(
             int i = 0, iLimit = packageNameComponents.size(); 
             i < iLimit; 
@@ -2172,11 +2213,7 @@ public class Model_1 implements Model_1_0 {
         )  {
             StringBuffer target = i == 0 ? javaPackageName : javaPackageName.append('.');
             String source = packageNameComponents.get(i);
-            if(openmdx1) {
-                Names.openmdx1NamespaceElement(target, source);
-            } else {
-                AbstractNames.openmdx2NamespaceElement(target, source);
-            }
+            AbstractNames.openmdx2NamespaceElement(target, source);
         }
         return javaPackageName.append(
             '.'
@@ -2259,6 +2296,41 @@ public class Model_1 implements Model_1_0 {
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.openmdx.base.mof.cci.Model_1_0#getIdentityPattern(org.openmdx.base.mof.cci.ModelElement_1_0)
+     */
+    public Path getIdentityPattern(
+        ModelElement_1_0 classDef
+    ) throws ServiceException {
+        if(!classDef.isClassifierType()) {
+            return null;            
+        }
+        List<String> components = new ArrayList<String>();
+        ModelElement_1_0 currentClassDef = classDef;
+        while(!this.isSubtypeOf(currentClassDef, "org:openmdx:base:Authority")) {
+            ModelElement_1_0 compositeReference = this.getCompositeReference(currentClassDef);
+            if(compositeReference == null) {
+                return null;
+            }
+            components.add(0, ":*");
+            components.add(
+                0,
+                (String)compositeReference.objGetValue("name")
+            );
+            ModelElement_1_0 exposedEnd = this.getElement(compositeReference.objGetValue("exposedEnd"));     
+            currentClassDef = this.getElement(exposedEnd.objGetValue("type"));
+        }
+        String className = (String)classDef.objGetValue("qualifiedName");        
+        components.add(
+            0,
+            className.substring(0, className.lastIndexOf(":"))
+        );
+        Path pattern = new Path(
+            components.toArray(new String[components.size()])
+        );
+        return pattern;
+    }
+
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------
@@ -2272,11 +2344,12 @@ public class Model_1 implements Model_1_0 {
     // Repository containing loaded models
     private Dataprovider_1_0 repository = null;
     // Channel to access repository
-    private RequestCollection channel = null;
+    private DataproviderRequestProcessor channel = null;
     // Caches for associations, structural features and all model elements 
     private volatile Map<String,List<AssociationDef>> associationDefMap = new HashMap<String,List<AssociationDef>>();
-    private volatile Map<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>> structuralFeatureDefMap = new HashMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>>();
+    private volatile ConcurrentMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>> structuralFeatureDefMap = new ConcurrentHashMap<Path,Map<Boolean,Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>>>>();
     private volatile Map<String,ModelElement_1_0> cache = new HashMap<String,ModelElement_1_0>();
+    private volatile ConcurrentMap<Path,Boolean> sharedAssociations = new ConcurrentHashMap<Path,Boolean>();
 
     /**
      * <em>Sorted</em> array of deprecated model package names.

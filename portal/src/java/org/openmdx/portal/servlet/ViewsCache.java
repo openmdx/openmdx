@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ViewsCache.java,v 1.8 2009/06/02 16:26:39 wfro Exp $
+ * Name:        $Id: ViewsCache.java,v 1.15 2010/04/17 17:07:30 wfro Exp $
  * Description: ViewsCache 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/02 16:26:39 $
+ * Date:        $Date: 2010/04/17 17:07:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,10 +55,12 @@
  */
 package org.openmdx.portal.servlet;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
 
@@ -71,22 +73,24 @@ import org.openmdx.portal.servlet.view.ObjectView;
 public class ViewsCache {
 
     //-----------------------------------------------------------------------
-    public ViewsCache(
-        Number viewsCacheSize
-    ) {
-        this.views = new LinkedHashMap(
-            viewsCacheSize == null ? 
-                DEFAULT_VIEWS_CACHE_SIZE : 
-                viewsCacheSize.intValue(),
-            0.75f,
-            true
-        );
-    }
-
+	private static class ExpiringView {
+		
+		public ExpiringView(
+			ObjectView view
+		) {
+			this.objectView = view;
+			this.lastAccessedAt = System.currentTimeMillis();
+		}
+		
+		public final ObjectView objectView;
+		public long lastAccessedAt;
+	}
+	
     //-----------------------------------------------------------------------
-    public Map getViews(
+    public ViewsCache(
+    	int timeoutInMinutes
     ) {
-        return this.views;
+    	this.viewsTimeoutMillis = 60000L * (long)timeoutInMinutes;
     }
 
     //-----------------------------------------------------------------------
@@ -94,89 +98,89 @@ public class ViewsCache {
         HttpSession session,
         long cachedSince          
     ) {
-        synchronized(this.views) {
-            this.views.clear();
-            session.setAttribute(
-                WebKeys.VIEW_CACHE_CACHED_SINCE, 
-                new Long(cachedSince)
-            );
-        }
+    	List<ExpiringView> views = new ArrayList<ExpiringView>(this.cache.values());
+        this.cache.clear();
+    	for(ExpiringView view: views) {
+    		if(view.objectView != null) {
+    			view.objectView.close();
+    		}
+    	}
+        session.setAttribute(
+            WebKeys.VIEW_CACHE_CACHED_SINCE, 
+            new Long(cachedSince)
+        );
     }
 
-    //-------------------------------------------------------------------------
-    public void evictViews(
-    ) {
-    	synchronized(this.views) {
-    		try {
-	            for(Iterator<Entry<String,ObjectView>> i = this.views.entrySet().iterator(); i.hasNext(); ) {
-	            	Entry<String,ObjectView> entry = i.next();
-	                ObjectView view = entry.getValue();
-	                view.getPersistenceManager().evictAll();
-	            }
-    		}
-    		catch(Exception e) {} // ignore
-    	}
-    }
-        
     //-----------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public void removeDirtyViews(
     ) {
-        synchronized(this.views) {
-        	try {
-	            for(Iterator<Entry<String,ObjectView>> i = this.views.entrySet().iterator(); i.hasNext(); ) {
-	            	Entry<String,ObjectView> entry = i.next();
-	                ObjectView view = entry.getValue();
-	                if(view.getObjectReference().getObject() == null) {
-	                    i.remove();
-	                }
-	            }
-        	}
-        	catch(Exception e) {} // ignore
-        }
+    	try {
+    		long now = System.currentTimeMillis();
+            for(
+            	Iterator<Entry<String,ExpiringView>> i = this.cache.entrySet().iterator(); 
+            	i.hasNext(); 
+            ) {
+            	Entry<String,ExpiringView> entry = i.next();
+            	ExpiringView expiringView = entry.getValue();
+                if(
+                	(expiringView.objectView.getObjectReference().getObject() == null) ||
+                	(expiringView.lastAccessedAt + this.viewsTimeoutMillis < now)
+                ) {
+                	if(expiringView.objectView != null) {
+                		expiringView.objectView.close();
+                	}
+                    i.remove();
+                }
+            }
+    	}
+    	catch(Exception e) {} // ignore
     }
 
     //-----------------------------------------------------------------------
     public ObjectView getView(
         String requestId
     ) {          
-        return (ObjectView)this.views.get(requestId);
+    	if(requestId == null) return null;
+    	ExpiringView view = this.cache.get(requestId);
+    	if(view == null) {
+    		return null;
+    	}
+    	view.lastAccessedAt = System.currentTimeMillis();
+    	return view.objectView;
     }
 
     //-----------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public void addView(
         String requestId,
         ObjectView view
     ) {
-        synchronized(this.views) {
-            this.views.put(
-                requestId, 
-                view
-            );
-        }
+        this.cache.put(
+            requestId, 
+            new ExpiringView(view)
+        );
     }
 
     //-----------------------------------------------------------------------
     public void removeView(
         String requestId
     ) {
-        synchronized(this.views) {
-            this.views.remove(requestId);
-        }          
+        ExpiringView view = this.cache.remove(requestId);
+        if(view != null && view.objectView != null) {
+        	view.objectView.close();
+        }
     }
 
     //-----------------------------------------------------------------------
     public boolean containsView(
         String requestId
     ) {
-        return this.views.containsKey(requestId);
+        return this.cache.containsKey(requestId);
     }
 
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    private static final int DEFAULT_VIEWS_CACHE_SIZE = 5;
-    private transient Map views = null;
+    private final transient Map<String,ExpiringView> cache = new ConcurrentHashMap<String,ExpiringView>();
+    private final long viewsTimeoutMillis;
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestPerformance.java,v 1.3 2009/03/05 17:51:35 hburger Exp $
+ * Name:        $Id: TestPerformance.java,v 1.4 2009/09/15 14:01:20 hburger Exp $
  * Description: TestPerformance 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 17:51:35 $
+ * Date:        $Date: 2009/09/15 14:01:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,7 +66,7 @@ public class TestPerformance {
 
     private static final int THROW_COUNT = 1000;
     
-    private static final int ACCEPTABLE_FACTOR = 2;
+    private static final int ACCEPTABLE_FACTOR = 3;
     
     @Test
     public void comparePerformance(){

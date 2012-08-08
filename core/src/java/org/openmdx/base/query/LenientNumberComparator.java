@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LenientNumberComparator.java,v 1.6 2009/01/06 10:21:19 wfro Exp $
+ * Name:        $Id: LenientNumberComparator.java,v 1.7 2010/01/26 15:43:30 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2010/01/26 15:43:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,30 +62,14 @@ import java.util.Comparator;
 public class LenientNumberComparator extends LenientCharacterComparator {
 
     /**
-     * Factory for a LenientNumberComparator using the default CharSequence comparator
-     * 
-     * @return  a lenient comparator using the default CharSequence comparator
-     */
-    public static Comparator<Object> getInstance(
-    ){
-        return LenientNumberComparator.instance;
-    }
-
-    /**
      * Use specific CharSequence comparator
      */
-    public LenientNumberComparator(
+    protected LenientNumberComparator(
         Comparator<Object> charSequenceComparator
     ) {
         super(charSequenceComparator);
     }
 
-    /**
-     * 
-     */
-    private static final Comparator<Object> instance = new LenientNumberComparator(null);
-            
-    
     //------------------------------------------------------------------------
     // Implements Comparator
     //------------------------------------------------------------------------
@@ -208,14 +192,11 @@ public class LenientNumberComparator extends LenientCharacterComparator {
     private static BigDecimal toBigDecimal(
         Number number
     ){
-        return number instanceof BigDecimal ? 
-            (BigDecimal)number : 
-        number instanceof BigInteger ? 
-            new BigDecimal((BigInteger)number) :
-        isAssignableToLong(number) ?
-            BigDecimal.valueOf(number.longValue()) :
-        isAssignableToDouble (number) ?
-            new BigDecimal(number.doubleValue()) :
+        return 
+            number instanceof BigDecimal ? (BigDecimal)number : 
+            number instanceof BigInteger ? new BigDecimal((BigInteger)number) :
+            isAssignableToLong(number) ? BigDecimal.valueOf(number.longValue()) :
+            isAssignableToDouble(number) ? new BigDecimal(number.doubleValue()) :
             new BigDecimal(number.toString());
     }
      

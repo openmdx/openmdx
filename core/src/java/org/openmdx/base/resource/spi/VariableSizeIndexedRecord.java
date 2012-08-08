@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: VariableSizeIndexedRecord.java,v 1.10 2009/05/11 11:56:43 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: VariableSizeIndexedRecord.java,v 1.12 2010/03/19 12:32:54 hburger Exp $
  * Description: JCA: variable-size IndexedRecord implementation
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/11 11:56:43 $
+ * Date:        $Date: 2010/03/19 12:32:54 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,31 +45,29 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.resource.spi;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
 import javax.resource.cci.IndexedRecord;
 
-import org.openmdx.base.resource.cci.ResultRecord;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 
 /**
  * Java Connector Architecture:
- * An variable-size IndxedRecord implementation.
+ * A variable-size IndxedRecord implementation.
  */
 @SuppressWarnings("unchecked")
-class VariableSizeIndexedRecord 
+public class VariableSizeIndexedRecord 
     extends ArrayList
-    implements IndexedRecord, ResultRecord, MultiLineStringRepresentation
+    implements IndexedRecord, MultiLineStringRepresentation
 {
 
     /**
@@ -100,7 +97,7 @@ class VariableSizeIndexedRecord
      *            information (stored in the metadata repository) for a specific
      *            record type. 
      */
-    VariableSizeIndexedRecord(
+    protected VariableSizeIndexedRecord(
         String recordName
     ){
         this(recordName,null);
@@ -121,7 +118,7 @@ class VariableSizeIndexedRecord
     VariableSizeIndexedRecord(
         String recordName,
         String description,
-        Collection initialContent
+        Collection<?> initialContent
     ){
         super(initialContent);
         this.recordName = recordName;
@@ -137,16 +134,6 @@ class VariableSizeIndexedRecord
      * The record short description
      */
     private String description;
-
-    /**
-     * The base collections size
-     */
-    private Long total;
-    
-    /**
-     * Tells whether more elements can be found on the base collection
-     */
-    private Boolean hasMore;
 
     
     //------------------------------------------------------------------------
@@ -175,6 +162,7 @@ class VariableSizeIndexedRecord
      *
      * @return  String representing name of the Record
      */
+    @Override
     public final String getRecordName(
     ){
         return this.recordName;
@@ -186,6 +174,7 @@ class VariableSizeIndexedRecord
      * @param name
      *        Name of the Record
      */
+    @Override
     public final void setRecordName(
         String name
     ){
@@ -198,6 +187,7 @@ class VariableSizeIndexedRecord
      *
      * @return   String representing a short description of the Record
      */
+    @Override
     public final String getRecordShortDescription(
     ){
         return this.description;
@@ -210,46 +200,14 @@ class VariableSizeIndexedRecord
      * @param description
      *        Description of the Record
      */
+    @Override
     public final void setRecordShortDescription(
         String description
     ){
         this.description = description;
     }
 
-    
-    //--------------------------------------------------------------------------
-    // Implements OutputRecord
-    //--------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.OutputRecord#setMore(boolean)
-     */
-    public void setHasMore(boolean hasMore) {
-        this.hasMore = Boolean.valueOf(hasMore);
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.OutputRecord#getMore()
-     */
-    public Boolean getHasMore() {
-        return this.hasMore;
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.OutputRecord#setTotal(long)
-     */
-    public void setTotal(long total) {
-        this.total = Long.valueOf(total);
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.rest.spi.OutputRecord#getTotal()
-     */
-    public Long getTotal() {
-        return this.total;
-    }
-    
-
+  
     //--------------------------------------------------------------------------
     // Implements List
     //--------------------------------------------------------------------------
@@ -261,6 +219,7 @@ class VariableSizeIndexedRecord
      *
      * @return  true if two instances are equal
      */
+    @Override
     public boolean equals(
         Object other
     ){
@@ -281,15 +240,13 @@ class VariableSizeIndexedRecord
      *
      * @return hash code
      */
+    @Override
     public int hashCode(
     ){
         int hashCode = 1;
-        for(
-            Iterator i = iterator();
-            i.hasNext();
-        ){
-            Object obj = i.next();
-            hashCode = 31*hashCode + (obj==null ? 0 : obj.hashCode());
+        for(Object member : this){
+            hashCode *= 31;
+            if(member != null) hashCode += member.hashCode();
         }
         return hashCode;
     }
@@ -299,6 +256,7 @@ class VariableSizeIndexedRecord
      *
      * @return  a copy of this IndexedRecord instance
      */
+    @Override
     public Object clone(
     ){
         return new VariableSizeIndexedRecord(
@@ -319,6 +277,7 @@ class VariableSizeIndexedRecord
      *
      * @return   a multi-line String representation of this Record.
      */
+    @Override
     public String toString(
     ){
         return IndentingFormatter.toString(this);

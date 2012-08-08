@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationPaneControl.java,v 1.80 2009/02/11 12:57:04 wfro Exp $
+ * Name:        $Id: OperationPaneControl.java,v 1.82 2009/09/25 12:02:37 wfro Exp $
  * Description: UiBasedOperationPaneControl class
- * Revision:    $Revision: 1.80 $
+ * Revision:    $Revision: 1.82 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/11 12:57:04 $
+ * Date:        $Date: 2009/09/25 12:02:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,12 +59,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
@@ -190,11 +190,11 @@ public class OperationPaneControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing        
     ) throws ServiceException {
-        AppLog.detail("> paint");
+    	SysLog.detail("> paint");
 
         ShowObjectView view = (ShowObjectView)p.getView();
         ApplicationContext app = view.getApplicationContext();
@@ -312,7 +312,7 @@ public class OperationPaneControl
             }
         }
 
-        AppLog.detail("< paint");
+        SysLog.detail("< paint");
 
     }
 

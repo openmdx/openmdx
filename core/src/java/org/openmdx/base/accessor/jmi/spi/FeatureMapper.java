@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FeatureMapper.java,v 1.12 2009/05/16 22:17:44 wfro Exp $
+ * Name:        $Id: FeatureMapper.java,v 1.15 2010/03/23 12:56:23 hburger Exp $
  * Description: FeatureMapper
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:44 $
+ * Date:        $Date: 2010/03/23 12:56:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,7 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -71,7 +72,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Class FeatureMapper
  */
-public class FeatureMapper {
+public class FeatureMapper implements Serializable {
 
     //------------------------------------------------------------------------
     public enum MethodSignature {
@@ -140,13 +141,15 @@ public class FeatureMapper {
                         featureName,
                         false
                     );
-                    if(featureDef == null) throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_MEMBER_NAME,
-                        "Feature not found in model repository",
-                        new BasicException.Parameter ("className", this.classDef.jdoGetObjectId()),
-                        new BasicException.Parameter ("featureName", featureName)
-                    );
+                    if(featureDef == null) { 
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_MEMBER_NAME,
+                            "Feature not found in model repository",
+                            new BasicException.Parameter ("className", this.classDef.jdoGetObjectId()),
+                            new BasicException.Parameter ("featureName", featureName)
+                        );
+                    }
                 }                    
                 String multiplicity = (String)featureDef.objGetValue("multiplicity");
                 boolean isBoolean =
@@ -445,10 +448,8 @@ public class FeatureMapper {
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.NOT_FOUND, 
                     "feature not found in class",
-                    new BasicException.Parameter [] {
-                        new BasicException.Parameter("method.name", methodName),
-                        new BasicException.Parameter("class.name", className)
-                    }
+                    new BasicException.Parameter("method.name", methodName),
+                    new BasicException.Parameter("class.name", className)
                 );                
             }
         }
@@ -458,15 +459,16 @@ public class FeatureMapper {
     //------------------------------------------------------------------------
     // Members
     //------------------------------------------------------------------------
-    private final ConcurrentMap<String,Method> accessors = new ConcurrentHashMap<String,Method>();
-    private final ConcurrentMap<String,Method> mutators = new ConcurrentHashMap<String,Method>();
-    private final ConcurrentMap<String,Method> operations = new ConcurrentHashMap<String,Method>();
-    private final ConcurrentMap<Method,Method> mapping = new ConcurrentHashMap<Method,Method>();
-    private final ConcurrentMap<String,Method> collections = new ConcurrentHashMap<String,Method>();
+    private static final long serialVersionUID = 4846709494755003575L;
     protected final static ConcurrentMap<String,ConcurrentMap<String,ModelElement_1_0>> allFeatures = 
         new ConcurrentHashMap<String,ConcurrentMap<String,ModelElement_1_0>>();
-
-    private final ModelElement_1_0 classDef;    
-    private final Class<?> targetIntf;    
+    
+    private transient final ConcurrentMap<String,Method> accessors = new ConcurrentHashMap<String,Method>();
+    private transient final ConcurrentMap<String,Method> mutators = new ConcurrentHashMap<String,Method>();
+    private transient final ConcurrentMap<String,Method> operations = new ConcurrentHashMap<String,Method>();
+    private transient final ConcurrentMap<Method,Method> mapping = new ConcurrentHashMap<Method,Method>();
+    private transient final ConcurrentMap<String,Method> collections = new ConcurrentHashMap<String,Method>();
+    private transient final ModelElement_1_0 classDef;    
+    private transient final Class<?> targetIntf;    
 
 }

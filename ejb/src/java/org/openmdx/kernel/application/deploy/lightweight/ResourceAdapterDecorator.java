@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ResourceAdapterDecorator.java,v 1.1 2009/01/12 12:49:22 wfro Exp $
+ * Name:        $Id: ResourceAdapterDecorator.java,v 1.5 2009/09/10 14:45:07 hburger Exp $
  * Description: Resource Adapter Decorator
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:22 $
+ * Date:        $Date: 2009/09/10 14:45:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,11 +61,11 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
-import org.openmdx.kernel.application.configuration.Report;
+import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.AuthenticationMechanism;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Connector;
 import org.openmdx.kernel.application.deploy.spi.Deployment.ResourceAdapter;
+import org.openmdx.kernel.loading.Classes;
 
 /**
  * Resource Adapter Decorator
@@ -155,7 +155,7 @@ public class ResourceAdapterDecorator
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getMaximumIdle()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getMaximumIdle()
      */
     public Integer getMaximumIdle() {
         return this.delegate.getMaximumIdle();
@@ -163,7 +163,7 @@ public class ResourceAdapterDecorator
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getMinimumEvictableIdleTime()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getMinimumEvictableIdleTime()
      */
     public Long getMinimumEvictableIdleTime() {
         return this.delegate.getMinimumEvictableIdleTime();
@@ -171,7 +171,7 @@ public class ResourceAdapterDecorator
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getMinimumIdle()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getMinimumIdle()
      */
     public Integer getMinimumIdle() {
         return this.delegate.getMinimumIdle();
@@ -179,7 +179,7 @@ public class ResourceAdapterDecorator
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getNumberOfTestsPerEvictionRun()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getNumberOfTestsPerEvictionRun()
      */
     public Integer getNumberOfTestsPerEvictionRun() {
         return this.delegate.getNumberOfTestsPerEvictionRun();
@@ -187,7 +187,7 @@ public class ResourceAdapterDecorator
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTestOnBorrow()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getTestOnBorrow()
      */
     public Boolean getTestOnBorrow() {
         return this.delegate.getTestOnBorrow();
@@ -195,7 +195,7 @@ public class ResourceAdapterDecorator
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTestOnReturn()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getTestOnReturn()
      */
     public Boolean getTestOnReturn() {
         return this.delegate.getTestOnReturn();
@@ -203,7 +203,7 @@ public class ResourceAdapterDecorator
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTestWhileIdle()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getTestWhileIdle()
      */
     public Boolean getTestWhileIdle() {
         return this.delegate.getTestWhileIdle();
@@ -211,7 +211,7 @@ public class ResourceAdapterDecorator
 
     /**
      * @return
-     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTimeBetweenEvictionRuns()
+     * @see org.openmdx.kernel.application.deploy.spi.Pool#getTimeBetweenEvictionRuns()
      */
     public Long getTimeBetweenEvictionRuns() {
         return this.delegate.getTimeBetweenEvictionRuns();

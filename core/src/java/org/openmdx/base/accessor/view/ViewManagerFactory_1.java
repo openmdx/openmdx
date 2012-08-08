@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewManagerFactory_1.java,v 1.3 2009/06/09 16:21:23 hburger Exp $
+ * Name:        $Id: ViewManagerFactory_1.java,v 1.7 2010/04/29 11:48:37 hburger Exp $
  * Description: View Manager Factory
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 16:21:23 $
+ * Date:        $Date: 2010/04/29 11:48:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,22 +61,25 @@ import javax.jdo.datastore.DataStoreCache;
 import javax.jdo.listener.InstanceLifecycleListener;
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
+import org.openmdx.base.aop1.PlugIn_1_0;
 
 
 /**
  * View Manager Factory
  */
-class ViewManagerFactory_1 implements PersistenceManagerFactory {
+public class ViewManagerFactory_1 implements PersistenceManagerFactory {
 
     /**
      * Constructor 
      *
      * @param delegate
      */
-    ViewManagerFactory_1(
-        PersistenceManagerFactory delegate
+    public ViewManagerFactory_1(
+        PersistenceManagerFactory delegate,
+        PlugIn_1_0... plugIns
     ){
         this.delegate = delegate;
+        this.plugIns = plugIns;
     }
     
     /**
@@ -84,6 +87,11 @@ class ViewManagerFactory_1 implements PersistenceManagerFactory {
      */
     private static final long serialVersionUID = 7786530602854422222L;
 
+    /**
+     * The View Manager Plug-Ins
+     */
+    private final PlugIn_1_0[] plugIns;
+    
     /**
      * The Data Object Manager Factory
      */
@@ -130,7 +138,7 @@ class ViewManagerFactory_1 implements PersistenceManagerFactory {
     }
 
     public DataStoreCache getDataStoreCache() {
-        throw new UnsupportedOperationException("Operation not supported by ViewManagerFactory_1");
+        return this.delegate.getDataStoreCache();
     }
 
     public String getMapping() {
@@ -144,7 +152,8 @@ class ViewManagerFactory_1 implements PersistenceManagerFactory {
     public PersistenceManager getPersistenceManager() {
         return new ViewManager_1(
             this,
-            (DataObjectManager_1_0) this.delegate.getPersistenceManager()
+            (DataObjectManager_1_0) this.delegate.getPersistenceManager(),
+            this.plugIns
         );
     }
 
@@ -154,7 +163,8 @@ class ViewManagerFactory_1 implements PersistenceManagerFactory {
     ) {
         return new ViewManager_1(
             this,
-            (DataObjectManager_1_0) this.delegate.getPersistenceManager(userid, password)
+            (DataObjectManager_1_0) this.delegate.getPersistenceManager(userid, password),
+            this.plugIns
         );
     }
 
@@ -232,10 +242,12 @@ class ViewManagerFactory_1 implements PersistenceManagerFactory {
         return this.delegate.getDetachAllOnCommit();
     }
 
+    @SuppressWarnings("unchecked")
     public FetchGroup getFetchGroup(Class cls, String name) {
         return this.delegate.getFetchGroup(cls, name);
     }
 
+    @SuppressWarnings("unchecked")
     public Set getFetchGroups() {
         return this.delegate.getFetchGroups();
     }

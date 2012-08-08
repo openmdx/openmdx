@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectEventHandler.java,v 1.55 2009/06/09 12:50:34 hburger Exp $
+ * Name:        $Id: ShowObjectEventHandler.java,v 1.65 2010/04/23 13:24:20 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.55 $
+ * Revision:    $Revision: 1.65 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:50:34 $
+ * Date:        $Date: 2010/04/23 13:24:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,7 +72,6 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefStruct;
 import javax.servlet.http.HttpSession;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
@@ -83,9 +82,10 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.PaintScope;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ViewsCache;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.view.EditObjectView;
@@ -110,8 +110,7 @@ public class ShowObjectEventHandler {
         ViewsCache showViewsCache 
     ) {
         ObjectView nextView = currentView;
-        PaintScope nextPaintMode = PaintScope.FULL;
-        PersistenceManager pm = currentView.getPersistenceManager();
+        ViewPort.Type nextViewPortType = null;
         
         // handle events
         ApplicationContext application = currentView.getApplicationContext();
@@ -134,9 +133,9 @@ public class ShowObjectEventHandler {
                     String forClass = Action.getParameter(parameter, Action.PARAMETER_FOR_CLASS);
                     String requestId = Action.getParameter(parameter, Action.PARAMETER_REQUEST_ID);
                    
-                    Map historyActions = (requestId == null) || (requestId.length() == 0)
-                        ? currentView.createHistoryAppendCurrent()
-                        : new HashMap();
+                    Map<Path,Action> historyActions = (requestId == null) || (requestId.length() == 0) ? 
+                    	currentView.createHistoryAppendCurrent() : 
+                    		new HashMap<Path,Action>();
                     // Go back to requested view
                     if(
                         (requestId != null) && 
@@ -146,14 +145,13 @@ public class ShowObjectEventHandler {
                     }
                     // EVENT_SELECT_AND_EDIT_OBJECT
                     else if(event == Action.EVENT_SELECT_AND_EDIT_OBJECT) {
-                        RefObject_1_0 nextObject = (RefObject_1_0)pm.getObjectById(objectIdentity);                    
+                    	PersistenceManager pm = application.getNewPmData();
+                        RefObject_1_0 object = (RefObject_1_0)pm.getObjectById(objectIdentity);                    
                         nextView = new EditObjectView(
                             currentView.getId(),
                             null,
-                            nextObject,
-                            nextObject.refGetPath(),
+                            object.refGetPath(),
                             application,
-                            currentView.getPersistenceManager(),
                             historyActions,
                             currentView.getLookupType(),
                             currentView.getRestrictToElements(),
@@ -162,6 +160,7 @@ public class ShowObjectEventHandler {
                     }
                     // EVENT_SELECT_AND_NEW_OBJECT
                     else if ((event == Action.EVENT_SELECT_AND_NEW_OBJECT) && (forClass.length() > 0) && (forReference.length() > 0)) {
+                    	PersistenceManager pm = application.getNewPmData();
                         RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(objectIdentity);
                         RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(forClass).refCreateInstance(null);
                         nextView = new EditObjectView(
@@ -170,7 +169,6 @@ public class ShowObjectEventHandler {
                             newObject,
                             null,
                             application,
-                            currentView.getPersistenceManager(),
                             historyActions,
                             currentView.getLookupType(),
                             currentView.getRestrictToElements(),
@@ -192,6 +190,7 @@ public class ShowObjectEventHandler {
                         // Show same grid in refreshed object
                         if (event == Action.EVENT_RELOAD) {
                             ShowObjectView view = (ShowObjectView) nextView;
+                            view.refresh(true);
                             if(view.getReferencePane().length == currentView.getReferencePane().length) {
                                 for (int i = 0; i < currentView.getReferencePane().length; i++) {
                                     view.getReferencePane()[i].selectReference(currentView.getReferencePane()[i].getSelectedReference());
@@ -228,7 +227,7 @@ public class ShowObjectEventHandler {
                 }
                 catch (Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
+                    SysLog.warning(e0.getMessage(), e0.getCause());
                     application.addErrorMessage(
                         application.getTexts().getErrorTextCannotSelectObject(), new String[] { objectXri, e.getMessage() }
                     );
@@ -268,7 +267,7 @@ public class ShowObjectEventHandler {
                 }
                 catch (Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
+                    SysLog.warning(e0.getMessage(), e0.getCause());
                     application.addErrorMessage(
                         application.getTexts().getErrorTextCannotSelectObject(), new String[] { objectXri, e.getMessage() }
                     );
@@ -282,10 +281,8 @@ public class ShowObjectEventHandler {
                     nextView = new EditObjectView(
                         currentView.getId(),
                         currentView.getContainerElementId(),
-                        currentView.getRefObject(),
-                        null,
+                        currentView.getRefObject().refGetPath(),
                         application,
-                        currentView.getPersistenceManager(),
                         currentView.createHistoryAppendCurrent(),
                         currentView.getLookupType(),
                         currentView.getRestrictToElements(),
@@ -296,7 +293,7 @@ public class ShowObjectEventHandler {
                 }
                 catch (Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
+                    SysLog.warning(e0.getMessage(), e0.getCause());
                     application.addErrorMessage(
                         application.getTexts().getErrorTextCannotEditObject(), new String[] { currentView.getRefObject().refMofId(), e.getMessage() }
                     );
@@ -307,8 +304,9 @@ public class ShowObjectEventHandler {
                 try {
                     String forClass = Action.getParameter(parameter, Action.PARAMETER_FOR_CLASS);
                     String forReference = Action.getParameter(parameter, Action.PARAMETER_FOR_REFERENCE);
-                    AppLog.detail("creating object", Action.PARAMETER_FOR_CLASS + "=" + forClass + "; " + Action.PARAMETER_FOR_REFERENCE + "=" + forReference);
-                    RefObject_1_0 parent = currentView.getRefObject(); 
+                    SysLog.detail("creating object", Action.PARAMETER_FOR_CLASS + "=" + forClass + "; " + Action.PARAMETER_FOR_REFERENCE + "=" + forReference);
+                    PersistenceManager pm = application.getNewPmData();
+                    RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(currentView.getRefObject().refGetPath()); 
                     RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(forClass).refCreateInstance(null);
                     newObject.refInitialize(false, false);
                     nextView = new EditObjectView(
@@ -317,7 +315,6 @@ public class ShowObjectEventHandler {
                         newObject,
                         null,
                         application,
-                        currentView.getPersistenceManager(),
                         currentView.createHistoryAppendCurrent(),
                         currentView.getLookupType(),
                         currentView.getRestrictToElements(),
@@ -328,7 +325,7 @@ public class ShowObjectEventHandler {
                 }
                 catch (Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
+                    SysLog.warning(e0.getMessage(), e0.getCause());
                     application.addErrorMessage(
                         application.getTexts().getErrorTextCannotEditObject(), new String[] { currentView.getRefObject().refMofId(), e.getMessage() }
                     );
@@ -338,7 +335,7 @@ public class ShowObjectEventHandler {
             case Action.EVENT_SELECT_LOCALE:
                 try {
                     String locale = Action.getParameter(parameter, Action.PARAMETER_LOCALE);
-                    AppLog.trace("setting locale", locale);
+                    SysLog.trace("Setting locale", locale);
                     application.setCurrentLocale(locale);
                     nextView = new ShowObjectView(
                         currentView.getId(),
@@ -356,7 +353,23 @@ public class ShowObjectEventHandler {
                 }
                 catch (Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
+                    SysLog.warning(e0.getMessage(), e0.getCause());
+                    application.addErrorMessage(
+                        application.getTexts().getErrorTextCannotSetLocale(),
+                        new String[] { parameter, e.getMessage() });
+                }
+                break;
+    
+            case Action.EVENT_SELECT_VIEWPORT:
+                try {
+                    String viewPortType = Action.getParameter(parameter, Action.PARAMETER_ID);
+                    SysLog.trace("Setting view port type", viewPortType);
+                    application.setCurrentViewPortType(ViewPort.Type.valueOf(viewPortType));
+                    nextView = currentView;
+                }
+                catch (Exception e) {
+                    ServiceException e0 = new ServiceException(e);
+                    SysLog.warning(e0.getMessage(), e0.getCause());
                     application.addErrorMessage(
                         application.getTexts().getErrorTextCannotSetLocale(),
                         new String[] { parameter, e.getMessage() });
@@ -366,7 +379,7 @@ public class ShowObjectEventHandler {
             case Action.EVENT_SELECT_PERSPECTIVE:
                 try {
                     String perspective = Action.getParameter(parameter, Action.PARAMETER_ID);
-                    AppLog.trace("Setting perspective", perspective);
+                    SysLog.trace("Setting perspective", perspective);
                     application.setCurrentPerspective(Integer.valueOf(perspective));
                     nextView = new ShowObjectView(
                         currentView.getId(),
@@ -380,7 +393,7 @@ public class ShowObjectEventHandler {
                 }
                 catch (Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
+                    SysLog.warning(e0.getMessage(), e0.getCause());
                     application.addErrorMessage(
                         application.getTexts().getErrorTextCannotSetPerspective(),
                         new String[] { parameter, e.getMessage() });
@@ -388,6 +401,9 @@ public class ShowObjectEventHandler {
                 break;
     
             case Action.EVENT_DELETE: {
+            	PersistenceManager pm = JDOHelper.getPersistenceManager(
+            		currentView.getRefObject()
+            	);
                 try {
                     pm.currentTransaction().begin();
                     currentView.getRefObject().refDelete();
@@ -396,17 +412,17 @@ public class ShowObjectEventHandler {
                 }
                 catch (Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
+                    SysLog.warning(e0.getMessage(), e0.getCause());
                     try {
                         pm.currentTransaction().rollback();
-                    } 
-                    catch (Exception e1) {}
+                    } catch (Exception e1) {}
                     currentView.handleCanNotCommitException(e0.getCause());
                 }
                 break;
             }
     
             case Action.EVENT_MULTI_DELETE: {
+            	PersistenceManager pm = application.getNewPmData();
                 try {
                     StringTokenizer tokenizer = new StringTokenizer(parameter, " ");
                     while (tokenizer.hasMoreTokens()) {
@@ -420,7 +436,7 @@ public class ShowObjectEventHandler {
                 }
                 catch (Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
+                    SysLog.warning(e0.getMessage(), e0.getCause());
                     try {
                         pm.currentTransaction().rollback();
                     } 
@@ -430,9 +446,8 @@ public class ShowObjectEventHandler {
                 break;
             }
     
-            case Action.EVENT_INVOKE_OPERATION: {
-    
-                AppLog.detail("invoking operation", parameter);
+            case Action.EVENT_INVOKE_OPERATION: {    
+            	SysLog.detail("invoking operation", parameter);
                 int tabIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_TAB));
                 int paneIndex = Integer.parseInt(Action.getParameter(parameter, Action.PARAMETER_PANE));
                 if (paneIndex < currentView.getOperationPane().length) {
@@ -440,7 +455,7 @@ public class ShowObjectEventHandler {
                         String message = "undefined operation";
                         String toolTip =  currentView.getOperationPane()[paneIndex].getOperationPaneControl().getToolTip();
                         String cause = "pane=" + toolTip + "; paneIndex=" + paneIndex + "; tabIndex=" + tabIndex;
-                        AppLog.error(message, cause);
+                        SysLog.error(message, cause);
                         application.addErrorMessage(
                             application.getTexts().getErrorTextCanNotInvokeOperation(), 
                             new String[] {
@@ -474,8 +489,7 @@ public class ShowObjectEventHandler {
                                 paramValuesMap,
                                 parameterMap,
                                 fieldMap,
-                                application,
-                                currentView.getPersistenceManager()
+                                application
                             );
     
                             // Set current filter of current pane as attribute value
@@ -544,7 +558,11 @@ public class ShowObjectEventHandler {
                                 ModelElement_1_0 fieldDef = model.getElement(j.next());
                                 paramValues.add(paramValuesMap.get(fieldDef.objGetValue("qualifiedName")));
                             }
-                            RefStruct param = ((RefPackage_1_0) currentView.getRefObject().refImmediatePackage()).refCreateStruct(
+                            PersistenceManager pm = application.getNewPmData();
+                            RefObject_1_0 target = (RefObject_1_0)pm.getObjectById(
+                            	currentView.getRefObject().refGetPath()
+                            );
+                            RefStruct param = ((RefPackage_1_0)target.refImmediatePackage()).refCreateStruct(
                                 (String)paramDef.objGetValue("qualifiedName"), 
                                 paramValues
                             );
@@ -553,7 +571,7 @@ public class ShowObjectEventHandler {
                                 // Reset error messages not related to operation invocation
                                 application.getErrorMessages().clear();
                                 pm.currentTransaction().begin();
-                                result = (RefStruct) currentView.getRefObject().refInvokeOperation(
+                                result = (RefStruct)target.refInvokeOperation(
                                     tab.getOperationTabControl().getOperationName(), 
                                     Arrays.asList(new Object[]{param})
                                 );
@@ -561,11 +579,8 @@ public class ShowObjectEventHandler {
                                 // Test whether object is still accessible. If not
                                 // go back to previous view. Notify other views about object update
                                 try {
-                                	RefObject_1_0 pcView = currentView.getRefObject(); 
-                                    JDOHelper.getPersistenceManager(pcView).refresh(pcView);
-                                    showViewsCache.evictViews();
                                     RefObject_1_0 newTarget = application.getPortalExtension().handleOperationResult(
-                                        currentView.getRefObject(), 
+                                        target, 
                                         tab.getOperationTabControl().getOperationName(), 
                                         param, 
                                         result
@@ -585,13 +600,13 @@ public class ShowObjectEventHandler {
                                             );
                                         }
                                         catch (JmiServiceException e) {
-                                            AppLog.warning(e.getMessage(), e.getCause());
+                                        	SysLog.warning(e.getMessage(), e.getCause());
                                             application.addErrorMessage(
                                                 application.getTexts().getErrorTextCanNotSetOperationResult(), new String[] {currentView.getRefObject().refMofId(), tab.getOperationTabControl().getOperationName(), e.getMessage() }
                                             );
                                         }
                                         try {
-                                            // Do not refresh view here because the servlet does a reload
+                                            nextView.refresh(true);
                                             tab.getFieldGroup()[0].refresh(false);
                                             tab.getFieldGroup()[1].refresh(false);
                                             currentView.setOperationTabResult(tab);
@@ -620,17 +635,17 @@ public class ShowObjectEventHandler {
                                 }
                                 catch (Exception e) {
                                     ServiceException e0 = new ServiceException(e);
-                                    AppLog.info(e0.getMessage(), e0.getCause());
+                                    SysLog.info(e0.getMessage(), e0.getCause());
                                     nextView = currentView.getPreviousView(null);
                                 }
                             }
                             catch(Exception e) {
                                 ServiceException e0 = new ServiceException(e);
                                 if(e0.getExceptionCode() == BasicException.Code.CONCURRENT_ACCESS_FAILURE) {
-                                	AppLog.detail(e0.getMessage(), e0.getCause());
+                                	SysLog.detail(e0.getMessage(), e0.getCause());
                                 }
                                 else {
-                                	AppLog.warning(e0.getMessage(), e0.getCause());
+                                	SysLog.warning(e0.getMessage(), e0.getCause());
                                 }
                                 try {
                                     pm.currentTransaction().rollback();
@@ -641,9 +656,10 @@ public class ShowObjectEventHandler {
                                     e0.getCause(), tab.getOperationTabControl().getOperationName()
                                 );
                             }
+                            pm.close();
                         }
                         catch (ServiceException e) {
-                            AppLog.warning(e.getMessage(), e.getCause());
+                        	SysLog.warning(e.getMessage(), e.getCause());
                             application.addErrorMessage(
                                 application.getTexts().getErrorTextCanNotInvokeOperation(), 
                                 new String[] {
@@ -695,21 +711,19 @@ public class ShowObjectEventHandler {
                                         }
                                     }
                                 }
-                                if (hasValues) {
+                                if(hasValues) {
                                     RefObject_1_0 parent = currentView.getRefObject();
+                                    PersistenceManager pm = JDOHelper.getPersistenceManager(parent);
                                     EditObjectView editView = null;
                                     // Edit existing object
                                     if (objectXri.startsWith("xri://@openmdx") || objectXri.startsWith("xri:@openmdx:")) {
                                         Path objectIdentity = new Path(objectXri);
-                                        RefObject_1_0 editObject = (RefObject_1_0)pm.getObjectById(objectIdentity);
                                         try {
                                             editView = new EditObjectView(
                                                 currentView.getId(),
                                                 currentView.getContainerElementId(),
-                                                editObject, 
-                                                null, 
+                                                objectIdentity, 
                                                 application, 
-                                                currentView.getPersistenceManager(),
                                                 new LinkedHashMap<Path,Action>(), 
                                                 currentView.getLookupType(),
                                                 currentView.getRestrictToElements(),
@@ -717,7 +731,7 @@ public class ShowObjectEventHandler {
                                             );
                                         }
                                         catch(ServiceException e) {
-                                            AppLog.warning(e.getMessage(), e.getCause());
+                                        	SysLog.warning(e.getMessage(), e.getCause());
                                         }
                                     }
                                     // Create new object from existing
@@ -733,7 +747,6 @@ public class ShowObjectEventHandler {
                                                 newObject, 
                                                 null, 
                                                 application, 
-                                                currentView.getPersistenceManager(),
                                                 new LinkedHashMap<Path,Action>(), 
                                                 currentView.getLookupType(),
                                                 currentView.getRestrictToElements(),
@@ -743,7 +756,7 @@ public class ShowObjectEventHandler {
                                             );
                                         }
                                         catch(ServiceException e) {
-                                            AppLog.warning(e.getMessage(), e.getCause());
+                                        	SysLog.warning(e.getMessage(), e.getCause());
                                         }
                                     }
                                     // Create new object
@@ -756,7 +769,6 @@ public class ShowObjectEventHandler {
                                                 newObject, 
                                                 null, 
                                                 application, 
-                                                currentView.getPersistenceManager(),
                                                 new LinkedHashMap<Path,Action>(), 
                                                 currentView.getLookupType(),
                                                 currentView.getRestrictToElements(),
@@ -766,22 +778,16 @@ public class ShowObjectEventHandler {
                                             );
                                         }
                                         catch(ServiceException e) {
-                                            AppLog.warning(e.getMessage(), e.getCause());
+                                        	SysLog.warning(e.getMessage(), e.getCause());
                                         }
                                     }
                                     // Process edit request
                                     if(editView != null) {
                                         try {
-                                            pm.currentTransaction().begin();
                                             editView.storeObject(row, new HashMap());
-                                            pm.currentTransaction().commit();
                                         }
                                         catch (Exception e) {
                                             ServiceException e0 = new ServiceException(e);
-                                            try {
-                                                pm.currentTransaction().rollback();
-                                            }
-                                            catch (Exception e1) {}
                                             currentView.handleCanNotCommitException(e0.getCause());
                                         }
                                     }
@@ -799,14 +805,14 @@ public class ShowObjectEventHandler {
             }
                 
             case Action.EVENT_OBJECT_GET_ATTRIBUTES: { 
-                nextPaintMode = PaintScope.ATTRIBUTE_PANE;
+                nextViewPortType = ViewPort.Type.EMBEDDED;
                 break;
             }
             
         }
         return new HandleEventResult(
             nextView,
-            nextPaintMode
+            nextViewPortType
         );
     }
     
@@ -828,7 +834,8 @@ public class ShowObjectEventHandler {
             (event == Action.EVENT_MACRO) ||
             (event == Action.EVENT_OBJECT_GET_ATTRIBUTES) ||
             (event == Action.EVENT_SAVE_GRID) ||
-            (event == Action.EVENT_SELECT_PERSPECTIVE);
+            (event == Action.EVENT_SELECT_PERSPECTIVE) ||
+            (event == Action.EVENT_SELECT_VIEWPORT);
     }
     
 }

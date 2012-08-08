@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: View.java,v 1.61 2009/04/23 13:15:38 wfro Exp $
+ * Name:        $Id: View.java,v 1.66 2010/04/22 09:27:00 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.61 $
+ * Revision:    $Revision: 1.66 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/23 13:15:38 $
+ * Date:        $Date: 2010/04/22 09:27:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,16 +59,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
-import javax.jdo.PersistenceManager;
-import javax.jmi.reflect.RefStruct;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.kernel.id.cci.UUIDGenerator;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.QuickAccessor;
@@ -100,9 +95,6 @@ public abstract class View
         this.containerElementId = containerElementId;
         this.object = object;
         this.application = application;
-        // View must only work with this persistence manager and must not
-        // get the persistence manager from application.getPmData.
-        this.pm = application.getPmData(); 
     }
 
     //-------------------------------------------------------------------------
@@ -111,7 +103,7 @@ public abstract class View
     //-------------------------------------------------------------------------
     public void createRequestId(
     ) {
-        this.requestId = this.uuidGenerator.next().toString();
+        this.requestId = UUIDConversion.toUID(UUIDs.newUUID());
     }
   
     //-------------------------------------------------------------------------
@@ -178,7 +170,7 @@ public abstract class View
         QuickAccessor[] quickAccessors = this.getApplicationContext().getQuickAccessors();
         Action[] actions = new Action[quickAccessors.length];
         for(int i = 0; i < quickAccessors.length; i++) {
-            actions[i] = quickAccessors[i].getAction();
+            actions[i] = quickAccessors[i].getAction(this.getObject());
         }
         return actions;
     }
@@ -252,28 +244,6 @@ public abstract class View
     }
     
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
-    public void structToMap(
-        RefStruct from,
-        Map to,
-        ModelElement_1_0 structDef
-    ) throws ServiceException {
-        for(Iterator i = ((Map)structDef.objGetValue("field")).values().iterator(); i.hasNext(); ) {
-          ModelElement_1_0 field = (ModelElement_1_0)i.next();
-          String fieldName = (String)field.objGetValue("qualifiedName");
-          try {
-            to.put(
-              fieldName,
-              from.refGetValue(fieldName)
-            );
-          }
-          catch(Exception e) {
-            to.put(fieldName, null);
-          }
-        }
-    }
-
-    //-------------------------------------------------------------------------
     public void handleCanNotCommitException(
         BasicException e
     ) {
@@ -338,12 +308,6 @@ public abstract class View
        );
     } 
   
-    //-------------------------------------------------------------------------
-    public PersistenceManager getPersistenceManager(
-    ) {
-        return this.pm;
-    }
-    
     //-------------------------------------------------------------------------
     public Object getObject(
     ) {
@@ -465,13 +429,10 @@ public abstract class View
     protected final String id;
     protected final String containerElementId;
     protected Object object;
-    protected PersistenceManager pm;
   
     protected String requestId = null;
     protected Object[] macro = null;
     
-    private transient UUIDGenerator uuidGenerator = UUIDs.getGenerator();
-
 }
 
 //--- End of File -----------------------------------------------------------

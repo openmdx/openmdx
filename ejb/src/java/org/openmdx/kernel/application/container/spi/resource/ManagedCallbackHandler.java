@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ManagedCallbackHandler.java,v 1.1 2009/01/12 12:49:22 wfro Exp $
+ * Name:        $Id: ManagedCallbackHandler.java,v 1.2 2009/08/25 13:47:48 hburger Exp $
  * Description: Managed Callback Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:22 $
+ * Date:        $Date: 2009/08/25 13:47:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,7 +57,7 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.loading.Classes;
 
 /**
  * Managed <code>CallbackHandler</code>

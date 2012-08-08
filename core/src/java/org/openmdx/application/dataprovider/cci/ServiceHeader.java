@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ServiceHeader.java,v 1.5 2009/04/24 01:07:43 hburger Exp $
+ * Name:        $Id: ServiceHeader.java,v 1.8 2009/12/21 13:31:39 wfro Exp $
  * Description: Service Header
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/24 01:07:43 $
+ * Date:        $Date: 2009/12/21 13:31:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,6 +63,7 @@ import javax.resource.ResourceException;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
+import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 
@@ -91,18 +92,11 @@ public final class ServiceHeader
      *              The requested quality of service
      */ 
     public ServiceHeader(
-        String principal,
-        String correlationId,
-        boolean traceRequest,
-        QualityOfService qualityOfService
+        String principal
     ){
         this(
             principal, 
-            correlationId, 
-            traceRequest, 
-            qualityOfService, 
-            null, // requestedAt
-            null // requestedFor
+            null // requestedAt
         );
     }
 
@@ -124,57 +118,13 @@ public final class ServiceHeader
      */ 
     public ServiceHeader(
         String principal,
-        String correlationId,
-        boolean traceRequest,
-        QualityOfService qualityOfService,
-        String requestedAt,
-        String requestedFor
+        String requestedAt
     ){
         this(
             principal == null ? 
                 NO_PRINCIPALS : 
                 Collections.singletonList(principal), 
-            correlationId,
-            traceRequest,
-            qualityOfService,
-            requestedAt, 
-            requestedFor
-        );
-    }
-
-    /**
-     * Constructor for marshallers.
-     *
-     * @param       principalChain
-     *              The request is processed on behalf of principalChain.
-     * @param       correlationId
-     * @param       trace
-     *              Define, whether the request should be traced
-     *              over all the tiers.
-     * @param       qualityOfService
-     *              The requested quality of service
-     * @param       requestedAt
-     *              Defines the time point for queries of stateful objects
-     * @param       requestedFor
-     *              Defines the time point for the data of stateful objects
-     */ 
-    public ServiceHeader(
-        String[] principalChain,
-        String correlationId,
-        boolean traceRequest,
-        QualityOfService qualityOfService,
-        String requestedAt,
-        String requestedFor
-    ){
-        this(
-            principalChain == null ? 
-                NO_PRINCIPALS :
-                Arrays.asList(principalChain),
-            correlationId,
-            traceRequest,
-            qualityOfService,
-            requestedAt, 
-            requestedFor
+            requestedAt 
         );
     }
 
@@ -196,41 +146,12 @@ public final class ServiceHeader
      */ 
     private ServiceHeader(
         List<String> principalChain,
-        String correlationId,
-        boolean traceRequest,
-        QualityOfService qualityOfService,
-        String requestedAt,
-        String requestedFor
+        String requestedAt
     ){
         this.principalChain = new ArrayList<String>(principalChain);
-        this.correlationId = correlationId;
-        this.traceRequest = traceRequest;
-        this.qualityOfService = qualityOfService;
         this.requestedAt = requestedAt;
-        this.requestedFor = requestedFor;
     }
     
-    /**
-     * Deprecated onstructor for marshallers.
-     *
-     * @deprecated    Marshallers must handle requestedAt and requestedFor
-     */ 
-    public ServiceHeader(
-        String[] principalChain,
-        String correlationId,
-        boolean traceRequest,
-        QualityOfService qualityOfService
-    ){
-        this(
-            principalChain,
-            correlationId,
-            traceRequest,
-            qualityOfService,
-            null, // requestedAt 
-            null // requestedFor
-        );
-    }
-
     /**
      * Default constructor
      */
@@ -238,11 +159,7 @@ public final class ServiceHeader
     ){
         this(
             NO_PRINCIPALS, // principalChain
-            null, // correlationId
-            false, // traceRequest
-            QualityOfService.STANDARD,
-            null, // requestedAt
-            null // requestedFor
+            null // requestedAt
         );
     }
 
@@ -261,14 +178,9 @@ public final class ServiceHeader
      */
     private final static String[] TO_STRING_CONTENT = {
         "principalChain",
-        "correlationId",
         "requestedAt",
-        "requestedFor"
     };
 
-    /**
-     *
-     */
     public List<String> getPrincipalChain(){
         return Collections.unmodifiableList(this.principalChain);
     }
@@ -292,56 +204,12 @@ public final class ServiceHeader
         if(principal != null) this.principalChain.add(principal);
     }
 
-    /**
-     * The correlation id
-     */
-    private final String correlationId;
-
-    /**
-     * Get the correlation id
-     * 
-     * @return the correlation id
-     */
-    public String getCorrelationId(){
-        return this.correlationId;
-    }
-    /**
-     * The session id in case of a session based request; "" otherwise.
-     * @return the correlation id
-     * @deprecated use org.openmdx.compatibility.base.dataprovider.cci.ServcieHeader#getCorrelationId() instead
-     */
-    public String getSessionId(){
-        return getCorrelationId();
-    }
-    
-    /**
-     * Define, whether the request should be traced over all the tiers.
-     */
-    private final boolean traceRequest;
-    public boolean traceRequest(){
-        return this.traceRequest;
-    }
-
-    /**
-     *
-     */
-    private final QualityOfService qualityOfService;
-    public QualityOfService getQualityOfService(){
-        return this.qualityOfService;
-    }
-
     private final String requestedAt;
     public String getRequestedAt(
     ){
         return this.requestedAt;
     }
 
-    private final String requestedFor;
-    public String getRequestedFor(
-    ){
-        return this.requestedFor;
-    }
-    
     //------------------------------------------------------------------------
     // Implements Cloneable
     //------------------------------------------------------------------------
@@ -353,48 +221,8 @@ public final class ServiceHeader
     ) throws CloneNotSupportedException {        
         return new ServiceHeader(
              this.principalChain,
-             this.correlationId,
-             this.traceRequest,
-             this.qualityOfService,
-             this.requestedAt,
-             this.requestedFor
+             this.requestedAt
         );
-    }
-
-    /**
-     * Convert the stringified principal chain into a collection of principal
-     * names.
-     * 
-     * @param connectionUsername a principal or the stringified principal list 
-     * 
-     * @return a principal name collection
-     */
-    public static List<String> toPrincipalChain(
-        String connectionUsername
-    ){
-        if(
-            connectionUsername == null || 
-            "".equals(connectionUsername)
-        ) {
-            return Collections.emptyList();
-        } else if (
-            (connectionUsername.startsWith("[") && connectionUsername.endsWith("]")) ||
-            (connectionUsername.startsWith("{") && connectionUsername.endsWith("}"))
-        ) {
-            List<String> principalChain = new ArrayList<String>();
-            for(
-                int j = 0, i = 1, iLimit = connectionUsername.length() - 1;
-                i < iLimit;
-                i = j + 2
-            ){
-                j = connectionUsername.indexOf(", ", i);
-                if(j < 0) j = iLimit;
-                principalChain.add(connectionUsername.substring(i, j));
-            }
-            return principalChain;
-        } else {
-            return Collections.singletonList(connectionUsername);
-        }
     }
 
     /**
@@ -407,9 +235,7 @@ public final class ServiceHeader
     private static String[] toPrincipalArray(
         String connectionUsername
     ){
-        Collection<String> principalNames = toPrincipalChain(
-            connectionUsername
-        );
+        Collection<String> principalNames = PersistenceManagers.toPrincipalChain(connectionUsername);
         return principalNames.toArray(
             new String[principalNames.size()]
         );
@@ -469,13 +295,9 @@ public final class ServiceHeader
         String connectionUsername, 
         String connectionPassword
     ){
-        return  new ServiceHeader(
-            toPrincipalArray(connectionUsername),
-            "".equals(connectionPassword) ? null : connectionPassword, // correlationId,
-            false, // traceRequest
-            QualityOfService.STANDARD,
-            null, // requestedAt,
-            null // requestedFor
+        return new ServiceHeader(
+            Arrays.asList(toPrincipalArray(connectionUsername)),
+            null // requestedAt
         );
     }
     
@@ -496,9 +318,7 @@ public final class ServiceHeader
                 TO_STRING_CONTENT,
                 new Object[]{
                     this.principalChain,
-                    this.correlationId,
-                    this.requestedAt,
-                    this.requestedFor
+                    this.requestedAt
                 }
             ).toString();
         } catch (ResourceException exception) {

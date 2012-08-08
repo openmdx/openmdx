@@ -1,12 +1,12 @@
-<%@ page contentType= "text/html;charset=UTF-8" language="java" pageEncoding= "UTF-8" %><%
+﻿<%@ page contentType= "text/html;charset=UTF-8" language="java" pageEncoding= "UTF-8" %><%
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: edit-Default.jsp,v 1.46 2009/02/26 16:09:55 wfro Exp $
+ * Name:        $Id: edit-Default.jsp,v 1.50 2009/09/25 13:41:35 wfro Exp $
  * Description: edit-Default.jsp
- * Revision:    $Revision: 1.46 $
+ * Revision:    $Revision: 1.50 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/26 16:09:55 $
+ * Date:        $Date: 2009/09/25 13:41:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,10 +67,9 @@ org.openmdx.portal.servlet.texts.*
 	ApplicationContext app = (ApplicationContext)session.getValue(WebKeys.APPLICATION_KEY);
 	ViewsCache viewsCache = (ViewsCache)session.getValue(WebKeys.VIEW_CACHE_KEY_EDIT);
 	EditObjectView view = (EditObjectView)viewsCache.getView(request.getParameter(Action.PARAMETER_REQUEST_ID));
-	PaintScope paintScope = PaintScope.valueOf(request.getParameter(Action.PARAMETER_SCOPE));
 	Texts_1_0 texts = app.getTexts();
 	EditInspectorControl inspectorControl = view.getEditInspectorControl();
-	HtmlPage p = HtmlPageFactory.openPage(
+	ViewPort p = ViewPortFactory.openPage(
 		view,
 		request,
 		out
@@ -153,6 +152,9 @@ org.openmdx.portal.servlet.texts.*
 	<link rel="stylesheet" type="text/css" href="_style/ssf.css" >
 	<link rel="stylesheet" type="text/css" href="_style/n2default.css" >
 	<link rel="stylesheet" type="text/css" href="javascript/yui/build/assets/skins/sam/container.css" >
+	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.css" >
+	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.lang.css" >
+	<link rel="stylesheet" type="text/css" href="javascript/wiky/wiky.math.css" >
 	<link rel='shortcut icon' href='images/favicon.ico' />
 <%
 	prolog.paint(p, PagePrologControl.FRAME_POST_PROLOG, false);
@@ -187,7 +189,7 @@ org.openmdx.portal.servlet.texts.*
 <%@ include file="../../../../edit-footer.html" %>
 			</div> <!-- content -->
 		</div> <!-- content-wrap -->
-	<div> <!-- wrap -->
+	</div> <!-- wrap -->
 </div> <!-- container -->
 </body>
 </html>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MappedRecordFilter.java,v 1.1 2009/06/02 13:19:06 wfro Exp $
+ * Name:        $Id: MappedRecordFilter.java,v 1.6 2010/01/26 15:38:12 hburger Exp $
  * Description: Dataprovider Object Filter
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/02 13:19:06 $
+ * Date:        $Date: 2010/01/26 15:38:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,16 +52,17 @@ package org.openmdx.application.dataprovider.layer.persistence.none;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
+import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.collection.CompactSparseList;
-import org.openmdx.base.collection.SparseList;
-import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.query.AbstractFilter;
 import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.rest.spi.Object_2Facade;
+import org.w3c.cci2.SparseArray;
 
 /**
  * Dataprovider Object Filter
@@ -92,26 +93,23 @@ public class MappedRecordFilter extends AbstractFilter {
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.query.AbstractFilter#getValues(java.lang.Object, java.lang.String)
      */
-    protected Iterator<?> getValues(
+    protected Iterator<?> getValuesIterator(
         Object candidate, 
         String attribute
-    ){
-        try {
-            MappedRecord object = (MappedRecord)candidate;
-            ObjectHolder_2Facade facade = ObjectHolder_2Facade.newInstance(object);
-            SparseList<?> values = SystemAttributes.OBJECT_CLASS.equals(attribute) ?
-                new CompactSparseList<String>(facade.getObjectClass()) :
+    ) throws ResourceException, ServiceException {
+        MappedRecord object = (MappedRecord)candidate;
+        Object_2Facade facade = Object_2Facade.newInstance(object);
+        Object values = SystemAttributes.OBJECT_CLASS.equals(attribute) ?
+            Collections.singletonList(facade.getObjectClass()) :
                 facade.getAttributeValues(attribute);
-            return 
-                values != null ? values.populationIterator() :
-                SystemAttributes.OBJECT_IDENTITY.equals(attribute) ? 
-                    Collections.singleton(facade.getPath()).iterator() :
-                    Collections.EMPTY_LIST.iterator();
-        } 
-        catch (Exception exception){
-            new RuntimeServiceException(exception).log();
-            return null;
-        }
+        return 
+            values instanceof SparseArray<?> ? 
+                ((SparseArray<?>)values).populationIterator() : 
+                    values instanceof List<?> ?
+                        ((List<?>)values).listIterator() :
+                            SystemAttributes.OBJECT_IDENTITY.equals(attribute) ? 
+                                Collections.singleton(facade.getPath()).iterator() :
+                                Collections.EMPTY_LIST.iterator();
     }
       
   }

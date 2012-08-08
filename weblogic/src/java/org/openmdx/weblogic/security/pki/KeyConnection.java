@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: KeyConnection.java,v 1.1 2009/01/04 18:10:46 wfro Exp $
+ * Name:        $Id: KeyConnection.java,v 1.2 2009/07/06 11:14:48 hburger Exp $
  * Description: KeyConnection 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/04 18:10:46 $
+ * Date:        $Date: 2009/07/06 11:14:48 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,7 +55,7 @@ package org.openmdx.weblogic.security.pki;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 
-import org.openmdx.kernel.security.pki.KeyProvider;
+import org.openmdx.resource.pki.cci.KeyProvider;
 
 /**
  * KeyConnection

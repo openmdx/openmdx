@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.7 2009/06/14 00:03:43 wfro Exp $
+ * Name:        $Id: Model_1.java,v 1.24 2010/03/23 19:06:41 hburger Exp $
  * Description: model1 application plugin
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/14 00:03:43 $
+ * Date:        $Date: 2010/03/23 19:06:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,19 +70,19 @@ import java.util.TreeSet;
 import java.util.zip.ZipOutputStream;
 
 import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.IndexedRecord;
+import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
 import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
-import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
-import org.openmdx.application.dataprovider.cci.DataproviderRequestContexts;
-import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.spi.Layer_1;
-import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelExceptions;
 import org.openmdx.application.mof.mapping.cci.Mapper_1_0;
@@ -99,24 +99,30 @@ import org.openmdx.base.query.Directions;
 import org.openmdx.base.query.FilterOperators;
 import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.Quantors;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.resource.Records;
+import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
 //---------------------------------------------------------------------------
 @SuppressWarnings("unchecked")
-public class Model_1 
-extends Layer_1 {
+public class Model_1 extends Layer_1 {
 
-    private static final List<String> STANDARD_FORMAT = Collections.unmodifiableList(
-        Arrays.asList(
-            MappingTypes.XMI1, 
-            MappingTypes.UML_OPENMDX_1,
-            MappingTypes.UML2_OPENMDX_1,
-            MappingTypes.TOGETHER_OPENMDX_1
-        )
-    );
-
+    public Model_1(
+    ) {
+    }
+    
+    // --------------------------------------------------------------------------
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new LayerInteraction(connection);
+    }
+                    
+    // --------------------------------------------------------------------------
     class PathComponent {
 
         //-----------------------------------------------------------------------
@@ -159,12 +165,12 @@ extends Layer_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     public void activate(
         short id,
         Configuration configuration,
-        Layer_1_0 delegation
+        Layer_1 delegation
     ) throws ServiceException {
-
         super.activate(
             id, 
             configuration, 
@@ -176,7 +182,7 @@ extends Layer_1 {
     }
 
     //---------------------------------------------------------------------------
-    private String getReferenceName(
+    protected String getReferenceName(
         DataproviderRequest request
     ) throws ServiceException {
         Path path = request.path();    
@@ -187,7 +193,7 @@ extends Layer_1 {
     }
 
     //---------------------------------------------------------------------------
-    private void completeElements(
+    protected void completeElements(
         ServiceHeader header,
         Map elements
     ) throws ServiceException { 
@@ -200,22 +206,23 @@ extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord element = i.next();
-            ObjectHolder_2Facade elementFacade;
+            Object_2Facade elementFacade;
             try {
-                elementFacade = ObjectHolder_2Facade.newInstance(element);
+                elementFacade = Object_2Facade.newInstance(element);
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }
             // collect classifier
-            if(elementFacade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
+            if(elementFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
                 classifiers.put(
                     elementFacade.getPath(),
                     element
                 );
             }
             // qualified name
-            elementFacade.clearAttributeValues("qualifiedName").add(
+            elementFacade.attributeValuesAsList("qualifiedName").clear();
+            elementFacade.attributeValuesAsList("qualifiedName").add(
                 elementFacade.getPath().getBase()
             );
         }
@@ -226,15 +233,16 @@ extends Layer_1 {
             i.hasNext();
         ) { 
             MappedRecord classifier = i.next();
-            ObjectHolder_2Facade classifierFacade;
+            Object_2Facade classifierFacade;
             try {
-                classifierFacade = ObjectHolder_2Facade.newInstance(classifier);
+                classifierFacade = Object_2Facade.newInstance(classifier);
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }            
-            if(classifierFacade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
-                classifierFacade.clearAttributeValues("allSupertype").addAll(
+            if(classifierFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
+                classifierFacade.attributeValuesAsList("allSupertype").clear();
+                classifierFacade.attributeValuesAsList("allSupertype").addAll(
                     this.getAllSupertype(
                         classifier,
                         elements
@@ -254,15 +262,16 @@ extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord classifier = i.next();
-            ObjectHolder_2Facade classifierFacade;
+            Object_2Facade classifierFacade;
             try {
-                classifierFacade = ObjectHolder_2Facade.newInstance(classifier);
+                classifierFacade = Object_2Facade.newInstance(classifier);
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }                        
-            if(classifierFacade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
-                classifierFacade.clearAttributeValues("allSubtype").addAll(
+            if(classifierFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
+                classifierFacade.attributeValuesAsList("allSubtype").clear();
+                classifierFacade.attributeValuesAsList("allSubtype").addAll(
                     this.getAllSubtype(
                         classifier,
                         elements
@@ -282,15 +291,16 @@ extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord classifier = i.next();
-            ObjectHolder_2Facade classifierFacade;
+            Object_2Facade classifierFacade;
             try {
-                classifierFacade = ObjectHolder_2Facade.newInstance(classifier);
+                classifierFacade = Object_2Facade.newInstance(classifier);
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }                                    
-            if(classifierFacade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {      
-                classifierFacade.clearAttributeValues("feature").addAll(
+            if(classifierFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {      
+                classifierFacade.attributeValuesAsList("feature").clear();
+                classifierFacade.attributeValuesAsList("feature").addAll(
                     this.getFeatures(
                         header,
                         classifier,
@@ -311,22 +321,22 @@ extends Layer_1 {
     }
 
     //---------------------------------------------------------------------------
-    private List<MappedRecord> getNamespaceContent(
+    protected List<MappedRecord> getNamespaceContent(
         ServiceHeader header,
         MappedRecord namespace
     ) throws ServiceException {
-        RequestCollection channel = new RequestCollection(
+        DataproviderRequestProcessor channel = new DataproviderRequestProcessor(
             header,
             this.getDelegation()
         );
         return channel.addFindRequest(
-            ObjectHolder_2Facade.getPath(namespace).getParent(),
+            Object_2Facade.getPath(namespace).getParent(),
             new FilterProperty[]{
                 new FilterProperty(
                     Quantors.THERE_EXISTS,
                     "container",
                     FilterOperators.IS_IN,
-                    ObjectHolder_2Facade.getPath(namespace)
+                    Object_2Facade.getPath(namespace)
                 )        
             },
             AttributeSelectors.ALL_ATTRIBUTES,
@@ -338,7 +348,7 @@ extends Layer_1 {
     }
 
     //---------------------------------------------------------------------------
-    private List getNamespaceContentAsPaths(
+    protected List getNamespaceContentAsPaths(
         ServiceHeader header,
         MappedRecord namespace
     ) throws ServiceException {
@@ -352,7 +362,7 @@ extends Layer_1 {
             i.hasNext();
         ) {
             contentAsPaths.add(
-                ObjectHolder_2Facade.getPath(i.next())
+                Object_2Facade.getPath(i.next())
             );
         }
         return contentAsPaths;
@@ -369,7 +379,7 @@ extends Layer_1 {
         Set<Path> allSupertype = new TreeSet<Path>();
         try {
             for(
-                Iterator i = ObjectHolder_2Facade.newInstance(classifier).attributeValues("supertype").iterator();
+                Iterator i = Object_2Facade.newInstance(classifier).attributeValuesAsList("supertype").iterator();
                 i.hasNext();
             ) {
                 Path supertypePath = (Path)i.next();
@@ -379,7 +389,7 @@ extends Layer_1 {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE, 
                         "type not found in set of loaded models (HINT: probably not configured as 'modelPackage')",
-                        new BasicException.Parameter("classifier", ObjectHolder_2Facade.getPath(classifier)),
+                        new BasicException.Parameter("classifier", Object_2Facade.getPath(classifier)),
                         new BasicException.Parameter("supertype", supertypePath)
                     );
                 }
@@ -395,7 +405,7 @@ extends Layer_1 {
             throw new ServiceException(e);
         }
         allSupertype.add(
-            ObjectHolder_2Facade.getPath(classifier)
+            Object_2Facade.getPath(classifier)
         );
         return allSupertype;
     }
@@ -414,7 +424,7 @@ extends Layer_1 {
         ) {
             MappedRecord classifier = i.next();
             try {
-                ObjectHolder_2Facade.newInstance(classifier).clearAttributeValues("subtype");
+                Object_2Facade.newInstance(classifier).attributeValuesAsList("subtype").clear();
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
@@ -426,27 +436,27 @@ extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord classifier = i.next();
-            ObjectHolder_2Facade classifierFacade;
+            Object_2Facade classifierFacade;
             try {
-                classifierFacade = ObjectHolder_2Facade.newInstance(classifier);
+                classifierFacade = Object_2Facade.newInstance(classifier);
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }
             try {
                 for(
-                    Iterator j = ObjectHolder_2Facade.newInstance(classifier).attributeValues("supertype").iterator();
+                    Iterator j = Object_2Facade.newInstance(classifier).attributeValuesAsList("supertype").iterator();
                     j.hasNext();
                 ) {
                     Object next = j.next();
                     MappedRecord supertype = classifiers.get(next);
                     if(supertype == null) {
-                        SysLog.error("supertype " + next + " of classifier " + ObjectHolder_2Facade.getPath(classifier) + " not found in repository");
+                        SysLog.error("supertype " + next + " of classifier " + Object_2Facade.getPath(classifier) + " not found in repository");
                     }
                     else {
-                        ObjectHolder_2Facade superTypeFacade = ObjectHolder_2Facade.newInstance(supertype);
-                        if(!superTypeFacade.attributeValues("subtype").contains(classifierFacade.getPath())) {
-                            superTypeFacade.attributeValues("subtype").add(
+                        Object_2Facade superTypeFacade = Object_2Facade.newInstance(supertype);
+                        if(!superTypeFacade.attributeValuesAsList("subtype").contains(classifierFacade.getPath())) {
+                            superTypeFacade.attributeValuesAsList("subtype").add(
                                 classifierFacade.getPath()
                             );
                         }
@@ -456,8 +466,8 @@ extends Layer_1 {
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }
-            if(!classifierFacade.attributeValues("subtype").contains(classifierFacade.getPath())) {
-                classifierFacade.attributeValues("subtype").add(
+            if(!classifierFacade.attributeValuesAsList("subtype").contains(classifierFacade.getPath())) {
+                classifierFacade.attributeValuesAsList("subtype").add(
                     classifierFacade.getPath()
                 );
             }
@@ -478,7 +488,7 @@ extends Layer_1 {
         ) {
             MappedRecord element = i.next();
             try {
-                ObjectHolder_2Facade.newInstance(element).clearAttributeValues("content");
+                Object_2Facade.newInstance(element).attributeValuesAsList("content");
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
@@ -490,9 +500,9 @@ extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord content = i.next();
-            ObjectHolder_2Facade contentFacade;
+            Object_2Facade contentFacade;
             try {
-                contentFacade = ObjectHolder_2Facade.newInstance(content);
+                contentFacade = Object_2Facade.newInstance(content);
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
@@ -505,15 +515,15 @@ extends Layer_1 {
                     SysLog.error("container " + contentFacade.attributeValue("container") + " of element " + contentFacade.getPath() + " not found in repository");
                 }
                 else { 
-                    ObjectHolder_2Facade containerFacade;
+                    Object_2Facade containerFacade;
                     try {
-                        containerFacade = ObjectHolder_2Facade.newInstance(container);
+                        containerFacade = Object_2Facade.newInstance(container);
                     } 
                     catch (ResourceException e) {
                         throw new ServiceException(e);
                     }
-                    if(!containerFacade.attributeValues("content").contains(contentFacade.getPath())) {
-                        containerFacade.attributeValues("content").add(
+                    if(!containerFacade.attributeValuesAsList("content").contains(contentFacade.getPath())) {
+                        containerFacade.attributeValuesAsList("content").add(
                             contentFacade.getPath()
                         );
                     }
@@ -528,18 +538,19 @@ extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord container = i.next();
-            ObjectHolder_2Facade containerFacade;
+            Object_2Facade containerFacade;
             try {
-                containerFacade = ObjectHolder_2Facade.newInstance(container);
+                containerFacade = Object_2Facade.newInstance(container);
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }
             if(containerFacade.getAttributeValues("content") != null) {
                 Set content = new TreeSet(
-                    containerFacade.attributeValues("content")
+                    containerFacade.attributeValuesAsList("content")
                 );
-                containerFacade.clearAttributeValues("content").addAll(
+                containerFacade.attributeValuesAsList("content").clear();
+                containerFacade.attributeValuesAsList("content").addAll(
                     content
                 );
             }
@@ -561,18 +572,18 @@ extends Layer_1 {
         Set<Path> features = new TreeSet<Path>();    
         try {
             for(
-                Iterator i = ObjectHolder_2Facade.newInstance(classifier).attributeValues("allSupertype").iterator();
+                Iterator i = Object_2Facade.newInstance(classifier).attributeValuesAsList("allSupertype").iterator();
                 i.hasNext();
             ) {
                 MappedRecord supertype = elements.get(i.next());
                 for(
-                    Iterator j = ObjectHolder_2Facade.newInstance(supertype).attributeValues("content").iterator();
+                    Iterator j = Object_2Facade.newInstance(supertype).attributeValuesAsList("content").iterator();
                     j.hasNext();
                 ) {
                     MappedRecord feature = elements.get(j.next());
-                    if(ObjectHolder_2Facade.newInstance(feature).attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.FEATURE)) {
+                    if(Object_2Facade.newInstance(feature).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.FEATURE)) {
                         features.add(
-                            ObjectHolder_2Facade.getPath(feature)
+                            Object_2Facade.getPath(feature)
                         );
                     }
                 }
@@ -596,7 +607,7 @@ extends Layer_1 {
         Set<Path> allSubtypes = new TreeSet<Path>();
         try {
             for(
-                Iterator i = ObjectHolder_2Facade.newInstance(classifier).attributeValues("subtype").iterator();
+                Iterator i = Object_2Facade.newInstance(classifier).attributeValuesAsList("subtype").iterator();
                 i.hasNext();
             ) {
                 MappedRecord subtype = elements.get(i.next());
@@ -615,7 +626,7 @@ extends Layer_1 {
             throw new ServiceException(e);
         }
         allSubtypes.add(
-            ObjectHolder_2Facade.getPath(classifier)
+            Object_2Facade.getPath(classifier)
         ); 
         return allSubtypes;
     }
@@ -634,14 +645,14 @@ extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord reference = i.next();
-            ObjectHolder_2Facade referenceFacade;
+            Object_2Facade referenceFacade;
             try {
-                referenceFacade = ObjectHolder_2Facade.newInstance(reference);
+                referenceFacade = Object_2Facade.newInstance(reference);
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }
-            if(referenceFacade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.REFERENCE)) {
+            if(referenceFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.REFERENCE)) {
                 MappedRecord type = classifiers.get(
                     referenceFacade.attributeValue("type")
                 );
@@ -649,9 +660,9 @@ extends Layer_1 {
                     SysLog.error("type " + referenceFacade.attributeValue("type") + " of reference " + referenceFacade.getPath() + " is not found in repository");
                 }
                 else {
-                    ObjectHolder_2Facade typeFacade;
+                    Object_2Facade typeFacade;
                     try {
-                        typeFacade = ObjectHolder_2Facade.newInstance(type);
+                        typeFacade = Object_2Facade.newInstance(type);
                     } 
                     catch (ResourceException e) {
                         throw new ServiceException(e);
@@ -663,25 +674,28 @@ extends Layer_1 {
                         SysLog.error("association end " + referenceFacade.attributeValue("referencedEnd") + " of reference " + referenceFacade.getPath() + " is not found in repository");
                     }
                     else {
-                        ObjectHolder_2Facade referencedEndFacade;
+                        Object_2Facade referencedEndFacade;
                         try {
-                            referencedEndFacade = ObjectHolder_2Facade.newInstance(referencedEnd);
+                            referencedEndFacade = Object_2Facade.newInstance(referencedEnd);
                         } 
                         catch (ResourceException e) {
                             throw new ServiceException(e);
                         }
                         if(AggregationKind.COMPOSITE.equals(referencedEndFacade.attributeValue("aggregation"))) {
-                            typeFacade.clearAttributeValues("compositeReference").add(
+                            typeFacade.attributeValuesAsList("compositeReference").clear();
+                            typeFacade.attributeValuesAsList("compositeReference").add(
                                 referenceFacade.getPath()
                             );
                             // set 'compositeReference' for all subtypes of type
                             for(
-                                Iterator j = typeFacade.attributeValues("allSubtype").iterator();
+                                Iterator j = typeFacade.attributeValuesAsList("allSubtype").iterator();
                                 j.hasNext();
                             ) {
                                 MappedRecord subtype = classifiers.get(j.next());
                                 try {
-                                    ObjectHolder_2Facade.newInstance(subtype).clearAttributeValues("compositeReference").add(
+                                    Object_2Facade subtypeFacade = Object_2Facade.newInstance(subtype);
+                                    subtypeFacade.attributeValuesAsList("compositeReference").clear();
+                                    subtypeFacade.attributeValuesAsList("compositeReference").add(
                                         referenceFacade.getPath()
                                     );
                                 } 
@@ -703,9 +717,9 @@ extends Layer_1 {
     MappedRecord completeNames(
         MappedRecord object
     ) throws ServiceException {
-        ObjectHolder_2Facade facade;
+        Object_2Facade facade;
         try {
-            facade = ObjectHolder_2Facade.newInstance(object);
+            facade = Object_2Facade.newInstance(object);
         } 
         catch (ResourceException e) {
             throw new ServiceException(e);
@@ -713,389 +727,357 @@ extends Layer_1 {
         // qualifiedName = last path component
         // name = last component of qualifiedName
         String qualifiedName = facade.getPath().getBase();
-        facade.clearAttributeValues("qualifiedName").add(
+        facade.attributeValuesAsList("qualifiedName").clear();
+        facade.attributeValuesAsList("qualifiedName").add(
             qualifiedName
         );
-        facade.attributeValues("name").add(
+        facade.attributeValuesAsList("name").add(
             qualifiedName.substring(qualifiedName.lastIndexOf(':') + 1)
         );
         return object;
     }
 
-    //---------------------------------------------------------------------------
-    /**
-     * complete derived attributes
-     */
-    void completeObject(
-        ServiceHeader header,
-        DataproviderRequest request,
-        MappedRecord object
-    ) throws ServiceException {
-
-        ObjectHolder_2Facade facade;
-        try {
-            facade = ObjectHolder_2Facade.newInstance(object);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+    // --------------------------------------------------------------------------
+    public class LayerInteraction extends Layer_1.LayerInteraction {
         
-        // INSTANCEOF
-        List allSupertype = ModelUtils.getallSupertype(facade.getObjectClass());
-        facade.clearAttributeValues(SystemAttributes.OBJECT_INSTANCE_OF);
-        if(allSupertype != null) {
-            facade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).addAll(allSupertype);
+        public LayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
         }
-
-        // calculate derived attributes only if attributes have to be returned
-        // and if it is a class of org:omg:model1
-        if(
-            (request.attributeSelector() != AttributeSelectors.NO_ATTRIBUTES) &&
-            facade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ELEMENT)
-        ) {
-            // Reference.referencedEndIsNavigable
-            if(
-                facade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-                    ModelAttributes.REFERENCE
-                )
-            ) {
-                DataproviderRequest getRequest;
-                try {
-                    getRequest = new DataproviderRequest(
-                        ObjectHolder_2Facade.newInstance((Path)facade.attributeValue("referencedEnd")).getDelegate(),
-                        DataproviderOperations.OBJECT_RETRIEVAL,
-                        AttributeSelectors.ALL_ATTRIBUTES,
-                        null
-                    );
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
-                getRequest.contexts().putAll(request.contexts());
-                MappedRecord referencedEnd = this.get(
-                    header,
-                    getRequest
-                ).getObject();
-                try {
-                    facade.clearAttributeValues("referencedEndIsNavigable").addAll(
-                        ObjectHolder_2Facade.newInstance(referencedEnd).attributeValues("isNavigable")
-                    );
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
-            }
-            // Operation.parameter
-            if(
-                facade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-                    ModelAttributes.OPERATION
-                )
-            ) {
-                facade.clearAttributeValues("parameter").addAll(
-                    this.getNamespaceContentAsPaths(
-                        header,
-                        object
-                    )
-                );
-            }
-            // GeneralizableElement.allSupertype
-            if(
-                facade.attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(
-                    ModelAttributes.GENERALIZABLE_ELEMENT
-                )
-            ) {
-                // should this statement really be empty? TODO  
-            }         
-            // ModelElement.name, qualifiedName
-            this.completeNames(
-                object
-            );
-
-        }
-    }
-
-    //---------------------------------------------------------------------------
-    DataproviderReply completeReply(
-        ServiceHeader header,
-        DataproviderRequest request,
-        DataproviderReply reply
-    ) throws ServiceException {
-
-        for(
-            int i = 0;
-            i < reply.getObjects().length;
-            i++
-        ) {
-            //SysLog.trace("completing object: " + reply.getObjects()[i]);
-            this.completeObject(
-                header,
-                request,
-                reply.getObjects()[i]
-            );
-        }
-        reply.context(DataproviderReplyContexts.HAS_MORE).set(0,Boolean.FALSE);
-        reply.context(DataproviderReplyContexts.TOTAL).set(0, new Integer(reply.getObjects().length));
-
-        return reply;
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply get(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        Path accessPath = new Path(request.path().toString());
-        DataproviderReply reply = null;
-        // get ModelElement by 'content' reference
-        if(
-            ModelAttributes.ELEMENT.equals(
-                request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
-            ) && 
-            "content".equals(getReferenceName(request))
-        ) {
-            // rewrite to .../element/<id> path
+                
+        //---------------------------------------------------------------------------
+        /**
+         * complete derived attributes
+         */
+        void completeObject(
+            ServiceHeader header,
+            DataproviderRequest request,
+            MappedRecord object
+        ) throws ServiceException {
+    
+            Object_2Facade facade;
             try {
-                ObjectHolder_2Facade.newInstance(request.object()).setPath(
-                    accessPath.getPrefix(accessPath.size()-3).getChild(accessPath.getBase())
-                );
+                facade = Object_2Facade.newInstance(object);
             } 
             catch (ResourceException e) {
                 throw new ServiceException(e);
             }
-            reply = super.get(
-                header,
-                request
-            );
-            // test whether container is correct
-            try {
+            
+            // INSTANCEOF
+            List allSupertype = ModelUtils.getallSupertype(facade.getObjectClass());
+            facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).clear();
+            if(allSupertype != null) {
+                facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).addAll(allSupertype);
+            }
+    
+            // calculate derived attributes only if attributes have to be returned
+            // and if it is a class of org:omg:model1
+            if(
+                (request.attributeSelector() != AttributeSelectors.NO_ATTRIBUTES) &&
+                facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.ELEMENT)
+            ) {
+                // Reference.referencedEndIsNavigable
                 if(
-                    !((Path)ObjectHolder_2Facade.newInstance(reply.getObject()).attributeValue("container")).equals(
-                        accessPath.getPrefix(accessPath.size()-2)
+                    facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(
+                        ModelAttributes.REFERENCE
                     )
                 ) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.NOT_FOUND, 
-                        "no such member",
-                        new BasicException.Parameter("path", accessPath)
-                    );
-                }
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
-        }
-        // non-derived access
-        else {
-            reply = super.get(
-                header,
-                request
-            );
-        }
-        // reset to access path
-        this.completeReply(
-            header,
-            request,
-            reply
-        );
-        try {
-            ObjectHolder_2Facade.newInstance(reply.getObject()).setPath(
-                accessPath
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
-        return reply;
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply find(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        // references on ModelElement
-        if(
-            ModelAttributes.ELEMENT.equals(
-                request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
-            )
-        ) {
-
-            // element
-            if("element".equals(getReferenceName(request))) {
-                return this.completeReply(
-                    header,
-                    request,
-                    super.find(
-                        header,
-                        request
-                    )
-                );    
-            }
-            else {
-                if(request.operation() == DataproviderOperations.ITERATION_CONTINUATION) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ASSERTION_FAILURE, 
-                        "ITERATION_CONTINUATION not supported on derived reference"
-                    );
-                }
-                // namespaceContent
-                else if("namespaceContent".equals(getReferenceName(request))) {
+                    MappedRecord referencedEnd;
                     try {
-                        return this.completeReply(
-                            header,
-                            request,
-                            new DataproviderReply(
-                                new ArrayList(
-                                    this.getNamespaceContent(
-                                        header,
-                                        ObjectHolder_2Facade.newInstance(ObjectHolder_2Facade.getPath(request.object()).getParent()).getDelegate()
-                                    )
-                                )
-                            )
+                        DataproviderRequest getRequest = new DataproviderRequest(
+                            Query_2Facade.newInstance((Path)facade.attributeValue("referencedEnd")).getDelegate(),
+                            DataproviderOperations.OBJECT_RETRIEVAL,
+                            AttributeSelectors.ALL_ATTRIBUTES,
+                            null
+                        );
+                        DataproviderReply getReply = this.newDataproviderReply();
+                        super.get(
+                            getRequest.getInteractionSpec(), 
+                            Query_2Facade.newInstance(getRequest.object()), 
+                            getReply.getResult()
+                        );
+                        referencedEnd = getReply.getObject();
+                    } 
+                    catch (ResourceException e) {
+                        throw new ServiceException(e);
+                    }
+                    try {
+                        facade.attributeValuesAsList("referencedEndIsNavigable").clear();
+                        facade.attributeValuesAsList("referencedEndIsNavigable").addAll(
+                            Object_2Facade.newInstance(referencedEnd).attributeValuesAsList("isNavigable")
                         );
                     } 
                     catch (ResourceException e) {
                         throw new ServiceException(e);
                     }
                 }
+                // Operation.parameter
+                if(
+                    facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(
+                        ModelAttributes.OPERATION
+                    )
+                ) {
+                    facade.attributeValuesAsList("parameter").clear();
+                    facade.attributeValuesAsList("parameter").addAll(
+                        Model_1.this.getNamespaceContentAsPaths(
+                            header,
+                            object
+                        )
+                    );
+                }
+                // GeneralizableElement.allSupertype
+                if(
+                    facade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(
+                        ModelAttributes.GENERALIZABLE_ELEMENT
+                    )
+                ) {
+                    // should this statement really be empty? TODO  
+                }         
+                // ModelElement.name, qualifiedName
+                Model_1.this.completeNames(
+                    object
+                );
+    
             }
         }
-        // non-derived references
-        else {
-            return completeReply(
+    
+        //---------------------------------------------------------------------------
+        DataproviderReply completeReply(
+            ServiceHeader header,
+            DataproviderRequest request,
+            DataproviderReply reply
+        ) throws ServiceException {
+            for(
+                int i = 0;
+                i < reply.getObjects().length;
+                i++
+            ) {
+                //SysLog.trace("completing object: " + reply.getObjects()[i]);
+                this.completeObject(
+                    header,
+                    request,
+                    reply.getObjects()[i]
+                );
+            }
+            reply.setHasMore(Boolean.FALSE);
+            reply.setTotal(new Integer(reply.getObjects().length));
+    
+            return reply;
+        }
+    
+        //---------------------------------------------------------------------------
+        @Override
+        public boolean get(
+            RestInteractionSpec ispec,
+            Query_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            ServiceHeader header = this.getServiceHeader();
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);
+            
+            Path accessPath = new Path(request.path().toString());
+            // get ModelElement by 'content' reference
+            if("content".equals(Model_1.this.getReferenceName(request))) {
+                // rewrite to .../element/<id> path
+                try {
+                    Object_2Facade.newInstance(request.object()).setPath(
+                        accessPath.getPrefix(accessPath.size()-3).getChild(accessPath.getBase())
+                    );
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
+                super.get(
+                    ispec,
+                    input,
+                    output
+                );
+                // test whether container is correct
+                try {
+                    if(
+                        !((Path)Object_2Facade.newInstance(reply.getObject()).attributeValue("container")).equals(
+                            accessPath.getPrefix(accessPath.size()-2)
+                        )
+                    ) {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_FOUND, 
+                            "no such member",
+                            new BasicException.Parameter("path", accessPath)
+                        );
+                    }
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
+            }
+            // non-derived access
+            else {
+                super.get(
+                    ispec,
+                    input,
+                    output
+                );
+            }
+            // reset to access path
+            this.completeReply(
                 header,
                 request,
+                reply
+            );
+            try {
+                Object_2Facade.newInstance(reply.getObject()).setPath(
+                    accessPath
+                );
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
+            return true;
+        }
+    
+        //---------------------------------------------------------------------------
+        @Override
+        public boolean find(
+            RestInteractionSpec ispec,
+            Query_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            ServiceHeader header = this.getServiceHeader();
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);
+            if("element".equals(getReferenceName(request))) {
                 super.find(
+                    ispec, 
+                    input, 
+                    output
+                );
+                this.completeReply(
                     header,
-                    request
-                )
-            );    
+                    request,
+                    reply
+                );
+                return true;
+            }
+            // namespaceContent
+            else if("namespaceContent".equals(getReferenceName(request))) {
+                try {
+                    reply.getResult().addAll(
+                        new ArrayList(
+                            Model_1.this.getNamespaceContent(
+                                header,
+                                Object_2Facade.newInstance(Object_2Facade.getPath(request.object()).getParent()).getDelegate()
+                            )
+                        )
+                    );
+                    this.completeReply(
+                        header,
+                        request,
+                        reply
+                    );
+                    return true;
+                } 
+                catch (ResourceException e) {
+                    throw new ServiceException(e);
+                }
+            }
+            // non-derived references
+            else {
+                super.find(
+                    ispec, 
+                    input, 
+                    output
+                );
+                completeReply(
+                    header,
+                    request,
+                    reply
+                );
+                return true;
+            }
         }
-        throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE, 
-            "unknown reference on type",
-            new BasicException.Parameter("reference", getReferenceName(request)),
-            new BasicException.Parameter("type", request.context(DataproviderRequestContexts.OBJECT_TYPE))
-        );
-
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply modify(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        if(!this.importing) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE, 
-                "repository not in import state. Call beginImport() before importing elements",
-                new BasicException.Parameter("request", request)
-            );
+    
+        //---------------------------------------------------------------------------
+        @Override
+        public boolean put(
+            RestInteractionSpec ispec,
+            Object_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            if(!Model_1.this.importing) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ILLEGAL_STATE, 
+                    "repository not in import state. Call beginImport() before importing elements",
+                    new BasicException.Parameter("request", request)
+                );
+            }
+            else {
+                super.put(
+                    ispec,
+                    input,
+                    output
+                );
+                return true;
+            }
         }
-        else {
-            return super.modify(
-                header,
-                request
-            );
+    
+        //---------------------------------------------------------------------------
+        @Override
+        public boolean create(
+            RestInteractionSpec ispec,
+            Object_2Facade input,
+            IndexedRecord output
+        ) throws ServiceException {
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            if(!Model_1.this.importing) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ILLEGAL_STATE, 
+                    "repository not in import state. Call beginImport() before importing elements",
+                    new BasicException.Parameter("request", request)
+                );
+            }
+            else {
+                super.create(
+                    ispec,
+                    input,
+                    output
+                );
+                return true;
+            }
         }
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply set(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        if(!this.importing) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE, 
-                "repository not in import state. Call beginImport() before importing elements",
-                new BasicException.Parameter("request", request)
-            );
-        }
-        else {
-            return super.set(
-                header,
-                request
-            );
-        }
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply replace(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        if(!this.importing) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE, 
-                "repository not in import state. Call beginImport() before importing elements",
-                new BasicException.Parameter("request", request)
-            );
-        }
-        else {
-            return super.replace(
-                header,
-                request
-            );
-        }
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply create(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        if(!this.importing) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ILLEGAL_STATE, 
-                "repository not in import state. Call beginImport() before importing elements",
-                new BasicException.Parameter("request", request)
-            );
-        }
-        else {
-            return super.create(
-                header,
-                request
-            );
-        }
-    }
-
-    //---------------------------------------------------------------------------
-    public DataproviderReply operation(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        String operationName = getReferenceName(request);
-        MappedRecord params = request.object();
-        ObjectHolder_2Facade paramsFacade;
-        try {
-            paramsFacade = ObjectHolder_2Facade.newInstance(params);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
-        // Operations on ModelElements
-        if(
-            ModelAttributes.ELEMENT.equals(
-                request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
-            )
-        ) {
-            // lookupElement
+    
+        //---------------------------------------------------------------------------
+        @Override
+        public boolean invoke(
+            RestInteractionSpec ispec, 
+            MessageRecord input, 
+            MessageRecord output
+        ) throws ServiceException {
+            ServiceHeader header = this.getServiceHeader();
+            Path target = input.getTarget();
+            String operationName = target.getBase();
+            Object_2Facade paramsFacade;
+            try {
+                paramsFacade = Object_2Facade.newInstance();
+                paramsFacade.setPath(input.getPath());
+                paramsFacade.setValue(input.getBody());
+            } 
+            catch (ResourceException e) {
+                throw new ServiceException(e);
+            }
             if("lookupElement".equals(operationName)) {
                 // get content  
                 // search elements with matching name
                 List<MappedRecord> contents;
                 try {
-                    contents = this.getNamespaceContent(
+                    contents = Model_1.this.getNamespaceContent(
                         header,
-                        ObjectHolder_2Facade.newInstance(request.path().getPrefix(request.path().size()-2)).getDelegate()
+                        Object_2Facade.newInstance(input.getPath().getPrefix(input.getPath().size()-2)).getDelegate()
                     );
                 } 
                 catch (ResourceException e) {
@@ -1106,12 +1088,12 @@ extends Layer_1 {
                     i.hasNext();
                 ) {
                     MappedRecord content = i.next();                 
-                    this.completeNames(
+                    Model_1.this.completeNames(
                         content
                     );
                     try {
-                        if(ObjectHolder_2Facade.newInstance(content).attributeValue("name").equals(paramsFacade.attributeValue("name"))) {
-                            paramsFacade.attributeValues("result").add(ObjectHolder_2Facade.getPath(content));
+                        if(Object_2Facade.newInstance(content).attributeValue("name").equals(paramsFacade.attributeValue("name"))) {
+                            paramsFacade.attributeValuesAsList("result").add(Object_2Facade.getPath(content));
                             break;
                         }
                     } 
@@ -1124,12 +1106,12 @@ extends Layer_1 {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND, 
                         "element not found",
-                        new BasicException.Parameter("params", params)
+                        new BasicException.Parameter("params", input)
                     );
                 }
-                return new DataproviderReply(
-                    params
-                );
+                output.setPath(paramsFacade.getPath());
+                output.setBody(paramsFacade.getValue());
+                return true;
             }
             // resolveQualifiedName
             else if("resolveQualifiedName".equals(operationName)) {
@@ -1137,9 +1119,9 @@ extends Layer_1 {
                 // search elements with matching qualifiedName
                 List contents;
                 try {
-                    contents = this.getNamespaceContent(
+                    contents = Model_1.this.getNamespaceContent(
                         header,
-                        ObjectHolder_2Facade.newInstance(request.path().getPrefix(request.path().size()-2)).getDelegate()
+                        Object_2Facade.newInstance(input.getPath().getPrefix(input.getPath().size()-2)).getDelegate()
                     );
                 } 
                 catch (ResourceException e) {
@@ -1150,13 +1132,13 @@ extends Layer_1 {
                     i.hasNext();
                 ) {
                     MappedRecord content = i.next();
-                    this.completeNames(
+                    Model_1.this.completeNames(
                         content
                     );
                     try {
-                        if(ObjectHolder_2Facade.newInstance(content).attributeValue("qualifiedName").equals(paramsFacade.attributeValues("qualifiedName").get(0))) {
-                            paramsFacade.attributeValues("result").add(
-                                ObjectHolder_2Facade.getPath(content)
+                        if(Object_2Facade.newInstance(content).attributeValue("qualifiedName").equals(paramsFacade.attributeValuesAsList("qualifiedName").get(0))) {
+                            paramsFacade.attributeValuesAsList("result").add(
+                                Object_2Facade.getPath(content)
                             );
                             break;
                         }
@@ -1170,21 +1152,21 @@ extends Layer_1 {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND, 
                         "element not found",
-                        new BasicException.Parameter("params", params.toString())
+                        new BasicException.Parameter("params", input)
                     );
                 }
-                return new DataproviderReply(
-                    params
-                );
+                output.setPath(paramsFacade.getPath());
+                output.setBody(paramsFacade.getValue());
+                return true;
             }
             // findElementsByType
             else if("findElementsByType".equals(operationName)) {
                 // get content ...
                 List contents;
                 try {
-                    contents = this.getNamespaceContent(
+                    contents = Model_1.this.getNamespaceContent(
                         header,
-                        ObjectHolder_2Facade.newInstance(request.path().getPrefix(request.path().size()-2)).getDelegate()
+                        Object_2Facade.newInstance(input.getPath().getPrefix(input.getPath().size()-2)).getDelegate()
                     );
                 } 
                 catch (ResourceException e) {
@@ -1206,9 +1188,9 @@ extends Layer_1 {
                             j.hasNext();
                         ) {
                             try {
-                                if(ObjectHolder_2Facade.newInstance(content).attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(j.next())) {
-                                    paramsFacade.attributeValues("result").add(
-                                        ObjectHolder_2Facade.getPath(content)
+                                if(Object_2Facade.newInstance(content).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(j.next())) {
+                                    paramsFacade.attributeValuesAsList("result").add(
+                                        Object_2Facade.getPath(content)
                                     );
                                     break;
                                 }
@@ -1219,9 +1201,9 @@ extends Layer_1 {
                         }
                     } else
                         try {
-                            if(ObjectHolder_2Facade.newInstance(content).attributeValues(SystemAttributes.OBJECT_INSTANCE_OF).contains(paramsFacade.attributeValues("ofType").get(0))) {
-                                paramsFacade.attributeValues("result").add(
-                                    ObjectHolder_2Facade.getPath(content)
+                            if(Object_2Facade.newInstance(content).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(paramsFacade.attributeValuesAsList("ofType").get(0))) {
+                                paramsFacade.attributeValuesAsList("result").add(
+                                    Object_2Facade.getPath(content)
                                 );
                             }
                         } 
@@ -1229,43 +1211,28 @@ extends Layer_1 {
                             throw new ServiceException(e);
                         }
                 }
-                return new DataproviderReply(
-                    params
-                );
+                output.setPath(paramsFacade.getPath());
+                output.setBody(paramsFacade.getValue());
+                return true;
             }
-        }
-        // Operations on ModelClassifier
-        else if(
-            ModelAttributes.CLASSIFIER.equals(
-                request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
-            )
-        ) {
-            // externalizeClassifier
-            if("externalizeClassifier".equals(operationName)) {
-                return new DataproviderReply(
-                    params
-                );
+            else if("externalizeClassifier".equals(operationName)) {
+                output.setPath(input.getPath());
+                output.setBody(input.getBody());
+                return true;
             }
-        }
-        // Operations on ModelPackage
-        else if(
-            ModelAttributes.PACKAGE.equals(
-                request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0)
-            )
-        ) {
-            // externalizePackage
-            if("externalizePackage".equals(operationName)) {
+            // Operations on ModelPackage
+            else if("externalizePackage".equals(operationName)) {
                 try {
                     SysLog.trace("activating model");
                     Model_1_0 model = org.openmdx.application.mof.repository.accessor.Model_1.getInstance(
-                        this,
+                        Model_1.this,
                         true
                     );
                     // check whether the desired package to externalize exists in the 
                     // model repository or not
-                    Path modelPackagePath = request.path().getParent().getParent();
+                    Path modelPackagePath = input.getPath().getParent().getParent();
                     String qualifiedPackageName = modelPackagePath.getBase();
-
+    
                     // only test for existence if not wildcard export
                     if(
                         (qualifiedPackageName.indexOf("%") < 0) &&
@@ -1280,13 +1247,13 @@ extends Layer_1 {
                     }
                     SysLog.trace("Verify model constraints");
                     new ModelConstraintsChecker_1(model).verify();
-
+    
                     ByteArrayOutputStream bs = null;
                     ZipOutputStream zip = new ZipOutputStream(
                         bs = new ByteArrayOutputStream()         
                     );
-                    List formats = !paramsFacade.attributeValues("format").isEmpty() ? 
-                        paramsFacade.attributeValues("format") : 
+                    List formats = !paramsFacade.attributeValuesAsList("format").isEmpty() ? 
+                        paramsFacade.attributeValuesAsList("format") : 
                         STANDARD_FORMAT;
                     for(
                         Iterator i = formats.iterator();
@@ -1295,14 +1262,14 @@ extends Layer_1 {
                         String format = (String)i.next();
                         Mapper_1_0 mapper = MapperFactory_1.create(format);
                         if(
-                            this.openmdxjdoMetadataDirectory != null && 
+                            Model_1.this.openmdxjdoMetadataDirectory != null && 
                             mapper instanceof Mapper_1_1
                         ){
                             ((Mapper_1_1)mapper).externalize(
                                 modelPackagePath.getBase(),
                                 model,
                                 zip,
-                                this.openmdxjdoMetadataDirectory
+                                Model_1.this.openmdxjdoMetadataDirectory
                             );
                         } 
                         else {
@@ -1314,142 +1281,112 @@ extends Layer_1 {
                         }
                     }
                     zip.close();
-                    ObjectHolder_2Facade resultFacade;
-                    try {
-                        resultFacade = ObjectHolder_2Facade.newInstance(
-                            paramsFacade.getPath(),
-                            "org:omg:model1:PackageExternalizeResult"
-                        );
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
-                    resultFacade.attributeValues("packageAsJar").add(
-                        bs.toByteArray()
-                    );
-                    return new DataproviderReply(
-                        resultFacade.getDelegate()
-                    );          
+                    output.setPath(input.getPath());
+                    MappedRecord body = Records.getRecordFactory().createMappedRecord("org:omg:model1:PackageExternalizeResult");
+                    output.setBody(body);
+                    body.put("packageAsJar", bs.toByteArray());
+                    return true;
                 }
                 catch(IOException e) {
                     throw new ServiceException(e);
+                } catch (ResourceException exception) {
+                    throw new ServiceException(exception);
                 }
             }
-        }
-        // beginImport
-        else if("beginImport".equals(operationName)) {
-            this.importing = true;
-            ObjectHolder_2Facade resultFacade;
-            try {
-                resultFacade = ObjectHolder_2Facade.newInstance(
-                    paramsFacade.getPath().getDescendant("reply", super.uidAsString()),
-                    "org:openmdx:base:Void"
-                );
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
+            // beginImport
+            else if("beginImport".equals(operationName)) {
+                Model_1.this.importing = true;
+                output.setPath(newResponseId(input.getPath()));
+                output.setBody(null);
+                return true;
             }
-            return new DataproviderReply(
-                resultFacade.getDelegate()
-            );
-        }
-        // endImport
-        else if("endImport".equals(operationName)) {
-            // recalculate all derived attributes and update repository
-            RequestCollection channel = new RequestCollection(
-                header,
-                this.getDelegation()
-            );
-            // get full repository content ...
-            List segments = channel.addFindRequest(
-                PROVIDER_ROOT_PATH.getChild("segment"),
-                null
-            );
-            Map completedElements = new HashMap();
-            for(
-                Iterator<MappedRecord> i = segments.iterator();
-                i.hasNext();
-            ) {
-                MappedRecord segment = i.next();
-                List<MappedRecord> elements = channel.addFindRequest(
-                    ObjectHolder_2Facade.getPath(segment).getChild("element"),
-                    null,
-                    AttributeSelectors.ALL_ATTRIBUTES,
-                    null,
-                    0,
-                    Integer.MAX_VALUE,
-                    Directions.ASCENDING
+            // endImport
+            else if("endImport".equals(operationName)) {
+                // recalculate all derived attributes and update repository
+                DataproviderRequestProcessor channel = new DataproviderRequestProcessor(
+                    header,
+                    this.getDelegatingLayer()
                 );
+                // get full repository content ...
+                List segments = channel.addFindRequest(
+                    PROVIDER_ROOT_PATH.getChild("segment"),
+                    null
+                );
+                Map completedElements = new HashMap();
                 for(
-                    Iterator<MappedRecord> j = elements.iterator();
-                    j.hasNext();  
+                    Iterator<MappedRecord> i = segments.iterator();
+                    i.hasNext();
                 ) {
-                    MappedRecord element = j.next();
-                    completedElements.put(
-                        ObjectHolder_2Facade.getPath(element),
+                    MappedRecord segment = i.next();
+                    List<MappedRecord> elements = channel.addFindRequest(
+                        Object_2Facade.getPath(segment).getChild("element"),
+                        null,
+                        AttributeSelectors.ALL_ATTRIBUTES,
+                        null,
+                        0,
+                        Integer.MAX_VALUE,
+                        Directions.ASCENDING
+                    );
+                    for(
+                        Iterator<MappedRecord> j = elements.iterator();
+                        j.hasNext();  
+                    ) {
+                        MappedRecord element = j.next();
+                        completedElements.put(
+                            Object_2Facade.getPath(element),
+                            element
+                        );
+                    }
+                }
+                // ... complete it ...
+                Model_1.this.completeElements(
+                    header,
+                    completedElements
+                );
+                // ... and replace the existing elements with the completed
+                for(
+                    Iterator<MappedRecord> i = completedElements.values().iterator();
+                    i.hasNext();
+                ) {
+                    MappedRecord element = i.next();
+                    channel.addReplaceRequest(
                         element
                     );
                 }
+                SysLog.trace("completed elements", completedElements.size());
+                // Void reply  
+                output.setPath(newResponseId(input.getPath()));
+                output.setBody(null);
+                Model_1.this.importing = false;
+                return true;
             }
-            // ... complete it ...
-            this.completeElements(
-                header,
-                completedElements
-            );
-            // ... and replace the existing elements with the completed
-            for(
-                Iterator<MappedRecord> i = completedElements.values().iterator();
-                i.hasNext();
-            ) {
-                MappedRecord element = i.next();
-                channel.addReplaceRequest(
-                    element
-                );
-            }
-            SysLog.trace("completed elements", completedElements.size());
-            // Void reply      
-            ObjectHolder_2Facade resultFacade;
-            try {
-                resultFacade = ObjectHolder_2Facade.newInstance(
-                    paramsFacade.getPath().getDescendant("reply", super.uidAsString()),
-                    "org:openmdx:base:Void"
-                );
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
-            this.importing = false;
-            return new DataproviderReply(
-                resultFacade.getDelegate()
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE, 
+                "unknown operation",
+                new BasicException.Parameter("operation", operationName),
+                new BasicException.Parameter("object type", input)
             );
         }
-        throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE, 
-            "unknown operation",
-            new BasicException.Parameter("operation", operationName),
-            new BasicException.Parameter("object type", request.context(DataproviderRequestContexts.OBJECT_TYPE).get(0))
-        );
+        
     }
 
     //---------------------------------------------------------------------------
     // Variables
     //---------------------------------------------------------------------------
+   static protected final Path PROVIDER_ROOT_PATH = new Path("xri:@openmdx:org.omg.model1/provider/Mof");
 
-    /**
-     * 
-     */
-    static private final Path PROVIDER_ROOT_PATH = new Path("xri:@openmdx:org.omg.model1/provider/Mof");
+    protected static final List<String> STANDARD_FORMAT = Collections.unmodifiableList(
+        Arrays.asList(
+            MappingTypes.XMI1, 
+            MappingTypes.UML_OPENMDX_1,
+            MappingTypes.UML2_OPENMDX_1,
+            MappingTypes.TOGETHER_OPENMDX_1
+        )
+    );
 
-    /**
-     * 
-     */
-    private boolean importing = false;
-
-    /**
-     * 
-     */
-    private String openmdxjdoMetadataDirectory; 
+    protected boolean importing = false;
+    protected String openmdxjdoMetadataDirectory; 
 
 }
 

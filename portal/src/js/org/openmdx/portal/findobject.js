@@ -1,10 +1,10 @@
 // ====================================================================
 // Project:     openmdx, http://www.openmdx.org/
-// Name:        $Id: findobject.js,v 1.1 2008/06/03 08:23:15 cmu Exp $
+// Name:        $Id: findobject.js,v 1.3 2009/10/22 08:29:24 wfro Exp $
 // Description: JCA: Utility methods for records
-// Revision:    $Revision: 1.1 $
+// Revision:    $Revision: 1.3 $
 // Owner:       OMEX AG, Switzerland, http://www.omex.ch
-// Date:        $Date: 2008/06/03 08:23:15 $
+// Date:        $Date: 2009/10/22 08:29:24 $
 // ====================================================================
 // 
 // This software is published under the BSD license
@@ -60,14 +60,17 @@ function ObjectFinder() {
 }
 
 function findObject(href, objectTitle, objectReference, id) {
-  this.referenceField[id] = objectReference;
-  this.titleField[id] = objectTitle;
-  win = window.open(href + '&filtervalues=' + encodeURIComponent(objectTitle.value), "OF", "help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true); 
-  win.focus();
+	this.referenceField[id] = objectReference;
+	this.titleField[id] = objectTitle;
+	win = window.open(href + '&filtervalues=' + encodeURIComponent(objectTitle.value), "OF", "help=yes,status=yes,scrollbars=yes,resizable=yes,dependent=yes,alwaysRaised=yes", true); 
+	win.focus();
 }
     
 function selectAndClose(objectReference, objectTitle, id, win) {
-  this.referenceField[id].value = objectReference;
-  this.titleField[id].value = objectTitle;
-  win.close();
+	this.referenceField[id].value = objectReference;
+	this.titleField[id].value = objectTitle;
+	try {
+		this.referenceField[id].onchange();
+	} catch(e) {}
+	win.close();
 }

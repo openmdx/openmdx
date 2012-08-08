@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TestThreadSafety.java,v 1.9 2009/03/08 18:03:26 wfro Exp $
+ * Name:        $Id: TestThreadSafety.java,v 1.10 2009/06/16 17:08:27 wfro Exp $
  * Description: TestThreadSafety
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:26 $
+ * Date:        $Date: 2009/06/16 17:08:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,8 +74,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.text.conversion.Base64;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.WebKeys;
 
@@ -225,7 +225,7 @@ public class TestThreadSafety
     ) {
         try {
           System.out.println("<<<< **** End Test: " + this.getName());
-          AppLog.info("End test",this.getName());
+          SysLog.info("End test",this.getName());
         }
         catch(Exception e) {
           System.out.println("error in tearDown");

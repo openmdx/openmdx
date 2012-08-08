@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     opencrx, http://www.opencrx.org/
- * Name:        $Id: HtmlEncoder.java,v 1.17 2009/05/01 08:40:34 wfro Exp $
+ * Name:        $Id: HtmlEncoder.java,v 1.19 2009/09/03 14:50:07 wfro Exp $
  * Description: HttpEncoder class
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2009/05/01 08:40:34 $
+ * Date:        $Date: 2009/09/03 14:50:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -126,17 +126,14 @@ public class HtmlEncoder {
             }
         }
         String t = target.toString();
-        boolean startsWithTag = t.startsWith("<");
-        return forEditing || startsWithTag || (t.indexOf("\n") < 0)
-            ? t
-            : t.replaceAll("\n", "<br />");
+        return t;
     }
 
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
     private static final String XSS_CHARS[] = {
-        "&quot;", null, null, "&#37;", "&amp;", "&#39;", null, null, null, null,
+        "&quot;", null, null, null, "&amp;", "&#39;", null, null, null, null,
         null, null, null, null, null, null, null, null, null, null,
         null, null, null, null, null, "&#59;", "&lt;", null, "&gt;", null, "&#64;"
     };

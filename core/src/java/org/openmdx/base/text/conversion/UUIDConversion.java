@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UUIDConversion.java,v 1.7 2009/05/27 22:48:21 hburger Exp $
+ * Name:        $Id: UUIDConversion.java,v 1.10 2010/01/21 17:36:09 hburger Exp $
  * Description: UUID conversion
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/27 22:48:21 $
+ * Date:        $Date: 2010/01/21 17:36:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,6 +57,8 @@ import java.util.UUID;
 
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.kernel.exception.BasicException;
 
 
 
@@ -68,6 +70,7 @@ import org.ietf.jgss.Oid;
  * <li><b>UID</b>, e.g. <i>XubSsL0VEdufdQFDCgEBxg</i>
  * <li><b>UUID</b>, e.g. <i>5ee6d2b0-bd15-11db-9f75-01430a0101c6</i>
  * <li><b>URN</b>, e.g. <i>urn:uuid:5ee6d2b0-bd15-11db-9f75-01430a0101c6</i>
+ * <li><b>XRI</b>, e.g. <i>xri://$t*uuid*5ee6d2b0-bd15-11db-9f75-01430a0101c6</i>
  * </ul>
  */
 public class UUIDConversion {
@@ -82,6 +85,7 @@ public class UUIDConversion {
      * <li>if the length of <code>uuid</code> is <code>22</code> it is considered to be in <b>UID</b> format
      * <li>if the length of <code>uuid</code> is <code>36</code> it is considered to be in <b>UUID</b> format
      * <li>if the length of <code>uuid</code> is <code>45</code> it is considered to be in <b>URN</b> format
+     * <li>if the length of <code>uuid</code> is <code>50</code> it is considered to be in <b>XRI</b> format
      * </ul>
      *
      * @param uuid the String representatation of a UUID
@@ -108,6 +112,7 @@ public class UUIDConversion {
             case UID_FORMAT: return UUIDConversion.fromUID(uuid);
             case UUID_FORMAT: return UUID.fromString(uuid);
             case URN_FORMAT: return UUID.fromString(uuid.substring(9));
+            case XRI_FORMAT: return UUID.fromString(uuid.substring(14));
             default: throw new IllegalArgumentException(
                 "Invalid UUID string: " + uuid
             );
@@ -177,7 +182,7 @@ public class UUIDConversion {
     }
 
     /**
-     * Returns a base 36 encoded URI.
+     * Returns a base 36 encoded UUID.
      * <p>
      * Note:<br>
      * The encoding is as following:<ul>
@@ -203,6 +208,23 @@ public class UUIDConversion {
     }
 
     /**
+     * Returns a UUID Oid's dot representation according to ISO/IEC 9834-8 | ITU-T Rec. X.667
+     * http://www.itu.int/ITU-T/studygroups/com17/oid/X.667-E.pdf
+     * <p> 
+     * Example: <i>2.25.3325839809379844461264382260940242222</i>,
+     * an Oid based on the UUID 02808890-0ad8-1085-9bdf-0002a5d5fd2e. 
+     * 
+     * @param uuid
+     * 
+     * @return the corresponding UUID Oid
+     */
+    public static String toOID (
+        UUID uuid
+    ){
+        return uuid == null ? null : "2.25." + new BigInteger(1, toBinary(uuid)); 
+    }
+
+    /**
      * Returns a UUID Oid according to ISO/IEC 9834-8 | ITU-T Rec. X.667
      * http://www.itu.int/ITU-T/studygroups/com17/oid/X.667-E.pdf
      * <p> 
@@ -217,18 +239,21 @@ public class UUIDConversion {
     public static Oid toOid (
         UUID uuid
     ){
+        String oid = toOID(uuid); 
         try {
-            return uuid == null ? null : new Oid(
-                "2.25." + new BigInteger(1, toBinary(uuid))
-            );
+            return oid == null ? null : new Oid(oid);
         } catch (GSSException exception) {
-            throw new RuntimeException(
+            throw new RuntimeServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.TRANSFORMATION_FAILURE,
                 "UUID to oid conversion failed",
-                exception
+                new BasicException.Parameter("uuid", uuid),
+                new BasicException.Parameter("oid", oid),
+                new BasicException.Parameter("hint", "might be a JRE bug")
             );
         }
     }
-
 
     /**
      * Returns the binary representation of a UUID
@@ -302,15 +327,6 @@ public class UUIDConversion {
     }
 
     /**
-     * Treat the given <code>uuid</code> object as <code>UUID</code>
-     */
-    public static UUID asUUID(
-        Object uuid
-    ){
-        return (UUID)uuid;
-    }
-
-    /**
      * Decodes a base 36 encoded UID
      * <p>
      * Note:<br>
@@ -377,10 +393,12 @@ public class UUIDConversion {
     }
     
     /**
+     * Create a base 36 encoded UUID.
      * 
      * @param mostSignificantBits
      * @param leastSignificantBits
-     * @return
+     * 
+     * @return a base 36 encoded UUID
      */
     private static String toUID(
         long mostSignificantBits,
@@ -424,5 +442,10 @@ public class UUIDConversion {
      * The URN format's length
      */
     private static final int URN_FORMAT = 45;
+
+    /**
+     * The XRI format's length
+     */
+    private static final int XRI_FORMAT = 50;
 
 }

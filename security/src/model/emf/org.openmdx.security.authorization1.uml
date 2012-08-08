@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_zYkIkN6_EdmkJO73lqONhA" name="authorization1">
+  <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D417CB8E700AFPPP" name="org">
+    <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D417CB8E700AFPP" name="openmdx">
+      <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D417CB8E700AFP" name="security">
+        <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D417CB8E700AF" name="authorization1">
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417E3886017B" name="Segment">
+            <generalization xmi:id="_3C7B8A60016D417E3A3C02C5">
+              <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FC487C80099"/>
+            </generalization>
+            <ownedAttribute xmi:id="_3C7B8A60016D4183BAD60099" name="policy" type="_3C7B8A60016D4183BAA70268" isUnique="false" aggregation="composite" association="_3C7B8A60016D4183BAD502C9">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hXPGqN6-EdmkJO73lqONhA" value="1"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hXPGp96-EdmkJO73lqONhA"/>
+              <qualifier xmi:id="_3C7B8A60016D4183BAEB0099" name="id" visibility="private">
+                <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+              </qualifier>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417F99C001F6" name="ModelElementPrivilege" isAbstract="true">
+            <ownedComment xmi:id="_hXI_8t6-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D417F99C001F6">
+              <body>The privilege's name corresponds to a fully qualifed model element name.</body>
+            </ownedComment>
+            <generalization xmi:id="_3C7B8A60016D4181774D0155" general="_3C7B8A60016D41817704013C"/>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417F9A3F01B3" name="ModelClassPrivilege">
+            <ownedComment xmi:id="_hXI_996-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D417F9A3F01B3">
+              <body>The privilege's name corresponds to a fully qualifed model class name.</body>
+            </ownedComment>
+            <generalization xmi:id="_3C7B8A60016D4180F608035F" general="_3C7B8A60016D417F99C001F6"/>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417F9A5701F3" name="ModelReferencePrivilege">
+            <ownedComment xmi:id="_hXI__N6-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D417F9A5701F3">
+              <body>The privilege's name corresponds to a fully qualifed model reference name.</body>
+            </ownedComment>
+            <generalization xmi:id="_3C7B8A60016D4180F60F01CF" general="_3C7B8A60016D417F99C001F6"/>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D4180F81602ED" name="ResourcePrivilege">
+            <ownedComment xmi:id="_hXPGld6-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D4180F81602ED">
+              <body>The privilege's name corresponds usually to the resource's URI.</body>
+            </ownedComment>
+            <generalization xmi:id="_3C7B8A60016D4181771703A6" general="_3C7B8A60016D41817704013C"/>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D41817704013C" name="Privilege">
+            <generalization xmi:id="_3C7B8A60016D4181772C00D5">
+              <general xmi:type="uml:Class" href="org.openmdx.security.realm1.uml#_3C7B8A60016D417E21D70063"/>
+            </generalization>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D4183BAA70268" name="Policy">
+            <generalization xmi:id="_3C7B8A60016D417E3A3903BC">
+              <general xmi:type="uml:Class" href="org.openmdx.security.realm1.uml#_3C7B8A60016D417CF570029D"/>
+            </generalization>
+            <generalization xmi:id="_3C7B8A60016D4185260E0380">
+              <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
+            </generalization>
+            <ownedAttribute xmi:id="_3C7B8A60016D417E3C2B0082" name="parent" type="_3C7B8A60016D4183BAA70268" isUnique="false" association="_3C7B8A60016D417E3C27039E">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hXPGod6-EdmkJO73lqONhA" value="1"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hXPGoN6-EdmkJO73lqONhA"/>
+            </ownedAttribute>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D417E3C27039E" name="PolicyHasParent" memberEnd="_3C7B8A60016D417E3C2B0082 _3C7B8A60016D417E3C2B0084">
+            <ownedEnd xmi:id="_3C7B8A60016D417E3C2B0084" name="child" type="_3C7B8A60016D4183BAA70268" isUnique="false" association="_3C7B8A60016D417E3C27039E">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hXPGpN6-EdmkJO73lqONhA" value="*"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hXPGo96-EdmkJO73lqONhA"/>
+            </ownedEnd>
+          </packagedElement>
+          <packagedElement xmi:type="uml:Association" xmi:id="_3C7B8A60016D4183BAD502C9" name="SegmentContainsPolicy" memberEnd="_3C7B8A60016D4183BAD60099 _3C7B8A60016D4183BAD6009B">
+            <ownedEnd xmi:id="_3C7B8A60016D4183BAD6009B" name="segment" type="_3C7B8A60016D417E3886017B" isUnique="false" association="_3C7B8A60016D4183BAD502C9">
+              <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hXPGrN6-EdmkJO73lqONhA" value="1"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hXPGq96-EdmkJO73lqONhA" value="1"/>
+            </ownedEnd>
+          </packagedElement>
+        </packagedElement>
+      </packagedElement>
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

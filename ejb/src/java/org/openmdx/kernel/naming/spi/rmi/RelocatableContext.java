@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RelocatableContext.java,v 1.1 2009/01/12 12:49:24 wfro Exp $
+ * Name:        $Id: RelocatableContext.java,v 1.4 2009/09/11 13:39:20 hburger Exp $
  * Description: Relocatable Context
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:24 $
+ * Date:        $Date: 2009/09/11 13:39:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,8 +62,8 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.ServiceUnavailableException;
 
-import org.openmdx.kernel.naming.spi.AbstractContext;
-import org.openmdx.kernel.naming.spi.StringBasedContext;
+import org.openmdx.kernel.lightweight.naming.spi.AbstractContext;
+import org.openmdx.kernel.lightweight.naming.spi.StringBasedContext;
 
 /**
  * Relocatable Context

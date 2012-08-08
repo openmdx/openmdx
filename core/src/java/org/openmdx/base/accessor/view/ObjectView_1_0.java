@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectView_1_0.java,v 1.13 2009/06/09 12:45:17 hburger Exp $
+ * Name:        $Id: ObjectView_1_0.java,v 1.15 2009/11/27 19:06:29 hburger Exp $
  * Description: Object 1.6 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:17 $
+ * Date:        $Date: 2009/11/27 19:06:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,7 @@ package org.openmdx.base.accessor.view;
 
 import javax.resource.cci.InteractionSpec;
 
+import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -72,6 +73,11 @@ public interface ObjectView_1_0
      */
     Model_1_0 getModel();
 
+    /**
+     * Retrieve the object view's manager
+     */
+    DataObjectManager_1_0 jdoGetPersistenceManager();
+    
     
     //------------------------------------------------------------------------
     // Synchronization
@@ -101,7 +107,7 @@ public interface ObjectView_1_0
      */
     void objSetDelegate(
         DataObject_1_0 delegate
-    );
+    ) throws ServiceException;
 
     public Marshaller getMarshaller(
     );

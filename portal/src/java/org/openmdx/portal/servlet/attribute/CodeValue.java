@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeValue.java,v 1.39 2009/04/30 11:48:40 wfro Exp $
+ * Name:        $Id: CodeValue.java,v 1.43 2010/04/27 08:27:11 wfro Exp $
  * Description: CodeValue
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.43 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/30 11:48:40 $
+ * Date:        $Date: 2010/04/27 08:27:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,7 +68,7 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.control.EditObjectControl;
 
 public class CodeValue
@@ -208,7 +208,7 @@ public class CodeValue
     
     //-------------------------------------------------------------------------
     protected String getStringifiedValueInternal(
-        HtmlPage p, 
+        ViewPort p, 
         Object v,
         boolean multiLine,
         boolean forEditing,
@@ -219,6 +219,7 @@ public class CodeValue
 
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
+    @Override
     public Object getValue(
         boolean shortFormat
     ) {
@@ -286,9 +287,10 @@ public class CodeValue
   
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
+    @Override
     public void paint(
         Attribute attribute,
-        HtmlPage p,
+        ViewPort p,
         String id,
         String label,
         RefObject_1_0 lookupObject,
@@ -304,11 +306,8 @@ public class CodeValue
         String stringifiedValue,
         boolean forEditing
     ) throws ServiceException {
-        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();                        
-        if(label == null) {
-            label = attribute.getLabel();
-            label += label.length() == 0 ? "" : ":";        
-        }
+        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();    
+        label = this.getLabel(attribute, p, label);
         if(forEditing) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0)            
@@ -393,11 +392,17 @@ public class CodeValue
                     styleModifier += "height:" + (1.2+(attribute.getSpanRow()-1)*1.35) + "em;\"";
                 }
                 p.debug("<!-- multi-valued CodeValue -->");
-                p.write(gapModifier);
-                p.write("<td class=\"label\"><span class=\"nw\">",  htmlEncoder.encode(label, false), "</span></td>");
-                p.write("<td class=\"valueL\" ", rowSpanModifier, " ", widthModifier, " ", styleModifier, ">");
-                if(!this.isSingleValued()) {
-                    p.write("  <div class=\"valueMulti\" ", styleModifier, "> ");
+                if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                	p.write("		<label>", htmlEncoder.encode(label, false), "</label>");                	
+	                p.write("       <div class=\"valueL\">");                	
+                }
+                else {
+	                p.write(gapModifier);
+	                p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+	                p.write("<td class=\"valueL\" ", rowSpanModifier, " ", widthModifier, " ", styleModifier, ">");
+	                if(!this.isSingleValued()) {
+	                    p.write("  <div class=\"valueMulti\" ", styleModifier, ">");
+	                }
                 }
                 Object v = super.getValue(false);
                 Collection values = new ArrayList();
@@ -434,14 +439,19 @@ public class CodeValue
                         p.write("<img src=\"", p.getResourcePath("images/"), "spacer.gif\" width=\"5\" height=\"0\" align=\"bottom\" border=\"0\" alt=\"\" />");
                     }
                     if(text != null) {
-                        this.application.getPortalExtension().renderTextValue(p, htmlEncoder.encode(text, false));
+                        this.application.getPortalExtension().renderTextValue(p, htmlEncoder.encode(text, false), false);
                     }
                     p.write("</div>");
                 }
-                if(!this.isSingleValued()) {
-                    p.write("  </div>"); // valueMulti
+                if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                    p.write("       </div>"); // valueMulti                	
                 }
-                p.write("</td>");
+                else {
+	                if(!this.isSingleValued()) {
+	                    p.write("  </div>"); // valueMulti
+	                }
+	                p.write("</td>");
+                }
             }
         }
     }

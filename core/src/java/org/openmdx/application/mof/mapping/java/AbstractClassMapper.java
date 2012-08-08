@@ -1,10 +1,10 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Name: $Id: AbstractClassMapper.java,v 1.3 2009/06/09 12:45:18 hburger Exp $ 
- * Description: JMIClassLevelTemplate Revision: $Revision: 1.3 $ 
+ * Name: $Id: AbstractClassMapper.java,v 1.4 2009/07/12 17:23:09 hburger Exp $ 
+ * Description: JMIClassLevelTemplate Revision: $Revision: 1.4 $ 
  * Owner: OMEX AG, Switzerland, http://www.omex.ch 
- * Date: $Date: 2009/06/09 12:45:18 $
+ * Date: $Date: 2009/07/12 17:23:09 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -309,12 +309,8 @@ public class AbstractClassMapper
      */
     private static final Set<String> TRANSIENT_REFERENCES = new HashSet<String>(
         Arrays.asList(
-//          "org:openmdx:base:BasicObject",
             "org:openmdx:base:Context",
-            "org:openmdx:base:ExtentCapable",
-            "org:openmdx:compatibility:role1:Role",
-            "org:openmdx:compatibility:state1:State",
-            "org:openmdx:compatibility:view1:View"
+            "org:openmdx:base:ExtentCapable"
         )
     );
 

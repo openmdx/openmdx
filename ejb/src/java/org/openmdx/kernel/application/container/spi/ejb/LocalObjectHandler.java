@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LocalObjectHandler.java,v 1.2 2009/02/24 16:02:51 hburger Exp $
+ * Name:        $Id: LocalObjectHandler.java,v 1.3 2009/08/25 17:23:04 hburger Exp $
  * Description: Local Object Invocation Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/24 16:02:51 $
+ * Date:        $Date: 2009/08/25 17:23:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,6 +55,7 @@ import java.lang.reflect.Method;
 
 import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBLocalObject;
+import javax.ejb.TransactionAttributeType;
 
 import org.openmdx.kernel.exception.BasicException;
 
@@ -158,7 +159,7 @@ extends AbstractObjectHandler<LocalHomeHandler<H>>
         LocalAction(
             LocalHomeHandler<H> home,
             Method method, 
-            TransactionAttribute transactionAttribute
+            TransactionAttributeType transactionAttribute
         ){
             super(home, method, transactionAttribute);
         }

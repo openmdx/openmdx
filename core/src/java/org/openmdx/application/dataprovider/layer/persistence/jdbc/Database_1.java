@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Database_1.java,v 1.2 2009/05/26 14:55:54 wfro Exp $
+ * Name:        $Id: Database_1.java,v 1.5 2010/02/11 13:15:11 hburger Exp $
  * Description: Database_1Jdbc2 plugin
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:55:54 $
+ * Date:        $Date: 2010/02/11 13:15:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,20 +66,25 @@ import java.sql.SQLException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.BinaryLargeObject;
-import org.w3c.cci2.ByteString;
-import org.w3c.cci2.ByteStringInputStream;
+import org.w3c.cci2.BinaryLargeObjects;
+import org.w3c.cci2.CharacterLargeObjects;
 
 /*
  * Concrete implementation of the AbstractDatabase_1 plugin using Jdbc2 driver
  * features. 
  */
 //---------------------------------------------------------------------------
-public class Database_1
-extends AbstractDatabase_1 {
+public class Database_1 extends AbstractDatabase_1 {
 
+    //---------------------------------------------------------------------------
+    public Database_1(
+    ) {
+    }
+    
     //---------------------------------------------------------------------------
     PreparedStatement prepareStatement(
         Connection conn,
@@ -137,9 +142,9 @@ extends AbstractDatabase_1 {
         ModelElement_1_0 attributeDef
     ) throws ServiceException, SQLException {
 
-        boolean isStream = attributeDef == null
-        ? false
-            : attributeDef.objGetList("multiplicity").contains(Multiplicities.STREAM);
+        boolean isStream = 
+            attributeDef != null && 
+            Multiplicities.STREAM.equals(ModelUtils.getMultiplicity(attributeDef));
 
         // Blob
         if(val instanceof Blob) {
@@ -154,15 +159,7 @@ extends AbstractDatabase_1 {
 
         // byte[]
         else if(val instanceof byte[]) {
-            byte[] bytes = (byte[])val;
-            if(isStream) {
-                return new ByteStringInputStream(
-                    new ByteString(bytes)
-                );
-            }
-            else {
-                return bytes;
-            }
+            return isStream ? BinaryLargeObjects.valueOf((byte[])val) : val;
         }
         else {
             return null;
@@ -175,10 +172,10 @@ extends AbstractDatabase_1 {
         String attributeName,
         ModelElement_1_0 attributeDef
     ) throws ServiceException, SQLException {
-
-        boolean isStream = attributeDef == null
-        ? false
-            : attributeDef.objGetList("multiplicity").contains(Multiplicities.STREAM);
+        
+        boolean isStream = 
+            attributeDef != null && 
+            Multiplicities.STREAM.equals(ModelUtils.getMultiplicity(attributeDef));
 
         // Clob
         if(val instanceof Clob) {
@@ -193,13 +190,7 @@ extends AbstractDatabase_1 {
 
         // String
         else if(val instanceof String) {
-            String chars = (String)val;
-            if(isStream) {
-                return new StringReader(chars);
-            }
-            else {
-                return chars;
-            }
+            return isStream ? CharacterLargeObjects.valueOf((String)val) : val;
         }
 
         else {

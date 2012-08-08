@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Attribute.java,v 1.17 2008/12/08 16:33:52 wfro Exp $
+ * Name:        $Id: Attribute.java,v 1.18 2009/09/25 12:02:38 wfro Exp $
  * Description: Attribute 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/08 16:33:52 $
+ * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,7 +60,7 @@ import java.util.List;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 
 public final class Attribute
   implements Serializable {
@@ -181,7 +181,7 @@ public final class Attribute
 
     //-------------------------------------------------------------------------
     public String getStringifiedValue(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing,
         boolean shortFormat
     ) {
@@ -208,7 +208,7 @@ public final class Attribute
      * @throws ServiceException
      */
     public void paintForShow(
-        HtmlPage p,
+        ViewPort p,
         int nCols,
         String gapModifier,
         String styleModifier,
@@ -244,7 +244,7 @@ public final class Attribute
      * @throws ServiceException
      */
     public void paintForShow(
-        HtmlPage p,
+        ViewPort p,
         String label,
         int nCols,
         String gapModifier,
@@ -290,7 +290,7 @@ public final class Attribute
      * @throws ServiceException
      */
     public void paintForEdit(
-        HtmlPage p,
+        ViewPort p,
         RefObject_1_0 lookupObject,
         int nCols,
         int tabIndex,
@@ -334,7 +334,7 @@ public final class Attribute
      * @throws ServiceException
      */
     public void paintForEdit(
-        HtmlPage p,
+        ViewPort p,
         String id,
         String label,
         RefObject_1_0 lookupObject,

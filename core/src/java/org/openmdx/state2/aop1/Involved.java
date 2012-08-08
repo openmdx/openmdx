@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Involved.java,v 1.2 2009/01/10 02:09:17 wfro Exp $
+ * Name:        $Id: Involved.java,v 1.3 2009/08/17 13:08:46 hburger Exp $
  * Description: Involved 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/10 02:09:17 $
+ * Date:        $Date: 2009/08/17 13:08:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,6 @@
  */
 package org.openmdx.state2.aop1;
 
-import org.openmdx.base.exception.ServiceException;
 
 /**
  * Involved
@@ -67,6 +66,6 @@ interface Involved<T> {
      */
     Iterable<T> getInvolved(
         AccessMode accessMode
-    ) throws ServiceException;
+    );
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextsFactory.java,v 1.6 2009/05/26 12:41:15 wfro Exp $
+ * Name:        $Id: TextsFactory.java,v 1.7 2009/06/16 17:08:27 wfro Exp $
  * Description: TextsFactory
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 12:41:15 $
+ * Date:        $Date: 2009/06/16 17:08:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,8 +60,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 
 public class TextsFactory
   implements Serializable {
@@ -84,11 +84,11 @@ public class TextsFactory
 		          );
               }
 		      catch(ServiceException e) {
-		          AppLog.warning("can not load texts " + i);
+		    	  SysLog.warning("can not load texts " + i);
 		      }
           }
       }
-      AppLog.info("loaded texts=" + this.texts.keySet());
+      SysLog.info("loaded texts=" + this.texts.keySet());
   }
   
   //-------------------------------------------------------------------------

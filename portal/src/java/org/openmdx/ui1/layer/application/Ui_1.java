@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Ui_1.java,v 1.72 2009/06/13 18:48:08 wfro Exp $
+ * Name:        $Id: Ui_1.java,v 1.83 2010/03/23 17:31:35 wfro Exp $
  * Description: Ui_1 plugin
- * Revision:    $Revision: 1.72 $
+ * Revision:    $Revision: 1.83 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/13 18:48:08 $
+ * Date:        $Date: 2010/03/23 17:31:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,37 +69,49 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.IndexedRecord;
+import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
-import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
-import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.layer.application.Standard_1;
 import org.openmdx.application.dataprovider.spi.Layer_1;
-import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
-import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.Directions;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
 /**
  * Implementation of the model org:openmdx:ui1.
  */
-public class Ui_1 extends Layer_1 {
+public class Ui_1 extends Standard_1 {
 
+    //--------------------------------------------------------------------------
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new StandardLayerInteraction(connection);
+    }
+ 
     //------------------------------------------------------------------------
     private abstract class FeatureDefinition {
 
@@ -185,18 +197,19 @@ public class Ui_1 extends Layer_1 {
             this.isChangeable = (element.objGetValue("isChangeable") == null) || (element.objGetList("isChangeable").isEmpty()) ? 
                 new Boolean(Ui_1.this.changableDefaultValue) : 
                 (Boolean)element.objGetValue("isChangeable");
-            if(Ui_1.this.model.isAttributeType(element) || Ui_1.this.model.isStructureFieldType(element)) {
+            Model_1_0 model = Ui_1.this.getModel();
+            if(model.isAttributeType(element) || model.isStructureFieldType(element)) {
                 this.isReference = false;
                 this.isReferenceStoredAsAttribute = false;
             }
-            else if(Ui_1.this.model.isReferenceType(element)) {
-                ModelElement_1_0 referencedEnd = Ui_1.this.model.getElement(element.objGetValue("referencedEnd"));
-                ModelElement_1_0 exposedEnd = Ui_1.this.model.getElement(element.objGetValue("exposedEnd"));
+            else if(model.isReferenceType(element)) {
+                ModelElement_1_0 referencedEnd = model.getElement(element.objGetValue("referencedEnd"));
+                ModelElement_1_0 exposedEnd = model.getElement(element.objGetValue("exposedEnd"));
                 // A reference is handled as attribute in case of a single-valued reference with aggregation=none
                 this.isReference = 
                     !referencedEnd.objGetList("qualifierName").isEmpty() || 
                     !exposedEnd.objGetList("qualifierName").isEmpty();
-                this.isReferenceStoredAsAttribute = Ui_1.this.model.referenceIsStoredAsAttribute(element);
+                this.isReferenceStoredAsAttribute = model.referenceIsStoredAsAttribute(element);
             }
             else {
                 this.isReference = true;
@@ -222,11 +235,6 @@ public class Ui_1 extends Layer_1 {
         public boolean isReference(
         ) {
             return this.isReference;
-        }
-
-        public boolean isReferenceStoredAsAttribute(
-        ) {
-            return this.isReferenceStoredAsAttribute;
         }
 
         private final Object type;
@@ -263,28 +271,22 @@ public class Ui_1 extends Layer_1 {
                 : ((Boolean)element.objGetValue("isQuery")).booleanValue();
         }
 
-        public boolean isQuery(
-        ) {
-            return this.isQuery;
-        }
-
         private final boolean isQuery;
 
     }
 
     //------------------------------------------------------------------------
+    @Override
     public void activate(
         short id,
         Configuration configuration,
-        Layer_1_0 delegation
+        Layer_1 delegation
     ) throws ServiceException {
         super.activate(
             id, 
             configuration, 
             delegation
         );
-        // Get model
-        this.model = Model_1Factory.getModel();
         // Get changableDefaultValue
         if (configuration.containsEntry("changableDefaultValue")) {
             this.changableDefaultValue = configuration.isOn("changableDefaultValue");
@@ -297,22 +299,6 @@ public class Ui_1 extends Layer_1 {
     }
 
     //------------------------------------------------------------------------
-    public void prolog(
-        ServiceHeader header,
-        DataproviderRequest[] requests
-    ) throws ServiceException {
-        super.prolog(
-            header,
-            requests
-        );
-        this.delegation = new RequestCollection(
-            new ServiceHeader(),
-            this.getDelegation()
-        );    
-
-    }
-
-    //------------------------------------------------------------------------
     // Ui_1
     //------------------------------------------------------------------------
 
@@ -321,11 +307,28 @@ public class Ui_1 extends Layer_1 {
         Path segmentIdentity,
         MappedRecord element
     ) throws ServiceException {
-        this.delegation.addSetRequest(
-            element
-        );
+        DataproviderRequestProcessor delegation = new DataproviderRequestProcessor(
+            new ServiceHeader(),
+            this.getDelegation()
+        );    
+        try {
+	        delegation.addGetRequest(
+	            Object_2Facade.getPath(element)
+	        );
+	        delegation.addReplaceRequest(
+	            element
+	        );
+        }
+        catch(ServiceException e) {
+        	if(e.getExceptionCode() != BasicException.Code.NOT_FOUND) {
+        		throw e;
+        	}
+	        delegation.addCreateRequest(
+	            element
+	        );        	
+        }
         this.existingElements.get(segmentIdentity).put(
-            ObjectHolder_2Facade.getPath(element).getBase(),
+            Object_2Facade.getPath(element).getBase(),
             element
         );
     }
@@ -335,11 +338,28 @@ public class Ui_1 extends Layer_1 {
         Path segmentIdentity,
         MappedRecord elementDefinition
     ) throws ServiceException {
-        this.delegation.addSetRequest(
-            elementDefinition
-        );
+        DataproviderRequestProcessor delegation = new DataproviderRequestProcessor(
+            new ServiceHeader(),
+            this.getDelegation()
+        );        	
+        try {
+	        delegation.addGetRequest(
+	            Object_2Facade.getPath(elementDefinition)
+	        );
+	        delegation.addReplaceRequest(
+	            elementDefinition
+	        );
+        }
+        catch(ServiceException e) {
+        	if(e.getExceptionCode() != BasicException.Code.NOT_FOUND) {
+        		throw e;
+        	}
+	        delegation.addCreateRequest(
+	            elementDefinition
+	        );        	
+        }
         this.existingElementDefinitions.get(segmentIdentity).put(
-            ObjectHolder_2Facade.getPath(elementDefinition).getBase(),
+            Object_2Facade.getPath(elementDefinition).getBase(),
             elementDefinition
         );
     }
@@ -351,18 +371,18 @@ public class Ui_1 extends Layer_1 {
         boolean isChangeable,
         String iconKey 
     ) throws ServiceException {
-    	ObjectHolder_2Facade facade;
+    	Object_2Facade facade;
         try {
-	        facade = ObjectHolder_2Facade.newInstance(f);
+	        facade = Object_2Facade.newInstance(f);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }
-    	facade.attributeValues("toolTip").addAll(toolTip);
-    	facade.attributeValues("changeable").add(new Boolean(isChangeable));
-    	facade.attributeValues("autoGenerated").add(new Boolean(true));
+    	facade.attributeValuesAsList("toolTip").addAll(toolTip);
+    	facade.attributeValuesAsList("changeable").add(new Boolean(isChangeable));
+    	facade.attributeValuesAsList("autoGenerated").add(new Boolean(true));
         if(iconKey != null) {
-        	facade.attributeValues("iconKey").add(iconKey);
+        	facade.attributeValuesAsList("iconKey").add(iconKey);
         }
     }
 
@@ -381,25 +401,25 @@ public class Ui_1 extends Layer_1 {
             isChangeable,
             iconKey
         );
-    	ObjectHolder_2Facade facade;
+    	Object_2Facade facade;
         try {
-	        facade = ObjectHolder_2Facade.newInstance(f);
+	        facade = Object_2Facade.newInstance(f);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }        
         if(color != null) {
-        	facade.attributeValues("color").add(color);
+        	facade.attributeValuesAsList("color").add(color);
         }
         if(backColor != null) {
-        	facade.attributeValues("backColor").add(backColor);
+        	facade.attributeValuesAsList("backColor").add(backColor);
         }
-        facade.attributeValues("fontName").add("Tahoma");
-        facade.attributeValues("fontSize").add(new BigDecimal(8.25));
-        facade.attributeValues("fontBold").add(new Boolean(false));
-        facade.attributeValues("fontItalic").add(new Boolean(false));
-        facade.attributeValues("fontStrikeout").add(new Boolean(false));
-        facade.attributeValues("fontUnderline").add(new Boolean(false));
+        facade.attributeValuesAsList("fontName").add("Tahoma");
+        facade.attributeValuesAsList("fontSize").add(new BigDecimal(8.25));
+        facade.attributeValuesAsList("fontBold").add(new Boolean(false));
+        facade.attributeValuesAsList("fontItalic").add(new Boolean(false));
+        facade.attributeValuesAsList("fontStrikeout").add(new Boolean(false));
+        facade.attributeValuesAsList("fontUnderline").add(new Boolean(false));
     }
 
     //-------------------------------------------------------------------------
@@ -447,15 +467,15 @@ public class Ui_1 extends Layer_1 {
             color,
             backColor
         );
-    	ObjectHolder_2Facade facade;
+    	Object_2Facade facade;
         try {
-	        facade = ObjectHolder_2Facade.newInstance(f);
+	        facade = Object_2Facade.newInstance(f);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }                
-        facade.attributeValues("label").addAll(labels);
-        facade.attributeValues("shortLabel").addAll(shortLabelDefault);
+        facade.attributeValuesAsList("label").addAll(labels);
+        facade.attributeValuesAsList("shortLabel").addAll(shortLabelDefault);
     }
 
     //-------------------------------------------------------------------------
@@ -489,24 +509,24 @@ public class Ui_1 extends Layer_1 {
             color,
             backColor
         );
-    	ObjectHolder_2Facade facade;
+    	Object_2Facade facade;
         try {
-	        facade = ObjectHolder_2Facade.newInstance(f);
+	        facade = Object_2Facade.newInstance(f);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }                        
-        facade.attributeValues("multiplicity").add(multiplicity);
-        facade.attributeValues("spanRow").add(spanRow);
-        facade.attributeValues("skipRow").add(skipRow);
-        facade.attributeValues("displayValueExpr").addAll(displayValueExprs);
-        facade.attributeValues("filterable").add(new Boolean(filterable));
-        facade.attributeValues("sortable").add(new Boolean(sortable));
-        facade.attributeValues("mandatory").add(new Boolean(mandatory));
-        facade.attributeValues("featureName").add(featureName);
-        facade.attributeValues("qualifiedFeatureName").add(qualifiedFeatureName);
+        facade.attributeValuesAsList("multiplicity").add(multiplicity);
+        facade.attributeValuesAsList("spanRow").add(spanRow);
+        facade.attributeValuesAsList("skipRow").add(skipRow);
+        facade.attributeValuesAsList("displayValueExpr").addAll(displayValueExprs);
+        facade.attributeValuesAsList("filterable").add(new Boolean(filterable));
+        facade.attributeValuesAsList("sortable").add(new Boolean(sortable));
+        facade.attributeValuesAsList("mandatory").add(new Boolean(mandatory));
+        facade.attributeValuesAsList("featureName").add(featureName);
+        facade.attributeValuesAsList("qualifiedFeatureName").add(qualifiedFeatureName);
         if(dataBindingName != null) {
-        	facade.attributeValues("dataBindingName").add(dataBindingName);
+        	facade.attributeValuesAsList("dataBindingName").add(dataBindingName);
         }
     }
 
@@ -515,53 +535,54 @@ public class Ui_1 extends Layer_1 {
     	MappedRecord objectReference,
         StructuralFeatureDefinition feature
     ) throws ServiceException {
-    	ObjectHolder_2Facade objectReferenceFacace;
+    	Object_2Facade objectReferenceFacace;
         try {
-        	objectReferenceFacace = ObjectHolder_2Facade.newInstance(objectReference);
+        	objectReferenceFacace = Object_2Facade.newInstance(objectReference);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }                            	
-        ModelElement_1_0 featureType = this.model.getDereferencedType(
+        Model_1_0 model = this.getModel();
+        ModelElement_1_0 featureType = model.getDereferencedType(
             feature.getType()
         );
-        objectReferenceFacace.attributeValues("referenceName").add(feature.getName());
-        objectReferenceFacace.attributeValues("referencedTypeName").add(featureType.objGetValue("qualifiedName"));
+        objectReferenceFacace.attributeValuesAsList("referenceName").add(feature.getName());
+        objectReferenceFacace.attributeValuesAsList("referencedTypeName").add(featureType.objGetValue("qualifiedName"));
         // Reference
         if(feature.isReference()) {
-        	objectReferenceFacace.attributeValues("referenceIsStoredAsAttribute").add(
+        	objectReferenceFacace.attributeValuesAsList("referenceIsStoredAsAttribute").add(
                 Boolean.valueOf(feature.isReferenceStoredAsAttribute)
             );
             ModelElement_1_0 element = feature.getModelElement();
             if(element != null) {
-                ModelElement_1_0 referencedEnd = this.model.getElement(
+                ModelElement_1_0 referencedEnd = model.getElement(
                     element.objGetValue("referencedEnd")
                 );
                 if(!referencedEnd.objGetList("qualifierName").isEmpty()) {
                     String qualifierName = (String)referencedEnd.objGetValue("qualifierName");           
-                    objectReferenceFacace.attributeValues("userDefinedQualifier").add(
+                    objectReferenceFacace.attributeValuesAsList("userDefinedQualifier").add(
                         new Boolean(!"id".equals(qualifierName))
                     );
-                    objectReferenceFacace.attributeValues("qualifierLabel").add(qualifierName);
+                    objectReferenceFacace.attributeValuesAsList("qualifierLabel").add(qualifierName);
                 }
                 else {
-                	objectReferenceFacace.attributeValues("userDefinedQualifier").add(
+                	objectReferenceFacace.attributeValuesAsList("userDefinedQualifier").add(
                         Boolean.FALSE
                     );
                 }
             }
             else {
-            	objectReferenceFacace.attributeValues("userDefinedQualifier").add(
+            	objectReferenceFacace.attributeValuesAsList("userDefinedQualifier").add(
                     Boolean.FALSE
                 );                
             }
         }
         // Attribute of type class
         else {
-        	objectReferenceFacace.attributeValues("referenceIsStoredAsAttribute").add(
+        	objectReferenceFacace.attributeValuesAsList("referenceIsStoredAsAttribute").add(
                 Boolean.TRUE
             );
-        	objectReferenceFacace.attributeValues("userDefinedQualifier").add(
+        	objectReferenceFacace.attributeValuesAsList("userDefinedQualifier").add(
                 Boolean.FALSE
             );
         }
@@ -589,16 +610,16 @@ public class Ui_1 extends Layer_1 {
     private List getOrderFieldGroup(
     	MappedRecord elementDefinition
     ) throws ServiceException {
-    	ObjectHolder_2Facade elementDefinitionFacade;
+    	Object_2Facade elementDefinitionFacade;
         try {
-	        elementDefinitionFacade = ObjectHolder_2Facade.newInstance(elementDefinition);
+	        elementDefinitionFacade = Object_2Facade.newInstance(elementDefinition);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }
-        List order = elementDefinitionFacade.attributeValues("orderFieldGroup");
+        List order = elementDefinitionFacade.attributeValuesAsList("orderFieldGroup");
         if((order == null) || order.isEmpty()) {
-            order = elementDefinitionFacade.attributeValues("order");
+            order = elementDefinitionFacade.attributeValuesAsList("order");
         }
         return order;
     }
@@ -607,16 +628,16 @@ public class Ui_1 extends Layer_1 {
     private List<Object> getOrderObjectContainer(
     	MappedRecord elementDefinition
     ) throws ServiceException {
-    	ObjectHolder_2Facade elementDefinitionFacade;
+    	Object_2Facade elementDefinitionFacade;
         try {
-	        elementDefinitionFacade = ObjectHolder_2Facade.newInstance(elementDefinition);
+	        elementDefinitionFacade = Object_2Facade.newInstance(elementDefinition);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }    	
-        List<Object> order = elementDefinitionFacade.attributeValues("orderObjectContainer");
+        List<Object> order = elementDefinitionFacade.attributeValuesAsList("orderObjectContainer");
         if((order == null) || order.isEmpty()) {
-            order = elementDefinitionFacade.attributeValues("order");
+            order = elementDefinitionFacade.attributeValuesAsList("order");
         }
         return order;
     }
@@ -625,32 +646,33 @@ public class Ui_1 extends Layer_1 {
     private void setElementDefinitionDefaultLayout(
     	MappedRecord element
     ) throws ServiceException {
-    	ObjectHolder_2Facade elementFacade;
+    	Object_2Facade elementFacade;
         try {
-        	elementFacade = ObjectHolder_2Facade.newInstance(element);
+        	elementFacade = Object_2Facade.newInstance(element);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }    	    	
-        elementFacade.attributeValues("verticalFill").add(new Boolean(false));
-        elementFacade.attributeValues("columnBreakAtElement");
-        elementFacade.attributeValues("columnSizeMin");
-        elementFacade.attributeValues("columnSizeMax");
+        elementFacade.attributeValuesAsList("verticalFill").add(new Boolean(false));
+        elementFacade.attributeValuesAsList("columnBreakAtElement");
+        elementFacade.attributeValuesAsList("columnSizeMin");
+        elementFacade.attributeValuesAsList("columnSizeMax");
     }
 
     //-------------------------------------------------------------------------
     private boolean isMemberOfObjectContainer(
         StructuralFeatureDefinition feature
     ) throws ServiceException {
+    	Model_1_0 model = this.getModel();
         if(feature.getModelElement() == null) {
             return true;
         }
         else {
             ModelElement_1_0 element = feature.getModelElement();
             return 
-                this.model.isAttributeType(element) 
-                || this.model.isStructureFieldType(element) 
-                || this.model.isReferenceType(element);
+                model.isAttributeType(element) 
+                || model.isStructureFieldType(element) 
+                || model.isReferenceType(element);
         }
     }
 
@@ -658,13 +680,14 @@ public class Ui_1 extends Layer_1 {
     private boolean isReferenceField(
         StructuralFeatureDefinition feature
     ) throws ServiceException {
-        ModelElement_1_0 elementType = this.model.getElement(feature.getType());
+    	Model_1_0 model = this.getModel();
+        ModelElement_1_0 elementType = model.getElement(feature.getType());
         if(feature.getModelElement() == null) {
-            return this.model.isClassType(elementType);
+            return model.isClassType(elementType);
         }
         else {
             ModelElement_1_0 element = feature.getModelElement();
-            return (((this.model.isAttributeType(element) || this.model.isStructureFieldType(element)) && this.model.isClassType(elementType)) || this.model.isReferenceType(element));
+            return (((model.isAttributeType(element) || model.isStructureFieldType(element)) && model.isClassType(elementType)) || model.isReferenceType(element));
         }
     }
 
@@ -696,7 +719,8 @@ public class Ui_1 extends Layer_1 {
             return elementDefinition;
         }
         // Lookup element definition with defining class of feature
-        ModelElement_1_0 definingClass = this.model.getElement(
+        Model_1_0 model = this.getModel();
+        ModelElement_1_0 definingClass = model.getElement(
             containedFeature.getContainer()
         );        
         containerName =
@@ -816,39 +840,39 @@ public class Ui_1 extends Layer_1 {
         // Create default definition if already in Root
         else {
             SysLog.detail("no configured definition found. creating default", elementName);
-            ObjectHolder_2Facade elementDefinitionFacade;
+            Object_2Facade elementDefinitionFacade;
             try {
-	            elementDefinition = ObjectHolder_2Facade.newInstance(
+	            elementDefinition = Object_2Facade.newInstance(
 	                segmentIdentity.getDescendant(new String[]{"elementDefinition", elementName}),
 	                "org:openmdx:ui1:ElementDefinition"
 	            ).getDelegate();
-	            elementDefinitionFacade = ObjectHolder_2Facade.newInstance(elementDefinition);
+	            elementDefinitionFacade = Object_2Facade.newInstance(elementDefinition);
             }
             catch (ResourceException e) {
             	throw new ServiceException(e);
             }
             // Active
-            elementDefinitionFacade.attributeValues("active").add(new Boolean(true));
+            elementDefinitionFacade.attributeValuesAsList("active").add(new Boolean(true));
             // Default iconKey
             if(useDefaultIconKey) {
-            	elementDefinitionFacade.attributeValues("iconKey").add(elementName);
+            	elementDefinitionFacade.attributeValuesAsList("iconKey").add(elementName);
             }
             // Default label
             if(elementDefinitionFacade.getAttributeValues("label") == null) {
-                List<Object> values = elementDefinitionFacade.attributeValues("label");
+                List<Object> values = elementDefinitionFacade.attributeValuesAsList("label");
                 values.add(
                     defaultLabel == null ? "N/A" : defaultLabel
                 );
             }
             // Default shortLabel
             if(elementDefinitionFacade.getAttributeValues("shortLabel") == null) {        
-                List<Object> values = elementDefinitionFacade.attributeValues("shortLabel");
+                List<Object> values = elementDefinitionFacade.attributeValuesAsList("shortLabel");
                 values.addAll(
-                	elementDefinitionFacade.attributeValues("label")
+                	elementDefinitionFacade.attributeValuesAsList("label")
                 );
             }    
             // Default toolTip
-            List<Object> values = elementDefinitionFacade.attributeValues("toolTip");
+            List<Object> values = elementDefinitionFacade.attributeValuesAsList("toolTip");
             values.add("toolTip of element " + elementName);
         }
         this.storeElementDefinition(
@@ -905,18 +929,19 @@ public class Ui_1 extends Layer_1 {
                     useDefaultIconKey
                 );
             	try {
-	            	MappedRecord definition = ObjectHolder_2Facade.cloneObject(elementDefinition);            	
-	            	ObjectHolder_2Facade definitionFacade = ObjectHolder_2Facade.newInstance(definition);
-	            	ObjectHolder_2Facade overloadDefinitionFacade = ObjectHolder_2Facade.newInstance(overloadDefinition);
+	            	MappedRecord definition = Object_2Facade.cloneObject(elementDefinition);            	
+	            	Object_2Facade definitionFacade = Object_2Facade.newInstance(definition);
+	            	Object_2Facade overloadDefinitionFacade = Object_2Facade.newInstance(overloadDefinition);
 	            	definitionFacade.setPath(overloadDefinitionFacade.getPath());
 	                for(
 	                    Iterator i = overloadDefinitionFacade.getValue().keySet().iterator();
 	                    i.hasNext();
 	                ) {
 	                    String attributeName = (String)i.next();
-	                    if(!overloadDefinitionFacade.attributeValues(attributeName).isEmpty()) {
-	                    	definitionFacade.clearAttributeValues(attributeName).addAll(
-	                    		overloadDefinitionFacade.attributeValues(attributeName)
+	                    if(!overloadDefinitionFacade.attributeValuesAsList(attributeName).isEmpty()) {
+	                    	definitionFacade.attributeValuesAsList(attributeName).clear();
+	                    	definitionFacade.attributeValuesAsList(attributeName).addAll(
+	                    		overloadDefinitionFacade.attributeValuesAsList(attributeName)
 	                        );
 	                    }
 	                }
@@ -928,16 +953,18 @@ public class Ui_1 extends Layer_1 {
             }
         }
         // Default order is (100000,0,0)
-    	ObjectHolder_2Facade elementDefinitionFacade;
+    	Object_2Facade elementDefinitionFacade;
         try {
-	        elementDefinitionFacade = ObjectHolder_2Facade.newInstance(elementDefinition);
+	        elementDefinitionFacade = Object_2Facade.newInstance(elementDefinition);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }
-        List<Object> values = elementDefinitionFacade.getAttributeValues("order");
+        List<Object> values = elementDefinitionFacade.getAttributeValues("order") == null ?
+        	null :
+        		elementDefinitionFacade.attributeValuesAsList("order");
         if((values == null) || values.isEmpty()) {
-            values = elementDefinitionFacade.attributeValues("order");
+            values = elementDefinitionFacade.attributeValuesAsList("order");
             // all customized fields have lower order than non-customized fields
             values.add(new Integer(100000));
             values.add(new Integer(0));
@@ -945,22 +972,24 @@ public class Ui_1 extends Layer_1 {
         }
         // Default isSortable=false, isFilterable=false if non-modeled element
         if(feature.getModelElement() == null) {
-        	elementDefinitionFacade.attributeValues("sortable").add(
+        	elementDefinitionFacade.attributeValuesAsList("sortable").add(
                 Boolean.FALSE
             );
-        	elementDefinitionFacade.attributeValues("filterable").add(
+        	elementDefinitionFacade.attributeValuesAsList("filterable").add(
                 Boolean.FALSE
             );
-        	elementDefinitionFacade.attributeValues("mandatory").add(
+        	elementDefinitionFacade.attributeValuesAsList("mandatory").add(
                 Boolean.FALSE
             );
         }
         // Default sizeXWeight
         if(!feature.isReference()) {
-            values = elementDefinitionFacade.getAttributeValues("sizeXWeight");
+            values = elementDefinitionFacade.getAttributeValues("sizeXWeight") == null ?
+            	null :
+            		elementDefinitionFacade.attributeValuesAsList("sizeXWeight");
             if((values == null) || values.isEmpty()) {
                 // set default to weight 3
-            	elementDefinitionFacade.attributeValues("sizeXWeight").add(new Integer(3));
+            	elementDefinitionFacade.attributeValuesAsList("sizeXWeight").add(new Integer(3));
             }
         }
         return elementDefinition;    
@@ -975,16 +1004,17 @@ public class Ui_1 extends Layer_1 {
         String defaultMimeType,
         String defaultValue
     ) throws ServiceException {
-    	ObjectHolder_2Facade fieldFacade;
-    	ObjectHolder_2Facade definitionFacade;
+    	Object_2Facade fieldFacade;
+    	Object_2Facade definitionFacade;
         try {
-	        fieldFacade = ObjectHolder_2Facade.newInstance(field);
-	        definitionFacade = ObjectHolder_2Facade.newInstance(definition);
+	        fieldFacade = Object_2Facade.newInstance(field);
+	        definitionFacade = Object_2Facade.newInstance(definition);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }
-        ModelElement_1_0 featureType = this.model.getDereferencedType(
+        Model_1_0 model = this.getModel();
+        ModelElement_1_0 featureType = model.getDereferencedType(
             feature.getType()
         );
         String typeName = (String)featureType.objGetValue("qualifiedName");
@@ -992,7 +1022,7 @@ public class Ui_1 extends Layer_1 {
             "org:openmdx:ui1:AdditionalElementDefinition".equals(definitionFacade.getObjectClass());
         // Default value
         if(defaultValue != null) {
-        	fieldFacade.attributeValues("defaultValue").add(defaultValue);
+        	fieldFacade.attributeValuesAsList("defaultValue").add(defaultValue);
         }
         // Reference stored as attribute or attribute of type class
         boolean isReferenceField = this.isReferenceField(feature) && !isAdditionalElementDefinition;
@@ -1002,8 +1032,8 @@ public class Ui_1 extends Layer_1 {
                 field,
                 feature
             );
-            fieldFacade.attributeValues("titleIndex").add(
-                !definitionFacade.attributeValues("titleIndex").isEmpty() 
+            fieldFacade.attributeValuesAsList("titleIndex").add(
+                !definitionFacade.attributeValuesAsList("titleIndex").isEmpty() 
                 ? definitionFacade.attributeValue("titleIndex")
                     : new Integer(0)
             );
@@ -1049,28 +1079,28 @@ public class Ui_1 extends Layer_1 {
                 defaultMinValue = new BigDecimal(Integer.MIN_VALUE);
                 defaultMaxValue = new BigDecimal(Integer.MAX_VALUE);            
             }
-            fieldFacade.attributeValues("minValue").add(
-                !definitionFacade.attributeValues("minValue").isEmpty()
+            fieldFacade.attributeValuesAsList("minValue").add(
+                !definitionFacade.attributeValuesAsList("minValue").isEmpty()
                 ? new BigDecimal((String)definitionFacade.attributeValue("minValue"))
                 : defaultMinValue
             );
-            fieldFacade.attributeValues("maxValue").add(
-                !definitionFacade.attributeValues("maxValue").isEmpty()
+            fieldFacade.attributeValuesAsList("maxValue").add(
+                !definitionFacade.attributeValuesAsList("maxValue").isEmpty()
                 ? new BigDecimal((String)definitionFacade.attributeValue("maxValue"))
                 : defaultMaxValue
             );
-            fieldFacade.attributeValues("decimalPlaces").add(
-                !definitionFacade.attributeValues("decimalPlaces").isEmpty()
+            fieldFacade.attributeValuesAsList("decimalPlaces").add(
+                !definitionFacade.attributeValuesAsList("decimalPlaces").isEmpty()
                 ? new Integer(((Number)definitionFacade.attributeValue("decimalPlaces")).intValue())
                 : defaultDecimalPlaces        
             );
-            fieldFacade.attributeValues("increment").add(
-                !definitionFacade.attributeValues("increment").isEmpty()
+            fieldFacade.attributeValuesAsList("increment").add(
+                !definitionFacade.attributeValuesAsList("increment").isEmpty()
                 ? new BigDecimal((String)definitionFacade.attributeValue("increment"))
                 : new BigDecimal(1)
             );
-            fieldFacade.attributeValues("hasThousandsSeparator").add(
-                !definitionFacade.attributeValues("hasThousandsSeparator").isEmpty()
+            fieldFacade.attributeValuesAsList("hasThousandsSeparator").add(
+                !definitionFacade.attributeValuesAsList("hasThousandsSeparator").isEmpty()
                 ? (Boolean)definitionFacade.attributeValue("hasThousandsSeparator")
                     : Boolean.TRUE
             );
@@ -1078,61 +1108,61 @@ public class Ui_1 extends Layer_1 {
         // date
         else if(PrimitiveTypes.DATE.equals(typeName)) {
             fieldFacade.getValue().setRecordName("org:openmdx:ui1:DateField");
-            fieldFacade.attributeValues("format").add("d");
+            fieldFacade.attributeValuesAsList("format").add("d");
         }
         // dateTime
         else if(PrimitiveTypes.DATETIME.equals(typeName)) {
         	fieldFacade.getValue().setRecordName("org:openmdx:ui1:DateField");
-        	fieldFacade.attributeValues("format").add("g");
+        	fieldFacade.attributeValuesAsList("format").add("g");
         }
         // boolean
         else if(PrimitiveTypes.BOOLEAN.equals(typeName)) {
         	fieldFacade.getValue().setRecordName("org:openmdx:ui1:CheckBox");
-        	fieldFacade.attributeValues("threeState").add(new Boolean(false));
+        	fieldFacade.attributeValuesAsList("threeState").add(new Boolean(false));
         }
         // binary
         else if(PrimitiveTypes.BINARY.equals(typeName)) {
         	fieldFacade.getValue().setRecordName("org:openmdx:ui1:DocumentBox");
             if(defaultMimeType != null) {
-                fieldFacade.attributeValues("mimeType").add(defaultMimeType);
+                fieldFacade.attributeValuesAsList("mimeType").add(defaultMimeType);
             }
-            fieldFacade.attributeValues("inPlace").add(
-                !definitionFacade.attributeValues("inPlace").isEmpty()
+            fieldFacade.attributeValuesAsList("inPlace").add(
+                !definitionFacade.attributeValuesAsList("inPlace").isEmpty()
                 ? (Boolean)definitionFacade.attributeValue("inPlace")
                     : Boolean.FALSE
             );
         }
         // unknown primitive types are mapped to string
-        else if(this.model.isPrimitiveType(featureType)) {
+        else if(model.isPrimitiveType(featureType)) {
             mapToString = true;
         }
         if(mapToString) {
         	fieldFacade.getValue().setRecordName("org:openmdx:ui1:TextBox");
-        	fieldFacade.attributeValues("wordWrap").add(new Boolean(true));
-        	fieldFacade.attributeValues("tabStop").add(new Boolean(true));
-        	fieldFacade.attributeValues("multiline").add(new Boolean(false));
-        	fieldFacade.attributeValues("maxLength").add(
-                !definitionFacade.attributeValues("maxLength").isEmpty()
+        	fieldFacade.attributeValuesAsList("wordWrap").add(new Boolean(true));
+        	fieldFacade.attributeValuesAsList("tabStop").add(new Boolean(true));
+        	fieldFacade.attributeValuesAsList("multiline").add(new Boolean(false));
+        	fieldFacade.attributeValuesAsList("maxLength").add(
+                !definitionFacade.attributeValuesAsList("maxLength").isEmpty()
                 ? (Integer)definitionFacade.attributeValue("maxLength")
                     : new Integer(Integer.MAX_VALUE)
             );
-        	fieldFacade.attributeValues("autoSize").add(new Boolean(true));
-        	fieldFacade.attributeValues("acceptsTab").add(new Boolean(false));
-        	fieldFacade.attributeValues("isPassword").add(
-        		definitionFacade.attributeValues("isPassword").isEmpty()
+        	fieldFacade.attributeValuesAsList("autoSize").add(new Boolean(true));
+        	fieldFacade.attributeValuesAsList("acceptsTab").add(new Boolean(false));
+        	fieldFacade.attributeValuesAsList("isPassword").add(
+        		definitionFacade.attributeValuesAsList("isPassword").isEmpty()
                 ? new Boolean(false)
                 : definitionFacade.attributeValue("isPassword")
             );
-        	fieldFacade.attributeValues("textAlign").add(new Short((short)0));
+        	fieldFacade.attributeValuesAsList("textAlign").add(new Short((short)0));
             if(defaultMimeType != null) {
-                fieldFacade.attributeValues("mimeType").add(defaultMimeType);
+                fieldFacade.attributeValuesAsList("mimeType").add(defaultMimeType);
             }
         }
         // complete
         if(fieldFacade.getObjectClass() != null) {
             // as default take changeability from model. 
             Boolean isChangeable = feature.isChangeable();
-            isChangeable = (definitionFacade.getAttributeValues("changeable") == null) || definitionFacade.attributeValues("changeable").isEmpty()
+            isChangeable = (definitionFacade.getAttributeValues("changeable") == null) || definitionFacade.attributeValuesAsList("changeable").isEmpty()
             ? isChangeable
                 : (Boolean)definitionFacade.attributeValue("changeable"); 
             boolean isSortable = 
@@ -1140,30 +1170,30 @@ public class Ui_1 extends Layer_1 {
                 !PrimitiveTypes.BINARY.equals(typeName);
             this.setValuedFieldDefault(
                 field,
-                definitionFacade.attributeValues("label"),
-                definitionFacade.attributeValues("shortLabel"),
-                definitionFacade.attributeValues("displayValueExpr"),
-                definitionFacade.attributeValues("toolTip"),
+                definitionFacade.attributeValuesAsList("label"),
+                definitionFacade.attributeValuesAsList("shortLabel"),
+                definitionFacade.attributeValuesAsList("displayValueExpr"),
+                definitionFacade.attributeValuesAsList("toolTip"),
                 isChangeable.booleanValue(), 
                 (String)definitionFacade.attributeValue("iconKey"),
                 (String)definitionFacade.attributeValue("color"), 
                 (String)definitionFacade.attributeValue("backColor"), 
-                definitionFacade.attributeValues("multiplicity").isEmpty() ? 
+                definitionFacade.attributeValuesAsList("multiplicity").isEmpty() ? 
                     feature.getMultiplicity() : 
                     (String)definitionFacade.attributeValue("multiplicity"),
-                !definitionFacade.attributeValues("spanRow").isEmpty() ? 
+                !definitionFacade.attributeValuesAsList("spanRow").isEmpty() ? 
                     (Integer)definitionFacade.attributeValue("spanRow") : 
                     new Integer(1), 
-                !definitionFacade.attributeValues("skipRow").isEmpty() ? 
+                !definitionFacade.attributeValuesAsList("skipRow").isEmpty() ? 
                     (Integer)definitionFacade.attributeValue("skipRow") : 
                     new Integer(0), 
-                definitionFacade.attributeValues("filterable").isEmpty() ? 
+                definitionFacade.attributeValuesAsList("filterable").isEmpty() ? 
                     !isReferenceField : 
                     ((Boolean)definitionFacade.attributeValue("filterable")).booleanValue(),
-                definitionFacade.attributeValues("sortable").isEmpty() ? 
+                definitionFacade.attributeValuesAsList("sortable").isEmpty() ? 
                     isSortable : 
                     ((Boolean)definitionFacade.attributeValue("sortable")).booleanValue(),
-                definitionFacade.attributeValues("mandatory").isEmpty() ? 
+                definitionFacade.attributeValuesAsList("mandatory").isEmpty() ? 
                     Multiplicities.SINGLE_VALUE.equals(feature.getMultiplicity()) && feature.isChangeable() : 
                     ((Boolean)definitionFacade.attributeValue("mandatory")).booleanValue(),
                 feature.getName(),
@@ -1180,16 +1210,16 @@ public class Ui_1 extends Layer_1 {
     	MappedRecord base,
     	MappedRecord overloadWith
     ) throws ServiceException {
-    	ObjectHolder_2Facade targetFacade;
-    	ObjectHolder_2Facade overloadWithFacade;
+    	Object_2Facade targetFacade;
+    	Object_2Facade overloadWithFacade;
         try {
-	        targetFacade = ObjectHolder_2Facade.newInstance(target);
+	        targetFacade = Object_2Facade.newInstance(target);
         	Path targetPath = targetFacade.getPath(); 
         	target.putAll(
-        		ObjectHolder_2Facade.cloneObject(base)
+        		Object_2Facade.cloneObject(base)
         	);
 	        targetFacade.setPath(targetPath);	        	
-	        overloadWithFacade = ObjectHolder_2Facade.newInstance(overloadWith);
+	        overloadWithFacade = Object_2Facade.newInstance(overloadWith);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
@@ -1201,9 +1231,10 @@ public class Ui_1 extends Layer_1 {
             i.hasNext();
         ) {
             String attributeName = (String)i.next();
-            if(!overloadWithFacade.attributeValues(attributeName).isEmpty()) {
-            	targetFacade.clearAttributeValues(attributeName).addAll(
-                	overloadWithFacade.attributeValues(attributeName)
+            if(!overloadWithFacade.attributeValuesAsList(attributeName).isEmpty()) {
+            	targetFacade.attributeValuesAsList(attributeName).clear();
+            	targetFacade.attributeValuesAsList(attributeName).addAll(
+                	overloadWithFacade.attributeValuesAsList(attributeName)
                 );
             }
         }
@@ -1217,9 +1248,9 @@ public class Ui_1 extends Layer_1 {
     ) throws ServiceException {
         for(String groupName: modifiedGroups) {
             MappedRecord group = this.existingElements.get(segmentIdentity).get(groupName);
-            ObjectHolder_2Facade groupFacade;
+            Object_2Facade groupFacade;
             try {
-	            groupFacade = ObjectHolder_2Facade.newInstance(group);
+	            groupFacade = Object_2Facade.newInstance(group);
             }
             catch (ResourceException e) {
             	throw new ServiceException(e);
@@ -1235,11 +1266,11 @@ public class Ui_1 extends Layer_1 {
             // three columns
             int defaultColumnHeight = 
                 java.lang.Math.max(
-                    new Double(java.lang.Math.ceil(groupFacade.attributeValues("member").size() / 3.0)).intValue(),  
+                    new Double(java.lang.Math.ceil(groupFacade.attributeValuesAsList("member").size() / 3.0)).intValue(),  
                     7
                 );
             for(
-                Iterator j = groupFacade.attributeValues("member").iterator();
+                Iterator j = groupFacade.attributeValuesAsList("member").iterator();
                 j.hasNext();
                 memberIndex++
             ) {
@@ -1247,7 +1278,7 @@ public class Ui_1 extends Layer_1 {
                 MappedRecord elementDefinition = cachedDefinitions.get(e);
                 List columnBreak;
                 try {
-	                columnBreak = ObjectHolder_2Facade.newInstance(elementDefinition).attributeValues("columnBreak");
+	                columnBreak = Object_2Facade.newInstance(elementDefinition).attributeValuesAsList("columnBreak");
                 }
                 catch (ResourceException e0) {
                 	throw new ServiceException(e0);
@@ -1255,15 +1286,15 @@ public class Ui_1 extends Layer_1 {
                 if(
                     ((!columnBreak.isEmpty() && ((Boolean)columnBreak.get(0)).booleanValue()) || (!customizedGroup && (fieldIndex % defaultColumnHeight == 0)))
                 ) { 
-                	groupFacade.attributeValues("columnSizeMin").add(new Integer(330));
-                	groupFacade.attributeValues("columnSizeMax").add(new Integer(currentColumnSizeMax));
-                	groupFacade.attributeValues("columnBreakAtElement").add(new Integer(memberIndex));
+                	groupFacade.attributeValuesAsList("columnSizeMin").add(new Integer(330));
+                	groupFacade.attributeValuesAsList("columnSizeMax").add(new Integer(currentColumnSizeMax));
+                	groupFacade.attributeValuesAsList("columnBreakAtElement").add(new Integer(memberIndex));
                     currentColumn++;
                     currentColumnSizeMax = 0;
                     fieldIndex = 0;
                 }
                 try {
-                	Integer sizeXWeight = (Integer)ObjectHolder_2Facade.newInstance(cachedDefinitions.get(e)).attributeValues("sizeXWeight").get(0);
+                	Integer sizeXWeight = (Integer)Object_2Facade.newInstance(cachedDefinitions.get(e)).attributeValuesAsList("sizeXWeight").get(0);
 	                currentColumnSizeMax = java.lang.Math.max(
 	                    330 + (sizeXWeight == null ? 0 : sizeXWeight.intValue()) * 100, 
 	                    currentColumnSizeMax
@@ -1274,9 +1305,9 @@ public class Ui_1 extends Layer_1 {
                 }
                 fieldIndex++;
             }
-            groupFacade.attributeValues("columnSizeMin").add(new Integer(330));
-            groupFacade.attributeValues("columnSizeMax").add(new Integer(Integer.MAX_VALUE));
-            groupFacade.attributeValues("columnBreakAtElement").add(new Integer(Integer.MAX_VALUE));     
+            groupFacade.attributeValuesAsList("columnSizeMin").add(new Integer(330));
+            groupFacade.attributeValuesAsList("columnSizeMax").add(new Integer(Integer.MAX_VALUE));
+            groupFacade.attributeValuesAsList("columnBreakAtElement").add(new Integer(Integer.MAX_VALUE));     
             this.storeElement(
                 segmentIdentity,
                 group
@@ -1311,7 +1342,7 @@ public class Ui_1 extends Layer_1 {
                     false // no default iconKey for attributes
                 );
                 try {
-                	Boolean isActive = (Boolean)ObjectHolder_2Facade.newInstance(baseDefinition).attributeValue("active");
+                	Boolean isActive = (Boolean)Object_2Facade.newInstance(baseDefinition).attributeValue("active");
 	                if(isActive != null && isActive.booleanValue()) {
 	                    List<MappedRecord> definitions = new ArrayList<MappedRecord>();
 	                    definitions.add(
@@ -1329,7 +1360,7 @@ public class Ui_1 extends Layer_1 {
 	                    );
 	                    // Map to tab/field group
 	                    for(MappedRecord definition: definitions) {
-	                    	ObjectHolder_2Facade definitionFacade = ObjectHolder_2Facade.newInstance(definition);
+	                    	Object_2Facade definitionFacade = Object_2Facade.newInstance(definition);
 	                        Boolean definitionIsActive = Boolean.TRUE;
 	                        if(definitionFacade.attributeValue("active") instanceof String) {
 	                            SysLog.error("Value of attibute 'active' is not instanceof Boolean", definition);
@@ -1365,39 +1396,39 @@ public class Ui_1 extends Layer_1 {
 	                                    0,
 	                                    inspectorClass
 	                                );
-	                            	ObjectHolder_2Facade tabElementDefinitionFacade = ObjectHolder_2Facade.newInstance(tabElementDefinition);
+	                            	Object_2Facade tabElementDefinitionFacade = Object_2Facade.newInstance(tabElementDefinition);
 	                                // skip element in case tab is not active
 	                                if(!((Boolean)tabElementDefinitionFacade.attributeValue("active")).booleanValue()) {
 	                                    continue;
 	                                }
-	                                tab = ObjectHolder_2Facade.newInstance(
+	                                tab = Object_2Facade.newInstance(
 	                                    segmentIdentity.getDescendant(new String[]{"element", tabName}),
 	                                    "org:openmdx:ui1:Tab"
 	                                ).getDelegate();   
 	                                this.setElementDefault(
 	                                    tab,
-	                                    tabElementDefinitionFacade.attributeValues("toolTip"),
-	                                    tabElementDefinitionFacade.attributeValues("changeable").isEmpty() ? 
+	                                    tabElementDefinitionFacade.attributeValuesAsList("toolTip"),
+	                                    tabElementDefinitionFacade.attributeValuesAsList("changeable").isEmpty() ? 
 	                                        this.changableDefaultValue : 
 	                                        ((Boolean)tabElementDefinitionFacade.attributeValue("changeable")).booleanValue(),
 	                                    "N/A"
 	                                );
-	                                ObjectHolder_2Facade.newInstance(tab).attributeValues("title").addAll(
-	                                	tabElementDefinitionFacade.attributeValues("label")
+	                                Object_2Facade.newInstance(tab).attributeValuesAsList("title").addAll(
+	                                	tabElementDefinitionFacade.attributeValuesAsList("label")
 	                                );
 	                                this.setElementDefinitionDefaultLayout(tab);
 	                                // Add tab to pane and sort by tabName
-	                                List members = ObjectHolder_2Facade.newInstance(pane).attributeValues("member");
+	                                List members = Object_2Facade.newInstance(pane).attributeValuesAsList("member");
 	                                int k = 0;
 	                                while(
 	                                    (k < members.size()) &&
-	                                    ObjectHolder_2Facade.getPath(tab).getBase().compareTo(((Path)members.get(k)).getBase()) >= 0
+	                                    Object_2Facade.getPath(tab).getBase().compareTo(((Path)members.get(k)).getBase()) >= 0
 	                                ) {
 	                                    k++;
 	                                }
 	                                members.add(
 	                                    k, 
-	                                    ObjectHolder_2Facade.getPath(tab)
+	                                    Object_2Facade.getPath(tab)
 	                                );
 	                                this.storeElement(
 	                                    segmentIdentity,
@@ -1415,22 +1446,22 @@ public class Ui_1 extends Layer_1 {
 	                                    1,
 	                                    inspectorClass
 	                                );
-	                            	ObjectHolder_2Facade groupElementDefinitionFacade = ObjectHolder_2Facade.newInstance(groupElementDefinition);
+	                            	Object_2Facade groupElementDefinitionFacade = Object_2Facade.newInstance(groupElementDefinition);
 	                                // skip element in case field group is not active
 	                                if(!((Boolean)groupElementDefinitionFacade.attributeValue("active")).booleanValue()) {
 	                                    continue;
 	                                }
-	                                group = ObjectHolder_2Facade.newInstance(
+	                                group = Object_2Facade.newInstance(
 	                                    segmentIdentity.getDescendant(new String[]{"element", groupName}),
 	                                    "org:openmdx:ui1:FieldGroup"
 	                                ).getDelegate();
-	                                ObjectHolder_2Facade groupFacade = ObjectHolder_2Facade.newInstance(group);
+	                                Object_2Facade groupFacade = Object_2Facade.newInstance(group);
 	                                this.setLabelledFieldDefault(
 	                                    group,
-	                                    groupElementDefinitionFacade.attributeValues("label"),
-	                                    groupElementDefinitionFacade.attributeValues("shortLabel"),
-	                                    groupElementDefinitionFacade.attributeValues("toolTip"),
-	                                    groupElementDefinitionFacade.attributeValues("changeable").isEmpty() ? 
+	                                    groupElementDefinitionFacade.attributeValuesAsList("label"),
+	                                    groupElementDefinitionFacade.attributeValuesAsList("shortLabel"),
+	                                    groupElementDefinitionFacade.attributeValuesAsList("toolTip"),
+	                                    groupElementDefinitionFacade.attributeValuesAsList("changeable").isEmpty() ? 
 	                                        this.changableDefaultValue : 
 	                                        ((Boolean)groupElementDefinitionFacade.attributeValue("changeable")).booleanValue(),
 	                                    "N/A",
@@ -1438,14 +1469,14 @@ public class Ui_1 extends Layer_1 {
 	                                    (String)groupElementDefinitionFacade.attributeValue("backColor")
 	                                );
 	                                this.setElementDefinitionDefaultLayout(group);
-	                                groupFacade.attributeValues("showMaxMember").addAll(
-	                                	groupElementDefinitionFacade.attributeValues("showMaxMember")
+	                                groupFacade.attributeValuesAsList("showMaxMember").addAll(
+	                                	groupElementDefinitionFacade.attributeValuesAsList("showMaxMember")
 	                                );
-	                                groupFacade.attributeValues("inPlaceEditable").addAll(
-	                                	groupElementDefinitionFacade.attributeValues("inPlace")
+	                                groupFacade.attributeValuesAsList("inPlaceEditable").addAll(
+	                                	groupElementDefinitionFacade.attributeValuesAsList("inPlace")
 	                                );
 	                                // add group to tab and sort by groupName
-	                                List members = ObjectHolder_2Facade.newInstance(tab).attributeValues("member");
+	                                List members = Object_2Facade.newInstance(tab).attributeValuesAsList("member");
 	                                int k = 0;
 	                                while(
 	                                    (k < members.size()) && 
@@ -1469,7 +1500,7 @@ public class Ui_1 extends Layer_1 {
 	                            }
 	                            MappedRecord element = this.existingElements.get(segmentIdentity).get(elementName);
 	                            if(element == null) {
-	                                element = ObjectHolder_2Facade.newInstance(
+	                                element = Object_2Facade.newInstance(
 	                                    segmentIdentity.getDescendant(new String[]{"element", elementName})                                    
 	                                ).getDelegate();
 	                                this.mapField(
@@ -1485,7 +1516,7 @@ public class Ui_1 extends Layer_1 {
 	                                    element
 	                                );
 	                                // add element to group and sort by order
-	                                List<Object> members = ObjectHolder_2Facade.newInstance(group).attributeValues("member");
+	                                List<Object> members = Object_2Facade.newInstance(group).attributeValuesAsList("member");
 	                                int l = 0;
 	                                int r = members.size() - 1;
 	                                while(l <= r) {
@@ -1506,25 +1537,25 @@ public class Ui_1 extends Layer_1 {
 	                                }
 	                                if(members.isEmpty()) {
 	                                    members.add(
-	                                        ObjectHolder_2Facade.getPath(element)
+	                                        Object_2Facade.getPath(element)
 	                                    );
 	                                }
 	                                else {
 	                                    members.add(
 	                                        l,
-	                                        ObjectHolder_2Facade.getPath(element)
+	                                        Object_2Facade.getPath(element)
 	                                    );              
 	                                }
 	                            }    
 	                            cachedDefinitions.put(
-	                            	ObjectHolder_2Facade.getPath(element),
+	                            	Object_2Facade.getPath(element),
 	                                definition
 	                            );
 	                            modifiedGroups.add(
-	                            	ObjectHolder_2Facade.getPath(group).getBase()
+	                            	Object_2Facade.getPath(group).getBase()
 	                            );
 	                            modifiedTabs.add(
-	                            	ObjectHolder_2Facade.getPath(tab).getBase()
+	                            	Object_2Facade.getPath(tab).getBase()
 	                            );
 	                        }
 	                    }
@@ -1621,10 +1652,10 @@ public class Ui_1 extends Layer_1 {
                     elementDefinition
                 );
                 try {
-                	Boolean isActive = elementDefinition == null ? null : (Boolean)ObjectHolder_2Facade.newInstance(elementDefinition).attributeValues("active").get(0);
+                	Boolean isActive = elementDefinition == null ? null : (Boolean)Object_2Facade.newInstance(elementDefinition).attributeValuesAsList("active").get(0);
 	                if(isActive != null && isActive.booleanValue()) {
 	                    String elementName = containerName + ":" + feature.getName();
-	                    MappedRecord element = ObjectHolder_2Facade.newInstance(
+	                    MappedRecord element = Object_2Facade.newInstance(
 	                        segmentIdentity.getDescendant(new String[]{"element", elementName})
 	                    ).getDelegate();
 	                    this.mapField(
@@ -1639,7 +1670,7 @@ public class Ui_1 extends Layer_1 {
 	                            null : 
 	                            (String)memberDefaultValues.get(feature.getName())                  
 	                    );
-	                    if(ObjectHolder_2Facade.getObjectClass(element) != null) {
+	                    if(Object_2Facade.getObjectClass(element) != null) {
 	                        // Test whether element is in showMemberRange
 	                        List<Object> elementOrder = this.getOrderObjectContainer(elementDefinition);
 	                        boolean isInShowMemberRange = false;
@@ -1686,14 +1717,14 @@ public class Ui_1 extends Layer_1 {
 	                                element
 	                            );                
 	                            elementDefinitions.put(
-	                                ObjectHolder_2Facade.getPath(element),
+	                                Object_2Facade.getPath(element),
 	                                elementDefinition
 	                            );
    
 	                            // add element to container and sort by order
 	                            List<Object> members;
 	                            try {
-	                                members = ObjectHolder_2Facade.newInstance(container).attributeValues("member");
+	                                members = Object_2Facade.newInstance(container).attributeValuesAsList("member");
 	                            }
 	                            catch (ResourceException e) {
 	                            	throw new ServiceException(e);
@@ -1715,13 +1746,13 @@ public class Ui_1 extends Layer_1 {
 	                            }
 	                            if(members.isEmpty()) {
 	                                members.add(
-	                                    ObjectHolder_2Facade.getPath(element)
+	                                    Object_2Facade.getPath(element)
 	                                );
 	                            }
 	                            else {
 	                                members.add(
 	                                    l,
-	                                    ObjectHolder_2Facade.getPath(element)
+	                                    Object_2Facade.getPath(element)
 	                                );
 	                            }
 	                        }
@@ -1745,10 +1776,14 @@ public class Ui_1 extends Layer_1 {
         ModelElement_1_0 inspectorClass,
         List<MappedRecord> definitions
     ) throws ServiceException {
+        DataproviderRequestProcessor delegation = new DataproviderRequestProcessor(
+            new ServiceHeader(),
+            this.getDelegation()
+        );        	
         // get additional element definitions. Construct an element 
         // definition on the base definition and override with additional definition
-        List<MappedRecord> additionalElementDefinitions = this.delegation.addFindRequest(
-            ObjectHolder_2Facade.getPath(baseDefinition).getChild("additionalElementDefinition"),
+        List<MappedRecord> additionalElementDefinitions = delegation.addFindRequest(
+            Object_2Facade.getPath(baseDefinition).getChild("additionalElementDefinition"),
             null,
             AttributeSelectors.ALL_ATTRIBUTES,
             0,
@@ -1758,8 +1793,8 @@ public class Ui_1 extends Layer_1 {
         for(MappedRecord additionalDefinition: additionalElementDefinitions) {
         	MappedRecord target;
             try {
-	            target = ObjectHolder_2Facade.newInstance(
-	                ObjectHolder_2Facade.getPath(additionalDefinition)
+	            target = Object_2Facade.newInstance(
+	                Object_2Facade.getPath(additionalDefinition)
 	            ).getDelegate();
             }
             catch (ResourceException e) {
@@ -1770,9 +1805,9 @@ public class Ui_1 extends Layer_1 {
                 baseDefinition,
                 additionalDefinition
             );
-            ObjectHolder_2Facade targetFacade;
+            Object_2Facade targetFacade;
             try {
-	            targetFacade = ObjectHolder_2Facade.newInstance(target);
+	            targetFacade = Object_2Facade.newInstance(target);
             }
             catch (ResourceException e) {
             	throw new ServiceException(e);
@@ -1780,7 +1815,7 @@ public class Ui_1 extends Layer_1 {
             // filter additional definition: add definition only if base class matches for class
             // or if forClass is unspecified
             String inspectorClassName = (String)inspectorClass.objGetValue("qualifiedName");
-            if((targetFacade.getAttributeValues("forClass") == null) || targetFacade.attributeValues("forClass").contains(inspectorClassName)) {
+            if((targetFacade.getAttributeValues("forClass") == null) || targetFacade.attributeValuesAsList("forClass").contains(inspectorClassName)) {
                 definitions.add(
                     target
                 );
@@ -1795,10 +1830,14 @@ public class Ui_1 extends Layer_1 {
         ModelElement_1_0 inspectorClass,
         List<MappedRecord> definitions
     ) throws ServiceException {
+        DataproviderRequestProcessor delegation = new DataproviderRequestProcessor(
+            new ServiceHeader(),
+            this.getDelegation()
+        );        	
         // get alternate element definitions. Construct an element 
         // definition on the base definition and override with alternate definition
-        List<MappedRecord> alternateElementDefinitions = this.delegation.addFindRequest(
-            ObjectHolder_2Facade.getPath(baseDefinition).getChild("alternateElementDefinition"),
+        List<MappedRecord> alternateElementDefinitions = delegation.addFindRequest(
+            Object_2Facade.getPath(baseDefinition).getChild("alternateElementDefinition"),
             null,
             AttributeSelectors.ALL_ATTRIBUTES,
             0,
@@ -1812,8 +1851,8 @@ public class Ui_1 extends Layer_1 {
         	MappedRecord alternateDefinition = j.next();
         	MappedRecord target;
             try {
-	            target = ObjectHolder_2Facade.newInstance(
-	                ObjectHolder_2Facade.getPath(alternateDefinition)
+	            target = Object_2Facade.newInstance(
+	                Object_2Facade.getPath(alternateDefinition)
 	            ).getDelegate();
             }
             catch (ResourceException e) {
@@ -1834,25 +1873,25 @@ public class Ui_1 extends Layer_1 {
     private Map<String,Object> getMemberMimeTypes(
     	MappedRecord containerDefinition
     ) throws ServiceException {
-    	ObjectHolder_2Facade containerDefinitionFacade;
+    	Object_2Facade containerDefinitionFacade;
         try {
-	        containerDefinitionFacade = ObjectHolder_2Facade.newInstance(containerDefinition);
+	        containerDefinitionFacade = Object_2Facade.newInstance(containerDefinition);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }
         Map<String,Object> memberMimeTypes = new HashMap<String,Object>();
         if(containerDefinitionFacade.getAttributeValues("memberElementName") != null) {
-            for(int i = 0; i < containerDefinitionFacade.attributeValues("memberElementName").size(); i++) {
-                String name = (String)containerDefinitionFacade.attributeValues("memberElementName").get(i);
+            for(int i = 0; i < containerDefinitionFacade.attributeValuesAsList("memberElementName").size(); i++) {
+                String name = (String)containerDefinitionFacade.attributeValuesAsList("memberElementName").get(i);
                 if(
-                    (containerDefinitionFacade.attributeValues("memberMimeType").size() > i) &&
-                    (containerDefinitionFacade.attributeValues("memberMimeType").get(i) != null) &&
-                    !"".equals(containerDefinitionFacade.attributeValues("memberMimeType").get(i))
+                    (containerDefinitionFacade.attributeValuesAsList("memberMimeType").size() > i) &&
+                    (containerDefinitionFacade.attributeValuesAsList("memberMimeType").get(i) != null) &&
+                    !"".equals(containerDefinitionFacade.attributeValuesAsList("memberMimeType").get(i))
                 ) {
                     memberMimeTypes.put(
                         name,
-                        containerDefinitionFacade.attributeValues("memberMimeType").get(i)
+                        containerDefinitionFacade.attributeValuesAsList("memberMimeType").get(i)
                     );
                 }
             }
@@ -1864,25 +1903,25 @@ public class Ui_1 extends Layer_1 {
     private Map<String,Object> getMemberDefaultValues(
     	MappedRecord containerDefinition
     ) throws ServiceException {
-    	ObjectHolder_2Facade containerDefinitionFacade;
+    	Object_2Facade containerDefinitionFacade;
         try {
-	        containerDefinitionFacade = ObjectHolder_2Facade.newInstance(containerDefinition);
+	        containerDefinitionFacade = Object_2Facade.newInstance(containerDefinition);
         }
         catch (ResourceException e) {
         	throw new ServiceException(e);
         }    	
         Map<String,Object> memberDefaultValues = new HashMap<String,Object>();
         if(containerDefinitionFacade.getAttributeValues("memberElementName") != null) {
-            for(int i = 0; i < containerDefinitionFacade.attributeValues("memberElementName").size(); i++) {
-                String name = (String)containerDefinitionFacade.attributeValues("memberElementName").get(i);
+            for(int i = 0; i < containerDefinitionFacade.attributeValuesAsList("memberElementName").size(); i++) {
+                String name = (String)containerDefinitionFacade.attributeValuesAsList("memberElementName").get(i);
                 if(
-                    (containerDefinitionFacade.attributeValues("memberDefaultValue").size() > i) &&
-                    (containerDefinitionFacade.attributeValues("memberDefaultValue").get(i) != null) &&
-                    !"".equals(containerDefinitionFacade.attributeValues("memberDefaultValue").get(i))
+                    (containerDefinitionFacade.attributeValuesAsList("memberDefaultValue").size() > i) &&
+                    (containerDefinitionFacade.attributeValuesAsList("memberDefaultValue").get(i) != null) &&
+                    !"".equals(containerDefinitionFacade.attributeValuesAsList("memberDefaultValue").get(i))
                 ) {
                     memberDefaultValues.put(
                         name,
-                        containerDefinitionFacade.attributeValues("memberDefaultValue").get(i)
+                        containerDefinitionFacade.attributeValuesAsList("memberDefaultValue").get(i)
                     );
                 }
             }
@@ -1915,8 +1954,9 @@ public class Ui_1 extends Layer_1 {
         boolean includeSubtypes,
         boolean attributesOnly
     ) throws ServiceException {
+    	Model_1_0 model = this.getModel();
         List<ModelElement_1_0> featureDefs = new ArrayList(
-            this.model.getStructuralFeatureDefs(
+            model.getStructuralFeatureDefs(
                 classDef, 
                 includeSubtypes, 
                 true, 
@@ -1929,7 +1969,7 @@ public class Ui_1 extends Layer_1 {
             StructuralFeatureDefinition feature = new StructuralFeatureDefinition(featureDef);            
             if(feature.isReference()) {
                 // Only add reference features if not explicitly excluded and exposed end is not composite
-                ModelElement_1_0 exposedEnd = this.model.getElement(featureDef.objGetValue("exposedEnd"));
+                ModelElement_1_0 exposedEnd = model.getElement(featureDef.objGetValue("exposedEnd"));
                 if(
                     !(REFERENCES_TO_EXCLUDE.contains(feature.getQualifiedName()) || REFERENCES_TO_EXCLUDE.contains(feature.getName())) &&
                     !AggregationKind.COMPOSITE.equals(exposedEnd.objGetValue("aggregation"))
@@ -1951,7 +1991,7 @@ public class Ui_1 extends Layer_1 {
         for(StructuralFeatureDefinition featureDefinition: this.structuralFeatureDefinitions.get(segmentIdentity.getParent().getChild("Root"))) {
             if(
                 (!featureDefinition.isReference() || !attributesOnly) &&
-                this.model.isSubtypeOf(classDef, featureDefinition.getContainer())
+                model.isSubtypeOf(classDef, featureDefinition.getContainer())
             ) {                
                 featureDefinitions.put(
                     featureDefinition.getQualifiedName(),
@@ -1963,7 +2003,7 @@ public class Ui_1 extends Layer_1 {
         for(StructuralFeatureDefinition featureDefinition: this.structuralFeatureDefinitions.get(segmentIdentity)) {
             if(
                 (!featureDefinition.isReference() || !attributesOnly) &&
-                this.model.isSubtypeOf(classDef, featureDefinition.getContainer())
+                model.isSubtypeOf(classDef, featureDefinition.getContainer())
             ) {
                 featureDefinitions.put(
                     featureDefinition.getQualifiedName(),
@@ -1980,6 +2020,7 @@ public class Ui_1 extends Layer_1 {
         Path segmentIdentity,
         ModelElement_1_0 classDef
     ) throws ServiceException {
+    	Model_1_0 model = this.getModel();
         Map<String,Ui_1.OperationDefinition> featureDefinitions = new HashMap<String,Ui_1.OperationDefinition>();
         // Add modeled operations
         Collection features = ((Map)classDef.objGetValue("allFeature")).values();
@@ -1988,7 +2029,7 @@ public class Ui_1 extends Layer_1 {
             i.hasNext(); 
         ) {
             ModelElement_1_0 feature = i.next();
-            if(this.model.isOperationType(feature)) {
+            if(model.isOperationType(feature)) {
                 OperationDefinition featureDefinition = new OperationDefinition(feature);
                 featureDefinitions.put(
                     featureDefinition.getQualifiedName(),
@@ -1998,7 +2039,7 @@ public class Ui_1 extends Layer_1 {
         }
         // Add customized operations for segment Root
         for(OperationDefinition featureDefinition: this.operationDefinitions.get(segmentIdentity.getParent().getChild("Root"))) {
-            if(this.model.isSubtypeOf(classDef, featureDefinition.getContainer())) {
+            if(model.isSubtypeOf(classDef, featureDefinition.getContainer())) {
                 featureDefinitions.put(
                     featureDefinition.getQualifiedName(),
                     featureDefinition
@@ -2007,7 +2048,7 @@ public class Ui_1 extends Layer_1 {
         }      
         // Add customized operations for current segment
         for(OperationDefinition featureDefinition: this.operationDefinitions.get(segmentIdentity)) {
-            if(this.model.isSubtypeOf(classDef, featureDefinition.getContainer())) {
+            if(model.isSubtypeOf(classDef, featureDefinition.getContainer())) {
                 featureDefinitions.put(
                     featureDefinition.getQualifiedName(),
                     featureDefinition
@@ -2026,7 +2067,8 @@ public class Ui_1 extends Layer_1 {
         ModelElement_1_0 inspectorClassDef,
         Map<Path,MappedRecord> elementDefinitions
     ) throws ServiceException {
-        ModelElement_1_0 featureType = this.model.getDereferencedType(
+    	Model_1_0 model = this.getModel();
+        ModelElement_1_0 featureType = model.getDereferencedType(
             feature.getType()
         );
         MappedRecord baseDefinition = this.getElementDefinition(
@@ -2052,15 +2094,15 @@ public class Ui_1 extends Layer_1 {
         );
         // Create ui object containers for base and additional definitions
         for(MappedRecord definition: definitions) {
-        	ObjectHolder_2Facade definitionFacade;
+        	Object_2Facade definitionFacade;
             try {
-	            definitionFacade = ObjectHolder_2Facade.newInstance(definition);
+	            definitionFacade = Object_2Facade.newInstance(definition);
             }
             catch (ResourceException e) {
             	throw new ServiceException(e);
             }
             if(
-            	definitionFacade.attributeValues("active").isEmpty() || // default to true if active is not set
+            	definitionFacade.attributeValuesAsList("active").isEmpty() || // default to true if active is not set
                 ((Boolean)definitionFacade.attributeValue("active")).booleanValue()
             ) {            
             	MappedRecord pane = this.addPane(
@@ -2075,7 +2117,7 @@ public class Ui_1 extends Layer_1 {
                     "";
                 // Create new ObjectContainer if it is a reference of classDef
                 MappedRecord container = this.existingElements.get(segmentIdentity).get(
-                    this.model.getElement(feature.getContainer()).objGetValue("qualifiedName") + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix
+                    model.getElement(feature.getContainer()).objGetValue("qualifiedName") + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix
                 );
                 if(
                     (container == null) ||
@@ -2083,7 +2125,7 @@ public class Ui_1 extends Layer_1 {
                 ) { 
                     String containerName = forClass + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix;
                     try {
-	                    container = ObjectHolder_2Facade.newInstance(
+	                    container = Object_2Facade.newInstance(
 	                        segmentIdentity.getDescendant(new String[]{"element", containerName}),
 	                        "org:openmdx:ui1:ObjectContainer"
 	                    ).getDelegate();
@@ -2091,38 +2133,38 @@ public class Ui_1 extends Layer_1 {
                     catch (ResourceException e) {
                     	throw new ServiceException(e);
                     }
-                    ObjectHolder_2Facade containerFacade;
+                    Object_2Facade containerFacade;
                     try {
-	                    containerFacade = ObjectHolder_2Facade.newInstance(container);
+	                    containerFacade = Object_2Facade.newInstance(container);
                     }
                     catch (ResourceException e) {
                     	throw new ServiceException(e);
                     }
                     Boolean isChangeable = feature.isChangeable();
-                    isChangeable = definitionFacade.attributeValues("changeable").isEmpty() ? 
+                    isChangeable = definitionFacade.attributeValuesAsList("changeable").isEmpty() ? 
                         isChangeable : 
                         (Boolean)definitionFacade.attributeValue("changeable");
                     this.setLabelledFieldDefault(
                         container,
-                        definitionFacade.attributeValues("label"),
-                        definitionFacade.attributeValues("shortLabel"),
-                        definitionFacade.attributeValues("toolTip"),
+                        definitionFacade.attributeValuesAsList("label"),
+                        definitionFacade.attributeValuesAsList("shortLabel"),
+                        definitionFacade.attributeValuesAsList("toolTip"),
                         isChangeable.booleanValue(),
                         "N/A",
                         (String)definitionFacade.attributeValue("color"),
                         (String)definitionFacade.attributeValue("backColor")
                     );
-                    containerFacade.attributeValues("showMaxMember").addAll(
-                    	definitionFacade.attributeValues("showMaxMember")
+                    containerFacade.attributeValuesAsList("showMaxMember").addAll(
+                    	definitionFacade.attributeValuesAsList("showMaxMember")
                     );
-                    containerFacade.attributeValues("inPlaceEditable").addAll(
-                    	definitionFacade.attributeValues("inPlace")
+                    containerFacade.attributeValuesAsList("inPlaceEditable").addAll(
+                    	definitionFacade.attributeValuesAsList("inPlace")
                     );
-                    containerFacade.attributeValues("dataBindingName").addAll(
-                    	definitionFacade.attributeValues("dataBindingName")
+                    containerFacade.attributeValuesAsList("dataBindingName").addAll(
+                    	definitionFacade.attributeValuesAsList("dataBindingName")
                     );
                     // let the renderer set default label
-                    containerFacade.attributeValues("label").clear();
+                    containerFacade.attributeValuesAsList("label").clear();
                     this.setObjectReference(
                         container,
                         feature
@@ -2132,7 +2174,7 @@ public class Ui_1 extends Layer_1 {
                         segmentIdentity,
                         container,
                         containerName,
-                        definitionFacade.attributeValues("showMemberRange"),
+                        definitionFacade.attributeValuesAsList("showMemberRange"),
                         this.getStructuralFeatureDefinitions(
                             segmentIdentity,
                             featureType,
@@ -2144,14 +2186,15 @@ public class Ui_1 extends Layer_1 {
                         null
                     );
                     // Limit number of members to maxMember (if defined)
-                    int maxMember = !definitionFacade.attributeValues("maxMember").isEmpty() ? 
+                    int maxMember = !definitionFacade.attributeValuesAsList("maxMember").isEmpty() ? 
                         ((Number)definitionFacade.attributeValue("maxMember")).intValue()
                         : DEFAULT_MAX_MEMBER;
-                    if(containerFacade.attributeValues("member").size() > maxMember) {
+                    if(containerFacade.attributeValuesAsList("member").size() > maxMember) {
                         List<Object> limitedMembers = new ArrayList<Object>(
-                        	containerFacade.attributeValues("member").subList(0, maxMember)
+                        	containerFacade.attributeValuesAsList("member").subList(0, maxMember)
                         );
-                        containerFacade.clearAttributeValues("member").addAll(
+                        containerFacade.attributeValuesAsList("member").clear();
+                        containerFacade.attributeValuesAsList("member").addAll(
                             limitedMembers
                         );
                     }
@@ -2161,10 +2204,10 @@ public class Ui_1 extends Layer_1 {
                     );
                 }
                 // Tab
-                String tabName = ObjectHolder_2Facade.getPath(pane).getBase() + ":Tab:" + feature.getName() + alternateDefinitionNameSuffix;
+                String tabName = Object_2Facade.getPath(pane).getBase() + ":Tab:" + feature.getName() + alternateDefinitionNameSuffix;
                 MappedRecord tab;
                 try {
-	                tab = ObjectHolder_2Facade.newInstance(
+	                tab = Object_2Facade.newInstance(
 	                    segmentIdentity.getDescendant(new String[]{"element", tabName}),
 	                    "org:openmdx:ui1:Tab"
 	                ).getDelegate();
@@ -2173,21 +2216,21 @@ public class Ui_1 extends Layer_1 {
                 	throw new ServiceException(e);
                 }                
                 try {
-	                ObjectHolder_2Facade.newInstance(tab).attributeValues("title").addAll(
-	                    definitionFacade.attributeValues("label")
+	                Object_2Facade.newInstance(tab).attributeValuesAsList("title").addAll(
+	                    definitionFacade.attributeValuesAsList("label")
 	                );
                 }
                 catch (ResourceException e) {
                 	throw new ServiceException(e);
                 }
                 elementDefinitions.put(
-                    ObjectHolder_2Facade.getPath(tab),
+                    Object_2Facade.getPath(tab),
                     definition
                 );
                 // Add tab to pane and sort by order
                 List<Object> members;
                 try {
-	                members = ObjectHolder_2Facade.newInstance(pane).attributeValues("member");
+	                members = Object_2Facade.newInstance(pane).attributeValuesAsList("member");
                 }
                 catch (ResourceException e) {
                 	throw new ServiceException(e);
@@ -2199,8 +2242,8 @@ public class Ui_1 extends Layer_1 {
                     int res;
                     try {
 	                    res = this.compareOrder(
-	                    	definitionFacade.attributeValues("order"),
-	                        ObjectHolder_2Facade.newInstance(elementDefinitions.get(members.get(pos))).attributeValues("order")
+	                    	definitionFacade.attributeValuesAsList("order"),
+	                        Object_2Facade.newInstance(elementDefinitions.get(members.get(pos))).attributeValuesAsList("order")
 	                    );
                     }
                     catch (ResourceException e) {
@@ -2212,19 +2255,19 @@ public class Ui_1 extends Layer_1 {
                 }
                 if(members.isEmpty()) {
                     members.add(
-                        ObjectHolder_2Facade.getPath(tab)
+                        Object_2Facade.getPath(tab)
                     );
                 }
                 else {
                     members.add(
                         l,
-                        ObjectHolder_2Facade.getPath(tab)
+                        Object_2Facade.getPath(tab)
                     );              
                 }
                 // add object container to tab
                 try {
-	                ObjectHolder_2Facade.newInstance(tab).attributeValues("member").add(
-	                    ObjectHolder_2Facade.getPath(container)
+	                Object_2Facade.newInstance(tab).attributeValuesAsList("member").add(
+	                    Object_2Facade.getPath(container)
 	                );
                 }
                 catch (ResourceException e) {
@@ -2267,29 +2310,29 @@ public class Ui_1 extends Layer_1 {
         Map<Path,MappedRecord> tabDefs
     ) throws ServiceException {
     	try {
-	        Path segmentIdentity = ObjectHolder_2Facade.getPath(pane).getPrefix(5);
+	        Path segmentIdentity = Object_2Facade.getPath(pane).getPrefix(5);
 	        Path tabIdentity = segmentIdentity.getDescendant(
 	            new String[]{"element", tabName}
 	        );
-	        MappedRecord tab = ObjectHolder_2Facade.newInstance(
+	        MappedRecord tab = Object_2Facade.newInstance(
 	        	tabIdentity,
 	        	tabType
 	        ).getDelegate();
-	        ObjectHolder_2Facade tabDefFacade = ObjectHolder_2Facade.newInstance(tabDef);
+	        Object_2Facade tabDefFacade = Object_2Facade.newInstance(tabDef);
 	        this.setElementDefault(
 	            tab,
-	            tabDefFacade.attributeValues("toolTip"),
-	            tabDefFacade.attributeValues("changeable").isEmpty() ? 
+	            tabDefFacade.attributeValuesAsList("toolTip"),
+	            tabDefFacade.attributeValuesAsList("changeable").isEmpty() ? 
 	                this.changableDefaultValue : 
-	                ((Boolean)tabDefFacade.attributeValues("changeable").get(0)).booleanValue(),
+	                ((Boolean)tabDefFacade.attributeValuesAsList("changeable").get(0)).booleanValue(),
 	            (String)tabDefFacade.attributeValue("iconKey")
 	        );
-	        ObjectHolder_2Facade.newInstance(tab).attributeValues("title").addAll(
-	        	tabDefFacade.attributeValues("label")
+	        Object_2Facade.newInstance(tab).attributeValuesAsList("title").addAll(
+	        	tabDefFacade.attributeValuesAsList("label")
 	        );
 	        this.setElementDefinitionDefaultLayout(tab);
 	        // Add tab to pane and sort by order
-	        List<Object> members = ObjectHolder_2Facade.newInstance(pane).attributeValues("member");
+	        List<Object> members = Object_2Facade.newInstance(pane).attributeValuesAsList("member");
 	        int l = 0;
 	        int r = members.size() - 1;
 	        while(l <= r) {
@@ -2298,8 +2341,8 @@ public class Ui_1 extends Layer_1 {
 	                System.out.println("#ERR");
 	            }
 	            int res = this.compareOrder(
-	            	tabDefFacade.attributeValues("order"),
-	                ObjectHolder_2Facade.newInstance(tabDefs.get(members.get(pos))).attributeValues("order")
+	            	tabDefFacade.attributeValuesAsList("order"),
+	                Object_2Facade.newInstance(tabDefs.get(members.get(pos))).attributeValuesAsList("order")
 	            );
 	            if(res == 0) { l = pos; r = pos; break;} 
 	            else if(res > 0) l = pos + 1;
@@ -2342,8 +2385,8 @@ public class Ui_1 extends Layer_1 {
 	        );
 	        Number paneOrder = uiDef == null ? 
 	            null : 
-	            !ObjectHolder_2Facade.newInstance(uiDef).attributeValues("order").isEmpty() ? 
-	                (Number)ObjectHolder_2Facade.newInstance(uiDef).attributeValue("order") : 
+	            !Object_2Facade.newInstance(uiDef).attributeValuesAsList("order").isEmpty() ? 
+	                (Number)Object_2Facade.newInstance(uiDef).attributeValue("order") : 
 	                new Integer(90000);                     
 	        DecimalFormat orderFormatter= new DecimalFormat("###00"); 
 	        Path paneIdentity = segmentIdentity.getDescendant(
@@ -2362,15 +2405,15 @@ public class Ui_1 extends Layer_1 {
 	        );
 	        MappedRecord pane = panes.get(paneIdentity);
 	        if(pane == null) {
-	            pane = ObjectHolder_2Facade.newInstance(
+	            pane = Object_2Facade.newInstance(
 	            	paneIdentity,
 	            	paneType
 	            ).getDelegate();
-	            ObjectHolder_2Facade paneDefFacade = ObjectHolder_2Facade.newInstance(paneDef);
+	            Object_2Facade paneDefFacade = Object_2Facade.newInstance(paneDef);
 	            this.setElementDefault(
 	                pane,
-	                paneDefFacade.attributeValues("toolTip"),
-	                !paneDefFacade.attributeValues("isChangeable").isEmpty() ? 
+	                paneDefFacade.attributeValuesAsList("toolTip"),
+	                !paneDefFacade.attributeValuesAsList("isChangeable").isEmpty() ? 
 	                    ((Boolean)paneDefFacade.attributeValue("isChangeable")).booleanValue() : 
 	                    true, 
 	                (String)paneDefFacade.attributeValue("iconKey")
@@ -2395,6 +2438,7 @@ public class Ui_1 extends Layer_1 {
         ModelElement_1_0 inspectorClass,
         Map<Path,MappedRecord> elementDefinitions
     ) throws ServiceException {
+    	Model_1_0 model = this.getModel();
     	MappedRecord baseDefinition = this.getOperationDefinition(
             segmentIdentity,
             operationDef,
@@ -2403,7 +2447,7 @@ public class Ui_1 extends Layer_1 {
             inspectorClass
         );
         try {
-	        if(((Boolean)ObjectHolder_2Facade.newInstance(baseDefinition).attributeValue("active")).booleanValue()) {
+	        if(((Boolean)Object_2Facade.newInstance(baseDefinition).attributeValue("active")).booleanValue()) {
 	            List<MappedRecord> opDefs = new ArrayList<MappedRecord>();
 	            opDefs.add(baseDefinition);
 	            this.addAdditionalElementDefinitions(
@@ -2424,7 +2468,7 @@ public class Ui_1 extends Layer_1 {
 	                // Tab
 	                String tabName = this.getPaneName(PANE_TYPE_OPERATION, inspectorClass) + ":Tab:" + operationDef.getName();
 	                if(opDef != baseDefinition) {
-	                    tabName += ":" + ObjectHolder_2Facade.getPath(opDef).getBase();
+	                    tabName += ":" + Object_2Facade.getPath(opDef).getBase();
 	                }	    
 	                MappedRecord tab = this.addTab(
 	                    tabName,
@@ -2433,12 +2477,12 @@ public class Ui_1 extends Layer_1 {
 	                    pane,
 	                    elementDefinitions
 	                );
-	                ObjectHolder_2Facade tabFacade = ObjectHolder_2Facade.newInstance(tab);
-	                tabFacade.attributeValues("operationName").add(
+	                Object_2Facade tabFacade = Object_2Facade.newInstance(tab);
+	                tabFacade.attributeValuesAsList("operationName").add(
 	                    operationDef.getQualifiedName()
 	                );
 	                if(tabFacade.getAttributeValues("isQuery") != null) {
-	                	tabFacade.attributeValues("isQuery").add(
+	                	tabFacade.attributeValuesAsList("isQuery").add(
 	                        Boolean.valueOf(operationDef.isQuery)
 	                    );
 	                }                        
@@ -2450,7 +2494,7 @@ public class Ui_1 extends Layer_1 {
 	                        j.hasNext();
 	                    ) {        
 	                        // create group and add to tab
-	                        ModelElement_1_0 paramDef = this.model.getElement(j.next());
+	                        ModelElement_1_0 paramDef = model.getElement(j.next());
 	                        MappedRecord groupElementDefinition = this.getOperationDefinition(
 	                            segmentIdentity,
 	                            operationDef,
@@ -2458,19 +2502,19 @@ public class Ui_1 extends Layer_1 {
 	                            1,
 	                            inspectorClass
 	                        );
-	                        ObjectHolder_2Facade groupElementDefinitionFacade = ObjectHolder_2Facade.newInstance(groupElementDefinition);
+	                        Object_2Facade groupElementDefinitionFacade = Object_2Facade.newInstance(groupElementDefinition);
 	                        String groupName = tabName + ":Group:" + paramDef.objGetValue("name");
-	                        MappedRecord group = ObjectHolder_2Facade.newInstance(
+	                        MappedRecord group = Object_2Facade.newInstance(
 	                            segmentIdentity.getDescendant(new String[]{"element", groupName}),
 	                            "org:openmdx:ui1:FieldGroup"
 	                        ).getDelegate();
-	                        ObjectHolder_2Facade groupFacade = ObjectHolder_2Facade.newInstance(group);
+	                        Object_2Facade groupFacade = Object_2Facade.newInstance(group);
 	                        this.setLabelledFieldDefault(
 	                            group,
-	                            groupElementDefinitionFacade.attributeValues("label"),
-	                            groupElementDefinitionFacade.attributeValues("shortLabel"),
-	                            groupElementDefinitionFacade.attributeValues("toolTip"),
-	                            groupElementDefinitionFacade.attributeValues("changeable").isEmpty() ? 
+	                            groupElementDefinitionFacade.attributeValuesAsList("label"),
+	                            groupElementDefinitionFacade.attributeValuesAsList("shortLabel"),
+	                            groupElementDefinitionFacade.attributeValuesAsList("toolTip"),
+	                            groupElementDefinitionFacade.attributeValuesAsList("changeable").isEmpty() ? 
 	                                this.changableDefaultValue : 
 	                                ((Boolean)groupElementDefinitionFacade.attributeValue("changeable")).booleanValue(),
 	                            "N/A",
@@ -2478,20 +2522,20 @@ public class Ui_1 extends Layer_1 {
 	                            (String)groupElementDefinitionFacade.attributeValue("backColor")
 	                        );
 	                        this.setElementDefinitionDefaultLayout(group);
-	                        tabFacade.attributeValues("member").add(
+	                        tabFacade.attributeValuesAsList("member").add(
 	                        	groupFacade.getPath()
 	                        );
-	                        groupFacade.attributeValues("showMaxMember").addAll(
-	                        	groupElementDefinitionFacade.attributeValues("showMaxMember")
+	                        groupFacade.attributeValuesAsList("showMaxMember").addAll(
+	                        	groupElementDefinitionFacade.attributeValuesAsList("showMaxMember")
 	                        );
-	                        groupFacade.attributeValues("inPlaceEditable").addAll(
-	                        	groupElementDefinitionFacade.attributeValues("inPlace")
+	                        groupFacade.attributeValuesAsList("inPlaceEditable").addAll(
+	                        	groupElementDefinitionFacade.attributeValuesAsList("inPlace")
 	                        );
 	                        // Add fields of parameter to group
-	                        ModelElement_1_0 paramType = this.model.getElementType(
+	                        ModelElement_1_0 paramType = model.getElementType(
 	                            paramDef
 	                        );
-	                        if(this.model.isStructureType(paramType)) {
+	                        if(model.isStructureType(paramType)) {
 	                            this.addFieldsToObjectContainer(
 	                                segmentIdentity,
 	                                group,
@@ -2503,9 +2547,9 @@ public class Ui_1 extends Layer_1 {
 	                                this.getMemberDefaultValues(opDef)
 	                            );
 	                        }      
-	                        groupFacade.attributeValues("columnSizeMin").add(new Integer(330));
-	                        groupFacade.attributeValues("columnSizeMax").add(new Integer(600));
-	                        groupFacade.attributeValues("columnBreakAtElement").add(new Integer(999)); // no break
+	                        groupFacade.attributeValuesAsList("columnSizeMin").add(new Integer(330));
+	                        groupFacade.attributeValuesAsList("columnSizeMax").add(new Integer(600));
+	                        groupFacade.attributeValuesAsList("columnBreakAtElement").add(new Integer(999)); // no break
 	                        this.storeElement(
 	                            segmentIdentity,
 	                            group
@@ -2529,11 +2573,15 @@ public class Ui_1 extends Layer_1 {
     private List<MappedRecord> getAdditionalInspectorDefinitions(
     	MappedRecord inspectorDefinition
     ) throws ServiceException {
+        DataproviderRequestProcessor delegation = new DataproviderRequestProcessor(
+            new ServiceHeader(),
+            this.getDelegation()
+        );        	
     	try {
 	        List<MappedRecord> inspectorDefinitions = new ArrayList<MappedRecord>();
 	        // Get additional inspector definitions
-	        List<MappedRecord> additionalInspectorDefinitions = this.delegation.addFindRequest(
-	            ObjectHolder_2Facade.getPath(inspectorDefinition).getChild("additionalElementDefinition"),
+	        List<MappedRecord> additionalInspectorDefinitions = delegation.addFindRequest(
+	            Object_2Facade.getPath(inspectorDefinition).getChild("additionalElementDefinition"),
 	            null,
 	            AttributeSelectors.ALL_ATTRIBUTES,
 	            0,
@@ -2541,8 +2589,8 @@ public class Ui_1 extends Layer_1 {
 	            Directions.ASCENDING
 	        );
 	        for(MappedRecord additionalInspectorDefinition: additionalInspectorDefinitions) {
-	        	MappedRecord target = ObjectHolder_2Facade.newInstance(
-	                ObjectHolder_2Facade.getPath(additionalInspectorDefinition)
+	        	MappedRecord target = Object_2Facade.newInstance(
+	                Object_2Facade.getPath(additionalInspectorDefinition)
 	            ).getDelegate();
 	            this.overloadDefinition(
 	                target,
@@ -2565,11 +2613,12 @@ public class Ui_1 extends Layer_1 {
         String qualifiedOperationName,
         boolean isQuery
     ) throws ServiceException {
+    	Model_1_0 model = this.getModel();
         return new OperationDefinition(
             qualifiedOperationName.substring(qualifiedOperationName.lastIndexOf(":") + 1),
             qualifiedOperationName,
             isQuery,
-            this.model.getElement("org:openmdx:base:BasicObject")
+            model.getElement("org:openmdx:base:BasicObject")
         );
     }
 
@@ -2579,17 +2628,18 @@ public class Ui_1 extends Layer_1 {
         String forClass
     ) throws ServiceException {
     	try {
+    		Model_1_0 model = this.getModel();
 	        // Return if inspector already exists or visited in unit of work
 	        if(this.existingElements.get(segmentIdentity).get(forClass) != null) {
 	            return;
 	        }
-	        ModelElement_1_0 classDef = this.model.getElement(forClass);
+	        ModelElement_1_0 classDef = model.getElement(forClass);
 	        // Create inspector for all supertypes
 	        for(
 	            Iterator i = classDef.objGetList("allSupertype").iterator();
 	            i.hasNext(); 
 	        ) {
-	            ModelElement_1_0 supertype = this.model.getElement(i.next());
+	            ModelElement_1_0 supertype = model.getElement(i.next());
 	            if(supertype != classDef) {
 	                this.createInspector(
 	                    segmentIdentity,
@@ -2602,21 +2652,21 @@ public class Ui_1 extends Layer_1 {
 	            segmentIdentity,
 	            new StructuralFeatureDefinition(classDef)
 	        );
-	        ObjectHolder_2Facade inspectorDefinitionFacade = ObjectHolder_2Facade.newInstance(inspectorDefinition);
-	        MappedRecord inspector = ObjectHolder_2Facade.newInstance(
+	        Object_2Facade inspectorDefinitionFacade = Object_2Facade.newInstance(inspectorDefinition);
+	        MappedRecord inspector = Object_2Facade.newInstance(
 	            segmentIdentity.getDescendant(new String[]{"element", forClass}),
 	            "org:openmdx:ui1:Inspector"
 	        ).getDelegate();
-	        ObjectHolder_2Facade inspectorFacade = ObjectHolder_2Facade.newInstance(inspector);
-	        inspectorFacade.attributeValues("toolTip").addAll(inspectorDefinitionFacade.attributeValues("toolTip"));
-	        inspectorFacade.attributeValues("changeable").add(
-	        	inspectorDefinitionFacade.attributeValues("changeable").isEmpty() ? 
+	        Object_2Facade inspectorFacade = Object_2Facade.newInstance(inspector);
+	        inspectorFacade.attributeValuesAsList("toolTip").addAll(inspectorDefinitionFacade.attributeValuesAsList("toolTip"));
+	        inspectorFacade.attributeValuesAsList("changeable").add(
+	        	inspectorDefinitionFacade.attributeValuesAsList("changeable").isEmpty() ? 
 	            new Boolean(this.changableDefaultValue) : 
 	            inspectorDefinitionFacade.attributeValue("changeable")
 	        );
-	        inspectorFacade.attributeValues("forClass").add(forClass);
-	        inspectorFacade.attributeValues("scaleX").add(new Integer(1));
-	        inspectorFacade.attributeValues("scaleY").add(new Integer(1));
+	        inspectorFacade.attributeValuesAsList("forClass").add(forClass);
+	        inspectorFacade.attributeValuesAsList("scaleX").add(new Integer(1));
+	        inspectorFacade.attributeValuesAsList("scaleY").add(new Integer(1));
 	        // Get additional inspector definitions
 	        List<MappedRecord> inspectorDefinitions = new ArrayList<MappedRecord>();
 	        inspectorDefinitions.add(inspectorDefinition);
@@ -2633,17 +2683,17 @@ public class Ui_1 extends Layer_1 {
 	            ii++
 	        ) {
 	        	MappedRecord definition = i.next();
-	        	ObjectHolder_2Facade definitionFacade = ObjectHolder_2Facade.newInstance(definition);
-	        	MappedRecord inspectorTitle = ObjectHolder_2Facade.newInstance(
+	        	Object_2Facade definitionFacade = Object_2Facade.newInstance(definition);
+	        	MappedRecord inspectorTitle = Object_2Facade.newInstance(
 	                segmentIdentity.getDescendant(new String[]{"element", forClass + ":Title:" + ii}),
 	                "org:openmdx:ui1:TextField"
 	            ).getDelegate();
 	            this.setValuedFieldDefault(
 	                inspectorTitle,
-	                definitionFacade.attributeValues("label"),
-	                definitionFacade.attributeValues("shortLabel"),
-	                definitionFacade.attributeValues("displayValueExpr"),
-	                definitionFacade.attributeValues("toolTip"),
+	                definitionFacade.attributeValuesAsList("label"),
+	                definitionFacade.attributeValuesAsList("shortLabel"),
+	                definitionFacade.attributeValuesAsList("displayValueExpr"),
+	                definitionFacade.attributeValuesAsList("toolTip"),
 	                false,
 	                (String)definitionFacade.attributeValue("iconKey"),
 	                (String)definitionFacade.attributeValue("color"),
@@ -2662,8 +2712,8 @@ public class Ui_1 extends Layer_1 {
 	                segmentIdentity,
 	                inspectorTitle
 	            );
-	            inspectorFacade.attributeValues("member").add(
-	                ObjectHolder_2Facade.getPath(inspectorTitle)
+	            inspectorFacade.attributeValuesAsList("member").add(
+	                Object_2Facade.getPath(inspectorTitle)
 	            );
 	        }
 	        Map<Path,MappedRecord> panes = new TreeMap<Path,MappedRecord>();
@@ -2756,8 +2806,8 @@ public class Ui_1 extends Layer_1 {
 	            i.hasNext();
 	        ) {
 	        	MappedRecord pane = i.next();
-	            inspectorFacade.attributeValues("member").add(
-	                ObjectHolder_2Facade.getPath(pane)
+	            inspectorFacade.attributeValuesAsList("member").add(
+	                Object_2Facade.getPath(pane)
 	            );                
 	            this.storeElement(
 	                segmentIdentity,
@@ -2774,437 +2824,479 @@ public class Ui_1 extends Layer_1 {
     	}
     }
 
-    //------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
-    private void assertCachedElements(
-        Path segmentIdentity
-    ) throws ServiceException {
-    	try {
-	        // Prefetch all elements
-	        if(this.existingElements.get(segmentIdentity) == null) {
-	            Collection<MappedRecord> elements = this.delegation.addFindRequest(
-	                segmentIdentity.getChild("element"),
-	                new FilterProperty[]{},
+    //--------------------------------------------------------------------------
+    public class StandardLayerInteraction extends Layer_1.LayerInteraction {
+      
+        public StandardLayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
+        }
+                
+	    //-------------------------------------------------------------------------
+	    protected MappedRecord retrieveObject(
+	        Path identity
+	    ) throws ServiceException {
+	        try {
+	        	DataproviderRequest getRequest = new DataproviderRequest(
+	                Object_2Facade.newInstance(identity).getDelegate(),
+	                DataproviderOperations.OBJECT_RETRIEVAL,
 	                AttributeSelectors.ALL_ATTRIBUTES,
+	                new AttributeSpecifier[]{}
+	            );
+	        	DataproviderReply getReply = this.newDataproviderReply();
+		        super.get(
+		            getRequest.getInteractionSpec(),
+		            Query_2Facade.newInstance(getRequest.path()),
+		            getReply.getResult()
+		        );
+		        return getReply.getObject();
+	        }
+	        catch (ResourceException e) {
+	        	throw new ServiceException(e);
+	        }
+	    }
+            
+	    //------------------------------------------------------------------------
+	    private void assertCachedElements(
+	        Path segmentIdentity
+	    ) throws ServiceException {    	
+	    	try {
+	    		Model_1_0 model = this.getModel();
+		        // Prefetch all elements
+		        if(Ui_1.this.existingElements.get(segmentIdentity) == null) {
+		        	DataproviderRequest findRequest = new DataproviderRequest(
+		                Query_2Facade.newInstance(segmentIdentity.getChild("element")).getDelegate(),
+		                DataproviderOperations.ITERATION_START,
+		                null,
+		                0,
+		                Integer.MAX_VALUE,
+		                Directions.ASCENDING,
+		                AttributeSelectors.ALL_ATTRIBUTES,
+		                null
+		        	);
+		        	DataproviderReply findReply = super.newDataproviderReply();
+		        	this.getDelegatingInteraction().find(
+		        		findRequest.getInteractionSpec(), 
+		        		Query_2Facade.newInstance(findRequest.object()), 
+		        		findReply.getResult()
+		        	);		        	
+		            MappedRecord[] elements = findReply.getObjects(); 
+		            Map<String,MappedRecord> existingElements = new HashMap<String,MappedRecord>();
+		            Ui_1.this.existingElements.put(
+		                segmentIdentity,
+		                existingElements
+		            );
+		            for(MappedRecord element: elements) {
+		                try {
+		                    existingElements.put(
+		                        Object_2Facade.getPath(element).getBase(),
+		                        Object_2Facade.cloneObject(element)
+		                    );
+	                    }
+	                    catch (ResourceException e) {
+	                    	throw new ServiceException(e);
+	                    }
+		            }
+		        }
+		        // Prefetch all element definitions
+		        if(Ui_1.this.existingElementDefinitions.get(segmentIdentity) == null) {
+		        	DataproviderRequest findRequest = new DataproviderRequest(
+		                Query_2Facade.newInstance(segmentIdentity.getChild("elementDefinition")).getDelegate(),
+		                DataproviderOperations.ITERATION_START,
+		                null,
+		                0,
+		                Integer.MAX_VALUE,
+		                Directions.ASCENDING,
+		                AttributeSelectors.ALL_ATTRIBUTES,
+		                null
+		        	);
+		        	DataproviderReply findReply = super.newDataproviderReply();
+		        	this.getDelegatingInteraction().find(
+		        		findRequest.getInteractionSpec(), 
+		        		Query_2Facade.newInstance(findRequest.object()), 
+		        		findReply.getResult()
+		        	);		        			        	
+		        	MappedRecord[] elementDefinitions = findReply.getObjects();
+		            Map<String,MappedRecord> existingElementDefinitions = new HashMap<String,MappedRecord>();
+		            Ui_1.this.existingElementDefinitions.put(
+		                segmentIdentity,
+		                existingElementDefinitions
+		            );
+		            for(MappedRecord elementDefinition: elementDefinitions) {
+		                try {
+		                    existingElementDefinitions.put(
+		                        Object_2Facade.getPath(elementDefinition).getBase(),
+		                        Object_2Facade.cloneObject(elementDefinition)
+		                    );
+	                    }
+	                    catch (ResourceException e) {
+	                    	throw new ServiceException(e);
+	                    }
+		            }
+		        }
+		        // Prepare feature definitions
+		        List<Ui_1.StructuralFeatureDefinition> structuralFeatureDefinitions = new ArrayList<Ui_1.StructuralFeatureDefinition>();
+		        Ui_1.this.structuralFeatureDefinitions.put(
+		            segmentIdentity,
+		            structuralFeatureDefinitions
+		        );
+		        List<Ui_1.OperationDefinition> operationDefinitions = new ArrayList<Ui_1.OperationDefinition>();
+		        Ui_1.this.operationDefinitions.put(
+		            segmentIdentity,
+		            operationDefinitions
+		        );
+	        	DataproviderRequest findRequest = new DataproviderRequest(
+	                Query_2Facade.newInstance(segmentIdentity.getChild("featureDefinition")).getDelegate(),
+	                DataproviderOperations.ITERATION_START,
+	                null,
 	                0,
 	                Integer.MAX_VALUE,
-	                Directions.ASCENDING
-	            );
-	            Map<String,MappedRecord> existingElements = new HashMap<String,MappedRecord>();
-	            this.existingElements.put(
-	                segmentIdentity,
-	                existingElements
-	            );
-	            for(
-	                Iterator<MappedRecord> j = elements.iterator();
-	                j.hasNext();
-	            ) {
-	            	MappedRecord element = j.next();
-	                try {
-	                    existingElements.put(
-	                        ObjectHolder_2Facade.getPath(element).getBase(),
-	                        ObjectHolder_2Facade.cloneObject(element)
-	                    );
-                    }
-                    catch (ResourceException e) {
-                    	throw new ServiceException(e);
-                    }
-	            }
-	        }
-	        // Prefetch all element definitions
-	        if(this.existingElementDefinitions.get(segmentIdentity) == null) {
-	            Collection<MappedRecord> elementDefinitions = this.delegation.addFindRequest(
-	                segmentIdentity.getChild("elementDefinition"),
-	                new FilterProperty[]{},
+	                Directions.ASCENDING,
 	                AttributeSelectors.ALL_ATTRIBUTES,
-	                0,
-	                Integer.MAX_VALUE,
-	                Directions.ASCENDING
-	            );
-	            Map<String,MappedRecord> existingElementDefinitions = new HashMap<String,MappedRecord>();
-	            this.existingElementDefinitions.put(
-	                segmentIdentity,
-	                existingElementDefinitions
-	            );
+	                null
+	        	);
+	        	DataproviderReply findReply = super.newDataproviderReply();
+	        	this.getDelegatingInteraction().find(
+	        		findRequest.getInteractionSpec(), 
+	        		Query_2Facade.newInstance(findRequest.object()), 
+	        		findReply.getResult()
+	        	);		        			        
+		        MappedRecord[] featureDefinitions = findReply.getObjects();
+		        for(MappedRecord featureDefinition: featureDefinitions) {
+		        	Object_2Facade featureDefinitionFacade = Object_2Facade.newInstance(featureDefinition);
+		            String qualifiedName = featureDefinitionFacade.getPath().getBase();
+		            String name = qualifiedName.substring(qualifiedName.lastIndexOf(":") + 1);
+		            String className = qualifiedName.substring(0, qualifiedName.lastIndexOf(":"));
+		            if("org:openmdx:ui1:StructuralFeatureDefinition".equals(featureDefinitionFacade.getObjectClass())) {
+		                String typeName = (String)featureDefinitionFacade.attributeValue("type");
+		                try {
+		                    structuralFeatureDefinitions.add(
+		                        new StructuralFeatureDefinition(
+		                            name,
+		                            qualifiedName,
+		                            model.getElement(typeName),
+		                            model.getElement(className),
+		                            (String)featureDefinitionFacade.attributeValue("multiplicity"),
+		                            (Boolean)featureDefinitionFacade.attributeValue("changeable"),
+		                            (Boolean)featureDefinitionFacade.attributeValue("isReference")
+		                        )
+		                    );
+		                }
+		                catch(ServiceException e) {
+		                    SysLog.warning("Unable to register structural feature definition (ignoring)", Arrays.asList(new String[]{name, qualifiedName, className, typeName}));
+		                    e.log();
+		                }
+		            }
+		            else if("org:openmdx:ui1:OperationDefinition".equals(featureDefinitionFacade.getObjectClass())) {
+		                Boolean isQuery = (Boolean)featureDefinitionFacade.attributeValue("isQuery");
+		                try {
+		                    operationDefinitions.add(
+		                        new OperationDefinition(
+		                            name,
+		                            qualifiedName,
+		                            isQuery == null ? 
+		                                true : 
+		                                isQuery.booleanValue(),
+		                            model.getElement(className)
+		                        )
+		                    );
+		                }
+		                catch(ServiceException e) {
+		                    SysLog.warning("Unable to register operation definition (ignoring)", Arrays.asList(new String[]{name, qualifiedName, className}));
+		                    e.log();
+		                }
+		            }
+		            else {
+		                SysLog.warning("Unable to register feature definition (ignoring)", Arrays.asList(new String[]{name, qualifiedName, className}));               
+		            }
+		        }
+	    	}
+	    	catch(ResourceException e) {
+	    		throw new ServiceException(e);
+	    	}
+	    }          
+
+	    /**
+	     * any modification resets cached elements.
+	     */
+	    @Override
+	    public boolean create(
+	        RestInteractionSpec ispec,
+	        Object_2Facade input,
+	        IndexedRecord output
+	    ) throws ServiceException {
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+	    	try {
+		        Ui_1.this.existingElementDefinitions.clear();
+		        Ui_1.this.existingElements.clear();
+		        Object_2Facade facade = Object_2Facade.newInstance(request.object());
+		        String objectClass = facade.getObjectClass();
+		        if("org:openmdx:ui1:StructuralFeatureDefinition".equals(objectClass)) {
+		        	if(facade.getAttributeValues("isReference") == null) {
+		        		facade.attributeValuesAsList("isReference").add(Boolean.FALSE);
+		        	}
+		        }
+		        super.create(
+		            ispec,
+		            input,
+		            output
+		        );
+		        return true;
+	    	}
+	    	catch(ResourceException e) {
+	    		throw new ServiceException(e);
+	    	}
+	    }
+	
+	    //------------------------------------------------------------------------
+	    @Override
+	    public boolean delete(
+	        RestInteractionSpec ispec,
+	        Object_2Facade input,
+	        IndexedRecord output
+	    ) throws ServiceException {
+	    	Ui_1.this.existingElementDefinitions.clear();
+	    	Ui_1.this.existingElements.clear();
+	        return super.delete(
+	            ispec,
+	            input,
+	            output
+	        );
+	    }
+	
+	    //------------------------------------------------------------------------
+	    @Override
+	    public boolean put(
+	        RestInteractionSpec ispec,
+	        Object_2Facade input,
+	        IndexedRecord output
+	    ) throws ServiceException {
+	    	Ui_1.this.existingElementDefinitions.clear();
+	    	Ui_1.this.existingElements.clear();
+	        return super.put(
+	            ispec,
+	            input,
+	            output
+	        );
+	    }
+	
+	    //------------------------------------------------------------------------
+	    @SuppressWarnings("unchecked")
+	    @Override
+	    public boolean find(
+	        RestInteractionSpec ispec,
+	        Query_2Facade input,
+	        IndexedRecord output
+	    ) throws ServiceException {
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            DataproviderReply reply = this.newDataproviderReply(output);
+            Model_1_0 model = this.getModel();
+	        if("assertableInspector".equals(request.path().getBase())) {
+	            Path segmentIdentity = request.path().getPrefix(5);
+	            this.assertCachedElements(segmentIdentity);
+	            List<MappedRecord> assertableInspectors = new ArrayList<MappedRecord>();  
+	            // Return assertableInspector for all loaded classes
 	            for(
-	                Iterator<MappedRecord> j = elementDefinitions.iterator();
-	                j.hasNext();
+	                Iterator i = model.getContent().iterator(); 
+	                i.hasNext();
 	            ) {
-	            	MappedRecord elementDefinition = j.next();
-	                try {
-	                    existingElementDefinitions.put(
-	                        ObjectHolder_2Facade.getPath(elementDefinition).getBase(),
-	                        ObjectHolder_2Facade.cloneObject(elementDefinition)
-	                    );
-                    }
-                    catch (ResourceException e) {
-                    	throw new ServiceException(e);
-                    }
+	                ModelElement_1_0 elementDef = (ModelElement_1_0)i.next();
+	                if(model.isClassType(elementDef)) {
+	                	try {
+		                	MappedRecord assertableInspector = Object_2Facade.newInstance(
+		                        request.path().getChild((String)elementDef.objGetValue("qualifiedName")),
+		                        "org:openmdx:ui1:AssertableInspector"
+		                    ).getDelegate();
+		                    MappedRecord inspectorDefinition = Ui_1.this.getInspectorElementDefinition(
+		                        segmentIdentity,
+		                        new StructuralFeatureDefinition(elementDef)
+		                    );
+		                    Object_2Facade assertableInspectorFacade = Object_2Facade.newInstance(assertableInspector);
+		                    Object_2Facade inspectorDefinitionFacade = Object_2Facade.newInstance(inspectorDefinition);
+		                    Ui_1.this.getAdditionalInspectorDefinitions(
+		                        inspectorDefinition
+		                    );
+		                    assertableInspectorFacade.attributeValuesAsList("forClass").add(
+		                        elementDef.objGetValue("qualifiedName")
+		                    );
+		                    // label
+		                    assertableInspectorFacade.attributeValuesAsList("label").addAll(
+		                    	inspectorDefinitionFacade.attributeValuesAsList("label")
+		                    );
+		                    // toolTip
+		                    assertableInspectorFacade.attributeValuesAsList("toolTip").addAll(
+		                    	inspectorDefinitionFacade.attributeValuesAsList("toolTip")
+		                    );
+		                    // changeable
+		                    assertableInspectorFacade.attributeValuesAsList("changeable").addAll(
+		                    	inspectorDefinitionFacade.attributeValuesAsList("changeable")
+		                    );
+		                    if(assertableInspectorFacade.attributeValuesAsList("changeable").isEmpty()) {
+		                    	assertableInspectorFacade.attributeValuesAsList("changeable").add(Boolean.TRUE);
+		                    }
+		                    // filterable
+		                    assertableInspectorFacade.attributeValuesAsList("filterable").addAll(
+		                    	inspectorDefinitionFacade.attributeValuesAsList("filterable")
+		                    );
+		                    if(assertableInspectorFacade.attributeValuesAsList("filterable").isEmpty()) {
+		                    	assertableInspectorFacade.attributeValuesAsList("filterable").add(Boolean.TRUE);
+		                    }
+		                    // sortable
+		                    assertableInspectorFacade.attributeValuesAsList("sortable").addAll(
+		                    	inspectorDefinitionFacade.attributeValuesAsList("sortable")
+		                    );
+		                    if(assertableInspectorFacade.attributeValuesAsList("sortable").isEmpty()) {
+		                    	assertableInspectorFacade.attributeValuesAsList("sortable").add(Boolean.TRUE);
+		                    }
+		                    // color
+		                    assertableInspectorFacade.attributeValuesAsList("color").addAll(
+		                    	inspectorDefinitionFacade.attributeValuesAsList("color")
+		                    );
+		                    // backColor
+		                    assertableInspectorFacade.attributeValuesAsList("backColor").addAll(
+		                    	inspectorDefinitionFacade.attributeValuesAsList("backColor")
+		                    );
+		                    // iconKey
+		                    assertableInspectorFacade.attributeValuesAsList("iconKey").addAll(
+		                    	inspectorDefinitionFacade.attributeValuesAsList("iconKey")
+		                    );
+		                    // order
+		                    assertableInspectorFacade.attributeValuesAsList("order").addAll(
+		                    	inspectorDefinitionFacade.attributeValuesAsList("order")
+		                    );
+		                    assertableInspectors.add(
+		                        assertableInspector
+		                    );
+	                	}
+	                	catch(ResourceException e) {
+	                		throw new ServiceException(e);
+	                	}
+	                }
 	            }
-	        }
-	        // Prepare feature definitions
-	        List<Ui_1.StructuralFeatureDefinition> structuralFeatureDefinitions = new ArrayList<Ui_1.StructuralFeatureDefinition>();
-	        this.structuralFeatureDefinitions.put(
-	            segmentIdentity,
-	            structuralFeatureDefinitions
-	        );
-	        List<Ui_1.OperationDefinition> operationDefinitions = new ArrayList<Ui_1.OperationDefinition>();
-	        this.operationDefinitions.put(
-	            segmentIdentity,
-	            operationDefinitions
-	        );
-	        List<MappedRecord> featureDefinitions = this.delegation.addFindRequest(
-	            segmentIdentity.getChild("featureDefinition"),
-	            null,
-	            AttributeSelectors.ALL_ATTRIBUTES,
-	            0,
-	            Integer.MAX_VALUE,
-	            Directions.ASCENDING
-	        );
-	        for(
-	            Iterator<MappedRecord> i = featureDefinitions.iterator();
-	            i.hasNext();
-	        ) {
-	        	MappedRecord featureDefinition = i.next();
-	        	ObjectHolder_2Facade featureDefinitionFacade = ObjectHolder_2Facade.newInstance(featureDefinition);
-	            String qualifiedName = featureDefinitionFacade.getPath().getBase();
-	            String name = qualifiedName.substring(qualifiedName.lastIndexOf(":") + 1);
-	            String className = qualifiedName.substring(0, qualifiedName.lastIndexOf(":"));
-	            if("org:openmdx:ui1:StructuralFeatureDefinition".equals(featureDefinitionFacade.getObjectClass())) {
-	                String typeName = (String)featureDefinitionFacade.attributeValue("type");
-	                try {
-	                    structuralFeatureDefinitions.add(
-	                        new StructuralFeatureDefinition(
-	                            name,
-	                            qualifiedName,
-	                            this.model.getElement(typeName),
-	                            this.model.getElement(className),
-	                            (String)featureDefinitionFacade.attributeValue("multiplicity"),
-	                            (Boolean)featureDefinitionFacade.attributeValue("changeable"),
-	                            (Boolean)featureDefinitionFacade.attributeValue("isReference")
-	                        )
-	                    );
-	                }
-	                catch(ServiceException e) {
-	                    SysLog.warning("Unable to register structural feature definition (ignoring)", Arrays.asList(new String[]{name, qualifiedName, className, typeName}));
-	                    e.log();
-	                }
-	            }
-	            else if("org:openmdx:ui1:OperationDefinition".equals(featureDefinitionFacade.getObjectClass())) {
-	                Boolean isQuery = (Boolean)featureDefinitionFacade.attributeValue("isQuery");
-	                try {
-	                    operationDefinitions.add(
-	                        new OperationDefinition(
-	                            name,
-	                            qualifiedName,
-	                            isQuery == null ? 
-	                                true : 
-	                                isQuery.booleanValue(),
-	                            this.model.getElement(className)
-	                        )
-	                    );
-	                }
-	                catch(ServiceException e) {
-	                    SysLog.warning("Unable to register operation definition (ignoring)", Arrays.asList(new String[]{name, qualifiedName, className}));
-	                    e.log();
-	                }
+	            if(request.position() >= assertableInspectors.size()) {
+		            reply.setHasMore(Boolean.FALSE);
+		            reply.setTotal(0);            	
 	            }
 	            else {
-	                SysLog.warning("Unable to register feature definition (ignoring)", Arrays.asList(new String[]{name, qualifiedName, className}));               
+	            	if(reply.getResult() != null) {
+	            		reply.getResult().addAll(
+	            			assertableInspectors
+	            	    );
+			            reply.setHasMore(Boolean.FALSE);
+			            reply.setTotal(assertableInspectors.size());
+	            	}
 	            }
+	            return true;
 	        }
-    	}
-    	catch(ResourceException e) {
-    		throw new ServiceException(e);
-    	}
-    }          
-
-    //------------------------------------------------------------------------
-    // Layer_1_0
-    //------------------------------------------------------------------------
-
-    /**
-     * any modification resets cached elements.
-     */
-    public DataproviderReply create(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-    	try {
-	        this.existingElementDefinitions.clear();
-	        this.existingElements.clear();
-	        ObjectHolder_2Facade facade = ObjectHolder_2Facade.newInstance(request.object());
-	        String objectClass = facade.getObjectClass();
-	        if("org:openmdx:ui1:StructuralFeatureDefinition".equals(objectClass)) {
-	        	if(facade.getAttributeValues("isReference") == null) {
-	        		facade.attributeValues("isReference").add(Boolean.FALSE);
-	        	}
-	        }
-	        return super.create(
-	            header, 
-	            request
-	        );
-    	}
-    	catch(ResourceException e) {
-    		throw new ServiceException(e);
-    	}
-    }
-
-    //------------------------------------------------------------------------
-    public DataproviderReply modify(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        this.existingElementDefinitions.clear();
-        this.existingElements.clear();
-        return super.modify(
-            header, 
-            request
-        );
-    }
-
-    //------------------------------------------------------------------------
-    public DataproviderReply remove(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        this.existingElementDefinitions.clear();
-        this.existingElements.clear();
-        return super.remove(
-            header, 
-            request
-        );
-    }
-
-    //------------------------------------------------------------------------
-    public DataproviderReply replace(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        this.existingElementDefinitions.clear();
-        this.existingElements.clear();
-        return super.replace(
-            header, 
-            request
-        );
-    }
-
-    //------------------------------------------------------------------------
-    public DataproviderReply set(
-        ServiceHeader header, 
-        DataproviderRequest request
-    ) throws ServiceException {
-        this.existingElementDefinitions.clear();
-        this.existingElements.clear();
-        return super.set(
-            header, 
-            request
-        );
-    }
-
-    //------------------------------------------------------------------------
-    public DataproviderReply find(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        if("assertableInspector".equals(request.path().getBase())) {
-            Path segmentIdentity = request.path().getPrefix(5);
-            this.assertCachedElements(segmentIdentity);
-            List<MappedRecord> assertableInspectors = new ArrayList<MappedRecord>();  
-            // Return assertableInspector for all loaded classes
-            for(
-                Iterator i = this.model.getContent().iterator(); 
-                i.hasNext();
-            ) {
-                ModelElement_1_0 elementDef = (ModelElement_1_0)i.next();
-                if(this.model.isClassType(elementDef)) {
-                	try {
-	                	MappedRecord assertableInspector = ObjectHolder_2Facade.newInstance(
-	                        request.path().getChild((String)elementDef.objGetValue("qualifiedName")),
-	                        "org:openmdx:ui1:AssertableInspector"
-	                    ).getDelegate();
-	                    MappedRecord inspectorDefinition = this.getInspectorElementDefinition(
-	                        segmentIdentity,
-	                        new StructuralFeatureDefinition(elementDef)
-	                    );
-	                    ObjectHolder_2Facade assertableInspectorFacade = ObjectHolder_2Facade.newInstance(assertableInspector);
-	                    ObjectHolder_2Facade inspectorDefinitionFacade = ObjectHolder_2Facade.newInstance(inspectorDefinition);
-	                    this.getAdditionalInspectorDefinitions(
-	                        inspectorDefinition
-	                    );
-	                    assertableInspectorFacade.attributeValues("forClass").add(
-	                        elementDef.objGetValue("qualifiedName")
-	                    );
-	                    // label
-	                    assertableInspectorFacade.attributeValues("label").addAll(
-	                    	inspectorDefinitionFacade.attributeValues("label")
-	                    );
-	                    // toolTip
-	                    assertableInspectorFacade.attributeValues("toolTip").addAll(
-	                    	inspectorDefinitionFacade.attributeValues("toolTip")
-	                    );
-	                    // changeable
-	                    assertableInspectorFacade.attributeValues("changeable").addAll(
-	                    	inspectorDefinitionFacade.attributeValues("changeable")
-	                    );
-	                    if(assertableInspectorFacade.attributeValues("changeable").isEmpty()) {
-	                    	assertableInspectorFacade.attributeValues("changeable").add(Boolean.TRUE);
-	                    }
-	                    // filterable
-	                    assertableInspectorFacade.attributeValues("filterable").addAll(
-	                    	inspectorDefinitionFacade.attributeValues("filterable")
-	                    );
-	                    if(assertableInspectorFacade.attributeValues("filterable").isEmpty()) {
-	                    	assertableInspectorFacade.attributeValues("filterable").add(Boolean.TRUE);
-	                    }
-	                    // sortable
-	                    assertableInspectorFacade.attributeValues("sortable").addAll(
-	                    	inspectorDefinitionFacade.attributeValues("sortable")
-	                    );
-	                    if(assertableInspectorFacade.attributeValues("sortable").isEmpty()) {
-	                    	assertableInspectorFacade.attributeValues("sortable").add(Boolean.TRUE);
-	                    }
-	                    // color
-	                    assertableInspectorFacade.attributeValues("color").addAll(
-	                    	inspectorDefinitionFacade.attributeValues("color")
-	                    );
-	                    // backColor
-	                    assertableInspectorFacade.attributeValues("backColor").addAll(
-	                    	inspectorDefinitionFacade.attributeValues("backColor")
-	                    );
-	                    // iconKey
-	                    assertableInspectorFacade.attributeValues("iconKey").addAll(
-	                    	inspectorDefinitionFacade.attributeValues("iconKey")
-	                    );
-	                    // order
-	                    assertableInspectorFacade.attributeValues("order").addAll(
-	                    	inspectorDefinitionFacade.attributeValues("order")
-	                    );
-	                    assertableInspectors.add(
-	                        assertableInspector
-	                    );
-                	}
-                	catch(ResourceException e) {
-                		throw new ServiceException(e);
-                	}
-                }
-            }
-            DataproviderReply reply = null;
-            if(request.position() >= assertableInspectors.size()) {
-            	reply = new DataproviderReply();
-	            reply.context(DataproviderReplyContexts.HAS_MORE).set(0, Boolean.FALSE);
-	            reply.context(DataproviderReplyContexts.TOTAL).set(0, 0);            	
-            }
-            else {
-	            reply = new DataproviderReply(
-	                assertableInspectors
+	        else {
+	            return super.find(
+	                ispec,
+	                input,
+	                output
 	            );
-	            reply.context(DataproviderReplyContexts.HAS_MORE).set(0, Boolean.FALSE);
-	            reply.context(DataproviderReplyContexts.TOTAL).set(0, assertableInspectors.size());
-            }
-            return reply;
-        }
-        else {
-            return super.find(
-                header,
-                request
-            );
-        }
-    }
-
-    //------------------------------------------------------------------------
-    public DataproviderReply operation(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-    	try {
-	        String operation = request.path().get(
-	            request.path().size() - 2
-	        );
-	        MappedRecord arguments = request.object();
-	        if("assertInspector".equals(operation)) {
-	            try {
-	                Path segmentIdentity = request.path().getPrefix(5);
-	                String forClass = (String)ObjectHolder_2Facade.newInstance(arguments).attributeValue("forClass");
-	                MappedRecord inspectorDef = null;
-	                try {
-	                    inspectorDef = this.delegation.addGetRequest(
-	                        segmentIdentity.getDescendant(new String[]{"element", forClass})
-	                    );
-	                }
-	                catch(ServiceException e) {} 
-	                if(inspectorDef == null) {
-	                    // Always assert perspective Root
-	                    if(!"Root".equals(segmentIdentity.getBase())) {
-	                        Path rootSegmentIdentity = segmentIdentity.getParent().getChild("Root");
-	                        try {
-	                            this.delegation.addGetRequest(
-	                                rootSegmentIdentity.getDescendant(new String[]{"element", forClass})
-	                            );
-	                        } 
-	                        catch(Exception e) {
-	                            this.assertCachedElements(
-	                                rootSegmentIdentity
-	                            );
-	                            this.createInspector(
-	                                rootSegmentIdentity,
-	                                forClass
-	                            );
-	                        }
-	                    }
-	                    this.assertCachedElements(
-	                        segmentIdentity
-	                    );
-	                    this.createInspector(
-	                        segmentIdentity,
-	                        forClass
-	                    );
-	                    this.createInspector(
-	                        segmentIdentity.getParent().getChild("Root"),
-	                        forClass
-	                    );                        
-	                }
-	            }
-	            catch(ServiceException e) {
-	                throw new ServiceException(
-	                    e,
-	                    BasicException.Code.DEFAULT_DOMAIN,
-	                    BasicException.Code.CREATION_FAILURE,
-	                    "Inspector for class " + ObjectHolder_2Facade.newInstance(arguments).attributeValue("forClass") + " can not be created",
-	                    new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
-	                    new BasicException.Parameter("reason", e.getCause().getDescription())
-	                );
-	            }
-	            catch(Exception e) {
-	                throw new ServiceException(
-	                    e,
-	                    BasicException.Code.DEFAULT_DOMAIN,
-	                    BasicException.Code.CREATION_FAILURE,
-	                    "Inspector for class " + ObjectHolder_2Facade.newInstance(arguments).attributeValue("forClass") + " can not be created",
-	                    new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
-	                    new BasicException.Parameter("reason", e.getMessage())
-	                );
-	            }
-	            MappedRecord result = ObjectHolder_2Facade.newInstance(
-	                request.path().getDescendant(
-	                    new String[]{ "reply", super.uidAsString()}
-	                ),
-	                "org:openmdx:base:Void"
-	            ).getDelegate();
-	            return new DataproviderReply(result);
 	        }
-	        throw new ServiceException(
-	            BasicException.Code.DEFAULT_DOMAIN,
-	            BasicException.Code.NOT_SUPPORTED,
-	            "operation not supported",
-	            new BasicException.Parameter("operation", operation)
-	        );
-    	}
-    	catch(ResourceException e) {
-    		throw new ServiceException(e);
-    	}
+	    }
+	
+	    //------------------------------------------------------------------------
+	    @Override
+	    public boolean invoke(
+            RestInteractionSpec ispec, 
+            MessageRecord input,
+            MessageRecord output
+	    ) throws ServiceException {
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+	    	try {
+		        String operationName = request.path().get(
+		            request.path().size() - 2
+		        );
+		        MappedRecord arguments = request.object();
+		        if("assertInspector".equals(operationName)) {
+		            try {
+		                Path segmentIdentity = request.path().getPrefix(5);
+		                String forClass = (String)Object_2Facade.newInstance(arguments).attributeValue("forClass");
+		                MappedRecord inspectorDef = null;
+		                try {
+		                    inspectorDef = this.retrieveObject(
+		                        segmentIdentity.getDescendant(new String[]{"element", forClass})
+		                    );
+		                }
+		                catch(ServiceException e) {} 
+		                if(inspectorDef == null) {
+		                    // Always assert perspective Root
+		                    if(!"Root".equals(segmentIdentity.getBase())) {
+		                        Path rootSegmentIdentity = segmentIdentity.getParent().getChild("Root");
+		                        try {
+		                            this.retrieveObject(
+		                                rootSegmentIdentity.getDescendant(new String[]{"element", forClass})
+		                            );
+		                        } 
+		                        catch(Exception e) {
+		                        	this.assertCachedElements(
+		                                rootSegmentIdentity
+		                            );
+		                        	Ui_1.this.createInspector(
+		                                rootSegmentIdentity,
+		                                forClass
+		                            );
+		                        }
+		                    }
+		                    this.assertCachedElements(
+		                        segmentIdentity
+		                    );
+		                    Ui_1.this.createInspector(
+		                        segmentIdentity,
+		                        forClass
+		                    );
+		                    Ui_1.this.createInspector(
+		                        segmentIdentity.getParent().getChild("Root"),
+		                        forClass
+		                    );                        
+		                }
+		            }
+		            catch(ServiceException e) {
+		                throw new ServiceException(
+		                    e,
+		                    BasicException.Code.DEFAULT_DOMAIN,
+		                    BasicException.Code.CREATION_FAILURE,
+		                    "Inspector for class " + Object_2Facade.newInstance(arguments).attributeValue("forClass") + " can not be created",
+		                    new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
+		                    new BasicException.Parameter("reason", e.getCause().getDescription())
+		                );
+		            }
+		            catch(Exception e) {
+		                throw new ServiceException(
+		                    e,
+		                    BasicException.Code.DEFAULT_DOMAIN,
+		                    BasicException.Code.CREATION_FAILURE,
+		                    "Inspector for class " + Object_2Facade.newInstance(arguments).attributeValue("forClass") + " can not be created",
+		                    new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
+		                    new BasicException.Parameter("reason", e.getMessage())
+		                );
+		            }
+		            Object_2Facade result = Object_2Facade.newInstance(
+		                request.path().getDescendant(
+		                    new String[]{ "reply", super.uidAsString()}
+		                ),
+		                "org:openmdx:base:Void"
+		            );		            
+		            output.setPath(result.getPath());
+		            output.setBody(result.getValue());
+		            return true;
+		        }
+		        throw new ServiceException(
+		            BasicException.Code.DEFAULT_DOMAIN,
+		            BasicException.Code.NOT_SUPPORTED,
+		            "operation not supported",
+		            new BasicException.Parameter("operation", operationName)
+		        );
+	    	}
+	    	catch(ResourceException e) {
+	    		throw new ServiceException(e);
+	    	}
+	    }
     }
-
+    
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------  
@@ -3216,13 +3308,13 @@ public class Ui_1 extends Layer_1 {
     public static final String RELOAD_OBJECT_OPERATION_NAME = "org:openmdx:base:BasicObject:reload";
     public static final String NAVIGATE_TO_PARENT_OPERATION_NAME = "org:openmdx:base:BasicObject:navigateToParent";
 
-    private static final String PANE_TYPE_OPERATION = "org:openmdx:ui1:OperationPane";
-    private static final String PANE_TYPE_ATTRIBUTE = "org:openmdx:ui1:AttributePane";
-    private static final String PANE_TYPE_REFERENCE = "org:openmdx:ui1:ReferencePane";
+    protected static final String PANE_TYPE_OPERATION = "org:openmdx:ui1:OperationPane";
+    protected static final String PANE_TYPE_ATTRIBUTE = "org:openmdx:ui1:AttributePane";
+    protected static final String PANE_TYPE_REFERENCE = "org:openmdx:ui1:ReferencePane";
 
-    private static final String TAB_TYPE_OPERATION = "org:openmdx:ui1:OperationTab";
+    protected static final String TAB_TYPE_OPERATION = "org:openmdx:ui1:OperationTab";
 
-    private static final List REFERENCES_TO_EXCLUDE = Arrays.asList(
+    protected static final List REFERENCES_TO_EXCLUDE = Arrays.asList(
         new String[]{
             "view",
             "org:openmdx:base:Segment:extent",
@@ -3230,23 +3322,20 @@ public class Ui_1 extends Layer_1 {
             "org:openmdx:base:ContextCapable:context"
         }
     );  
-    private Model_1_0 model = null;
-    private Map<Path,Map<String,MappedRecord>> existingElementDefinitions =
+    protected Map<Path,Map<String,MappedRecord>> existingElementDefinitions =
         new HashMap<Path,Map<String,MappedRecord>>();
-    private Map<Path,Map<String,MappedRecord>> existingElements =
+    protected Map<Path,Map<String,MappedRecord>> existingElements =
         new HashMap<Path,Map<String,MappedRecord>>();
-    private Map<Path,List<Ui_1.StructuralFeatureDefinition>> structuralFeatureDefinitions = 
+    protected Map<Path,List<Ui_1.StructuralFeatureDefinition>> structuralFeatureDefinitions = 
         new HashMap<Path,List<Ui_1.StructuralFeatureDefinition>>();
-    private Map<Path,List<Ui_1.OperationDefinition>> operationDefinitions =
+    protected Map<Path,List<Ui_1.OperationDefinition>> operationDefinitions =
         new HashMap<Path,List<Ui_1.OperationDefinition>>();
-    private boolean changableDefaultValue = true;
+    protected boolean changableDefaultValue = true;
 
-    private RequestCollection delegation = null; // initialized in prolog()
-
-    private OperationDefinition editObjectOperationDef = null;
-    private OperationDefinition deleteObjectOperationDef = null;
-    private OperationDefinition reloadObjectOperationDef = null;
-    private OperationDefinition navigateToParentOperationDef = null;
+    protected OperationDefinition editObjectOperationDef = null;
+    protected OperationDefinition deleteObjectOperationDef = null;
+    protected OperationDefinition reloadObjectOperationDef = null;
+    protected OperationDefinition navigateToParentOperationDef = null;
 
 }
 

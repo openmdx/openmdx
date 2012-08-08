@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PathComponent.java,v 1.2 2009/01/21 14:00:46 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: PathComponent.java,v 1.4 2009/11/10 15:17:48 hburger Exp $
  * Description: A Path COmponent 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/21 14:00:46 $
+ * Date:        $Date: 2009/11/10 15:17:48 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -255,6 +254,19 @@ implements Comparable, Cloneable, Serializable
     }
 
     /**
+     * Tells whether a given XRI segment is a placeholder
+     * 
+     * @param segment an XRI segment
+     * 
+     * @return <code>true</code> if the given XRI segment is a placeholder
+     */
+    public static boolean isPlaceHolder(
+        String segment
+    ){
+        return new PathComponent(segment).isPlaceHolder();
+    }
+    
+    /**
      *
      */
     public boolean isPrivate(
@@ -374,7 +386,7 @@ implements Comparable, Cloneable, Serializable
         if (
                 position < 0 ||
                 position > size()
-        ) throw new ArrayIndexOutOfBoundsException(BAD_FIELD_NUMBER);
+        ) throw new ArrayIndexOutOfBoundsException("The field number must be in the range [0,size()]");
         String[] fields = new String[position];
         System.arraycopy(
             this.fields, 0,
@@ -406,7 +418,7 @@ implements Comparable, Cloneable, Serializable
         if (
                 position < 0 ||
                 position > size()
-        ) throw new ArrayIndexOutOfBoundsException(BAD_FIELD_NUMBER);
+        ) throw new ArrayIndexOutOfBoundsException("The field number must be in the range [0,size()]");
         String[] fields = new String[size()-position];
         System.arraycopy(
             this.fields, position,
@@ -805,7 +817,7 @@ implements Comparable, Cloneable, Serializable
     public static PathComponent createPlaceHolder(
     ){
         return new PathComponent(
-            new String[]{"",UUIDs.getGenerator().next().toString()}
+            new String[]{"",UUIDs.newUUID().toString()}
         );
     }
 
@@ -829,13 +841,6 @@ implements Comparable, Cloneable, Serializable
     //------------------------------------------------------------------------
     // Constants
     //------------------------------------------------------------------------
-
-    /**
-     * An error message in case the number of a field is outside the
-     * allowed range.
-     */
-    final static private String BAD_FIELD_NUMBER =
-        "The field number must be in the range [0,size()]";
 
     /**
      * The fields are delimited by a single colon in a path component's String

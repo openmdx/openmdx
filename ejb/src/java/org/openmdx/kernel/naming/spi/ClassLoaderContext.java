@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ClassLoaderContext.java,v 1.1 2009/01/12 12:49:23 wfro Exp $
+ * Name:        $Id: ClassLoaderContext.java,v 1.3 2009/09/11 13:39:20 hburger Exp $
  * Description: Java URL Context
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:23 $
+ * Date:        $Date: 2009/09/11 13:39:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +62,9 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
+import org.openmdx.kernel.lightweight.naming.spi.HashMapContext;
+import org.openmdx.kernel.lightweight.naming.spi.NameBasedContext;
+
 
 /**
  * Java URL Context
@@ -75,12 +78,10 @@ public class ClassLoaderContext extends NameBasedContext {
      * @param urlPrefix 
      */
     ClassLoaderContext(
-        Hashtable<?,?> environment, 
+        Map<?,?> environment, 
         String urlPrefix
     ) {
-        super.environment = environment == null ? 
-        	new Hashtable<Object,Object>() :
-        	new Hashtable<Object,Object>(environment);
+    	super(environment);
         this.urlPrefix = urlPrefix;
     }
     

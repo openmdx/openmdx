@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ValueListAutocompleter.java,v 1.15 2008/08/12 16:38:05 wfro Exp $
+ * Name:        $Id: ValueListAutocompleter.java,v 1.17 2009/09/25 12:02:38 wfro Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:05 $
+ * Date:        $Date: 2009/09/25 12:02:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,8 +61,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 
 public class ValueListAutocompleter
@@ -77,7 +77,7 @@ public class ValueListAutocompleter
     
     //-----------------------------------------------------------------------
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String id,
         int tabIndex,
         String fieldName,
@@ -89,7 +89,7 @@ public class ValueListAutocompleter
         CharSequence imgTag
     ) throws ServiceException {
         
-        AppLog.detail("> paint");        
+    	SysLog.detail("> paint");        
         
         ApplicationContext app = p.getApplicationContext();
         HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
@@ -105,11 +105,11 @@ public class ValueListAutocompleter
                 if(numericCompare) {
                     BigDecimal d1 = app.parseNumber((String)option);
                     if(d1 == null) {
-                        AppLog.warning("Option for numeric field is not a number", Arrays.asList(new Object[]{fieldName, option, this.options}));
+                    	SysLog.warning("Option for numeric field is not a number", Arrays.asList(new Object[]{fieldName, option, this.options}));
                     }
                     BigDecimal d2 = app.parseNumber((String)currentValue.getValue(false));
                     if(d2 == null) {
-                        AppLog.warning("Numeric attribute value can not be parsed as number", Arrays.asList(new Object[]{fieldName, option}));                        
+                    	SysLog.warning("Numeric attribute value can not be parsed as number", Arrays.asList(new Object[]{fieldName, option}));                        
                     }
                     selectedModifier = (d1 != null) && (d2 != null)  
                         ? d1.compareTo(d2) == 0 ? "selected" : ""

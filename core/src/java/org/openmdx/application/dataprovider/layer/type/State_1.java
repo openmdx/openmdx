@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: State_1.java,v 1.1 2009/05/26 14:31:21 wfro Exp $
- * Description: State_1 
- * Revision:    $Revision: 1.1 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: State_1.java,v 1.9 2010/01/06 17:16:35 wfro Exp $
+ * Description: Strict_1 class performing type checking of DataproviderRequest/DataproviderReply
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:21 $
+ * Date:        $Date: 2010/01/06 17:16:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,51 +48,98 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.application.dataprovider.layer.type;
 
+import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.Interaction;
+import javax.resource.cci.MappedRecord;
+
+import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
-import org.openmdx.application.dataprovider.cci.DataproviderReply;
-import org.openmdx.application.dataprovider.cci.DataproviderRequest;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.dataprovider.layer.model.State_1_Attributes;
+import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.rest.spi.Object_2Facade;
 
-/**
- * State_1
+/** 
+ * Apply org::openmdx::state2 configuration
  */
-public class State_1
-    extends Strict_1
-{
+public class State_1 extends Strict_1 {
 
-    /**
-     * Constructor 
+    //-----------------------------------------------------------------------
+    public State_1(
+    ) {
+    }
+    
+    // --------------------------------------------------------------------------
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new StateLayerInteraction(connection);
+    }
+            
+    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.layer.type.Strict_1#activate(short, org.openmdx.application.configuration.Configuration, org.openmdx.application.dataprovider.spi.Layer_1_0)
      */
-    public State_1() {
-        super();
+    @Override
+    public void activate(
+        short id,
+        Configuration configuration,
+        Layer_1 delegation
+    ) throws ServiceException {
+        super.activate(id, configuration, delegation);
+        this.validTimeUnique = configuration.isOn(
+            LayerConfigurationEntries.VALID_TIME_UNIQUE
+        );
+        this.transactionTimeUnique = configuration.isOn(
+            LayerConfigurationEntries.TRANSACTION_TIME_UNIQUE
+        );
     }
 
+    // --------------------------------------------------------------------------
+    public class StateLayerInteraction extends Strict_1.LayerInteraction {
+        
+        public StateLayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
+        }
+    }
+    
+    //-----------------------------------------------------------------------
     /**
-     * State requests should return all attributes at once to allow client side cloning.
+     * Tells whether states are disabled or not
      */
-    public DataproviderReply find(
-        ServiceHeader header,
-        DataproviderRequest request
+    private boolean validTimeUnique;
+
+    /**
+     * Tells whether invalidated states are deleted or kept.
+     */
+    private boolean transactionTimeUnique;
+    
+    //-----------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.layer.type.Strict_1#completeAndVerifyReplyObject(javax.resource.cci.MappedRecord, short, org.openmdx.base.query.AttributeSpecifier[])
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void completeAndVerifyReplyObject(
+        MappedRecord object, 
+        short attributeSelector
     ) throws ServiceException {
-        return super.find(
-            header,
-            State_1_Attributes.indexOfStatedObject(request.attributeFilter()) >= 0 &&
-            request.attributeSelector() == AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES ? new DataproviderRequest(
-                request.object(),
-                request.operation(),
-                request.attributeFilter(),
-                request.position(),
-                request.size(),
-                request.direction(),
-                AttributeSelectors.ALL_ATTRIBUTES,
-                request.attributeSpecifier()
-            ) : request
+        super.completeAndVerifyReplyObject(
+            object, 
+            attributeSelector
         );
+        if(
+            attributeSelector != AttributeSelectors.NO_ATTRIBUTES &&
+            getModel().objectIsSubtypeOf(object, "org:openmdx:state2:StateCapable")
+        ) {
+            MappedRecord value = Object_2Facade.getValue(object);
+            value.put("validTimeUnique", Boolean.valueOf(validTimeUnique));
+            value.put("transactionTimeUnique", Boolean.valueOf(this.transactionTimeUnique));
+        }
     }
 
 }

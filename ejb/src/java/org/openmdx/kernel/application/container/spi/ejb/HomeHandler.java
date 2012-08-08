@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HomeHandler.java,v 1.3 2009/05/15 00:38:58 hburger Exp $
+ * Name:        $Id: HomeHandler.java,v 1.5 2010/04/16 12:36:39 hburger Exp $
  * Description: Home Handler
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/15 00:38:58 $
+ * Date:        $Date: 2010/04/16 12:36:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,8 +58,8 @@ import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import javax.ejb.HomeHandle;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Classes;
 
 /**
  * Home Invocation Handler
@@ -147,7 +147,7 @@ implements HomeHandle
     public EJBHome getHome(
     ) throws RemoteException {
         try {
-            return (EJBHome) Classes.newProxyInstance(
+            return Classes.<EJBHome>newProxyInstance(
                 this,
                 EJBHome.class, Classes.getApplicationClass(this.ejbHomeClass)
             );

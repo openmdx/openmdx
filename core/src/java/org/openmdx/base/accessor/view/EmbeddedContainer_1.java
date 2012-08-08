@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EmbeddedContainer_1.java,v 1.3 2009/06/02 19:54:54 hburger Exp $
+ * Name:        $Id: EmbeddedContainer_1.java,v 1.9 2009/08/18 14:02:26 hburger Exp $
  * Description: Embedded Container
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/02 19:54:54 $
+ * Date:        $Date: 2009/08/18 14:02:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,9 +58,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import javax.jdo.FetchPlan;
+
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.collection.FilterableMap;
+import org.openmdx.base.naming.Path;
 
 /**
  * Embedded Container
@@ -71,14 +73,6 @@ public class EmbeddedContainer_1
 {
 
     /**
-     * Constructor for a modifiable container
-     */
-    public EmbeddedContainer_1(
-    ){
-        this.readonly = false;
-    }
-
-    /**
      * Constructor for an unmodifiable
      *
      * @param source
@@ -87,14 +81,8 @@ public class EmbeddedContainer_1
         Map<? extends String, ? extends DataObject_1_0> source
      ) {
         super(source);
-        this.readonly = true;
     }
 
-    /**
-     * Tells whether the container is modifiable or not
-     */
-    private final boolean readonly;
-    
     /**
      * Implements <code>Serializable</code>
      */
@@ -103,7 +91,7 @@ public class EmbeddedContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#subMap(java.lang.Object)
      */
-    public FilterableMap<String, DataObject_1_0> subMap(Object filter) {
+    public Container_1_0 subMap(Object filter) {
         throw new UnsupportedOperationException(
             "Filtering of embedded objects not yet implemented"
         );
@@ -121,24 +109,12 @@ public class EmbeddedContainer_1
         return new ArrayList<DataObject_1_0>(values());
     }
 
-    /**
-     * A read-only container is unmodifiable...
-     */
-    protected void assertModifiability(){
-        if(this.readonly) {
-            throw new UnsupportedOperationException(
-                "This is a read-only container"
-            );
-        }
-    }
-    
     /* (non-Javadoc)
      * @see java.util.TreeMap#clear()
      */
     @Override
     public void clear() {
-        assertModifiability();
-        super.clear();
+        throw new UnsupportedOperationException("This is a read-only container");
     }
 
     /* (non-Javadoc)
@@ -146,8 +122,7 @@ public class EmbeddedContainer_1
      */
     @Override
     public DataObject_1_0 put(String key, DataObject_1_0 value) {
-        assertModifiability();
-        return super.put(key, value);
+        throw new UnsupportedOperationException("This is a read-only container");
     }
 
     /* (non-Javadoc)
@@ -155,8 +130,7 @@ public class EmbeddedContainer_1
      */
     @Override
     public DataObject_1_0 remove(Object key) {
-        assertModifiability();
-        return super.remove(key);
+        throw new UnsupportedOperationException("This is a read-only container");
     }
 
     /* (non-Javadoc)
@@ -164,7 +138,7 @@ public class EmbeddedContainer_1
      */
     @Override
     public Set<java.util.Map.Entry<String, DataObject_1_0>> entrySet() {
-        return this.readonly ? Collections.unmodifiableSet(super.entrySet()) : super.entrySet();
+        return Collections.unmodifiableSet(super.entrySet());
     }
 
     /* (non-Javadoc)
@@ -172,7 +146,7 @@ public class EmbeddedContainer_1
      */
     @Override
     public Set<String> keySet() {
-        return this.readonly ? Collections.unmodifiableSet(super.keySet()) : super.keySet();
+        return Collections.unmodifiableSet(super.keySet());
     }
 
     /* (non-Javadoc)
@@ -180,27 +154,38 @@ public class EmbeddedContainer_1
      */
     @Override
     public Collection<DataObject_1_0> values() {
-        return this.readonly ? Collections.unmodifiableCollection(super.values()) : super.values();
+        return Collections.unmodifiableCollection(super.values());
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Container_1_0#superSet()
      */
-    public Container_1_0 superSet() {
+    public Container_1_0 container() {
         throw new UnsupportedOperationException("Operation not supported by EmbeddedContainer_1");
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
      */
-    public void retrieveAll(boolean useFetchPlan) {
+    public void retrieveAll(FetchPlan fetchPlan) {
         throw new UnsupportedOperationException("Operation not supported by EmbeddedContainer_1");
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Container_1_0#getObjectId()
      */
-    public Object getContainerId() {
+    public Path getContainerId() {
+        throw new UnsupportedOperationException("Operation not supported by EmbeddedContainer_1");
+    }
+
+    public boolean isRetrieved() {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.Container_1_0#refreshAll()
+     */
+    public void refreshAll() {
         throw new UnsupportedOperationException("Operation not supported by EmbeddedContainer_1");
     }
     

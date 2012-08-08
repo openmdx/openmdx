@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: HexadecimalFormatter.java,v 1.2 2007/10/10 17:16:08 hburger Exp $
+ * Name:        $Id: HexadecimalFormatter.java,v 1.3 2009/12/31 13:09:56 wfro Exp $
  * Description: Hexadecmial Formatter
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 17:16:08 $
+ * Date:        $Date: 2009/12/31 13:09:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,7 +54,7 @@ package org.openmdx.kernel.text.format;
 import java.util.Arrays;
 
 /**
- * Hexadecmial Formatter
+ * Hexadecimal Formatter
  */
 public class HexadecimalFormatter {
 

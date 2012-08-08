@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelImporter_1.java,v 1.6 2009/06/14 00:03:42 wfro Exp $
+ * Name:        $Id: ModelImporter_1.java,v 1.12 2010/03/23 17:00:01 hburger Exp $
  * Description: ModelImporter_1 class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/14 00:03:42 $
+ * Date:        $Date: 2010/03/23 17:00:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,7 +68,7 @@ import org.omg.mof.cci.ScopeKind;
 import org.omg.mof.cci.VisibilityKind;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelExceptions;
@@ -77,7 +77,9 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
+import org.openmdx.base.resource.Records;
+import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -122,10 +124,10 @@ implements ModelImporter_1_0 {
     }
         
     //---------------------------------------------------------------------------
-    private RequestCollection getChannel(
+    private DataproviderRequestProcessor getChannel(
     ) throws ServiceException {
         if(this.channel == null) {
-            this.channel = new RequestCollection(
+            this.channel = new DataproviderRequestProcessor(
                 this.header,
                 this.target
             );
@@ -140,12 +142,12 @@ implements ModelImporter_1_0 {
     ) throws ServiceException {
         if(scope == null || ((scope.size() >= 2) && "Logical View".equals(scope.get(0)))) {
             // create segment on-demand
-            String modelName = ObjectHolder_2Facade.getPath(object).get(4);
+            String modelName = Object_2Facade.getPath(object).get(4);
             if(!this.segments.contains(modelName)) {
                 MappedRecord segment;
                 try {
-                    segment = ObjectHolder_2Facade.newInstance(
-                        ObjectHolder_2Facade.getPath(object).getPrefix(5),
+                    segment = Object_2Facade.newInstance(
+                        Object_2Facade.getPath(object).getPrefix(5),
                         "org:omg:model1:Segment"
                     ).getDelegate();
                 } 
@@ -157,12 +159,27 @@ implements ModelImporter_1_0 {
                 );
                 this.segments.add(modelName);
             }
-            if(ModelAttributes.PACKAGE.equals(ObjectHolder_2Facade.getObjectClass(object))) {
-                this.getChannel().addSetRequest(
-                    object,
-                    AttributeSelectors.NO_ATTRIBUTES,
-                    null
-                );
+            if(ModelAttributes.PACKAGE.equals(Object_2Facade.getObjectClass(object))) {
+                try {
+                    this.getChannel().addGetRequest(
+                        Object_2Facade.getPath(object)
+                    );
+                    this.getChannel().addReplaceRequest(
+                        object,
+                        AttributeSelectors.NO_ATTRIBUTES,
+                        null
+                    );
+                }
+                catch(ServiceException e) {
+                    if(e.getExceptionCode() != BasicException.Code.NOT_FOUND) {
+                        throw e;
+                    }
+                    this.getChannel().addCreateRequest(
+                        object,
+                        AttributeSelectors.NO_ATTRIBUTES,
+                        null
+                    );                    
+                }
             }
             else {
                 try {
@@ -200,8 +217,7 @@ implements ModelImporter_1_0 {
                 new Path("xri:@openmdx:org.omg.model1/provider/" + this.providerName)
             );
             this.endImport();
-        }
-        catch(ServiceException e) {
+        } catch(ServiceException e) {
             if (e.getExceptionCode() != BasicException.Code.NOT_FOUND) {
                 e.log();
             }
@@ -209,27 +225,19 @@ implements ModelImporter_1_0 {
         // beginImport clears all pending requests and prepares for
         // a new import    
         try {
-            this.getChannel().addOperationRequest(
-                ObjectHolder_2Facade.newInstance(
-                    PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport"),
-                    "org:openmdx:base:Void"
-                ).getDelegate()
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
-        this.segments = new HashSet();
-        // create repository root
-        try {
+            MessageRecord request = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
+            request.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "beginImport"));
+            request.setBody(null);
+            this.getChannel().addOperationRequest(request);
+            this.segments = new HashSet();
+            // create repository root
             this.getChannel().addCreateRequest(
-                ObjectHolder_2Facade.newInstance(
+                Object_2Facade.newInstance(
                     new Path("xri:@openmdx:org.omg.model1/provider/" + this.providerName),
-                    "org:openmdx:base:Void"
+                    "org:openmdx:base:Provider"
                 ).getDelegate()
             );
-        } 
-        catch (ResourceException e) {
+        } catch (ResourceException e) {
             throw new ServiceException(e);
         }
     }
@@ -238,14 +246,11 @@ implements ModelImporter_1_0 {
     protected void endImport(
     ) throws ServiceException {
         try {
-            this.getChannel().addOperationRequest(
-                ObjectHolder_2Facade.newInstance(
-                    PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport"),
-                    "org:openmdx:base:Void"
-                ).getDelegate()
-            );
-        } 
-        catch (ResourceException e) {
+            MessageRecord request = (MessageRecord) Records.getRecordFactory().createMappedRecord(MessageRecord.NAME);
+            request.setPath(PROVIDER_ROOT_PATH.getDescendant("segment", "-", "endImport"));
+            request.setBody(null);
+            this.getChannel().addOperationRequest(request);
+        } catch (ResourceException e) {
             throw new ServiceException(e);
         }
     }
@@ -429,7 +434,7 @@ implements ModelImporter_1_0 {
                 new BasicException.Parameter("multiplicity", text),
                 new BasicException.Parameter("lowerBound", lowerBound),
                 new BasicException.Parameter("upperBound", upperBound),
-                new BasicException.Parameter("container", ObjectHolder_2Facade.getPath(container)),
+                new BasicException.Parameter("container", Object_2Facade.getPath(container)),
                 new BasicException.Parameter("element", elementName)
             );
         }
@@ -452,40 +457,40 @@ implements ModelImporter_1_0 {
         List scope
     ) throws ServiceException {
         try {
-            ObjectHolder_2Facade associationEndDef1Facade = ObjectHolder_2Facade.newInstance(associationEndDef1);
-            ObjectHolder_2Facade associationEndDef2Facade = ObjectHolder_2Facade.newInstance(associationEndDef2);        
+            Object_2Facade associationEndDef1Facade = Object_2Facade.newInstance(associationEndDef1);
+            Object_2Facade associationEndDef2Facade = Object_2Facade.newInstance(associationEndDef2);        
             if(
                 ((Boolean)associationEndDef2Facade.attributeValue("isNavigable")).booleanValue()
             ) {
-                ObjectHolder_2Facade referenceDefFacade = ObjectHolder_2Facade.newInstance(
+                Object_2Facade referenceDefFacade = Object_2Facade.newInstance(
                     newFeaturePath(
                         ((Path)associationEndDef1Facade.attributeValue("type")),
                         (String)associationEndDef2Facade.attributeValue("name")
                     ),
                     ModelAttributes.REFERENCE
                 );
-                referenceDefFacade.attributeValues("container").addAll(
-                    associationEndDef1Facade.attributeValues("type")
+                referenceDefFacade.attributeValuesAsList("container").addAll(
+                    associationEndDef1Facade.attributeValuesAsList("type")
                 );
-                referenceDefFacade.attributeValues("type").addAll(
-                    associationEndDef2Facade.attributeValues("type")
+                referenceDefFacade.attributeValuesAsList("type").addAll(
+                    associationEndDef2Facade.attributeValuesAsList("type")
                 );
-                referenceDefFacade.attributeValues("referencedEnd").add(
+                referenceDefFacade.attributeValuesAsList("referencedEnd").add(
                     associationEndDef2Facade.getPath()
                 );
-                referenceDefFacade.attributeValues("exposedEnd").add(
+                referenceDefFacade.attributeValuesAsList("exposedEnd").add(
                     associationEndDef1Facade.getPath()
                 );
-                referenceDefFacade.attributeValues("multiplicity").addAll(
-                    associationEndDef2Facade.attributeValues("multiplicity")
+                referenceDefFacade.attributeValuesAsList("multiplicity").addAll(
+                    associationEndDef2Facade.attributeValuesAsList("multiplicity")
                 );
-                referenceDefFacade.attributeValues("isChangeable").addAll(
-                    associationEndDef2Facade.attributeValues("isChangeable")
+                referenceDefFacade.attributeValuesAsList("isChangeable").addAll(
+                    associationEndDef2Facade.attributeValuesAsList("isChangeable")
                 );
-                referenceDefFacade.attributeValues("visibility").add(
+                referenceDefFacade.attributeValuesAsList("visibility").add(
                     VisibilityKind.PUBLIC_VIS
                 );
-                referenceDefFacade.attributeValues("scope").add(
+                referenceDefFacade.attributeValuesAsList("scope").add(
                     ScopeKind.INSTANCE_LEVEL
                 );
                 createModelElement(
@@ -508,23 +513,25 @@ implements ModelImporter_1_0 {
         MappedRecord associationEndDef2
     ) throws ServiceException {
         try {
-            ObjectHolder_2Facade associationEndDef1Facade = ObjectHolder_2Facade.newInstance(associationEndDef1);
-            ObjectHolder_2Facade associationEndDef2Facade = ObjectHolder_2Facade.newInstance(associationEndDef2);
+            Object_2Facade associationEndDef1Facade = Object_2Facade.newInstance(associationEndDef1);
+            Object_2Facade associationEndDef2Facade = Object_2Facade.newInstance(associationEndDef2);
             // end1.aggregation=COMPOSITE --> end2.isChangeable=false
             if(AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation"))) {
-                associationEndDef2Facade.clearAttributeValues("isChangeable").add(
+                associationEndDef2Facade.attributeValuesAsList("isChangeable").clear();
+                associationEndDef2Facade.attributeValuesAsList("isChangeable").add(
                     Boolean.FALSE
                 );
             }
             if(AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation"))) {
-                associationEndDef1Facade.clearAttributeValues("isChangeable").add(
+                associationEndDef1Facade.attributeValuesAsList("isChangeable").clear();
+                associationEndDef1Facade.attributeValuesAsList("isChangeable").add(
                     Boolean.FALSE
                 );
             }
             // end1.aggregation=COMPOSITE --> end2.aggregation=AggregationKind.NONE
             if(
-                (AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation")) && !AggregationKind.NONE.equals(associationEndDef2Facade.attributeValues("aggregation").get(0))) ||
-                (AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation")) && !AggregationKind.NONE.equals(associationEndDef1Facade.attributeValues("aggregation").get(0)))
+                (AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation")) && !AggregationKind.NONE.equals(associationEndDef2Facade.attributeValuesAsList("aggregation").get(0))) ||
+                (AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation")) && !AggregationKind.NONE.equals(associationEndDef1Facade.attributeValuesAsList("aggregation").get(0)))
             ) {
                 SysLog.error("Wrong aggregation. end1.aggregation='composite' --> end2.aggregation='none'");
                 throw new ServiceException(
@@ -539,8 +546,8 @@ implements ModelImporter_1_0 {
             }
             // end1.aggregation=COMPOSITE --> end2.multiplicity="1..1"
             if(
-                (AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation")) && !("1..1".equals(associationEndDef2Facade.attributeValues("multiplicity").get(0)) || "0..1".equals(associationEndDef2Facade.attributeValues("multiplicity").get(0)))) ||
-                (AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation")) && !("1..1".equals(associationEndDef1Facade.attributeValues("multiplicity").get(0)) || "0..1".equals(associationEndDef1Facade.attributeValues("multiplicity").get(0))))
+                (AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation")) && !("1..1".equals(associationEndDef2Facade.attributeValuesAsList("multiplicity").get(0)) || "0..1".equals(associationEndDef2Facade.attributeValuesAsList("multiplicity").get(0)))) ||
+                (AggregationKind.COMPOSITE.equals(associationEndDef2Facade.attributeValue("aggregation")) && !("1..1".equals(associationEndDef1Facade.attributeValuesAsList("multiplicity").get(0)) || "0..1".equals(associationEndDef1Facade.attributeValuesAsList("multiplicity").get(0))))
             ) {
                 SysLog.error("Wrong multiplicity. end1.aggregation='composite' --> end2.multiplicity='1..1'|'0..1'");
                 throw new ServiceException(
@@ -572,9 +579,9 @@ implements ModelImporter_1_0 {
     private void verifyNavigabilityOfCompositeAggregation(
         MappedRecord associationEndDef
     ) throws ServiceException {
-        ObjectHolder_2Facade associationEndDefFacade = null;
+        Object_2Facade associationEndDefFacade = null;
         try {
-            associationEndDefFacade = ObjectHolder_2Facade.newInstance(associationEndDef);
+            associationEndDefFacade = Object_2Facade.newInstance(associationEndDef);
         } 
         catch (ResourceException e) {
             throw new ServiceException(e);
@@ -603,15 +610,15 @@ implements ModelImporter_1_0 {
     private void checkUnnecessaryQualifiers(
         MappedRecord associationEndDef
     ) throws ServiceException {
-        ObjectHolder_2Facade associationEndDefFacade = null;
+        Object_2Facade associationEndDefFacade = null;
         try {
-            associationEndDefFacade = ObjectHolder_2Facade.newInstance(associationEndDef);
+            associationEndDefFacade = Object_2Facade.newInstance(associationEndDef);
         } 
         catch (ResourceException e) {
             throw new ServiceException(e);
         }        
         if(
-            (associationEndDefFacade.attributeValues("qualifierName").size() > 0) &&
+            (associationEndDefFacade.attributeValuesAsList("qualifierName").size() > 0) &&
             !((Boolean)associationEndDefFacade.attributeValue("isNavigable")).booleanValue()
         ) {
             SysLog.error("Found association end with qualifier which is not navigable. Only navigable association ends need a unique identifying qualifier.");
@@ -886,7 +893,7 @@ implements ModelImporter_1_0 {
 
     static private final Path PROVIDER_ROOT_PATH = new Path("xri:@openmdx:org.omg.model1/provider/Mof");
 
-    private RequestCollection channel = null;
+    private DataproviderRequestProcessor channel = null;
     protected Set segments = null;
     protected ServiceHeader header = null;
     protected Dataprovider_1_0 target = null;

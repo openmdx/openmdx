@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_4AqJsEc1Ed-o1OTPw_6HJg" name="models">
+  <eAnnotations xmi:id="_-2WPIEc1Ed-o1OTPw_6HJg" source="org.w3c">
+    <references xmi:type="uml:Package" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62D700DA"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_Itky8Ec2Ed-o1OTPw_6HJg" source="org.openmdx.security.authentication1">
+    <references xmi:type="uml:Package" href="org.openmdx.security.authentication1.uml#_3C7B8A60016D3FC4BEDF0244"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_SrBTgEc2Ed-o1OTPw_6HJg" source="org.openmdx.security.authorization1">
+    <references xmi:type="uml:Package" href="org.openmdx.security.authorization1.uml#_3C7B8A60016D417CB8E700AF"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_XKERsEc2Ed-o1OTPw_6HJg" source="org.openmdx.security.realm1">
+    <references xmi:type="uml:Package" href="org.openmdx.security.realm1.uml#_3C7B8A60016D3FB68C60019C"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="_1fcUsEc2Ed-o1OTPw_6HJg" source="org.openmdx.base">
+    <references xmi:type="uml:Package" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D40A89A0D0015"/>
+  </eAnnotations>
+  <eAnnotations xmi:id="__kggMEc2Ed-o1OTPw_6HJg" source="org.oasis-open">
+    <references xmi:type="uml:Package" href="../openMDX%202%20~%20Core%20(EMF)/org.oasis-open.uml#_3C7B8A60016D4022002100C9"/>
+  </eAnnotations>
+</uml:Model>

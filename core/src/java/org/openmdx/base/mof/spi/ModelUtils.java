@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ModelUtils.java,v 1.3 2009/05/16 22:17:54 wfro Exp $
+ * Name:        $Id: ModelUtils.java,v 1.4 2010/01/14 16:29:05 wfro Exp $
  * Description: ModelUtils
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:54 $
+ * Date:        $Date: 2010/01/14 16:29:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -95,6 +95,22 @@ public class ModelUtils {
         return multiplicity;
     }
 
+    public static boolean isDerived(
+        ModelElement_1_0 featureDef
+    ) throws ServiceException {
+        Model_1_0 model = featureDef.getModel();
+        if(featureDef.isAttributeType()) {
+            return Boolean.TRUE.equals(featureDef.objGetValue("isDerived"));
+        }
+        else if(featureDef.isReferenceType()) {
+            ModelElement_1_0 referencedEnd = model.getElement(featureDef.objGetValue("referencedEnd"));
+            ModelElement_1_0 association = model.getElement(referencedEnd.objGetValue("container"));
+            return Boolean.TRUE.equals(association.objGetValue("isDerived"));
+        }
+        else {
+            return false;
+        }
+    }
 }
 
 //--- End of File -----------------------------------------------------------

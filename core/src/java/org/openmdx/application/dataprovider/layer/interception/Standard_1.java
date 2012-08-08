@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.3 2009/06/04 14:47:06 hburger Exp $
- * Description: Standard Transport Layer Plug-In
- * Revision:    $Revision: 1.3 $
+ * Name:        $Id: Standard_1.java,v 1.10 2009/12/17 12:37:35 wfro Exp $
+ * Description: Standard Interception Plug-In
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/04 14:47:06 $
+ * Date:        $Date: 2009/12/17 12:37:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,143 +50,49 @@
  */
 package org.openmdx.application.dataprovider.layer.interception;
 
-import javax.resource.cci.MappedRecord;
+import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.Interaction;
 
 import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.cci.DataproviderOperations;
-import org.openmdx.application.dataprovider.cci.DataproviderReply;
-import org.openmdx.application.dataprovider.cci.DataproviderRequest;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
-import org.openmdx.application.dataprovider.spi.Layer_1_0;
-import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.rest.spi.ObjectHolder_2Facade;
 
 /**
  * The standard implementation of the interception layer's plug-in.
  */
-public class Standard_1
-    extends SystemAttributes_1 
-{
+public class Standard_1 extends Layer_1 {
 
+    public Standard_1(
+    ) {
+    }
+    
     //--------------------------------------------------------------------------
-    // Implements Layer_1_0
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new StandardLayerInteraction(connection);
+    }
+ 
     //--------------------------------------------------------------------------
-
-    /**
-     * Activates a dataprovider layer
-     * 
-     * @param   id              the dataprovider layer's id
-     * @param   configuration   the dataprovider'a configuration
-     *  <dl>
-     *      <dt>namespaceId</dt>            <dd>String</dd>
-     *      <dt>exposedPath</dt>            <dd>Path[]</dd>
-     *      <dt>propagateSet</dt>           <dd>Boolean</dd>
-     *  </dl>
-     * @param       delegation
-     *              the layer to delegate to;
-     *              or null if "persistenceLayer".equals(id)
-     *
-     * @exception   ServiceException
-     *              expected exceptions
-     * @exception   Exception
-     *              unexpected exceptions
-     *
-     */
+    public class StandardLayerInteraction extends Layer_1.LayerInteraction {
+      
+        public StandardLayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
+        }
+                
+    }
+    
+    //--------------------------------------------------------------------------
+    @Override
     public void activate(
         short id,
         Configuration configuration,
-        Layer_1_0 delegation
+        Layer_1 delegation
     ) throws ServiceException {
         super.activate(id,configuration,delegation);
-        this.interceptSet = ! configuration.isOn(LayerConfigurationEntries.PROPAGATE_SET);
     }
-
-    /**
-     * Set the corresponding system attributes for write operations. 
-     *
-     * @param       header
-     *              the requests' service header
-     * @param       requests
-     *              the request list
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public void prolog(
-        ServiceHeader header,
-        DataproviderRequest[] requests
-    ) throws ServiceException {
-        super.prolog(header, requests);
-        if(this.interceptSet)for(
-            int index = 0;
-            index < requests.length;
-            index++
-        ){
-            DataproviderRequest request = requests[index];
-            MappedRecord afterImage = request.object();
-            try {
-                ObjectHolder_2Facade afterImageFacade = ObjectHolder_2Facade.newInstance(afterImage);
-                if(request.operation()== DataproviderOperations.OBJECT_SETTING) {
-                    try {
-                        ObjectHolder_2Facade beforeImageFacade = ObjectHolder_2Facade.newInstance(
-                            this.getBeforeImage(header, request)
-                        );
-                        afterImageFacade.setVersion(
-                            beforeImageFacade.getVersion()
-                        );
-                    } 
-                    catch (ServiceException exception) {
-                        afterImageFacade.clearAttributeValues(SystemAttributes.CREATED_BY).add(
-                            afterImageFacade.attributeValues(SystemAttributes.MODIFIED_BY)
-                        );
-                        afterImageFacade.clearAttributeValues(SystemAttributes.CREATED_AT).add(
-                            afterImageFacade.attributeValues(SystemAttributes.MODIFIED_AT)
-                        );
-                    }
-                }
-            }
-            catch(Exception e) {
-                throw new ServiceException(e);
-            }
-        }
-    }
-
-    /**
-     * Creates an object or modifies all its changeable attributes if it
-     * already exists.
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply set(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        return this.interceptSet ? (
-            hasBeforeImage(request) ? 
-                replace(header,request) :
-                create(header,request)
-            ) :
-            super.set(header,request);
-    }
-
-
-    //--------------------------------------------------------------------------
-    // Instance members
-    //--------------------------------------------------------------------------
-
-    /**
-     * false => intercept set operations
-     * true => propagate set operations
-     */
-    private boolean interceptSet = false;
-        
+            
 }

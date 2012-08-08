@@ -1,9 +1,9 @@
 <!--
 =======================================================================
-= Name:        $Id: test-clock-1.jsp,v 1.2 2004/07/26 23:32:16 hburger Exp $
+= Name:        $Id: test-clock-1.jsp,v 1.3 2009/11/11 19:45:16 hburger Exp $
 = Description: openMDX/Core Build File
-= Revision:    $Revision: 1.2 $
-= Date:        $Date: 2004/07/26 23:32:16 $
+= Revision:    $Revision: 1.3 $
+= Date:        $Date: 2009/11/11 19:45:16 $
 = Copyright:   (c) 2003-2004 OMEX AG
 =======================================================================
 =
@@ -48,5 +48,5 @@
 <body bgcolor="white">
 <font color="red">
 <pre>
-<%= org.openmdx.test.clock1.rmi.ClockClient_1.getTime() %>
+<%= test.openmdx.clock1.rmi.ClockClient_1.getTime() %>
 </pre>

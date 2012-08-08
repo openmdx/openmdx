@@ -14,7 +14,7 @@
 
 	<servlet>
 	    <servlet-name>clock</servlet-name>
-	    <servlet-class>org.openmdx.test.clock1.servlet.Clock_1Servlet</servlet-class>
+	    <servlet-class>test.openmdx.clock1.servlet.Clock_1Servlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>

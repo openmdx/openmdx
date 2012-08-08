@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UserObjects.java,v 1.4 2009/04/08 14:51:59 hburger Exp $
+ * Name:        $Id: UserObjects.java,v 1.7 2009/11/03 11:27:18 hburger Exp $
  * Description: UserObjects 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/08 14:51:59 $
+ * Date:        $Date: 2009/11/03 11:27:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,15 +51,24 @@
 
 package org.openmdx.base.persistence.cci;
 
-import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
 
+import org.openmdx.base.persistence.spi.SharedObjects;
+
 /**
  * User Objects
  */
-public class UserObjects {
+public class UserObjects extends SharedObjects {
+    
+    /**
+     * Constructor 
+     */
+    private UserObjects() {
+        // Avoid instantiation
+    }
 
     /**
      * Retrieve the principal chain
@@ -68,11 +77,47 @@ public class UserObjects {
      * 
      * @return the principal chain
      */
-    @SuppressWarnings("unchecked")
     public static List<String> getPrincipalChain(
         PersistenceManager persistenceManager
     ){
-        return (List<String>) persistenceManager.getUserObject(Principal[].class);
+        List<String> principalChain = sharedObjects(persistenceManager).getPrincipalChain(); 
+        return principalChain == null ? Collections.<String>emptyList() : principalChain;
     }
-        
+
+    /**
+     * If set the task identifier's <code>toString()</code> method is evaluated 
+     * at the beginning of each unit of work.
+     * <p>
+     * An application may therefore<ul>
+     * <li>either replace <em>unmodifiable</em> task identifiers 
+     * (e.g. <code>java.langString</code> instances) to change the task id 
+     * <li>use a <em>stateful</em> task identifier providing the current task id each time its
+     * <code>toString()</code> method is invoked
+     * </ul>
+     * 
+     * @param persistenceManager
+     * @param taskIdentifier
+     */
+    public static void setTaskIdentifier(
+        PersistenceManager persistenceManager,
+        Object taskIdentifier
+    ){
+        sharedObjects(persistenceManager).setTaskIdentifier(taskIdentifier);
+    }
+    
+    /**
+     * Retrieve the current task identifier 
+     * 
+     * @param persistenceManager
+     * 
+     * @return the current task identifier 
+     * 
+     * @see UserObjects#setTaskIdentifier(PersistenceManager, Object)
+     */
+    public static Object getTaskIdentifier(
+        PersistenceManager persistenceManager
+    ){
+        return sharedObjects(persistenceManager).getTaskIdentifier();
+    }
+    
 }

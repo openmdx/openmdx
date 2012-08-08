@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsEventHandler.java,v 1.26 2009/05/16 23:02:56 wfro Exp $
+ * Name:        $Id: FindObjectsEventHandler.java,v 1.28 2010/04/27 12:21:07 wfro Exp $
  * Description: FindObjectsEventHandler 
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 23:02:56 $
+ * Date:        $Date: 2010/04/27 12:21:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import javax.jdo.PersistenceManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -107,22 +108,24 @@ public class FindObjectsEventHandler {
         // TODO: the option format allows to specify the output format 
 //        String format = Action.getParameter(parameter, Action.PARAMETER_FORMAT);
         String positionAsString = Action.getParameter(parameter, Action.PARAMETER_POSITION);
-        int position = positionAsString == null
-            ? 0
-            : new Integer(positionAsString).intValue();         
+        int position = positionAsString == null ? 
+        	0 : 
+        		new Integer(positionAsString).intValue();         
         String sizeAsString = Action.getParameter(parameter, Action.PARAMETER_SIZE);        
-        int size = sizeAsString == null
-            ? 0
-            : new Integer(sizeAsString).intValue();
+        int size = sizeAsString == null ? 
+        	0 : 
+        		new Integer(sizeAsString).intValue();
 
         // Output
         PrintWriter pw = EventHandlerHelper.getWriter(
             request, 
             response
         );
+        PersistenceManager pm = null;
         try {
             Path objectIdentity = new Path(objectXri);
-            RefObject_1_0 parent = (RefObject_1_0)application.getPmData().getObjectById(objectIdentity);
+            pm = application.getNewPmData();
+            RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(objectIdentity);
             List filterProperties = new ArrayList();
             filterProperties.addAll(
                 application.getPortalExtension().getFindObjectsBaseFilter(
@@ -161,6 +164,10 @@ public class FindObjectsEventHandler {
                     if(filterFeatureDef != null) {
                         boolean filterFeatureIsNumeric = model.isNumericType(filterFeatureDef.objGetValue("type"));
                         String filterValue = filterValues[0];
+                        // Remove trailing "[ text ]". This suffix was most probably by the autocompleter.
+                        if(filterValue.indexOf(" [") >= 0 && filterValue.endsWith("]")) {
+                        	filterValue = filterValue.substring(0, filterValue.indexOf(" ["));
+                        }
                         filterProperties.add(
                             new FilterProperty(
                                 Quantors.THERE_EXISTS,
@@ -239,6 +246,10 @@ public class FindObjectsEventHandler {
         }
         catch(Exception e) {
             new ServiceException(e).log();
+        } finally {
+        	if(pm != null) {
+        		pm.close();
+        	}
         }
         pw.close();  
         return new HandleEventResult(

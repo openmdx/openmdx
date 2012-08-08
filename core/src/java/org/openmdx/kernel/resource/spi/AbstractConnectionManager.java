@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractConnectionManager.java,v 1.1 2009/03/11 15:58:15 hburger Exp $
+ * Name:        $Id: AbstractConnectionManager.java,v 1.2 2009/08/25 13:42:54 hburger Exp $
  * Description: Abstract Connection Manager
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/11 15:58:15 $
+ * Date:        $Date: 2009/08/25 13:42:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,7 @@ import javax.resource.spi.ManagedConnection;
 import javax.resource.spi.ManagedConnectionFactory;
 import javax.security.auth.Subject;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.loading.Classes;
 
 /**
  * Abstract Connection Manager

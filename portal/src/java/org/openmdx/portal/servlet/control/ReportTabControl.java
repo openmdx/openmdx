@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportTabControl.java,v 1.8 2008/11/12 10:36:53 wfro Exp $
+ * Name:        $Id: ReportTabControl.java,v 1.10 2009/10/19 23:54:37 wfro Exp $
  * Description: WizardTabControl
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 10:36:53 $
+ * Date:        $Date: 2009/10/19 23:54:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,7 @@ import java.io.Serializable;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.reports.ReportDefinition;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
@@ -111,7 +111,7 @@ public class ReportTabControl
     //-----------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p, 
+        ViewPort p, 
         String frame, 
         boolean forEditing
     ) throws ServiceException {
@@ -125,7 +125,7 @@ public class ReportTabControl
         }        
         // Report input fields
         else if(FRAME_PARAMETERS.equals(frame)) {
-            int operationIndex = 100*(this.getPaneIndex() + 1) + this.getTabIndex();        
+            int operationIndex = this.getTabId();        
             String formId = "op" + operationIndex + "Form";
             p.write("<script language=\"javascript\" type=\"text/javascript\">");
             p.write("  var op", Integer.toString(operationIndex), "Dialog = null;");

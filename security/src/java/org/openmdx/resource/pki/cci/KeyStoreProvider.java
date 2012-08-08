@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: KeyStoreProvider.java,v 1.1 2009/03/11 16:04:23 hburger Exp $
+ * Name:        $Id: KeyStoreProvider.java,v 1.2 2010/03/05 13:24:13 hburger Exp $
  * Description: KeyStoreProvider
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/11 16:04:23 $
+ * Date:        $Date: 2010/03/05 13:24:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,6 @@ package org.openmdx.resource.pki.cci;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
-import org.openmdx.kernel.security.resource.Connection;
 
 /**
  * <code>KeyStore</code> Provider

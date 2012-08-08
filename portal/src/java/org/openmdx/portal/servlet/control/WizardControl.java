@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardControl.java,v 1.25 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: WizardControl.java,v 1.28 2009/10/21 17:16:10 wfro Exp $
  * Description: WizardControl
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/10/21 17:16:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,10 +57,10 @@ package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.wizards.WizardDefinition;
 
 //-----------------------------------------------------------------------------
@@ -114,11 +114,11 @@ public class WizardControl
     //-------------------------------------------------------------------------
     @Override
     public void paint(
-        HtmlPage p,
+        ViewPort p,
         String frame,
         boolean forEditing
     ) throws ServiceException {
-        AppLog.detail("> paint");
+    	SysLog.detail("> paint");
 
         // Wizard menu entries
         if(frame == null) {
@@ -140,9 +140,15 @@ public class WizardControl
                 p.write("</li>");
             }
         }                   
-        AppLog.detail("< paint");        
+        SysLog.detail("< paint");        
     }
 
+    //-------------------------------------------------------------------------
+    public WizardTabControl[] getWizardTabControls(
+    ) {
+    	return this.wizardTabs;
+    }
+    
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = -7785589508766566304L;
     

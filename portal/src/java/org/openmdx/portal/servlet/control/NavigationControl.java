@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: NavigationControl.java,v 1.14 2008/11/12 13:58:44 wfro Exp $
+ * Name:        $Id: NavigationControl.java,v 1.27 2009/10/19 23:53:07 wfro Exp $
  * Description: NavigationControl 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 13:58:44 $
+ * Date:        $Date: 2009/10/19 23:53:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,7 +58,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.ShowObjectView;
@@ -83,7 +83,7 @@ public class NavigationControl
         
     //-------------------------------------------------------------------------    
     public static void paintClose(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing
     ) {
         try {
@@ -102,7 +102,7 @@ public class NavigationControl
         
     //-------------------------------------------------------------------------    
     public static void paintHeaderHider(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing
     ) {
         try {
@@ -124,7 +124,7 @@ public class NavigationControl
         
     //-------------------------------------------------------------------------    
     public static void paintPrint(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing
     ) {
         try {
@@ -137,7 +137,7 @@ public class NavigationControl
     
     //-------------------------------------------------------------------------    
     public static void paintSelectPerspectives(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing
     ) {
         try {
@@ -153,7 +153,7 @@ public class NavigationControl
                     for(int i = 0; i < selectPerspectiveActions.length; i++) {
                         Action action = selectPerspectiveActions[i];
                         if(action.isEnabled()) {
-                            p.write("      <li><a href=\"#\" id=\"op10", Integer.toString(i), "Trigger\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\"><img src=\"./images/perspective_", Integer.toString(i), WebKeys.ICON_TYPE, "\" border=\"0\" align=\"bottom\" alt=\"", action.getTitle(), "\" title=\"\"/>&nbsp;", action.getTitle(), "</a></li>");
+                            p.write("      <li><a href=\"#\" id=\"op0", Integer.toString(i), "Trigger\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\"><img src=\"./images/perspective_", Integer.toString(i), WebKeys.ICON_TYPE, "\" border=\"0\" align=\"bottom\" alt=\"", action.getTitle(), "\" title=\"\"/>&nbsp;", action.getTitle(), "</a></li>");
                         }
                     }
                     p.write("    </ul></li>");
@@ -166,21 +166,56 @@ public class NavigationControl
             new ServiceException(e).log();
         }
     }
+
+    //-------------------------------------------------------------------------    
+    public static void paintToggleViewPort(
+        ViewPort p,
+        boolean forEditing
+    ) {
+        try {
+            View view = p.getView();
+            if(view instanceof ShowObjectView) {
+                ShowObjectView showView = (ShowObjectView)view;
+                ApplicationContext app = p.getApplicationContext();
+                HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
+                Texts_1_0 texts = app.getTexts();
+                texts.getViewTitle();
+                Action action = showView.getToggleViewPortAction();
+                if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                	p.write("<div style=\"float:right;height:20px;width:150px;cursor:pointer;\" title=\"", htmlEncoder.encode(texts.getViewTitle() + " " + action.getTitle(), false), "\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">&nbsp;</div>");
+                	p.write("<a class=\"button\" href=\"#\" onclick=\"javascript:self.close();\">X</a>");                	
+                }
+                else {
+                	p.write("<div id=\"toggleViewPort\" style=\"cursor:pointer;\" title=\"", htmlEncoder.encode(texts.getViewTitle() + " " + action.getTitle(), false), "\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">&nbsp;</div>");
+                }
+            }                     
+        }
+        catch(Exception e) {
+            new ServiceException(e).log();
+        }
+    }
     
     //-------------------------------------------------------------------------    
     public static void paintBreadcrum(
-        HtmlPage p,
+        ViewPort p,
         boolean forEditing
     ) {
         try {
             if(!forEditing) {
-                Texts_1_0 texts = p.getApplicationContext().getTexts();
+            	ApplicationContext app = p.getApplicationContext();
+                Texts_1_0 texts = app.getTexts();
                 HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();
                 ShowObjectView view = (ShowObjectView)p.getView();
                 if((view.getLookupType() != null) && view.getObjectReference().isInstanceof(view.getLookupType())) {
                     p.write("<input type=\"checkbox\" name=\"objselect\" value=\"obj\" onclick=\"OF.selectAndClose('", view.getObjectReference().refMofId(), "', '", htmlEncoder.encode(view.getObjectReference().getTitleEscapeQuote(), false), "', '", view.getId(), "', window);\" />");
                 }
-                p.write("<div id=\"reloadIcon\" onclick=\"javascript:window.location.href=", p.getEvalHRef(view.getObjectReference().getReloadAction()), ";\" title=\"", texts.getReloadText(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), view.getObjectReference().getIconKey(), "\" border=\"0\" align=\"absbottom\" alt=\"o\" title=\"\""), "</div>");
+                if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                    p.write("<a href=\"#\" onmouseover=\"javascript:window.location.href=", p.getEvalHRef(view.getObjectReference().getReloadAction()), ";\" title=\"", texts.getReloadText(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), view.getObjectReference().getIconKey(), "\" border=\"0\" align=\"top\" alt=\"o\" title=\"\""), "&nbsp;&nbsp;</a>");
+                    p.write("<a href=\"./jsp/MobileMain.jsp?", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "\">", htmlEncoder.encode(app.getApplicationName(), false), "</a>&nbsp;&gt;");                	
+                }
+                else {
+                    p.write("<div id=\"reloadIcon\" onclick=\"javascript:window.location.href=", p.getEvalHRef(view.getObjectReference().getReloadAction()), ";\" title=\"", texts.getReloadText(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), view.getObjectReference().getIconKey(), "\" border=\"0\" align=\"absbottom\" alt=\"o\" title=\"\""), "</div>");                	
+                }
                 Action[] selectParentActions = view.getSelectParentAction();
                 for(
                     int i = 0; 

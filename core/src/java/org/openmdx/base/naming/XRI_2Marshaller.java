@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XRI_2Marshaller.java,v 1.7 2009/06/02 13:02:59 hburger Exp $
+ * Name:        $Id: XRI_2Marshaller.java,v 1.9 2009/09/11 14:29:24 hburger Exp $
  * Description: Path/ObjectId Marshaller 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/02 13:02:59 $
+ * Date:        $Date: 2009/09/11 14:29:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,7 @@ import java.util.List;
 
 import org.openmdx.base.exception.RuntimeServiceException;import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.text.conversion.URITransformation;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
@@ -118,10 +119,12 @@ public final class XRI_2Marshaller
             i < segments.length;
             i++
         ){
-            oid.append(
-                separator
-            );
             String segment = segments[i].toString();
+            if(i > 0 || !segment.startsWith("!")) {
+                oid.append(
+                    separator
+                );
+            }
             if(isForeignCrossReference(segment)) {
                 //
                 // Foreign Cross Reference
@@ -280,7 +283,11 @@ public final class XRI_2Marshaller
         if(isCaseExactString(source)) {
             appendCaseExactString(oid, xriSegment);
         } else {
-            Segment segment = new Segment(true, authority, source);
+            Segment segment = new Segment(
+                true, 
+                authority, 
+                source
+            );
             if(segment.isValid()) {
                 oid.append(xriSegment);
             } else {
@@ -312,7 +319,7 @@ public final class XRI_2Marshaller
             String[] reply = new String[
                 segments.size() - (treeWildcard ? 1 : 0)
             ];
-            reply[0] = authority.substring(9).replaceAll(
+            reply[0] = authority.charAt(8) == '*' ? authority.substring(9).replaceAll(
                 "\\(\\$\\.\\.\\.\\)", "%"
             ).replaceAll(
                 "\\(\\$\\.\\.\\)", ":*"
@@ -325,7 +332,7 @@ public final class XRI_2Marshaller
             ).replaceAll(
                 "\\.",
                 ":"
-            );
+            ) : authority.substring(8);
             for(
                 int i = 1;
                 i < reply.length;
@@ -460,28 +467,9 @@ public final class XRI_2Marshaller
     private String unescape(
         String source
     ){
-        if(isCaseExactString(source)) {
-            byte[] utf8 = new byte[source.length()];
-            int j = 0;
-            for(
-                int i = 8, iLimit = source.length() - 1;
-                i < iLimit;
-                i++
-            ){
-                char c = source.charAt(i);
-                if(c == '%') {
-                    utf8[j++] = (byte) (
-                        0x10 * digitForCharacter(source.charAt(++i)) +
-                        digitForCharacter(source.charAt(++i))
-                    );
-                } else {
-                    utf8[j++] = (byte) c;
-                }
-            }
-            return UnicodeTransformation.toString(utf8, 0, j);   
-        } else {
-            return source;
-        }
+        return isCaseExactString(source) ?
+            URITransformation.decode(source.substring(8, source.length() - 1)) :
+            source;
     }
 
     private static boolean isCaseExactString(
@@ -489,9 +477,9 @@ public final class XRI_2Marshaller
     ){
         return 
             subSegment.startsWith("($t*ces*") && 
-            subSegment.endsWith(")");
+            subSegment.indexOf(')') == subSegment.length() - 1;
     }
-    
+
     /**
      * Test whether the parenthesis are balanced
      * 
@@ -570,16 +558,6 @@ public final class XRI_2Marshaller
         );
     }
     
-    private final static int digitForCharacter(
-        char character
-    ){
-        return 
-            character >= '0' && character <= '9' ? character - '0' :
-            character >= 'A' && character <= 'Z' ? character - 'A' + 10 :
-            character >= 'a' && character <= 'z' ? character - 'a' + 10 :
-            -1; // invalid hexadecimal digit
-    }
-
     /**
      * Tests whether the String represents an openMDX object identifier
      * 
@@ -700,7 +678,7 @@ public final class XRI_2Marshaller
                         throw new RuntimeServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.TRANSFORMATION_FAILURE,
-                            "The XRI contains a losing parenthesis without matching opening parenthesis",
+                            "The XRI contains a closing parenthesis without matching opening parenthesis",
                             new BasicException.Parameter("xri", path),
                             new BasicException.Parameter("position", i)
                         );
@@ -1044,6 +1022,7 @@ public final class XRI_2Marshaller
          * Constructor 
          *
          * @param lenient tells whether the status is retrieved via isValid() or exceptions are thrown
+         * 
          * @param authority
          * @param xriSegment
          */

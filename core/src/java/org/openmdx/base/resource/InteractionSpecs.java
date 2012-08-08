@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InteractionSpecs.java,v 1.5 2009/05/15 00:26:34 hburger Exp $
+ * Name:        $Id: InteractionSpecs.java,v 1.10 2010/02/10 16:06:33 hburger Exp $
  * Description: InteractionSpecs 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/15 00:26:34 $
+ * Date:        $Date: 2010/02/10 16:06:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,6 @@
 package org.openmdx.base.resource;
 
 import java.io.ObjectStreamException;
-import java.util.List;
 
 import javax.resource.cci.InteractionSpec;
 
@@ -65,52 +64,36 @@ import org.openmdx.base.resource.spi.RestInteractionSpec;
  */
 public class InteractionSpecs {
 
-    //----------------------------------------------------------------------------------
-    // REST Interaction Specifications
-    //----------------------------------------------------------------------------------
-    
     /**
      * Constructor 
-     * 
-     * @param principalChainAsList
      * @param retainValues
      */
     private InteractionSpecs(
-        List<String> principalChainAsList,
         boolean retainValues
     ){
-        String[] principalChain = principalChainAsList == null ? null : principalChainAsList.toArray(
-            new String[principalChainAsList.size()]
-        );
-        this.CREATE = newRestInteractionSpec(
+        this.CREATE = new RestInteractionSpec(
             RestFunction.POST,
-            retainValues ? InteractionSpec.SYNC_SEND_RECEIVE : InteractionSpec.SYNC_SEND,
-            principalChain
+            retainValues ? InteractionSpec.SYNC_SEND_RECEIVE : InteractionSpec.SYNC_SEND
         );
-        this.INVOKE = newRestInteractionSpec(
+        this.INVOKE = new RestInteractionSpec(
             RestFunction.POST,
-            InteractionSpec.SYNC_SEND_RECEIVE,
-            principalChain
+            InteractionSpec.SYNC_SEND_RECEIVE
         );
-        this.GET = newRestInteractionSpec(
+        this.GET = new RestInteractionSpec(
             RestFunction.GET,
-            InteractionSpec.SYNC_SEND_RECEIVE,
-            principalChain
+            InteractionSpec.SYNC_SEND_RECEIVE
         );
-        this.VERIFY = newRestInteractionSpec(
+        this.VERIFY = new RestInteractionSpec(
             RestFunction.GET,
-            InteractionSpec.SYNC_SEND,
-            principalChain
+            InteractionSpec.SYNC_SEND
         );
-        this.PUT = newRestInteractionSpec(
+        this.PUT = new RestInteractionSpec(
             RestFunction.PUT,
-            retainValues ? InteractionSpec.SYNC_SEND_RECEIVE : InteractionSpec.SYNC_SEND,
-            principalChain
+            retainValues ? InteractionSpec.SYNC_SEND_RECEIVE : InteractionSpec.SYNC_SEND
         );
-        this.DELETE = newRestInteractionSpec(
+        this.DELETE = new RestInteractionSpec(
             RestFunction.DELETE,
-            InteractionSpec.SYNC_SEND,
-            principalChain
+            InteractionSpec.SYNC_SEND
         );
     }
 
@@ -145,48 +128,25 @@ public class InteractionSpecs {
     public final RestInteractionSpec DELETE;
 
     /**
+     * CREATE and PUT return updates
+     */
+    private static InteractionSpecs retainingValues = new InteractionSpecs(true);
+    
+    /**
+     * CREATE and PUT return nothing
+     */
+    private static InteractionSpecs notRetainingValues = new InteractionSpecs(false);
+    
+    /**
      * REST <code>InteractionSpecs</code> factory method.
-     * 
-     * @param principalChain
      * 
      * @return a new <code>InteractionSpecs</code> instance
      */
-    public static InteractionSpecs newRestInteractionSpecs(
-        List<String> principalChain,
+    public static InteractionSpecs getRestInteractionSpecs(
         boolean retainValues
     ){
-        return new InteractionSpecs(
-            principalChain,
-            retainValues
-        );
+        return retainValues ? retainingValues : notRetainingValues;
     }
-    
-    /**
-     * Internal <code>RestInteractionSpec</code> factory method 
-     * 
-     * @param function
-     * @param interactionVerb
-     * @param principalChain
-     * 
-     * @return a new <code>InteractionSpec</code> instance for the given function
-     */
-    private static RestInteractionSpec newRestInteractionSpec(
-        RestFunction function,
-        int interactionVerb,
-        String[] principalChain
-    ){
-        RestInteractionSpec interactionSpec = new RestInteractionSpec();
-        interactionSpec.setFunction(function);
-        interactionSpec.setInteractionVerb(interactionVerb);
-        interactionSpec.setPrincipalChain(principalChain);
-        interactionSpec.setUnmodifiable();
-        return interactionSpec;
-    }
-    
-    
-    //----------------------------------------------------------------------------------
-    // Method Invocation Specifications
-    //----------------------------------------------------------------------------------
     
     /**
      * Method invocation specification factory method.

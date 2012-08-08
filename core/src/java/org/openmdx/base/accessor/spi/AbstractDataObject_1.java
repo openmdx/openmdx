@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractDataObject_1.java,v 1.2 2009/03/20 16:03:36 hburger Exp $
+ * Name:        $Id: AbstractDataObject_1.java,v 1.6 2010/01/21 17:25:17 hburger Exp $
  * Description: SPICE Object Layer: Abstract Object_1_0 Implementation
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/20 16:03:36 $
+ * Date:        $Date: 2010/01/21 17:25:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,9 +50,8 @@
  */
 package org.openmdx.base.accessor.spi;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import javax.jdo.JDOHelper;
+import javax.jdo.ObjectState;
 import javax.resource.ResourceException;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
@@ -94,10 +93,6 @@ public abstract class AbstractDataObject_1
      */
     private transient ServiceException inaccessibilityReason;
     
-    //------------------------------------------------------------------------
-    // Implements Object_1_1
-    //------------------------------------------------------------------------
-
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_2#getInaccessabilityReason()
      */
@@ -126,20 +121,15 @@ public abstract class AbstractDataObject_1
         this.inaccessibilityReason = inaccessibilityReason;
     }
     
+
     //------------------------------------------------------------------------
     // Extends Object
     //------------------------------------------------------------------------
 
-    protected static String stateToString(
+    protected static ObjectState stateToString(
         DataObject_1_0 source
     ){
-        Set<String> state = new HashSet<String>();
-        if(source.jdoIsDeleted()) state.add("deleted");
-        if(source.jdoIsDirty()) state.add("dirty");
-        if(source.jdoIsTransactional()) state.add("inUnitOfWork");
-        if(source.jdoIsNew()) state.add("new");
-        if(source.jdoIsPersistent()) state.add("persistent");
-        return state.toString();
+        return JDOHelper.getObjectState(source);
     }
 
     protected static Object defaultFetchGroupToString(
@@ -229,7 +219,7 @@ public abstract class AbstractDataObject_1
                 new Object[]{
                     objectId,
                     objectClass,
-                    stateToString(source),
+                    JDOHelper.getObjectState(source),
                     defaultFetchGroupToString(source)
                 }
             ).toString();

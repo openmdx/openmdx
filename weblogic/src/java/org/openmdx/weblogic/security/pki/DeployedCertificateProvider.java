@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DeployedCertificateProvider.java,v 1.1 2009/01/04 18:10:46 wfro Exp $
+ * Name:        $Id: DeployedCertificateProvider.java,v 1.2 2009/07/06 11:14:48 hburger Exp $
  * Description: DeployedKeyProvider 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/04 18:10:46 $
+ * Date:        $Date: 2009/07/06 11:14:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,7 @@ import java.security.cert.Certificate;
 
 import javax.naming.NamingException;
 
-import org.openmdx.kernel.security.pki.CertificateProvider;
+import org.openmdx.resource.pki.cci.CertificateProvider;
 
 /**
  * Deployed Key Provider

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: HandleEventResult.java,v 1.2 2009/03/08 18:03:21 wfro Exp $
+ * Name:        $Id: HandleEventResult.java,v 1.4 2009/09/25 13:41:50 wfro Exp $
  * Description: HandleEventResult 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:21 $
+ * Date:        $Date: 2009/09/25 13:41:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,7 +52,7 @@
 
 package org.openmdx.portal.servlet.eventhandler;
 
-import org.openmdx.portal.servlet.PaintScope;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.view.ObjectView;
 
 /**
@@ -71,16 +71,25 @@ public class HandleEventResult {
     ) {
         this.statusCode = statusCode;
         this.view = null;
-        this.paintScope = null;
+        this.viewPortType = null;
     }
 
     public HandleEventResult(
+        ObjectView view
+    ) {
+    	this(
+    		view,
+    		null
+    	);
+    }
+    
+    public HandleEventResult(
         ObjectView view,
-        PaintScope paintScope
+        ViewPort.Type viewPortType
     ) {
         this.statusCode = HandleEventResult.StatusCode.FORWARD;
         this.view = view;
-        this.paintScope = paintScope;
+        this.viewPortType = viewPortType;
     }
 
     public StatusCode getStatusCode(
@@ -93,13 +102,13 @@ public class HandleEventResult {
         return this.view;
     }
     
-    public PaintScope getPaintScope(
+    public ViewPort.Type getViewPortType(
     ) {
-        return this.paintScope;
+        return this.viewPortType;
     }
     
     private final StatusCode statusCode;
     private final ObjectView view;
-    private final PaintScope paintScope;
+    private final ViewPort.Type viewPortType;
     
 }

@@ -15,7 +15,7 @@
   limitations under the License.
 ================================================================================
 
-$Id: RUNNING.txt,v 1.1 2009/02/23 18:05:56 wfro Exp $
+$Id: RUNNING.txt,v 1.3 2010/04/12 08:37:03 wfro Exp $
 
             ===================================================
             Running The Apache Tomcat 6.0 Servlet/JSP Container
@@ -97,16 +97,14 @@ Advanced Configuration - Multiple Tomcat Instances
 
 In many circumstances, it is desirable to have a single copy of a Tomcat
 binary distribution shared among multiple users on the same server.  To make
-this possible, you can pass a "-Dcatalina.base=$CATALINA_BASE" argument when
-executing the startup command (see (2)). In this
-"-Dcatalina.base=$CATALINA_BASE" argument, replace $CATALINA_BASE with the
+this possible, you can set the $CATALINA_BASE environment variable to the
 directory that contains the files for your 'personal' Tomcat instance.
 
-When you use this "-Dcatalina.base=$CATALINA_BASE" argument, Tomcat will
-calculate all relative references for files in the following directories based
-on the value of $CATALINA_BASE instead of $CATALINA_HOME:
+When you use $CATALINA_BASE, Tomcat will calculate all relative references for
+files in the following directories based on the value of $CATALINA_BASE instead
+of $CATALINA_HOME:
 
-* bin  - Only setenv.sh (*nix) and setenv.bat (windows)
+* bin  - Only setenv.sh (*nix), setenv.bat (windows) and tomcat-juli.jar
 
 * conf - Server configuration files (including server.xml)
 
@@ -118,9 +116,14 @@ on the value of $CATALINA_BASE instead of $CATALINA_HOME:
 
 * temp - Directory used by the JVM for temporary files (java.io.tmpdir)
 
-If you do not pass the "-Dcatalina.base=$CATALINA_BASE" argument to the
-startup command, $CATALINA_BASE will default to the same value as $CATALINA_HOME,
- which means that the same directory is used for all relative path resolutions.
+Note that by default Tomcat will first try to load classes and JARs from
+$CATALINA_BASE/lib and then $CATALINA_HOME/lib. You can place instance specific
+JARs and classes (e.g. JDBC drivers) in $CATALINA_BASE/lib whilst keeping the
+standard Tomcat JARs in $CATALINA_HOME/lib.  
+
+If you do not set $CATALINA_BASE, $CATALINA_BASE will default to the same value
+as $CATALINA_HOME, which means that the same directory is used for all relative
+path resolutions.
 
 
 ================

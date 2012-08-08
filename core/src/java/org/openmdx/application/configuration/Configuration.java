@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Configuration.java,v 1.5 2009/05/26 16:45:48 hburger Exp $
+ * Name:        $Id: Configuration.java,v 1.6 2009/12/30 19:09:51 wfro Exp $
  * Description: Configuration
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 16:45:48 $
+ * Date:        $Date: 2009/12/30 19:09:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,16 +52,17 @@ package org.openmdx.application.configuration;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.openmdx.base.collection.CompactSparseList;
-import org.openmdx.base.collection.SparseList;
+import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
+import org.w3c.cci2.SparseArray;
 
 
 /**
@@ -103,24 +104,27 @@ implements Cloneable, MultiLineStringRepresentation
     ){
         for(Map.Entry<String, ?> entry : source.entrySet()) {
             final String name = entry.getKey();
-            SparseList<Object> values;
+            SparseArray<Object> values;
             if (entry.getValue() instanceof Collection<?>) {
-                values = new CompactSparseList<Object>(
-                        (Collection<?>)entry.getValue()
+                values = new TreeSparseArray<Object>(
+                    (Collection<?>)entry.getValue()
+                );
+            } else if (entry.getValue() instanceof TreeSparseArray<?>) {
+                values = new TreeSparseArray<Object>(
+                    (TreeSparseArray<?>)entry.getValue()
                 );
             } else if (entry.getValue() instanceof Object[]) {
-                values = new CompactSparseList<Object>(
-                        Arrays.asList((Object[])entry.getValue())
+                values = new TreeSparseArray<Object>(
+                    Arrays.asList((Object[])entry.getValue())
                 );
             } else {
-                values = new CompactSparseList<Object>(
-                    entry.getValue()
+                values = new TreeSparseArray<Object>(
+                    Collections.singletonList(entry.getValue())
                 );
             }
             this.entries.put(name,values);
         }
     }
-
 
     //------------------------------------------------------------------------
     // Value list interface
@@ -160,12 +164,12 @@ implements Cloneable, MultiLineStringRepresentation
      * This method never returns null.
      */
     @SuppressWarnings("unchecked")
-    public final <T> SparseList<T> values(
+    public final <T> SparseArray<T> values(
         String entryName
     ){
-        SparseList<T> values = (SparseList<T>)this.entries.get(entryName);
+        SparseArray<T> values = (SparseArray<T>)this.entries.get(entryName);
         if (values == null) {
-            values = new CompactSparseList<T>();
+            values = new TreeSparseArray<T>();
             this.entries.put(entryName, values);
         }
         return values;
@@ -210,7 +214,7 @@ implements Cloneable, MultiLineStringRepresentation
 
         // Set the value at its correct position. 
         // Do not allow overwriting 
-        final SparseList<?> list = values(name);
+        final SparseArray<?> list = values(name);
         if (list.get(index) != null) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.DUPLICATE,
@@ -223,22 +227,20 @@ implements Cloneable, MultiLineStringRepresentation
                 value
             )
         );
-        values(name).set(
+        values(name).put(
             index,
             value
         );
     }
 
-
     //------------------------------------------------------------------------
     // Entry collection interface
     //------------------------------------------------------------------------
 
-    public final Map<String, SparseList<?>> entries(
+    public final Map<String, SparseArray<?>> entries(
     ){
         return this.entries;
     }
-
 
     //------------------------------------------------------------------------
     // String interface
@@ -261,14 +263,14 @@ implements Cloneable, MultiLineStringRepresentation
     public final String[] getValues(
         String name
     ) {
-        final SparseList<?> values = this.entries.get(name);
+        final SparseArray<?> values = this.entries.get(name);
         if(values == null) return NO_VALUES;
         final String[] target = new String[values.size()];  
         final Iterator<?> iterator = values.iterator();
         for(
-                int index = 0;
-                index < target.length;
-                index++
+            int index = 0;
+            index < target.length;
+            index++
         ) target[index] = String.valueOf(iterator.next());
         return target;  
     }           
@@ -284,10 +286,10 @@ implements Cloneable, MultiLineStringRepresentation
     public final String getFirstValue(
         String name
     ) {
-        final SparseList<?> values = this.entries.get(name);
+        final SparseArray<?> values = this.entries.get(name);
         return values == null || values.isEmpty() ? 
             null : 
-                values.get(values.firstIndex()).toString();
+                values.get(values.firstKey()).toString();
     }
 
     /**
@@ -367,6 +369,6 @@ implements Cloneable, MultiLineStringRepresentation
     /**
      *
      */
-    private Map<String, SparseList<?>> entries = new HashMap<String, SparseList<?>>();
+    private Map<String, SparseArray<?>> entries = new HashMap<String, SparseArray<?>>();
 
 }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_ekVogN67EdmkJO73lqONhA" name="iso">
+  <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C8B7F0E0072P" name="org">
+    <packagedElement xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C8B7F0E0072" name="iso">
+      <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C8B7F1C01C6" name="Language">
+        <eAnnotations xmi:id="_MhkRg965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+          <details xmi:id="_MhkRhN65EdmrtKJSXC0_FQ" key="alias"/>
+        </eAnnotations>
+        <ownedAttribute xmi:id="_3C7B8A60016D3E6671380184" name="org::w3c::string"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C8B7FC5029C" name="Currency">
+        <eAnnotations xmi:id="_MhkRh965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+          <details xmi:id="_MhkRiN65EdmrtKJSXC0_FQ" key="alias"/>
+        </eAnnotations>
+        <ownedAttribute xmi:id="_3C7B8A60016D3E667144038A" name="org::w3c::string"/>
+      </packagedElement>
+      <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3C8B8CCD0194" name="Sex">
+        <eAnnotations xmi:id="_MhkRi965EdmrtKJSXC0_FQ" source="http://www.eclipse.org/uml2/2.0.0/UML">
+          <details xmi:id="_MhkRjN65EdmrtKJSXC0_FQ" key="alias"/>
+        </eAnnotations>
+        <ownedAttribute xmi:id="_3C7B8A60016D3E6671510298" name="org::w3c::string"/>
+      </packagedElement>
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

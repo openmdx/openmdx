@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectView.java,v 1.69 2009/05/26 12:41:16 wfro Exp $
+ * Name:        $Id: ShowObjectView.java,v 1.74 2010/04/23 13:24:20 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.69 $
+ * Revision:    $Revision: 1.74 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 12:41:16 $
+ * Date:        $Date: 2010/04/23 13:24:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,13 +63,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.control.ShowInspectorControl;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 
@@ -91,9 +92,7 @@ public class ShowObjectView
         super(
             id, 
             containerElementId,
-            (RefObject_1_0)application.getPmData().getObjectById(
-                objectIdentity
-            ), 
+            objectIdentity,
             application, 
             historyActions,
             lookupType,
@@ -106,7 +105,7 @@ public class ShowObjectView
         this.inspectorControl = inspectorControl;
         
         // Attribute pane
-        AppLog.detail("Preparing attribute pane");
+        SysLog.detail("Preparing attribute pane");
         this.attributePane = new AttributePane(
             inspectorControl.getAttributePaneControl(),
             this,
@@ -114,7 +113,7 @@ public class ShowObjectView
         );
 
         // Operation pane
-        AppLog.detail("Preparing operation panes");
+        SysLog.detail("Preparing operation panes");
         this.operationPane = new OperationPane[inspectorControl.getOperationPaneControl().length];
         for (int i = 0; i < this.operationPane.length; i++) {
             this.operationPane[i] = new OperationPane(
@@ -124,7 +123,7 @@ public class ShowObjectView
         }
 
         // Reference pane
-        AppLog.detail("Preparing reference panes");
+        SysLog.detail("Preparing reference panes");
         this.referencePane = new ReferencePane[inspectorControl.getReferencePaneControl().length];
         for(int i = 0; i < this.referencePane.length; i++) {
             this.referencePane[i] = new ReferencePane(
@@ -149,7 +148,7 @@ public class ShowObjectView
             }
         }
         catch (ServiceException e) {
-            AppLog.detail("can not refresh", e.getMessage());
+        	SysLog.detail("can not refresh", e.getMessage());
             new ServiceException(e).log();
         }
     }
@@ -196,13 +195,16 @@ public class ShowObjectView
     }
 
     // -------------------------------------------------------------------------
-    public Map createHistoryAppendCurrent(
+    public Map<Path,Action> createHistoryAppendCurrent(
     ) {
         Map<Path,Action> historyActions = new LinkedHashMap<Path,Action>();
         historyActions.putAll(this.historyActions);
+        if(this.objectReference == null || this.objectReference.getObject() == null) {
+        	return historyActions;
+        }
         // Remove first (oldest) history entry in case MAX_HISTORY_ENTRIES is
         // reached
-        if (historyActions.size() >= MAX_HISTORY_ENTRIES) {
+        if(historyActions.size() >= MAX_HISTORY_ENTRIES) {
             Iterator i = historyActions.entrySet().iterator();
             i.next();
             i.remove();
@@ -309,6 +311,25 @@ public class ShowObjectView
         return selectPerspectiveActions.toArray(new Action[selectPerspectiveActions.size()]);
     }
       
+    //-------------------------------------------------------------------------  
+    public Action getToggleViewPortAction(
+    ) {
+    	ViewPort.Type newViewPortType = this.application.getCurrentViewPortType() == ViewPort.Type.STANDARD ?
+    		ViewPort.Type.MOBILE :
+    			ViewPort.Type.STANDARD;        		
+        return new Action(
+            Action.EVENT_SELECT_VIEWPORT,
+            new Action.Parameter[]{
+                new Action.Parameter(
+                	Action.PARAMETER_ID, 
+                	newViewPortType.toString()
+                )
+            },
+            newViewPortType.toString(),
+            true
+        );
+    }
+    
     // -------------------------------------------------------------------------
     public OperationPane[] getOperationPane(
     ) {

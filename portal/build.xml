@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.50 2009/03/09 14:25:26 wfro Exp $
+= Name:        $Id: build.xml,v 1.57 2010/04/30 13:05:19 wfro Exp $
 = Description: ant build for openMDX/Portal
-= Revision:    $Revision: 1.50 $
-= Date:        $Date: 2009/03/09 14:25:26 $
-= Copyright:   (c) 2004-2006 OMEX AG
+= Revision:    $Revision: 1.57 $
+= Date:        $Date: 2010/04/30 13:05:19 $
+= Copyright:   (c) 2004-2010 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -57,7 +57,7 @@
 	<description>Builds the openMDX/Portal component</description>
 	<property name="project.specification.title" value="openMDX/Portal"/>
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.5"/>
+	<property name="project.platform.list" value="jre-1.6"/>
 	<!-- Included Ant Projects -->
 	<import file="../ant/etc/ant/build-properties.xml"/>
 	<import file="../ant/etc/ant/build-library.xml"/>
@@ -168,6 +168,18 @@
 			<param name="in.dir.name" value="${basedir}/src/js/org/openmdx/portal"/>
 			<param name="file.name" value="guicontrol.js"/>
 		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="${basedir}/src/js/net/wiky"/>
+			<param name="file.name" value="wiky.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="${basedir}/src/js/net/wiky"/>
+			<param name="file.name" value="wiky.lang.js"/>
+		</antcall>
+		<antcall target="-compress-and-append-">
+			<param name="in.dir.name" value="${basedir}/src/js/net/wiky"/>
+			<param name="file.name" value="wiky.math.js"/>
+		</antcall>
 		<copy file="${build.dir}/src/js/portal-all.js" todir="src/war/openmdx-inspector.war/javascript"/>
 		<copy file="${build.dir}/src/js/findobject.js" todir="src/war/openmdx-inspector.war/javascript"/>
 		<copy file="${build.dir}/src/js/guicontrol.js" todir="src/war/openmdx-inspector.war/javascript"/>		
@@ -193,6 +205,7 @@
 			</manifest>
 			<zipfileset dir="src/war/openmdx-inspector.war" />
 			<zipfileset dir="src/js/org/wymeditor" prefix="javascript/wymeditor" />
+			<zipfileset dir="src/js/net/wiky" prefix="javascript/wiky" />
 			<zipfileset dir="src/js/org/jit" prefix="javascript/jit" />
 			<zipfileset dir="src/js/com/dynarch/calendar/lang" prefix="javascript/calendar/lang" />
 			<zipfileset dir="src/js/org/prototypejs" prefix="javascript" />
@@ -324,9 +337,9 @@
 			<packageset dir="${basedir}/src/java"/>
 			<packageset dir="${build.dir}/src/java"/>
 			<classpath refid="project.bin.classpath"/>
-			<link href="http://java.sun.com/j2se/1.4/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2se/"/>
-			<link href="http://java.sun.com/j2ee/1.4/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2ee/"/>
-			<link href="http://www.openmdx.org/openmdx/core/${openmdx.public.version}/java-${build.java.platform}/" offline="true" packagelistLoc="${openmdx.home}/core/build/jre-1.4/doc/api/"/>
+			<link href="http://java.sun.com/javase/6/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2se/"/>
+			<link href="http://java.sun.com/javaee/5/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2ee/"/>
+			<link href="http://www.openmdx.org/openmdx/core/${openmdx.public.version}/java-${build.java.platform}/" offline="true" packagelistLoc="${openmdx.home}/core/build/jre-1.6/doc/api/"/>
 			<group>
 				<title>${project.specification.title} Radius</title>
 				<package name="org.openmdx.portal"/>

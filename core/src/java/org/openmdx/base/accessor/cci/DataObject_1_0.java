@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObject_1_0.java,v 1.11 2009/05/26 09:29:22 wfro Exp $
+ * Name:        $Id: DataObject_1_0.java,v 1.22 2010/02/11 13:13:20 hburger Exp $
  * Description: Data Object interface
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 09:29:22 $
+ * Date:        $Date: 2010/02/11 13:13:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,11 +50,10 @@
  */
 package org.openmdx.base.accessor.cci;
 
-import java.util.EventListener;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.UUID;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
@@ -158,7 +157,7 @@ public interface DataObject_1_0
      * @see PersistenceManager#getObjectById(Object oid, boolean validate)
      * @return a transient object id
      */
-    Path jdoGetTransactionalObjectId();
+    UUID jdoGetTransactionalObjectId();
     
     /**
      * Returns the object's model class.
@@ -329,27 +328,6 @@ public interface DataObject_1_0
     ) throws ServiceException;
     
     /**
-     * Get a large object feature
-     * <p> 
-     * This method returns a new LargeObject.
-     *
-     * @param       feature
-     *              The feature's name.
-     *
-     * @return      a large object which may be empty but never is null.
-     *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if the object is deleted
-     * @exception   ClassCastException
-     *              if the feature's value is not a large object
-     * @exception   ServiceException BAD_MEMBER_NAME
-     *              if the object has no such feature
-     */
-    LargeObject_1_0 objGetLargeObject(
-        String feature
-    ) throws ServiceException;
-
-    /**
      * Get a reference feature.
      * <p> 
      * This method never returns <code>null</code> as an instance of the
@@ -410,82 +388,6 @@ public interface DataObject_1_0
         Record output
     ) throws ResourceException;
     
-    //------------------------------------------------------------------------
-    // Event Handling
-    //------------------------------------------------------------------------
-
-    /**
-     * Add an event listener.
-     * 
-     * @param listener
-     *        the event listener to be added
-     * <p>
-     * It is implementation dependent whether the feature name is verified or 
-     * not.
-     * 
-     * @exception   ServiceException BAD_MEMBER_NAME
-     *              if the object has no such feature or if a non-null
-     *              feature name is specified for an instance level event
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the listener's class is not supported
-     * @exception   ServiceException TOO_MANY_EVENT_LISTENERS
-     *              if an attempt is made to register more than one 
-     *              listener for a unicast event.
-     * @exception   ServiceException BAD_PARAMETER
-     *              If the listener is null 
-     */
-    void objAddEventListener(
-        EventListener listener
-    ) throws ServiceException;
-
-    /**
-     * Remove an event listener.
-     * <p>
-     * It is implementation dependent whether feature name and listener
-     * class are verified. 
-     * 
-     * @param listener
-     *        the event listener to be removed
-     * 
-     * @exception   ServiceException BAD_MEMBER_NAME
-     *              if the object has no such feature or if a non-null
-     *              feature name is specified for an instance level event
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the listener's class is not supported
-     * @exception   ServiceException BAD_PARAMETER
-     *              If the listener is null 
-     */
-    void objRemoveEventListener(
-        EventListener listener
-    ) throws ServiceException;
-
-    /**
-     * Get event listeners.
-     * <p>
-     * The <code>feature</code> argument is ignored for listeners registered 
-     * with a <code>null</code> feature argument.
-     * <p>
-     * It is implementation dependent whether feature name and listener
-     * type are verified. 
-     * 
-     * @param listenerType
-     *        the type of the event listeners to be returned
-     * 
-     * @return an array of listenerType containing the matching event
-     *         listeners
-     * 
-     * @exception   ServiceException BAD_MEMBER_NAME
-     *              if the object has no such feature or if a non-null
-     *              feature name is specified for an instance level event
-     * @exception   ServiceException BAD_PARAMETER
-     *              If the listener's type is not a subtype of EventListener 
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the listener type is not supported
-     */
-    <T extends EventListener> T[] objGetEventListeners(
-        Class<T> listenerType
-    ) throws ServiceException;
-
     /**
      * Tests whether object is member of a container.
      * 
@@ -512,29 +414,4 @@ public interface DataObject_1_0
     ServiceException getInaccessibilityReason(
     ) throws ServiceException;
     
-    /**
-     * Retrieve aspects for the specified aspect class.
-     * 
-     * @param aspectClass the aspect sub-class' MOF id
-     * 
-     * @return the requested aspect map
-     */
-    Map<String,DataObject_1_0> getAspect(
-        String aspectClass
-    ) throws ServiceException;
-
-   /**
-    * Retrieves all aspects
-    * 
-    * @param aspectClass the aspect sub-class' MOF id
-    * 
-    * @return the requested aspect map
-    */
-    Map<String, DataObject_1_0> getAspects(
-    ) throws ServiceException;
-    
-    
-    public static final String SYSTEM_ATTRIBUTE_MODIFIER = "$";
-    public static final String RECORD_NAME_REQUEST = SYSTEM_ATTRIBUTE_MODIFIER + SystemAttributes.OBJECT_CLASS;
-
 }

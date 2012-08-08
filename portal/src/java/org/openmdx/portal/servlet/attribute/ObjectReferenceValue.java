@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReferenceValue.java,v 1.63 2009/04/23 13:33:37 wfro Exp $
+ * Name:        $Id: ObjectReferenceValue.java,v 1.70 2010/04/27 12:21:07 wfro Exp $
  * Description: ObjectReferenceValue 
- * Revision:    $Revision: 1.63 $
+ * Revision:    $Revision: 1.70 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/23 13:33:37 $
+ * Date:        $Date: 2010/04/27 12:21:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,12 +67,13 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.ObjectReference;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.view.View;
 
 public class ObjectReferenceValue
@@ -141,6 +142,7 @@ implements Serializable {
 
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
+    @Override
     public Object getValue(
         boolean shortFormat
     ) {
@@ -180,9 +182,10 @@ implements Serializable {
             );
         }
         else {
+        	SysLog.warning("Reference is of type String instead RefObject or Collection. Retrieving object with new persistence manager");
             Path objectIdentity = new Path(value.toString());
             return new ObjectReference(
-                (RefObject_1_0)this.application.getPmData().getObjectById(objectIdentity),
+                (RefObject_1_0)this.application.getNewPmData().getObjectById(objectIdentity),
                 this.application
             );
         }
@@ -222,12 +225,12 @@ implements Serializable {
             return "";
         }
         else if(value instanceof ObjectReference) {
-            return ((ObjectReference)value).getTitle();
+            return value.toString();
         }
         else if(value instanceof Collection) {
             List<String> titles = new ArrayList<String>();
             for(Iterator i = ((Collection)value).iterator(); i.hasNext(); ) {
-                titles.add(((ObjectReference)i.next()).getTitle());
+                titles.add(i.next().toString());
             }
             return titles.toString();
         }
@@ -241,7 +244,7 @@ implements Serializable {
      * Prepares a single stringified value to append.
      */
     protected String getStringifiedValueInternal(
-        HtmlPage p, 
+        ViewPort p, 
         Object v,
         boolean multiLine,
         boolean forEditing,
@@ -314,9 +317,10 @@ implements Serializable {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         Attribute attribute,
-        HtmlPage p,
+        ViewPort p,
         String id,
         String label,
         RefObject_1_0 lookupObject,
@@ -334,10 +338,7 @@ implements Serializable {
     ) throws ServiceException {
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();                
         View view = p.getView();
-        if(label == null) {
-            label = attribute.getLabel();
-            label += label.length() == 0 ? "" : ":";        
-        }
+        label = this.getLabel(attribute, p, label);
         if(forEditing && this.isSingleValued()) {
             String feature = this.getName();
             ObjectReference objectReference = (ObjectReference)this.getValue(false);
@@ -380,10 +381,10 @@ implements Serializable {
             p.write("<td class=\"addon\" ", rowSpanModifier, ">");
             if(this.isChangeable()) {
                 if(
-                        (autocompleter == null) || 
-                        !autocompleter.hasFixedSelectableValues()
+                    (autocompleter == null) || 
+                    !autocompleter.hasFixedSelectableValues()
                 ) {
-                    String lookupId = org.openmdx.kernel.id.UUIDs.getGenerator().next().toString();
+                    String lookupId = org.openmdx.kernel.id.UUIDs.newUUID().toString();
                     Action findObjectAction = view.getFindObjectAction(
                         feature, 
                         lookupId

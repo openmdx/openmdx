@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: RootMenuControl.java,v 1.22 2009/03/08 18:03:26 wfro Exp $
+ * Name:        $Id: RootMenuControl.java,v 1.26 2010/02/01 10:57:07 wfro Exp $
  * Description: RootMenuControl
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:26 $
+ * Date:        $Date: 2010/02/01 10:57:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.ObjectView;
@@ -70,7 +70,7 @@ public class RootMenuControl
     extends Control
     implements Serializable {
 
-    //-------------------------------------------------------------------------
+	//-------------------------------------------------------------------------
     public RootMenuControl(
         String id,
         String locale,
@@ -85,33 +85,37 @@ public class RootMenuControl
     
     //-------------------------------------------------------------------------
     public static void paintQuickAccessors(
-        HtmlPage p
+        ViewPort p
     ) throws ServiceException {
         ObjectView view = (ObjectView)p.getView();        
-        String spacer = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        String spacer = p.getViewPortType() == ViewPort.Type.MOBILE ? "" : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         if(view.getQuickAccessActions().length > 0) {
             for(int i = 0; i < view.getQuickAccessActions().length; i++) {
                 Action action = view.getQuickAccessActions()[i];
-                p.write("  <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\" title=\"", action.getToolTip(), "\">", spacer, (action.getIconKey() == null ? "" : p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\"")), " " ,action.getTitle(), "</a></li>");
+                if(p.getViewPortType() != ViewPort.Type.MOBILE || action.getParameter(Action.PARAMETER_NAME).length() == 0) {
+                	p.write("  <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\" title=\"", action.getToolTip(), "\">", spacer, (action.getIconKey() == null ? "" : p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\"")), " " ,action.getTitle(), "</a></li>");
+                }
             }
         }        
-        ApplicationContext app = p.getApplicationContext();
-        Texts_1_0 texts = app.getTexts();
-        Action showHeaderAction = view.getSetPanelStateAction("Header", 0);
-        Action hideHeaderAction = view.getSetPanelStateAction("Header", 1);
-        Action logoffAction = view.getLogoffAction();
-        Action saveSettingsAction = view.getSaveSettingsAction();
-        String showHeaderTitle = texts.getShowHeaderTitle();
-        String hideHeaderTitle = texts.getHideHeaderTitle();
-        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(hideHeaderAction), ", {asynchronous:true});try{$('logoTable').id='logoTableNH';$('content').id='contentNH';}catch(e){};\" title=\"", hideHeaderTitle, "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_HEADER_HIDE, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", hideHeaderTitle, "</a></li>");             
-        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(showHeaderAction), ", {asynchronous:true});try{$('logoTableNH').id='logoTable';$('contentNH').id='content';}catch(e){};\" title=\"", showHeaderTitle, "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_HEADER_SHOW, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", showHeaderTitle, "</a></li>"); 
-        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});\" title=\"", saveSettingsAction.getTitle(), "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SAVE_SELECTED, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", saveSettingsAction.getTitle(), "</a></li>");             
-        p.write("  <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(logoffAction), ";\" title=\"", logoffAction.getTitle(), "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_LOGOFF_SELECTED, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", logoffAction.getTitle(), "</a></li>");             
+        if(p.getViewPortType() != ViewPort.Type.MOBILE) {
+	        ApplicationContext app = p.getApplicationContext();
+	        Texts_1_0 texts = app.getTexts();
+	        Action showHeaderAction = view.getSetPanelStateAction("Header", 0);
+	        Action hideHeaderAction = view.getSetPanelStateAction("Header", 1);
+	        Action logoffAction = view.getLogoffAction();
+	        Action saveSettingsAction = view.getSaveSettingsAction();
+	        String showHeaderTitle = texts.getShowHeaderTitle();
+	        String hideHeaderTitle = texts.getHideHeaderTitle();
+	        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(hideHeaderAction), ", {asynchronous:true});try{$('logoTable').id='logoTableNH';$('content').id='contentNH';}catch(e){};\" title=\"", hideHeaderTitle, "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_HEADER_HIDE, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", hideHeaderTitle, "</a></li>");             
+	        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(showHeaderAction), ", {asynchronous:true});try{$('logoTableNH').id='logoTable';$('contentNH').id='content';}catch(e){};\" title=\"", showHeaderTitle, "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_HEADER_SHOW, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", showHeaderTitle, "</a></li>"); 
+	        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});\" title=\"", saveSettingsAction.getTitle(), "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SAVE_SELECTED, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", saveSettingsAction.getTitle(), "</a></li>");             
+	        p.write("  <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(logoffAction), ";\" title=\"", logoffAction.getTitle(), "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_LOGOFF_SELECTED, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", logoffAction.getTitle(), "</a></li>");
+        }
     }
     
     //-------------------------------------------------------------------------
     public static void paintTopNavigation(
-        HtmlPage p
+        ViewPort p
     ) throws ServiceException {
         ObjectView view = (ObjectView)p.getView();
         ApplicationContext application = view.getApplicationContext();
@@ -123,8 +127,10 @@ public class RootMenuControl
         int indexItemLevel0 = 0;
         int nItemsLevel0 = 0;
         int topNavigationShowMax = 6;
+        boolean topNavigationShowSublevel = true; 
         try {
-            topNavigationShowMax = Integer.valueOf(application.getSettings().getProperty("TopNavigation.ShowMax", "7")).intValue();
+            topNavigationShowMax = Integer.valueOf(application.getSettings().getProperty(TOP_NAVIGATION_SHOW_MAX, "7")).intValue();
+            topNavigationShowSublevel = Boolean.valueOf(application.getSettings().getProperty(TOP_NAVIGATION_SHOW_SUBLEVEL, "true")).booleanValue();
         } 
         catch(Exception e) {}
         String stateItemLevel0 = "1";                
@@ -149,18 +155,29 @@ public class RootMenuControl
                 // open levels
                 int j = 0;
                 while(j < currentItemLevel - lastItemLevel) {
-                  p.write("  <ul>");
-                  j++;
+                    if(p.getViewPortType() != ViewPort.Type.MOBILE) {      
+                    	if(topNavigationShowSublevel) {
+                    		p.write("  <ul>");
+                    	}
+                    	else {
+                    		p.write("  <ul style=\"display:none\">");                    		
+                    	}
+                    }
+                    j++;
                 }
                 // close levels
                 j = 0;
                 while(j < lastItemLevel - currentItemLevel) {
-                    p.write("  </ul>");
-                    p.write("</li>");
+                    if(p.getViewPortType() != ViewPort.Type.MOBILE) {                	
+	                    p.write("  </ul>");
+	                    p.write("</li>");
+                    }
                     j++;
                 }
                 if(currentItemLevel == 1) {
-                    p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", action.getTitle(), "</a></li>");
+                    if(p.getViewPortType() != ViewPort.Type.MOBILE) {
+                    	p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", action.getTitle(), "</a></li>");
+                    }
                 }
                 else {
                     String selectedTag = "";
@@ -168,7 +185,12 @@ public class RootMenuControl
                     if(selectedObjectIdentity.startsWith(currentObjectIdentity)) {
                         selectedTag = "class=\"selected\"";
                     }
-                    p.write("<li ", selectedTag, "><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"><span>", action.getTitle(), "</span></a>");
+                    if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                    	p.write("<li ", selectedTag, "><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", action.getIconKey(), "\""), "&nbsp;&nbsp;&nbsp;<span>", action.getTitle(), "</span></a>");                    	
+                    }
+                    else {
+                    	p.write("<li ", selectedTag, "><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"><span>", action.getTitle(), "</span></a>");
+                    }
                 }
             }
             lastItemLevel = currentItemLevel;
@@ -177,31 +199,44 @@ public class RootMenuControl
         // Close levels
         int j = 0;
         while(j < lastItemLevel) {
-            p.write("  </ul>");
-            p.write("</li>");
+            if(p.getViewPortType() != ViewPort.Type.MOBILE) {        	
+	            p.write("  </ul>");
+	            p.write("</li>");
+            }
             j++;
         } 
         if(i < selectRootObjectAction.length) {
-            p.write("<li><a href=\"#\" onclick=\"javascript:return false;\"><span>\u00BB</span></a>");
-            p.write("  <ul>");
+            if(p.getViewPortType() != ViewPort.Type.MOBILE) {        	
+	            p.write("<li><a href=\"#\" onclick=\"javascript:return false;\"><span>\u00BB</span></a>");
+	            p.write("  <ul>");
+            }
             while(i < selectRootObjectAction.length) {
                 Action action = selectRootObjectAction[i];
                 if((action.getEvent() == Action.EVENT_SELECT_OBJECT) && (action.getParameter(Action.PARAMETER_REFERENCE).length() == 0)) {                
                     stateItemLevel0 = application.getSettings().getProperty("RootObject." + indexItemLevel0 + ".State", "1");
                     indexItemLevel0++;
-                    if(action.isEnabled() && "1".equals(stateItemLevel0)) {                    
-                        p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", action.getTitle(), "</a></li>");
+                    if(action.isEnabled() && "1".equals(stateItemLevel0)) {    
+                    	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+                    		p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", action.getIconKey(), "\""), "&nbsp;&nbsp;&nbsp;<span>", action.getTitle(), "</span></a></li>");                    		
+                    	}
+                    	else {
+                    		p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", action.getTitle(), "</a></li>");
+                    	}
                     }
                 }
                 i++;
-            }    
-            p.write("  </ul>");
-            p.write("</li>");
+            }
+            if(p.getViewPortType() != ViewPort.Type.MOBILE) {            
+	            p.write("  </ul>");
+	            p.write("</li>");
+            }
         }
     }
    
     //---------------------------------------------------------------------------------
     // Members
     //---------------------------------------------------------------------------------
+    public static final String TOP_NAVIGATION_SHOW_MAX = "TopNavigation.ShowMax";
+	public static final String TOP_NAVIGATION_SHOW_SUBLEVEL = "TopNavigation.ShowSublevel";
                
 }

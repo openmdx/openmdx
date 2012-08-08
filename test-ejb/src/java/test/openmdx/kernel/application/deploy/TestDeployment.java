@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestDeployment.java,v 1.2 2009/05/27 23:18:03 hburger Exp $
+ * Name:        $Id: TestDeployment.java,v 1.7 2010/04/09 09:40:33 hburger Exp $
  * Description: Container Test
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/27 23:18:03 $
+ * Date:        $Date: 2010/04/09 09:40:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,6 +66,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.zip.Deflater;
 
+import javax.ejb.TransactionAttributeType;
 import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -79,11 +80,9 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.application.configuration.Report;
 import org.openmdx.kernel.application.container.lightweight.LightweightContainer;
 import org.openmdx.kernel.application.container.lightweight.LightweightContainerTransaction;
 import org.openmdx.kernel.application.container.spi.ejb.ContainerTransaction;
-import org.openmdx.kernel.application.container.spi.ejb.TransactionAttribute;
 import org.openmdx.kernel.application.deploy.enterprise.EjbLocalReferenceDeploymentDescriptor;
 import org.openmdx.kernel.application.deploy.enterprise.EjbRemoteReferenceDeploymentDescriptor;
 import org.openmdx.kernel.application.deploy.enterprise.EnvEntryDeploymentDescriptor;
@@ -91,6 +90,8 @@ import org.openmdx.kernel.application.deploy.enterprise.SessionBeanDeploymentDes
 import org.openmdx.kernel.application.deploy.enterprise.VerifyingDeploymentManager;
 import org.openmdx.kernel.application.deploy.lightweight.ValidatingDeploymentManager;
 import org.openmdx.kernel.application.deploy.spi.Deployment;
+import org.openmdx.kernel.application.deploy.spi.Pool;
+import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Application;
 import org.openmdx.kernel.application.deploy.spi.Deployment.ApplicationClient;
 import org.openmdx.kernel.application.deploy.spi.Deployment.AuthenticationMechanism;
@@ -162,7 +163,7 @@ public class TestDeployment extends TestCase {
       LightweightContainer.getInstance(
           LightweightContainer.Mode.ENTERPRISE_APPLICATION_CONTAINER
       ).deployApplicationClient(
-          new File(FULLY_EXPLODED_EAR_LOCATION).toURL().toString(), 
+          new File(FULLY_EXPLODED_EAR_LOCATION).toURI().toURL().toString(), 
           NO_APPLICATION_CLIENT_ENVIRONMENT,
           new String[]{}
       );      
@@ -171,35 +172,35 @@ public class TestDeployment extends TestCase {
   public void testFullyExplodedEAR(
   ) throws Exception {
     this.runEARDeploymentTests(	
-      new File(FULLY_EXPLODED_EAR_LOCATION).toURL()
+      new File(FULLY_EXPLODED_EAR_LOCATION).toURI().toURL()
     );
   }
 
   public void testFullyExplodedConnector(
   ) throws Exception {
     this.runConnectorDeploymentTests(
-      new File(FULLY_EXPLODED_EAR_LOCATION + "/eis1.rar").toURL()
+      new File(FULLY_EXPLODED_EAR_LOCATION + "/eis1.rar").toURI().toURL()
     );
   }
 
   public void testConnector(
   ) throws Exception {
     this.runConnectorDeploymentTests(
-      new File(this.directory.getAbsoluteFile() + "/test1.ear.semi-exploded/eis1.rar").toURL()
+      new File(this.directory.getAbsoluteFile() + "/test1.ear.semi-exploded/eis1.rar").toURI().toURL()
     );
   }
 
   public void testSemiExplodedEAR(
   ) throws Exception {
     this.runEARDeploymentTests(
-      new File(this.directory.getAbsoluteFile() + "/test1.ear.semi-exploded").toURL()
+      new File(this.directory.getAbsoluteFile() + "/test1.ear.semi-exploded").toURI().toURL()
     );
   }
 
   public void testEAR(
   ) throws Exception {
     this.runEARDeploymentTests(
-      new File(this.directory.getAbsoluteFile() + "/test1.ear").toURL()
+      new File(this.directory.getAbsoluteFile() + "/test1.ear").toURI().toURL()
     );
   }  
   
@@ -285,12 +286,12 @@ public class TestDeployment extends TestCase {
       // check deployed references
       this.assertReference(
           applicationContext, 
-          true ? "(gateway.jar)/explorer_Dataprovider_1ManagingTransaction/local" : "(gateway.jar)/*explorer_Dataprovider_1ManagingTransaction/*local", 
+          "(gateway.jar)/explorer_Dataprovider_1ManagingTransaction/local", 
           LOCAL_LINK_REF
       );
       this.assertReference(
           applicationContext, 
-          true ? "(gateway.jar)/explorer_Dataprovider_1ManagingTransaction/remote" : "(gateway.jar)/*explorer_Dataprovider_1ManagingTransaction/*remote", 
+          "(gateway.jar)/explorer_Dataprovider_1ManagingTransaction/remote", 
           REMOTE_LINK_REF
       );
   }
@@ -349,7 +350,7 @@ public class TestDeployment extends TestCase {
     this.assertReference(
         clientContext, 
         "env/ejb/Harald", 
-        true ? "openmdx:application/(one.jar)/Harald/remote" : "openmdx:application/(one.jar)/*Harald/*remote"
+        "openmdx:application/(one.jar)/Harald/remote"
     );
     
     // check resource reference
@@ -445,12 +446,12 @@ public class TestDeployment extends TestCase {
     this.assertReference(
         contextWerner, 
         "env/ejb/Harald", 
-        true ? "openmdx:application/(one.jar)/Harald/local" : "openmdx:application/(one.jar)/*Harald/*local"
+        "openmdx:application/(one.jar)/Harald/local"
     );
     this.assertReference(
         contextWerner, 
         "env/ejb/Roger", 
-        true ? "openmdx:application/(one.jar)/Roger/remote" : "openmdx:application/(one.jar)/*Roger/*remote" 
+        "openmdx:application/(one.jar)/Roger/remote" 
     );
 
     Deployment.SessionBean sessionBeanWerner = this.assertSessionBean(componentWerner);
@@ -471,12 +472,12 @@ public class TestDeployment extends TestCase {
     // check deployed references
     this.assertReference(
         applicationContext, 
-        true ? "(one.jar)/Werner/local" : "(one.jar)/*Werner/*local", 
+        "(one.jar)/Werner/local", 
         LOCAL_LINK_REF
     );
     this.assertReference(
         applicationContext, 
-        true ? "(one.jar)/Werner/remote" : "(one.jar)/*Werner/*remote", 
+        "(one.jar)/Werner/remote", 
         REMOTE_LINK_REF
     );
 
@@ -490,22 +491,22 @@ public class TestDeployment extends TestCase {
     this.assertReference(
         contextHarald, 
         "env/ejb/MartinWithModulePrefix", 
-        true ? "openmdx:application/(two.jar)/Martin/local" : "openmdx:application/(two.jar)/*Martin/*local"
+        "openmdx:application/(two.jar)/Martin/local"
     );
     this.assertReference(
         contextHarald, 
         "env/ejb/JuergWithModulePrefix", 
-        true ? "openmdx:application/(two.jar)/Juerg/remote" : "openmdx:application/(two.jar)/*Juerg/*remote"
+        "openmdx:application/(two.jar)/Juerg/remote"
     );
     this.assertReference(
         contextHarald, 
         "env/ejb/MartinWithoutModulePrefix", 
-        true ? "openmdx:application/(two.jar)/Martin/local" : "openmdx:application/(two.jar)/*Martin/*local"
+        "openmdx:application/(two.jar)/Martin/local"
     );
     this.assertReference(
         contextHarald, 
         "env/ejb/JuergWithoutModulePrefix", 
-        true ? "openmdx:application/(two.jar)/Juerg/remote" : "openmdx:application/(two.jar)/*Juerg/*remote"
+        "openmdx:application/(two.jar)/Juerg/remote"
     );
 
     Deployment.SessionBean sessionBeanHarald = this.assertSessionBean(componentHarald);
@@ -526,12 +527,12 @@ public class TestDeployment extends TestCase {
     // check deployed references
     this.assertReference(
         applicationContext, 
-        true ? "(one.jar)/Harald/local" : "(one.jar)/*Harald/*local", 
+        "(one.jar)/Harald/local", 
         LOCAL_LINK_REF
     );
     this.assertReference(
         applicationContext, 
-        true ? "(one.jar)/Harald/remote" : "(one.jar)/*Harald/*remote", 
+        "(one.jar)/Harald/remote", 
         REMOTE_LINK_REF
     );
 
@@ -549,12 +550,12 @@ public class TestDeployment extends TestCase {
     this.assertReference(
         contextRoger, 
         "env/ejb/Harald", 
-        true ? "openmdx:application/(one.jar)/Harald/remote" : "openmdx:application/(one.jar)/*Harald/*remote"
+        "openmdx:application/(one.jar)/Harald/remote"
     );
     this.assertReference(
         contextRoger, 
         "env/ejb/Werner", 
-        true ? "openmdx:application/(one.jar)/Werner/local" : "openmdx:application/(one.jar)/*Werner/*local" 
+        "openmdx:application/(one.jar)/Werner/local" 
     );
 
     // check resource reference
@@ -563,8 +564,8 @@ public class TestDeployment extends TestCase {
     // check resource-env reference
     this.assertReference(contextRoger, "env/resource-env/TestResourceEnvRef", "openmdx:container/org/openmdx/test/resource-env/TestResourceEnvRef");
 
-    assertTrue("component must be instance of Deployment.Pool", componentRoger instanceof Deployment.Pool);
-    Deployment.Pool poolRoger = (Deployment.Pool) componentRoger;
+    assertTrue("component must be instance of Deployment.Pool", componentRoger instanceof Pool);
+    Pool poolRoger = (Pool) componentRoger;
     assertEquals("MaximumCapacity", new Integer(100), poolRoger.getMaximumCapacity());
     assertEquals("InitialCapacity", new Integer(1), poolRoger.getInitialCapacity());
     assertEquals("MaximumWait", new Long(1000000), poolRoger.getMaximumWait());
@@ -592,23 +593,23 @@ public class TestDeployment extends TestCase {
     );
     assertEquals(
         "Remote method transaction attribute", 
-        TransactionAttribute.REQUIRED, 
+        TransactionAttributeType.REQUIRED, 
         containerTransactionLightweight.getTransactionAttribute("Remote", "anyMethod", new String[]{})
     );
     assertEquals(
         "Remote method transaction attribute", 
-        TransactionAttribute.SUPPORTS, 
+        TransactionAttributeType.SUPPORTS, 
         containerTransactionLightweight.getTransactionAttribute("Local", "anyMethod", new String[]{})
     );
     // check deployed references
     this.assertReference(
         applicationContext, 
-        true ? "(one.jar)/Roger/local" : "(one.jar)/*Roger/*local", 
+        "(one.jar)/Roger/local", 
         LOCAL_LINK_REF
     );
     this.assertReference(
         applicationContext, 
-        true ? "(one.jar)/Roger/remote" : "(one.jar)/*Roger/*remote", 
+        "(one.jar)/Roger/remote", 
         REMOTE_LINK_REF
    );
     
@@ -642,12 +643,12 @@ public class TestDeployment extends TestCase {
     // check deployed references
     this.assertReference(
         applicationContext, 
-        true ? "(two.jar)/Martin/local" : "(two.jar)/*Martin/*local", 
+        "(two.jar)/Martin/local", 
         LOCAL_LINK_REF
     );
     this.assertReference(
         applicationContext, 
-        true ? "(two.jar)/Martin/remote" : "(two.jar)/*Martin/*remote", 
+        "(two.jar)/Martin/remote", 
         REMOTE_LINK_REF
     );
     this.assertReference(
@@ -673,12 +674,12 @@ public class TestDeployment extends TestCase {
     // check deployed references
     this.assertReference(
         applicationContext, 
-        true ? "(two.jar)/Juerg/local" : "(two.jar)/*Juerg/*local", 
+        "(two.jar)/Juerg/local", 
         LOCAL_LINK_REF
     );
     this.assertReference(
         applicationContext, 
-        true ? "(two.jar)/Juerg/remote" : "(two.jar)/*Juerg/*remote", 
+        "(two.jar)/Juerg/remote", 
         REMOTE_LINK_REF
     );
     this.assertReference(
@@ -704,12 +705,12 @@ public class TestDeployment extends TestCase {
     // check deployed references
     this.assertReference(
         applicationContext, 
-        true ? "(two.jar)/Andy/local" : "(two.jar)/*Andy/*local", 
+        "(two.jar)/Andy/local", 
         LOCAL_LINK_REF
     );
     this.assertReference(
         applicationContext, 
-        true ? "(two.jar)/Andy/remote" : "(two.jar)/*Andy/*remote", 
+        "(two.jar)/Andy/remote", 
         REMOTE_LINK_REF
      );
     this.assertReference(

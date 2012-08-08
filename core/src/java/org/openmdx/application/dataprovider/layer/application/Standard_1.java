@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.1 2009/05/26 14:31:22 wfro Exp $
+ * Name:        $Id: Standard_1.java,v 1.5 2009/12/17 12:37:35 wfro Exp $
  * Description: Standard_1 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:22 $
+ * Date:        $Date: 2009/12/17 12:37:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,21 +48,40 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.application.dataprovider.layer.application;
+
+import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
+import javax.resource.cci.Interaction;
+
+import org.openmdx.application.dataprovider.spi.Layer_1;
 
 /**
  * Standard_1
  */
-public class Standard_1
-    extends ProvidingUid_1
-{
+public class Standard_1 extends Layer_1 {
 
-    /**
-     * Constructor 
-     */
-    public Standard_1() {
-        super();
+    //--------------------------------------------------------------------------
+    public Standard_1(
+    ) {
     }
-
+    
+    //--------------------------------------------------------------------------
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new StandardLayerInteraction(connection);
+    }
+ 
+    //--------------------------------------------------------------------------
+    public class StandardLayerInteraction extends Layer_1.LayerInteraction {
+      
+        public StandardLayerInteraction(
+            Connection connection
+        ) throws ResourceException {
+            super(connection);
+        }
+                
+    }
+    
 }

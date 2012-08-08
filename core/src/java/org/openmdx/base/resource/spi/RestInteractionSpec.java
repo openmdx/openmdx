@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestInteractionSpec.java,v 1.4 2009/05/22 00:51:22 wfro Exp $
+ * Name:        $Id: RestInteractionSpec.java,v 1.7 2010/04/08 01:18:59 hburger Exp $
  * Description: REST Interaction Specification
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/22 00:51:22 $
+ * Date:        $Date: 2010/04/08 01:18:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,55 +55,48 @@ import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.RestFunction;
-import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 
 
 /**
- * REST Interaction Specification
+ * Unmodifiable REST Interaction Specification
  */
-public class RestInteractionSpec implements InteractionSpec {
+public final class RestInteractionSpec implements InteractionSpec {
+
+    /**
+     * Constructor 
+     *
+     * @param function
+     * @param interactionVerb
+     */
+    public RestInteractionSpec(
+        RestFunction function, 
+        int interactionVerb
+    ) {
+        this.function = function;
+        this.interactionVerb = interactionVerb;
+    }
 
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = -7618869395528893650L;
+    private static final long serialVersionUID = -721366034760859071L;
 
     /**
      * The REST function
      */
-    private RestFunction function = null;
+    private final RestFunction function;
     
     /**
      * The interaction verb
      */
-    private int interactionVerb = InteractionSpec.SYNC_SEND_RECEIVE;
+    private final int interactionVerb;
 
-    /**
-     * The principal chain
-     */
-    private String[] principalChain;
-
-    /**
-     * Tells, whether this <code>InteractionSpec</code> may be modified or not.
-     */
-    boolean unmodifiable = false;
-    
-    /**
-     * Test whether this <code>InteractionSpec</code> is modifiable.
-     */
-    private void assertModifiability(
-    ){
-        if(this.unmodifiable) throw BasicException.initHolder(
-            new IllegalStateException(
-                "This REST InteractionSpec is unmodifiable",
-                BasicException.newEmbeddedExceptionStack(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ILLEGAL_STATE
-                )
-            )
-        );
-    }
+    private static final String[] INTERACTION_VERBS = {
+        "SYNC_SEND",        
+        "SYNC_SEND_RECEIVE",        
+        "SYNC_RECEIVE"        
+    };
     
     /**
      * Retrieve function.
@@ -115,18 +108,6 @@ public class RestInteractionSpec implements InteractionSpec {
     }
 
     /**
-     * Set the function
-     * 
-     * @param function The function to set.
-     */
-    public void setFunction(
-        RestFunction function
-    ) {
-        assertModifiability();
-        this.function = function;
-    }
-    
-    /**
      * Retrieve the function by name 
      * 
      * @return the function by name 
@@ -136,19 +117,6 @@ public class RestInteractionSpec implements InteractionSpec {
     }
 
     /**
-     * Set the function by name
-     * 
-     * @param functionName the function name
-     */
-    public void setFunctionName(
-        String functionName
-    ){
-        setFunction(
-            RestFunction.valueOf(functionName)
-        );
-    }
-    
-    /**
      * Retrieve the interaction verb.
      *
      * @return Returns the interaction verb
@@ -157,74 +125,6 @@ public class RestInteractionSpec implements InteractionSpec {
         return this.interactionVerb;
     }
     
-    /**
-     * Set the interaction verb.
-     * 
-     * @param interactionVerb the interaction verb to set
-     */
-    public void setInteractionVerb(int interactionVerb) {
-        assertModifiability();
-        this.interactionVerb = interactionVerb;
-    }
-
-    
-    /**
-     * Retrieve the principal chain
-     *
-     * @return Returns the principal chain
-     */
-    public String[] getPrincipalChain() {
-        return this.principalChain;
-    }
-    
-    /**
-     * Retrieve the principal chain
-     *
-     * @return Returns the principal chain
-     */
-    public String getPrincipalChain(
-        int index
-    ) {
-        return this.principalChain[index];
-    }
-    
-    /**
-     * Set the principal chain
-     *    
-     * @param principalChain the principal chain to be set
-     * 
-     * @throws ResourceException 
-     */
-    public void setPrincipalChain(
-        String[] principalChain
-    ){
-        assertModifiability();
-        this.principalChain = principalChain;
-    }    
-
-    /**
-     * Set the principal chain
-     *    
-     * @param principal the principal to be set
-     * 
-     * @throws ResourceException 
-     */
-    public void setPrincipalChain(
-        int index,
-        String principal
-    ) throws ResourceException {
-        assertModifiability();
-        this.principalChain[index] = principal;
-    }    
-
-    /**
-     * Make this <code>InteractionSpec</code> unmodifiable. 
-     * If already unmodifiable, this method has no effect.
-     */
-    public void setUnmodifiable(){
-        this.unmodifiable = true;
-    }
-
     @Override
     public String toString(
     ) {
@@ -232,24 +132,45 @@ public class RestInteractionSpec implements InteractionSpec {
             return IndentingFormatter.toString(
                 Records.getRecordFactory().asMappedRecord(
                     this.getClass().getName(), 
-                    null, 
+                    "openMDX/REST Interaction Spec", 
                     new String[]{
                         "function",
-                        "interactionVerb",
-                        "principalChain",
-                        "unmodifiable"
+                        "interactionVerb"
                     },
                     new Object[]{
                         this.function,
-                        this.interactionVerb,
-                        this.principalChain,
-                        this.unmodifiable
+                        INTERACTION_VERBS[this.interactionVerb]
                     }
                 )
             );
-        }
-        catch(ResourceException e) {
-            return null;
+        } catch(ResourceException e) {
+            return super.toString();
         }
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof RestInteractionSpec) {
+            RestInteractionSpec that = (RestInteractionSpec) obj; 
+            return that.function == this.function && that.interactionVerb == this.interactionVerb;
+        } else {
+            return false;
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        int i = this.interactionVerb;
+        if(this.function != null) {
+            i += 4 * this.function.ordinal();
+        }
+        return i;
+    }
+    
 }

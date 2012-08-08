@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DateValue.java,v 1.49 2009/05/14 12:28:35 wfro Exp $
+ * Name:        $Id: DateValue.java,v 1.53 2009/10/19 15:55:57 hburger Exp $
  * Description: DateValue 
- * Revision:    $Revision: 1.49 $
+ * Revision:    $Revision: 1.53 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/14 12:28:35 $
+ * Date:        $Date: 2009/10/19 15:55:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,7 +56,6 @@
 package org.openmdx.portal.servlet.attribute;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -68,11 +67,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.control.EditObjectControl;
+import org.w3c.spi2.Datatypes;
 
 public class DateValue
     extends AttributeValue
@@ -115,11 +114,10 @@ public class DateValue
             application
         );
         try {
-            this.defaultValue = fieldDef.defaultValue == null
-                ? null
-                : DateFormat.getInstance().parse(fieldDef.defaultValue);
+            this.defaultValue = Datatypes.create(Date.class, fieldDef.defaultValue);
+        } catch(IllegalArgumentException e) {
+        	// ignore
         }
-        catch(ParseException e) {}
     }
 
     //-------------------------------------------------------------------------
@@ -254,7 +252,7 @@ public class DateValue
 
     //-------------------------------------------------------------------------
     protected String getStringifiedValueInternal(
-        HtmlPage p,
+        ViewPort p,
         Object v,
         boolean multiLine,
         boolean forEditing,
@@ -328,9 +326,10 @@ public class DateValue
     }
     
     //-------------------------------------------------------------------------
+    @Override
     public void paint(
         Attribute attribute,
-        HtmlPage p,
+        ViewPort p,
         String id,
         String label,
         RefObject_1_0 lookupObject,
@@ -346,11 +345,8 @@ public class DateValue
         String stringifiedValue,
         boolean forEditing
     ) throws ServiceException {
-        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();                        
-        if(label == null) {
-            label = attribute.getLabel();
-            label += label.length() == 0 ? "" : ":";        
-        }
+        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();         
+        label = this.getLabel(attribute, p, label);
         if(forEditing) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0) ? 

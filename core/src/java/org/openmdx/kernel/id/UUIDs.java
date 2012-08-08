@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UUIDs.java,v 1.7 2009/04/24 00:01:40 hburger Exp $
+ * Name:        $Id: UUIDs.java,v 1.9 2009/11/05 17:44:19 hburger Exp $
  * Description: UUIDs
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/24 00:01:40 $
+ * Date:        $Date: 2009/11/05 17:44:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,11 +52,11 @@ package org.openmdx.kernel.id;
 
 import java.util.UUID;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.id.cci.UUIDBuilder;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
 import org.openmdx.kernel.id.plugin.RandomBasedUUIDGenerator;
 import org.openmdx.kernel.id.plugin.TimeBasedUUIDGeneratorUsingRandomBasedNode;
+import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 
 
@@ -86,8 +86,24 @@ public final class UUIDs {
     /**
      * The UUID generator class
      */
-    private static final Class<? extends UUIDGenerator> uuidGenerator = getGeneratorClass();
+    private static final Class<? extends UUIDGenerator> generatorClass = getGeneratorClass();
 
+    /**
+     * Provide thread-local generators for the <code>newUUID</code> method
+     */
+    private static final ThreadLocal<UUIDGenerator> threadLocalGenerator = new ThreadLocal<UUIDGenerator>(){
+
+        /* (non-Javadoc)
+         * @see java.lang.ThreadLocal#initialValue()
+         */
+        @Override
+        protected UUIDGenerator initialValue() {
+            return getGenerator();
+        }
+        
+    };
+    
+    
     /**
      * The UUID provider system property.
      */
@@ -101,7 +117,7 @@ public final class UUIDs {
      * represented as "urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6".
      * 
      * @param uuid to be represented as URN
-     * 
+     * p
      * @return an URN corresponding to the provided uuid
      */
     public static String toURN(
@@ -113,15 +129,17 @@ public final class UUIDs {
     /**
      * Load the configured UUID provider
      * <p>
-     * If multiple threads need to generate UUIDs simultaneously then
-     * each should obtain its own <code>UUIDBuilder</code> instance.
+     * If multiple threads need to generate UUIDs simultaneously then each should<ul>
+     * <li>either obtain its own <code>UUIDBuilder</code> instance (for bulk usage)
+     * <li>or use <code>newUUID()</code> instead (for standard usage)
+     * </ul>
      * 
      * @return a UUID provider instance
      */
     public static UUIDGenerator getGenerator(
     ){
         try {
-            return UUIDs.uuidGenerator.newInstance();
+            return UUIDs.generatorClass.newInstance();
         } catch (Throwable throwable) {
             SysLog.error(
                 "UUID generator acquisition failure",
@@ -134,6 +152,15 @@ public final class UUIDs {
         }
     }
 
+    /**
+     * Create a UUID
+     * 
+     * @return a new <code>UUID</code>
+     */
+    public static UUID newUUID(){
+        return threadLocalGenerator.get().next();
+    }
+    
     /**
      * Load the configured UUID provider
      * <p>

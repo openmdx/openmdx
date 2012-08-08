@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection_2_0Remote.java,v 1.1 2009/04/24 01:04:10 hburger Exp $
+ * Name:        $Id: Connection_2_0Remote.java,v 1.3 2009/09/30 12:42:59 hburger Exp $
  * Description: Connection 2.0 Remote Interface
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/24 01:04:10 $
+ * Date:        $Date: 2009/09/30 12:42:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,7 +55,6 @@ import java.rmi.RemoteException;
 import javax.ejb.EJBObject;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
-import javax.resource.cci.ConnectionMetaData;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 
@@ -65,9 +64,10 @@ import javax.resource.cci.Record;
 public interface Connection_2_0Remote extends EJBObject {
 
     /** 
-     * Executes an interaction represented by the InteractionSpec.
-     * This form of invocation takes an input Record and returns an 
-     * output Record if the execution of the Interaction has been
+     * Allows the execution of an interaction represented by the 
+     * <code>InteractionSpec</code>.
+     * This invocation takes an input <code>Record</code> and returns an  
+     * output <code>Record</code> if the execution of the Interaction has been
      * successful.
      *  
      * @param   ispec   InteractionSpec representing a target EIS 
@@ -95,21 +95,6 @@ public interface Connection_2_0Remote extends EJBObject {
     Record execute(
         InteractionSpec ispec, 
         Record input
-    ) throws ResourceException, RemoteException;
-
-    /** 
-     * Gets the information on the underlying EIS instance represented
-     * through an active connection.
-     *
-     * @return   ConnectionMetaData instance representing information 
-     *           about the EIS instance
-     * @throws   ResourceException  
-     *                        Failed to get information about the 
-     *                        connected EIS instance. Error can be
-     *                        resource adapter-internal, EIS-specific
-     *                        or communication related.
-     */
-    ConnectionMetaData getMetaData(
     ) throws ResourceException, RemoteException;
 
 }

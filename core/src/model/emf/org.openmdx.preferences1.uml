@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="2.1" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmlns:uml="http://www.eclipse.org/uml2/3.0.0/UML" xmi:id="_km7dgFhTEdqpq69lOCMZBw" name="preferences1">
+  <packagedElement xmi:type="uml:Package" xmi:id="_o9hDQFhTEdqpq69lOCMZBwPP" name="org">
+    <packagedElement xmi:type="uml:Package" xmi:id="_o9hDQFhTEdqpq69lOCMZBwP" name="openmdx">
+      <packagedElement xmi:type="uml:Package" xmi:id="_o9hDQFhTEdqpq69lOCMZBw" name="preferences1">
+        <packagedElement xmi:type="uml:Class" xmi:id="_8ghv4FhTEdqpq69lOCMZBw" name="Segment">
+          <generalization xmi:id="_tMxAAFhVEdqpq69lOCMZBw">
+            <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D3FC487C80099"/>
+          </generalization>
+          <ownedAttribute xmi:id="__1sU4VhTEdqpq69lOCMZBw" name="preferences" type="_-WSXoFhTEdqpq69lOCMZBw" aggregation="composite" association="__1sU4FhTEdqpq69lOCMZBw">
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="__1sU5FhTEdqpq69lOCMZBw" value="1"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="__1sU41hTEdqpq69lOCMZBw"/>
+            <qualifier xmi:id="_tn4EIFhUEdqpq69lOCMZBw" name="id" visibility="private">
+              <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            </qualifier>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Class" xmi:id="_-WSXoFhTEdqpq69lOCMZBw" name="Preferences">
+          <generalization xmi:id="_qGD1sLf4EdqY9OgpKQcsuw">
+            <general xmi:type="uml:Class" href="org.openmdx.generic1.uml#_3C7B8A60016D3DC93385006B"/>
+          </generalization>
+          <ownedAttribute xmi:id="_i5a2AFhXEdqpq69lOCMZBw" name="absolutePath">
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="_A35t4FhWEdqpq69lOCMZBw" name="name" isReadOnly="true" isDerived="true">
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="_NOMAAFhUEdqpq69lOCMZBw" name="description">
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+            <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_jRqBwVhVEdqpq69lOCMZBw" value="1"/>
+            <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_jRqBwFhVEdqpq69lOCMZBw"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="_xZPVkFhXEdqpq69lOCMZBw" name="parent" isReadOnly="true" isDerived="true">
+            <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
+          </ownedAttribute>
+        </packagedElement>
+        <packagedElement xmi:type="uml:Association" xmi:id="__1sU4FhTEdqpq69lOCMZBw" name="SegmentContainsPreferences" memberEnd="__1sU4VhTEdqpq69lOCMZBw __1sU4lhTEdqpq69lOCMZBw">
+          <ownedEnd xmi:id="__1sU4lhTEdqpq69lOCMZBw" name="segment" type="_8ghv4FhTEdqpq69lOCMZBw" association="__1sU4FhTEdqpq69lOCMZBw"/>
+        </packagedElement>
+      </packagedElement>
+    </packagedElement>
+  </packagedElement>
+</uml:Model>

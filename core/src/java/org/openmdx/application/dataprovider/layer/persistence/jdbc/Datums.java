@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Datums.java,v 1.1 2009/05/26 14:31:21 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Datums.java,v 1.3 2010/04/16 09:47:54 hburger Exp $
  * Description: Oracle SQL Datum Conversions
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:21 $
+ * Date:        $Date: 2010/04/16 09:47:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,9 +58,9 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.loading.Classes;
 
 /**
  * Oracle SQL Datum Conversions
@@ -134,11 +134,10 @@ public class Datums {
                 if(oracleToJdbc == null) oracleToJdbc = Classes.getApplicationClass(
                     "oracle.sql.Datum"
                 ).getMethod(
-                    "toJdbc",
-                    (Class[])null
+                    "toJdbc"
                 );
                 try {
-                    return oracleToJdbc.invoke(datum, (Object[])null);
+                    return oracleToJdbc.invoke(datum);
                 } catch (InvocationTargetException exception) {
                     throw exception.getTargetException() instanceof Exception ?
                         (Exception) exception.getTargetException() :

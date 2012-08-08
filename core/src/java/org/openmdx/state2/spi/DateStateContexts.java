@@ -1,9 +1,9 @@
 /*
  * ====================================================================
  * Description: Date State Contexts
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/16 11:55:25 $
+ * Date:        $Date: 2009/10/23 14:42:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -48,7 +48,8 @@
  */
 package org.openmdx.state2.spi;
 
-import java.text.ParseException;
+import static org.openmdx.state2.cci.ViewKind.TIME_POINT_VIEW;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -58,9 +59,10 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.state2.cci.StateContext;
 import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Date State Contexts
@@ -90,10 +92,10 @@ public class DateStateContexts {
             return DateStateViewContext.newTimePointViewContext(
                 fromBasicFormat(validFor),
                 new Date(
-                    DateFormat.getInstance().parse(invalidatedAt).getTime() - 1
+                    Datatypes.create(Date.class, invalidatedAt).getTime() - 1
                 )
             );
-        } catch (ParseException exception) {
+        } catch (IllegalArgumentException exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -169,6 +171,21 @@ public class DateStateContexts {
             calendar.get(Calendar.DAY_OF_MONTH),
             DatatypeConstants.FIELD_UNDEFINED
         );
+    }
+    
+    /**
+     * Tests whether the context describes a history view
+     * 
+     * @param context
+     * 
+     * @return <code>true</code> if the context describes a history view
+     */
+    public static boolean isHistoryView(
+        StateContext<?> context
+    ){
+        return
+            context.getViewKind() == TIME_POINT_VIEW &&
+            context.getExistsAt() != null;
     }
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractObject.java,v 1.7 2009/05/23 15:08:56 wfro Exp $
+ * Name:        $Id: AbstractObject.java,v 1.10 2010/01/21 17:31:39 hburger Exp $
  * Description: Abstract Object
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/23 15:08:56 $
+ * Date:        $Date: 2010/01/21 17:31:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,8 +51,8 @@
 package org.openmdx.base.aop2;
 
 import java.util.Collections;
+import java.util.UUID;
 
-import javax.jdo.JDOFatalInternalException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.listener.ClearCallback;
@@ -64,8 +64,7 @@ import javax.jmi.reflect.RefPackage;
 
 import org.openmdx.base.jmi1.BasePackage;
 import org.openmdx.base.jmi1.Void;
-import org.openmdx.base.persistence.cci.PersistenceHelper;
-import org.openmdx.base.persistence.spi.AspectObjectAcessor;
+import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.jdo.listener.ConstructCallback;
 
 /**
@@ -160,28 +159,6 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
     //------------------------------------------------------------------------
     
     /**
-     * Retrieve the current object id
-     * 
-     * @return the current object id
-     */
-    private final Object contextId(){
-        return PersistenceHelper.getCurrentObjectId(sameObject());
-    }
-    
-    /**
-     * Acquire the <code>AspectObjectAcessor</code> instance
-     * 
-     * @return the <code>AspectObjectAcessor</code> instance
-     */
-    private AspectObjectAcessor aspectObjectAccessor(){
-        AspectObjectAcessor contexts = (AspectObjectAcessor) sameManager().getUserObject(AspectObjectAcessor.class);
-        if(contexts == null) throw new JDOFatalInternalException(
-            AspectObjectAcessor.class.getSimpleName() + " acquisition failure"
-        );
-        return contexts;
-    }
-    
-    /**
      * Retrieve the context belonging to this aspect, creating a new one if necessary.
      * 
      * @return the context
@@ -189,15 +166,17 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
     @SuppressWarnings("unchecked")
     protected C thisContext(
     ){
-        AspectObjectAcessor contexts = aspectObjectAccessor();
-        Object id = contextId();
+        SharedObjects.Aspects contexts = SharedObjects.aspectObjects(sameManager());
+        UUID id = (UUID) JDOHelper.getTransactionalObjectId(sameObject());
         Class<?> aspect = getClass();
         Object context = contexts.get(id, aspect);
-        if(context ==  null) contexts.put(
-            id,
-            aspect,
-            context = newContext()
-        );
+        if(context ==  null) {
+            contexts.put(
+                id,
+                aspect,
+                context = newContext()
+            );
+        }
         return (C) context;
     }
     
@@ -215,8 +194,8 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
      */
     protected void evictContext(
     ){
-        aspectObjectAccessor().remove(
-            contextId(), // id
+        SharedObjects.aspectObjects(sameManager()).remove(
+            (UUID) JDOHelper.getTransactionalObjectId(sameObject()),
             getClass() // aspect
         );
     }

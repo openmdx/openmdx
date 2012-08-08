@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ClassInvocationHandler.java,v 1.16 2009/06/09 12:45:17 hburger Exp $
+ * Name:        $Id: Jmi1ClassInvocationHandler.java,v 1.20 2010/04/19 11:21:52 hburger Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:17 $
+ * Date:        $Date: 2010/04/19 11:21:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2008, OMEX AG, Switzerland
+ * Copyright (c) 2007-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,76 +57,31 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefClass;
 import javax.jmi.reflect.RefFeatured;
 
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
+import org.openmdx.base.exception.ServiceException;
 
 /**
  * Jmi1ClassInvocationHandler
- *
  */
 public class Jmi1ClassInvocationHandler implements InvocationHandler {
-    
-    //-----------------------------------------------------------------------
-    public static class RefClass_1Proxy extends RefClass_1 {
-        
-        public RefClass_1Proxy(
-            String qualifiedClassName,
-            RefPackage_1_0 immediatePackage        
-        ) {
-            super(
-                immediatePackage
-            );
-            this.qualifiedClassName = qualifiedClassName;
-        }
-        
-        private static final long serialVersionUID = -1410998279197958164L;
-        private final String qualifiedClassName;
 
-        public String refMofId(
-        ) throws JmiException {
-            return this.qualifiedClassName;
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
-        @Override
-        public boolean equals(Object obj) {
-            return 
-                obj instanceof RefClass_1Proxy && 
-                this.qualifiedClassName.equals(
-                    ((RefClass_1Proxy)obj).qualifiedClassName
-                );
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#hashCode()
-         */
-        @Override
-        public int hashCode() {
-            return this.qualifiedClassName.hashCode();
-        }
-
-        /* (non-Javadoc)
-         * @see java.lang.Object#toString()
-         */
-        @Override
-        public String toString() {
-            return "RefClass " + this.qualifiedClassName;
-        }
-    
-    }
-    
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param qualifiedClassName
+     * @param immediatePackage
+     * 
+     * @throws ServiceException
+     */
     public Jmi1ClassInvocationHandler(
         String qualifiedClassName,
         RefPackage_1_0 immediatePackage
-    ) {
-        this.delegation = new RefClass_1Proxy(
+    ) throws ServiceException {
+        this.delegate = new RefClass_1(
             qualifiedClassName,
             immediatePackage
         );
@@ -148,75 +103,78 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
             // Object methods
             //
             if("toString".equals(methodName)) {
-                return proxy.getClass().getName() + " delegating to " + this.delegation;
+                return proxy.getClass().getName() + " delegating to " + this.delegate;
             } 
             else if ("hashCode".equals(methodName)) {
-                return this.delegation.hashCode();
+                return this.delegate.hashCode();
             } 
             else if ("equals".equals(methodName)) {
                 if(Proxy.isProxyClass(args[0].getClass())) {
                     InvocationHandler invocationHandler = Proxy.getInvocationHandler(args[0]);
                     if(invocationHandler instanceof Jmi1ClassInvocationHandler) {
-                        return this.delegation.equals(
-                            ((Jmi1ClassInvocationHandler)invocationHandler).delegation
+                        return this.delegate.equals(
+                            ((Jmi1ClassInvocationHandler)invocationHandler).delegate
                         );
                     }
                 }
                 return false;
             }
-        } else if(
-            declaringClass == Jmi1Class_1_0.class || 
-            declaringClass == RefClass.class ||
-            declaringClass == RefFeatured.class ||
-            declaringClass == RefBaseObject.class
-        ){
-            //
-            // RefObject API
-            //
-            if("refCreateInstance".equals(methodName) && args.length == 1) {
-                return this.delegation.refCreateInstance(
-                    (List<?>)args[0], // arguments
-                    (RefClass)proxy
-                );
-            } else try {
-                return method.invoke(
-                    this.delegation, 
-                    args
-                );
-            } catch(InvocationTargetException e) {
-                throw e.getTargetException();
-            }
-        } else if(
-            args == null || 
-            args.length == 0 ||
-            methodName.startsWith("create")
-        ) {
-            //
-            // Creators
-            //
-            return this.delegation.refCreateInstance(
-                null, // arguments
-                (RefClass)proxy
-            );            
-        } else if(
-            args == null || 
-            args.length == 1 ||
-            methodName.startsWith("get")
-        ) {
-            //
-            // Creators
-            //
-            return this.delegation.refCreateInstance(
-                Arrays.asList(args), 
-                (RefClass)proxy
-            );            
-        }        
+        } else {
+            this.delegate.assertOpen();
+            if(
+                declaringClass == Jmi1Class_1_0.class || 
+                declaringClass == RefClass.class ||
+                declaringClass == RefFeatured.class ||
+                declaringClass == RefBaseObject.class
+            ){
+                //
+                // RefObject API
+                //
+                if("refCreateInstance".equals(methodName) && args.length == 1) {
+                    return this.delegate.refCreateInstance(
+                        (List<?>)args[0], // arguments
+                        (Jmi1Class_1_0)proxy
+                    );
+                } else try {
+                    return method.invoke(
+                        this.delegate, 
+                        args
+                    );
+                } catch(InvocationTargetException e) {
+                    throw e.getTargetException();
+                }
+            } else if(
+                args == null || 
+                args.length == 0 ||
+                methodName.startsWith("create")
+            ) {
+                //
+                // Creators
+                //
+                return this.delegate.refCreateInstance(
+                    null, // arguments
+                    (Jmi1Class_1_0)proxy
+                );            
+            } else if(
+                args == null || 
+                args.length == 1 ||
+                methodName.startsWith("get")
+            ) {
+                //
+                // Creators
+                //
+                return this.delegate.refCreateInstance(
+                    Arrays.asList(args), 
+                    (Jmi1Class_1_0)proxy
+                );            
+            }        
+        }
         throw new UnsupportedOperationException(method.getName());
     }
     
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    protected final RefClass_1 delegation;
+    protected final RefClass_1 delegate;
     
 }

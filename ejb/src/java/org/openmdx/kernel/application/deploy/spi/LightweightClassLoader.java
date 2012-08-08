@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightClassLoader.java,v 1.3 2009/03/31 17:06:10 hburger Exp $
+ * Name:        $Id: LightweightClassLoader.java,v 1.5 2010/04/09 09:33:38 hburger Exp $
  * Description: Lightweight Class Loader
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:06:10 $
+ * Date:        $Date: 2010/04/09 09:33:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,8 +73,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.openmdx.kernel.application.configuration.Report;
-import org.openmdx.kernel.environment.SystemProperties;
 import org.openmdx.kernel.log.LoggerFactory;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
@@ -264,7 +262,7 @@ public class LightweightClassLoader extends URLClassLoader
     	File file = toFile(url);
     	return file == null ?
     		url :
-    		file.toURL();
+    		file.toURI().toURL();
     }
     
 	/* (non-Javadoc)
@@ -309,7 +307,7 @@ public class LightweightClassLoader extends URLClassLoader
     			new FileInputStream(manifestFile)
     		);
     	} else if(module.isFile()) return getManifest(
-    		module.toURL().toExternalForm()
+    		module.toURI().toURL().toExternalForm()
     	);
     	return null;
     }

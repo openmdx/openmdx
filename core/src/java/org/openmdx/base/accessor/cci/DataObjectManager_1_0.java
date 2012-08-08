@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObjectManager_1_0.java,v 1.1 2009/05/29 17:04:10 hburger Exp $
+ * Name:        $Id: DataObjectManager_1_0.java,v 1.7 2010/01/21 17:11:57 hburger Exp $
  * Description: openMDX Object Layer: Object Factory Interface
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/29 17:04:10 $
+ * Date:        $Date: 2010/01/21 17:11:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,8 @@
  */
 package org.openmdx.base.accessor.cci;
 
+import java.util.UUID;
+
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.exception.ServiceException;
 
@@ -59,10 +61,11 @@ import org.openmdx.base.exception.ServiceException;
 public interface DataObjectManager_1_0 extends PersistenceManager_1_0 {
 
     /**
-     * Create an object
-     *
+     * Create a transient object
+     * 
      * @param       objectClass
      *              The model class of the object to be created
+     * @param       transientObjectId, may be <code>null</code> to create a new one
      *
      * @return      a new object instance
      *
@@ -72,12 +75,25 @@ public interface DataObjectManager_1_0 extends PersistenceManager_1_0 {
      *              if the objectClass is an Aspect sub-class             
      */
     DataObject_1_0 newInstance(
-        String objectClass
+        String objectClass, 
+        UUID transientObjectId
     ) throws ServiceException;
     
     /**
-     * Resets current transaction and clears the object cache.
+     * Set the optimal fetch size
+     * 
+     * @return the optimal fetch size
      */
-    void clear();
+    int getOptimalFetchSize(
+    );
+
+    /**
+     * Retrieve the cache threshold value
+     * 
+     * @return the cache threshold value
+     */
+    int getCacheThreshold(
+    );
+
 
 }

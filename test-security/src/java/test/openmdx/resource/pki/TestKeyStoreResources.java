@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestKeyStoreResources.java,v 1.2 2009/03/31 17:10:26 hburger Exp $
+ * Name:        $Id: TestKeyStoreResources.java,v 1.5 2010/01/04 17:35:01 hburger Exp $
  * Description: Test Key Store Resources
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:10:26 $
+ * Date:        $Date: 2010/01/04 17:35:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,16 +52,22 @@ package test.openmdx.resource.pki;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
+import javax.naming.NamingException;
+import javax.naming.spi.NamingManager;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.openmdx.application.dataprovider.deployment.Deployment_1;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
-import org.openmdx.base.persistence.cci.EntityManagerFactory;
+import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.preferences1.jmi1.Preferences;
 import org.openmdx.preferences1.jmi1.Preferences1Package;
 import org.openmdx.preferences1.jmi1.Segment;
@@ -71,52 +77,59 @@ import org.openmdx.preferences1.jmi1.Segment;
  */
 public class TestKeyStoreResources {
 
-    /**
-     * The SLF4 Logger
-     */
-    private static final Logger logger = Logger.getLogger(TestKeyStoreResources.class.getName());
-    
-    private static EntityManagerFactory deployment = new Deployment_1(
-        true, // inProcess
-        new String[]{
-            "file:src/connector/openmdx-2/certificate-provider.rar",
-            "file:src/connector/openmdx-2/key-provider.rar"
-        }, //connectorURI
-        new String[]{
-            "file:src/ear/test-pki.ear"
-        }, // applicationURI, 
-        true, // logDeploymentDetails
-        "test/openmdx/pki/EntityProviderFactory", // entityManagerFactoryURI 
-        null, // gatewayURI,
-        new String[]{
-            "org:openmdx:preferences1" 
-        } // model
-    );
-    
-    /**
+	@Before
+	public void setUp() throws NamingException{
+		if(!NamingManager.hasInitialContextFactoryBuilder()) {
+			Map<String,String> pkiProviders = new HashMap<String,String>();
+			String userHome = System.getProperty("user.home").replaceAll("/", "\\\\/");
+			pkiProviders.put(
+				"org.openmdx.comp.env.pki.certificate",
+				"eis:org.openmdx.resource.pki.keystore.ManagedKeyStoreConnectionFactory?" +
+				"KeyStoreType=jks&" +
+				"ConnectionURL=file:" + userHome + "\\/opt\\/bea\\/weblogic92\\/server\\/lib\\/DemoTrust.jks&" +
+				"UserName=certgenca&" +
+				"Password=DemoTrustKeyStorePassPhrase"
+			);
+			pkiProviders.put(
+				"org.openmdx.comp.env.pki.key",
+				"eis:org.openmdx.resource.pki.keystore.ManagedKeyStoreConnectionFactory?" +
+				"KeyStoreType=jks&" +
+				"ConnectionURL=file:" + userHome + "\\/opt\\/bea\\/weblogic92\\/server\\/lib\\/DemoIdentity.jks&" +
+				"PassPhraseSeparator=|&" +
+				"UserName=DemoIdentity&" +
+				"Password=DemoIdentityKeyStorePassPhrase|DemoIdentityPassPhrase"
+			);
+            NonManagedInitialContextFactoryBuilder.install(pkiProviders);
+		}
+	}
+
+	/**
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
      */
     @Test
     public void testKeyStoreResources(
     ) throws Throwable {
-        PersistenceManager persistenceManager = deployment.getEntityManager();
+    	PersistenceManagerFactory persistenceManagerFactory = JDOHelper.getPersistenceManagerFactory(
+			"test-PKI-EntityManagerFactory"
+    	);
+        PersistenceManager persistenceManager = persistenceManagerFactory.getPersistenceManager();
         Authority authority = (Authority) persistenceManager.getObjectById(
             Authority.class,
             Preferences1Package.AUTHORITY_XRI
         );
-        Provider provider = authority.getProvider("JKS");
+        Provider provider = authority.getProvider("PKI");
         Segment segment = (Segment) provider.getSegment("certificate");
         Preferences preferences = segment.getPreferences("certificate");
         assertEquals("certgenca/certificate", preferences.getAbsolutePath());
-        logger.log(Level.INFO,"{0}: {1}", new Object[]{preferences.getAbsolutePath(), preferences.getDescription()});
+        SysLog.log(Level.INFO,"{0}: {1}", preferences.getAbsolutePath(), preferences.getDescription());
         segment = (Segment) provider.getSegment("key");
         preferences = segment.getPreferences("certificate");
         assertEquals("DemoIdentity/certificate", preferences.getAbsolutePath());
-        logger.log(Level.INFO,"{0}: {1}", new Object[]{preferences.getAbsolutePath(), preferences.getDescription()});
+        SysLog.log(Level.INFO,"{0}: {1}", preferences.getAbsolutePath(), preferences.getDescription());
         preferences = segment.getPreferences("key");
         assertEquals("DemoIdentity/key", preferences.getAbsolutePath());
-        logger.log(Level.INFO,"{0}: {1}", new Object[]{preferences.getAbsolutePath(), preferences.getDescription()});
+        SysLog.log(Level.INFO,"{0}: {1}", preferences.getAbsolutePath(), preferences.getDescription());
     }
 
 }

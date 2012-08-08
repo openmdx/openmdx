@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: ReferenceGrid.java,v 1.9 2008/11/12 16:10:58 wfro Exp $
+ * Name:        $Id: ReferenceGrid.java,v 1.10 2010/03/28 00:49:52 wfro Exp $
  * Description: ReferenceGridControl
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 16:10:58 $
+ * Date:        $Date: 2010/03/28 00:49:52 $
  * ====================================================================
  *
  *
@@ -60,9 +60,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.jdo.PersistenceManager;
+
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
@@ -86,29 +90,37 @@ public class ReferenceGrid
     }
 
     //-------------------------------------------------------------------------
-    protected Collection getAllObjects(
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Collection<RefObject_1_0> getAllObjects(
+    	PersistenceManager pm
     ) {
-        Collection allObjects = (Collection)this.view.getObjectReference().getObject().refGetValue(
+    	RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(
+    		this.view.getObjectReference().getObject().refGetPath()
+    	);
+        Collection<RefObject_1_0> allObjects = (Collection<RefObject_1_0>)parent.refGetValue(
             this.getGridControl().getObjectContainer().getReferenceName()
         );
         if(allObjects == null) {
-            allObjects = new ArrayList();
+            allObjects = Collections.emptyList();
         }            
         return allObjects;    
     }
     
     //-------------------------------------------------------------------------
-    protected List getFilteredObjects(
+    @Override
+    protected List<RefObject_1_0> getFilteredObjects(
+    	PersistenceManager pm,
         Filter filter
     ) {
-        Collection<?> allObjects = this.getAllObjects();
-        List<Object> filteredObjects = new ArrayList<Object>();
+        Collection<RefObject_1_0> allObjects = this.getAllObjects(pm);
+        List<RefObject_1_0> filteredObjects = new ArrayList<RefObject_1_0>();
         if(allObjects != null) {
-            filteredObjects = new ArrayList<Object>();
-            Iterator<?> i = allObjects.iterator();
+            filteredObjects = new ArrayList<RefObject_1_0>();
+            Iterator<RefObject_1_0> i = allObjects.iterator();
             while(i.hasNext()) {
                 try {
-                    Object object = i.next();
+                    RefObject_1_0 object = i.next();
                     filteredObjects.add(object);
                 }
                 catch(Exception e) {

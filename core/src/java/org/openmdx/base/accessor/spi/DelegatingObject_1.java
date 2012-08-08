@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingObject_1.java,v 1.21 2009/05/26 09:29:22 wfro Exp $
+ * Name:        $Id: DelegatingObject_1.java,v 1.34 2010/02/11 13:10:31 hburger Exp $
  * Description: DelegatingObject_1 class
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 09:29:22 $
+ * Date:        $Date: 2010/02/11 13:10:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,11 +50,10 @@
  */
 package org.openmdx.base.accessor.spi;
 
-import java.util.EventListener;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.UUID;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
@@ -66,7 +65,6 @@ import javax.resource.cci.Record;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.LargeObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
@@ -93,13 +91,12 @@ public abstract class DelegatingObject_1
      */
     protected DelegatingObject_1(
     ){
-        this.delegate = null;
     }
     
     /**
-     * The object's identity
+     * The delegate
      */
-    private DataObject_1_0 delegate;
+    protected DataObject_1_0 delegate;
 
     /**
      * Retrieve the object's delegate
@@ -116,7 +113,25 @@ public abstract class DelegatingObject_1
             throw new ServiceException(inaccessibilityReason);
         }
     }
-        
+     
+    /**
+     * Retrieve the object's state delegate
+     * 
+     * @return the object's state delegate
+     */
+    protected PersistenceCapable getStateDelegate (
+    ){
+        try {
+            return getDelegate();
+        } catch(Exception e) {
+            throw new JDOUserException(
+                "Unable to get object state",
+                e,
+                this
+            );
+        }        
+    }
+    
     /**
      * Replace the object's delegate
      * 
@@ -284,16 +299,7 @@ public abstract class DelegatingObject_1
      */ 
     public boolean jdoIsDirty(
     ) {
-        try {
-            return getDelegate().jdoIsDirty();
-        }
-        catch(Exception e) {
-            throw new JDOUserException(
-                "Unable to get object state",
-                e,
-                this
-            );
-        }        
+        return getStateDelegate().jdoIsDirty();
     }
 
     /**
@@ -304,16 +310,7 @@ public abstract class DelegatingObject_1
      */
     public boolean jdoIsPersistent(
     ) {
-        try {
-            return getDelegate().jdoIsPersistent();
-        }
-        catch(Exception e) {
-            throw new JDOUserException(
-                "Unable to get object state",
-                e,
-                this
-            );
-        }                    
+        return getStateDelegate().jdoIsPersistent();
     }
 
     /**
@@ -327,16 +324,7 @@ public abstract class DelegatingObject_1
      */
     public boolean jdoIsNew(
     ){
-        try {
-            return getDelegate().jdoIsNew();
-        }
-        catch(Exception e) {
-            throw new JDOUserException(
-                "Unable to get object state",
-                e,
-                this
-            );
-        }                
+        return getStateDelegate().jdoIsNew();
     }
 
     /**
@@ -348,16 +336,7 @@ public abstract class DelegatingObject_1
      */
     public boolean jdoIsDeleted(
     ) {
-        try {
-            return getDelegate().jdoIsDeleted();
-        }
-        catch(Exception e) {
-            throw new JDOUserException(
-                "Unable to get object state",
-                e,
-                this
-            );
-        }                
+        return getStateDelegate().jdoIsDeleted();
     }
 
     /**
@@ -367,33 +346,7 @@ public abstract class DelegatingObject_1
      */
     public boolean jdoIsTransactional(
     ) {
-        try {
-            return getDelegate().jdoIsTransactional();
-        }
-        catch(Exception e) {
-            throw new JDOUserException(
-                "Unable to get object state",
-                e,
-                this
-            );
-        }                
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.cci.Object_1_0#getAspect(java.lang.String)
-     */
-    public Map<String, DataObject_1_0> getAspect(
-        String aspectClass
-    ) throws ServiceException {
-        return this.getDelegate().getAspect(aspectClass);
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.cci.Object_1_0#getAspect(java.lang.String)
-     */
-    public Map<String, DataObject_1_0> getAspects(
-    ) throws ServiceException {
-        return this.getDelegate().getAspects();
+        return getStateDelegate().jdoIsTransactional();
     }
 
     /* (non-Javadoc)
@@ -454,7 +407,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
-    public Path jdoGetTransactionalObjectId(
+    public UUID jdoGetTransactionalObjectId(
     ) {
         return this.delegate.jdoGetTransactionalObjectId();
     }
@@ -472,7 +425,7 @@ public abstract class DelegatingObject_1
      */
     public boolean jdoIsDetached(
     ) {
-        throw new UnsupportedOperationException("Operation not supported by DelegatingObject_1");
+        return getStateDelegate().jdoIsDetached();
     }
 
     /* (non-Javadoc)
@@ -706,29 +659,6 @@ public abstract class DelegatingObject_1
     }
         
     /**
-     * Get a large object feature
-     * <p> 
-     * This method returns a new LargeObject.
-     *
-     * @param       feature
-     *              The feature's name.
-     *
-     * @return      a large object which may be empty but never is null.
-     *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if the object is deleted
-     * @exception   ClassCastException
-     *              if the feature's value is not a large object
-     * @exception   ServiceException BAD_MEMBER_NAME
-     *              if the object has no such feature
-     */
-    public LargeObject_1_0 objGetLargeObject(
-        String feature
-    ) throws ServiceException {
-        return getDelegate().objGetLargeObject(feature);
-    }
-
-    /**
      * Get a reference feature.
      * <p> 
      * This method never returns <code>null</code> as an instance of the
@@ -774,33 +704,6 @@ public abstract class DelegatingObject_1
                 )
             );
         }
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objAddEventListener(java.lang.String, java.util.EventListener)
-     */
-    public void objAddEventListener(
-        EventListener listener
-    ) throws ServiceException {
-        getDelegate().objAddEventListener(listener);     
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objRemoveEventListener(java.lang.String, java.util.EventListener)
-     */
-    public void objRemoveEventListener(
-        EventListener listener
-    ) throws ServiceException {
-        getDelegate().objRemoveEventListener(listener);      
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetEventListeners(java.lang.String, java.lang.Class)
-     */
-    public <T extends EventListener> T[] objGetEventListeners(
-        Class<T> listenerType
-    ) throws ServiceException {
-        return getDelegate().objGetEventListeners(listenerType);
     }
 
 }

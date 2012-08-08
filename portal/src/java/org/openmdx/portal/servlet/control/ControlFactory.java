@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: ControlFactory.java,v 1.31 2008/12/08 15:30:09 wfro Exp $
+ * Name:        $Id: ControlFactory.java,v 1.32 2009/11/05 18:03:14 hburger Exp $
  * Description: ControlFactory
- * Revision:    $Revision: 1.31 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/08 15:30:09 $
+ * Date:        $Date: 2009/11/05 18:03:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -99,7 +99,7 @@ public class ControlFactory
     //-------------------------------------------------------------------------
     private String uuidAsString(
     ) {
-        return UUIDConversion.toUID(this.uuidGenerator.next());
+        return UUIDConversion.toUID(UUIDs.newUUID());
     }
     
     //-------------------------------------------------------------------------
@@ -471,7 +471,6 @@ public class ControlFactory
     private Map<String,GridControl> gridControls = new HashMap<String,GridControl>();
     private Map<String,InspectorControl> inspectorControls = new HashMap<String,InspectorControl>();
     private AttributeValueFactory valueFactory = new AttributeValueFactory();
-    private transient UUIDGenerator uuidGenerator = UUIDs.getGenerator();
     
 }
 
