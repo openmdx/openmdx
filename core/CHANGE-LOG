@@ -5,7 +5,7 @@
 
 
 ==============================================================================
-Version 2.9.0+                                                      2012-01-05
+Version 2.9.1                                                       2012-01-10
 ==============================================================================
 
 0.    KNOWN ISSUES
@@ -167,9 +167,9 @@ Version 2.9.0                                                       2012-01-04
           }
             
       CR20019341
-      Nachführung des Rose-Modells
+      Rose Model Update
       
-      Die Änderung beinhaltet
+      The change consists of:
       * CR20019340: StateCapable should extend ContextCapable
       * CR20019978: modifiedBy, createdBy, removedBy
       * CR20019979: audit1 
@@ -177,11 +177,11 @@ Version 2.9.0                                                       2012-01-04
       CR20019978
       modifiedBy, createdBy, removedBy
       
-      Die Attribute
+      The attributs
       * Modifiable.modifiedBy
       * Creatable.createdBy
       * Removable.removedBy
-      sind neu vom Typ List<String> anstelle von Set<String>
+      are now of type List<String> instead of Set<String>
       
       CR20019858
       org.openmdx.base.aop0.PlugIn_1_0

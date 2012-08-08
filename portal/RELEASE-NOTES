@@ -1,5 +1,5 @@
-Release Name: openMDX/Portal 2.8.20
-Release Date: 2011-05-04
+Release Name: openMDX/Portal 2.9.0
+Release Date: 2012-01-06
 
 ---------------------------------------------------------------------
 Notes:
@@ -7,7 +7,7 @@ Notes:
   This software is published under the BSD license
   as listed below.
   
-  Copyright (c) 2006-2011, OMEX AG, Switzerland
+  Copyright (c) 2006-2012, OMEX AG, Switzerland
   All rights reserved.
   
   Redistribution and use in source and binary forms, with or without 
@@ -49,10 +49,45 @@ Notes:
 Changes:
 
 0.    SUMMARY
-      * Workspaces
       * Clean up
-      * Fefactoring
+      * Refactoring
       * Bug fixes
+
+==============================================================================
+Version 2.9.0                                                       2012-01-08
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019878
+      GridMoveUpObjectAction, GridMoveDownObjectAction. Add grid actions which 
+      allow to move position of values for multi-valued, ordered reference features.
+      
+      CR10010042
+      PortalExtension: grid actions. Allow to add custom-specific actions 
+      to grid menu 'Actions'.              
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019914
+      Deprecate RoleMapper_1_0 and remove dependency to openMDX/Security.
+            
+      CR10010109
+      The method PortalExtension_1_0.isEnabled() was renamed to the more general
+      method hasPermission(). The new signature allows to control show- and edit-
+      permissions for GUI elements such as fields, field groups, operations and
+      references.
+            
+2.1.  FIXED BUGS
+      none      
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
 
 ==============================================================================
 Version 2.8.20                                                      2011-05-04

@@ -1,13 +1,13 @@
 Distribution Name: openMDX/Core
-Release Date: 2012-01-04
-Implementation Version: 2.9.0
+Release Date: 2012-01-10
+Implementation Version: 2.9.1
 
 ---------------------------------------------------------------------
 Notes:
 
   This software is published under the BSD license as listed below.
   
-  Copyright (c) 2004-2011, OMEX AG, Switzerland
+  Copyright (c) 2004-2012, OMEX AG, Switzerland
   All rights reserved.
   
   Redistribution and use in source and binary forms, with or without 
@@ -61,6 +61,84 @@ Notes:
       * Fixed bugs
  
 
+
+                    =====================================
+                             CHANGE LOG openMDX
+                    =====================================
+
+
+==============================================================================
+Version 2.9.1                                                       2012-01-10
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+      
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      none
+       
+2.2.  DEPRECATED FEATURES
+
+      CR20019352
+      Cleanup Configuration Specification
+      
+      The following class has been deprecated:
+      * org.openmdx.application.cci.ConfigurationSpecifier 
+            
+2.3.  REMOVED FEATURES
+
+      CR20019352
+      Cleanup Configuration Constants 
+      
+      The following configuration constants have been removed
+      * KERNEL/persistenceManagerBinding
+      * KERNEL/modelPackage
+      * KERNEL/packageImpl
+      * KERNEL/exposedPath
+      * KERNEL/delegationPath
+      * KERNEL/serverId
+      * KERNEL/bypassedByLenientRequests
+      * PERSISTENCE/optimizedType
+      * PERSISTENCE/optimizedTable
+      * PERSISTENCE/storageFolder
+
+      CR20019998
+      context:BeforeImage 
+      
+      context:BeforeImage:<feature> replies have been removed.
+       
+      
 ==============================================================================
 Version 2.9.0                                                       2012-01-04
 ==============================================================================
@@ -152,9 +230,9 @@ Version 2.9.0                                                       2012-01-04
           }
             
       CR20019341
-      Nachführung des Rose-Modells
+      Rose Model Update
       
-      Die Änderung beinhaltet
+      The change consists of:
       * CR20019340: StateCapable should extend ContextCapable
       * CR20019978: modifiedBy, createdBy, removedBy
       * CR20019979: audit1 
@@ -162,11 +240,11 @@ Version 2.9.0                                                       2012-01-04
       CR20019978
       modifiedBy, createdBy, removedBy
       
-      Die Attribute
+      The attributs
       * Modifiable.modifiedBy
       * Creatable.createdBy
       * Removable.removedBy
-      sind neu vom Typ List<String> anstelle von Set<String>
+      are now of type List<String> instead of Set<String>
       
       CR20019858
       org.openmdx.base.aop0.PlugIn_1_0
@@ -185,6 +263,9 @@ Version 2.9.0                                                       2012-01-04
       
 2.1.  FIXED BUGS
       
+      CR20019996
+      refSetValue fails with qualified name
+       
       CR20019991
       Erroneous ObjectAndValidStateComparator
       
@@ -769,14 +850,14 @@ Version 2.8.31                                                      2011-09-11
       Performance Improvement
       
       Get rid if SELECT statements retrieving configured values such as 
-      transactionTimeUnique or validTimeUnique.                        
+      transactionTimeUnique or validTimeUnique.
       
       There is a state plug-in to support the improvement:
       * KERNEL/MODEL=org.openmdx.application.dataprovider.layer.model.State_2
       * MODEL/transactionTimeUnique=(java.lang.Boolean)false
       * MODEL/validTimeUnique=(java.lang.Boolean)false
-
-
+      
+                        
 2.1.  FIXED BUGS
       
       CR20019908
@@ -840,9 +921,9 @@ Version 2.8.30                                                      2011-08-28
       Queries create views with column aliases starting with the private
       attribute prefix, e.g. p$$.
       
-      Formerly the column mapping was applied to the resulting alias requiring
-      all mappings made to avoid too long column names had to be applied twice,
-      once to column name and once to the prefixed column name.
+      Formerly the column mapping was applied to the resulting alias requiring 
+      all mappings made to avoid too long column names had to be applied twice, 
+      once to the column name and once to the prefixed column name.
       
       Now the column mapping is applied to the original column name and the
       prefix is prepended to the resulting name.      
@@ -853,6 +934,9 @@ Version 2.8.30                                                      2011-08-28
 2.2.  DEPRECATED FEATURES
       none
             
+2.3.  REMOVED FEATURES
+      none
+
  
 ==============================================================================
 Version 2.8.29                                                      2011-08-24
@@ -946,7 +1030,10 @@ Version 2.8.29                                                      2011-08-24
 2.2.  DEPRECATED FEATURES
       none
             
- 
+2.3.  REMOVED FEATURES
+      none
+
+  
 ==============================================================================
 Version 2.8.28                                                      2011-08-08
 ==============================================================================
