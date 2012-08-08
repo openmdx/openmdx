@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObjectParentRidOnly.java,v 1.1 2009/05/26 14:31:21 wfro Exp $
+ * Name:        $Id: SlicedDbObjectParentRidOnly.java,v 1.2 2010/10/19 22:08:06 hburger Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:21 $
+ * Date:        $Date: 2010/10/19 22:08:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,6 +52,7 @@
 package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.openmdx.base.exception.ServiceException;
@@ -79,6 +80,12 @@ public class SlicedDbObjectParentRidOnly
             conn, 
             typeConfiguration
         );
+        this.columnNameParentRid = this.database.toRid(
+            this.database.privateAttributesPrefix + "object_parent_"
+        );            
+        this.columnNameParentOid = this.database.toOid(
+            this.database.privateAttributesPrefix + "object_parent_"
+        );
     }
     
     //-------------------------------------------------------------------------
@@ -98,18 +105,22 @@ public class SlicedDbObjectParentRidOnly
             isExtent,
             isQuery
         );
+        this.columnNameParentRid = this.database.toRid(
+            this.database.privateAttributesPrefix + "object_parent_"
+        );            
+        this.columnNameParentOid = this.database.toOid(
+            this.database.privateAttributesPrefix + "object_parent_"
+        );
         if(
-            !isExtent && ( 
+            (
+                !isExtent ||
+                this.getReference().isLike(INVOLVEMENT_REFERENCE_PATTERN) // TODO make it more general!
+                
+            ) && ( 
                 accessPath.isLike(typeConfigurationEntry.getType()) || 
                 (accessPath.size() % 2 == 0 && accessPath.isLike(typeConfigurationEntry.getType().getParent()))
             )
         ) {
-            String columnNameParentRid = this.database.toRid(
-                this.database.privateAttributesPrefix + "object_parent_"
-            );            
-            String columnNameParentOid = this.database.toOid(
-                this.database.privateAttributesPrefix + "object_parent_"
-            );
             // get rid|oid of parent object and construct reference clause
             this.referenceValues = new ArrayList();
             // parent object rid
@@ -121,21 +132,50 @@ public class SlicedDbObjectParentRidOnly
                     false
                 )
             );
-            // parent object oid
-            this.referenceValues.add(
-                this.database.getObjectId(
-                    parentResourceIdentifier.getBase()
-                )
-            );
-            this.referenceClause = 
-                "(v." + columnNameParentRid + " IN (?)) AND " +
-                "(v." + columnNameParentOid + " IN (?))";           
+            if(":*".equals(parentResourceIdentifier.getBase())) {
+                this.referenceClause = 
+                    "(v." + columnNameParentRid + " IN (?))";           
+            } else {
+                // parent object oid
+                this.referenceValues.add(
+                    this.database.getObjectId(
+                        parentResourceIdentifier.getBase()
+                    )
+                );
+                this.referenceClause = 
+                    "(v." + columnNameParentRid + " IN (?)) AND " +
+                    "(v." + columnNameParentOid + " IN (?))";           
+            }
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.layer.persistence.jdbc.SlicedDbObject#getObjectReference(org.openmdx.application.dataprovider.layer.persistence.jdbc.FastResultSet)
+     */
+    @Override
+    public Path getObjectReference(FastResultSet frs)
+        throws SQLException, ServiceException {
+        if(this.database.configuration.normalizeObjectIds()) {
+            return this.database.configuration.buildResourceIdentifier(
+                frs.getObject(columnNameParentRid).toString(), 
+                true // reference
+            ).getDescendant(
+                frs.getObject(columnNameParentOid).toString(),
+                getReference().getBase()
+            );
+        } else {
+            return super.getObjectReference(frs);
+        }
+    }
+
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3257566196189706291L;
-
+    private static final Path INVOLVEMENT_REFERENCE_PATTERN = new Path(
+        "xri://@openmdx*org.openmdx.audit2/provider/($..)/segment/($..)/unitOfWork/($..)/involvement"
+    );
+    private final String columnNameParentRid;
+    private final String columnNameParentOid;
+    
 }
 
 //--- End of File -----------------------------------------------------------

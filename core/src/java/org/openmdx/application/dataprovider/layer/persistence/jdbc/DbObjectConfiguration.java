@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObjectConfiguration.java,v 1.2 2010/06/02 13:41:40 hburger Exp $
+ * Name:        $Id: DbObjectConfiguration.java,v 1.4 2010/11/18 15:44:32 hburger Exp $
  * Description: TypeConfigurationEntry class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:41:40 $
+ * Date:        $Date: 2010/11/18 15:44:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -90,7 +90,10 @@ public class DbObjectConfiguration {
     List autonumColumns,
     String joinTable,
     String joinColumnEnd1,
-    String joinColumnEnd2
+    String joinColumnEnd2, 
+    String unitOfWorkProvider, 
+    String removableReferenceIdPrefix, 
+    boolean aboslutePositioningDisabled
   ) throws ServiceException { 
 
     // need an object path
@@ -134,6 +137,9 @@ public class DbObjectConfiguration {
     else {
       this.objectIdPatternMatcher = null;
     }                          
+    this.unitOfWorkProvider = unitOfWorkProvider == null || unitOfWorkProvider.length() == 0 ? null : new Path(unitOfWorkProvider).lock();  
+    this.removableReferenceIdPrefix = removableReferenceIdPrefix == null || removableReferenceIdPrefix.length() == 0 ? null : removableReferenceIdPrefix;
+    this.absolutePositioningDisabled = aboslutePositioningDisabled;
   }
   
     //---------------------------------------------------------------------------
@@ -251,6 +257,23 @@ public class DbObjectConfiguration {
   }
   
   //---------------------------------------------------------------------------
+  public Path getUnitOfWorkProvider(
+  ) {
+    return this.unitOfWorkProvider;
+  }
+
+  //---------------------------------------------------------------------------
+  public String getRemovableReferenceIdPrefix(
+  ) {
+    return this.removableReferenceIdPrefix;
+  }
+
+  //---------------------------------------------------------------------------
+  public boolean isAbsolutePositioningDisabled(){
+      return this.absolutePositioningDisabled;
+  }
+  
+  //---------------------------------------------------------------------------
   // Variables
   //---------------------------------------------------------------------------
   private final Path type;
@@ -268,6 +291,9 @@ public class DbObjectConfiguration {
   private int objectIdComponents;
   private final List autonumColumns;
   private final String[] joinCriteria;
+  private final Path unitOfWorkProvider;
+  private final String removableReferenceIdPrefix;
+  private final boolean absolutePositioningDisabled;
 
   private static final String[] TO_STRING_FIELDS = {
       "typeName","dbObject","dbObject2","dbObjectFormat","dbObjectForQuery","dbObjectForQuery2","pathNormalizeLevel","dbObjectHint","objectIdPattern","autonumColumns"

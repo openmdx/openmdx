@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.41 2010/06/04 19:31:30 hburger Exp $
+ * Name:        $Id: Standard_1.java,v 1.42 2010/11/16 00:12:32 hburger Exp $
  * Description: Model layer
- * Revision:    $Revision: 1.41 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 19:31:30 $
+ * Date:        $Date: 2010/11/16 00:12:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -510,7 +510,11 @@ public class Standard_1 extends Layer_1 {
                     catch (ResourceException e) {
                         throw new ServiceException(e);
                     }
-                    if(!Arrays.equals((byte[])beforeImageFacade.getVersion(), (byte[])afterImageFacade.getVersion())) {
+                    byte[] aferImageVersion = (byte[])afterImageFacade.getVersion();
+                    if(
+                        aferImageVersion!= null && 
+                        !Arrays.equals((byte[])beforeImageFacade.getVersion(), aferImageVersion)
+                    ) {
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN, 
                             BasicException.Code.CONCURRENT_ACCESS_FAILURE,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1.java,v 1.29 2010/08/09 13:13:21 hburger Exp $
+ * Name:        $Id: UnitOfWork_1.java,v 1.38 2010/12/23 17:42:52 hburger Exp $
  * Description: Unit Of Work
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:13:21 $
+ * Date:        $Date: 2010/12/23 17:42:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,7 @@ package org.openmdx.base.accessor.rest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -247,7 +248,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
      * Shared object accessor
      */
     private final SystemObjects systemObjects = new SystemObjects();
-    
+
     /**
      * Flush the unit of work to the data store
      * 
@@ -302,37 +303,10 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
                    new BasicException.Parameter("maximum", UnitOfWork_1.PREPARE_CYCLE_LIMIT)
                );
            }
-           if(beforeCompletion) {
-               for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
-                   plugIn.beforeCompletion(this);
-               }
+           for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
+               plugIn.flush(this, beforeCompletion);
            }
-           for(
-               int index1 = 0, memberCount = this.members.size();
-               index1 < memberCount;
-               index1++
-           ){
-               DataObject_1 member1 = this.members.get(index1);
-               if(member1.jdoIsNew() && !member1.jdoIsDeleted()){
-                   Path xri1 = member1.jdoGetObjectId();
-                   for(
-                       int index2 = index1 + 1;
-                       index2 < memberCount;
-                       index2++
-                   ){
-                       DataObject_1 member2 = this.members.get(index2);
-                       if(member2.jdoIsNew() && !member2.jdoIsDeleted()){
-                           Path xri2 = member2.jdoGetObjectId();
-                           if(xri1.startsWith(xri2)){
-                               this.members.add(index1, this.members.remove(index2));
-                               member1 = member2;
-                               xri1 = xri2;
-                               index2 = index1 + 2;
-                           }
-                       }
-                   }
-               }
-           }
+           Collections.sort(this.members, FlushOrder.getInstance());
            if(this.dataObjectManager.isProxy()) {
                for(DataObject_1 member : this.members){
                    if(member.jdoIsNew() && !member.jdoIsDeleted()){
@@ -392,9 +366,18 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
         }
     }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.rest.spi.Synchronization_2_0#clear()
+     */
+//  @Override
+    public void clear() {
+        this.members.clear();
+        this.states.clear();
+    }
+
     void remove(
         DataObject_1 member
-    ) throws ServiceException {
+    ){
         this.members.remove(member);
         this.states.remove(member);
     }
@@ -615,7 +598,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
     private void enlist(
         boolean beginTransaction
     ) throws ResourceException {
-        this.interaction = this.connection.createInteraction();
+        this.interaction = this.dataObjectManager.newInteraction(this.connection);
         if(beginTransaction) {
             this.localTransaction.begin();
         }
@@ -706,7 +689,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
                                 new JDOOptimisticVerificationException(
                                     initialCause.getDescription(),
                                     BasicException.newEmbeddedExceptionStack(commitException),
-                                    this.getPersistenceManager().getObjectById(new Path(initialCause.getParameter("path"))) 
+                                    this.getPersistenceManager().getObjectById(new Path(initialCause.getParameter("path")), false) 
                                 )
                             )
                         }
@@ -998,6 +981,9 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
             this.aspectSpecificContexts.clear();
             if(status == javax.transaction.Status.STATUS_COMMITTED) {
                 SharedObjects.getPlugInObject(this.dataObjectManager, DataStoreCache_2_0.class).evictAll();
+            }
+            if(!this.dataObjectManager.isRetainValues()) {
+                this.dataObjectManager.evictAll();
             }
             if(this.entityManagerSynchronization != null) {
                 this.entityManagerSynchronization.afterCompletion(status);

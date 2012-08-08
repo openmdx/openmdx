@@ -1,15 +1,15 @@
 /*
  * ====================================================================
- * Name:        $Id: InstanceMapper.java,v 1.14 2010/08/30 15:39:35 wfro Exp $
+ * Name:        $Id: InstanceMapper.java,v 1.16 2010/10/11 11:28:11 hburger Exp $
  * Description: Instance Mapper 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/30 15:39:35 $
+ * Date:        $Date: 2010/10/11 11:28:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2008, OMEX AG, Switzerland
+ * Copyright (c) 2005-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -163,13 +163,14 @@ extends AbstractClassMapper {
                 (referenceDef.isComposition() || referenceDef.isShared())
         ){
             Format format = getFormat();
-            if(format == Format.JMI1) { // || format == Format.JDO2
+            if(format == Format.JMI1) {
                 this.trace("Instance/ReferenceAddWithQualifier");
                 ClassDef classDef = getClassDef(referenceDef.getQualifiedTypeName());
                 ClassType classType = getClassType(classDef);
                 String referenceType = classType.getType(classDef, format, TypeMode.PARAMETER);
-                String valueHolder = referenceDef.getName();
-                if(valueHolder.equals(referenceDef.getQualifierName())) valueHolder = '_' + valueHolder;
+                String valueHolder = Identifier.ATTRIBUTE_NAME.toIdentifier(referenceDef.getName());
+                String qualifierName = Identifier.ATTRIBUTE_NAME.toIdentifier(referenceDef.getQualifierName());
+                if(valueHolder.equals(qualifierName)) valueHolder = '_' + valueHolder;
                 this.pw.println("  /**");
                 this.pw.println(MapperUtils.wrapText(
                     "   * ",
@@ -185,13 +186,13 @@ extends AbstractClassMapper {
                     this.pw.println("   * <p>");
                     this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
                 }
-                this.pw.println("   * @param " + referenceDef.getQualifierName() + PERSISTENCY_SUFFIX + " <code>true</code> if <code>" + referenceDef.getQualifierName() + "</code> is persistent");
-                this.pw.println("   * @param " + referenceDef.getQualifierName() + " The qualifier attribute value that qualifies the reference to get the element to be appended.");
+                this.pw.println("   * @param " + qualifierName + PERSISTENCY_SUFFIX + " <code>true</code> if <code>" + qualifierName + "</code> is persistent");
+                this.pw.println("   * @param " + qualifierName + " The qualifier attribute value that qualifies the reference to get the element to be appended.");
                 this.pw.println("   * @param " + valueHolder + " The element to be appended.");
                 this.pw.println("   */");
                 this.pw.println("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
-                this.pw.println("    boolean " + referenceDef.getQualifierName() + PERSISTENCY_SUFFIX + ",");            
-                this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + referenceDef.getQualifierName() + ",");
+                this.pw.println("    boolean " + qualifierName + PERSISTENCY_SUFFIX + ",");            
+                this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + qualifierName + ",");
                 this.pw.println("    " + referenceType + " " + valueHolder);        
                 this.pw.println("  );");
                 this.pw.println();
@@ -210,11 +211,11 @@ extends AbstractClassMapper {
                     this.pw.println("   * <p>");
                     this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
                 }
-                this.pw.println("   * @param " + referenceDef.getQualifierName() + " The qualifier attribute value that qualifies the reference to get the element to be appended.");
+                this.pw.println("   * @param " + qualifierName + " The qualifier attribute value that qualifies the reference to get the element to be appended.");
                 this.pw.println("   * @param " + valueHolder + " The element to be appended.");
                 this.pw.println("   */");
                 this.pw.println("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
-                this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + referenceDef.getQualifierName() + ",");
+                this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + qualifierName + ",");
                 this.pw.println("    " + referenceType + " " + valueHolder);        
                 this.pw.println("  );");
                 this.pw.println();

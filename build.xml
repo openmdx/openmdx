@@ -3,11 +3,11 @@
  *
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: build.xml,v 1.107 2010/06/07 12:59:22 hburger Exp $
+ * Name:        $Id: build.xml,v 1.108 2010/12/20 23:37:59 wfro Exp $
  * Description: Ant master build file for openMDX
- * Revision:    $Revision: 1.107 $
+ * Revision:    $Revision: 1.108 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/07 12:59:22 $
+ * Date:        $Date: 2010/12/20 23:37:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -99,7 +99,7 @@
 			<available file="build.xml" filepath="portal"/>
 		</condition>
 		<condition property="include.ejb">
-			<available file="build.xml" filepath="ejb"/>
+			<available file="build.xml" filepath="ejb.dummy"/>
 		</condition>
 		<condition property="include.openejb">
 			<available file="build.xml" filepath="openejb"/>
@@ -111,7 +111,7 @@
 			<available file="build.xml" filepath="test-security"/>
 		</condition>
 		<condition property="include.test-ejb">
-			<available file="build.xml" filepath="test-ejb"/>
+			<available file="build.xml" filepath="test-ejb.dummy"/>
 		</condition>
 	</target>
 	

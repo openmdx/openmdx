@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Queries.java,v 1.6 2010/05/27 17:58:13 hburger Exp $
+ * Name:        $Id: Queries.java,v 1.7 2010/09/13 16:46:29 hburger Exp $
  * Description: OPENMDXQL Queries
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/27 17:58:13 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -49,8 +49,6 @@
  * listed in the NOTICE file.
  */
 package org.openmdx.base.persistence.cci;
-
-import javax.jdo.PersistenceManager;
 
 /**
  * Queries

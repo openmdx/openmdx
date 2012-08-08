@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SysLog.java,v 1.21 2010/08/27 16:12:14 hburger Exp $
+ * Name:        $Id: SysLog.java,v 1.22 2010/11/10 06:30:20 hburger Exp $
  * Description: Former Log API
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/27 16:12:14 $
+ * Date:        $Date: 2010/11/10 06:30:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -115,10 +115,12 @@ public class SysLog {
         Logger logger = LoggerFactory.getLogger();
         if(logger.isLoggable(level)) {
             LogRecord record = new ForeignLogRecord(
+                logger.getName(), 
                 SysLog.THIS, 
                 level, 
                 pattern
             );
+            // If we used resource bundles we would them set here
             record.setParameters(arguments);
             logger.log(record);
         }
@@ -138,7 +140,13 @@ public class SysLog {
     ){
         Logger logger = LoggerFactory.getLogger();
         if(logger.isLoggable(level)) {
-            LogRecord record = new ForeignLogRecord(THIS, level, message);
+            LogRecord record = new ForeignLogRecord(
+                logger.getName(), 
+                SysLog.THIS, 
+                level, 
+                message
+            );
+            // If we used resource bundles we would them set here
             record.setThrown(throwable);
             logger.log(record);
         }
@@ -161,7 +169,13 @@ public class SysLog {
     ){
         Logger logger = LoggerFactory.getLogger();
         if(logger.isLoggable(level)) {
-            LogRecord record = new ForeignLogRecord(THIS, level, pattern);
+            LogRecord record = new ForeignLogRecord(
+                logger.getName(), 
+                SysLog.THIS, 
+                level, 
+                pattern
+            );
+            // If we used resource bundles we would them set here
             record.setParameters(arguments);
             record.setThrown(throwable);
             logger.log(record);

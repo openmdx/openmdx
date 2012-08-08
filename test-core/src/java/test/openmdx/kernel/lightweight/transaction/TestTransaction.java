@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: TestTransaction.java,v 1.2 2009/09/17 16:23:01 hburger Exp $
+ * Name:        $Id: TestTransaction.java,v 1.3 2010/10/21 14:50:53 hburger Exp $
  * Description: Lightweight container transaction management test
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/17 16:23:01 $
+ * Date:        $Date: 2010/10/21 14:50:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -139,7 +139,7 @@ public class TestTransaction {
         PersistenceManager entityManager = entityManagerFactory.getPersistenceManager();
         Transaction unitOfWork = entityManager.currentTransaction();
         Authority authority = entityManager.getObjectById(Authority.class, App1Package.AUTHORITY_XRI);
-        Provider provider = authority.getProvider("ch:omex:test:junit");
+        Provider provider = authority.getProvider("Data");
         Segment segment = (Segment) provider.getSegment(name);
         if(segment != null) {            
             unitOfWork.begin();

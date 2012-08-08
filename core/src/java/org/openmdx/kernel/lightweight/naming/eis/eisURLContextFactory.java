@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: eisURLContextFactory.java,v 1.1 2009/09/11 13:16:23 hburger Exp $
+ * Name:        $Id: eisURLContextFactory.java,v 1.2 2010/09/23 12:19:03 hburger Exp $
  * Description: eis URL Context Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 13:16:23 $
+ * Date:        $Date: 2010/09/23 12:19:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -110,7 +110,7 @@ public class eisURLContextFactory implements ObjectFactory {
     /**
      * The URL scheme supported by this factory
      */
-    final static public String URL_SCHEME = "jdbc";
+    final static public String URL_SCHEME = "eis";
     
     /**
      * The URL prefix supported by this factory

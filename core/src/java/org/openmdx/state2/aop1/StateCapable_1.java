@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StateCapable_1.java,v 1.8 2010/01/26 15:44:08 hburger Exp $
+ * Name:        $Id: StateCapable_1.java,v 1.9 2010/10/31 18:18:20 hburger Exp $
  * Description: org::openmdx::state2::StateCapable plug-in
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:44:08 $
+ * Date:        $Date: 2010/10/31 18:18:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -88,7 +88,10 @@ public class StateCapable_1 extends Interceptor_1 {
                 return Integer.valueOf(-1);
             }
             if("validTimeUnique".equals(feature) || "transactionTimeUnique".equals(feature)) {
-                return Boolean.valueOf(super.objGetValue("core") == null); 
+                return Boolean.valueOf(
+                    super.getModel().isInstanceof(self, "org:openmdx:base:Aspect") && 
+                    super.objGetValue("core") == null
+                ); 
             }
         }
         return value;

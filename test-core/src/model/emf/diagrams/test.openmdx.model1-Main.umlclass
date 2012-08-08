@@ -1424,6 +1424,22 @@
     </children>
     <children xmi:type="notation:DecorationNode" xmi:id="_ipC6MUepEd-8Kob7ZR6raA" type="5019"/>
     <children xmi:type="notation:BasicCompartment" xmi:id="_ipC6MkepEd-8Kob7ZR6raA" type="7001">
+      <children xmi:type="notation:Node" xmi:id="_3tdhoNLyEd-RgPzeinICcg" type="3001">
+        <element xmi:type="uml:Property" href="../test.openmdx.model1.uml#_3C7B8A60016D3DAC17E402B6"/>
+        <layoutConstraint xmi:type="notation:Location" xmi:id="_3tdhodLyEd-RgPzeinICcg"/>
+      </children>
+      <children xmi:type="notation:Node" xmi:id="_3tdhotLyEd-RgPzeinICcg" type="3001">
+        <element xmi:type="uml:Property" href="../test.openmdx.model1.uml#_3C7B8A60016D3DAC18160128"/>
+        <layoutConstraint xmi:type="notation:Location" xmi:id="_3tdho9LyEd-RgPzeinICcg"/>
+      </children>
+      <children xmi:type="notation:Node" xmi:id="_3tdhpNLyEd-RgPzeinICcg" type="3001">
+        <element xmi:type="uml:Property" href="../test.openmdx.model1.uml#_3C7B8A60016D3DAC182C0147"/>
+        <layoutConstraint xmi:type="notation:Location" xmi:id="_3tdhpdLyEd-RgPzeinICcg"/>
+      </children>
+      <children xmi:type="notation:Node" xmi:id="_Bu_mENL1Ed-RgPzeinICcg" type="3001">
+        <element xmi:type="uml:Property" href="../test.openmdx.model1.uml#_Buq18NL1Ed-RgPzeinICcg"/>
+        <layoutConstraint xmi:type="notation:Location" xmi:id="_Bu_mEdL1Ed-RgPzeinICcg"/>
+      </children>
       <styles xmi:type="notation:TitleStyle" xmi:id="_ipC6M0epEd-8Kob7ZR6raA" showTitle="true"/>
       <styles xmi:type="notation:SortingStyle" xmi:id="_ipC6NEepEd-8Kob7ZR6raA"/>
       <styles xmi:type="notation:FilteringStyle" xmi:id="_ipC6NUepEd-8Kob7ZR6raA"/>

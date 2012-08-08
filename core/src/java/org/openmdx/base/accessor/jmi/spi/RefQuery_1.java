@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefQuery_1.java,v 1.46 2010/08/25 14:44:18 hburger Exp $
+ * Name:        $Id: RefQuery_1.java,v 1.47 2010/12/22 09:37:41 hburger Exp $
  * Description: RefQuery_1 class
- * Revision:    $Revision: 1.46 $
+ * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/25 14:44:18 $
+ * Date:        $Date: 2010/12/22 09:37:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,7 +81,6 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
-import org.openmdx.base.accessor.spi.URIMarshaller;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -109,10 +108,10 @@ import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.BooleanTypePredicate;
 import org.w3c.cci2.ComparableTypePredicate;
-import org.w3c.cci2.MatchableTypePredicate;
 import org.w3c.cci2.MultivaluedFeaturePredicate;
 import org.w3c.cci2.OptionalFeaturePredicate;
 import org.w3c.cci2.PartiallyOrderedTypePredicate;
+import org.w3c.cci2.ResourceIdentifierTypePredicate;
 import org.w3c.cci2.SimpleTypeOrder;
 import org.w3c.cci2.StringTypePredicate;
 
@@ -1089,7 +1088,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     //-------------------------------------------------------------------------
     public class RefResourceIdentifierTypePredicate<V extends Comparable<?>>
         extends RefComparableTypePredicate<V>
-        implements MatchableTypePredicate<V> 
+        implements ResourceIdentifierTypePredicate<V> 
     {
 
         public RefResourceIdentifierTypePredicate (
@@ -1461,15 +1460,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                         quantifier,
                         featureName,
                         conditionType,
-                        PrimitiveTypes.ANYURI.equals(
-                            model.getElement(featureDef.objGetValue("type")).objGetValue("qualifiedName")
-                        ) ? RefQuery_1.unmarshalValues(
-                            // anyURIs have to be unmarshalled
-                            URIMarshaller.STRING_TO_URI, 
-                            value
-                        ) : value.toArray(
-                            // other primitive types require no unmarshalling
-                        )
+                        value.toArray()
                     )
                 );
             }

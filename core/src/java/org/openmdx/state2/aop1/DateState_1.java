@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateState_1.java,v 1.17 2010/07/13 10:03:24 hburger Exp $
+ * Name:        $Id: DateState_1.java,v 1.20 2010/12/02 08:03:40 hburger Exp $
  * Description: Date State
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/13 10:03:24 $
+ * Date:        $Date: 2010/12/02 08:03:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,9 +69,8 @@ import javax.jdo.JDOHelper;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.accessor.view.Interceptor_1;
+import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -84,7 +83,7 @@ import org.openmdx.state2.spi.Order;
 import org.w3c.spi.DatatypeFactories;
 
 /**
- * Registers the the delegates with their manager
+ * Date State Plug-In
  */
 public class DateState_1
     extends BasicState_1<DateStateContext> 
@@ -270,6 +269,18 @@ public class DateState_1
         );
     }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.state2.aop1.BasicState_1#interfers(org.openmdx.base.accessor.cci.DataObject_1_0)
+     */
+    @Override
+    protected boolean interfersWith(
+        DataObject_1_0 candidate
+    ) throws ServiceException {
+        DateStateContext context = getContext();
+        return 
+            Order.compareValidFromToValidTo(context.getValidFrom(), (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")) <= 0 &&
+            Order.compareValidFromToValidTo((XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"), context.getValidTo()) <= 0;
+    }
 
     /* (non-Javadoc)
      * @see org.openmdx.state2.aop1.AbstractState_1#isInvolved()
@@ -335,7 +346,7 @@ public class DateState_1
         Collection<DataObject_1_0> states = getStates();
         SortedSet<DataObject_1_0> active = new TreeSet<DataObject_1_0>(StateComparator.getInstance());
         for(DataObject_1_0 state : states){
-            if(!state.jdoIsDeleted() && state.objGetValue(SystemAttributes.REMOVED_AT) == null) {
+            if(isActive(state)) {
                 active.add(state);
             }
         }
@@ -477,7 +488,12 @@ public class DateState_1
         Object left,
         Object right
     ){
-        return left == null ? right == null : left.equals(right);
+        if(left == null) {
+            return right == null;
+        } else {
+            // Some datatype implementations don't accept null as equals argument!
+            return right != null && left.equals(right);
+        }
     }
 
 }

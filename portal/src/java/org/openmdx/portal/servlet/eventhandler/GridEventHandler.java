@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GridEventHandler.java,v 1.57 2010/05/21 16:59:53 hburger Exp $
+ * Name:        $Id: GridEventHandler.java,v 1.58 2010/09/21 15:17:04 wfro Exp $
  * Description: GridEventHandler 
- * Revision:    $Revision: 1.57 $
+ * Revision:    $Revision: 1.58 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/21 16:59:53 $
+ * Date:        $Date: 2010/09/21 15:17:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -301,6 +301,11 @@ public class GridEventHandler {
 	                                	);
 	                                	addFilter = true;
                                 	}
+                                }
+                                if(parameterMap.get(WebKeys.REQUEST_PARAMETER_SHOW_SEARCH_FORM) != null) {
+                                	grid.setShowSearchForm(
+                                		Grid.getShowSearchFormParameter(parameterMap)
+                                	);
                                 }
                                 if(!addFilter) {
                                 	grid.setPage(

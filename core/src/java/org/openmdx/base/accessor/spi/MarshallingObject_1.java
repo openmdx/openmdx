@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingObject_1.java,v 1.24 2010/06/22 07:13:59 hburger Exp $
+ * Name:        $Id: MarshallingObject_1.java,v 1.25 2010/12/07 23:07:37 hburger Exp $
  * Description: MarshallingObject_1 class
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/22 07:13:59 $
+ * Date:        $Date: 2010/12/07 23:07:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -314,7 +314,6 @@ public abstract class MarshallingObject_1<M extends Marshaller>
 
     /**
      * Create an instance's clone
-     * 
      * @param identity the identity of the new object if a persistent-new 
      * instance should be returned, <code>null</code> if a transient instance 
      * should be returned
@@ -324,7 +323,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
      * @exception ServiceException if case of failure
      */
     @Override
-    public DataObject_1_0 openmdxjdoClone(
+    public DataObject_1_0 openmdxjdoClone(String... exclude
     ) {
         try {
             return (DataObject_1_0)this.getMarshaller().marshal(

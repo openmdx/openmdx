@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicState_1.java,v 1.20 2010/07/09 16:30:03 hburger Exp $
+ * Name:        $Id: BasicState_1.java,v 1.27 2010/11/16 07:25:14 hburger Exp $
  * Description: Basic State Plug-In
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/09 16:30:03 $
+ * Date:        $Date: 2010/11/16 07:25:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -72,6 +72,7 @@ import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.ExceptionHelper;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
@@ -84,8 +85,8 @@ import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.StateContext;
 import org.openmdx.state2.cci.ViewKind;
-import org.openmdx.state2.spi.DateStateContexts;
 import org.openmdx.state2.spi.Parameters;
+import org.openmdx.state2.spi.Propagation;
 import org.openmdx.state2.spi.StateViewContext;
 
 /**
@@ -130,7 +131,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
      *  
      */
     private transient Map<?,?> coreFeatures;
-    
+
     /**
      * Tells whether this instances handles a state view, a transient state or an object
      * with unique valid time.
@@ -167,6 +168,21 @@ public abstract class BasicState_1<C extends StateContext<?>>
     }
     
     /**
+     * Tests whether the context describes a history view
+     * 
+     * @param context
+     * 
+     * @return <code>true</code> if the context describes a history view
+     */
+    protected static boolean isHistoryView(
+        StateContext<?> context
+    ){
+        return
+            context.getViewKind() == TIME_POINT_VIEW &&
+            context.getExistsAt() != null;
+    }
+
+    /**
      * Tests whether a given state is involved in the given context
      * 
      * @param candidate
@@ -187,7 +203,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
             //
             // Transaction Time Test
             // 
-            if(DateStateContexts.isHistoryView(context)) {
+            if(BasicState_1.isHistoryView(context)) {
                 return candidate.jdoIsPersistent() && !candidate.jdoIsNew() && StateViewContext.compareTransactionTime(
                     context.getExistsAt(),
                     (Date)candidate.objGetValue(CREATED_AT),
@@ -237,13 +253,10 @@ public abstract class BasicState_1<C extends StateContext<?>>
         DataObject_1_0 state
     ) throws ServiceException;
 
-    /* (non-Javadoc)
-     * @see org.openmdx.state2.aop2.core.AbstractState_1#getStates()
-     */
     @SuppressWarnings("unchecked")
     protected Collection<DataObject_1_0> getStates(
-    ) throws ServiceException {
-        DataObject_1_0 core = self.objGetDelegate();
+        DataObject_1_0 core
+    ){
         return (Collection<DataObject_1_0>) core.jdoGetPersistenceManager().newNamedQuery(
             null,
             ASPECT_QUERY
@@ -252,7 +265,27 @@ public abstract class BasicState_1<C extends StateContext<?>>
             core
         );
     }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.state2.aop2.core.AbstractState_1#getStates()
+     */
+    protected Collection<DataObject_1_0> getStates(
+    ) throws ServiceException {
+        return getStates(self.objGetDelegate());
+    }
 
+    protected boolean isActive(
+        DataObject_1_0 state
+    ) throws ServiceException{
+        return 
+            !state.jdoIsDeleted() && 
+            state.objGetValue(SystemAttributes.REMOVED_AT) == null;
+    }
+
+    protected abstract boolean interfersWith(
+        DataObject_1_0 state
+    ) throws ServiceException;
+    
     /**
      * Retrieve the view's context
      * 
@@ -265,9 +298,9 @@ public abstract class BasicState_1<C extends StateContext<?>>
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.state2.aop1.Involved#getQueryAccess()
+     * @see org.openmdx.state2.aop1.Involved#getQueryAccessMode()
      */
-    @Override
+//  @Override
     public AccessMode getQueryAccessMode() {
         return Parameters.STRICT_QUERY && getContext().getViewKind() == ViewKind.TIME_RANGE_VIEW ? 
             AccessMode.UNDERLYING_STATE : 
@@ -488,10 +521,19 @@ public abstract class BasicState_1<C extends StateContext<?>>
                         core.objSetValue("validTimeUnique", Boolean.TRUE);
                         core.objSetValue("transactionTimeUnique", Boolean.TRUE);
                     } else {
+                        for(DataObject_1_0 state : this.getStates(core)) {
+                            if(isActive(state) && interfersWith(state)) {
+                                throw new ServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.DUPLICATE,
+                                    "The new state interfers with the existing ones"
+                                );
+                            }
+                        }
                         Model_1_0 model = getModel();
                         ModelElement_1_0 classifierDef = model.getElement(core.objGetClass());
                         for(String coreFeature : core.objDefaultFetchGroup()) {
-                            if(!"openmdxjdoVersion".equals(coreFeature)) {
+                            if(!Propagation.NON_PROPAGATED_ATTRIBUTES.contains(coreFeature)) {
                                 ModelElement_1_0 featureDef = model.getFeatureDef(
                                     classifierDef,
                                     coreFeature,
@@ -618,20 +660,6 @@ public abstract class BasicState_1<C extends StateContext<?>>
             }
         } else { 
             super.objRefresh();
-        }
-    }
-
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.view.PlugIn_1#objIsRemoved()
-     */
-    @Override
-    public boolean objIsRemoved(
-    ) throws ServiceException {
-        if(isView()) {
-            return getInvolved(null).iterator().hasNext();
-        } else {
-            return super.objIsRemoved();
         }
     }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Query_2Facade.java,v 1.11 2010/07/09 13:52:03 hburger Exp $
+ * Name:        $Id: Query_2Facade.java,v 1.12 2010/11/23 17:34:52 wfro Exp $
  * Description: Query Facade
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/09 13:52:03 $
+ * Date:        $Date: 2010/11/23 17:34:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -364,28 +364,6 @@ public class Query_2Facade {
         this.delegate.setGroups(groups);
     }
 
-    /**
-     * Retrieve the fetch group
-     * 
-     * @return the fields included in the active fetch groups
-     */
-    public final Set<String> getGroup(){
-        return this.delegate.getGroup();
-    }
-
-    /**
-     * Set the fetch group
-     * 
-     * @param group the fields included in the active fetch groups
-     * 
-     * @throws ResourceException 
-     */
-    public final void setGroup(
-        Set<String> group
-    ) throws ResourceException{
-        this.delegate.setGroup(group);
-    }
-    
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */

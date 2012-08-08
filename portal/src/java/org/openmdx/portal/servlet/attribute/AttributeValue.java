@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValue.java,v 1.95 2010/05/16 09:39:39 wfro Exp $
+ * Name:        $Id: AttributeValue.java,v 1.97 2010/12/07 12:56:35 wfro Exp $
  * Description: AttributeValue
- * Revision:    $Revision: 1.95 $
+ * Revision:    $Revision: 1.97 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/16 09:39:39 $
+ * Date:        $Date: 2010/12/07 12:56:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -404,16 +404,19 @@ implements Serializable {
                     }              
                 }
                 if(v != null) {
-                    stringifiedValue.append(
-                        this.getStringifiedValueInternal(
-                            p, 
-                            v, 
-                            multiLine, 
-                            forEditing, 
-                            shortFormat
-                        )
-                    ); 
+                	String internalValue = this.getStringifiedValueInternal(
+                        p, 
+                        v, 
+                        multiLine, 
+                        forEditing, 
+                        shortFormat
+                    );
+                    stringifiedValue.append(internalValue);
                     if(hasDivTag) {
+                    	// Empty div tag renders to zero height. Put a &nbsp;
+                    	if(internalValue.length() == 0) {
+                    		stringifiedValue.append("&nbsp;");
+                    	}
                         stringifiedValue.append("</div>");
                     }                
                 }
@@ -565,6 +568,16 @@ implements Serializable {
     }
     
     //-------------------------------------------------------------------------
+    protected String getTitle(
+    	Attribute attribute,
+    	String label
+    ) {
+    	String title = attribute.getToolTip();
+    	if(title == null) return null;
+    	return label.startsWith(title) ? null : title;
+    }
+    
+    //-------------------------------------------------------------------------
     /**
      * Paints the attribute to p.
      * 
@@ -607,13 +620,14 @@ implements Serializable {
     ) throws ServiceException { 
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();   
         label = this.getLabel(attribute, p, label);
+        String title = this.getTitle(attribute, label);
         if(forEditing) {
             // Only generate id if required
             String feature = this.getName();
             id = (id == null) || (id.length() == 0) ? 
             	feature + "[" + Integer.toString(tabIndex) + "]" : 
             	id;            
-            p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {
                 p.write("<td ", rowSpanModifier, ">");
                 if(attribute.getSpanRow() > 1) {
@@ -696,7 +710,7 @@ implements Serializable {
                     p.write("       <div class=\"valueL\"></div>");
                 }
                 else {
-                	p.write("<td class=\"label\"><span class=\"nw\">",  htmlEncoder.encode(label, false), "</span></td>");
+                	p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">",  htmlEncoder.encode(label, false), "</span></td>");
                     p.write("<td ", rowSpanModifier, " class=\"valueL\" ",  widthModifier, " ", styleModifier, ">&nbsp;</td>");
                 }
             }
@@ -708,7 +722,7 @@ implements Serializable {
                     	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	                    	
                     }
                     else {
-                    	p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+                    	p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
                     }
                     String feature = this.getName();                    	
                     id = (id == null) || (id.length() == 0) ? 
@@ -846,7 +860,7 @@ implements Serializable {
                     else {
 	                    p.debug("<!-- multi-valued AttributeValue -->");
 	                    p.write(gapModifier);
-	                    p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
+	                    p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", label, "</span></td>");
 	                    p.write("<td class=\"valueL\" ",  rowSpanModifier, " ",  widthModifier, " ",  styleModifier, ">");
 	                    p.write("  <div class=\"valueMulti\" ",  styleModifier, "> ");
                     }

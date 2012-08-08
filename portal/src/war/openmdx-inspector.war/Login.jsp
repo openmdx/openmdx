@@ -2,17 +2,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Login.jsp,v 1.69 2010/06/09 08:53:07 cmu Exp $
+ * Name:        $Id: Login.jsp,v 1.71 2010/11/17 13:11:07 wfro Exp $
  * Description: Login.jsp
- * Revision:    $Revision: 1.69 $
+ * Revision:    $Revision: 1.71 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/09 08:53:07 $
+ * Date:        $Date: 2010/11/17 13:11:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -72,6 +72,8 @@ org.openmdx.portal.servlet.*
 		request.setCharacterEncoding("UTF-8");
 		String requestURL = request.getRequestURL().toString();
 		System.out.println(new Date() + ": Login: requestURL=" + requestURL + "; isRequestedSessionIdFromCookie=" + request.isRequestedSessionIdFromCookie() + "; servletPath=" + request.getServletPath() + "; remoteUser=" + request.getRemoteUser());
+
+		// Locale
 		if(request.getParameter("locale") != null) {
 			request.getSession().setAttribute(
 				"locale",
@@ -88,9 +90,23 @@ org.openmdx.portal.servlet.*
 						request.getHeader("accept-language").substring(0,2) + "_" + request.getHeader("accept-language").substring(3) :
 					app.getCurrentLocaleAsString()
 			);
-		}
+		}		
 		String localeStr = (String)session.getAttribute("locale");
-%><%@ include file="localeSettings.jsp" %><%
+		if(localeStr != null && localeStr.length() > 5) {
+			localeStr = localeStr.substring(0, 5);
+		}
+		String defaultLocale = "en_US";
+		List activeLocales = new ArrayList();
+%><%@ include file="login-locales.jsp" %><%
+		if(!activeLocales.contains(defaultLocale)) {
+			activeLocales.add(defaultLocale);
+		}
+		if((localeStr == null) || !activeLocales.contains(localeStr)) {
+			localeStr = defaultLocale;
+		}
+		request.getSession().setAttribute("locale", localeStr);
+		
+		// Timezone		
 		if(request.getParameter("timezone") != null) {
 			request.getSession().setAttribute(
 				"timezone",

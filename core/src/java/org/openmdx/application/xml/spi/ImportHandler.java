@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ImportHandler.java,v 1.17 2010/06/02 13:43:14 hburger Exp $
+ * Name:        $Id: ImportHandler.java,v 1.18 2010/11/10 16:53:53 hburger Exp $
  * Description: Import Handler
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:43:14 $
+ * Date:        $Date: 2010/11/10 16:53:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -67,6 +67,7 @@ import java.util.StringTokenizer;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
+import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -84,6 +85,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import com.sun.jndi.toolkit.url.Uri;
 
 /**
  * Import Handler
@@ -756,24 +759,19 @@ public class ImportHandler extends DefaultHandler {
                                     throw new ServiceException(e);
                                 }
                             }
+                        } else if ("org.openmdx.base.duration".equals(attributeType)) {
+                            value = Datatypes.create(Duration.class, this.currentAttributeValue.toString().trim());
+                        } else if ("org.openmdx.base.anyURI".equals(attributeType)) {
+                            value = Datatypes.create(Uri.class, this.currentAttributeValue.toString().trim());
                         } else if ("org.openmdx.base.ObjectId".equals(attributeType)) {
-                            // SysLog.trace("adding string value to " +
-                            // localpart);
                             value = new Path(
                                 this.currentAttributeValue.toString().trim()
                             );
                         } else if ("org.w3c.binary".equals(attributeType)) {
-                            // SysLog.trace("adding string value to " +
-                            // localpart);
                             value = Base64.decode(
                                 this.currentAttributeValue.toString()
                             );
                         } else {
-                            // SysLog.info("unknown type of attribute [name="
-                            // + qualifiedClassName + ":" +
-                            // this.currentAttributeName + ";type=" +
-                            // attributeType +
-                            // "]. Assuming org:w3c:string");
                             ImportHandler.attributeTypes.put(
                                 qualifiedClassName + ":" + this.currentAttributeName,
                                 "org.w3c.string"

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SharedObjects.java,v 1.8 2010/07/08 09:08:21 hburger Exp $
+ * Name:        $Id: SharedObjects.java,v 1.9 2010/09/27 11:46:45 hburger Exp $
  * Description: Shared Objects
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/08 09:08:21 $
+ * Date:        $Date: 2010/09/27 11:46:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -218,6 +218,23 @@ public class SharedObjects {
          * @see Accessor#setTaskIdentifier(Object)
          */
         Object getTaskIdentifier(
+        );
+
+        /**
+         * Replace the tenant information
+         * 
+         * @param tenant information
+         */
+        void setTenant(
+            Object tenant
+        );
+        
+        /**
+         * Retrieve the tenant information
+         *  
+         * @return the tenant information
+         */
+        Object getTenant(
         );
         
         /**

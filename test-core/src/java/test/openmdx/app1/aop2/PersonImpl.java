@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersonImpl.java,v 1.3 2010/06/24 16:54:15 hburger Exp $
+ * Name:        $Id: PersonImpl.java,v 1.4 2010/10/29 12:42:44 hburger Exp $
  * Description: Person 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/24 16:54:15 $
+ * Date:        $Date: 2010/10/29 12:42:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -276,6 +276,14 @@ public class PersonImpl
         );
       }
       super.jdoPreStore();
+    }
+
+    /* (non-Javadoc)
+     * @see test.openmdx.app1.aop2.NaturalPerson#isRetired()
+     */
+//  @Override
+    public boolean isRetired() {
+        return false;
     }
 
 }

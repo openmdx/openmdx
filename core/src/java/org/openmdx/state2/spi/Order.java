@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Order.java,v 1.6 2009/12/31 14:10:17 wfro Exp $
+ * Name:        $Id: Order.java,v 1.7 2010/12/01 09:36:04 hburger Exp $
  * Description: ValidTimes 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/31 14:10:17 $
+ * Date:        $Date: 2010/12/01 09:36:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,9 +53,11 @@ package org.openmdx.state2.spi;
 
 import java.util.Date;
 
+import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.spi.DatatypeFactories;
 
@@ -98,6 +100,35 @@ public class Order {
     //------------------------------------------------------------------------
     // Date States
     //------------------------------------------------------------------------
+    
+    /**
+     * Tests whether validTo is greater than or equal to validFrom
+     * 
+     * @param validFrom
+     * @param validTo
+     * 
+     * @throws IllegalArgumentException if validTo is less than validFrom 
+     */
+    public static void assertTimeRange(
+        XMLGregorianCalendar validFrom,
+        XMLGregorianCalendar validTo
+    ){
+        if(validFrom != null && validTo != null) {
+            if(validTo.compare(validFrom) == DatatypeConstants.LESSER) {
+                throw BasicException.initHolder(
+                    new IllegalArgumentException(
+                        "validTo must be greater than or equal to validFrom",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            new BasicException.Parameter("validFrom", validFrom),
+                            new BasicException.Parameter("validTo", validTo)
+                        )
+                    )
+                );
+            }
+        }
+    }
     
     /**
      * Compare two XMLGregorianCalendar values where <code>null</code> is
@@ -205,6 +236,35 @@ public class Order {
     //------------------------------------------------------------------------
     // Date-Time States
     //------------------------------------------------------------------------
+    
+    /**
+     * Tests whether invalidFrom is greater than validFrom
+     * 
+     * @param validFrom
+     * @param invalidFrom
+     * 
+     * @throws IllegalArgumentException if invalidFrom is less than or equal to validFrom 
+     */
+    public static void assertTimeRange(
+        Date validFrom,
+        Date invalidFrom
+    ){
+        if(validFrom != null && invalidFrom != null) {
+            if(invalidFrom.compareTo(validFrom) <= 0) {
+                throw BasicException.initHolder(
+                    new IllegalArgumentException(
+                        "invalidFrom must be greater than validFrom",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            new BasicException.Parameter("validFrom", validFrom),
+                            new BasicException.Parameter("invalidFrom", invalidFrom)
+                        )
+                    )
+                );
+            }
+        }
+    }
     
     /**
      * Compare two Date values where <code>null</code> is

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: jdbcURLContextFactory.java,v 1.2 2009/09/11 13:16:23 hburger Exp $
+ * Name:        $Id: jdbcURLContextFactory.java,v 1.3 2010/09/28 10:59:09 hburger Exp $
  * Description: JDBC URL Context Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 13:16:23 $
+ * Date:        $Date: 2010/09/28 10:59:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,12 +53,14 @@ package org.openmdx.kernel.lightweight.naming.jdbc;
 import java.util.Hashtable;
 
 import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.Name;
 import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
 import javax.naming.spi.ObjectFactory;
 import javax.transaction.TransactionManager;
+
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.naming.ComponentEnvironment;
 
 /**
  * jdbc URL Context Factory
@@ -71,7 +73,7 @@ public class jdbcURLContextFactory implements ObjectFactory {
      * @throws NamingException
      */
     public jdbcURLContextFactory(
-    ) throws NamingException{
+    ) throws BasicException{
         if(dataSourceContext == null) {
             initialize();
         }
@@ -107,10 +109,10 @@ public class jdbcURLContextFactory implements ObjectFactory {
     }
 
     private synchronized void initialize(
-    ) throws NamingException {
+    ) throws BasicException {
         if(dataSourceContext == null) {
             dataSourceContext = new DataSourceContext(
-                (TransactionManager) new InitialContext().lookup("java:comp/TransactionManager")
+                ComponentEnvironment.lookup(TransactionManager.class)
             );
         }
     }

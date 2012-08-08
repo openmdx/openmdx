@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.19 2010/08/06 12:23:42 hburger Exp $
+ * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.22 2010/10/29 12:41:46 hburger Exp $
  * Description: ContainerInvocationHandler 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:23:42 $
+ * Date:        $Date: 2010/10/29 12:41:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,21 +50,25 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 import javax.jmi.reflect.InvalidCallException;
 import javax.jmi.reflect.RefBaseObject;
+
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
@@ -89,7 +93,7 @@ public class Jmi1ContainerInvocationHandler
         Marshaller marshaller, 
         RefContainer<?> delegate
     ) {
-        this.marshaller = marshaller == null ? IdentityMarshaller.INSTANCE : marshaller;
+        this.marshaller = marshaller;
         this.refDelegate = delegate;
         this.cciDelegate = null;
     }
@@ -103,7 +107,7 @@ public class Jmi1ContainerInvocationHandler
         Marshaller marshaller,
         Container<?> delegate
     ) {
-        this.marshaller = marshaller == null ? IdentityMarshaller.INSTANCE : marshaller;
+        this.marshaller = marshaller;
         this.cciDelegate = delegate;
         this.refDelegate = null;
     }
@@ -181,6 +185,24 @@ public class Jmi1ContainerInvocationHandler
                         return null;
                     }
                 }
+                else if (declaringClass == Collection.class) {
+                    if("toArray".equals(methodName) && args != null && args.length == 1) {
+                        Object[] source = ((Collection<?>)this.refDelegate).toArray();
+                        Object[] target = (Object[]) args[0];
+                        int size = this.refDelegate.size();
+                        if (target.length < size){
+                            target = (Object[]) Array.newInstance(target.getClass().getComponentType(), size);
+                        }
+                        int i;
+                        for(i = 0; i < size; i++){
+                            target[i] = this.marshaller.marshal(source[i]);
+                        }
+                        if(i < target.length) {
+                            target[i] = null;
+                        }
+                        return target;
+                    }
+                }
                 return this.marshaller.marshal(
                     method.invoke(this.refDelegate, 
                         (Object[]) this.marshaller.unmarshal(args)
@@ -191,15 +213,15 @@ public class Jmi1ContainerInvocationHandler
                 if(declaringClass == RefBaseObject.class) {
                     if(
                         "refOutermostPackage".equals(methodName) && 
-                        this.marshaller instanceof Jmi1ObjectInvocationHandler.StandardMarshaller
+                        this.marshaller instanceof StandardMarshaller
                      ) {
-                        return ((Jmi1ObjectInvocationHandler.StandardMarshaller)this.marshaller).getOutermostPackage();
+                        return ((StandardMarshaller)this.marshaller).getOutermostPackage();
                     } else if("refMofId".equals(methodName)) {
                         if(this.cciDelegate instanceof RefBaseObject) {
                             return ((RefBaseObject)this.cciDelegate).refMofId();
                         } else {
-                            Object xri = PersistenceHelper.getContainerId(this.cciDelegate);
-                            return xri == null ? null : xri.toString();
+                            Path xri = PersistenceHelper.getContainerId(this.cciDelegate);
+                            return xri == null ? null : xri.toXRI();
                         }
                     } else throw new UnsupportedOperationException(
                         declaringClass + ": " + methodName
@@ -267,14 +289,30 @@ public class Jmi1ContainerInvocationHandler
                     } else throw new UnsupportedOperationException(
                         declaringClass + ": " + methodName
                      );
-                } else {
-                    return this.marshaller.marshal(
-                        method.invoke(
-                            this.cciDelegate, 
-                            (Object[]) this.marshaller.unmarshal(args)
-                        )
-                    );
-                } 
+                } else if (declaringClass == Collection.class) {
+                    if("toArray".equals(methodName) && args != null && args.length == 1) {
+                        Object[] source = ((Collection<?>)this.cciDelegate).toArray();
+                        Object[] target = (Object[]) args[0];
+                        int size = this.cciDelegate.size();
+                        if (target.length < size){
+                            target = (Object[]) Array.newInstance(target.getClass().getComponentType(), size);
+                        }
+                        int i;
+                        for(i = 0; i < size; i++){
+                            target[i] = this.marshaller.marshal(source[i]);
+                        }
+                        if(i < target.length) {
+                            target[i] = null;
+                        }
+                        return target;
+                    }
+                }
+                return this.marshaller.marshal(
+                    method.invoke(
+                        this.cciDelegate, 
+                        (Object[]) this.marshaller.unmarshal(args)
+                    )
+                );
             }
         } catch (InvocationTargetException exception) {
             Throwable throwable = exception.getTargetException();
@@ -390,44 +428,5 @@ public class Jmi1ContainerInvocationHandler
         
     }
 
-    
-    //------------------------------------------------------------------------
-    // Class IdentityMarshaller
-    //------------------------------------------------------------------------
-    
-    /**
-     * 
-     * IdentityMarshaller
-     *
-     */
-    final static class IdentityMarshaller implements Marshaller {
-
-        /**
-         * Constructor 
-         */
-        private IdentityMarshaller() {
-            super();
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.persistence.spi.Marshaller#marshal(java.lang.Object)
-         */
-        public final Object marshal(Object source) {
-            return source;
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.persistence.spi.Marshaller#unmarshal(java.lang.Object)
-         */
-        public final Object unmarshal(Object source) {
-            return source;
-        } 
-        
-        /**
-         * The singleton
-         */
-        final static Marshaller INSTANCE = new IdentityMarshaller();
-        
-    }
     
 }

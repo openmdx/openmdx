@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.openmdx.base.Authority name="test:openmdx:datatypes1" _operation="null" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="xri://+resource/test/openmdx/datatypes1/xmi1/datatypes1.xsd">
+	<_object/>
+	<_content>
+		<provider>
+			<org.openmdx.base.Provider qualifiedName="Persistent" _operation="null">
+				<_object/>
+				<_content>
+					<segment>
+						<test.openmdx.datatypes1.Segment qualifiedName="Default">
+							<_object>
+								<description/>
+							</_object>
+							<_content>
+								<nonStated>
+									<test.openmdx.datatypes1.NonStated id="0">
+										<_object>
+											<value10>gAB/</value10>
+											<value11b>P5DT4H3M2.010S</value11b>
+											<value11a>P12Y6M</value11a>
+											<value9>http://www.openmdx.org</value9>
+											<segment/>
+											<value7>2006-06-01T12:00:00.123Z</value7>
+											<value8>2006-04-01</value8>
+											<value5>12.34</value5>
+											<value6>ABC</value6>
+											<value3>
+												<_item>-12</_item>
+												<_item>12</_item>
+											</value3>
+											<value4>8000000000</value4>
+											<value1>true</value1>
+											<value2>32767</value2>
+										</_object>
+										<_content/>
+									</test.openmdx.datatypes1.NonStated>
+									<test.openmdx.datatypes1.NonStated id="1">
+										<_object>
+											<value10/>
+											<value11b>-P5DT4H3M2.010S</value11b>
+											<value11a>-P12Y6M</value11a>
+											<value9>mailto:info@openmdx.org</value9>
+											<segment/>
+											<value7>2990-01-01T00:00:00.000Z</value7>
+											<value8>2990-01-01</value8>
+											<value5>-12.34</value5>
+											<value6>qwerty</value6>
+											<value3/>
+											<value4>8000000000</value4>
+											<value1>false</value1>
+											<value2>-32768</value2>
+										</_object>
+										<_content/>
+									</test.openmdx.datatypes1.NonStated>
+									<test.openmdx.datatypes1.NonStated id="2">
+										<_object>
+											<value10/>
+											<value11b>-P5DT4H3M2.010S</value11b>
+											<value11a>-P12Y6M</value11a>
+											<value9>mailto:info@openmdx.org</value9>
+											<segment/>
+											<value7>2006-12-01T12:00:00.123Z</value7>
+											<value8>2006-12-01</value8>
+											<value5>-12.34</value5>
+											<value6>an_undersocre</value6>
+											<value3/>
+											<value4>8000000000</value4>
+											<value1>false</value1>
+											<value2>-32768</value2>
+										</_object>
+										<_content/>
+									</test.openmdx.datatypes1.NonStated>
+								</nonStated>
+							</_content>
+						</test.openmdx.datatypes1.Segment>
+					</segment>
+				</_content>
+			</org.openmdx.base.Provider>
+		</provider>
+	</_content>
+</org.openmdx.base.Authority>

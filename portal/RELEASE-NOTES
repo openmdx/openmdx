@@ -1,5 +1,5 @@
-Release Name: openMDX/Portal 2.7.0
-Release Date: 2010-08-20
+Release Name: openMDX/Portal 2.8.0
+Release Date: 2010-12-27
 
 ---------------------------------------------------------------------
 Notes:
@@ -49,10 +49,82 @@ Notes:
 Changes:
 
 0.    SUMMARY
+      * Root objects per perspective
+      * Customizable grid coloring
+      * Show-always option for search forms
       * Clean up
       * Bug fixes
-      * JRE 6.0 / 5.0 support
                                           
+==============================================================================
+Version 2.8.0                                                       2010-12-27
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019414
+      Portal: tooltips for tabs. Generate title element to tabs.
+      
+      CR10009592
+      PortalExtension: grid coloring. Extend portal extension by method 
+      getGridRowColors(RefObject). Deprecate at the same time the method
+      hasGridColors().
+      
+     /**
+      * Returns colors which is used as foreground and background colors when an 
+      * object is rendered in a grid.
+      * @return foreground (at index 0) and background color (at index 1) or null. 
+      */    
+     @Override
+     public String[] getGridRowColors(
+    	RefObject_1_0 obj
+     ) {
+         if(obj instanceof Activity) {
+             Activity activity = (Activity)obj;
+             if(activity.getDueBy() != null) {
+                 String dueByDate = DateTimeFormat.BASIC_UTC_FORMAT.format(activity.getDueBy()).substring(0, 8);
+                 String todayDate = DateTimeFormat.BASIC_UTC_FORMAT.format(new Date()).substring(0, 8);
+                 return dueByDate.compareTo(todayDate) > 0 ?
+                     new String[]{null, "red"} :
+                         dueByDate.compareTo(todayDate) == 0 ?
+                             new String[]{null, "green"} :
+                                 null;
+              }
+          }
+          return super.getGridRowColors(obj);
+      }
+      
+      CR10009558
+      LookupObjectEventHandler. Action EVENT_FIND_OBJECT takes as 
+      parameter PARAMETER_REFERENCE which defines the type of the lookup object. 
+      In addition to modeled reference names, user-defined structural feature 
+      definitions are also supported.
+      
+      CR10009494
+      Show-always option for search forms. Option allows the user to show search
+      form automatically when a grid is displayed.
+      
+      CR10009511
+      Root objects per perspective. User settings should allow to configure 
+      the state (show|hide) of root objects per perspective.
+      
+      CR20019321
+      Title tag for labels. Create a title tag for labels if a tooltip for a 
+      field is customized.
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+            
+2.1.  FIXED BUGS
+      none
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
 ==============================================================================
 Version 2.7.0                                                       2010-08-20
 ==============================================================================
@@ -75,90 +147,6 @@ Version 2.7.0                                                       2010-08-20
       Turning off unneeded locales leads to NA's. Grid column labels are set 
       to NA if only one locale (locale[0]) is enabled in web.xml.
       
-
-2.2.  DEPRECATED FEATURES
-      none
-            
-2.3   REMOVED FEATURES
-      none
-
-==============================================================================
-Version 2.6.1                                                       2010-06-04
-==============================================================================
-
-1.    NEW FEATURES
-      
-      CR20019195
-      JRE 5.0
-      
-      openMDX 2.6 is now JRE 5.0 enabled. 
-      
-      CR10009406
-      Configurable user-agent for mobiles. The option mobileUserAgents for
-      ObjectInspectorServlet in web.xml allows to configure a comma or 
-      semi-colon separated list user agent patterns. The GUI will be launched 
-      in mobile mode if the user-agent header contains (indexOf() >= 0) one of 
-      the configured user agent patterns.  
-                                    
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-
-      CR20018664 	
-      FilterProperty 
-      
-      FilterProperty & AttributeSpecifier are now used by dataprovider classes 
-      only.
-
-      CR0002764
-      Filter Operators 
-      
-      Replace some generated short constant classes by enums:
-      * Directions & Orders -> SortOrder
-      * FilterOperators -> ConditionType
-            
-2.1.  FIXED BUGS
-      none
-
-2.2.  DEPRECATED FEATURES
-      none
-            
-2.3   REMOVED FEATURES
-      none
-
-==============================================================================
-Version 2.6.0                                                       2010-05-01
-==============================================================================
-
-1.    NEW FEATURES
-      
-      CR20006361
-      Application-specific ApplicationContext. The option 
-      'applicationContextClassName' allows to configure a user-defined
-      ApplicationContext class. The user-defined class must be a subclass of
-      org.openmdx.portal.servlet.ApplicationContext.
-                                    
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      
-      CR10009198
-      PortalExtension: getDataBinding(). The signature of getDataBinding() has changed. 
-      The parameter ApplicationContext app is removed because data bindings must not 
-      depend on the application context. The new interface DataBinding_2_0 has been 
-      added to support data bindings where the application context is passed as 
-      parameter for setValue(), getValue(). 
-      
-      CR20018907
-      Portal: Ajax-based login.
-      Login.jsp now first invokes the protected ./jsp/GetPath.jsp. The session 
-      is not authenticated if GetPath returns the redirect URL to the Login page. 
-      In this case the Login form is displayed. If GetPath returns the non-redirected 
-      URL, Login.jsp forwards to the ObjectInspectorServlet without displaying 
-      the login form. As a consequence /jsp/* must be protected in web.xml. 
-            
-2.1.  FIXED BUGS
-      none
 
 2.2.  DEPRECATED FEATURES
       none

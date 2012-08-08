@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: javaURLContextFactory.java,v 1.4 2009/09/11 13:16:23 hburger Exp $
+ * Name:        $Id: javaURLContextFactory.java,v 1.6 2010/10/11 06:47:56 hburger Exp $
  * Description: java URL Context Factory
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 13:16:23 $
+ * Date:        $Date: 2010/10/11 06:47:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -102,13 +102,13 @@ public class javaURLContextFactory implements ObjectFactory {
             }
         }
         if(object == null){
-            return urlContext;
+            return javaContext;
         } else if(object instanceof String){
             String url = (String) object;
             if(!url.startsWith("java:")) throw new NoInitialContextException(
                 "'java' URL scheme expected: " + url
             );
-            return urlContext.lookup(url);
+            return javaContext.lookup(url);
         } else { 
             throw new NoInitialContextException(
                 "'java' URL supports String object only: " + object.getClass().getName()
@@ -116,6 +116,22 @@ public class javaURLContextFactory implements ObjectFactory {
         }
     }
 
+    /**
+     * Retrieve the <code>java:comp</code> context
+     * 
+     * @return the component context
+     * 
+     * @throws NamingException 
+     */
+    private static Context getComponentContext(
+    ) throws NamingException {
+        try {
+            return (Context) javaContext.lookup("java:comp");
+        } catch (NameNotFoundException exception) {
+            return javaContext.createSubcontext("java:comp");
+        }
+    }
+    
     /**
      * Process <code>org.openmdx.comp&hellip;</code> properties
      * 
@@ -127,12 +143,7 @@ public class javaURLContextFactory implements ObjectFactory {
         Map<?,?> properties
     ) throws NoInitialContextException {
         if(properties != null && !properties.isEmpty()) try {
-            Context compContext;
-            try {
-                compContext = (Context) urlContext.lookup("java:comp");
-            } catch (NameNotFoundException exception) {
-                compContext = urlContext.createSubcontext("java:comp");
-            }
+            Context compContext = getComponentContext();
             for(Map.Entry<?,?> e : properties.entrySet()) {
                 Object key = e.getKey();
                 if(key instanceof String) {
@@ -149,8 +160,13 @@ public class javaURLContextFactory implements ObjectFactory {
                             }
                         }
                         Object value = e.getValue();
-                        if(value instanceof String && ((String)value).indexOf(':') > 0) {
-                            value = new LinkRef((String)value); 
+                        if(value instanceof String){
+                            String s = (String) value;
+                            int c = s.indexOf(':');
+                            int q = s.indexOf('?');
+                            if(c > 0 && (q < 0 || c < q)) {
+                                value = new LinkRef(s); 
+                            }
                         }
                         context.rebind(
                             path[t], 
@@ -171,6 +187,6 @@ public class javaURLContextFactory implements ObjectFactory {
     /**
      * The initial java: context
      */
-    private final static Context urlContext = new HashMapContext(null, null, "");
+    private final static Context javaContext = new HashMapContext(null, null, "");
 
 }

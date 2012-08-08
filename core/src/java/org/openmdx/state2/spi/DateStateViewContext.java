@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DateStateViewContext.java,v 1.4 2010/07/07 11:01:24 hburger Exp $
+ * Name:        $Id: DateStateViewContext.java,v 1.6 2010/12/01 10:09:32 hburger Exp $
  * Description: Date State View
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/07 11:01:24 $
+ * Date:        $Date: 2010/12/01 10:09:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,11 @@
  */
 package org.openmdx.state2.spi;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
+import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.state2.cci.DateStateContext;
@@ -134,15 +137,33 @@ public class DateStateViewContext
      *
      * @param validFrom the begin of the time range, or <code>null</code> for an unconstrained lower bound
      * @param validTo the end of the time range, or <code>null</code> for an unconstrained upper bound
+     * 
+     * @throws IllegalArgumentException if validTo is less than validFrom 
      */
     public static DateStateViewContext newTimeRangeViewContext(
         XMLGregorianCalendar validFrom,
         XMLGregorianCalendar validTo
     ){
         ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-        return new DateStateViewContext(
-            datatypeFactory.toDate(validFrom),
-            datatypeFactory.toDate(validTo)
+        validFrom = datatypeFactory.toDate(validFrom);
+        validTo = datatypeFactory.toDate(validTo);
+        Order.assertTimeRange(validFrom, validTo);
+        return new DateStateViewContext(validFrom, validTo);
+    }
+    
+    /**
+     * Retrieve the current date
+     * 
+     * @return the current date
+     */
+    public static XMLGregorianCalendar today(
+    ){
+        GregorianCalendar calendar = new GregorianCalendar();
+        return DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(
+            calendar.get(Calendar.YEAR), 
+            calendar.get(Calendar.MONTH) + 1, 
+            calendar.get(Calendar.DAY_OF_MONTH),
+            DatatypeConstants.FIELD_UNDEFINED
         );
     }
     
@@ -188,7 +209,7 @@ public class DateStateViewContext
      */
     @Override
     protected XMLGregorianCalendar newValidAt() {
-        return DateStateContexts.today();
+        return DateStateViewContext.today();
     }
 
 }

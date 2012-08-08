@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: RootMenuControl.java,v 1.26 2010/02/01 10:57:07 wfro Exp $
+ * Name:        $Id: RootMenuControl.java,v 1.27 2010/09/17 10:59:45 wfro Exp $
  * Description: RootMenuControl
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/01 10:57:07 $
+ * Date:        $Date: 2010/09/17 10:59:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,6 +61,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.UserSettings;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
@@ -118,9 +119,10 @@ public class RootMenuControl
         ViewPort p
     ) throws ServiceException {
         ObjectView view = (ObjectView)p.getView();
-        ApplicationContext application = view.getApplicationContext();
+        ApplicationContext app = view.getApplicationContext();
         Path selectedObjectIdentity = view.getObjectReference().getObject().refGetPath();
         Action[] selectRootObjectAction = view.getSelectRootObjectActions();
+        int currentPerspective = app.getCurrentPerspective();
         int lastItemLevel = 0;
         int currentItemLevel = 0;        
         int i = 0;
@@ -129,8 +131,8 @@ public class RootMenuControl
         int topNavigationShowMax = 6;
         boolean topNavigationShowSublevel = true; 
         try {
-            topNavigationShowMax = Integer.valueOf(application.getSettings().getProperty(TOP_NAVIGATION_SHOW_MAX, "7")).intValue();
-            topNavigationShowSublevel = Boolean.valueOf(application.getSettings().getProperty(TOP_NAVIGATION_SHOW_SUBLEVEL, "true")).booleanValue();
+            topNavigationShowMax = Integer.valueOf(app.getSettings().getProperty(UserSettings.TOP_NAVIGATION_SHOW_MAX, "7")).intValue();
+            topNavigationShowSublevel = Boolean.valueOf(app.getSettings().getProperty(UserSettings.TOP_NAVIGATION_SHOW_SUBLEVEL, "true")).booleanValue();
         } 
         catch(Exception e) {}
         String stateItemLevel0 = "1";                
@@ -145,7 +147,10 @@ public class RootMenuControl
             }
             // Get state of root object
             if(currentItemLevel == 0) {
-                stateItemLevel0 = application.getSettings().getProperty("RootObject." + indexItemLevel0 + ".State", "1");
+                stateItemLevel0 = app.getSettings().getProperty(
+                	UserSettings.ROOT_OBJECT_STATE + (currentPerspective == 0 ? "" : "[" + Integer.toString(currentPerspective) + "]") + "." + indexItemLevel0 + ".State", 
+                	"1"
+                );
                 if("1".equals(stateItemLevel0)) nItemsLevel0++;
                 if(nItemsLevel0 > topNavigationShowMax) break;
                 indexItemLevel0++;
@@ -213,7 +218,10 @@ public class RootMenuControl
             while(i < selectRootObjectAction.length) {
                 Action action = selectRootObjectAction[i];
                 if((action.getEvent() == Action.EVENT_SELECT_OBJECT) && (action.getParameter(Action.PARAMETER_REFERENCE).length() == 0)) {                
-                    stateItemLevel0 = application.getSettings().getProperty("RootObject." + indexItemLevel0 + ".State", "1");
+                    stateItemLevel0 = app.getSettings().getProperty(
+                    	UserSettings.ROOT_OBJECT_STATE + (currentPerspective == 0 ? "" : "[" + Integer.toString(currentPerspective) + "]") + "." + indexItemLevel0 + ".State", 
+                    	"1"
+                    );
                     indexItemLevel0++;
                     if(action.isEnabled() && "1".equals(stateItemLevel0)) {    
                     	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
@@ -232,11 +240,5 @@ public class RootMenuControl
             }
         }
     }
-   
-    //---------------------------------------------------------------------------------
-    // Members
-    //---------------------------------------------------------------------------------
-    public static final String TOP_NAVIGATION_SHOW_MAX = "TopNavigation.ShowMax";
-	public static final String TOP_NAVIGATION_SHOW_SUBLEVEL = "TopNavigation.ShowSublevel";
                
 }

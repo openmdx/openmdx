@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ConnectionFactoryAdapter.java,v 1.10 2010/05/21 14:01:40 hburger Exp $
+ * Name:        $Id: ConnectionFactoryAdapter.java,v 1.11 2010/12/22 00:14:56 hburger Exp $
  * Description: Connection Factory Adapter 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/21 14:01:40 $
+ * Date:        $Date: 2010/12/22 00:14:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,6 @@
  */
 package org.openmdx.base.rest.spi;
 
-import javax.ejb.TransactionAttributeType;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.resource.ResourceException;
@@ -65,6 +64,7 @@ import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
+import org.openmdx.base.transaction.TransactionAttributeType;
 
 /**
  * Connection Factory Adapter

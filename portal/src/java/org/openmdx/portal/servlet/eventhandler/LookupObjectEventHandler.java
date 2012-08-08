@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LookupObjectEventHandler.java,v 1.24 2010/03/28 00:49:53 wfro Exp $
+ * Name:        $Id: LookupObjectEventHandler.java,v 1.26 2010/11/28 13:23:09 wfro Exp $
  * Description: LookupObjectEventHandler 
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/28 00:49:53 $
+ * Date:        $Date: 2010/11/28 13:23:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@
 package org.openmdx.portal.servlet.eventhandler;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 import javax.jdo.PersistenceManager;
@@ -64,7 +65,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -98,17 +98,30 @@ public class LookupObjectEventHandler {
             switch(event) {
             
                 case Action.EVENT_FIND_OBJECT:
-                    String referenceName = null;
+                    String qualifiedElementName = null;
                     try {
-                        referenceName = Action.getParameter(parameter, Action.PARAMETER_REFERENCE);
+                        qualifiedElementName = Action.getParameter(parameter, Action.PARAMETER_REFERENCE);
                         String id = Action.getParameter(parameter, Action.PARAMETER_ID);
-                        SysLog.detail("find object", Action.PARAMETER_REFERENCE + "=" + referenceName + "; " + Action.PARAMETER_ID + "=" + id);
-                        RefPackage_1_0 rootPkg = (RefPackage_1_0) currentView.getRefObject().refOutermostPackage();
-                        Model_1_0 model = rootPkg.refModel();
-                        ModelElement_1_0 element = model.getElement(referenceName);
-                        ModelElement_1_0 lookupType = model.isClassType(element) ? 
-                        	element : 
-                        		model.getElement(element.objGetValue("type"));
+                        SysLog.detail("Find object", Arrays.asList(Action.PARAMETER_REFERENCE, qualifiedElementName, Action.PARAMETER_ID, id));
+                        Model_1_0 model = application.getModel();
+                        ModelElement_1_0 lookupType = null;
+                        // Get lookup type from model
+                        try {
+                            ModelElement_1_0 elementDef = model.getElement(qualifiedElementName);
+                            lookupType = model.isReferenceType(elementDef) ?
+                            	 model.getElement(elementDef.objGetValue("type")) :
+                            		 elementDef;
+                        }
+                        catch(Exception e) {
+                            try {
+                                // Fallback to customized feature definitions
+                                FeatureDefinition lookupFeature = application.getFeatureDefinition(qualifiedElementName);
+                                if(lookupFeature instanceof StructuralFeatureDefinition) {
+                                    lookupType = model.getElement(((StructuralFeatureDefinition)lookupFeature).getType());
+                                }
+                            }
+                            catch(Exception e0) {}
+                        }
                         Object[] parameterValues = (Object[]) parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
                         String filterValues = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);
                         nextView = application.getPortalExtension().getLookupView(
@@ -124,7 +137,7 @@ public class LookupObjectEventHandler {
                         application.addErrorMessage(
                             application.getTexts().getErrorTextCanNotLookupObject(), 
                             new String[] { 
-                                referenceName,
+                                qualifiedElementName,
                                 e.getMessage() 
                             }
                         );

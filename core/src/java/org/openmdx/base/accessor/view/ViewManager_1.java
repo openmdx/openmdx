@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ViewManager_1.java,v 1.43 2010/08/06 12:03:17 hburger Exp $
+ * Name:        $Id: ViewManager_1.java,v 1.46 2010/12/13 17:21:45 hburger Exp $
  * Description: View Manager
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.46 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:03:17 $
+ * Date:        $Date: 2010/12/13 17:21:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -82,14 +82,11 @@ import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.spi.AbstractTransaction_1;
-import org.openmdx.base.accessor.spi.ExceptionHelper;
 import org.openmdx.base.aop1.PlugIn_1_0;
 import org.openmdx.base.collection.ConcurrentWeakRegistry;
 import org.openmdx.base.collection.Maps;
-import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingMap;
 import org.openmdx.base.collection.MarshallingSet;
-import org.openmdx.base.collection.MarshallingSparseArray;
 import org.openmdx.base.collection.Unmarshalling;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -97,14 +94,12 @@ import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
-import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.MarshallingInstanceLifecycleListener;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.SortedMaps;
+import org.openmdx.state2.cci.StateContext;
 
 /**
  * View Manager
@@ -263,15 +258,15 @@ public class ViewManager_1
      */
     private DataObjectManager_1_0 getConnection(
     ) {
-    	try {
-	        validateState();
+        try {
+            validateState();
         } catch (ServiceException exception) {
-        	throw BasicException.initHolder(
-	        	new JDOFatalUserException(
-	        		"Unable to retrieve a closed persistence manager's connection",
-	        		BasicException.newEmbeddedExceptionStack(exception)
-	        	)
-	        );
+            throw BasicException.initHolder(
+                new JDOFatalUserException(
+                    "Unable to retrieve a closed persistence manager's connection",
+                    BasicException.newEmbeddedExceptionStack(exception)
+                )
+            );
         }
         return this.connection;
     }
@@ -325,7 +320,7 @@ public class ViewManager_1
         UUID transientObjectId,
         String featureName
     ) {
-        DataObject_1_0 source = (DataObject_1_0) getObjectById(transientObjectId);
+        ObjectView_1_0 source = (ObjectView_1_0) getObjectById(transientObjectId);
         try {
             if(source == null) { 
                 throw new ServiceException(
@@ -375,41 +370,7 @@ public class ViewManager_1
                 //
                 // Reference Stored As Attribute
                 //
-                String multiplicity = ModelUtils.getMultiplicity(featureDef);
-                if(
-                    Multiplicities.SINGLE_VALUE.equals(multiplicity) || 
-                    Multiplicities.OPTIONAL_VALUE.equals(multiplicity) 
-                ){
-                    Object pc = source.objGetValue(cciFeatureName); 
-                    return JDOHelper.isPersistent(pc) ?
-                        JDOHelper.getObjectId(pc) :
-                        JDOHelper.getTransactionalObjectId(pc);
-                } else if (Multiplicities.LIST.equals(multiplicity)) { 
-                    return new MarshallingList<Object>(
-                        ObjectIdMarshaller.INSTANCE,
-                        source.objGetList(cciFeatureName),
-                        Unmarshalling.RELUCTANT
-                    );
-                } else if (Multiplicities.SET.equals(multiplicity)) { 
-                    return new MarshallingSet<Object>(
-                        ObjectIdMarshaller.INSTANCE,
-                        source.objGetSet(cciFeatureName),
-                        Unmarshalling.RELUCTANT
-                    );
-                } else if (Multiplicities.SPARSEARRAY.equals(multiplicity)) { 
-                    return new MarshallingSparseArray(
-                        ObjectIdMarshaller.INSTANCE,
-                        SortedMaps.asSparseArray(source.objGetSparseArray(cciFeatureName)),
-                        Unmarshalling.RELUCTANT
-                    );
-                } else throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED,
-                    "Unsupported multiplicity",
-                    ExceptionHelper.newObjectIdParameter("id", source),
-                    new BasicException.Parameter("feature", cciFeatureName),
-                    new BasicException.Parameter("multiplicity", multiplicity)
-                 );
+            	return source.getFeatureReplaceingObjectById(featureDef);
             } else {
                 //
                 // Aggregation
@@ -641,9 +602,9 @@ public class ViewManager_1
      */
 //  @Override
     public void deletePersistentAll(Object... pcs) {
-    	for(Object pc : pcs){
-    		deletePersistent(pc);
-    	}
+        for(Object pc : pcs){
+            deletePersistent(pc);
+        }
     }
 
     /* (non-Javadoc)
@@ -652,9 +613,9 @@ public class ViewManager_1
     @SuppressWarnings("unchecked")
 //  @Override
     public void deletePersistentAll(Collection pcs) {
-    	for(Object pc : pcs){
-    		deletePersistent(pc);
-    	}
+        for(Object pc : pcs){
+            deletePersistent(pc);
+        }
     }
 
     /* (non-Javadoc)
@@ -686,7 +647,7 @@ public class ViewManager_1
      */
 //  @Override
     public void evict(Object pc) {
-    	getConnection().evict(toDataObject(pc));
+        getConnection().evict(toDataObject(pc));
     }
 
     /* (non-Javadoc)
@@ -694,7 +655,7 @@ public class ViewManager_1
      */
 //  @Override
     public void evictAll(Object... pcs) {
-    	getConnection().evictAll(toDataObjects(pcs));
+        getConnection().evictAll(toDataObjects(pcs));
     }
 
     /* (non-Javadoc)
@@ -703,7 +664,7 @@ public class ViewManager_1
     @SuppressWarnings("unchecked")
 //  @Override
     public void evictAll(Collection pcs) {
-    	getConnection().evictAll(toDataObjects(pcs));
+        getConnection().evictAll(toDataObjects(pcs));
     }
 
     /* (non-Javadoc)
@@ -803,9 +764,9 @@ public class ViewManager_1
      */
 //  @Override
     public void makeTransientAll(boolean useFetchPlan, Object... pcs) {
-    	for(Object pc : pcs){
-    		makeTransient(pc, useFetchPlan);
-    	}
+        for(Object pc : pcs){
+            makeTransient(pc, useFetchPlan);
+        }
     }
 
     /* (non-Javadoc)
@@ -1036,7 +997,7 @@ public class ViewManager_1
      */
 //  @Override
     public void makeTransactional(Object pc) {
-    	getConnection().makeTransactional(toDataObject(pc));
+        getConnection().makeTransactional(toDataObject(pc));
     }
 
     /* (non-Javadoc)
@@ -1044,7 +1005,7 @@ public class ViewManager_1
      */
 //  @Override
     public void makeTransactionalAll(Object... pcs) {
-    	getConnection().makeTransactionalAll(toDataObjects(pcs));
+        getConnection().makeTransactionalAll(toDataObjects(pcs));
     }
 
     /* (non-Javadoc)
@@ -1053,7 +1014,7 @@ public class ViewManager_1
     @SuppressWarnings("unchecked")
 //  @Override
     public void makeTransactionalAll(Collection pcs) {
-    	getConnection().makeTransactionalAll(toDataObjects(pcs));
+        getConnection().makeTransactionalAll(toDataObjects(pcs));
     }
 
     /* (non-Javadoc)
@@ -1061,7 +1022,7 @@ public class ViewManager_1
      */
 //  @Override
     public void makeTransient(Object pc) {
-    	getConnection().makeTransient(toDataObject(pc));
+        getConnection().makeTransient(toDataObject(pc));
     }
 
     /* (non-Javadoc)
@@ -1069,7 +1030,7 @@ public class ViewManager_1
      */
 //  @Override
     public void makeTransient(Object pc, boolean useFetchPlan) {
-    	getConnection().makeTransient(toDataObject(pc),useFetchPlan);
+        getConnection().makeTransient(toDataObject(pc),useFetchPlan);
     }
 
     /* (non-Javadoc)
@@ -1077,7 +1038,7 @@ public class ViewManager_1
      */
 //  @Override
     public void makeTransientAll(Object... pcs) {
-    	getConnection().makeTransientAll(toDataObjects(pcs));
+        getConnection().makeTransientAll(toDataObjects(pcs));
     }
 
     /* (non-Javadoc)
@@ -1086,7 +1047,7 @@ public class ViewManager_1
     @SuppressWarnings("unchecked")
 //  @Override
     public void makeTransientAll(Collection pcs) {
-    	getConnection().makeTransientAll(toDataObjects(pcs));
+        getConnection().makeTransientAll(toDataObjects(pcs));
     }
 
     /* (non-Javadoc)
@@ -1094,7 +1055,7 @@ public class ViewManager_1
      */
 //  @Override
     public void makeTransientAll(Object[] pcs, boolean useFetchPlan) {
-    	getConnection().makeTransientAll(useFetchPlan, toDataObjects(pcs));
+        getConnection().makeTransientAll(useFetchPlan, toDataObjects(pcs));
     }
 
     /* (non-Javadoc)
@@ -1103,7 +1064,7 @@ public class ViewManager_1
     @SuppressWarnings("unchecked")
 //  @Override
     public void makeTransientAll(Collection pcs, boolean useFetchPlan) {
-    	getConnection().makeTransientAll(toDataObjects(pcs), useFetchPlan);
+        getConnection().makeTransientAll(toDataObjects(pcs), useFetchPlan);
     }
 
     /* (non-Javadoc)
@@ -1328,7 +1289,7 @@ public class ViewManager_1
      */
 //  @Override
     public void retrieveAll(Object... pcs) {
-    	retrieveAll(false,pcs);
+        retrieveAll(false,pcs);
     }
 
     /* (non-Javadoc)
@@ -1345,7 +1306,7 @@ public class ViewManager_1
      */
 //  @Override
     public void retrieveAll(Object[] pcs, boolean useFetchPlan) {
-    	getConnection().retrieveAll(useFetchPlan, toDataObjects(pcs));
+        getConnection().retrieveAll(useFetchPlan, toDataObjects(pcs));
     }
 
     /* (non-Javadoc)
@@ -1442,6 +1403,15 @@ public class ViewManager_1
             return source;
         } else if (source instanceof DataObject_1_0) {
             DataObject_1_0 dataObject = (DataObject_1_0) source;
+            if(this.getInteractionSpec() instanceof StateContext<?>) {
+                Model_1_0 model = Model_1Factory.getModel();
+                if(model.isInstanceof(dataObject, "org:openmdx:state2:BasicState")) {
+                    DataObject_1_0 core = (DataObject_1_0) dataObject.objGetValue("core");
+                    if(core != null) {
+                        dataObject = core;
+                    }
+                }
+            }
             ObjectView_1 target = this.registry.get(dataObject);
             if(target == null) {
                 ObjectView_1 concurrent = this.registry.putUnlessPresent(
@@ -1482,47 +1452,47 @@ public class ViewManager_1
      * @return its DataObject_1_0 delegate
      */
     private static Object toDataObject(
-    	Object pc
+        Object pc
     ){
         if(pc instanceof ObjectView_1_0) try {
-    		return ((ObjectView_1_0)pc).objGetDelegate();
-    	} catch (ServiceException exception) {
-    		throw BasicException.initHolder(
-	        	new JDOFatalUserException(
-	        		"Unable to retrieve the persistence capable's DataObject_1_0 delegate",
-	        		BasicException.newEmbeddedExceptionStack(exception)
-	        	)
-        	);    		
-    	} else {
-    		throw BasicException.initHolder(
-	        	new JDOFatalUserException(
-	        		"Unable to retrieve the persistence capable's DataObject_1_0 delegate",
-	        		BasicException.newEmbeddedExceptionStack(
-	            		BasicException.Code.DEFAULT_DOMAIN,
-	            		BasicException.Code.BAD_PARAMETER,
-	            		new BasicException.Parameter("class", pc == null ? null : pc.getClass().getName()),
+            return ((ObjectView_1_0)pc).objGetDelegate();
+        } catch (ServiceException exception) {
+            throw BasicException.initHolder(
+                new JDOFatalUserException(
+                    "Unable to retrieve the persistence capable's DataObject_1_0 delegate",
+                    BasicException.newEmbeddedExceptionStack(exception)
+                )
+            );          
+        } else {
+            throw BasicException.initHolder(
+                new JDOFatalUserException(
+                    "Unable to retrieve the persistence capable's DataObject_1_0 delegate",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("class", pc == null ? null : pc.getClass().getName()),
                         new BasicException.Parameter("acceptable", ObjectView_1_0.class.getName())
-	        		)
-	        	)
-        	);    		
-    	}
+                    )
+                )
+            );          
+        }
     }
     
     private static Collection<Object> toDataObjects(Collection<?> pcs) {
-    	Collection<Object> dos = new ArrayList<Object>();
-    	for(Object pc : pcs) {
-    		dos.add(toDataObject(pc));
-    	}
-    	return dos;
+        Collection<Object> dos = new ArrayList<Object>();
+        for(Object pc : pcs) {
+            dos.add(toDataObject(pc));
+        }
+        return dos;
     }
 
     private static Object[] toDataObjects(Object[] pcs) {
-    	Object[] dos = new Object[pcs.length];
-    	int i = 0;
-    	for(Object pc : pcs) {
-    		dos[i++] = toDataObject(pc);
-    	}
-    	return dos;
+        Object[] dos = new Object[pcs.length];
+        int i = 0;
+        for(Object pc : pcs) {
+            dos[i++] = toDataObject(pc);
+        }
+        return dos;
     }
     
 

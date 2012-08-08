@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Extent_1.java,v 1.23 2010/07/01 15:56:25 hburger Exp $
+ * Name:        $Id: Extent_1.java,v 1.26 2010/12/18 18:42:06 hburger Exp $
  * Description: Extent
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/01 15:56:25 $
+ * Date:        $Date: 2010/12/18 18:42:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -104,6 +104,14 @@ public class Extent_1
         return this.parent.getModel();
     }
     
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+     */
+//  @Override
+    public PersistenceManager openmdxjdoGetPersistenceManager(){
+    	return this.parent.jdoGetPersistenceManager();
+    }
+    
 //  @Override
     public Path openmdxjdoGetContainerId() {
         return this.objGetDelegate().openmdxjdoGetContainerId();
@@ -120,12 +128,12 @@ public class Extent_1
 /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
-    @Override
-    public PersistenceManager openmdxjdoGetPersistenceManager() {
-        return this.objGetDelegate().openmdxjdoGetPersistenceManager();
+//  @Override
+    public PersistenceManager openmdxjdoGetDataObjectManager() {
+        return this.objGetDelegate().openmdxjdoGetDataObjectManager();
     }
 
-    //  @Override
+//  @Override
     public boolean openmdxjdoIsPersistent() {
         return true;
     }
@@ -158,8 +166,11 @@ public class Extent_1
      * @see org.openmdx.base.collection.FilterableMap#values(java.lang.Object)
      */
 //  @Override
-    public List<DataObject_1_0> values(OrderSpecifier... criteria) {
-        return this.objGetDelegate().values(criteria);
+    public List<DataObject_1_0> values(
+        FetchPlan fetchPlan, 
+        OrderSpecifier... criteria
+    ) {
+        return this.objGetDelegate().values(fetchPlan, criteria);
     }
 
     /* (non-Javadoc)

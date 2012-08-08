@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: JmiHelper.java,v 1.15 2010/07/13 10:30:27 hburger Exp $
+ * Name:        $Id: JmiHelper.java,v 1.16 2010/11/10 16:35:54 hburger Exp $
  * Description: JmiHelper class
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/13 10:30:27 $
+ * Date:        $Date: 2010/11/10 16:35:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,7 @@
  */
 package org.openmdx.application.dataprovider.cci;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -63,6 +64,7 @@ import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.resource.cci.MappedRecord;
+import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
@@ -139,6 +141,16 @@ public class JmiHelper {
             } else if(PrimitiveTypes.DATE.equals(this.typeName)) {                
                 return source instanceof XMLGregorianCalendar ? source : Datatypes.create(
                     XMLGregorianCalendar.class, 
+                    (String)source
+                );
+            } else if(PrimitiveTypes.DURATION.equals(this.typeName)) {                
+                return source instanceof Duration ? source : Datatypes.create(
+                    Duration.class, 
+                    (String)source
+                );
+            } else if(PrimitiveTypes.ANYURI.equals(this.typeName)) {                
+                return source instanceof URI ? source : Datatypes.create(
+                    URI.class, 
                     (String)source
                 );
             } else {

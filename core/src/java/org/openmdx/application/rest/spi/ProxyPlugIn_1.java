@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ProxyPlugIn_1.java,v 1.1 2010/01/04 17:17:43 hburger Exp $
+ * Name:        $Id: ProxyPlugIn_1.java,v 1.4 2010/12/23 17:41:47 hburger Exp $
  * Description: Proxy Plug-In
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/04 17:17:43 $
+ * Date:        $Date: 2010/12/23 17:41:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -91,10 +91,11 @@ class ProxyPlugIn_1 implements PlugIn_1_0 {
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#beforeCompletion(org.openmdx.base.accessor.rest.UnitOfWork_1)
+     * @see org.openmdx.base.aop0.PlugIn_1_0#flush(org.openmdx.base.accessor.rest.UnitOfWork_1)
      */
-    public void beforeCompletion(
-        UnitOfWork_1 unitOfWork
+    public void flush(
+        UnitOfWork_1 unitOfWork, 
+        boolean beforeCompletion
     ) {
         // nothing to do
     }
@@ -104,6 +105,14 @@ class ProxyPlugIn_1 implements PlugIn_1_0 {
      */
     public Object getUserObject(Object key) {
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.aop0.PlugIn_1_0#callbackOnCascadedDeletes()
+     */
+//  @Override
+    public boolean requiresCallbackOnCascadedDelete(DataObject_1 object) {
+        return false;
     }
 
 }

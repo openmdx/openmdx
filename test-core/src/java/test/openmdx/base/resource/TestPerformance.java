@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestPerformance.java,v 1.10 2010/06/03 15:58:06 hburger Exp $
+ * Name:        $Id: TestPerformance.java,v 1.12 2010/12/14 23:30:36 hburger Exp $
  * Description: class TestPerformance
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:58:06 $
+ * Date:        $Date: 2010/12/14 23:30:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,7 +81,7 @@ import org.openmdx.base.rest.spi.RestFormat;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.state2.spi.DateStateContexts;
+import org.openmdx.state2.cci.DateStateViews;
 import org.xml.sax.InputSource;
 
 public class TestPerformance {
@@ -90,6 +90,7 @@ public class TestPerformance {
     private static final int SIZE = 100;
     private static final int LOOP = 100;
     protected static final Path BASE = new Path("xri://@openmdx*test.app1/segment/JUnit");
+    protected static final String URI = "xri://+test/REST";
     protected static final boolean WBXML = false;
 
     private final SerializationTest[] tests = {
@@ -238,7 +239,7 @@ public class TestPerformance {
     @BeforeClass
     static public void setUp(
     ) throws ResourceException{
-        XMLGregorianCalendar today = DateStateContexts.today(); 
+        XMLGregorianCalendar today = DateStateViews.today(); 
         testData = Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
         for(int i = 0; i < SIZE; i++){
             if(i < SIZE / 5){
@@ -355,7 +356,7 @@ public class TestPerformance {
          * Constructor 
          */
         protected WBXMLSink() {
-            super("xri://+test/");
+            super(URI);
         }
 
         private static final String MIME_TYPE = "application/vnd.openmdx.wbxml";
@@ -398,7 +399,7 @@ public class TestPerformance {
          * Constructor 
          */
         protected UTF16Sink() {
-            super("xri://+test/");
+            super(URI);
         }
 
         private final StringWriter sink = new StringWriter();
@@ -443,7 +444,7 @@ public class TestPerformance {
          * Constructor 
          */
         protected UTF8Sink() {
-            super("xri://+test/");
+            super(URI);
         }
 
         private static final String MIME_TYPE = "application/xml";

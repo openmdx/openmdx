@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestState.java,v 1.14 2009/09/18 12:44:37 hburger Exp $
+ * Name:        $Id: TestState.java,v 1.15 2010/10/26 11:24:45 hburger Exp $
  * Description: TestState 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/18 12:44:37 $
+ * Date:        $Date: 2010/10/26 11:24:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -171,7 +171,7 @@ public class TestState {
         segment.addA(false, "a0", coreA);
         assertEquals("a0!0#stringValue", "State A", stateA0_0.getStringValue());
         assertNull("a0!1#stringValue", stateA0_1.getStringValue());
-        List<? extends DateState> states = (List<? extends DateState>) DateStateViews.getStates(coreA);
+        List<? extends DateState> states = (List<? extends DateState>) DateStateViews.getValidStates(coreA);
         System.out.println("Begin Before Commit");
         for( DateState s : states) {
             System.out.println(s.toString());

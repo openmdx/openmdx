@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BooleanValue.java,v 1.27 2009/09/26 23:28:49 wfro Exp $
+ * Name:        $Id: BooleanValue.java,v 1.28 2010/09/08 09:41:08 wfro Exp $
  * Description: BooleanValue
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/26 23:28:49 $
+ * Date:        $Date: 2010/09/08 09:41:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -166,12 +166,13 @@ public class BooleanValue
     ) throws ServiceException { 
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();     
         label = this.getLabel(attribute, p, label);
+        String title = this.getTitle(attribute, label);
         if(forEditing) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0)            
                 ? feature + "[" + Integer.toString(tabIndex) + "]"
                 : id;            
-            p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {                
                 // if checked sends (true,false). If not checked sends (false). The hidden field
                 // guarantees that always a value is sent.
@@ -235,7 +236,7 @@ public class BooleanValue
                 else {
 	                p.debug("<!-- BooleanValue -->");
 	                p.write(gapModifier);
-	                p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+	                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
 	                p.write("<td ",  rowSpanModifier, " class=\"valueL\" ",  widthModifier, " ",  styleModifier, "><div class=\"field\" title=\"", stringifiedValue, "\">",  images, "</div></td>");
                 }
             }

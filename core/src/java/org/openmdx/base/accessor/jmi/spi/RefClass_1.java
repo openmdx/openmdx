@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefClass_1.java,v 1.83 2010/06/02 15:43:16 hburger Exp $
+ * Name:        $Id: RefClass_1.java,v 1.85 2010/10/28 06:44:02 hburger Exp $
  * Description: RefClass_1 class
- * Revision:    $Revision: 1.83 $
+ * Revision:    $Revision: 1.85 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 15:43:16 $
+ * Date:        $Date: 2010/10/28 06:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.jdo.JDOFatalUserException;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefEnum;
@@ -68,7 +67,6 @@ import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectInvocationHandler.StandardMarshaller;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
@@ -491,10 +489,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
 //  @Override
     public StandardMarshaller getMarshaller(
     ) {
-        if(this.marshaller == null) {
-            this.marshaller = new StandardMarshaller(this.refOutermostPackage());
-        }
-        return this.marshaller;
+    	return this.refOutermostPackage().standardMarshaller;
     }
 
     //-------------------------------------------------------------------------
@@ -552,10 +547,5 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      */
     private final ClassMapping_1_0 mapping;
     
-    /**
-     * 
-     */
-    private transient StandardMarshaller marshaller = null;
-
 }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingObject_1.java,v 1.35 2010/06/30 13:08:15 hburger Exp $
+ * Name:        $Id: DelegatingObject_1.java,v 1.36 2010/12/07 23:06:54 hburger Exp $
  * Description: DelegatingObject_1 class
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 13:08:15 $
+ * Date:        $Date: 2010/12/07 23:06:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -539,7 +539,7 @@ public abstract class DelegatingObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.Cloneable#openmdxjdoClone()
      */
-    public DataObject_1_0 openmdxjdoClone(
+    public DataObject_1_0 openmdxjdoClone(String... exclude
     ) {
         throw new UnsupportedOperationException("Operation not supported by DelegatingObject_1");
     }

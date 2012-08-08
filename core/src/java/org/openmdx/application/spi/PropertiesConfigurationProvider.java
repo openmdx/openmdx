@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PropertiesConfigurationProvider.java,v 1.5 2010/08/16 13:36:47 hburger Exp $
- * Description: Standard Configuration Provider
- * Revision:    $Revision: 1.5 $
+ * Name:        $Id: PropertiesConfigurationProvider.java,v 1.8 2010/11/05 16:20:30 hburger Exp $
+ * Description: Properties Configuration Provider
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/16 13:36:47 $
+ * Date:        $Date: 2010/11/05 16:20:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,23 +50,32 @@
  */
 package org.openmdx.application.spi;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.jdo.Constants;
 
 import org.openmdx.application.cci.ConfigurationProvider_1_0;
 import org.openmdx.application.cci.ConfigurationSpecifier;
 import org.openmdx.application.configuration.Configuration;
+import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
+import org.w3c.cci2.SparseArray;
 
 /**
  * Standard Configuration Provider
@@ -81,93 +90,183 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider_1_
      * @throws ServiceException  
      */
     public PropertiesConfigurationProvider(
-        String url,
+        String uri,
         boolean strict
         
     ) throws ServiceException {
-        this.url = url;
+        this.uri = uri;
         this.strict = strict;
     }
 
     /**
      * The property file prefix
      */
-    private final String url;
+    private final String uri;
 
     /**
      * 
      */
     private final boolean strict;
     
-    /* (non-Javadoc)
-     * @see org.openmdx.application.cci.ConfigurationProvider_1_0#getConfiguration(java.lang.String[], java.util.Map)
+    /**
+     * 
+     */
+    private static final String RESOURCE_XRI_PREFIX = "xri://+resource/";
+
+    /**
+     * 
+     */
+    private static final Pattern INCLUDES = Pattern.compile("^include\\[([0-9]+)\\]?$");
+
+    /**
+     * 
+     */
+    private static final String DEFAULTS = "defaults";
+
+    /**
+     * Include the source into the target
+     * 
+     * @param target
+     * @param source
+     * 
+     * @throws ServiceException in case of conflicting values
+     */
+    private static void include(
+        Properties target,
+        Properties source
+    ) throws ServiceException{
+        for(Map.Entry<?, ?> e : source.entrySet()) {
+            Object name = e.getKey();
+            if(target.containsKey(name)) {
+                Object oldValue = target.get(name);
+                Object newValue = e.getValue();
+                if(oldValue == null ? newValue != null : !oldValue.equals(newValue)) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.INVALID_CONFIGURATION,
+                        "Conflicting property settings",
+                        new BasicException.Parameter("name", name),
+                        new BasicException.Parameter("oldValue", oldValue),
+                        new BasicException.Parameter("newValue", newValue)
+                    );
+                }
+            } else {
+                target.put(e.getKey(), e.getValue());
+            }
+        }
+    }
+    
+    /**
+     * Retrieve the properties by resolving defaults and include entries. 
+     * 
+     * @param url
+     * 
+     * @return the properties retrieved for the given URL
+     * 
+     * @throws IOException in case of access failure
+     * @throws ServiceException in case of configuration conflict
+     */
+    private Properties getProperties(
+        URL url
+    ) throws IOException, ServiceException{
+        Properties properties = new Properties();
+        InputStream source = url.openStream();
+        try {
+            properties.load(source);
+        } finally {
+            source.close();
+        }
+        String defaultsURI = (String) properties.remove(DEFAULTS);
+        if(defaultsURI != null) {
+            Properties combined = new Properties(getProperties(defaultsURI));
+            combined.putAll(properties);
+            properties = combined;
+        }
+        SparseArray<String> includes = new TreeSparseArray<String>();
+        for(
+            Iterator<Entry<Object, Object>> i  = properties.entrySet().iterator();
+            i.hasNext();
+        ) {
+            Map.Entry<?, ?> e = i.next();
+            Object key = e.getKey();
+            Object value = e.getValue();
+            if(e.getKey() instanceof String && value instanceof String){
+                Matcher matcher = INCLUDES.matcher((String)key); 
+                if(matcher.matches()) {
+                    includes.put(
+                        Integer.valueOf(matcher.group(1)), 
+                        (String)value
+                    );
+                    i.remove();
+                }
+            }
+        }
+        for(
+            ListIterator<String> i = includes.populationIterator();
+            i.hasNext();
+        ){
+            include(properties, getProperties(i.next()));
+        }
+        return properties;
+    }
+
+    /**
+     * Retrieve the properties by resolving URIs 
+     * 
+     * @param uri
+     * 
+     * @return the properties retrieved for the given URI
+     * 
+     * @throws IOException in case of access failure
+     * @throws ServiceException in case of configuration conflict
+     */
+    private Properties getProperties(
+        String uri
+    ) throws IOException, ServiceException {
+        List<URL> urls = uri == null || uri.length() == 0 ? Collections.<URL>emptyList(
+        ) : uri.startsWith(RESOURCE_XRI_PREFIX) ? Collections.list(
+            Classes.getResources(uri.substring(RESOURCE_XRI_PREFIX.length()))
+        ) : Collections.singletonList(
+            new URL(uri)
+        );
+        switch(urls.size()) {
+            case 0:
+                return new Properties();
+            case 1:
+                return getProperties(urls.get(0));
+            default:
+                Properties target = new Properties();
+                for(URL url : urls) {
+                    include(target, getProperties(url));
+                }
+                return target;
+        }
+    }
+    
+    
+    /**
+     * Amend the configuration by the properties found at the given URL
+     * 
+     * @param configuration
+     * @param section
+     * 
+     * @throws ServiceException
      */
     void amendConfiguration(
         Configuration configuration,
         String[] section
     ) throws ServiceException{
         try {
-            if(this.url.startsWith("xri://+resource/")) {
-                Set<URL> fragments = new HashSet<URL>();
-                for(
-                    Enumeration<URL> resources = Classes.getResources(this.url.substring(16));
-                    resources.hasMoreElements();
-                ) {
-                    URL fragment = resources.nextElement(); 
-                    if(fragments.add(fragment)) {
-                        amendConfiguration(
-                            fragment,
-                            configuration,
-                            section
-                        );
-                    }
-                }
-            } else {
-                amendConfiguration(
-                    new URL(this.url),
-                    configuration,
-                    section
-                );
-            }
+            amendConfiguration(getProperties(this.uri), configuration, "/", section);
         } catch (ServiceException exception) {
             throw exception;
         } catch (Exception exception) {
-            if(strict) throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "Could not load properties configuration",
-                new BasicException.Parameter("url", this.url),
-                new BasicException.Parameter("section", (Object[])section)
-            );
-        }
-    }
-
-    /**
-     * Amend the configuration
-     * 
-     * @param url
-     * @param configuration
-     * @param section
-     * 
-     * @throws ServiceException
-     */
-    private void amendConfiguration(
-        URL url,
-        Configuration configuration,
-        String[] section
-    ) throws ServiceException {
-        Properties properties = new Properties();
-        try {
-            properties.load(url.openStream());
-            amendConfiguration(properties, configuration, "/", section);
-        }  catch(Exception exception) {
             if(this.strict) throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
                 "Could not load properties configuration",
-                new BasicException.Parameter("url", url),
+                new BasicException.Parameter("url", this.uri),
                 new BasicException.Parameter("section", (Object[])section)
             );
         }
@@ -204,37 +303,17 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider_1_
                         }
                     }
                     String propertyValue = properties.getProperty(qualifiedPropertyName);
-                    Object value = null;
-                    if(propertyValue.startsWith("(java.lang.Boolean)")) {
-                        value = Boolean.valueOf(propertyValue.substring(19));
-                    }
-                    else if(propertyValue.startsWith("(java.lang.Integer)")) {
-                        value = Integer.valueOf(propertyValue.substring(19));
-                    }
-                    else if(propertyValue.startsWith("(java.lang.Long)")) {
-                        value = Long.valueOf(propertyValue.substring(16));
-                    }
-                    else if(propertyValue.startsWith("(java.lang.Short)")) {
-                        value = Short.valueOf(propertyValue.substring(17));
-                    }
-                    else if(propertyValue.startsWith("(java.lang.Byte)")) {
-                        value = Byte.valueOf(propertyValue.substring(16));
-                    }
-                    else if(propertyValue.startsWith("(java.lang.String)")) {
-                        value = propertyValue.substring(18);
-                    }
-                    else if(propertyValue.startsWith("(java.math.BigInteger)")) {
-                        value = new BigInteger(propertyValue.substring(22));
-                    }
-                    else if(propertyValue.startsWith("(java.math.BigDecimal)")) {
-                        value = new BigDecimal(propertyValue.substring(22));
-                    }
-                    else {
-                        value = propertyValue;
-                    }
                     configuration.setValue(
                         p[p.length - 1],
-                        value,
+                        propertyValue.startsWith("(java.lang.Boolean)") ? Boolean.valueOf(propertyValue.substring(19)) :
+                            propertyValue.startsWith("(java.lang.Integer)") ? Integer.valueOf(propertyValue.substring(19)) :
+                            propertyValue.startsWith("(java.lang.Long)") ? Long.valueOf(propertyValue.substring(16)) :
+                            propertyValue.startsWith("(java.lang.Short)") ?  Short.valueOf(propertyValue.substring(17)) :
+                            propertyValue.startsWith("(java.lang.Byte)") ? Byte.valueOf(propertyValue.substring(16)) :
+                            propertyValue.startsWith("(java.lang.String)") ? propertyValue.substring(18) :
+                            propertyValue.startsWith("(java.math.BigInteger)") ? new BigInteger(propertyValue.substring(22)) :
+                            propertyValue.startsWith("(java.math.BigDecimal)") ? new BigDecimal(propertyValue.substring(22)) :
+                            propertyValue,
                         true
                     );
                 }
@@ -314,5 +393,5 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider_1_
         return target;
         
     }
-    
+
 }

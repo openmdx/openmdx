@@ -4,6 +4,76 @@
                     =====================================
 
 ==============================================================================
+Version 2.8.0                                                       2010-12-27
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019414
+      Portal: tooltips for tabs. Generate title element to tabs.
+      
+      CR10009592
+      PortalExtension: grid coloring. Extend portal extension by method 
+      getGridRowColors(RefObject). Deprecate at the same time the method
+      hasGridColors().
+      
+     /**
+      * Returns colors which is used as foreground and background colors when an 
+      * object is rendered in a grid.
+      * @return foreground (at index 0) and background color (at index 1) or null. 
+      */    
+     @Override
+     public String[] getGridRowColors(
+    	RefObject_1_0 obj
+     ) {
+         if(obj instanceof Activity) {
+             Activity activity = (Activity)obj;
+             if(activity.getDueBy() != null) {
+                 String dueByDate = DateTimeFormat.BASIC_UTC_FORMAT.format(activity.getDueBy()).substring(0, 8);
+                 String todayDate = DateTimeFormat.BASIC_UTC_FORMAT.format(new Date()).substring(0, 8);
+                 return dueByDate.compareTo(todayDate) > 0 ?
+                     new String[]{null, "red"} :
+                         dueByDate.compareTo(todayDate) == 0 ?
+                             new String[]{null, "green"} :
+                                 null;
+              }
+          }
+          return super.getGridRowColors(obj);
+      }
+      
+      CR10009558
+      LookupObjectEventHandler. Action EVENT_FIND_OBJECT takes as 
+      parameter PARAMETER_REFERENCE which defines the type of the lookup object. 
+      In addition to modeled reference names, user-defined structural feature 
+      definitions are also supported.
+      
+      CR10009494
+      Show-always option for search forms. Option allows the user to show search
+      form automatically when a grid is displayed.
+      
+      CR10009511
+      Root objects per perspective. User settings should allow to configure 
+      the state (show|hide) of root objects per perspective.
+      
+      CR20019321
+      Title tag for labels. Create a title tag for labels if a tooltip for a 
+      field is customized.
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+            
+2.1.  FIXED BUGS
+      none
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
 Version 2.7.0                                                       2010-08-20
 ==============================================================================
 

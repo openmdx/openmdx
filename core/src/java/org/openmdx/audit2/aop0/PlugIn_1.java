@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.13 2010/06/02 16:14:39 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.22 2010/12/23 17:38:45 hburger Exp $
  * Description: Audit Plug-In
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 16:14:39 $
+ * Date:        $Date: 2010/12/23 17:38:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,18 +52,17 @@ package org.openmdx.audit2.aop0;
 
 import java.util.AbstractMap;
 import java.util.AbstractSet;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.jdo.ObjectState;
+import javax.jdo.PersistenceManager;
 
 import org.openmdx.audit2.spi.Configuration;
+import org.openmdx.audit2.spi.InvolvementPersistence;
 import org.openmdx.audit2.spi.Qualifiers;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
@@ -98,21 +97,14 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     protected Path[] auditPrefix;
 
     /**
-     * Tells whether the names of the modified features shall be persistent
+     * The involvement persistence mode
      */
-    private boolean modifiedFeaturePersistent = false;
+    private InvolvementPersistence involvementPersistence = InvolvementPersistence.STANDARD;
 
     /**
-     * Tells whether org::openmex::compatibility::audit1 persistence shall be
-     * used
+     * States of objects involved in a unit of work 
      */
-    private boolean audit1Persistence = false;
-
-    /**
-     * States of objects involved in a unit of work
-     */
-    private static final EnumSet<ObjectState> involvedStates = EnumSet.of(
-        ObjectState.PERSISTENT_NEW,
+    private static final EnumSet<ObjectState> involvedStatesForInvolvementPersistenceEmbedded = EnumSet.of(
         ObjectState.PERSISTENT_DIRTY,
         ObjectState.PERSISTENT_DELETED
     );
@@ -220,7 +212,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     }
 
     /**
-     * Internalize a resource identifier
+     * Validate a segment identifier
      * 
      * @param value
      *            an XRI's <code>String</code> representation
@@ -230,7 +222,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     private static Path toSegmentIdentifier(String value) {
         if (value != null) {
             Path candidate = new Path(value);
-            if (!candidate.containsWildcard() && candidate.isLike(SEGMENT_PATTERN)) {
+            if (candidate.isLike(SEGMENT_PATTERN)) {
                 return candidate;
             }
         }
@@ -253,9 +245,9 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      */
     private static String toXRI(Path value, boolean prefix) {
         return 
-        value == null ? null : 
+            value == null ? null : 
             prefix ? value.toXRI() + "/($...)" : 
-                value.toXRI();
+            value.toXRI();
     }
 
     /**
@@ -363,6 +355,36 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     public void setAuditPattern(int index, String value) {
         this.auditPrefix[index] = toPrefix(value);
     }
+    
+    /**
+     * Retrieve involvementPersistence.
+     *
+     * @return Returns the involvementPersistence.
+     */
+    public String getInvolvementPersistence() {
+        return this.involvementPersistence.name();
+    }
+
+    
+    /**
+     * Set involvementPersistence.
+     * 
+     * @param involvementPersistence The involvementPersistence to set.
+     */
+    public void setInvolvementPersistence(
+        String involvementPersistence
+    ) {
+        this.involvementPersistence = InvolvementPersistence.valueOf(involvementPersistence);
+    }
+
+   
+    /* (non-Javadoc)
+     * @see org.openmdx.audit2.spi.Configuration#getPersistenceMode()
+     */
+//  @Override
+    public InvolvementPersistence getPersistenceMode() {
+        return this.involvementPersistence;
+    }
 
     /**
      * Get an object id patterns for the before image
@@ -375,49 +397,6 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
         return toXRI(this.auditPrefix[index], true);
     }
 
-    /**
-     * Retrieve audit1Persistence.
-     * 
-     * @return Returns the audit1Persistence.
-     */
-    public boolean isAudit1Persistence() {
-        return this.audit1Persistence;
-    }
-
-    /**
-     * Set audit1Persistence.
-     * 
-     * @param audit1Persistence
-     *            The audit1Persistence to set.
-     */
-    public void setAudit1Persistence(boolean audit1Persistence) {
-        this.audit1Persistence = audit1Persistence;
-    }
-
-    /**
-     * Retrieve modifiedFeaturePersistent.
-     * 
-     * @return Returns the modifiedFeaturePersistent.
-     */
-    public boolean isModifiedFeaturePersistent() {
-        return this.modifiedFeaturePersistent;
-    }
-
-    /**
-     * Set modifiedFeaturePersistent.
-     * 
-     * @param modifiedFeaturePersistent
-     *            The modifiedFeaturePersistent to set.
-     */
-    public void setModifiedFeaturePersistent(boolean modifiedFeaturePersistent) {
-        this.modifiedFeaturePersistent = modifiedFeaturePersistent;
-    }
-
-
-    // ------------------------------------------------------------------------
-    // Implements Configuration
-    // ------------------------------------------------------------------------
-
     /* (non-Javadoc)
      * @see org.openmdx.audit2.spi.Configuration#getMapping()
      */
@@ -428,7 +407,9 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.audit2.spi.Configuration#getAuditSegmentId()
      */
-    public Path getAuditSegmentId() {
+    public Path getAuditSegmentId(
+        PersistenceManager context
+    ) {
         return this.auditSegmentId;
     }
 
@@ -469,10 +450,10 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * @param candidate
      *            the object to be tested
      * 
-     * @return <code>true/code> if the candidate shall be audited
+     * @return the matching index if the object is involved, -1 otherwise
      * @throws ServiceException
      */
-    protected boolean isInvolved(
+    protected int getMatchingIndex(
         DataObject_1 candidate
     ) throws ServiceException {
         if (
@@ -480,121 +461,83 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
             candidate.jdoGetPersistenceManager().getModel().isInstanceof(candidate,"org:openmdx:base:Modifiable")
         ) {
             Path path = candidate.jdoGetObjectId();
-            for (Path prefix : this.dataPrefix) {
-                if (path.startsWith(prefix)) {
-                    return true;
+            for(int i = 0; i < this.dataPrefix.length; i++) {
+                if(path.startsWith(this.dataPrefix[i])) {
+                    return i;
                 }
-            }
+             }
         }
-        return false;
+        return -1;
     }
 
+    /**
+     * Tests whether a given object shall be audited
+     * 
+     * @param candidate
+     *            the object to be tested
+     * 
+     * @return <code>true/code> if the candidate shall be audited
+     * @throws ServiceException
+     */
+    protected boolean isInvolved(
+        DataObject_1 candidate
+    ) throws ServiceException {
+        return getMatchingIndex(candidate) >= 0;
+    }
+    
     /*
      * (non-Javadoc)
      * 
      * @see org.openmdx.base.aop0.PlugIn_1_0#beforeCompletion(UnitOfWork_1)
      */
-    public void beforeCompletion(UnitOfWork_1 unitOfWork) {
+    public void flush(
+        UnitOfWork_1 unitOfWork, 
+        boolean beforeCompletion
+    ) {
         try {
             DataObjectManager_1 persistenceManager = (DataObjectManager_1) unitOfWork.getPersistenceManager();
-            List<DataObject_1> involvedObjects = new ArrayList<DataObject_1>();
-            for (Object managedObject : persistenceManager .getManagedObjects(involvedStates)) {
+            Map<Path,DataObject_1> auditBeforeImages = new HashMap<Path, DataObject_1>();
+            for (Object managedObject : persistenceManager.getManagedObjects(involvedStatesForInvolvementPersistenceEmbedded)) {
                 DataObject_1 candidate = (DataObject_1) managedObject;
-                if (isInvolved(candidate)) {
-                    involvedObjects.add(candidate);
+                if(this.getMatchingIndex(candidate) >= 0) {
+                    DataObject_1 beforeImage = candidate.getBeforeImage(null); // do not in-line!
+                    if(beforeImage != null && !beforeImage.jdoIsPersistent()) {
+                        if(candidate.jdoIsDeleted() || candidate.objIsModified()){
+                            auditBeforeImages.put(
+                                Qualifiers.getAudit2BeforeImageId(
+                                    this,
+                                    candidate.jdoGetObjectId(),
+                                    unitOfWork.getUnitOfWorkIdentifier()
+                                ), 
+                                beforeImage
+                            );
+                        } else if (candidate.jdoIsDirty()) {
+                            candidate.unconditionalEvict();
+                        }
+                    }
                 }
             }
-            //
-            // No need to audit non-modifying units of work
-            //
-            if (!involvedObjects.isEmpty()) {
-                DataObject_1_0 auditSegment = persistenceManager.getObjectById(this.auditSegmentId);
-                DataObject_1_0 auditUnitOfWork = persistenceManager.newInstance(
-                    isAudit1Persistence() ? "org:openmdx:compatibility:audit1:UnitOfWork" : "org:openmdx:audit2:UnitOfWork", null
-                );
-                auditUnitOfWork.objSetValue("taskId", unitOfWork.getTaskIdentifier());
-                auditUnitOfWork.objSetValue("createdAt", unitOfWork.getTransactionTime());
-                auditUnitOfWork.objGetSet("createdBy").addAll(UserObjects.getPrincipalChain(persistenceManager));
-                boolean hasInvolvements = false;
-                if (isAudit1Persistence()) {
-                    List<Object> involvements = auditUnitOfWork.objGetList("involved");
-                    for (DataObject_1 involvedObject : involvedObjects) {
-                        Path objectId = involvedObject.jdoGetObjectId();
-                        DataObject_1 beforeImage = involvedObject.getBeforeImage(null);
-                        boolean dirty;
-                        if (beforeImage == null) {
-                            dirty = false; // audit1 does not keep track of object creation
-                        } else if (involvedObject.jdoIsDeleted()) {
-                            dirty = true;
-                        } else {
-                            Set<Object> modifiedFeatures = new HashSet<Object>();
-                            involvedObject.addModifiedFeaturesTo(modifiedFeatures);
-                            dirty = !modifiedFeatures.isEmpty();
-                        }
-                        if (dirty) {
-                            if (beforeImage != null) {
-                                String unitOfWorkId = unitOfWork.getUnitOfWorkIdentifier();
-                                beforeImage.makePersistent(
-                                    Qualifiers.getAudit1ImageId(this,objectId, unitOfWorkId), 
-                                    false
-                                );
-                                involvements.add(
-                                    objectId.getDescendant("view:Audit:involved", unitOfWorkId)
-                                );
-                            }
-                            hasInvolvements = true;
-                        }
-                    }
-                } else {
-                    Container_1_0 involvements = auditUnitOfWork.objGetContainer("involvement");
-                    for (DataObject_1 involvedObject : involvedObjects) {
-                        Path objectId = involvedObject.jdoGetObjectId();
-                        DataObject_1_0 involvement = persistenceManager.newInstance("org:openmdx:audit2:Involvement", null);
-                        DataObject_1 beforeImage = involvedObject.getBeforeImage(null);
-                        DataObject_1 afterImage;
-                        boolean dirty;
-                        if (involvedObject.jdoIsDeleted()) {
-                            afterImage = null;
-                            dirty = true;
-                        } else {
-                            afterImage = involvedObject.jdoIsDeleted() ? null : (DataObject_1) persistenceManager.getObjectById(
-                                Qualifiers.getAudit2ImageId(
-                                    this,
-                                    objectId,
-                                    unitOfWork.getTransactionTime()
-                                ),
-                                false // validate would fail!
-                            );
-                            if (beforeImage == null) {
-                                dirty = true;
-                            } else {
-                                Set<Object> modifiedFeatures = isModifiedFeaturePersistent() ? 
-                                    involvement.objGetSet("modifiedFeature") : 
-                                        new HashSet<Object>();
-                                    involvedObject.addModifiedFeaturesTo(modifiedFeatures);
-                                    dirty = !modifiedFeatures.isEmpty();
-                            }
-                        }
-                        if (dirty) {
-                            if (beforeImage != null) {
-                                Path beforeImageId = Qualifiers.getAudit2ImageId(
-                                    this,
-                                    objectId,
-                                    (Date) beforeImage.objGetValue(SystemAttributes.MODIFIED_AT)
-                                );
-                                beforeImage.makePersistent(beforeImageId, false);
-                            }
-                            involvement.objMove(involvements, objectId.toString());
-                            involvement.objSetValue("beforeImage", beforeImage);
-                            involvement.objSetValue("afterImage", afterImage);
-                            hasInvolvements = true;
-                        }
-                    }
+            if(!auditBeforeImages.isEmpty()) {
+                if(this.involvementPersistence != InvolvementPersistence.EMBEDDED) {
+                    throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
                 }
-                if(hasInvolvements){
+                DataObject_1_0 auditSegment = persistenceManager.getObjectById(this.getAuditSegmentId(persistenceManager));
+                String unitOfWorkId = unitOfWork.getUnitOfWorkIdentifier();
+                Container_1_0 unitOfWorkContainer = auditSegment.objGetContainer("unitOfWork");
+                if(!unitOfWorkContainer.containsKey(unitOfWorkId)){
+                    DataObject_1_0 auditUnitOfWork = persistenceManager.newInstance("org:openmdx:audit2:UnitOfWork", null);
+                    auditUnitOfWork.objSetValue("taskId", unitOfWork.getTaskIdentifier());
+                    auditUnitOfWork.objSetValue(SystemAttributes.CREATED_AT, unitOfWork.getTransactionTime());
+                    auditUnitOfWork.objGetSet(SystemAttributes.CREATED_BY).addAll(UserObjects.getPrincipalChain(persistenceManager));
                     auditUnitOfWork.objMove(
-                        auditSegment.objGetContainer("unitOfWork"), 
-                        unitOfWork.getUnitOfWorkIdentifier()
+                        unitOfWorkContainer, 
+                        unitOfWorkId
+                    );
+                }
+                for(Map.Entry<Path, DataObject_1> auditBeforeImage : auditBeforeImages.entrySet()){
+                    auditBeforeImage.getValue().makePersistent(
+                        auditBeforeImage.getKey(), 
+                        false // already flushed
                     );
                 }
             }
@@ -604,6 +547,16 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
                 exception
             );
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.aop0.PlugIn_1_0#callbackOnCascadedDeletes()
+     */
+//  @Override
+    public boolean requiresCallbackOnCascadedDelete(
+        DataObject_1 object
+    ) throws ServiceException {
+        return this.isInvolved(object);
     }
 
 }

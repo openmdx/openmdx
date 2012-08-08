@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Ui_1.java,v 1.87 2010/06/08 13:00:17 hburger Exp $
+ * Name:        $Id: Ui_1.java,v 1.88 2010/10/25 08:58:28 wfro Exp $
  * Description: Ui_1 plugin
- * Revision:    $Revision: 1.87 $
+ * Revision:    $Revision: 1.88 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/08 13:00:17 $
+ * Date:        $Date: 2010/10/25 08:58:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -84,6 +84,7 @@ import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.layer.application.Standard_1;
 import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.application.dataprovider.spi.ResourceHelper;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -2221,14 +2222,13 @@ public class Ui_1 extends Standard_1 {
                 catch (ResourceException e) {
                 	throw new ServiceException(e);
                 }                
-                try {
-	                Object_2Facade.newInstance(tab).attributeValuesAsList("title").addAll(
-	                    definitionFacade.attributeValuesAsList("label")
-	                );
-                }
-                catch (ResourceException e) {
-                	throw new ServiceException(e);
-                }
+            	Object_2Facade tabFacade = ResourceHelper.getObjectFacade(tab);
+                tabFacade.attributeValuesAsList("title").addAll(
+                    definitionFacade.attributeValuesAsList("label")
+                );
+                tabFacade.attributeValuesAsList("toolTip").addAll(
+                    definitionFacade.attributeValuesAsList("toolTip")
+                );
                 elementDefinitions.put(
                     Object_2Facade.getPath(tab),
                     definition

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SegmentReferencesForeignPersonImpl.java,v 1.2 2010/05/27 09:12:30 hburger Exp $
+ * Name:        $Id: SegmentReferencesForeignPersonImpl.java,v 1.3 2010/09/22 09:04:52 hburger Exp $
  * Description: SegmentReferencesForgeignPerson 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/27 09:12:30 $
+ * Date:        $Date: 2010/09/22 09:04:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -138,8 +138,7 @@ public class SegmentReferencesForeignPersonImpl
      */
     @Override
     public Iterator<Person> iterator() {
-        SegmentHasPerson.Person<Person> collection = this.segment.getPerson();
-        return collection.iterator();
+        return this.segment.<Person>getPerson().iterator();
     }
 
     /* (non-Javadoc)
@@ -147,8 +146,7 @@ public class SegmentReferencesForeignPersonImpl
      */
     @Override
     public int size() {
-        SegmentHasPerson.Person<Person> collection = this.segment.getPerson();
-        return collection.size();
+        return this.segment.<Person>getPerson().size();
     }
 
     /* (non-Javadoc)
@@ -156,24 +154,21 @@ public class SegmentReferencesForeignPersonImpl
      */
     @Override
     public boolean isEmpty() {
-        SegmentHasPerson.Person<Person> collection = this.segment.getPerson();
-        return collection.isEmpty();
+        return this.segment.<Person>getPerson().isEmpty();
     }
 
     /* (non-Javadoc)
      * @see org.w3c.cci2.Container#getAll(org.w3c.cci2.AnyTypePredicate)
      */
     public List<Person> getAll(AnyTypePredicate predicate) {
-        SegmentHasPerson.Person<Person> collection = this.segment.getPerson();
-        return collection.getAll(predicate);
+        return this.segment.<Person>getPerson().getAll(predicate);
     }
 
     /* (non-Javadoc)
      * @see org.w3c.cci2.Container#removeAll(org.w3c.cci2.AnyTypePredicate)
      */
     public void removeAll(AnyTypePredicate predicate) {
-        SegmentHasPerson.Person<Person> collection = this.segment.getPerson();
-        collection.removeAll(predicate);
+        this.segment.<Person>getPerson().removeAll(predicate);
     }
 
 }

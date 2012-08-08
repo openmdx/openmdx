@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateCapableContainer_1.java,v 1.13 2010/07/01 15:58:03 hburger Exp $
+ * Name:        $Id: StateCapableContainer_1.java,v 1.18 2010/12/18 18:42:06 hburger Exp $
  * Description: State Object Container
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/01 15:58:03 $
+ * Date:        $Date: 2010/12/18 18:42:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -64,7 +64,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.jdo.FetchPlan;
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.resource.cci.InteractionSpec;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -76,6 +75,8 @@ import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
@@ -174,8 +175,16 @@ public class StateCapableContainer_1
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
 //  @Override
-    public PersistenceManager openmdxjdoGetPersistenceManager() {
-        return this.container.openmdxjdoGetPersistenceManager();
+    public PersistenceManager openmdxjdoGetPersistenceManager(){
+    	return this.parent.jdoGetPersistenceManager();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+     */
+//  @Override
+    public PersistenceManager openmdxjdoGetDataObjectManager() {
+        return this.container.openmdxjdoGetDataObjectManager();
     }
 
 //  @Override
@@ -301,11 +310,51 @@ public class StateCapableContainer_1
         }
     }
         
+    private static boolean isInstanceOfCondition(
+        Condition condition
+    ){
+        if(condition instanceof IsInstanceOfCondition) {
+            return true;
+        } else {
+            String name = condition.getName();
+            return SystemAttributes.OBJECT_CLASS.equals(name) || SystemAttributes.OBJECT_INSTANCE_OF.equals(name);
+        }
+    }
+    
+    private static boolean isStateFilter(
+        Condition condition
+    ){
+        Model_1_0 model = Model_1Factory.getModel();
+        for(Object value : condition.getValue()) {
+            try {
+                if(model.isSubtypeOf(value, "org:openmdx:state2:BasicState")) {
+                    return true;
+                }
+            } catch (ServiceException exception) {
+                exception.log();
+            }
+        }
+        return false;
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#subMap(java.lang.Object)
      */
 //  @Override
     public Container_1_0 subMap(Filter filter) {
+        if(this.isInTimeRangeView()){
+            Conditions: for(Condition condition : filter.getCondition()) {
+                if(isInstanceOfCondition(condition)) {
+                    if(isStateFilter(condition)) {
+                        throw new UnsupportedOperationException(
+                            "Inappropriate context for state queries: " +
+                            this.parent.getInteractionSpec()
+                        );
+                    }
+                    break Conditions;
+                }
+            }
+        }
         return filter == null ? this : new StateCapableContainer_1(
             this.parent,
             this.selection,
@@ -318,9 +367,9 @@ public class StateCapableContainer_1
      */
 //  @Override
     public List<DataObject_1_0> values(
-        OrderSpecifier... criteria
+        FetchPlan fetchPlan, OrderSpecifier... criteria
     ) {
-        return this.selection.values(criteria);
+        return this.selection.values(fetchPlan, criteria);
     }
 
     /* (non-Javadoc)
@@ -422,19 +471,18 @@ public class StateCapableContainer_1
         throw new UnsupportedOperationException();
     }
 
-    private void assertModifiability(
-    ) throws ServiceException {
+    /**
+     * Tells whether the container is in a time range view
+     * 
+     * @return <code>true</code> if the container is in a time range view
+     */
+    private boolean isInTimeRangeView(){
         InteractionSpec interactionSpec = this.parent.getInteractionSpec();
-        if(
-            !(interactionSpec instanceof DateStateContext) ||
-            ((DateStateContext)interactionSpec).getViewKind() != ViewKind.TIME_RANGE_VIEW
-        ) {
-            throw new UnsupportedOperationException(
-                "Inappropriate context for state view modification: " +
-                interactionSpec
-            );
-        }
+        return 
+            interactionSpec instanceof DateStateContext &&
+            ((DateStateContext)interactionSpec).getViewKind() == ViewKind.TIME_RANGE_VIEW;
     }
+    
     
     /* (non-Javadoc)
      * @see java.util.Map#remove(java.lang.Object)
@@ -443,20 +491,22 @@ public class StateCapableContainer_1
     public DataObject_1_0 remove(
         Object key
     ) {
-        try {
-            this.assertModifiability();
-            DataObject_1_0 value = this.get(key);
-            if(value.jdoIsPersistent()) {
-                JDOHelper.getPersistenceManager(value).deletePersistent(value);
-            } 
-            else {
-                this.selection.remove(value);
-            }
-            return value;
-        } 
-        catch(Exception exception) {
-            throw new RuntimeServiceException(exception);
-        }
+    	DataObject_1_0 value = this.get(key);
+    	if(value != null) try {
+			if(!this.isInTimeRangeView()){
+			    throw new UnsupportedOperationException(
+			        "Inappropriate context for state view modification: " +
+			        this.parent.getInteractionSpec()
+			    );
+			}
+			Container_1_0 viewContainer = this.parent.objGetContainer(
+				this.container.openmdxjdoGetTransientContainerId().getFeature()
+			);
+	        this.parent.jdoGetPersistenceManager().deletePersistent(viewContainer.get(key));
+    	} catch (ServiceException exception) {
+    		throw new RuntimeServiceException(exception);
+    	}
+        return value;
     }
 
     
@@ -579,7 +629,7 @@ public class StateCapableContainer_1
         @Override
         public Iterator<String> iterator(
         ){
-            return this.snapshot().iterator();
+            return new KeyIterator(this.snapshot().iterator());
         }
 
         /* (non-Javadoc)
@@ -649,9 +699,9 @@ public class StateCapableContainer_1
          * @param delegate
          */
         KeyIterator(
-            Set<String> delegate
+            Iterator<String> delegate
         ){
-            this.delegate = delegate.iterator();
+            this.delegate = delegate;
         }
         
         /**
@@ -685,9 +735,7 @@ public class StateCapableContainer_1
          */
     //  @Override
         public void remove() {
-            if(this.current == null) {
-                throw new IllegalStateException("No current element");
-            }
+        	this.delegate.remove();
             StateCapableContainer_1.this.remove(this.current);
             this.current = null;
         }
@@ -752,6 +800,11 @@ public class StateCapableContainer_1
          */
         private final Iterator<String> delegate = StateCapableContainer_1.this.keySet().iterator();
 
+        /**
+         * 
+         */
+        String current = null;
+        
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
@@ -765,15 +818,15 @@ public class StateCapableContainer_1
          */
     //  @Override
         public Map.Entry<String,DataObject_1_0> next() {
-            final String key = this.delegate.next(); 
+            this.current = this.delegate.next(); 
             return new Map.Entry<String, DataObject_1_0>(){
 
                 public String getKey() {
-                    return key;
+                    return EntryIterator.this.current;
                 }
 
                 public DataObject_1_0 getValue() {
-                    return StateCapableContainer_1.this.get(key);
+                    return StateCapableContainer_1.this.get(EntryIterator.this.current);
                 }
 
                 public DataObject_1_0 setValue(DataObject_1_0 value) {

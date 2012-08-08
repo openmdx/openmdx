@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractHttpInteraction.java,v 1.7 2010/05/26 12:21:50 wfro Exp $
+ * Name:        $Id: AbstractHttpInteraction.java,v 1.10 2010/11/18 08:16:05 hburger Exp $
  * Description: Abstract HTTP Interaction
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/26 12:21:50 $
+ * Date:        $Date: 2010/11/18 08:16:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -103,7 +103,23 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         RestFunction.POST,
         InteractionSpec.SYNC_SEND
     );
-
+    
+    /**
+     * The interaction spec used to post queries
+     */
+    protected final static RestInteractionSpec QUERY_SPEC = new RestInteractionSpec(
+        RestFunction.POST,
+        InteractionSpec.SYNC_SEND_RECEIVE
+    );
+    
+    /**
+     * The interaction spec to remove (virtual) connection objects
+     */
+    protected final static RestInteractionSpec DELETE_SPEC = new RestInteractionSpec(
+        RestFunction.PUT,
+        InteractionSpec.SYNC_SEND
+    );
+    
     /**
      * The path to create (virtual) connection objects
      */
@@ -167,8 +183,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         RestInteractionSpec interactionSpec,
         Path xri,
         Object_2Facade input,
-        IndexedRecord output, 
-        boolean validate
+        IndexedRecord output
     ) throws ServiceException {
         Message message = newMessage(interactionSpec, xri);
         RestFormat.format(message.getRequestBody(), input);
@@ -217,16 +232,23 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
                 message.getResponseBody()
             );
         } else if (status >= 400) {
-            BasicException cause = RestFormat.parseException(
-                message.getResponseBody()
-            );
-            throw cause == null ? new ServiceException(
+        	BasicException remote;
+        	BasicException local;
+            try {
+                remote = RestFormat.parseException(message.getResponseBody());
+                local = null;
+            } catch (ServiceException exception) {
+                remote = null;
+                local = exception.getCause();
+            }
+            throw remote == null ? new ServiceException(
+                local,
                 BasicException.Code.DEFAULT_DOMAIN,
                 toExceptionCode(status),
                 "HTTP REST request failed",
                 new BasicException.Parameter("status", status)
             ) : new ServiceException(
-                cause
+                remote
             );
         } else {
             try {
@@ -265,7 +287,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         Object_2Facade input,
         IndexedRecord output
     ) throws ServiceException {
-        return process(interactionSpec, input.getPath(), input, output, false);
+        return process(interactionSpec, input.getPath(), input, output);
     }
 
     /* (non-Javadoc)
@@ -277,7 +299,12 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         Object_2Facade input,
         IndexedRecord output
     ) throws ServiceException {
-        return process(interactionSpec, input.getPath(), input, output, true);
+        return process(
+            RestFunction.DELETE == interactionSpec.getFunction() ? DELETE_SPEC : interactionSpec, 
+            input.getPath(), 
+            input, 
+            output
+        );
     }
 
     /* (non-Javadoc)
@@ -289,7 +316,11 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         Query_2Facade input,
         IndexedRecord output
     ) throws ServiceException {
-        return process(interactionSpec, input, output);
+        return process(
+            RestFunction.DELETE == interactionSpec.getFunction() ? DELETE_SPEC : interactionSpec, 
+            input, 
+            output
+        );
     }
 
     /* (non-Javadoc)
@@ -301,7 +332,11 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         Query_2Facade input,
         IndexedRecord output
     ) throws ServiceException {
-        return process(interactionSpec, input, output);
+        return process(
+            RestFunction.GET == interactionSpec.getFunction() ? QUERY_SPEC : interactionSpec, 
+            input, 
+            output
+        );
     }
 
     /* (non-Javadoc)
@@ -313,7 +348,11 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         Query_2Facade input,
         IndexedRecord output
     ) throws ServiceException {
-        return process(interactionSpec, input, output);
+        return process(
+            RestFunction.GET == interactionSpec.getFunction() ? QUERY_SPEC : interactionSpec, 
+            input, 
+            output
+        );
     }
 
     /* (non-Javadoc)
@@ -340,7 +379,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         Object_2Facade input,
         IndexedRecord output
     ) throws ServiceException {
-        return process(interactionSpec, xri, input, output, false);
+        return process(interactionSpec, xri, input, output);
     }
 
     /* (non-Javadoc)
@@ -352,7 +391,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         Object_2Facade input,
         IndexedRecord output
     ) throws ServiceException {
-        return process(interactionSpec, input.getPath(), input, output, true);
+        return process(interactionSpec, input.getPath(), input, output);
     }
 
     /* (non-Javadoc)
@@ -364,7 +403,7 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
         Object_2Facade input,
         IndexedRecord output
     ) throws ServiceException {
-        return process(interactionSpec, input.getPath(), input, output, true);
+        return process(interactionSpec, input.getPath(), input, output);
     }
 
     

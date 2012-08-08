@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectView_1_0.java,v 1.16 2010/07/08 16:58:40 hburger Exp $
+ * Name:        $Id: ObjectView_1_0.java,v 1.17 2010/12/09 06:24:55 hburger Exp $
  * Description: Object 1.6 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/08 16:58:40 $
+ * Date:        $Date: 2010/12/09 06:24:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,6 +57,7 @@ import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 
 /**
@@ -65,6 +66,15 @@ import org.openmdx.base.mof.cci.Model_1_0;
 public interface ObjectView_1_0
     extends Delegating_1_0<DataObject_1_0>, DataObject_1_0
 {
+
+    /**
+     * Retrieve a feature replacing persistence capable objects by their id
+     * 
+     * @return the feature with persistence capable objects replaced by their id
+     */
+    Object getFeatureReplaceingObjectById(
+		ModelElement_1_0 featureDef
+	) throws ServiceException;
     
     /**
      * A convenience method to access the model repository
@@ -77,12 +87,7 @@ public interface ObjectView_1_0
      * Retrieve the object view's manager
      */
     DataObjectManager_1_0 jdoGetPersistenceManager();
-    
-    
-    //------------------------------------------------------------------------
-    // Synchronization
-    //------------------------------------------------------------------------
-
+        
     /**
      * Refresh the state of the instance from its provider.
      *

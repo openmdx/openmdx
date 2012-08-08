@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSequentialList.java,v 1.29 2010/07/01 16:24:13 hburger Exp $
+ * Name:        $Id: MarshallingSequentialList.java,v 1.30 2010/10/27 14:06:19 hburger Exp $
  * Description: Marshalling Sequential List
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/01 16:24:13 $
+ * Date:        $Date: 2010/10/27 14:06:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -344,6 +344,14 @@ public class MarshallingSequentialList<E>
     //------------------------------------------------------------------------
     // Implements PersistenceCapableCollection
     //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+     */
+//  @Override
+    public PersistenceManager openmdxjdoGetPersistenceManager(){
+    	throw new UnsupportedOperationException("This method is not yet supported");
+    }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoEvict(boolean)
@@ -376,9 +384,9 @@ public class MarshallingSequentialList<E>
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetPersistenceManager()
      */
 //  @Override
-    public PersistenceManager openmdxjdoGetPersistenceManager() {
+    public PersistenceManager openmdxjdoGetDataObjectManager() {
         if(this.list instanceof PersistenceCapableCollection){
-            return ((PersistenceCapableCollection)this.list).openmdxjdoGetPersistenceManager();
+            return ((PersistenceCapableCollection)this.list).openmdxjdoGetDataObjectManager();
         } else {
             throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
         }

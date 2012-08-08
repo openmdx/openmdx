@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WebKeys.java,v 1.31 2009/09/30 16:08:51 wfro Exp $
+ * Name:        $Id: WebKeys.java,v 1.32 2010/09/21 15:16:34 wfro Exp $
  * Description: WebKeys 
- * Revision:    $Revision: 1.31 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/30 16:08:51 $
+ * Date:        $Date: 2010/09/21 15:16:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,6 +73,7 @@ public class WebKeys {
     public static final String REQUEST_PARAMETER_FILTER_VALUES = "filtervalues";
     public static final String REQUEST_PARAMETER_PAGE_SIZE = "pagesize";  
     public static final String REQUEST_PARAMETER_LOCALE = "locale";      
+	public static final String REQUEST_PARAMETER_SHOW_SEARCH_FORM = "showSearchForm";    
     
     // Icons
     public static final String ICON_TYPE = ".gif";
@@ -138,7 +139,7 @@ public class WebKeys {
     public static final String TAB_GROUPING_CHARACTER = "\u00bb";
     
     // Pages
-    public static final String ERROR_PAGE = "/Error.jsp";    
+    public static final String ERROR_PAGE = "/Error.jsp";
     
 }
 

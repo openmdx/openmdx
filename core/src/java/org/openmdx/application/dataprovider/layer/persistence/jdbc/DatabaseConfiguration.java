@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseConfiguration.java,v 1.9 2009/12/30 19:09:51 wfro Exp $
+ * Name:        $Id: DatabaseConfiguration.java,v 1.16 2010/11/18 18:04:20 hburger Exp $
  * Description: DatabaseConfiguration 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/30 19:09:51 $
+ * Date:        $Date: 2010/11/18 18:04:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -86,13 +86,18 @@ public class DatabaseConfiguration {
         String referenceIdFormat,
         boolean useNormalizedReferences,
         boolean useNormalizedObjectIds,
-        DataSource connectionManager, 
-        Configuration configuration
+        boolean useViewsForRedundantColumns, 
+        boolean usePreferences, 
+        boolean cascadeDeletes, 
+        DataSource connectionManager, Configuration configuration
     ) {
         this.namespaceId = namespaceId;
         this.referenceIdFormat = referenceIdFormat;
         this.useNormalizedReferences = useNormalizedReferences;
         this.useNormalizedObjectIds = useNormalizedObjectIds;
+        this.useViewsForRedundantColumns = useViewsForRedundantColumns;
+        this.usePreferences = usePreferences;
+        this.cascadeDeletes = cascadeDeletes;
         this.connectionManager = connectionManager;
         this.configuration = configuration;
         this.dbObjectConfigurations = null;
@@ -146,88 +151,96 @@ public class DatabaseConfiguration {
     public void load(
     ) throws ServiceException {
         if(this.dbObjectConfigurations == null) {
-            Map<String,DbObjectConfiguration> dbObjectConfigurations = new HashMap<String,DbObjectConfiguration>();            
-            // Read configuration entries from table 'Preferences' if available
-            Connection conn = null;
-            PreparedStatement ps = null;
-            ResultSet rs = null;
-            String currentStatement = null;
-            try {
-                conn = this.connectionManager.getConnection();
-                ps = conn.prepareStatement(
-                    currentStatement = "SELECT * FROM prefs_Preference" + 
-                    " WHERE (object_rid = ?) AND (object_oid IN" +
-                    " (SELECT object_oid FROM prefs_Preference" + 
-                    " WHERE (parent = ?) AND (object_rid IN (?)) AND (object_idx = 0)))" + 
-                    " ORDER BY object_rid, object_oid, object_idx"
-                );
-                ps.setString(1, "preference/" + this.namespaceId);
-                ps.setString(2, DataproviderLayers.toString(DataproviderLayers.PERSISTENCE));
-                ps.setString(3, "preference/" + this.namespaceId);
-                rs = ps.executeQuery();
-                String objectClass = null;
-                String name = null;
-                while(rs.next()) {
-                    int index = rs.getInt("object_idx");
-                    if(index == 0) {
-                        objectClass = rs.getString("object__class");                        
-                        name = rs.getString("name");
-                    }
-                    SparseArray values = null;
-                    if(this.configuration.containsEntry(name)) {
-                        values = this.configuration.entries().get(name);
-                    }
-                    else {
-                        this.configuration.entries().put(
-                            name,
-                            values = new TreeSparseArray()
+            Map<String,DbObjectConfiguration> dbObjectConfigurations = new HashMap<String,DbObjectConfiguration>();
+            if(this.usePreferences) {
+                // Read configuration entries from table 'Preferences' if available
+                Connection conn = null;
+                PreparedStatement ps = null;
+                ResultSet rs = null;
+                String currentStatement = null;
+                try {
+                    conn = this.connectionManager.getConnection();
+                    ps = conn.prepareStatement(
+                        currentStatement = "SELECT * FROM prefs_Preference" + 
+                        " WHERE (object_rid = ?) AND (object_oid IN" +
+                        " (SELECT object_oid FROM prefs_Preference" + 
+                        " WHERE (parent = ?) AND (object_rid IN (?)) AND (object_idx = 0)))" + 
+                        " ORDER BY object_rid, object_oid, object_idx"
+                    );
+                    ps.setString(1, "preference/" + this.namespaceId);
+                    ps.setString(2, DataproviderLayers.toString(DataproviderLayers.PERSISTENCE));
+                    ps.setString(3, "preference/" + this.namespaceId);
+                    rs = ps.executeQuery();
+                    String objectClass = null;
+                    String name = null;
+                    while(rs.next()) {
+                        int index = rs.getInt("object_idx");
+                        if(index == 0) {
+                            objectClass = rs.getString("object__class");                        
+                            name = rs.getString("name");
+                        }
+                        SparseArray values = null;
+                        if(this.configuration.containsEntry(name)) {
+                            values = this.configuration.entries().get(name);
+                        }
+                        else {
+                            this.configuration.entries().put(
+                                name,
+                                values = new TreeSparseArray()
+                            );
+                        }
+                        Object newValue = null;
+                        if("org:openmdx:preferences1:StringPreference".equals(objectClass)) {
+                            Object s = rs.getObject("string_value");                        
+                            newValue = s == null 
+                            ? null 
+                                : s instanceof Clob 
+                                ? ((Clob)s).getSubString(1L, (int)((Clob)s).length())
+                                    : (String)s;
+                        }
+                        else if("org:openmdx:preferences1:IntegerPreference".equals(objectClass)) {
+                            newValue = new Integer(rs.getInt("integer_value"));
+                        }
+                        else if("org:openmdx:preferences1:DecimalPreference".equals(objectClass)) {
+                            newValue = rs.getBigDecimal("decimal_value");
+                        }
+                        else if("org:openmdx:preferences1:BooleanPreference".equals(objectClass)) {
+                            newValue = Boolean.valueOf("##true##".equals(rs.getString("boolean_value")));
+                        }
+                        else if("org:openmdx:preferences1:UriPreference".equals(objectClass)) {
+                            newValue = new Path(rs.getString("uri_value"));
+                        }
+                        values.put(
+                            index,
+                            newValue
                         );
                     }
-                    Object newValue = null;
-                    if("org:openmdx:preferences1:StringPreference".equals(objectClass)) {
-                        Object s = rs.getObject("string_value");                        
-                        newValue = s == null 
-                        ? null 
-                            : s instanceof Clob 
-                            ? ((Clob)s).getSubString(1L, (int)((Clob)s).length())
-                                : (String)s;
-                    }
-                    else if("org:openmdx:preferences1:IntegerPreference".equals(objectClass)) {
-                        newValue = new Integer(rs.getInt("integer_value"));
-                    }
-                    else if("org:openmdx:preferences1:DecimalPreference".equals(objectClass)) {
-                        newValue = rs.getBigDecimal("decimal_value");
-                    }
-                    else if("org:openmdx:preferences1:BooleanPreference".equals(objectClass)) {
-                        newValue = new Boolean("##true##".equals(rs.getString("boolean_value")));
-                    }
-                    else if("org:openmdx:preferences1:UriPreference".equals(objectClass)) {
-                        newValue = new Path(rs.getString("uri_value"));
-                    }
-                    values.put(
-                        index,
-                        newValue
+                }
+                catch(Exception e) {
+                    SysLog.warning(
+                        "Did not retrieve preferences from database. " +
+                        "Execution of statement failed. " +
+                    	"Maybe you should set the configuration property 'usePreferencesTable' to 'false'", 
+                    		
+                    	currentStatement
                     );
                 }
-            }
-            catch(Exception e) {
-                SysLog.warning("Did not retrieve preferences from database. Execution of statement failed", currentStatement);
-            }
-            finally {
-                try {
-                    if(rs != null) rs.close();
-                } catch(Throwable ex) {
-                    // ignore
-                }
-                try {  
-                    if(ps != null) ps.close();
-                } catch(Throwable ex) {
-                    // ignore
-                }      
-                try {
-                    if(conn != null) conn.close();
-                } catch(Throwable ex) {
-                    // ignore
+                finally {
+                    try {
+                        if(rs != null) rs.close();
+                    } catch(Throwable ex) {
+                        // ignore
+                    }
+                    try {  
+                        if(ps != null) ps.close();
+                    } catch(Throwable ex) {
+                        // ignore
+                    }      
+                    try {
+                        if(conn != null) conn.close();
+                    } catch(Throwable ex) {
+                        // ignore
+                    }
                 }
             }
 
@@ -308,14 +321,26 @@ public class DatabaseConfiguration {
                 // joinColumnEnd2
                 Object joinColumnEnd2 = this.configuration.values(LayerConfigurationEntries.JOIN_COLUMN_END2).get(index);
                 if("".equals(joinColumnEnd2)) joinColumnEnd2 = null;
+                
+                // unitOfWorkProvider
+                Object unitOfWorkProvider = this.configuration.values(LayerConfigurationEntries.UNIT_OF_WORK_PROVIDER).get(index);
+                if("".equals(unitOfWorkProvider)) unitOfWorkProvider = null;
+
+                // removableRidPrefix
+                Object removableReferenceIdPrefix = this.configuration.values(LayerConfigurationEntries.REMOVABLE_REFERENCE_ID_PREFIX).get(index);
+                if("".equals(removableReferenceIdPrefix)) removableReferenceIdPrefix = null;
+
+                // Tells whether one shouldn't try absolute positioning
+                boolean disableAboslutePositioning = Boolean.TRUE.equals(this.configuration.values(LayerConfigurationEntries.DISABLE_ABSOLUTE_POSITIONING).get(index));
+                
                 try {
                     SysLog.detail(
                         "Retrieved configuration", 
                         Records.getRecordFactory().asMappedRecord(
                             type.toString(), // recordName, 
                             null, // recordShortDescription
-                            new String[]{"typeName", "dbObject", "dbObject2", "pathNormalizeLevel", "dbObjectForQuery", "dbObjectForQuery2", "dbObjectHint", "objectIdPattern"},
-                            new Object[]{typeName, dbObject, dbObject2, pathNormalizeLevel, dbObjectForQuery, dbObjectForQuery2, dbObjectHint, objectIdPattern}
+                            new String[]{"typeName", "dbObject", "dbObject2", "pathNormalizeLevel", "dbObjectForQuery", "dbObjectForQuery2", "dbObjectHint", "objectIdPattern", "unitOfWorkProvider"},
+                            new Object[]{typeName, dbObject, dbObject2, pathNormalizeLevel, dbObjectForQuery, dbObjectForQuery2, dbObjectHint, objectIdPattern, unitOfWorkProvider}
                         ).toString()                    
                     );
                 } catch(Exception e) {}
@@ -328,10 +353,12 @@ public class DatabaseConfiguration {
                     ((dbObjectForQuery == null) || dbObjectForQuery instanceof String) &&
                     ((dbObjectForQuery2 == null) || dbObjectForQuery2 instanceof String) &&
                     ((dbObjectHint == null) || dbObjectHint instanceof String) &&
-                    ((objectIdPattern == null) || objectIdPattern instanceof String) ||
+                    ((objectIdPattern == null) || objectIdPattern instanceof String) &&
+                    ((unitOfWorkProvider == null) || (unitOfWorkProvider instanceof String)) &&
+                    ((removableReferenceIdPrefix == null) || (removableReferenceIdPrefix instanceof String)) ||
                     ((joinTable == null) || (joinTable instanceof String)) &&                
                     ((joinColumnEnd1 == null) || (joinColumnEnd1 instanceof String)) &&                
-                    ((joinColumnEnd2 == null) || (joinColumnEnd2 instanceof String)) 
+                    ((joinColumnEnd2 == null) || (joinColumnEnd2 instanceof String))                     
                 ) {
                     if(
                         LayerConfigurationEntries.REFERENCE_ID_FORMAT_TYPE_WITH_PATH_COMPONENTS.equals(this.referenceIdFormat) &&
@@ -376,20 +403,23 @@ public class DatabaseConfiguration {
                     // Create db object configuration entry
                     DbObjectConfiguration entry = new DbObjectConfiguration(
                         type instanceof Path ? (Path)type : new Path((String)type),
-                            (String)typeName,
-                            (String)dbObject,
-                            (String)dbObject2,
-                            (String)dbObjectFormat,
-                            (String)dbObjectForQuery,
-                            (String)dbObjectForQuery2,
-                            (String)dbObjectsForQueryJoinColumn,
-                            pathNormalizeLevel == null ? -1 : ((Number)pathNormalizeLevel).intValue(),
-                                (String)dbObjectHint,
-                                (String)objectIdPattern,
-                                autonumColumns,
-                                (String)joinTable,
-                                (String)joinColumnEnd1,
-                                (String)joinColumnEnd2
+                        (String)typeName,
+                        (String)dbObject,
+                        (String)dbObject2,
+                        (String)dbObjectFormat,
+                        (String)dbObjectForQuery,
+                        (String)dbObjectForQuery2,
+                        (String)dbObjectsForQueryJoinColumn,
+                        pathNormalizeLevel == null ? -1 : ((Number)pathNormalizeLevel).intValue(),
+                        (String)dbObjectHint,
+                        (String)objectIdPattern,
+                        autonumColumns,
+                        (String)joinTable,
+                        (String)joinColumnEnd1,
+                        (String)joinColumnEnd2, 
+                        (String)unitOfWorkProvider, 
+                        (String)removableReferenceIdPrefix, 
+                        disableAboslutePositioning
                     );
                     SysLog.detail("Configuration added", entry);
                     // Check that no two entries have the same type name
@@ -412,8 +442,8 @@ public class DatabaseConfiguration {
                     new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.INVALID_CONFIGURATION, 
-                        "[type,typeName,dbObject,dbObjectSecondary,dbObjectFormat,dbObjectForQuerySecondary,pathNormalizeLevel,dbObjectHint,objectIdPattern] must be of type [(String|Path),String,String,String,String,String,String,Number,String,String]",
-                        new BasicException.Parameter("type configuration", "[" + type + "," + dbObject + "," + dbObject2 + "," + dbObjectFormat + "," + dbObjectForQuery + "," + dbObjectForQuery2 + "," + pathNormalizeLevel + "," + dbObjectHint + "," + objectIdPattern + "]")
+                        "[type,typeName,dbObject,dbObjectSecondary,dbObjectFormat,dbObjectForQuerySecondary,pathNormalizeLevel,dbObjectHint,objectIdPattern,unitOfWorkProvider,removableReferenceIdPrefix] must be of type [(String|Path),String,String,String,String,String,String,Number,String,String,String,String]",
+                        new BasicException.Parameter("type configuration", "[" + type + "," + dbObject + "," + dbObject2 + "," + dbObjectFormat + "," + dbObjectForQuery + "," + dbObjectForQuery2 + "," + pathNormalizeLevel + "," + dbObjectHint + "," + objectIdPattern + "," + unitOfWorkProvider + "," + removableReferenceIdPrefix + "]")
                     ).log();
                 }
             }                
@@ -638,14 +668,27 @@ public class DatabaseConfiguration {
     ) {
         return this.toFromColumnNameMapping;
     }
-
+    
+    //---------------------------------------------------------------------------
+    public boolean useViewsForRedundantColumns(){
+    	return this.useViewsForRedundantColumns;
+    }
+    
+    //---------------------------------------------------------------------------
+    public boolean cascadeDeletes(){
+        return this.cascadeDeletes;
+    }
+    
     //---------------------------------------------------------------------------
     // Variables
     //---------------------------------------------------------------------------
     private final String namespaceId;    
     private final String referenceIdFormat;    
+    private final boolean usePreferences;
+    private final boolean cascadeDeletes;
     private final boolean useNormalizedReferences;
     private final boolean useNormalizedObjectIds;
+    private final boolean useViewsForRedundantColumns;
     private final Configuration configuration;
     private final DataSource connectionManager;
     // Maps short column names to long column names.

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Codes.java,v 1.19 2010/03/17 13:24:46 wfro Exp $
+ * Name:        $Id: Codes.java,v 1.20 2010/12/13 15:20:08 wfro Exp $
  * Description: Codes
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/17 13:24:46 $
+ * Date:        $Date: 2010/12/13 15:20:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -418,7 +418,7 @@ implements Serializable {
             	}
                 Map<Object,Object> longTexts = this.getLongText(feature, locale, true, false);
                 for(Map.Entry<Object,Object> entry: longTexts.entrySet()) {
-                    String longText = (String)entry.getValue();
+                    String longText = ((String)entry.getValue()).trim();
                     if((longText != null) && longText.toUpperCase().startsWith(value)) {
                     	return (Short)entry.getKey();
                     }

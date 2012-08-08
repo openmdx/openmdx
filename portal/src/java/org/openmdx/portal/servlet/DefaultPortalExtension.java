@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultPortalExtension.java,v 1.96 2010/08/05 09:34:37 wfro Exp $
+ * Name:        $Id: DefaultPortalExtension.java,v 1.100 2010/12/07 12:55:49 wfro Exp $
  * Description: DefaultEvaluator
- * Revision:    $Revision: 1.96 $
+ * Revision:    $Revision: 1.100 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/05 09:34:37 $
+ * Date:        $Date: 2010/12/07 12:55:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -124,7 +124,6 @@ import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.databinding.CompositeObjectDataBinding;
 import org.openmdx.portal.servlet.databinding.ReferencedObjectDataBinding;
-import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.ui1.jmi1.FeatureDefinition;
@@ -290,12 +289,12 @@ public class DefaultPortalExtension
     
     //-------------------------------------------------------------------------    
     /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.PortalExtension_1_0#hasGridColours(java.lang.String)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getGridRowBackColor(java.lang.String)
      */
-    public boolean hasGridColours(
-        String referencedTypeName
+    public String[] getGridRowColors(
+        RefObject_1_0 obj
     ) {
-        return false;
+        return null;
     }
     
     //-------------------------------------------------------------------------    
@@ -654,15 +653,24 @@ public class DefaultPortalExtension
                   // parse parameter values
                   List parameterValues = Arrays.asList((Object[])parameterMap.get(key));
                   StringTokenizer tokenizer = parameterValues.size() == 0 ? 
-                	  new StringTokenizer("", "\n") : 
-                	  new StringTokenizer((String)parameterValues.get(0), "\n\r");
+                	  new StringTokenizer("", "\n", true) : 
+                	  new StringTokenizer((String)parameterValues.get(0), "\n\r", true);
                   List<String> newValues = new ArrayList<String>();
+                  boolean lastTokenIsDelim = false;
                   while(tokenizer.hasMoreTokens()) {
-                    String token = tokenizer.nextToken();
-                    if(!"#NULL".equals(token)) {
-                      newValues.add(token);
-                    }
-                  }        
+                	  String token = tokenizer.nextToken();
+                	  if(!"#NULL".equals(token)) {
+                		  if("\n".equals(token) || "\r".equals(token)) {
+                			  if(lastTokenIsDelim) {
+                				  newValues.add("");
+                			  }
+                			  lastTokenIsDelim = true;
+                		  } else {
+                			  newValues.add(token);
+                			  lastTokenIsDelim = false;
+                		  }
+                	  }
+                  }
                   // accept?
                   AttributeValue valueHolder = feature.getValue();
                   boolean accept =
@@ -2079,7 +2087,7 @@ public class DefaultPortalExtension
      */
     public boolean hasUserDefineableQualifier(
         org.openmdx.ui1.jmi1.Inspector inspector,
-        ApplicationContext application
+        ApplicationContext app
     ) {
         return true;
     }
@@ -2091,15 +2099,33 @@ public class DefaultPortalExtension
      */
     public boolean showGridContentOnInit(
         GridControl gridControl,
-        ApplicationContext application
+        ApplicationContext app
     ) {
-        String showRowsOnInitPropertyName = gridControl.getPropertyName(
+        String propertyName = gridControl.getPropertyName(
             gridControl.getQualifiedReferenceName(),
-            Grid.PROPERTY_SHOW_ROWS_ON_INIT
+            UserSettings.SHOW_ROWS_ON_INIT
         );
-        return application.getSettings().getProperty(showRowsOnInitPropertyName) != null
-            ? Boolean.valueOf(application.getSettings().getProperty(showRowsOnInitPropertyName)).booleanValue()
+        return app.getSettings().getProperty(propertyName) != null
+            ? Boolean.valueOf(app.getSettings().getProperty(propertyName)).booleanValue()
             : true;        
+    }
+    
+    //-------------------------------------------------------------------------
+    /**
+     * The default implementation shows the search form according to the
+     * user settings. The default value is false if no user setting is found.
+     */
+    public boolean showSearchForm(
+        GridControl gridControl,
+        ApplicationContext app
+    ) {
+        String propertyName = gridControl.getPropertyName(
+            gridControl.getQualifiedReferenceName(),
+            UserSettings.SHOW_SEARCH_FORM
+        );
+        return app.getSettings().getProperty(propertyName) != null ? 
+        	Boolean.valueOf(app.getSettings().getProperty(propertyName)).booleanValue() : 
+        		false;        
     }
     
     //-------------------------------------------------------------------------

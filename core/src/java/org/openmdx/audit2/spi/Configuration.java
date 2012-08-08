@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Configuration.java,v 1.1 2009/11/27 19:13:19 hburger Exp $
+ * Name:        $Id: Configuration.java,v 1.3 2010/10/19 21:56:30 hburger Exp $
  * Description: Configuration 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/27 19:13:19 $
+ * Date:        $Date: 2010/10/19 21:56:30 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,10 +48,11 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.audit2.spi;
 
 import java.util.Map;
+
+import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.naming.Path;
 
@@ -70,38 +70,19 @@ public interface Configuration {
     Map<Path,Path>  getMapping();
 
     /**
-     * Retrieve the audit segment's object id.
+     * Retrieve the audit segment's id
      * 
-     * @return the audit segment's object id
+     * @return the audit segment's id
      */
-    Path getAuditSegmentId();
-
-    /**
-     * Tells whether audit1 persistence is used.
-     * <p>
-     * <em>
-     * <ul>
-     * <li>If <code>true</code>, then<ul>
-     * <li>newly created objects are not considered being involved in the 
-     * current unit of work
-     * </ul>
-     * <li>
-     * <li>If <code>false</code>, then<ul>
-     * <li>newly created objects are considered being involved in the current 
-     * unit of work
-     * </ul>
-     * <li>
-     * </ul>
-     * </em>
-     * @return return <code>true</code> if audit is persistence is used.
-     */
-    boolean isAudit1Persistence();
+    Path getAuditSegmentId(
+        PersistenceManager context
+    );
     
     /**
-     * Tells whether the modified feature set is persistent or re-calculated
+     * Tells which persistence mode shall be used
      * 
-     * @return <code>true</code> if the modified feature set is persistent
+     * @return the actual involvement persistence mode
      */
-    boolean isModifiedFeaturePersistent();
+    InvolvementPersistence getPersistenceMode();
     
 }

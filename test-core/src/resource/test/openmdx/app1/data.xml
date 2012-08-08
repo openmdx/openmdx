@@ -4,49 +4,7 @@
 	<_object/>
 	<_content>
 		<provider>
-<!-- 	
-			<org.openmdx.base.Provider qualifiedName="JmiNone" _operation="null">
-				<_object/>
-				<_content>
-					<segment>
-						<test.openmdx.app1.Segment qualifiedName="Standard">
-							<_object/>
-							<_content/>
-						</test.openmdx.app1.Segment>
-						<test.openmdx.app1.Segment qualifiedName="Standard" _operation="null">
-							<_object/>
-							<_content>
-								<person>
-									<test.openmdx.app1.Person id="10000" _operation="set">
-										<_object>
-											<birthdate>2001-01-01</birthdate>
-											<birthdateAsDateTime>2001-01-01T13:00:00.000Z</birthdateAsDateTime>
-											<foreignId>10000</foreignId>
-											<lastName>Muster</lastName>
-											<salutation>Mister</salutation>
-											<sex>0</sex>
-										</_object>
-										<_content/>
-									</test.openmdx.app1.Person>
-									<test.openmdx.app1.Person id="10000" _operation="update">
-										<_object>
-											<birthdate>2001-01-01</birthdate>
-											<birthdateAsDateTime>2001-01-01T13:00:00.000Z</birthdateAsDateTime>
-											<foreignId>10000</foreignId>
-											<lastName>Muster</lastName>
-											<salutation>Mister</salutation>
-											<sex>0</sex>
-										</_object>
-										<_content/>
-									</test.openmdx.app1.Person>
-								</person>
-							</_content>
-						</test.openmdx.app1.Segment>
-					</segment>
-				</_content>
-			</org.openmdx.base.Provider>
--->			
-			<org.openmdx.base.Provider qualifiedName="JmiJdbc" _operation="null">
+			<org.openmdx.base.Provider qualifiedName="Data" _operation="null">
 				<_object/>
 				<_content>
 					<segment>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-properties.xml,v 1.34 2009/09/18 16:29:41 hburger Exp $
+= Name:        $Id: build-properties.xml,v 1.35 2010/09/13 15:22:29 hburger Exp $
 = Description: openMDX Build Properties
-= Revision:    $Revision: 1.34 $
-= Date:        $Date: 2009/09/18 16:29:41 $
+= Revision:    $Revision: 1.35 $
+= Date:        $Date: 2010/09/13 15:22:29 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -82,6 +82,25 @@
 	<!-- load the project specific settings -->
 	<property name="project.build.properties" location="${basedir}/build.properties" />
 	<property file="${project.build.properties}" />
+
+	<!-- load the vendor specific settings -->
+	<basename 
+		property="java.vendor.id" 
+		file="${java.vendor.url}"
+	/>
+	<property 
+		name="java.vendor.properties" 
+		value="${openmdx.home}/ant/etc/ant/${java.vendor.id}-properties.xml"
+	/>
+	<import 
+		file="${java.vendor.properties}" 
+		optional="true"
+	/>
+	<!-- default value in case the vendor property file doesn't provide them -->
+	<property 
+		name="build.compile.bootclasspath" 
+		value="lib/rt.jar"
+	/>
 	
 	<!-- load the platform specific settings -->
 	<basename property="build.target.platform" file="${project.platform.list}"/>
@@ -96,8 +115,7 @@
 		name="java.platform.properties" 
 		value="${openmdx.home}/ant/etc/ant/${build.java.platform}-properties.xml"
 	/>
-	<import file="${java.platform.properties}" optional="false"/>
-	
+	<import file="${java.platform.properties}" optional="false"/>	
 	<!-- default value in case the platform property file doesn't provide them -->
 	<property name="build.target.version" value="${ant.java.version}"/>
 	<property name="build.source.version" value="${build.target.version}"/>
@@ -133,6 +151,7 @@
 	<!-- =================================================================== -->
 	<property name="build.debug"               value="on" />
 	<property name="build.optimize"            value="off" />
+	<property name="build.include.ant.runtime" value="false" />
 	
 	<!-- =================================================================== -->
 	<!-- = JUnit settings                                                  = -->

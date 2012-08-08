@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.34 2010/06/22 07:17:57 hburger Exp $
+= Name:        $Id: build.xml,v 1.35 2010/09/13 15:22:29 hburger Exp $
 = Description: openMDX/Ant Build File
-= Revision:    $Revision: 1.34 $
-= Date:        $Date: 2010/06/22 07:17:57 $
+= Revision:    $Revision: 1.35 $
+= Date:        $Date: 2010/09/13 15:22:29 $
 = Copyright:   (c) 2003-2010 OMEX AG
 =======================================================================
  *
@@ -63,6 +63,9 @@
 
 	<!-- Slash separated platform list, the last entry being the default -->
 	<property name="project.platform.list" value="jre-1.5/jre-1.6"/>
+
+	<!-- Override the default settings -->
+	<property name="build.include.ant.runtime" value="true"/>
 
 	<!-- Included Ant Projects -->
 	<import file="etc/ant/build-properties.xml"/>
@@ -198,6 +201,5 @@ ${build.dir}/doc/api/index.html
 
 	<target name="prepare">
 	</target>
-	
-</project>
 
+</project>

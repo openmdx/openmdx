@@ -1,9 +1,9 @@
 /*
  * ====================================================================
  * Description: Abstract Object_1
- * Revision:    $Revision: 1.50 $
+ * Revision:    $Revision: 1.52 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 13:08:44 $
+ * Date:        $Date: 2010/12/09 06:24:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,13 +61,24 @@ import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.spi.ExceptionHelper;
 import org.openmdx.base.accessor.spi.MarshallingObject_1;
+import org.openmdx.base.accessor.view.ViewManager_1.ObjectIdMarshaller;
 import org.openmdx.base.aop1.PlugIn_1_0;
+import org.openmdx.base.collection.MarshallingList;
+import org.openmdx.base.collection.MarshallingSet;
+import org.openmdx.base.collection.MarshallingSparseArray;
+import org.openmdx.base.collection.Unmarshalling;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
+import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.SortedMaps;
 
 /**
  * Registers the the delegates with their manager
@@ -128,11 +139,57 @@ class ObjectView_1
         return this.hollow;
     }
     
-    //--------------------------------------------------------------------------
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.view.ObjectView_1_0#getFeatureReplaceingObjectById(java.lang.String)
+	 */
+//	@Override
+	public Object getFeatureReplaceingObjectById(
+		ModelElement_1_0 featureDef
+	) throws ServiceException {
+        String multiplicity = ModelUtils.getMultiplicity(featureDef);
+        String feature = (String) featureDef.objGetValue("name");
+        if(
+            Multiplicities.SINGLE_VALUE.equals(multiplicity) || 
+            Multiplicities.OPTIONAL_VALUE.equals(multiplicity) 
+        ){
+            Object pc = getDelegate().objGetValue(feature); 
+            return JDOHelper.isPersistent(pc) ?
+                JDOHelper.getObjectId(pc) :
+                JDOHelper.getTransactionalObjectId(pc);
+        } else if (Multiplicities.LIST.equals(multiplicity)) { 
+            return new MarshallingList<Object>(
+                ObjectIdMarshaller.INSTANCE,
+                this.getDelegate().objGetList(feature),
+                Unmarshalling.RELUCTANT
+            );
+        } else if (Multiplicities.SET.equals(multiplicity)) { 
+            return new MarshallingSet<Object>(
+                ObjectIdMarshaller.INSTANCE,
+                this.getDelegate().objGetSet(feature),
+                Unmarshalling.RELUCTANT
+            );
+        } else if (Multiplicities.SPARSEARRAY.equals(multiplicity)) { 
+            return new MarshallingSparseArray(
+                ObjectIdMarshaller.INSTANCE,
+                SortedMaps.asSparseArray(this.getDelegate().objGetSparseArray(feature)),
+                Unmarshalling.RELUCTANT
+            );
+        } else throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            "Unsupported multiplicity",
+            ExceptionHelper.newObjectIdParameter("id", this),
+            new BasicException.Parameter("feature", feature),
+            new BasicException.Parameter("multiplicity", multiplicity)
+         );
+	}
+
+
+	//--------------------------------------------------------------------------
     // Extends Object
     //--------------------------------------------------------------------------
 
-    /* (non-Javadoc)
+	/* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.AbstractObject_1#toString()
      */
     @Override
@@ -271,10 +328,10 @@ class ObjectView_1
      * @see org.openmdx.base.accessor.spi.MarshallingObject_1#openmdxjdoClone()
      */
     @Override
-    public DataObject_1_0 openmdxjdoClone() {
+    public DataObject_1_0 openmdxjdoClone(String... exclude) {
         try {
             return (DataObject_1_0) getMarshaller().marshal(
-                this.dataObject.openmdxjdoClone()
+                this.dataObject.openmdxjdoClone(exclude)
             );
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);

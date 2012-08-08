@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 6"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX 2 ~ Core (jre-1.6)"/>
+	<classpathentry excluding="**/CVS/**|**/jre/before1_4/**|**/jre/before1_5/**|**/jre/since1_6/**" kind="src" path="src/scala"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ OSGi Enterprise (jre-1.6)"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ OSGi Extension (jre-1.6)"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Java2 Enterprise (jre-1.6)"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX 2 ~ Test Core (jre-1.6)"/>
+	<classpathentry kind="output" path="build/jre-1.6/eclipse"/>
+</classpath>

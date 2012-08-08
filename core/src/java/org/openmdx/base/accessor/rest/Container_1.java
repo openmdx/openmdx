@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Container_1.java,v 1.63 2010/08/06 12:15:12 hburger Exp $
+ * Name:        $Id: Container_1.java,v 1.67 2010/10/27 14:06:19 hburger Exp $
  * Description: Container_1 
- * Revision:    $Revision: 1.63 $
+ * Revision:    $Revision: 1.67 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:15:12 $
+ * Date:        $Date: 2010/10/27 14:06:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,6 +65,7 @@ import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOHelper;
 import javax.jdo.JDOObjectNotFoundException;
 import javax.jdo.JDOUserException;
+import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
@@ -103,7 +104,7 @@ class Container_1
             feature
         );
         this.ignoreCache = !this.isComposite();
-        this.validate = this.openmdxjdoGetPersistenceManager().isProxy() ? null : Boolean.FALSE;
+        this.validate = this.openmdxjdoGetDataObjectManager().isProxy() ? null : Boolean.FALSE;
         this.cache = this.ignoreCache || this.isStored() ? null : new ConcurrentHashMap<String,DataObject_1_0>();
         this.queries = new ConcurrentHashMap<String,BatchingList>();
     }
@@ -174,7 +175,7 @@ class Container_1
     private boolean isComposite(
     ){
         try {
-            Model_1_0 model = this.openmdxjdoGetPersistenceManager().getModel();
+            Model_1_0 model = this.openmdxjdoGetDataObjectManager().getModel();
             ModelElement_1_0 classDef = model.getElement(this.owner.objGetClass());
             ModelElement_1_0 reference = model.getFeatureDef(classDef, this.transientContainerId.getFeature(), true);
             ModelElement_1_0 referencedEnd = model.getElement(reference.objGetValue("referencedEnd"));
@@ -194,7 +195,7 @@ class Container_1
         if(this.validate == null) {
             Path xri = this.openmdxjdoGetContainerId();
             if(xri != null) try {
-                this.validate = Boolean.valueOf(this.openmdxjdoGetPersistenceManager().getModel().containsSharedAssociation(xri));
+                this.validate = Boolean.valueOf(this.openmdxjdoGetDataObjectManager().getModel().containsSharedAssociation(xri));
             } catch (Exception exception) {
                 this.validate = Boolean.TRUE;
             }
@@ -258,8 +259,16 @@ class Container_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
+//  @Override
+    public PersistenceManager openmdxjdoGetPersistenceManager(){
+        return this.owner.jdoGetPersistenceManager();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+     */
     @Override
-    public DataObjectManager_1 openmdxjdoGetPersistenceManager() {
+    public DataObjectManager_1 openmdxjdoGetDataObjectManager() {
         return this.owner.jdoGetPersistenceManager();
     }
 
@@ -308,7 +317,7 @@ class Container_1
             //
             // Test whether lookup for this object has already failed in the same unit of work.
             //
-            UnitOfWork_1 unitOfWork = this.openmdxjdoGetPersistenceManager().currentTransaction();
+            UnitOfWork_1 unitOfWork = this.openmdxjdoGetDataObjectManager().currentTransaction();
             if(unitOfWork.isActive()) {
                 TransactionalState_1 state = unitOfWork.getState(this.owner, true);
                 if(state != null) {
@@ -324,7 +333,7 @@ class Container_1
         }
     }
     
-    @Override
+//  @Override
     public DataObject_1_0 get(
         Object key
     ) {
@@ -334,14 +343,16 @@ class Container_1
                 //
                 // Retrieve the object from the cache
                 //
-                return this.cache.get(qualifier);
+            	return this.cache.get(qualifier);
             } else if(notFound(key)) {
                 return null;
             } else try { 
-                return this.openmdxjdoGetPersistenceManager().getObjectById(
+            	DataObject_1_0 member =  this.openmdxjdoGetDataObjectManager().getObjectById(
                     this.openmdxjdoGetContainerId().getChild(qualifier), 
                     this.mustValidate()
                 );
+            	// TODO This test a workaround for an erroneous JRE 5.0 behaviour!!!  
+            	return this.openmdxjdoIsPersistent() == member.jdoIsPersistent() ? member : null;
             } catch (JDOObjectNotFoundException exception) {
                 return null;
             }
@@ -350,7 +361,7 @@ class Container_1
         }
     }
 
-    @Override
+//  @Override
     public boolean containsKey(Object key) {
         if(this.isRetrieved()) {
             return this.cache.containsKey(key);
@@ -358,7 +369,7 @@ class Container_1
             if(notFound(key)) {
                 return false;
             } else try {
-                DataObject_1_0 candidate = this.openmdxjdoGetPersistenceManager().getObjectById(
+                DataObject_1_0 candidate = this.openmdxjdoGetDataObjectManager().getObjectById(
                     this.openmdxjdoGetContainerId().getChild((String)key), 
                     true
                 );
@@ -391,7 +402,7 @@ class Container_1
                     //
                     if(
                         dataObject.jdoIsPersistent() && 
-                        dataObject.jdoGetPersistenceManager() == this.openmdxjdoGetPersistenceManager()
+                        dataObject.jdoGetPersistenceManager() == this.openmdxjdoGetDataObjectManager()
                     ){
                         Path containerId = this.openmdxjdoGetContainerId();
                         if(containerId != null) {
@@ -432,7 +443,7 @@ class Container_1
         return containsObject(value) && !JDOHelper.isDeleted(value);
     }
 
-    @Override
+//  @Override
     public DataObject_1_0 put(
         String key, 
         DataObject_1_0 value
@@ -457,7 +468,7 @@ class Container_1
                 return null;
             } else {
                 if(value.jdoIsPersistent()) {
-                    this.openmdxjdoGetPersistenceManager().deletePersistent(value);
+                    this.openmdxjdoGetDataObjectManager().deletePersistent(value);
                     return value;
                 } else {
                     return this.cache.remove(qualifier);
@@ -468,7 +479,7 @@ class Container_1
         }
     }
 
-    @Override
+//   @Override
     public void openmdxjdoRetrieve(
         FetchPlan fetchPlan
     ) {
@@ -512,13 +523,7 @@ class Container_1
         return super.entrySet();
     }
 
-    void evictCache(){
-        if(this.isStored()) {
-            this.cache = null;
-        } 
-    }
-    
-    @Override
+//  @Override
     public void openmdxjdoEvict(
         boolean allMembers, 
         boolean allSubSets
@@ -545,7 +550,7 @@ class Container_1
      */
     String getQueryType(){
         if(this.queryType == null) try {
-            this.queryType = (String) this.openmdxjdoGetPersistenceManager().getModel().getTypes(this.openmdxjdoGetContainerId())[2].objGetValue("qualifiedName");
+            this.queryType = (String) this.openmdxjdoGetDataObjectManager().getModel().getTypes(this.openmdxjdoGetContainerId())[2].objGetValue("qualifiedName");
         } catch (ServiceException exception) {
             exception.log();
         }
@@ -586,7 +591,7 @@ class Container_1
         if(this.cache == null && !this.ignoreCache()) {
             BatchingList stored = this.queries.get("");
             if(stored != null && stored.isSmallerThanCacheThreshold()){
-                this.openmdxjdoRetrieve(this.openmdxjdoGetPersistenceManager().getFetchPlan());
+                this.openmdxjdoRetrieve(this.openmdxjdoGetDataObjectManager().getFetchPlan());
             }
         }
         return this.cache;
@@ -668,7 +673,7 @@ class Container_1
          */
         private final Container_1_0 superMap;
         
-        @Override
+//      @Override
         public void openmdxjdoEvict(
             boolean evictAllMembers, 
             boolean evictAllSubSets // TODO restrict to the SubSet's SubSets
@@ -701,7 +706,7 @@ class Container_1
          */
         @Override
         protected List<Condition> getConditions() {
-            return objectFilter.getDelegate(this.openmdxjdoGetPersistenceManager());
+            return objectFilter.getDelegate(this.openmdxjdoGetDataObjectManager());
         }
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.rest.AbstractContainer_1#getExtension()
@@ -730,14 +735,22 @@ class Container_1
          * @see org.openmdx.base.accessor.rest.AbstractContainer_1#openmdxjdoGetPersistenceManager()
          */
         @Override
-        public DataObjectManager_1 openmdxjdoGetPersistenceManager() {
-            return Container_1.this.openmdxjdoGetPersistenceManager();
+        public DataObjectManager_1 openmdxjdoGetDataObjectManager() {
+            return Container_1.this.openmdxjdoGetDataObjectManager();
+        }
+        
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+         */
+    //  @Override
+        public PersistenceManager openmdxjdoGetPersistenceManager(){
+        	return Container_1.this.openmdxjdoGetPersistenceManager();
         }
         
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetContainerId()
          */
-        @Override
+//      @Override
         public Path openmdxjdoGetContainerId() {
             throw new UnsupportedOperationException(
                 "Query XRIs not yet supported"
@@ -747,7 +760,7 @@ class Container_1
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetTransientContainerId()
          */
-        @Override
+//      @Override
         public TransientContainerId openmdxjdoGetTransientContainerId() {
             throw new UnsupportedOperationException(
                 "Query XRIs not yet supported"
@@ -757,7 +770,7 @@ class Container_1
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoIsPersistent()
          */
-        @Override
+//      @Override
         public boolean openmdxjdoIsPersistent() {
             return Container_1.this.openmdxjdoIsPersistent();
         }
@@ -765,7 +778,7 @@ class Container_1
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRetrieve(javax.jdo.FetchPlan)
          */
-        @Override
+//      @Override
         public void openmdxjdoRetrieve(
             FetchPlan fetchPlan
         ) {
@@ -777,7 +790,7 @@ class Container_1
         /* (non-Javadoc)
          * @see java.util.Map#containsKey(java.lang.Object)
          */
-        @Override
+//      @Override
         public boolean containsKey(Object key) {
             DataObject_1_0 candidate = this.superMap.get(key);
             return candidate != null && this.objectFilter.accept(candidate);
@@ -786,7 +799,7 @@ class Container_1
         /* (non-Javadoc)
          * @see java.util.Map#containsValue(java.lang.Object)
          */
-        @Override
+//      @Override
         public boolean containsValue(Object value) {
             return 
                 Container_1.this.containsValue(value) &&    
@@ -796,7 +809,7 @@ class Container_1
         /* (non-Javadoc)
          * @see java.util.Map#get(java.lang.Object)
          */
-        @Override
+//      @Override
         public DataObject_1_0 get(Object key) {
             DataObject_1_0 candidate = this.superMap.get(key);
             return candidate != null && this.objectFilter.accept(candidate) ? candidate : null;
@@ -805,7 +818,7 @@ class Container_1
         /* (non-Javadoc)
          * @see java.util.Map#put(java.lang.Object, java.lang.Object)
          */
-        @Override
+//      @Override
         public DataObject_1_0 put(String key, DataObject_1_0 value) {
             if(this.objectFilter.accept(value)) {
                 return this.superMap.put(key, value);

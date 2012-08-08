@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateTimeState_1.java,v 1.14 2010/07/13 10:03:24 hburger Exp $
+ * Name:        $Id: DateTimeState_1.java,v 1.16 2010/11/03 11:45:13 hburger Exp $
  * Description: Date State
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/13 10:03:24 $
+ * Date:        $Date: 2010/11/03 11:45:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -202,6 +202,20 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
         );
     }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.state2.aop1.BasicState_1#interfers(org.openmdx.base.accessor.cci.DataObject_1_0)
+     */
+    @Override
+    protected boolean interfersWith(
+        DataObject_1_0 candidate
+    ) throws ServiceException {
+        DateTimeStateContext context = getContext();
+        return 
+            Order.compareValidFromToValidTo(context.getValidFrom(), (Date) candidate.objGetValue("stateValidTo")) < 0 &&
+            Order.compareValidFromToValidTo((Date) candidate.objGetValue("stateValidFrom"), context.getInvalidFrom()) < 0;
+    }
+
+    
     /* (non-Javadoc)
      * @see org.openmdx.state2.aop1.AbstractState_1#isInvolved()
      */

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestRemovable.java,v 1.3 2010/01/03 15:15:27 wfro Exp $
+ * Name:        $Id: TestRemovable.java,v 1.4 2010/11/11 10:39:30 hburger Exp $
  * Description: Test Removable 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 15:15:27 $
+ * Date:        $Date: 2010/11/11 10:39:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,7 +67,7 @@ public class TestRemovable {
     public void testRemovedAtPlaceholder() throws ParseException{
         DateTimeFormat format = DateTimeFormat.getInstance("yyyyyMMdd'T'HHmmss.SSS'Z'");
         assertEquals(
-            "Future palceholder", 
+            "Future placeholder", 
             "100000101T000000.000Z", 
             format.format(Removable_1.IN_THE_FUTURE)
         );

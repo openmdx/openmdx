@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Removable_1.java,v 1.7 2009/11/04 15:59:44 hburger Exp $
+ * Name:        $Id: Removable_1.java,v 1.8 2010/11/05 18:16:27 hburger Exp $
  * Description: Removable_1 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/04 15:59:44 $
+ * Date:        $Date: 2010/11/05 18:16:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,10 +59,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.accessor.view.Interceptor_1;
+import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
@@ -131,15 +129,6 @@ public class Removable_1 extends Interceptor_1 {
         }
         super.objSetValue(feature, to);
     } 
-
-    @Override
-    public boolean objIsRemoved(
-    ) throws ServiceException { 
-        DataObject_1_0 dataObject = this.self.objGetDelegate();
-        return !dataObject.jdoIsDeleted() && IN_THE_FUTURE.equals(
-            dataObject.objGetValue(SystemAttributes.REMOVED_AT)
-        );   
-    }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.aop1.Aspect_1#objGetSet(java.lang.String)

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RefRootPackage_1.java,v 1.209 2010/08/09 13:12:05 hburger Exp $
+ * Name:        $Id: RefRootPackage_1.java,v 1.215 2010/12/09 15:12:22 hburger Exp $
  * Description: RefRootPackage_1 class
- * Revision:    $Revision: 1.209 $
+ * Revision:    $Revision: 1.215 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:12:05 $
+ * Date:        $Date: 2010/12/09 15:12:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -107,6 +107,7 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.accessor.rest.DataObject_1;
+import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
 import org.openmdx.base.accessor.spi.AbstractTransaction_1;
 import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
@@ -129,6 +130,8 @@ import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.Queries;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManager;
+import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
+import org.openmdx.base.persistence.spi.DelegatingPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.MarshallingInstanceLifecycleListener;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
@@ -184,9 +187,16 @@ public class RefRootPackage_1
         this.persistenceManagerFactory = persistenceManagerFactory;
         MarshallingInstanceLifecycleListener listener = new MarshallingInstanceLifecycleListener(this.registry, this);
         delegate.addInstanceLifecycleListener(listener);
-        this.persistenceManager = new PersistenceManager_1(
+        boolean containterMnagedTransaction = 
+            AbstractPersistenceManagerFactory.isTransactionContainerManaged(persistenceManagerFactory) ||
+            DelegatingPersistenceManagerFactory.isTransactionContainerManaged(persistenceManagerFactory);
+        this.persistenceManager = containterMnagedTransaction ? new ContainerManagedPersistenceManager_1(
             persistenceManagerFactory,
-            listener                
+            listener, 
+            interactionSpec == null && persistenceManagerFactory instanceof EntityManagerFactory_1
+        ) : new StandardPersistenceManager_1(
+            persistenceManagerFactory,
+            listener
         );
         if(this.userObjects != null) {
             for(Map.Entry<String,Object> userObject : this.userObjects.entrySet()) {
@@ -253,6 +263,8 @@ public class RefRootPackage_1
     protected ConcurrentMap<InteractionSpec,RefRootPackage_1> viewManager;
     private final PersistenceManagerFactory persistenceManagerFactory;
     protected final PersistenceManager_1_0 persistenceManager;
+    final StandardMarshaller standardMarshaller = new StandardMarshaller(this);
+    final ValidatingMarshaller validatingMarshaller = new ValidatingMarshaller(this);
 
     /**
      * Registry containing <qualifiedName, JMI class> and <qualifiedName, JMI structs> 
@@ -282,7 +294,6 @@ public class RefRootPackage_1
      * Alternate package name format indicator
      */
     private static final String JMI1_PACKAGE_NAME_INDICATOR = "." + Names.JMI1_PACKAGE_SUFFIX;
-    
     
     //-------------------------------------------------------------------------
     void unregister(
@@ -319,6 +330,7 @@ public class RefRootPackage_1
      */
 //  @Override
     public void exceptionThrown(Exception cause) {
+        
         throw this.toInvalidObjectException(cause);
     }
 
@@ -373,54 +385,52 @@ public class RefRootPackage_1
             return this.refCreateStruct(((RefStruct_1_0)source).refDelegate());
         } else if (source instanceof Record) {
             return this.refCreateStruct((Record)source);
-        } else {
+        } else if(source instanceof PersistenceCapable) {
             RefRootPackage_1 refPackage = this.refPackage(getInteractionsSpec(source));
             if(refPackage == this){
-                if(source instanceof PersistenceCapable) {
-                    PersistenceCapable pc = (PersistenceCapable) source;
-                    RefObject target = this.registry.get(pc);
-                    if(target == null) {
-                        String className;
-                        if(RefRootPackage_1.this.isTerminal()) {
-                            className = ((DataObject_1_0)source).objGetClass();
-                            if(className == null){
-                                if(this.refInteractionSpec() == null) throw new ServiceException(
-                                  BasicException.Code.DEFAULT_DOMAIN,
-                                  BasicException.Code.NOT_FOUND,
-                                  "Object class can not be determined",
-                                  new BasicException.Parameter(
-                                      "objectId", 
-                                      pc.jdoIsPersistent() ? ((Path)pc.jdoGetObjectId()).toXRI() : null
-                                  ),
-                                  new BasicException.Parameter(
-                                      "transientObjectId", 
-                                      pc.jdoGetTransactionalObjectId()
-                                  ),
-                                  new BasicException.Parameter(
-                                      "interactionSpec",
-                                      refPackage.interactionSpec
-                                  )
-                                );
-                                return null;
-                            }
-                        } else {
-                            className = this.implementationMapper.getModelClassName(source.getClass().getInterfaces()[0]);
+                PersistenceCapable pc = (PersistenceCapable) source;
+                RefObject target = this.registry.get(pc);
+                if(target == null) {
+                    String className;
+                    if(RefRootPackage_1.this.isTerminal()) {
+                        className = ((DataObject_1_0)source).objGetClass();
+                        if(className == null){
+                            if(this.refInteractionSpec() == null) throw new ServiceException(
+                              BasicException.Code.DEFAULT_DOMAIN,
+                              BasicException.Code.NOT_FOUND,
+                              "Object class can not be determined",
+                              new BasicException.Parameter(
+                                  "objectId", 
+                                  pc.jdoIsPersistent() ? ((Path)pc.jdoGetObjectId()).toXRI() : null
+                              ),
+                              new BasicException.Parameter(
+                                  "transientObjectId", 
+                                  pc.jdoGetTransactionalObjectId()
+                              ),
+                              new BasicException.Parameter(
+                                  "interactionSpec",
+                                  refPackage.interactionSpec
+                              )
+                            );
+                            return null;
                         }
-                        return this.registry.putUnlessPresent(
-                            pc,
-                            this.refClass(className).refCreateInstance(
-                                Collections.singletonList(source)
-                            )
-                        );
                     } else {
-                        return target;
+                        className = this.implementationMapper.getModelClassName(source.getClass().getInterfaces()[0]);
                     }
+                    return this.registry.putUnlessPresent(
+                        pc,
+                        this.refClass(className).refCreateInstance(
+                            Collections.singletonList(source)
+                        )
+                    );
                 } else {
-                    return source;
+                    return target;
                 }
             } else {
                 return refPackage.marshal(source);
             }
+        } else {
+        	return source;
         }
     }
 
@@ -480,7 +490,7 @@ public class RefRootPackage_1
                     )
                 );
                 return Classes.<C>newProxyInstance(
-                    new Jmi1ContainerInvocationHandler((Marshaller)null, container),
+                    new Jmi1ContainerInvocationHandler(this.validatingMarshaller, container),
                     containerClass == null ? RefContainer.class : containerClass, 
                     PersistenceCapableCollection.class,
                     Serializable.class
@@ -493,7 +503,7 @@ public class RefRootPackage_1
                 RefPackage_1_0 delegate = (RefPackage_1_0) authority.refOutermostPackage();
                 return Classes.<C>newProxyInstance(
                     new Jmi1ContainerInvocationHandler(
-                        new Jmi1ObjectInvocationHandler.StandardMarshaller(this),
+                        this.standardMarshaller,
                         delegate.refContainer(
                             resourceIdentifier, 
                             containerClass
@@ -1040,7 +1050,7 @@ public class RefRootPackage_1
     /**
      * The PersistenceManager associated with the outermost package
      */
-    class PersistenceManager_1
+    class StandardPersistenceManager_1
         extends AbstractPersistenceManager
         implements PersistenceManager_1_0, Delegating_1_0<RefRootPackage_1>
     {
@@ -1051,7 +1061,7 @@ public class RefRootPackage_1
          * @param factory
          * @param listener
          */
-        PersistenceManager_1(
+        StandardPersistenceManager_1(
             PersistenceManagerFactory factory, 
             MarshallingInstanceLifecycleListener listener
         ) {
@@ -1059,7 +1069,21 @@ public class RefRootPackage_1
                 factory, 
                 listener
             );
-            this.transaction = new AbstractTransaction_1(){
+        }
+
+        /**
+         * The transaction associated with this persistence manager, a one-to-one relation.
+         */
+        private final Transaction transaction = newTransaction();
+        
+        /**
+         * Create the persistence manager's transaction object
+         * 
+         * @return the persistence manager's transaction object
+         */
+        protected Transaction newTransaction(){
+            
+            return new AbstractTransaction_1(){
 
                 @Override
                 protected Transaction getDelegate() {
@@ -1067,13 +1091,12 @@ public class RefRootPackage_1
                 }
 
                 public PersistenceManager getPersistenceManager() {
-                    return PersistenceManager_1.this;
+                    return StandardPersistenceManager_1.this;
                 }
-             
+                
             };
-        }
 
-        private final Transaction transaction;
+        }
         
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.AbstractPersistenceManager#getUserObject(java.lang.Object)
@@ -1776,7 +1799,7 @@ public class RefRootPackage_1
         ) {
             if(pcs instanceof PersistenceCapableCollection) {
                 ((PersistenceCapableCollection)pcs).openmdxjdoRetrieve(
-                    useFetchPlan ? PersistenceManager_1.this.getFetchPlan() : null
+                    useFetchPlan ? StandardPersistenceManager_1.this.getFetchPlan() : null
                 );
             } else {
                 super.retrieveAll(pcs, useFetchPlan);
@@ -2148,4 +2171,76 @@ public class RefRootPackage_1
         
     }
     
+    //-------------------------------------------------------------------------
+    // Class PersistenceManager_1
+    //-------------------------------------------------------------------------
+
+    /**
+     * Entity manager used for container managed transactions
+     */
+    class ContainerManagedPersistenceManager_1 extends StandardPersistenceManager_1 {
+
+        /**
+         * Constructor 
+         *
+         * @param factory this manager's factory
+         * @param listener
+         * @param entityManager <true> in case of the <em>leading</em> manager in respect to unit of work management
+         */
+        ContainerManagedPersistenceManager_1(
+            PersistenceManagerFactory factory,
+            MarshallingInstanceLifecycleListener listener, 
+            boolean entityManager
+        ) {
+            super(factory, listener);
+            this.entityManager = entityManager;
+            if(this.entityManager) {
+                ((Synchronization_2_0)currentTransaction()).afterBegin();
+            }
+        }
+
+        /**
+         * <true> in case of the <em>leading</em> manager in respect to unit of work management
+         */
+        private final boolean entityManager;
+        
+        /**
+         * The lock object used for synchronization
+         */
+        private final Object lock = new Object();
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.AbstractPersistenceManager#finalize()
+         */
+        @Override
+        protected void finalize(
+        ) throws Throwable {
+            synchronized(this.lock) {
+                if(this.entityManager) {
+                    ((Synchronization_2_0)currentTransaction()).clear();
+                }
+                super.close();
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.accessor.jmi.spi.RefRootPackage_1.PersistenceManager_1#close()
+         */
+        @Override
+        public void close() {
+            synchronized(this.lock) {
+                if(this.entityManager) {
+                    ((Synchronization_2_0)currentTransaction()).beforeCompletion();
+                }
+                super.close();
+            }
+        }
+
+		@Override
+		protected boolean isTransactionContainerManaged() {
+			return true;
+		}
+        
+    }
+
 }

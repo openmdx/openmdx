@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: InboundConnection_2.java,v 1.54 2010/08/09 13:13:21 hburger Exp $
+ * Name:        $Id: InboundConnection_2.java,v 1.60 2010/12/23 17:42:52 hburger Exp $
  * Description: InboundConnection_2 
- * Revision:    $Revision: 1.54 $
+ * Revision:    $Revision: 1.60 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:13:21 $
+ * Date:        $Date: 2010/12/23 17:42:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,6 +55,7 @@ import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isTransactionO
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -134,7 +135,7 @@ import org.w3c.spi2.Datatypes;
  */
 public class InboundConnection_2 
     extends AbstractConnection
-    implements Synchronization_2_0 
+    implements Serializable, Synchronization_2_0 
 {
 
     /**
@@ -142,23 +143,35 @@ public class InboundConnection_2
      * 
      * @param connectionSpec 
      * @param persistenceManager
+     * @param refRefInitializeOnCreate defines whether refInitialize() shall be applied to new objects
      * 
      * @throws ResourceException 
      */
     public InboundConnection_2(
         RestConnectionSpec connectionSpec, 
-        PersistenceManager persistenceManager
+        PersistenceManager persistenceManager, 
+        boolean refRefInitializeOnCreate
     ) throws ResourceException{
         super(connectionSpec);
         this.persistenceManager = persistenceManager;
+        this.refRefInitializeOnCreate = refRefInitializeOnCreate;
         this.localTransaction = Constants.RESOURCE_LOCAL.equals(
             persistenceManager.getPersistenceManagerFactory().getTransactionType()
         ) ? LocalTransactions.getLocalTransaction(
             persistenceManager
         ) : null;
-
     }
 
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 279566182728456308L;
+
+    /**
+     * Defines whether new object's shall use refInitialize or not.
+     */
+    private final boolean refRefInitializeOnCreate;
+    
     /**
      * 
      */
@@ -174,6 +187,15 @@ public class InboundConnection_2
      */
     protected static final Path BASE_AUTHORITY = new Path("xri://@openmdx*org.openmdx.base");
 
+    /**
+     * Tells whether refInitialize() shall be applied to new objects
+     * 
+     * @return <code>true</code> if refInitialize() shall be applied to new objects
+     */
+    protected boolean isRefInitializeOnCreate(){
+       return this.refRefInitializeOnCreate; 
+    }
+    
     /**
      * Retrieve an object by its resource identifier
      * 
@@ -252,6 +274,14 @@ public class InboundConnection_2
         if(!transaction.isActive()) {
             transaction.begin();
         }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.rest.spi.Synchronization_2_0#clear()
+     */
+//  @Override
+    public void clear() {
+        ((Synchronization_2_0)this.persistenceManager.currentTransaction()).clear();
     }
 
     /* (non-Javadoc)
@@ -718,15 +748,26 @@ public class InboundConnection_2
                 input.getDelegate()
             );
             //
-            // TODO Fetch Plan
+            // Fetch Plan
             //
-            //          query.getFetchPlan();
+            Set<String> fetchGroupNames = input.getGroups();
+            if(fetchGroupNames != null && !fetchGroupNames.isEmpty()) {
+                query.getFetchPlan().setGroups(fetchGroupNames);
+            }
+            //
+            // Fetch Size
+            //
+            Long fetchSize = input.getSize();
+            if(fetchSize != null) {
+                query.getFetchPlan().setFetchSize(fetchSize.intValue());
+            }
             //
             // TODO Extension
             //
             //          for(Map.Entry<String, ?> extension : input.getExtensions().entrySet()) {
             //              query.addExtension(extension.getKey(), extension.getValue());
             //          }
+            //
             return query;
         }
 
@@ -975,7 +1016,9 @@ public class InboundConnection_2
                 RefObject_1_0 newObject = (RefObject_1_0)refPackage.refClass(input.getObjectClass()).refCreateInstance(
                     Collections.singletonList(xri)
                 );
-                newObject.refInitialize(false, false);
+                if(InboundConnection_2.this.isRefInitializeOnCreate()){
+                    newObject.refInitialize(false, false);
+                }
                 this.toRefObject(
                     xri,
                     newObject,
@@ -987,7 +1030,9 @@ public class InboundConnection_2
                 int featurePosition = xri.size() - (newId ? 1 : 2);
                 RefObject refParent = getObjectByResourceIdentifier(xri.getPrefix(featurePosition));
                 RefObject_1_0 refObject = (RefObject_1_0)refParent.refOutermostPackage().refClass(input.getObjectClass()).refCreateInstance(null);
-                refObject.refInitialize(false, false);
+                if(InboundConnection_2.this.isRefInitializeOnCreate()){
+                    refObject.refInitialize(false, false);
+                }
                 this.toRefObject(
                     xri,
                     refObject,

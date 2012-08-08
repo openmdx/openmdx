@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalExtension_1_0.java,v 1.39 2010/06/01 10:32:10 wfro Exp $
+ * Name:        $Id: PortalExtension_1_0.java,v 1.42 2010/11/01 13:41:49 wfro Exp $
  * Description: Evaluator_1_0
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 10:32:10 $
+ * Date:        $Date: 2010/11/01 13:41:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,22 +70,6 @@ import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.view.ObjectView;
 
 public interface PortalExtension_1_0 {
-
-    /**
-     * Evaluates the title obj the object refObj. Same as getTitle() with asShortTitle=true.
-     * 
-     * @param refObj object to evaluate the title
-     * @param locale locale index. Can be used to lookup code texts
-     * @param localeAsString the locale name
-     * @param application application context
-     * @return evaluated object title
-     */
-    public String getTitle(
-        RefObject_1_0 refObj,
-        short locale,
-        String localeAsString,
-        ApplicationContext application
-    );
 
     /**
      * Evaluates the title obj the object refObj.
@@ -172,11 +156,12 @@ public interface PortalExtension_1_0 {
     );
     
     /**
-     * Returns true if the rows of the grid containing objects of type 
-     * referencedTypeName are colour enabled.
+     * Returns colors which is used as foreground and background colors when an 
+     * object is rendered in a grid.
+     * @return foreground (at index 0) and background color (at index 1) or null. 
      */
-    public boolean hasGridColours(
-        String referencedTypeName
+    public String[] getGridRowColors(
+        RefObject_1_0 obj
     );
 
     /**
@@ -188,6 +173,15 @@ public interface PortalExtension_1_0 {
         ApplicationContext application
     );
 
+    /**
+     * The default implementation shows the search form according to the
+     * user settings. The default value is false if no user setting is found.
+     */
+    public boolean showSearchForm(
+        GridControl gridControl,
+        ApplicationContext app
+    );
+    
     /**
      * Get autocompleter for the specified object.
      * 

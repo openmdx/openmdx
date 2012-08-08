@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Qualifiers.java,v 1.6 2010/01/03 15:02:03 wfro Exp $
+ * Name:        $Id: Qualifiers.java,v 1.7 2010/10/19 21:56:30 hburger Exp $
  * Description: Qualifiers 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 15:02:03 $
+ * Date:        $Date: 2010/10/19 21:56:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -73,25 +73,35 @@ public class Qualifiers {
     }
 
     /**
-     * Leave out all delimiters
-     */
-    private static final DateTimeFormat VERSION_SUBSEGMENT = DateTimeFormat.getInstance("!yyyyMMddHHmmssSSS");
-
-    /**
-     * Build an org::openmdx::audit2 compliant qualifier
+     * Build an org::openmdx::audit2 compliant after image qualifier
      * 
      * @param qualifier
      * @param version
      * 
-     * @return an audit2 compliant qualifier
+     * @return an audit2 compliant after image qualifier
      */
-    public static String toAudit2ImageQualifier(
+    public static String toAudit2AfterImageQualifier(
         String qualifier,
         Date version
     ){
-        return qualifier + (version == null ? "!%" : VERSION_SUBSEGMENT.format(version));
+        return qualifier + '*' + (version == null ? "%" : DateTimeFormat.BASIC_UTC_FORMAT.format(version));
     }
 
+    /**
+     * Build an org::openmdx::audit2 compliant before image qualifier
+     * 
+     * @param qualifier
+     * @param unitOfWorkId
+     * 
+     * @return an audit2 compliant before image qualifier
+     */
+    public static String toAudit2BeforeImageQualifier(
+        String qualifier,
+        String unitOfWorkId
+    ){
+        return qualifier + "!" + (unitOfWorkId == null ? "%" : unitOfWorkId);
+    }
+    
     /**
      * Extract the base from an audit2 qualifier
      * 
@@ -102,43 +112,12 @@ public class Qualifiers {
     public static String getAudit2ObjectQualifier(
         String segment
     ){
-        return segment.substring(0, segment.lastIndexOf('!'));
+        return segment.substring(
+            0, 
+            Math.max(segment.lastIndexOf('!'), segment.lastIndexOf('*'))
+        );
     }
     
-    /**
-     * Build an org::openmdx::compatibility::audit1 compliant qualifier
-     * 
-     * @param qualifier
-     * @param unitOfWorkId
-     * 
-     * @return an audit1 compliant qualifier
-     */
-    public static String toAudit1ImageQualifier(
-        String qualifier,
-        String unitOfWorkId
-    ){
-        return qualifier + ":uow:" + unitOfWorkId;
-    }
-    
-    /**
-     * Extract the base from an audit2 qualifier
-     * 
-     * @param qualifier
-     * 
-     * @return the base from an audit2 qualifier
-     */
-    public static String getAudit1ObjectQualifier(
-        String qualifier
-    ){
-        return qualifier.substring(0, qualifier.lastIndexOf(":uow:"));
-    }
-
-    public static Path toAudit1InvolvedId(
-        Path objectId
-    ){
-        return objectId.getDescendant("view:Audit:involved", ":*");
-    }
-
     /**
      * Create a before or after image identifier
      * 
@@ -148,18 +127,14 @@ public class Qualifiers {
      * @param unitIfWorkId
      * 
      * @return the object's before or after image id
+     * 
      * @throws ServiceException
      */
-    public static Path getAudit1ImageId(
+    public static Path getAudit2BeforeImageId(
         Configuration configuration, 
         Path objectId, 
         String unitOfWorkId
-    ) throws ServiceException {
-        if (unitOfWorkId == null) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.BAD_PARAMETER,
-            "'unitOfWorkId' must not be null"
-        );
+    ) throws ServiceException{
         for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
             if (objectId.startsWith(entry.getKey())) {
                 Path imageId = new Path(entry.getValue());
@@ -173,7 +148,10 @@ public class Qualifiers {
                     imageId.add(segment);
                     if(segment.endsWith("%")) return imageId;
                 }
-                return imageId.add(toAudit1ImageQualifier(objectId.get(iLimit), unitOfWorkId));
+                String segment = objectId.get(iLimit);
+                return imageId.add(
+                    segment.endsWith("%") ? segment : toAudit2BeforeImageQualifier(segment, unitOfWorkId)
+                ); 
             }
         }
         throw new ServiceException(
@@ -193,10 +171,10 @@ public class Qualifiers {
      * @param unitIfWorkId
      * 
      * @return the object's before or after image id
-     * @throws ServiceException 
+     * 
      * @throws ServiceException
      */
-    public static Path getAudit2ImageId(
+    public static Path getAudit2AfterImageId(
         Configuration configuration, 
         Path objectId, 
         Date modifiedAt
@@ -216,7 +194,7 @@ public class Qualifiers {
                 }
                 String segment = objectId.get(iLimit);
                 return imageId.add(
-                    segment.endsWith("%") ? segment : toAudit2ImageQualifier(segment, modifiedAt)
+                    segment.endsWith("%") ? segment : toAudit2AfterImageQualifier(segment, modifiedAt)
                 ); 
             }
         }
@@ -227,47 +205,5 @@ public class Qualifiers {
             new BasicException.Parameter("objectId", objectId)
         );
     }
-
     
-    /**
-     * Derive the object id from its before or after image id
-     * 
-     * @param configuration
-     * @param imageId
-     * 
-     * @return the object id
-     * 
-     * @throws ServiceException
-     */
-    public static Path getObjectId(
-        Configuration configuration, 
-        Path imageId
-    ) throws ServiceException{
-        for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
-            if (imageId.startsWith(entry.getValue())) {
-                Path objectId = new Path(entry.getKey());
-                int iLimit = imageId.size() - 1;
-                for (
-                    int i = entry.getKey().size(); 
-                    i < iLimit; 
-                    i++
-                ) {
-                    objectId.add(imageId.get(i));
-                }
-                objectId.add(
-                    configuration.isAudit1Persistence() ? 
-                        getAudit1ObjectQualifier(imageId.get(iLimit)) :
-                        getAudit2ObjectQualifier(imageId.get(iLimit))
-                );
-                return objectId;
-            }
-        }
-        throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            "Data object pattern for the given image id missing",
-            new BasicException.Parameter("imageId", imageId)
-        );
-    }
-
 }

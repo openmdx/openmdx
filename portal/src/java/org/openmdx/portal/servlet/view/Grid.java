@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Grid.java,v 1.92 2010/06/01 10:32:11 wfro Exp $
+ * Name:        $Id: Grid.java,v 1.94 2010/09/21 15:17:46 wfro Exp $
  * Description: GridControl
- * Revision:    $Revision: 1.92 $
+ * Revision:    $Revision: 1.94 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 10:32:11 $
+ * Date:        $Date: 2010/09/21 15:17:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -103,6 +103,7 @@ import org.openmdx.portal.servlet.DataBinding;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.Filters;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
+import org.openmdx.portal.servlet.UserSettings;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.FieldDef;
@@ -148,7 +149,7 @@ public abstract class Grid
             // Default filter
             String defaultFilterPropertyName = control.getPropertyName(
                 control.getContainerId(),
-                GridControl.PROPERTY_DEFAULT_FILTER
+                UserSettings.DEFAULT_FILTER
             );
             // Fallback to old-style property name for default filter
             if(
@@ -157,7 +158,7 @@ public abstract class Grid
             ) {
                 defaultFilterPropertyName = control.getPropertyName(
                     control.getQualifiedReferenceName(),
-                    GridControl.PROPERTY_DEFAULT_FILTER
+                    UserSettings.DEFAULT_FILTER
                 );                
             }
             // Override DEFAULT filter, if at least ALL and DEFAULT filter are defined
@@ -380,7 +381,7 @@ public abstract class Grid
         // Show first page
         String showRowsOnInitPropertyName = control.getPropertyName(
             control.getQualifiedReferenceName(),
-            PROPERTY_SHOW_ROWS_ON_INIT
+            UserSettings.SHOW_ROWS_ON_INIT
         );
         if(application.getSettings().getProperty(showRowsOnInitPropertyName) != null) {
             this.setShowGridContentOnInit(
@@ -609,7 +610,7 @@ public abstract class Grid
           settings.setProperty(
               this.getGridControl().getPropertyName(
                   this.getGridControl().getContainerId(),
-                  GridControl.PROPERTY_DEFAULT_FILTER
+                  UserSettings.DEFAULT_FILTER
               ),
               Base64.encode(filterAsXml.getBytes())
           );
@@ -661,7 +662,7 @@ public abstract class Grid
               settings.setProperty(
                   this.getGridControl().getPropertyName(
                       this.getGridControl().getQualifiedReferenceName(),
-                      GridControl.PROPERTY_PAGE_SIZE
+                      UserSettings.PAGE_SIZE
                   ),
                   "" + newPageSize
               );
@@ -822,7 +823,7 @@ public abstract class Grid
       if(this.currentPageSize < 0) {
           String pageSizePropertyName = this.getGridControl().getPropertyName(
               this.getGridControl().getQualifiedReferenceName(),
-              GridControl.PROPERTY_PAGE_SIZE
+              UserSettings.PAGE_SIZE
           );
           if(application.getSettings().getProperty(pageSizePropertyName) != null) {
              this.currentPageSize = 
@@ -1731,6 +1732,22 @@ public abstract class Grid
     }
     
     //-------------------------------------------------------------------------
+    public void setShowSearchForm(
+        boolean newValue
+    ) {
+        ApplicationContext application = this.view.getApplicationContext();
+        GridControl gridControl = this.getGridControl();
+        Properties settings = application.getSettings();
+        settings.setProperty(
+            gridControl.getPropertyName(
+                gridControl.getQualifiedReferenceName(),
+                UserSettings.SHOW_SEARCH_FORM
+            ),
+            "" + newValue
+        );
+    }
+
+    //-------------------------------------------------------------------------
     public void setShowGridContentOnInit(
         boolean newValue
     ) {
@@ -1742,7 +1759,7 @@ public abstract class Grid
         settings.setProperty(
             gridControl.getPropertyName(
                 gridControl.getQualifiedReferenceName(),
-                PROPERTY_SHOW_ROWS_ON_INIT
+                UserSettings.SHOW_ROWS_ON_INIT
             ),
             "" + newValue
         );
@@ -1756,7 +1773,7 @@ public abstract class Grid
         GridControl gridControl = this.getGridControl();
         String gridAlignmentPropertyName = gridControl.getPropertyName(
             gridControl.getQualifiedReferenceName(),
-            PROPERTY_PAGE_ALIGNMENT
+            UserSettings.PAGE_ALIGNMENT
         );
         if(application.getSettings().getProperty(gridAlignmentPropertyName) != null) {
             return Short.parseShort(application.getSettings().getProperty(gridAlignmentPropertyName));
@@ -1778,7 +1795,7 @@ public abstract class Grid
         settings.setProperty(
             gridControl.getPropertyName(
                 gridControl.getQualifiedReferenceName(),
-                PROPERTY_PAGE_ALIGNMENT
+                UserSettings.PAGE_ALIGNMENT
             ),
             "" + alignment
         );
@@ -1849,9 +1866,18 @@ public abstract class Grid
     public static int getPageSizeParameter(
         Map parameterMap
     ) {
-        Object[] pageSizes = (Object[]) parameterMap.get(WebKeys.REQUEST_PARAMETER_PAGE_SIZE);
-        String pageSize = pageSizes == null ? null : (pageSizes.length > 0 ? (String) pageSizes[0] : null);
+        Object[] values = (Object[]) parameterMap.get(WebKeys.REQUEST_PARAMETER_PAGE_SIZE);
+        String pageSize = values == null ? null : (values.length > 0 ? (String) values[0] : null);
         return pageSize == null ? -1 : Integer.parseInt(pageSize);
+    }
+    
+    // -------------------------------------------------------------------------
+    public static boolean getShowSearchFormParameter(
+        Map parameterMap
+    ) {
+        Object[] values = (Object[]) parameterMap.get(WebKeys.REQUEST_PARAMETER_SHOW_SEARCH_FORM);
+        String showSearchForm = values == null ? null : (values.length > 0 ? (String) values[0] : null);
+        return showSearchForm == null ? false : Boolean.valueOf(showSearchForm);
     }
     
     //-------------------------------------------------------------------------
@@ -1870,9 +1896,6 @@ public abstract class Grid
   
     public static final int MAX_COLUMNS = 20;
   
-    public static final String PROPERTY_SHOW_ROWS_ON_INIT = "Page.DefaultFilterOnInit";
-    public static final String PROPERTY_PAGE_ALIGNMENT = "Page.Alignment";
-    
     private int currentRow = -1;
     private int currentPage = 0;
     private int currentPageSize = -1;

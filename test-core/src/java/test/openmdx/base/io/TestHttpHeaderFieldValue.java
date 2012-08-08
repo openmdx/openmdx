@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestHttpHeaderFieldValue.java,v 1.5 2010/05/18 14:22:12 hburger Exp $
+ * Name:        $Id: TestHttpHeaderFieldValue.java,v 1.6 2010/09/13 16:55:00 hburger Exp $
  * Description: Test HTTP Headers
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/18 14:22:12 $
+ * Date:        $Date: 2010/09/13 16:55:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -163,12 +163,12 @@ public class TestHttpHeaderFieldValue {
 
                 private int cursor = 0;
                 
-                @Override
+//              @Override
                 public boolean hasMoreElements() {
                     return this.cursor < headers.length;
                 }
 
-                @Override
+//              @Override
                 public String nextElement() {
                     return headers[this.cursor++];
                 }

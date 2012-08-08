@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ForeignLogRecord.java,v 1.1 2009/03/31 17:05:17 hburger Exp $
+ * Name:        $Id: ForeignLogRecord.java,v 1.2 2010/11/10 06:30:33 hburger Exp $
  * Description: Foreign Log Record 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:05:17 $
+ * Date:        $Date: 2010/11/10 06:30:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,16 +62,19 @@ public class ForeignLogRecord
 
     /**
      * Constructor 
-     *
+     * 
+     * @param loggerName The logger's name
      * @param level
      * @param msg
      */
     public ForeignLogRecord(
-        String loggerClass,
+        String loggerName,
+        String loggerClass, 
         Level level, 
         String msg
     ) {
         super(level, msg);
+        super.setLoggerName(loggerName);
         this.loggerClass = loggerClass;
     }
 
@@ -165,5 +168,5 @@ public class ForeignLogRecord
         //
         this.loggerClass = null;
     }
-    
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewManagerFactory_1.java,v 1.7 2010/04/29 11:48:37 hburger Exp $
+ * Name:        $Id: ViewManagerFactory_1.java,v 1.8 2010/11/18 17:36:43 hburger Exp $
  * Description: View Manager Factory
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/29 11:48:37 $
+ * Date:        $Date: 2010/11/18 17:36:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +62,7 @@ import javax.jdo.listener.InstanceLifecycleListener;
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.aop1.PlugIn_1_0;
+import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 
 
 /**
@@ -364,4 +365,21 @@ public class ViewManagerFactory_1 implements PersistenceManagerFactory {
         this.delegate.addFetchGroups(groups);
     }
 
+    /**
+     * Tells whether the transactions are container managed
+     * 
+     * @param persistenceManagerFactory
+     * 
+     * @return <code>true</code> if the persistenceManagerFactory is an instance of
+     * <code>AbstractPersistenceManagerFactory</code> and its transactions are 
+     * container managed
+     */
+    public static boolean isTransactionContainerManaged(
+        PersistenceManagerFactory persistenceManagerFactory
+    ){
+        return 
+            persistenceManagerFactory instanceof ViewManagerFactory_1 &&
+            AbstractPersistenceManagerFactory.isTransactionContainerManaged(((ViewManagerFactory_1)persistenceManagerFactory).delegate);
+    }
+    
 }

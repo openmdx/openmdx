@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectView.java,v 1.25 2010/04/27 12:21:06 wfro Exp $
+ * Name:        $Id: ObjectView.java,v 1.28 2010/09/28 09:39:01 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 12:21:06 $
+ * Date:        $Date: 2010/09/28 09:39:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -303,10 +303,15 @@ public abstract class ObjectView
         boolean refreshData
     ) throws ServiceException {
         if(refreshData) {
-        	if(this.getRefObject() != null) {        		
-        		RefObject_1_0 object = (RefObject_1_0)this.application.getNewPmData().getObjectById(
-        			this.getRefObject().refGetPath()
-        		);
+        	if(this.getRefObject() != null) {
+        		// Close existing pm
+        		RefObject_1_0 object = this.getRefObject();
+        		Path identity = object.refGetPath();
+        		PersistenceManager pm = JDOHelper.getPersistenceManager(object);
+        		pm.close();
+        		// Get new pm
+        		pm = this.application.getNewPmData();
+        		object = (RefObject_1_0)pm.getObjectById(identity);
         		this.object = object;
                 this.objectReference = new ObjectReference(
                     object,
@@ -315,7 +320,7 @@ public abstract class ObjectView
         	}
         }
     }
-  
+
     //-------------------------------------------------------------------------
     public ObjectView getPreviousView(
         ViewsCache showViewsCache

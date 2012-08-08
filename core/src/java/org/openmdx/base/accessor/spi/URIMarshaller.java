@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URIMarshaller.java,v 1.1 2009/10/19 12:29:01 hburger Exp $
+ * Name:        $Id: URIMarshaller.java,v 1.3 2010/12/22 09:41:15 hburger Exp $
  * Description: URI Marshaller
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/19 12:29:01 $
+ * Date:        $Date: 2010/12/22 09:41:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,70 +51,27 @@
 package org.openmdx.base.accessor.spi;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
-import org.openmdx.base.marshalling.ReluctantUnmarshalling;
-import org.openmdx.kernel.exception.BasicException;
 
 /**
- * Marshals and unmarshals URIs
+ * Norlmalize URIs
  */
-public class URIMarshaller
-    implements Marshaller, ReluctantUnmarshalling 
-{
+public class URIMarshaller {
 
     /**
      * Constructor 
      */
     private URIMarshaller(
     ) {
-        super();
+        // Avoid external instantiation
     }
 
     /**
-     * A singleton
+     * Normalizing Marshaller
      */
-    public static final Marshaller STRING_TO_URI = new URIMarshaller();
+    public static final Marshaller NORMALIZE = new NormalizingMarshaller(
+        URI.class
+    );    
     
-    /* (non-Javadoc)
-     * @see org.openmdx.base.marshalling.Marshaller#marshal(java.lang.Object)
-     */
-    public Object marshal(
-        Object source
-    ) throws ServiceException {
-        try {
-            return new URI((String)source);
-        } catch (URISyntaxException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN, 
-                BasicException.Code.TRANSFORMATION_FAILURE, 
-                "exception parsing URI",
-                new BasicException.Parameter("source", source),
-                new BasicException.Parameter("source class", source.getClass().getName())
-            );  
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.marshalling.Marshaller#unmarshal(java.lang.Object)
-     */
-    public Object unmarshal (
-        Object source
-    ) throws ServiceException {
-        if(source instanceof URI) {
-            return ((URI)source).toString();
-        }else {
-            throw new ServiceException (
-                BasicException.Code.DEFAULT_DOMAIN, 
-                BasicException.Code.TRANSFORMATION_FAILURE, 
-                "Can only unmarshal objects of type " + URI.class.getName(),
-                new BasicException.Parameter("source", source),
-                new BasicException.Parameter("source class", source.getClass().getName())
-            );  
-        }
-    }
-
 }

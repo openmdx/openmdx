@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Texts_1_0.java,v 1.15 2009/02/27 15:52:52 wfro Exp $
+ * Name:        $Id: Texts_1_0.java,v 1.16 2010/09/21 15:17:30 wfro Exp $
  * Description: Texts_1_0
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/27 15:52:52 $
+ * Date:        $Date: 2010/09/21 15:17:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -127,6 +127,7 @@ public interface Texts_1_0 {
     public String getExploreText();
     public String getShowHeaderTitle();
     public String getHideHeaderTitle();
+    public String getShowTitle();
 }
 
 //--- End of File -----------------------------------------------------------

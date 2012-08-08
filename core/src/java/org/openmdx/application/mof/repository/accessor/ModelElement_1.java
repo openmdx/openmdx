@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ModelElement_1.java,v 1.25 2010/06/30 12:48:31 hburger Exp $
+ * Name:        $Id: ModelElement_1.java,v 1.26 2010/12/07 23:13:47 hburger Exp $
  * Description: ModelElement_1 class
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 12:48:31 $
+ * Date:        $Date: 2010/12/07 23:13:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -800,7 +800,7 @@ public class ModelElement_1 implements ModelElement_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.Cloneable#openmdxjdoClone()
      */
-    public DataObject_1_0 openmdxjdoClone() {
+    public DataObject_1_0 openmdxjdoClone(String... exclude) {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
 

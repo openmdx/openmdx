@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1Package_1_0.java,v 1.14 2010/07/07 21:58:12 hburger Exp $
+ * Name:        $Id: Jmi1Package_1_0.java,v 1.15 2010/09/13 16:46:29 hburger Exp $
  * Description: JMI 1 Package Interface
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/07 21:58:12 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,7 +53,6 @@ package org.openmdx.base.accessor.jmi.spi;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.naming.Path;
 

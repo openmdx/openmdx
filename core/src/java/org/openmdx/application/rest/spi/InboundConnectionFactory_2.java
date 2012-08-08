@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: InboundConnectionFactory_2.java,v 1.23 2010/08/09 13:03:12 hburger Exp $
+ * Name:        $Id: InboundConnectionFactory_2.java,v 1.25 2010/10/26 16:52:54 hburger Exp $
  * Description: Inbound REST Connection Factory
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:03:12 $
+ * Date:        $Date: 2010/10/26 16:52:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,6 +56,7 @@ import java.util.Map;
 import javax.jdo.Constants;
 import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
+import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -70,6 +71,7 @@ import javax.resource.cci.ResourceAdapterMetaData;
 import org.openmdx.base.Version;
 import org.openmdx.base.accessor.rest.InboundConnection_2;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
+import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
 import org.openmdx.base.resource.spi.ResourceExceptions;
@@ -125,6 +127,17 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
      * The persistence manager factory
      */
     private transient PersistenceManagerFactory persistenceManagerFactory;
+    
+    /**
+     * Tests whether the "RefInitialize" option is active
+     * 
+     * @return <code>true</code> if refInitialize should be active
+     */
+    public boolean isRefinitializeOnCreate(){
+        return Boolean.parseBoolean(
+            (String)this.overrides.get(ConfigurableProperty.RefInitializeOnCreate.qualifiedName())
+        );
+    }
     
     /**
      * The resource adapter's metadata
@@ -280,7 +293,8 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     ) throws ResourceException {
         return new InboundConnection_2(
             null, // REST ConnectionSpec
-            this.getPersistenceManagerFactory().getPersistenceManager()
+            this.getPersistenceManagerFactory().getPersistenceManager(), 
+            this.isRefinitializeOnCreate()
         );
     }
 
@@ -295,12 +309,18 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
             return getConnection();
         } else if (properties instanceof RestConnectionSpec) {
             RestConnectionSpec connectionSpec = (RestConnectionSpec) properties;
+            PersistenceManager persistenceManager = getPersistenceManagerFactory().getPersistenceManager(
+                connectionSpec.getUserName(),
+                connectionSpec.getPassword()
+            ); 
+            Object tenant = connectionSpec.getTenant();
+            if(tenant != null) {
+                UserObjects.setTenant(persistenceManager, tenant);
+            }
             return new InboundConnection_2(
                 connectionSpec, 
-                getPersistenceManagerFactory().getPersistenceManager(
-                    connectionSpec.getUserName(),
-                    connectionSpec.getPassword()
-                )
+                persistenceManager, 
+                this.isRefinitializeOnCreate()
             );
         } else {
             throw ResourceExceptions.initHolder(

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Database_1.java,v 1.6 2010/06/02 13:41:40 hburger Exp $
+ * Name:        $Id: Database_1.java,v 1.11 2010/12/17 23:19:54 hburger Exp $
  * Description: Database_1Jdbc2 plugin
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:41:40 $
+ * Date:        $Date: 2010/12/17 23:19:54 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,6 +62,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+// import java.sql.SQLFeatureNotSupportedException;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -154,7 +155,21 @@ public class Database_1 extends AbstractDatabase_1 {
         if(val instanceof Blob) {
             Blob blob = (Blob)val;
             if(isStream) {
-                return blob.getBinaryStream();
+                Long length;
+                if(this.supportsLargeObjectLength) try {
+                    length = Long.valueOf(blob.length());
+//              } catch (SQLFeatureNotSupportedException exception) {
+//                  length = null;
+//                  this.supportsLargeObjectLength = false;
+                } catch (SQLException exception) {
+                    length = null;
+                } else {
+                    length = null;
+                }
+                return BinaryLargeObjects.valueOf(
+                    blob.getBinaryStream(),
+                    length
+                );
             }
             else {
                 return blob.getBytes(1L, (int)blob.length());
@@ -186,7 +201,21 @@ public class Database_1 extends AbstractDatabase_1 {
         if(val instanceof Clob) {
             Clob clob = (Clob)val;
             if(isStream) {
-                return clob.getCharacterStream();
+                Long length;
+                if(this.supportsLargeObjectLength) try {
+                    length = Long.valueOf(clob.length());
+//              } catch (SQLFeatureNotSupportedException exception) {
+//                  length = null;
+//                  this.supportsLargeObjectLength = false;
+                } catch (SQLException exception) {
+                    length = null;
+                } else {
+                    length = null;
+                }
+                return CharacterLargeObjects.valueOf(
+                    clob.getCharacterStream(),
+                    length
+                );
             }
             else {
                 return clob.getSubString(1L, (int)clob.length());
@@ -349,7 +378,8 @@ public class Database_1 extends AbstractDatabase_1 {
         int position,
         int lastPosition,
         int lastRowCount,
-        boolean isIndexed
+        boolean isIndexed, 
+        boolean absolutePositioningDisabled
     ) throws ServiceException, SQLException {
 
         boolean hasMore = rs.next();
@@ -369,7 +399,7 @@ public class Database_1 extends AbstractDatabase_1 {
         if(position > 0) {
             boolean positioned = false;
             // Move forward to position by ResultSet.absolute()
-            if(!isIndexed && this.supportsAbsolutePositioning) {
+            if(!isIndexed && !absolutePositioningDisabled && this.supportsAbsolutePositioning) {
                 try {
                     hasMore = frs.absolute(position+1);
                     positioned = true;
@@ -380,8 +410,18 @@ public class Database_1 extends AbstractDatabase_1 {
             }
             // Move forward to position by iterating the result set
             if(!positioned) {
-                // PK format: id
-                if(frs.getColumnNames().contains(OBJECT_ID)) {
+                if(!isIndexed) {
+                    //
+                    // PK not used
+                    //
+                    int count = 0;  
+                    while(hasMore && ++count <= position) {
+                        hasMore = frs.next();
+                    }            
+                } else if(frs.getColumnNames().contains(OBJECT_ID)) {
+                    //
+                    // PK format: id
+                    //
                     int count = 0;  
                     String previousId = (String)frs.getObject(OBJECT_ID);
                     while(hasMore) {
@@ -393,9 +433,10 @@ public class Database_1 extends AbstractDatabase_1 {
                         if(count >= position) break;
                         hasMore = frs.next();
                     }            
-                }
-                // PK format: rid/id
-                else {
+                } else {
+                    //
+                    // PK format: rid/id
+                    //
                     int count = 0;    
                     Object previousOid = frs.getObject(OBJECT_OID);
                     Object previousRid = frs.getObject(OBJECT_RID);        
@@ -484,6 +525,8 @@ public class Database_1 extends AbstractDatabase_1 {
     // Members
     //---------------------------------------------------------------------------
     private boolean supportsAbsolutePositioning = true;
+    private boolean supportsLargeObjectLength = true;
+    
 }
 
 //---End of File -------------------------------------------------------------

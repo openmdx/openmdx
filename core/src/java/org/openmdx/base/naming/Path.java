@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Path.java,v 1.26 2010/06/21 17:31:37 hburger Exp $
+ * Name:        $Id: Path.java,v 1.28 2010/10/20 11:33:48 hburger Exp $
  * Description: Profile Path 
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 17:31:37 $
+ * Date:        $Date: 2010/10/20 11:33:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -588,6 +588,8 @@ public final class Path
      * <li>Percent-encode all slash "/" characters that appear within a cross-reference as "%2F".
      * </ol>
      * @return   An XRI 2 based IRI representation of this path.
+     * 
+     * @see #toAnyURI()
      */
     public URI toIRI(
     ){
@@ -623,6 +625,23 @@ public final class Path
         return URI.create(iri.toString());
     }
 
+    /**
+     * Generates an AnyURI representation of this path.
+     * <ol>
+     * <li>Percent-encode all percent "%" characters as "%25" across the entire XRI reference.
+     * <li>Percent-encode all number sign "#" characters that appear within a cross-reference as "%23".
+     * <li>Percent-encode all question mark "?" characters that appear within a cross-reference as "%3F".
+     * <li>Percent-encode all slash "/" characters that appear within a cross-reference as "%2F".
+     * </ol>
+     * @return   An AnyURI representation of this path.
+     * 
+     * @see #toIRI()
+     */
+    public URI toAnyURI(
+    ){
+        return toIRI();
+    }
+    
     /**
      * Transient object id pattern (<code>xri://@openmdx!($t*uuid*&lt;uuid&gt;)</code>).
      * 
@@ -1165,10 +1184,13 @@ public final class Path
 
     /**
      * Make this path object unmodifiable
+     * 
+     * @return the (now) unmodifiable path
      */
-    public void lock(
+    public Path lock(
     ) {
         this.readOnly = true;
+        return this;
     }
 
     /**

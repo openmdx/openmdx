@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIImporter_1.java,v 1.13 2010/06/18 12:59:36 hburger Exp $
+ * Name:        $Id: XMIImporter_1.java,v 1.14 2010/09/21 16:32:46 hburger Exp $
  * Description: XMI Model Importer
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/18 12:59:36 $
+ * Date:        $Date: 2010/09/21 16:32:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -342,7 +342,7 @@ implements UML1Consumer {
         catch (ResourceException e) {
             throw new ServiceException(e);
         }
-        modelPackageFacade.attributeValuesAsList("isAbstract").add(new Boolean(false));
+        modelPackageFacade.attributeValuesAsList("isAbstract").add(Boolean.FALSE);
         modelPackageFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
 
         // annotation
@@ -389,10 +389,10 @@ implements UML1Consumer {
         // stereotype
         associationDefFacade.attributeValuesAsList("stereotype").addAll(umlAssociation.getStereotypes());
 
-        associationDefFacade.attributeValuesAsList("isAbstract").add(new Boolean(false));
+        associationDefFacade.attributeValuesAsList("isAbstract").add(Boolean.FALSE);
         associationDefFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
         associationDefFacade.attributeValuesAsList("isDerived").add(
-            new Boolean(umlAssociation.isDerived())
+            Boolean.valueOf(umlAssociation.isDerived())
         );
         this.createModelElement(
             null, 
@@ -567,7 +567,7 @@ implements UML1Consumer {
         );
         // isChangeable
         associationEndDefFacade.attributeValuesAsList("isChangeable").add(
-            new Boolean(
+            Boolean.valueOf(
                 this.toMOFChangeability(umlAssociationEnd.getChangeability())
             )
         );
@@ -577,7 +577,7 @@ implements UML1Consumer {
         );
         // isNavigable
         associationEndDefFacade.attributeValuesAsList("isNavigable").add(
-            new Boolean(umlAssociationEnd.isNavigable())
+            Boolean.valueOf(umlAssociationEnd.isNavigable())
         );
         // qualifiers
         for (
@@ -683,7 +683,7 @@ implements UML1Consumer {
 
         // isAbstract attribute
         structureTypeDefFacade.attributeValuesAsList("isAbstract").add(
-            new Boolean(umlClass.isAbstract())
+            Boolean.valueOf(umlClass.isAbstract())
         );
 
         // visibility attribute
@@ -691,7 +691,7 @@ implements UML1Consumer {
 
         // isSingleton attribute
         structureTypeDefFacade.attributeValuesAsList("isSingleton").add(
-            new Boolean(false)
+            Boolean.FALSE
         );
 
         this.createModelElement(
@@ -800,7 +800,7 @@ implements UML1Consumer {
 
         // isAbstract attribute
         aliasTypeDefFacade.attributeValuesAsList("isAbstract").add(
-            new Boolean(umlClass.isAbstract())
+            Boolean.valueOf(umlClass.isAbstract())
         );
 
         // visibility attribute
@@ -808,7 +808,7 @@ implements UML1Consumer {
 
         // isSingleton attribute
         aliasTypeDefFacade.attributeValuesAsList("isSingleton").add(
-            new Boolean(false)
+            Boolean.FALSE
         );
 
         // type
@@ -895,7 +895,7 @@ implements UML1Consumer {
 
         // isAbstract attribute
         classDefFacade.attributeValuesAsList("isAbstract").add(
-            new Boolean(umlClass.isAbstract())
+            Boolean.valueOf(umlClass.isAbstract())
         );
 
         // visibility attribute
@@ -903,7 +903,7 @@ implements UML1Consumer {
 
         // isSingleton attribute
         classDefFacade.attributeValuesAsList("isSingleton").add(
-            new Boolean(false)
+            Boolean.FALSE
         );
 
         SysLog.detail("Class", classDefFacade.getPath());
@@ -953,8 +953,8 @@ implements UML1Consumer {
 
         attributeDefFacade.attributeValuesAsList("container").add(containerPath);
         attributeDefFacade.attributeValuesAsList("visibility").add(this.toMOFVisibility(umlAttribute.getVisiblity()));
-        attributeDefFacade.attributeValuesAsList("uniqueValues").add(new Boolean(DEFAULT_ATTRIBUTE_IS_UNIQUE));
-        attributeDefFacade.attributeValuesAsList("isLanguageNeutral").add(new Boolean(DEFAULT_ATTRIBUTE_IS_LANGUAGE_NEUTRAL));
+        attributeDefFacade.attributeValuesAsList("uniqueValues").add(Boolean.valueOf(DEFAULT_ATTRIBUTE_IS_UNIQUE));
+        attributeDefFacade.attributeValuesAsList("isLanguageNeutral").add(Boolean.valueOf(DEFAULT_ATTRIBUTE_IS_LANGUAGE_NEUTRAL));
         attributeDefFacade.attributeValuesAsList("maxLength").add(new Integer(this.getAttributeMaxLength(umlAttribute)));
 
         boolean isDerived = this.isAttributeDerived(umlAttribute);
@@ -986,8 +986,8 @@ implements UML1Consumer {
                     : DEFAULT_ATTRIBUTE_MULTIPLICITY
         );
         attributeDefFacade.attributeValuesAsList("scope").add(ScopeKind.INSTANCE_LEVEL);
-        attributeDefFacade.attributeValuesAsList("isDerived").add(new Boolean(isDerived));
-        attributeDefFacade.attributeValuesAsList("isChangeable").add(new Boolean(isChangeable));
+        attributeDefFacade.attributeValuesAsList("isDerived").add(Boolean.valueOf(isDerived));
+        attributeDefFacade.attributeValuesAsList("isChangeable").add(Boolean.valueOf(isChangeable));
 
         // annotation
         String annotation = this.getAnnotation(umlAttribute);
@@ -1052,7 +1052,7 @@ implements UML1Consumer {
 
         // isQuery
         operationDefFacade.attributeValuesAsList("isQuery").add(
-            new Boolean(umlOperation.isQuery())
+            Boolean.valueOf(umlOperation.isQuery())
         );
 
         // parameters
@@ -1084,8 +1084,8 @@ implements UML1Consumer {
                 ModelAttributes.STRUCTURE_TYPE
             );
             parameterTypeFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
-            parameterTypeFacade.attributeValuesAsList("isAbstract").add(new Boolean(false));
-            parameterTypeFacade.attributeValuesAsList("isSingleton").add(new Boolean(false));
+            parameterTypeFacade.attributeValuesAsList("isAbstract").add(Boolean.FALSE);
+            parameterTypeFacade.attributeValuesAsList("isSingleton").add(Boolean.FALSE);
             parameterTypeFacade.attributeValuesAsList("container").addAll(
                 Object_2Facade.newInstance(aContainer).attributeValuesAsList("container")
             );
@@ -1363,12 +1363,12 @@ implements UML1Consumer {
 
         // isAbstract attribute
         primitiveTypeDefFacade.attributeValuesAsList("isAbstract").add(
-            new Boolean(umlDataType.isAbstract())
+            Boolean.valueOf(umlDataType.isAbstract())
         );
 
         // isSingleton attribute
         primitiveTypeDefFacade.attributeValuesAsList("isSingleton").add(
-            new Boolean(false)
+            Boolean.FALSE
         );
 
         // visibility attribute

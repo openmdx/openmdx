@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StandardRecordFactory.java,v 1.11 2010/06/02 10:50:06 hburger Exp $
+ * Name:        $Id: StandardRecordFactory.java,v 1.12 2010/09/13 16:46:29 hburger Exp $
  * Description: Java Connector Architecture: Extended Record Factory Implementation
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 10:50:06 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,6 @@ package org.openmdx.base.resource.spi;
 
 import java.util.List;
 
-import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;

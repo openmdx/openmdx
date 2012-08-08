@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1_0.java,v 1.5 2009/11/23 17:27:53 hburger Exp $
+ * Name:        $Id: PlugIn_1_0.java,v 1.7 2010/11/30 14:11:43 hburger Exp $
  * Description: PlugIn_1_0 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/23 17:27:53 $
+ * Date:        $Date: 2010/11/30 14:11:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -94,10 +94,13 @@ public interface PlugIn_1_0 {
     /**
      * Called when the unit of work is about to be completed
      * 
-     * @param unitOfWork
+     * @param unitOfWork the unit of work to be flushed
+     * @param beforeCompletion <code>true</code> if the flush is induced by the unit of
+     * work's before completion transition, <code>false</code> otherwise 
      */
-    void beforeCompletion(
-        UnitOfWork_1 unitOfWork
+    void flush(
+        UnitOfWork_1 unitOfWork, 
+        boolean beforeCompletion
     );
     
     /**
@@ -111,5 +114,20 @@ public interface PlugIn_1_0 {
     Object getUserObject(
         Object key
     );    
-    
+ 
+    /**
+     * Tells whether the plug-in requires cascaded deletes to be handled by the
+     * data object manager
+     *  
+     * @param object the anchestor
+     *  
+     * @return <code>true</code> if the data object manager has to handle
+     * cascading deletes 
+     * 
+     * @throws ServiceException 
+     */
+    boolean requiresCallbackOnCascadedDelete(
+        DataObject_1 object
+    ) throws ServiceException;
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: OperationAwareLayer_1.java,v 1.16 2010/06/02 13:42:04 hburger Exp $
+ * Name:        $Id: OperationAwareLayer_1.java,v 1.17 2010/09/21 16:28:36 hburger Exp $
  * Description: Stream Operation Aware Layer_1_0 Implementation
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:42:04 $
+ * Date:        $Date: 2010/09/21 16:28:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -168,13 +168,9 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
                     output
                 );
             } else {
-                try {
-                    Object_2Facade responseFacade = Object_2Facade.newInstance(response);
-                    output.setPath(responseFacade.getPath());
-                    output.setBody(responseFacade.getValue());
-                } catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                Object_2Facade responseFacade = ResourceHelper.getObjectFacade(response);
+                output.setPath(responseFacade.getPath());
+                output.setBody(responseFacade.getValue());
             }
             return true;
         }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: EntityManagerProxyFactory_2.java,v 1.7 2010/08/09 13:03:13 hburger Exp $
+ * Name:        $Id: EntityManagerProxyFactory_2.java,v 1.10 2010/12/22 00:13:20 hburger Exp $
  * Description: Entity Manager Proxy Factory
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:03:13 $
+ * Date:        $Date: 2010/12/22 00:13:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.ejb.TransactionAttributeType;
 import javax.jdo.Constants;
 import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOFatalDataStoreException;
@@ -83,6 +82,7 @@ import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.ConnectionAdapter;
+import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Factory;
@@ -178,6 +178,10 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
                             //
                             // Standard Properties
                             //
+                            connectionDriverProperties.put(
+                                "ConnectionURL",
+                                connectionURL
+                            );
                             String userName = super.getConnectionUserName();
                             if(userName != null) {
                                 connectionDriverProperties.put(
@@ -416,16 +420,14 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
         String password
     ) {
         try {
+            RestConnectionSpec connectionSpec = new RestConnectionSpec(userid, password);
             return new DataObjectManager_1(
                 this,
                 true, // proxy
                 userid == null ? null : PersistenceManagers.toPrincipalChain(userid),
                 ConnectionAdapter.newInstance(
                     null, // connectionFactory
-                    new RestConnectionSpec(
-                        userid, 
-                        password
-                    ),     
+                    connectionSpec,     
                     TransactionAttributeType.SUPPORTS, 
                     new Switch_2(
                         new BasicCache_2(), 
@@ -435,7 +437,8 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
                 null, // connection2
                 STANDARD_PLUG_INS, 
                 this.optimalFetchSize, 
-                this.cacheThreshold  
+                this.cacheThreshold, 
+                connectionSpec  
             );
         } catch (ResourceException exception) {
             throw BasicException.initHolder(

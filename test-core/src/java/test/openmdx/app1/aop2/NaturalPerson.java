@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openNDX, http://www.openmdx.org/
- * Name:        $Id: NaturalPerson.java,v 1.1 2010/06/03 17:07:11 hburger Exp $
+ * Name:        $Id: NaturalPerson.java,v 1.2 2010/10/29 12:42:44 hburger Exp $
  * Description: Person 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 17:07:11 $
+ * Date:        $Date: 2010/10/29 12:42:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,5 +54,7 @@ package test.openmdx.app1.aop2;
  * A mix-in interface
  */
 public interface NaturalPerson {
-    // a natural person mix-in interface
+
+    boolean isRetired();
+    
 }

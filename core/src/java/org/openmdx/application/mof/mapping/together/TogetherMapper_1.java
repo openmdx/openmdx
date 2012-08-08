@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TogetherMapper_1.java,v 1.7 2010/04/13 17:37:55 wfro Exp $
+ * Name:        $Id: TogetherMapper_1.java,v 1.8 2010/09/21 16:33:22 hburger Exp $
  * Description: TogetherCppExternalizer_1
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/13 17:37:55 $
+ * Date:        $Date: 2010/09/21 16:33:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -203,7 +203,7 @@ public class TogetherMapper_1
       if(!((Boolean)referencedEnd.objGetValue("isChangeable")).booleanValue()) {
           supplierConstraints = "isFrozen";
       }
-      Boolean isDirected = new Boolean(!((Boolean)exposedEnd.objGetValue("isNavigable")).booleanValue());
+      Boolean isDirected = Boolean.valueOf(!((Boolean)exposedEnd.objGetValue("isNavigable")).booleanValue());
       String aggregation = (String)referencedEnd.objGetValue("aggregation");
       try {
         umlMapper.mapClassReference(

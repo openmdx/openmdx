@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ServletPort.java,v 1.16 2010/06/03 15:57:54 hburger Exp $
+ * Name:        $Id: ServletPort.java,v 1.18 2010/12/13 16:25:38 hburger Exp $
  * Description: ServletPort 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:57:54 $
+ * Date:        $Date: 2010/12/13 16:25:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -219,7 +219,7 @@ public class ServletPort
         protected void open(
         ) throws ResourceException {
             ServletMessage message = new ServletMessage(CONNECT_SPEC, CONNECT_XRI);
-            message.request.parameters.put("UserName", new String[]{getConnectionUserName()});
+            message.request.getParameterMap().put("UserName", new String[]{getConnectionUserName()});
             try {
                 message.execute();
             } catch (ServiceException exception) {
@@ -442,6 +442,9 @@ public class ServletPort
                 this.servletPath = '/' + servletPath.substring(
                     servletPath.charAt(14) == '!' ? 14 : 15
                 );
+                if(interactionSpec == DELETE_SPEC) {
+                    this.request.getParameterMap().put("FunctionName", new String[]{"DELETE"});
+                }
             }
             
             protected final RestInteractionSpec interactionSpec;
@@ -582,7 +585,7 @@ public class ServletPort
 
             //  @Override
                 public String getPathInfo() {
-                    return null;
+                    return null; // Assume default servlet mapping ("/")
                 }
 
             //  @Override

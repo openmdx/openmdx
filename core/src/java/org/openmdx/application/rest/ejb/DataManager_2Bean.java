@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataManager_2Bean.java,v 1.6 2010/08/09 13:01:20 hburger Exp $
+ * Name:        $Id: DataManager_2Bean.java,v 1.8 2010/10/15 16:24:18 hburger Exp $
  * Description: Data Manager 2 Bean 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:01:20 $
+ * Date:        $Date: 2010/10/15 16:24:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,6 @@
  */
 package org.openmdx.application.rest.ejb;
 
-import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
@@ -117,8 +116,6 @@ public class DataManager_2Bean implements SessionBean {
 
     /**
      * Connect to an entity manager
-     * 
-     * @param connectionSpec
      * 
      * @throws EJBException
      */

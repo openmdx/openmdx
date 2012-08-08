@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--xtools2_universal_type_manager-->
-<uml:Model xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.ibm.com/xtools/1.5.0/Notation" xmlns:uml="http://www.eclipse.org/uml2/1.0.0/UML" xmlns:umlnotation="http://www.ibm.com/xtools/1.5.0/Umlnotation" xmi:id="_tjGt4N67EdmkJO73lqONhA" name="generic1" appliedProfile="_ulAPxN67EdmkJO73lqONhA _ulAPx967EdmkJO73lqONhA _ulAPyt67EdmkJO73lqONhA _ulAPzd67EdmkJO73lqONhA _ulAP0N67EdmkJO73lqONhA">
+<uml:Model xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.ibm.com/xtools/1.5.0/Notation" xmlns:uml="http://www.eclipse.org/uml2/1.0.0/UML" xmlns:umlnotation="http://www.ibm.com/xtools/1.5.0/Umlnotation" xmi:id="_tjGt4N67EdmkJO73lqONhA" name="generic1">
   <eAnnotations xmi:id="_tjGt4d67EdmkJO73lqONhA" source="uml2.diagrams"/>
   <eAnnotations xmi:id="_X2zUIifmEdq7bcxd2VCi2Q" source="http://www.eclipse.org/emf/2002/Ecore"/>
   <packageImport xmi:type="uml:ProfileApplication" xmi:id="_tjGt5N67EdmkJO73lqONhA">

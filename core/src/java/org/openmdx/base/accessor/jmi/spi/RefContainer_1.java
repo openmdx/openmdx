@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefContainer_1.java,v 1.55 2010/08/30 15:41:41 wfro Exp $
+ * Name:        $Id: RefContainer_1.java,v 1.58 2010/12/18 18:38:22 hburger Exp $
  * Description: RefContainer_1 class
- * Revision:    $Revision: 1.55 $
+ * Revision:    $Revision: 1.58 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/30 15:41:41 $
+ * Date:        $Date: 2010/12/18 18:38:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -264,6 +264,14 @@ public class RefContainer_1
     //------------------------------------------------------------------------
 
     /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+     */
+//  @Override
+    public PersistenceManager openmdxjdoGetPersistenceManager(){
+    	throw new UnsupportedOperationException("This method is not yet supported");
+    }
+    
+    /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.Container#openmdxjdoGetContainerId()
      */
 //  @Override
@@ -283,8 +291,8 @@ public class RefContainer_1
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
 //  @Override
-    public PersistenceManager openmdxjdoGetPersistenceManager() {
-        return this.container.openmdxjdoGetPersistenceManager();
+    public PersistenceManager openmdxjdoGetDataObjectManager() {
+        return this.container.openmdxjdoGetDataObjectManager();
     }
 
     /* (non-Javadoc)
@@ -332,7 +340,7 @@ public class RefContainer_1
     /* (non-Javadoc)
      * @see org.w3c.cci2.Container#removeAll(org.w3c.cci2.AnyTypePredicate)
      */
-    @Override
+//  @Override
     public void removeAll(AnyTypePredicate predicate) {
         this.refRemoveAll(predicate);
     }
@@ -371,6 +379,7 @@ public class RefContainer_1
     public List<RefObject_1_0> refGetAll(Object query) {
         Container_1_0 source = this.container;
         OrderSpecifier[] order = null;
+        FetchPlan fetchPlan = null;
         if(query instanceof Object[]) {
             Object[] args = (Object[]) query;
             if(args.length == 1 && args[0] instanceof RefQuery_1_0) {
@@ -394,14 +403,16 @@ public class RefContainer_1
             source = this.container.subMap(filter);
             order = orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]);
         } else if(query instanceof RefQuery_1_0) {
-            Filter filter = ((RefQuery_1_0)query).refGetFilter();
+            RefQuery_1_0 refQuery = (RefQuery_1_0)query;
+            Filter filter = refQuery.refGetFilter();
             List<OrderSpecifier> orderSpecifier = filter.getOrderSpecifier();
             source = this.container.subMap(filter);
             order = orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]);
+            fetchPlan = refQuery.getFetchPlan();
         }
         return new MarshallingSequentialList<RefObject_1_0>(
             this.marshaller, 
-            source.values(order)
+            source.values(fetchPlan, order)
         );
     }
 

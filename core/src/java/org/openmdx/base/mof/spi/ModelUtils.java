@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ModelUtils.java,v 1.4 2010/01/14 16:29:05 wfro Exp $
+ * Name:        $Id: ModelUtils.java,v 1.5 2010/09/21 16:02:24 hburger Exp $
  * Description: ModelUtils
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/14 16:29:05 $
+ * Date:        $Date: 2010/09/21 16:02:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -95,6 +95,15 @@ public class ModelUtils {
         return multiplicity;
     }
 
+    /**
+     * Tells whether the given feature is derived
+     * 
+     * @param featureDef
+     * 
+     * @return <code>true</code> if the given feature is derived
+     * 
+     * @throws ServiceException
+     */
     public static boolean isDerived(
         ModelElement_1_0 featureDef
     ) throws ServiceException {
@@ -111,6 +120,27 @@ public class ModelUtils {
             return false;
         }
     }
+    
+    /**
+     * Tells whether the given feature is changeable
+     * 
+     * @param featureDef
+     * 
+     * @return <code>true</code> if the given feature is changeable
+     * 
+     * @throws ServiceException
+     */
+    public static boolean isChangeable(
+        ModelElement_1_0 feature
+    ) throws ServiceException{
+        return feature.getModel().isReferenceType(feature) ? (
+            !feature.getModel().referenceIsDerived(feature) 
+        ) : (
+            !((Boolean)feature.objGetValue("isDerived")).booleanValue() && 
+            ((Boolean)feature.objGetValue("isChangeable")).booleanValue()
+        );
+    }
+
 }
 
 //--- End of File -----------------------------------------------------------

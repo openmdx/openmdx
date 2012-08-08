@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PersistenceCapableCollection.java,v 1.2 2010/07/01 15:56:58 hburger Exp $
+ * Name:        $Id: PersistenceCapableCollection.java,v 1.3 2010/10/27 14:06:20 hburger Exp $
  * Description: Persistence Capable Collection
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/01 15:56:58 $
+ * Date:        $Date: 2010/10/27 14:06:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -86,6 +86,13 @@ public interface PersistenceCapableCollection {
      * @return the container's transient id
      */
     TransientContainerId openmdxjdoGetTransientContainerId();
+
+    /** 
+     * Retrieve the associated Data Object Manager.
+     * 
+     * @return the associated Data Object Manager
+     */
+    PersistenceManager openmdxjdoGetDataObjectManager();
 
     /** 
      * Retrieve the associated PersistenceManager.

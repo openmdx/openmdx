@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ModelAwareFilter.java,v 1.4 2010/06/30 13:07:18 hburger Exp $
+ * Name:        $Id: ModelAwareFilter.java,v 1.6 2010/11/03 13:02:26 hburger Exp $
  * Description: Model Aware Filter
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 13:07:18 $
+ * Date:        $Date: 2010/11/03 13:02:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -84,7 +84,7 @@ abstract class ModelAwareFilter
         List<Condition> filter
     ){
         super(
-            filter == null ? new Condition[]{} : filter.toArray(new Condition[filter.size()])
+            filter == null ? NO_CONDITION : filter.toArray(new Condition[filter.size()])
         );        
     }
 
@@ -92,6 +92,11 @@ abstract class ModelAwareFilter
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = -3121625282542792849L;
+    
+    /**
+     * No condition
+     */
+    private static final Condition[] NO_CONDITION = {};
 
     @Override
     protected Iterator<?> getValuesIterator(
@@ -107,6 +112,8 @@ abstract class ModelAwareFilter
             ModelElement_1_0 classifier = model.getElement(objectClass);
             if(SystemAttributes.OBJECT_INSTANCE_OF.equals(attribute)){
                 return new InstanceOfIterator(classifier);
+            } else if("core".equals(attribute) && isCoreInstance(classifier)){
+            	return Collections.emptySet().iterator();
             } else {
                 ModelElement_1_0 featureDef = model.getFeatureDef(classifier, attribute, false);
                 String multiplicity = featureDef == null ? null : ModelUtils.getMultiplicity(featureDef);
@@ -127,6 +134,29 @@ abstract class ModelAwareFilter
     }
     
     /**
+     * Tells whether the classifier represents a core instance
+     * 
+     * @param classifier
+     * 
+     * @return <code>true</code> if the class is <code>org::openmdx::base::AspectCapable</code> 
+     * but not an <code>org::openmdx:base::Aspect</code>
+     * 
+     * @throws ServiceException 
+     */
+    private boolean isCoreInstance(
+		ModelElement_1_0 classifier	
+    ) throws ServiceException{
+        boolean aspectCapable = false;
+        boolean aspect = false;
+        for(Object superType : classifier.objGetList("allSupertype")) {
+           String superTypeName = ((Path) superType).getBase();
+           aspect |= "org:openmdx:base:Aspect".equals(superTypeName);
+           aspectCapable |= "org:openmdx:base:AspectCapable".equals(superTypeName);
+        }
+        return aspectCapable & !aspect;
+    }
+    
+    /**
      * InstanceOfIterator
      */
     private class InstanceOfIterator implements Iterator<String> {
@@ -140,7 +170,7 @@ abstract class ModelAwareFilter
         InstanceOfIterator(
             ModelElement_1_0 classifier
         ) throws ServiceException{
-            this.objectClass = classifier.jdoGetObjectId().getBase();
+            this.objectClass = (String) classifier.objGetValue("qualifiedName");
             this.superTypes = classifier.objGetList("allSupertype");
         }
 

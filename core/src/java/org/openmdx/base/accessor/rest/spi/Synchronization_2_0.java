@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Synchronization_2_0.java,v 1.1 2009/11/03 11:28:41 hburger Exp $
+ * Name:        $Id: Synchronization_2_0.java,v 1.2 2010/11/29 12:34:59 hburger Exp $
  * Description: Synchronization interface 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/03 11:28:41 $
+ * Date:        $Date: 2010/11/29 12:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,6 +63,11 @@ public interface Synchronization_2_0 extends Synchronization {
      * started, and that the subsequent access to its managed objects
      * will be invoked in the context of this unit of work.
      */
-    public void afterBegin();
+    void afterBegin();
+
+    /**
+     * Clearing avoids flushing during finalization
+     */
+    void clear();
     
 }

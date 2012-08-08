@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.7 2010/07/13 09:13:01 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.14 2010/12/23 17:42:52 hburger Exp $
  * Description: Standard Plug-In
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/13 09:13:01 $
+ * Date:        $Date: 2010/12/23 17:42:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -134,11 +134,12 @@ public class PlugIn_1
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#beforeCompletion(org.openmdx.base.accessor.rest.UnitOfWork_1)
+     * @see org.openmdx.base.aop0.PlugIn_1_0#flush(org.openmdx.base.accessor.rest.UnitOfWork_1)
      */
 //  @Override
-    public void beforeCompletion(
-        UnitOfWork_1 unitOfWork
+    public void flush(
+        UnitOfWork_1 unitOfWork, 
+        boolean beforeCompletion
     ) {
         // nothing to do
     }
@@ -151,7 +152,7 @@ public class PlugIn_1
         DataObject_1 object, 
         String qualifier
     ) {
-        if(qualifier == null && object.getUnitOfWork().getOptimistic()) {
+        if(qualifier == null && object.isProxy()) {
             return PathComponent.createPlaceHolder().toString();
         } else if(qualifier == null || PathComponent.isPlaceHolder(qualifier)) {
             UUID uuid = UUIDs.newUUID();
@@ -243,7 +244,6 @@ public class PlugIn_1
             );
         }
     }
-
     
     //------------------------------------------------------------------------
     // Implements DeleteLifecycleListener
@@ -264,16 +264,24 @@ public class PlugIn_1
     public void preDelete(InstanceLifecycleEvent event) {
         DataObject_1 persistentInstance = (DataObject_1) event.getPersistentInstance();
         try {
-            if(Model_1Factory.getModel().isInstanceof(persistentInstance, "org:openmdx:base:Removable")){
-                if(!persistentInstance.jdoIsNew()) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ILLEGAL_STATE,
-                        "A Removable object can't be deleted unless it is new",
-                        new BasicException.Parameter("id", persistentInstance.jdoGetObjectId()),
-                        new BasicException.Parameter("state", JDOHelper.getObjectState(persistentInstance))
-                    );
+            Model_1_0 model = Model_1Factory.getModel(); 
+            if(model.isInstanceof(persistentInstance, "org:openmdx:base:Removable")){
+                if(persistentInstance.jdoIsNew()){
+                    return; // new objects may be deleted
                 }
+                if(model.isInstanceof(persistentInstance, "org:openmdx:base:Aspect")) {
+                    DataObject_1 core = (DataObject_1)persistentInstance.objGetValue("core");
+                    if(core.jdoIsDeleted()) {
+                        return; // a core object's aspects may be deleted together with the core object
+                    }
+                }
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ILLEGAL_STATE,
+                    "A Removable object can't be deleted unless it is new",
+                    new BasicException.Parameter("id", persistentInstance.jdoGetObjectId()),
+                    new BasicException.Parameter("state", JDOHelper.getObjectState(persistentInstance))
+                );
             }
         } catch (ServiceException exception) {
             throw new JDOUserCallbackException(
@@ -284,6 +292,14 @@ public class PlugIn_1
         }
     }
     
+    /* (non-Javadoc)
+     * @see org.openmdx.base.aop0.PlugIn_1_0#callbackOnCascadedDeletes()
+     */
+//  @Override
+    public boolean requiresCallbackOnCascadedDelete(DataObject_1 object) {
+        return false;
+    }
+
 
     //------------------------------------------------------------------------
     // Enum QualifierType

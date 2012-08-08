@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.5 2010/06/02 13:41:57 hburger Exp $
+ * Name:        $Id: Standard_1.java,v 1.6 2010/10/31 17:48:39 hburger Exp $
  * Description: Standard_1 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:41:57 $
+ * Date:        $Date: 2010/10/31 17:48:39 $
  * ====================================================================
  *
  * This software is published under the BSD license  as listed below.
@@ -58,7 +58,7 @@ import javax.resource.cci.Interaction;
 /**
  * Standard_1
  */
-public class Standard_1 extends State_1 {
+public class Standard_1 extends Strict_1 {
     
     public Standard_1(
     ) {
@@ -73,7 +73,7 @@ public class Standard_1 extends State_1 {
     }
                 
     // --------------------------------------------------------------------------
-    public class LayerInteraction extends State_1.StateLayerInteraction {
+    public class LayerInteraction extends Strict_1.LayerInteraction {
         
         public LayerInteraction(
             Connection connection

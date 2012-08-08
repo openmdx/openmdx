@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BinaryLargeObjects.java,v 1.17 2010/03/02 18:27:36 hburger Exp $
+ * Name:        $Id: BinaryLargeObjects.java,v 1.19 2010/12/16 12:48:14 hburger Exp $
  * Description: Binary Large Object Factory 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/02 18:27:36 $
+ * Date:        $Date: 2010/12/16 12:48:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,12 +51,16 @@
 package org.w3c.cci2;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -197,15 +201,13 @@ public class BinaryLargeObjects {
         OutputStream target
     ) throws IOException {
         byte[] buffer = new byte[CAPACITY];
-        long count = 0l;
         if(position != 0l) {
             source.skip(position);
         }
-        int n = source.read(buffer);
-        while(n > 0) {
+        long count = 0l;
+        for(int n; (n = source.read(buffer)) >= 0;){
             count += n;
             target.write(buffer, 0, n);
-            n = source.read(buffer);
         }
         return count;
     }
@@ -218,7 +220,7 @@ public class BinaryLargeObjects {
     /**
      * Array BLOB
      */
-    private static class ArrayLargeObject implements BinaryLargeObject {
+    private static class ArrayLargeObject implements BinaryLargeObject, Serializable {
 
         /**
          * Constructor 
@@ -237,9 +239,14 @@ public class BinaryLargeObjects {
             this.length = length;
         }
 
-        private final byte[] value;
-        private final int offset;
-        private final int length;
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = 3886030128086687249L;
+
+        private byte[] value;
+        private int offset;
+        private int length;
 
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
@@ -271,60 +278,65 @@ public class BinaryLargeObjects {
             stream.write(this.value, offset, length);
         }
 
+        private void writeObject(
+            ObjectOutputStream stream
+        ) throws IOException {
+            stream.writeLong(this.length);
+            stream.write(this.value, this.offset, this.length);
+        }
+        
+        private void readObject(
+            ObjectInputStream stream
+        ) throws IOException, ClassNotFoundException {
+            this.offset = 0;
+            this.length = (int)stream.readLong();
+            this.value = new byte[this.length];
+            stream.read(this.value);
+        }
+
     }
-       
+    
     
     //------------------------------------------------------------------------
-    // Class URLLargeObject
+    // Class AbstractLargeObject
     //------------------------------------------------------------------------
 
     /**
-     * URL BLOB
+     * The underlying stream may be retrieved once only
      */
-    private static class URLLargeObject implements BinaryLargeObject {
+    private static abstract class AbstractLargeObject implements BinaryLargeObject, Serializable {
         
         /**
          * Constructor 
          *
-         * @param value
+         * @param stream
          */
-        public URLLargeObject(final URL url) {
-            this.url = url;
+        protected AbstractLargeObject(
+            Long length
+        ){
+            this.length = length;
         }
 
         /**
-         * 
+         * Implements <code>Serializable</code>
          */
-        private final URL url;
+        private static final long serialVersionUID = -5837819381102619869L;
+
+        private transient byte[] value;
+        private transient Long length;
 
         /**
+         * Provide the input stream content
          * 
-         */
-        private transient URLConnection connection;
-        
-        /**
+         * @return the content
          * 
+         * @throws IOException
          */
-        private transient Long length = null;
-        
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.BinaryLargeObject#getContent()
-         */
-        public InputStream getContent(
+        protected InputStream newContent(
         ) throws IOException {
-            return getConnection().getInputStream();
+            return this.value == null ? null : new ByteArrayInputStream(this.value);
         }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.LargeObject#getLength()
-         */
-        public Long getLength(
-        ) throws IOException{
-            return this.length == null ?
-                this.length = asLength(getConnection().getContentLength()) :
-                this.length;
-        }
-
+        
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
          */
@@ -332,11 +344,103 @@ public class BinaryLargeObjects {
             OutputStream stream, 
             long position
         ) throws IOException {
-            this.length = position + streamCopy(
+            Long length = position + streamCopy(
                 getContent(),
                 position,
                 stream
             );
+            this.length = length;
+        }
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.LargeObject#getLength()
+         */
+        public Long getLength(
+        ) throws IOException {
+            return this.length;
+        }
+        
+        protected void setLength(
+            Long length
+        ){
+            this.length = length;
+        }
+        
+        private void writeObject(
+            ObjectOutputStream stream
+        ) throws IOException {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            getContent(buffer, 0);
+            stream.writeLong(this.length.longValue());
+            buffer.writeTo(stream);
+        }
+        
+        private void readObject(
+            ObjectInputStream stream
+        ) throws IOException, ClassNotFoundException {
+            this.length = Long.valueOf(stream.readLong());
+            this.value = new byte[this.length.intValue()];
+            stream.read(this.value);
+        }
+        
+    }
+    
+     
+    //------------------------------------------------------------------------
+    // Class URLLargeObject
+    //------------------------------------------------------------------------
+
+    /**
+     * URL BLOB
+     */
+    private static class URLLargeObject extends AbstractLargeObject {
+        
+        /**
+         * Constructor 
+         *
+         * @param value
+         */
+        public URLLargeObject(final URL url) {
+            super(null);
+            this.url = url;
+        }
+
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = 3916312441998769493L;
+
+        /**
+         * 
+         */
+        private transient URL url;
+
+        /**
+         * 
+         */
+        private transient URLConnection connection;
+        
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.BinaryLargeObject#getContent()
+         */
+        public InputStream getContent(
+        ) throws IOException {
+            return this.url != null ? getConnection().getInputStream() : newContent();
+        }
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.LargeObject#getLength()
+         */
+        @Override
+        public Long getLength(
+        ) throws IOException {
+            Long length = super.getLength();
+            if(length == null) {
+                super.setLength(
+                    length = asLength(getConnection().getContentLength())
+                );
+            }
+            return length;
         }
 
         /**
@@ -347,9 +451,10 @@ public class BinaryLargeObjects {
          * @throws IOException
          */
         protected URLConnection getConnection() throws IOException{
-            return this.connection == null ?
-                this.connection = url.openConnection() :
-                this.connection;
+            if(this.connection == null) {
+                this.connection = url.openConnection();
+            }
+            return this.connection;
         }
         
     }
@@ -362,53 +467,33 @@ public class BinaryLargeObjects {
     /**
      * File BLOB
      */
-    private static class FileLargeObject implements BinaryLargeObject {
+    private static class FileLargeObject extends AbstractLargeObject {
         
         /**
          * Constructor 
          *
          * @param value
          */
-        public FileLargeObject(final File file) {
+        public FileLargeObject(
+            final File file
+        ) {
+            super(asLength(file.length()));
             this.file = file;
         }
 
+        private transient File file;
+
         /**
-         * 
+         * Implements <code>Serializable</code>
          */
-        private final File file;
-        private transient Long length = null;
+        private static final long serialVersionUID = -1566865189136279414L;
 
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
         public InputStream getContent(
         ) throws IOException {
-            return new FileInputStream(this.file);
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.LargeObject#getLength()
-         */
-        public Long getLength(
-        ){
-            return this.length == null ?
-                this.length = asLength(this.file.length()) :
-                this.length;
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
-         */
-        public void getContent(
-            OutputStream stream, 
-            long position
-        ) throws IOException {
-            this.length = position + streamCopy(
-                getContent(),
-                position,
-                stream
-            );
+            return this.file != null ? new FileInputStream(this.file) : newContent();
         }
 
     }
@@ -421,7 +506,7 @@ public class BinaryLargeObjects {
     /**
      * The underlying stream may be retrieved once only
      */
-    public static class StreamLargeObject implements BinaryLargeObject {
+    public static class StreamLargeObject extends AbstractLargeObject {
         
         /**
          * Constructor 
@@ -440,24 +525,23 @@ public class BinaryLargeObjects {
          * @param stream
          * @param length
          */
-        StreamLargeObject(
+        protected StreamLargeObject(
             final InputStream stream,
             final Long length
         ){
+            super(length);
             this.stream = stream;
-            this.length = length;
         }
         
-        
         /**
-         * 
+         * Implements <code>Serializable</code>
          */
-        private InputStream stream;
+        private static final long serialVersionUID = -6473575658856881436L;
 
         /**
-         * 
+         * The stream may be read pnce only
          */
-        private Long length;
+        private transient InputStream stream;
 
         /**
          * Determine the large objetc's size
@@ -475,58 +559,27 @@ public class BinaryLargeObjects {
                 return null;
             }
         }
-
-        /**
-         * Provide the input stream content
-         * 
-         * @return the content
-         * 
-         * @throws IOException
-         */
-        protected InputStream newContent(
-        ) throws IOException {
-            throw new IllegalStateException("The content may be retrieved once only");
-        }
         
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
         public InputStream getContent(
         ) throws IOException {
+            InputStream content;
             if(this.stream == null) {
-                return newContent();
+                content = newContent();
             } else {
-                InputStream stream = this.stream;
+                content = this.stream;
                 this.stream = null;
-                return stream;
             }
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
-         */
-        public void getContent(
-            OutputStream stream, 
-            long position
-        ) throws IOException {
-            Long length = position + streamCopy(
-                getContent(),
-                position,
-                stream
+            if(content != null) {
+                return content;
+            }
+            throw new IllegalStateException(
+                "The stream may be  retrieved once only"
             );
-            if(this.length == null) {
-                this.length = length;
-            }
         }
 
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.LargeObject#getLength()
-         */
-        public Long getLength(
-        ) throws IOException {
-            return this.length;
-        }
-        
     }
        
 }

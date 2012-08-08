@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Names.java,v 1.4 2010/04/16 09:46:36 hburger Exp $
+ * Name:        $Id: Names.java,v 1.5 2010/09/13 16:46:29 hburger Exp $
  * Description: Names 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 09:46:36 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -49,8 +49,6 @@
  * listed in the NOTICE file.
  */
 package org.omg.mof.spi;
-
-import org.openmdx.base.exception.ServiceException;
 
 /**
  * Names

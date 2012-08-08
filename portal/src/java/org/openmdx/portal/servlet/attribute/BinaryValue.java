@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BinaryValue.java,v 1.50 2010/04/27 08:26:41 wfro Exp $
+ * Name:        $Id: BinaryValue.java,v 1.52 2010/10/15 13:46:41 wfro Exp $
  * Description: BinaryValue
- * Revision:    $Revision: 1.50 $
+ * Revision:    $Revision: 1.52 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 08:26:41 $
+ * Date:        $Date: 2010/10/15 13:46:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,7 +75,6 @@ import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
@@ -202,17 +201,13 @@ public class BinaryValue
             (this.object instanceof RefObject_1_0) &&
             (featureDef != null)
         ) {
-            // <<stream>> org:w3c:binary can not be optional
-            if(Multiplicities.STREAM.equals(featureDef.objGetValue("multiplicity"))) {
+            Object bytes = super.getValue(false);
+            if(bytes == null) {
+            	this.isNull = true;
+            } else if(bytes instanceof Collection) {
+                this.isNull = ((Collection)bytes).isEmpty();
+            } else {
                 this.isNull = false;
-            }
-            // Check whether binary value is empty
-            else {
-                Object bytes = super.getValue(false);
-                if(bytes instanceof Collection) {
-                    bytes = ((Collection)bytes).iterator().next();
-                }
-                this.isNull = bytes == null;
             }
             if(!this.isNull) {
                 String encodedName = this.name;
@@ -469,11 +464,12 @@ public class BinaryValue
         Texts_1_0 texts = this.application.getTexts();
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();   
         label = this.getLabel(attribute, p, label);
+        String title = this.getTitle(attribute, label);
         if(forEditing) {
             String idTag = id == null ? 
                 "" : 
                 "id=\"" + id + "\"";                                                                        
-            p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             String feature = this.getName();
             p.write("<td ", rowSpanModifier, ">");
             p.write("  <input ", idTag, " type=\"file\" class=\"valueL", lockedModifier, "\" name=\"", feature, "[", Integer.toString(tabIndex), "]\" ", readonlyModifier, " ", disabledModifier, " tabindex=\"", Integer.toString(tabIndex), "\" title=\"", texts.getEnterNullToDeleteText(), "\">");
@@ -517,7 +513,7 @@ public class BinaryValue
             	}
             	else {
 	                p.write(gapModifier);
-	                p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
+	                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", label, "</span></td>");
 	                p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, ">");
 	                p.write("<div class=\"field\">", attribute.getStringifiedValue(p, false, false), "</div>");
 	                p.write("</td>");

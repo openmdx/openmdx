@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConfigurableProperty.java,v 1.3 2010/08/09 13:13:49 hburger Exp $
+ * Name:        $Id: ConfigurableProperty.java,v 1.6 2010/10/26 16:58:19 hburger Exp $
  * Description: JDO 2.0 Options
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:13:49 $
+ * Date:        $Date: 2010/10/26 16:58:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -114,11 +114,13 @@ public enum ConfigurableProperty {
     MappingSchema(Constants.PROPERTY_MAPPING_SCHEMA),
 
     //------------------------------------------------------------------------
-    // Vendor Specific Options
+    // Vendor Specific Properties
     //------------------------------------------------------------------------
 
     ConnectionFactory("org.openmdx.jdo.ConnectionFactory"),
-    ConnectionFactory2("org.openmdx.jdo.ConnectionFactory2");
+    ConnectionFactory2("org.openmdx.jdo.ConnectionFactory2"),
+    ContainerManaged("org.openmdx.jdo.option.ContainerManaged"),
+    RefInitializeOnCreate("org.openmdx.jmi.option.RefInitializeOnCreate");
 
     /**
      * Constructor

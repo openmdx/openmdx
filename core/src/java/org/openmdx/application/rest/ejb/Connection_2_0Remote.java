@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection_2_0Remote.java,v 1.3 2009/09/30 12:42:59 hburger Exp $
+ * Name:        $Id: Connection_2_0Remote.java,v 1.4 2010/09/13 16:46:29 hburger Exp $
  * Description: Connection 2.0 Remote Interface
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/30 12:42:59 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,7 +53,6 @@ package org.openmdx.application.rest.ejb;
 import java.rmi.RemoteException;
 
 import javax.ejb.EJBObject;
-import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;

@@ -2,11 +2,11 @@ package org.openmdx.catalina.realm;
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtendedJDBCRealm.java,v 1.3 2010/06/05 00:29:22 hburger Exp $
+ * Name:        $Id: ExtendedJDBCRealm.java,v 1.4 2010/11/15 14:37:20 wfro Exp $
  * Description: Extended Context Bindings
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/05 00:29:22 $
+ * Date:        $Date: 2010/11/15 14:37:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,9 +51,6 @@ package org.openmdx.catalina.realm;
  */
 
 
-import java.security.Principal;
-
-import org.apache.catalina.Realm;
 import org.apache.catalina.realm.JDBCRealm;
 import org.apache.catalina.util.Base64;
 import org.apache.catalina.util.HexUtils;
@@ -78,26 +75,6 @@ public class ExtendedJDBCRealm extends JDBCRealm {
      */
     public void setDigestFormat(String format) {
         this.digestFormat = format;
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * Returns the flag.
-     *
-     * @return The flag
-     */
-    public String getFlag() {
-        return this.flag;
-    }
-
-    //-----------------------------------------------------------------------
-    /**
-     * Sets the flag. Supported values are <code>sufficient</code>, <code>required</code>.
-     *
-     * @param flag flag.
-     */
-    public void setFlag(String flag) {
-        this.flag = flag;
     }
 
     //-----------------------------------------------------------------------
@@ -139,51 +116,11 @@ public class ExtendedJDBCRealm extends JDBCRealm {
     }
 
     //-----------------------------------------------------------------------
-    @Override
-    public synchronized Principal authenticate(
-        String username,
-        String credentials
-    ) {
-        Principal principal = super.authenticate(username, credentials);
-        if(
-            "required".equals(this.flag) ||
-            (principal != null)
-        ) {
-            System.out.println("ExtendedJDBCRealm: authentication OK for " + principal);
-            return principal;
-        }
-        else if("sufficient".equals(this.flag)) {
-            Realm realm = this.getContainer().getParent() == null
-                ? this.getContainer().getRealm()
-                : this.getContainer().getParent().getRealm();
-            if(this == realm) {
-                System.out.println("ExtendedJDBCRealm: already at parent level. authentication FAILED");
-                return null;
-            }
-            else {
-                return realm.authenticate(
-                    username, 
-                    credentials
-                );
-            }
-        }
-        else {
-            containerLog.error("Illegal flag: " + getFlag());
-            throw new IllegalArgumentException("Illegal flag: " + getFlag());            
-        }
-    }
-
-    //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
     /**
      * The format for the digest (hex, base64)
      */
     protected String digestFormat = "hex";
-    /**
-     * flag which allows to set whether an authentication with this 
-     * realm is sufficient or required.
-     */
-    protected String flag = "sufficient";
     
 }

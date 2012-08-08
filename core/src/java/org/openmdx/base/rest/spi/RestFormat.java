@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestFormat.java,v 1.20 2010/08/06 12:01:47 hburger Exp $
+ * Name:        $Id: RestFormat.java,v 1.23 2010/12/22 09:34:52 hburger Exp $
  * Description: REST Format
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:01:47 $
+ * Date:        $Date: 2010/12/22 09:34:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,6 +59,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -371,7 +372,7 @@ public class RestFormat {
     public static Target asTarget(
         final ObjectOutput output
     ){
-        return new Target("./"){
+        return new Target("."){
 
             @Override
             protected XMLStreamWriter newWriter(
@@ -1124,11 +1125,10 @@ public class RestFormat {
          */
         protected String toURL(Path xri) {
             if (xri == null) {
-                return this.base + '!' + UUIDs.newUUID();
+                return this.base + "/!" + UUIDs.newUUID();
             } else {
                 String uri = xri.toXRI();
-                return this.base
-                + uri.substring(uri.charAt(14) == '!' ? 14 : 15);
+                return this.base + "/" + uri.substring(uri.charAt(14) == '!' ? 14 : 15);
             }
         }
 
@@ -1211,18 +1211,29 @@ public class RestFormat {
                 return this.getQuery(xri);
             } else if (this.values == null || this.isStructureType(typeName)) {
                 return this.values;
+            } else if (xri.isTransientObjectId()){
+                Object_2Facade facade = this.getObject(null);
+                MappedRecord delegate = facade.getDelegate();
+                return xri.equals(facade.getPath()) ? delegate : Records.getRecordFactory().singletonMappedRecord(
+                    "map",
+                    null,
+                    xri,
+                    delegate
+                );
             } else {
-                return this.getObject(xri);
+                return this.getObject(xri).getDelegate();
             }
         }
 
         /**
          * Retrieve the interaction's object record
+         * @param xri TODO
          * 
          * @return the interaction's object record
          */
-        MappedRecord getObject(Path xri)
-        throws ServiceException {
+        Object_2Facade getObject(
+            Path xri
+        ) throws ServiceException {
             try {
                 Object_2Facade object = Object_2Facade.newInstance();
                 object.setValue(this.values);
@@ -1232,12 +1243,12 @@ public class RestFormat {
                 if (this.version != null) {
                     object.setVersion(Base64.decode(this.version));
                 }
-                return object.getDelegate();
+                return object;
             } catch (ResourceException exception) {
                 throw new ServiceException(exception);
             }
         }
-
+        
         /**
          * Retrieve the interaction's query record
          * 
@@ -1252,8 +1263,10 @@ public class RestFormat {
             return query;
         }
 
-        @SuppressWarnings("unchecked")
-    @Override
+        @SuppressWarnings({
+            "unchecked", "cast"
+        })
+        @Override
         public void endElement(String uri, String localName, String name)
         throws SAXException {
             try {
@@ -1266,7 +1279,7 @@ public class RestFormat {
                     // Object
                     //
                     if (target instanceof IndexedRecord) {
-                        ((IndexedRecord)this.target).add(this.getObject(null));
+                        ((IndexedRecord)this.target).add((MappedRecord) this.getObject(null).getDelegate());
                         this.values = null;
                     } else if (this.target instanceof MessageRecord) {
                         ((MessageRecord)this.target).setPath(this.source.getXRI(this.href));
@@ -1294,6 +1307,7 @@ public class RestFormat {
                                 PrimitiveTypes.OBJECT_ID.equals(featureType) ? text.trim() : 
                                 PrimitiveTypes.DATETIME.equals(featureType) ? Datatypes.create(Date.class,text.trim()) : 
                                 PrimitiveTypes.DATE.equals(featureType) ? Datatypes.create(XMLGregorianCalendar.class, text.trim()) : 
+                                PrimitiveTypes.ANYURI.equals(featureType) ? Datatypes.create(URI.class, text.trim()) : 
                                 PrimitiveTypes.BINARY.equals(featureType) ? Base64.decode(text.trim()) : 
                                 featureType != null && model.isClassType(featureType) ? new Path(text.trim()) : text;
                         }

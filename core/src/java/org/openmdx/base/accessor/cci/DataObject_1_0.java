@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObject_1_0.java,v 1.23 2010/06/30 12:49:16 hburger Exp $
+ * Name:        $Id: DataObject_1_0.java,v 1.24 2010/09/13 16:46:29 hburger Exp $
  * Description: Data Object interface
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 12:49:16 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,9 +55,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.UUID;
 
-import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
-import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;

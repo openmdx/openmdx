@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DateValue.java,v 1.53 2009/10/19 15:55:57 hburger Exp $
+ * Name:        $Id: DateValue.java,v 1.54 2010/09/08 09:41:08 wfro Exp $
  * Description: DateValue 
- * Revision:    $Revision: 1.53 $
+ * Revision:    $Revision: 1.54 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/19 15:55:57 $
+ * Date:        $Date: 2010/09/08 09:41:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -347,12 +347,13 @@ public class DateValue
     ) throws ServiceException {
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();         
         label = this.getLabel(attribute, p, label);
+        String title = this.getTitle(attribute, label);
         if(forEditing) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0) ? 
                 feature + "[" + Integer.toString(tabIndex) + "]" : 
                 id;            
-            p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {
                 String classModifier = this.isMandatory() ?
                     "valueR mandatory" :

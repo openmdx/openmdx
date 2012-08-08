@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestProxy.java,v 1.2 2010/08/26 10:06:53 wfro Exp $
+ * Name:        $Id: TestProxy.java,v 1.3 2010/09/13 16:57:01 hburger Exp $
  * Description: Test Proxy 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/26 10:06:53 $
+ * Date:        $Date: 2010/09/13 16:57:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -85,7 +85,7 @@ public class TestProxy {
         /* (non-Javadoc)
          * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
          */
-        @Override
+//      @Override
         public Object invoke(
             Object arg0, 
             Method arg1, 

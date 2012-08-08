@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ArrayDeque.java,v 1.3 2010/06/01 15:13:31 hburger Exp $
+ * Name:        $Id: ArrayDeque.java,v 1.4 2010/09/13 16:46:29 hburger Exp $
  * Description: ArrayDeque 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 15:13:31 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
@@ -21,11 +21,7 @@ import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Queue;
-import java.util.Stack;
 
 import org.openmdx.kernel.collection.ArraysExtension;
 

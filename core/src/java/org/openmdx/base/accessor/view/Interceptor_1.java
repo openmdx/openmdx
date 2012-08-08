@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Interceptor_1.java,v 1.2 2009/11/27 19:06:29 hburger Exp $
+ * Name:        $Id: Interceptor_1.java,v 1.3 2010/11/05 18:16:27 hburger Exp $
  * Description: Object 1 Plug-In
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/27 19:06:29 $
+ * Date:        $Date: 2010/11/05 18:16:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -160,13 +160,7 @@ public class Interceptor_1
         }
     }
     
-    public boolean objIsRemoved(
-    ) throws ServiceException { 
-        DataObject_1_0 delegate = getDelegate();
-        return delegate instanceof Interceptor_1 && ((Interceptor_1)delegate).objIsRemoved();
-    }
 
-    
     //------------------------------------------------------------------------
     // Implements InstanceCallbacks
     //------------------------------------------------------------------------

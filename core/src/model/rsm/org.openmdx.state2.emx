@@ -212,7 +212,7 @@
             <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_-V5WfoC4Ed2lDKTVYu2_Tw"/>
           </children>
           <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_-V5WcYC4Ed2lDKTVYu2_Tw" fontName="Arial" fontHeight="11" showListVisibility="Text" fillColor="13434879" lineColor="3276953" showStereotype="Text"/>
-          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_-V5WcoC4Ed2lDKTVYu2_Tw" x="19080" y="4134" width="9746" height="3228"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_-V5WcoC4Ed2lDKTVYu2_Tw" x="19080" y="4134" width="13158" height="3228"/>
         </children>
         <children xmi:id="_stTMgIygEd6xh6MVzLqAFg">
           <children xmi:id="_svSwkIygEd6xh6MVzLqAFg" type="ImageCompartment">
@@ -237,7 +237,30 @@
           <element xmi:type="uml:Class" href="org.openmdx.base.emx#_jK4zQH8vEd2MQvsjduCbTg?base/base/Modifiable?"/>
           <layoutConstraint xmi:type="notation:Bounds" xmi:id="_stTzkYygEd6xh6MVzLqAFg" x="22940" y="620" width="3079" height="2479"/>
         </children>
-        <styles xmi:type="umlnotation:UMLDiagramStyle" xmi:id="_MmiRG965EdmrtKJSXC0_FQ"/>
+        <children xmi:id="_5_rGIMSfEd-PIP34lUqlJQ">
+          <children xmi:id="_5_rGIcSfEd-PIP34lUqlJQ" type="ImageCompartment">
+            <layoutConstraint xmi:type="notation:Size" xmi:id="_5_rGIsSfEd-PIP34lUqlJQ" width="1318" height="1318"/>
+          </children>
+          <children xmi:id="_5_rGI8SfEd-PIP34lUqlJQ" type="Stereotype"/>
+          <children xmi:id="_5_rGJMSfEd-PIP34lUqlJQ" type="Name"/>
+          <children xmi:id="_5_rGJcSfEd-PIP34lUqlJQ" type="Parent"/>
+          <children xmi:id="_5_rGJsSfEd-PIP34lUqlJQ" visible="false" type="AttributeCompartment">
+            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_5_rGJ8SfEd-PIP34lUqlJQ"/>
+          </children>
+          <children xmi:id="_5_rGKMSfEd-PIP34lUqlJQ" visible="false" type="OperationCompartment">
+            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_5_rGKcSfEd-PIP34lUqlJQ"/>
+          </children>
+          <children xmi:id="_5_rGKsSfEd-PIP34lUqlJQ" visible="false" type="SignalCompartment">
+            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_5_rGK8SfEd-PIP34lUqlJQ"/>
+          </children>
+          <children xmi:id="_5_rGLMSfEd-PIP34lUqlJQ" visible="false" type="StructureCompartment">
+            <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_5_rGLcSfEd-PIP34lUqlJQ" canonical="false"/>
+          </children>
+          <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_5_rGLsSfEd-PIP34lUqlJQ" fontName="Arial" fontHeight="11" italic="true" showListStereotype="Text" showListVisibility="Text" fillColor="10337791" lineColor="3342489" showStereotype="Text"/>
+          <element xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F48350281?base/base/ContextCapable?"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_5_rGL8SfEd-PIP34lUqlJQ" x="29120" y="620" width="3102" height="2480"/>
+        </children>
+        <styles xmi:type="umlnotation:UMLDiagramStyle" xmi:id="_MmiRG965EdmrtKJSXC0_FQ" description="&lt;br />"/>
         <edges xmi:id="_aS0qwOc9EdqFRN8NA1-Qnw" element="_aSukIOc9EdqFRN8NA1-Qnw" source="_AUdrUOc9EdqFRN8NA1-Qnw" target="_NBNqwOc9EdqFRN8NA1-Qnw">
           <children xmi:id="_aS0qw-c9EdqFRN8NA1-Qnw" type="NameLabel">
             <children xmi:id="_aS0qxec9EdqFRN8NA1-Qnw" type="Stereotype" element="_aSukIOc9EdqFRN8NA1-Qnw"/>
@@ -397,8 +420,17 @@
             <children xmi:id="_opb5AIyhEd6xh6MVzLqAFg" type="Name"/>
             <layoutConstraint xmi:type="notation:Bounds" xmi:id="_opaD0YyhEd6xh6MVzLqAFg" y="-136"/>
           </children>
-          <styles xmi:type="umlnotation:UMLConnectorStyle" xmi:id="_opXAgYyhEd6xh6MVzLqAFg" fontName="DejaVu Sans" routing="Rectilinear" lineWidth="1" showStereotype="Text"/>
+          <styles xmi:type="umlnotation:UMLConnectorStyle" xmi:id="_opXAgYyhEd6xh6MVzLqAFg" fontName="DejaVu Sans" routing="Rectilinear" lineColor="2763429" lineWidth="1" showStereotype="Text"/>
           <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_opXAgoyhEd6xh6MVzLqAFg" points="[-21, -62, 11, 88]$[-39, -103, -7, 47]"/>
+        </edges>
+        <edges xmi:id="_EOUEYMSgEd-PIP34lUqlJQ" element="_ENou8MSgEd-PIP34lUqlJQ" source="_-V5WcIC4Ed2lDKTVYu2_Tw" target="_5_rGIMSfEd-PIP34lUqlJQ">
+          <children xmi:id="_EOVSgMSgEd-PIP34lUqlJQ" type="NameLabel">
+            <children xmi:id="_EOV5kMSgEd-PIP34lUqlJQ" type="Stereotype"/>
+            <children xmi:id="_EOWgoMSgEd-PIP34lUqlJQ" type="Name"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_EOVSgcSgEd-PIP34lUqlJQ" y="-136"/>
+          </children>
+          <styles xmi:type="umlnotation:UMLConnectorStyle" xmi:id="_EOUEYcSgEd-PIP34lUqlJQ" fontName="Sans" routing="Rectilinear" lineColor="2763429" lineWidth="1" showStereotype="Text"/>
+          <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_EOUEYsSgEd-PIP34lUqlJQ" points="[143, -82, -116, 118]$[262, -137, 3, 63]"/>
         </edges>
       </contents>
       <contents xmi:type="notation:Diagram" xmi:id="_3C7B8A60016D410408020067" type="Class" name="_LICENSE">
@@ -452,9 +484,6 @@
       <eAnnotations xmi:id="_xhzikH88Ed2MQvsjduCbTg" source="http://www.eclipse.org/uml2/2.0.0/UML">
         <details xmi:id="_xhzikX88Ed2MQvsjduCbTg" key="root"/>
       </eAnnotations>
-      <generalization xmi:id="_k0DtgOdAEdqFRN8NA1-Qnw">
-        <general xmi:type="uml:Class" href="org.openmdx.base.emx#_wJRXcOcuEdqFRN8NA1-Qnw?base/base/View?"/>
-      </generalization>
       <generalization xmi:id="_ihmdUH89Ed2MQvsjduCbTg">
         <general xmi:type="uml:Class" href="org.openmdx.base.emx#_PfY_YH83Ed2MQvsjduCbTg?base/base/Aspect?"/>
       </generalization>
@@ -477,6 +506,9 @@
       </generalization>
       <generalization xmi:id="_oolkcIyhEd6xh6MVzLqAFg">
         <general xmi:type="uml:Class" href="org.openmdx.base.emx#_jK4zQH8vEd2MQvsjduCbTg?base/base/Modifiable?"/>
+      </generalization>
+      <generalization xmi:id="_ENou8MSgEd-PIP34lUqlJQ">
+        <general xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F48350281?base/base/ContextCapable?"/>
       </generalization>
       <ownedAttribute xmi:id="_FpXZ0KtHEd2CZJkknFnJMw" name="transactionTimeUnique" isReadOnly="true">
         <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B63180083?w3c/w3c/boolean?"/>

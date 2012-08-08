@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.4 2010/06/01 08:08:23 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.8 2010/11/16 07:24:41 hburger Exp $
  * Description: Audit Plug-in
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 08:08:23 $
+ * Date:        $Date: 2010/11/16 07:24:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,25 +50,15 @@
  */
 package org.openmdx.audit2.aop1;
 
-import java.util.Date;
-import java.util.Map;
-
 import javax.jdo.JDOHelper;
-import javax.jdo.PersistenceManager;
 
 import org.openmdx.audit2.spi.Configuration;
-import org.openmdx.audit2.spi.Qualifiers;
-import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.aop1.PlugIn_1_0;
-import org.openmdx.base.aop1.Segment_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Audit Plug-in
@@ -111,94 +101,18 @@ public class PlugIn_1 implements PlugIn_1_0 {
         if(dataObject.jdoIsPersistent()) {
             Path objectId = view.jdoGetObjectId();
             Configuration configuration = this.getConfiguration(dataObject);
-            if(objectId.startsWith(configuration.getAuditSegmentId())) {
+            if(objectId.startsWith(configuration.getAuditSegmentId(view.jdoGetPersistenceManager()))) {
                 String type = objectId.get(objectId.size() - 2);
-                if(this.configuration.isAudit1Persistence()) {
-                    //
-                    // org::openmdx::compatibility::audit1
-                    //
-                    if("segment".equals(type)) {
-                        return new Segment_1(view, next){
-
-                            @Override
-                            protected Container_1_0 newExtent(
-                                ObjectView_1_0 parent,
-                                Container_1_0 container
-                            ) throws ServiceException {
-                                return new org.openmdx.compatibility.audit1.aop1.Extent_1(
-                                    parent, 
-                                    container
-                                );
-                            } 
-                            
-                        };
-                    }
-                    if("unitOfWork".equals(type)) {
-                        return new org.openmdx.compatibility.audit1.aop1.UnitOfWork_1(view, next);
-                    }
-                    if("involvement".equals(type)) {
-                        return new org.openmdx.compatibility.audit1.aop1.Involvement_1(view, next);
-                    }
-                } else {
-                    //
-                    // org::openmdx::audit2
-                    //
-                    if("unitOfWork".equals(type)) {
-                        return new UnitOfWork_1(view, next);
-                    }
-                    if("involvement".equals(type)) {
-                        return new Involvement_1(view, next);
-                    }
-                    
+                //
+                // org::openmdx::audit2
+                //
+                if("unitOfWork".equals(type)) {
+                    return new UnitOfWork_1(view, next);
                 }
-            }
-            Entries: for(Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
-               if(objectId.startsWith(entry.getValue())) {
-                   PersistenceManager dataObjectManager = dataObject.jdoGetPersistenceManager();
-                   BasicException failure; 
-                   try {
-                       dataObject.objGetClass();
-                       continue Entries;
-                   } catch (ServiceException exception) {
-                       failure = BasicException.toExceptionStack(exception);
-                   } catch (RuntimeException exception) {
-                       failure = BasicException.toExceptionStack(exception);
-                   }
-                   if(failure.getExceptionCode() == BasicException.Code.NOT_FOUND) {
-                       Path currentId = new Path(entry.getKey());
-                       int iLimit = objectId.size() - 1;
-                       for(
-                           int i = entry.getValue().size();
-                           i < iLimit;
-                           i++
-                       ){
-                           currentId.add(objectId.get(i));
-                       }
-                       String objectBase = objectId.get(iLimit);
-                       String currentBase = Qualifiers.getAudit2ObjectQualifier(objectBase);
-                       currentId.add(currentBase);
-                       DataObject_1 beforeImage = (
-                           (DataObject_1)dataObjectManager.getObjectById(currentId)
-                       ).getBeforeImage(
-                           objectId
-                       );
-                       Date modifiedAt = (Date) beforeImage.objGetValue(SystemAttributes.MODIFIED_AT);
-                       if(objectBase.equals(Qualifiers.toAudit2ImageQualifier(currentBase, modifiedAt))) {
-                           view.objSetDelegate(beforeImage);
-                       } else throw beforeImage.setInaccessibilityReason(
-                           new ServiceException(
-                               BasicException.Code.DEFAULT_DOMAIN,
-                               BasicException.Code.NOT_FOUND,
-                               "Missing before image for the given transaction time",
-                               new BasicException.Parameter("auditId", objectId),
-                               new BasicException.Parameter("objectId", currentId),
-                               new BasicException.Parameter("modifiedAt", modifiedAt)
-                          )
-                       );
-                   } else {
-                       throw new ServiceException(failure);
-                   }
-               }
+                if("involvement".equals(type)) {
+                    return new Involvement_1(view, next);
+                }
+                
             }
         }
         return next;

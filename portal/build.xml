@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.59 2010/06/07 15:41:03 hburger Exp $
+= Name:        $Id: build.xml,v 1.60 2010/10/27 14:37:15 wfro Exp $
 = Description: ant build for openMDX/Portal
-= Revision:    $Revision: 1.59 $
-= Date:        $Date: 2010/06/07 15:41:03 $
+= Revision:    $Revision: 1.60 $
+= Date:        $Date: 2010/10/27 14:37:15 $
 = Copyright:   (c) 2004-2010 OMEX AG
 =======================================================================
  *
@@ -62,8 +62,8 @@
 	<import file="../ant/etc/ant/build-properties.xml"/>
 	<import file="../ant/etc/ant/build-library.xml"/>
 	<path id="project.lib.classpath">
-		<path refid="java2.enterprise.lib"/>
-		<path refid="java2.extension.lib"/>
+		<path refid="osgi.enterprise.lib"/>
+		<path refid="osgi.extension.lib"/>
 		<path refid="openmdx.core.lib"/>
 		<path refid="openmdx.core.bin"/>
 		<pathelement location="../codehaus/${build.target.platform}/groovy/lib/groovy.jar"/>

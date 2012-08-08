@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: MessageRecord.java,v 1.5 2010/06/02 13:45:10 hburger Exp $
+ * Name:        $Id: MessageRecord.java,v 1.6 2010/11/18 08:19:15 hburger Exp $
  * Description: ObjectRecord 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:10 $
+ * Date:        $Date: 2010/11/18 08:19:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -237,11 +237,16 @@ public class MessageRecord
 //  @Override
     public String getCorellationId() {
         String messageId = getMessageId();
-        int d = Math.max(
-            messageId.lastIndexOf('!'), 
-            messageId.lastIndexOf('*')
-        );
-        return d < 0 ? null : messageId.substring(0, d);
+        if(messageId != null) {
+            int d = Math.max(
+                messageId.lastIndexOf('!'), 
+                messageId.lastIndexOf('*')
+            );
+            if(d > 0){
+                return messageId.substring(0, d);
+            }
+        } 
+        return null; 
     }
     
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StandardDbObject.java,v 1.7 2010/06/02 13:41:40 hburger Exp $
+ * Name:        $Id: StandardDbObject.java,v 1.10 2010/11/09 23:54:23 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:41:40 $
+ * Date:        $Date: 2010/11/09 23:54:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,8 +67,7 @@ import org.openmdx.kernel.exception.BasicException;
 @SuppressWarnings({
     "unchecked", "serial"
 })
-public abstract class StandardDbObject 
-extends DbObject {
+public abstract class StandardDbObject extends DbObject {
 
     //-------------------------------------------------------------------------
     protected StandardDbObject(
@@ -225,6 +224,20 @@ extends DbObject {
         return this.indexColumn;
     }
 
+    /**
+     * The method updates the collections if necessary
+     * 
+     * @param referenceIdColumns
+     * @param referenceIdValues
+     */
+    protected void adaptReferenceSelection (
+        List<String> referenceIdColumns,
+        List<Object> referenceIdValues
+    ){
+        // may be overrriden by a sub-class
+    }
+    
+    
     //-------------------------------------------------------------------------
     @Override
     public void remove(
@@ -254,28 +267,29 @@ extends DbObject {
                             (type.size() == accessPath.size() && accessPath.isLike(type))) &&
                             (this.getConfiguration().getDbObjectForUpdate1().length() > 0)
             ) {
-                statementParameters = new ArrayList();
+                statementParameters = new ArrayList<Object>();
                 String selectReferenceIdsClause = this.database.getSelectReferenceIdsClause(
                     conn, 
                     this.getReference(), 
                     statementParameters
                 );
-                statementParameters.add(
-                    this.database.getObjectId(
-                        this.getObjectId()
-                    )
-                );
+                List<String> referenceIdColumns = new ArrayList<String>();
+                referenceIdColumns.add("v." + this.database.OBJECT_RID);
+                this.adaptReferenceSelection(referenceIdColumns, statementParameters);
+                statementParameters.addAll(this.getObjectIdValues());
                 for(
-                        Iterator i = dbObjects.iterator();
-                        i.hasNext();
+                    Iterator i = dbObjects.iterator();
+                    i.hasNext();
                 ) {
                     String dbObject = (String)i.next();
-                    String statement =
-                        "DELETE FROM " + dbObject + 
-                        " WHERE " + this.database.OBJECT_RID + " " + selectReferenceIdsClause + " AND " + this.database.OBJECT_OID + " IN (?)";
+                    StringBuilder statement = new StringBuilder("DELETE FROM ").append(dbObject).append(" v WHERE ");
+                    for(String referenceIdColumn : referenceIdColumns) {
+                        statement.append(referenceIdColumn).append(' ').append(selectReferenceIdsClause).append(" AND ");
+                    }
+                    statement.append(this.getObjectIdClause());
                     ps = this.database.prepareStatement(
                         conn,
-                        currentStatement = statement
+                        currentStatement = statement.toString()
                     );
                     for(int j = 0; j < statementParameters.size(); j++) {
                         this.database.setPreparedStatementValue(
@@ -290,41 +304,43 @@ extends DbObject {
                 }
             }
 
-            // Composite objects (only if dbObject (=table) is configured)
-            if(
-                    ((type.size() == 1) || // catch all type
-                            ((type.size() > accessPath.size()) && accessPath.isLike(type.getPrefix(accessPath.size())))) &&
-                            (this.getConfiguration().getDbObjectForUpdate1() != null) &&
-                            (this.getConfiguration().getDbObjectForUpdate1().length() > 0)        
-            ) {
-                statementParameters = new ArrayList();
-                String selectReferenceIdsClause = this.database.getSelectReferenceIdsClause(
-                    conn, 
-                    accessPath.getDescendant(type.getSuffix(accessPath.size())),
-                    statementParameters
-                );
-                for(
-                        Iterator i = dbObjects.iterator();
-                        i.hasNext();
+            if(this.database.configuration.cascadeDeletes()) {
+                // Composite objects (only if dbObject (=table) is configured)
+                if(
+                        ((type.size() == 1) || // catch all type
+                                ((type.size() > accessPath.size()) && accessPath.isLike(type.getPrefix(accessPath.size())))) &&
+                                (this.getConfiguration().getDbObjectForUpdate1() != null) &&
+                                (this.getConfiguration().getDbObjectForUpdate1().length() > 0)        
                 ) {
-                    String dbObject = (String)i.next();
-                    String statement =
-                        "DELETE FROM " + dbObject + 
-                        " WHERE " + this.database.OBJECT_RID + " " + selectReferenceIdsClause;
-                    ps = this.database.prepareStatement(
-                        conn,
-                        currentStatement = statement
+                    statementParameters = new ArrayList();
+                    String selectReferenceIdsClause = this.database.getSelectReferenceIdsClause(
+                        conn, 
+                        accessPath.getDescendant(type.getSuffix(accessPath.size())),
+                        statementParameters
                     );
-                    for(int j = 0; j < statementParameters.size(); j++) {
-                        this.database.setPreparedStatementValue(
-                            this.conn,
-                            ps, 
-                            j+1, 
-                            statementParameters.get(j)
+                    for(
+                            Iterator i = dbObjects.iterator();
+                            i.hasNext();
+                    ) {
+                        String dbObject = (String)i.next();
+                        String statement =
+                            "DELETE FROM " + dbObject + 
+                            " WHERE " + this.database.OBJECT_RID + " " + selectReferenceIdsClause;
+                        ps = this.database.prepareStatement(
+                            conn,
+                            currentStatement = statement
                         );
+                        for(int j = 0; j < statementParameters.size(); j++) {
+                            this.database.setPreparedStatementValue(
+                                this.conn,
+                                ps, 
+                                j+1, 
+                                statementParameters.get(j)
+                            );
+                        }
+                        this.database.executeUpdate(ps, currentStatement, statementParameters);
+                        ps.close(); ps = null;
                     }
-                    this.database.executeUpdate(ps, currentStatement, statementParameters);
-                    ps.close(); ps = null;
                 }
             }
         }
@@ -341,19 +357,19 @@ extends DbObject {
                 new BasicException.Parameter("sqlState", ex.getSQLState())
 
             );
-        }
-        catch(ServiceException e) {
-            throw e;
-        }
-        catch(Exception ex) {
+        } catch(ServiceException exception) {
+            throw exception;
+        } catch(NullPointerException exception) {
+            exception.printStackTrace();
+            throw new ServiceException(exception);
+        } catch(Exception exception) {
             throw new ServiceException(
-                ex, 
+                exception, 
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC, 
-                ex.toString()
+                exception.toString()
             );
-        }
-        finally {
+        } finally {
             try {
                 if(ps != null) ps.close();
             } catch(Throwable ex) {
@@ -362,6 +378,11 @@ extends DbObject {
         }
     }
 
+    /**
+                  Path unitOfWorkProvider = this.dbObjectConfiguration.getUnitOfWorkProvider(); 
+            if(unitOfWorkProvider == null || !accessPath.startsWith(unitOfWorkProvider)) {
+
+     */
     //---------------------------------------------------------------------------  
     @Override
     public Path getObjectReference(

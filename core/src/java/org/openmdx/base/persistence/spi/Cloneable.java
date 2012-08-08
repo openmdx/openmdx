@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Cloneable.java,v 1.1 2009/01/08 00:28:21 hburger Exp $
+ * Name:        $Id: Cloneable.java,v 1.2 2010/12/07 23:03:12 hburger Exp $
  * Description: Cloneable
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/08 00:28:21 $
+ * Date:        $Date: 2010/12/07 23:03:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,9 +57,11 @@ public interface Cloneable<T> {
 
     /**
      * Clone the given object
+     *
+     * @param exclude the features not to be cloned
      * 
      * @return a transient clone of this object
      */
-    T openmdxjdoClone();
+    T openmdxjdoClone(String... exclude);
 
 }

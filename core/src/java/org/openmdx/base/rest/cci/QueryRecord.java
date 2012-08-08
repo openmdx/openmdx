@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: QueryRecord.java,v 1.1 2010/03/19 12:32:54 hburger Exp $
+ * Name:        $Id: QueryRecord.java,v 1.2 2010/11/23 17:34:52 wfro Exp $
  * Description: Query Record
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:54 $
+ * Date:        $Date: 2010/11/23 17:34:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,21 +66,6 @@ public interface QueryRecord extends MappedRecord {
      * An object record's name
      */
     String NAME = "org:openmdx:kernel:Query";
-    
-    /**
-     * Retrieve group.
-     *
-     * @return Returns the group.
-     */
-    Set<String> getGroup();
-    
-    /**
-     * Set group.
-     * 
-     * @param group The group to set.
-     */
-    void setGroup(Set<String> group);
-
     
     /**
      * Retrieve groups.

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeValue.java,v 1.44 2010/07/07 12:11:32 wfro Exp $
+ * Name:        $Id: CodeValue.java,v 1.45 2010/09/08 09:41:08 wfro Exp $
  * Description: CodeValue
- * Revision:    $Revision: 1.44 $
+ * Revision:    $Revision: 1.45 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/07 12:11:32 $
+ * Date:        $Date: 2010/09/08 09:41:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -308,12 +308,13 @@ public class CodeValue
     ) throws ServiceException {
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();    
         label = this.getLabel(attribute, p, label);
+        String title = this.getTitle(attribute, label);
         if(forEditing) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0)            
                 ? feature + "[" + Integer.toString(tabIndex) + "]"
                 : id;            
-            p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             Map longTextsT = this.getLongText(
             	false, 
             	false
@@ -402,7 +403,7 @@ public class CodeValue
                 }
                 else {
 	                p.write(gapModifier);
-	                p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+	                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
 	                p.write("<td class=\"valueL\" ", rowSpanModifier, " ", widthModifier, " ", styleModifier, ">");
 	                if(!this.isSingleValued()) {
 	                    p.write("  <div class=\"valueMulti\" ", styleModifier, ">");

@@ -65,6 +65,9 @@
           <generalization xmi:id="_oolkcIyhEd6xh6MVzLqAFg">
             <general xmi:type="uml:Class" href="org.openmdx.base.uml#_jK4zQH8vEd2MQvsjduCbTg"/>
           </generalization>
+          <generalization xmi:id="_YKu6EMShEd-3-qbbT8i9CQ">
+            <general xmi:type="uml:Class" href="org.openmdx.base.uml#_3C7B8A60016D403F48350281"/>
+          </generalization>
           <ownedAttribute xmi:id="_FpXZ0KtHEd2CZJkknFnJMw" name="transactionTimeUnique" isReadOnly="true">
             <type xmi:type="uml:PrimitiveType" href="org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
           </ownedAttribute>

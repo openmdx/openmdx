@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AuditQueries.java,v 1.11 2010/06/22 07:13:52 hburger Exp $
+ * Name:        $Id: AuditQueries.java,v 1.14 2010/10/19 21:58:01 hburger Exp $
  * Description: Audit Queries 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/22 07:13:52 $
+ * Date:        $Date: 2010/10/19 21:58:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,6 @@ package org.openmdx.audit2.cci;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -62,32 +61,22 @@ import java.util.TreeMap;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 
-import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.audit2.cci2.UnitOfWorkQuery;
 import org.openmdx.audit2.jmi1.Involvement;
 import org.openmdx.audit2.jmi1.Segment;
 import org.openmdx.audit2.jmi1.UnitOfWork;
 import org.openmdx.audit2.spi.Configuration;
-import org.openmdx.audit2.spi.Qualifiers;
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.jmi1.ExtentCapable;
 import org.openmdx.base.jmi1.Modifiable;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.ExtentCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
-import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.IsLikeCondition;
-import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
-import org.openmdx.base.query.SortOrder;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.Container;
 
 /**
  * Audit Queries
@@ -101,7 +90,7 @@ public class AuditQueries {
     ) {
         // Avoid instantiation
     }
-    
+
     /**
      * Retrieve the audit configuration
      * @param persistenceManager
@@ -124,10 +113,10 @@ public class AuditQueries {
         PersistenceManager persistenceManager
     ){
         return (Segment) persistenceManager.getObjectById(
-            AuditQueries.getConfiguration(persistenceManager).getAuditSegmentId()
+            AuditQueries.getConfiguration(persistenceManager).getAuditSegmentId(persistenceManager)
         );
     }
-    
+
     /**
      * Retrieve the persistence manager from a validated Modifiable[]
      * 
@@ -147,9 +136,35 @@ public class AuditQueries {
                         BasicException.Code.BAD_PARAMETER
                     )
                 )
-             );
+            );
         }
         return JDOHelper.getPersistenceManager(modifiable[0]);
+    }
+
+    /**
+     * Retrieve the objects' ids
+     * 
+     * @param objects
+     * 
+     * @return the objects' ids
+     */
+    private static Object[] toObjectIds(
+        Modifiable... objects
+    ){
+        Object[] objectIds = new Object[objects.length];
+        for(
+            int i = 0;
+            i < objects.length;
+            i++
+        ){
+            Object source = objects[i];
+            objectIds[i] = JDOHelper.isPersistent(source) ? JDOHelper.getObjectId(
+                source
+            ) : JDOHelper.getTransactionalObjectId(
+                source
+            );
+        }
+        return objectIds;
     }
 
     /**
@@ -171,77 +186,9 @@ public class AuditQueries {
         PersistenceManager persistenceManager = AuditQueries.getPersistenceManager(involvedObjects);
         Configuration configuration = AuditQueries.getConfiguration(persistenceManager);
         Segment auditSegment = AuditQueries.getAuditSegment(persistenceManager);
-        if(configuration.isAudit1Persistence()) {
-            Object[] involved = new Path[involvedObjects.length];
-            for(
-                int i = 0;
-                i < involvedObjects.length;
-                i++
-            ){
-                involved[i] = Qualifiers.toAudit1InvolvedId(involvedObjects[i].refGetPath());
-            }
-            List<Condition> conditions = new ArrayList<Condition>();
-            conditions.add(
-                new IsInstanceOfCondition(
-                    true,
-                    "org:openmdx:compatibility:audit1:UnitOfWork"
-                )
-            );
-            conditions.add(
-                new IsLikeCondition(
-                    Quantifier.THERE_EXISTS,
-                    "involved",
-                    true,
-                    involved
-                )
-            );
-            if(from != null){
-                conditions.add(
-                    new IsGreaterOrEqualCondition(
-                        Quantifier.THERE_EXISTS,
-                        SystemAttributes.CREATED_AT,
-                        true,
-                        from
-                    )
-                );
-            }
-            if(to != null){
-                conditions.add(
-                    new IsGreaterOrEqualCondition(
-                        Quantifier.THERE_EXISTS,
-                        SystemAttributes.CREATED_AT,
-                        false,
-                        to
-                    )
-                );
-            }
-            return auditSegment.<UnitOfWork>getUnitOfWork().getAll(
-                new Filter(
-                    conditions,
-                    Collections.singletonList(
-                        new OrderSpecifier(
-                            SystemAttributes.CREATED_AT,
-                            SortOrder.ASCENDING
-                        )
-                    ),
-                    null // extension
-                )
-            );
-        } else {
-            SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
-            Object[] involved = new Path[involvedObjects.length];
-            for(
-                int i = 0;
-                i < involvedObjects.length;
-                i++
-            ) try {
-                involved[i] = Qualifiers.getAudit2ImageId(configuration, involvedObjects[i].refGetPath(), null);
-            } catch (ServiceException exception) {
-                throw new RuntimeServiceException(exception);
-            }
-            Container<Involvement> extent = auditSegment.getExtent();
-            {
-                List<Involvement> involvements = extent.getAll(
+        switch(configuration.getPersistenceMode()) {
+            case EMBEDDED: {
+                List<Involvement> involvements = auditSegment.<Involvement>getExtent().getAll(
                     new Filter(
                         new IsInstanceOfCondition(
                             "org:openmdx:audit2:Involvement"
@@ -254,71 +201,34 @@ public class AuditQueries {
                                 auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
                             )
                         ),
-                        new IsLikeCondition(
+                        new IsInCondition(
                             Quantifier.THERE_EXISTS,
-                            "beforeImage",
+                            "object",
                             true,
-                            involved
+                            toObjectIds(involvedObjects)
                         )
                     )
                 );
-                Involvements: for(Involvement involvement : involvements) {
-                    for(Modifiable involvedObject : involvedObjects){
-                        String xri = involvement.getObjectId();
-                        if(involvedObject.refMofId().equals(xri)){
-                            UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                            if(
-                                (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                                (to == null || to.after(unitOfWork.getCreatedAt()))
-                            ){
-                                unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
-                            }
-                            continue Involvements;
+                SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
+                for(Involvement involvement : involvements) {
+                    try {
+                        UnitOfWork unitOfWork = involvement.getUnitOfWork();
+                        if(
+                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
+                            (to == null || to.after(unitOfWork.getCreatedAt()))
+                        ){
+                            unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
+                        }
+                    } catch (RuntimeException e) {
+                        if(BasicException.toExceptionStack(e).getExceptionCode() != BasicException.Code.NOT_FOUND) {
+                            throw e;
                         }
                     }
                 }
+                return unitsOfWork.values();
             }
-            {
-                List<Involvement> involvements = extent.getAll(
-                    new Filter(
-                        new Condition[]{
-                            new IsInstanceOfCondition(
-                                "org:openmdx:audit2:Involvement"
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS,
-                                SystemAttributes.OBJECT_IDENTITY,
-                                true,
-                                ExtentCollection.toIdentityPattern(
-                                    auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                                )
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS,
-                                "afterImage",
-                                true,
-                                involved
-                            )
-                        }
-                    )
-                );
-                Involvements: for(Involvement involvement : involvements) {
-                    for(Modifiable involvedObject : involvedObjects){
-                        String xri = involvement.getObjectId();
-                        if(involvedObject.refMofId().equals(xri)){
-                            UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                            if(
-                                (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                                (to == null || to.after(unitOfWork.getCreatedAt()))
-                            ){
-                                unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
-                            }
-                            continue Involvements;
-                        }
-                    }
-                }
-            }
-            return unitsOfWork.values();
+            default: 
+                throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
         }
     }
 
@@ -345,100 +255,10 @@ public class AuditQueries {
             PersistenceManager persistenceManager = extentCollection.getExtent().getPersistenceManager();
             Configuration configuration = getConfiguration(persistenceManager);
             Segment auditSegment = getAuditSegment(persistenceManager);
-            Path pattern = extentCollection.getPattern(); 
-            if(configuration.isAudit1Persistence()) { 
-                List<Condition> conditions = new ArrayList<Condition>();
-                conditions.add(
-                    new IsInstanceOfCondition(
-                        "org:openmdx:compatibility:audit1:UnitOfWork"
-                    )
-                );
-                conditions.add(
-                    new IsLikeCondition(
-                        Quantifier.THERE_EXISTS,
-                        "involved",
-                        true,
-                        pattern.getBase().endsWith("%") ? pattern : pattern.getChild("%")
-                    )
-                );
-                if(from != null){
-                    conditions.add(
-                        new IsGreaterOrEqualCondition(
-                            Quantifier.THERE_EXISTS,
-                            SystemAttributes.CREATED_AT,
-                            true,
-                            from
-                        )
-                    );
-                }
-                if(to != null){
-                    conditions.add(
-                        new IsGreaterOrEqualCondition(
-                            Quantifier.THERE_EXISTS,
-                            SystemAttributes.CREATED_AT,
-                            false,
-                            to
-                        )
-                    );
-                }
-                return auditSegment.<UnitOfWork>getUnitOfWork().getAll(
-                    new Filter(
-                        conditions,
-                        Collections.singletonList(
-                            new OrderSpecifier(
-                                SystemAttributes.CREATED_AT,
-                                SortOrder.ASCENDING
-                            )
-                        ),
-                        null // extension
-                    )
-                );
-            } else {
-                SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
-                Container<ExtentCapable> extent = auditSegment.getExtent();
-                Path involved;
-                try {
-                    involved = Qualifiers.getAudit2ImageId(configuration, pattern, null);
-                } catch (ServiceException exception) {
-                    throw new RuntimeServiceException(exception);
-                }
-                List<?> involvements = extent.getAll(
-                    new Filter(
-                        new IsInstanceOfCondition(
-                            "org:openmdx:audit2:Involvement"
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS,
-                            SystemAttributes.OBJECT_IDENTITY,
-                            true,
-                            ExtentCollection.toIdentityPattern(
-                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                            )
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS,
-                            "beforeImage",
-                            true,
-                            involved
-                        )
-                    )
-                );
-                Involvements: for(Object i : involvements) {
-                    Involvement involvement = (Involvement) i;
-                    if(new Path(involvement.getObjectId()).isLike(pattern)){
-                        UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                        if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
-                        ){
-                            unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
-                        }
-                        continue Involvements;
-                    }
-                }
-                involvements = extent.getAll(
-                    new Filter(
-                        new Condition[]{
+            switch(configuration.getPersistenceMode()) {
+                case EMBEDDED: {
+                    List<Involvement> involvements = auditSegment.<Involvement>getExtent().getAll(
+                        new Filter(
                             new IsInstanceOfCondition(
                                 "org:openmdx:audit2:Involvement"
                             ),
@@ -452,27 +272,32 @@ public class AuditQueries {
                             ),
                             new IsLikeCondition(
                                 Quantifier.THERE_EXISTS,
-                                "afterImage",
+                                "object",
                                 true,
-                                involved
+                                extentCollection.getPattern()
                             )
+                        )
+                    );
+                    SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
+                    for(Involvement involvement : involvements) {
+                        if(JDOHelper.isPersistent(involvement)) try {
+                            UnitOfWork unitOfWork = involvement.getUnitOfWork();
+                            if(
+                                (from == null || !from.after(unitOfWork.getCreatedAt())) &&
+                                (to == null || to.after(unitOfWork.getCreatedAt()))
+                            ){
+                                unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
+                            }
+                        } catch (RuntimeException e) {
+                            if(BasicException.toExceptionStack(e).getExceptionCode() != BasicException.Code.NOT_FOUND) {
+                                throw e;
+                            }
                         }
-                    )
-                );
-                Involvements: for(Object i : involvements) {
-                    Involvement involvement = (Involvement) i;
-                    if(new Path(involvement.getObjectId()).isLike(pattern)){
-                        UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                        if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
-                        ){
-                            unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
-                        }
-                        continue Involvements;
                     }
+                    return unitsOfWork.values();
                 }
-                return unitsOfWork.values();
+                default: 
+                    throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
             }
         } else {
             throw BasicException.initHolder(
@@ -483,10 +308,10 @@ public class AuditQueries {
                         BasicException.Code.BAD_PARAMETER
                     )
                 )
-             );
+            );
         }
     }
-    
+
     /**
      * Retrieve the units of work a given object was touched in
      * 
@@ -509,119 +334,34 @@ public class AuditQueries {
     ){
         PersistenceManager persistenceManager = getPersistenceManager(touchedObjects);
         Configuration configuration = getConfiguration(persistenceManager);
-        Segment auditSegment = getAuditSegment(persistenceManager);
-        if(configuration.isAudit1Persistence()) {
-            Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
-            Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, touchedObjects)) {
-                for(Modifiable touchedObject : touchedObjects) {
-                    Involvement involvement = candidate.getInvolvement(touchedObject.refGetPath().toString());
-                    if(involvement != null && involvement.getAfterImage() != null) {
-                        if(attributes == null) {
-                            unitsOfWork.add(candidate);
-                            continue Candidate;
-                        } else {
-                            for(String modifiedFeature : involvement.getModifiedFeature()) {
-                                if(attributes.contains(modifiedFeature)){
-                                    unitsOfWork.add(candidate);
-                                    continue Candidate;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return unitsOfWork;
-        } else {
-            SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
-            Object[] involved = new Path[touchedObjects.length];
-            for(
-                int i = 0;
-                i < touchedObjects.length;
-                i++
-            ) try {
-                involved[i] = Qualifiers.getAudit2ImageId(configuration, touchedObjects[i].refGetPath(), null);
-            } catch (ServiceException exception) {
-                throw new RuntimeServiceException(exception);
-            }
-            RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
-            List<Condition> conditions = new ArrayList<Condition>();
-            conditions.add(
-                new IsInstanceOfCondition(
-                    "org:openmdx:audit2:Involvement"
-                )
-            );
-            conditions.add(
-                new IsLikeCondition(
-                    Quantifier.THERE_EXISTS,
-                    SystemAttributes.OBJECT_IDENTITY,
-                    true,
-                    ExtentCollection.toIdentityPattern(
-                        auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                    )
-                )
-            );
-            conditions.add(
-                new IsLikeCondition(
-                    Quantifier.THERE_EXISTS,
-                    "afterImage",
-                    true,
-                    involved
-                )
-            );
-            conditions.add(
-                new IsLikeCondition(
-                    Quantifier.THERE_EXISTS,
-                    "beforeImage",
-                    true,
-                    involved
-                )
-            );
-            if(configuration.isModifiedFeaturePersistent()) {
-                conditions.add(
-                    new IsInCondition(
-                        Quantifier.THERE_EXISTS,
-                        "modifiedFeature",
-                        true,
-                        attributes
-                    )
-                );
-            }
-            Filter filter = new Filter();
-            filter.getCondition().addAll(conditions);
-            List<?> involvements = extent.refGetAll(filter);
-            Involvements: for(Object i : involvements) {
-                Involvement involvement = (Involvement) i;
-                String xri = involvement.getObjectId();
-                for(Modifiable touchedObject : touchedObjects){
-                    if(touchedObject.refMofId().equals(xri)){
-                        if(involvement.getAfterImage() != null) {
-                            boolean include = attributes == null || configuration.isModifiedFeaturePersistent();
-                            if(!include) {
-                                Features: for(String modifiedFeature : involvement.getModifiedFeature()) {
+        switch(configuration.getPersistenceMode()) {
+            case EMBEDDED: {
+                Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
+                Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, touchedObjects)) {
+                    for(Modifiable touchedObject : touchedObjects) {
+                        Involvement involvement = candidate.getInvolvement(touchedObject.refGetPath().toString());
+                        if(involvement != null && involvement.getAfterImage() != null) {
+                            if(attributes == null) {
+                                unitsOfWork.add(candidate);
+                                continue Candidate;
+                            } else {
+                                for(String modifiedFeature : involvement.getModifiedFeature()) {
                                     if(attributes.contains(modifiedFeature)){
-                                        include = true;
-                                        break Features;
+                                        unitsOfWork.add(candidate);
+                                        continue Candidate;
                                     }
                                 }
                             }
-                            if(include){
-                                UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                                if(
-                                    (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                                    (to == null || to.after(unitOfWork.getCreatedAt()))
-                                ){
-                                    unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
-                                }
-                            }
                         }
-                        continue Involvements;
                     }
                 }
+                return unitsOfWork;
             }
-            return unitsOfWork.values();
+            default: 
+                throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
         }
     }
-    
+
     /**
      * Retrieve the units of work objects with a given object id pattern are 
      * involved in.
@@ -648,81 +388,30 @@ public class AuditQueries {
             ExtentCollection<?> extentCollection = (ExtentCollection<?>) modifiable;
             PersistenceManager persistenceManager = extentCollection.getExtent().getPersistenceManager();
             Configuration configuration = getConfiguration(persistenceManager);
-            Path pattern = extentCollection.getPattern();
-            if(configuration.isAudit1Persistence()) { 
-                Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
-                Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, modifiable)) {
-                    for(Involvement involvement : candidate.<Involvement>getInvolvement()) {
-                        if(
-                            new Path(involvement.getObjectId()).isLike(pattern) &&
-                            involvement.getAfterImage() != null
-                        ) {
-                            if(attributes == null) {
-                                unitsOfWork.add(candidate);
-                                continue Candidate;
-                            } else {
-                                for(String modifiedFeature : involvement.getModifiedFeature()) {
-                                    if(attributes.contains(modifiedFeature)){
-                                        unitsOfWork.add(candidate);
-                                        continue Candidate;
+            switch(configuration.getPersistenceMode()) {
+                case EMBEDDED: {
+                    Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
+                    Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, modifiable)) {
+                        for(Involvement involvement : candidate.<Involvement>getInvolvement()) {
+                            if(involvement.getAfterImage() != null) {
+                                if(attributes == null) {
+                                    unitsOfWork.add(candidate);
+                                    continue Candidate;
+                                } else {
+                                    for(String modifiedFeature : involvement.getModifiedFeature()) {
+                                        if(attributes.contains(modifiedFeature)){
+                                            unitsOfWork.add(candidate);
+                                            continue Candidate;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    return unitsOfWork;
                 }
-                return unitsOfWork;
-            } else {
-                SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
-                Segment auditSegment = getAuditSegment(persistenceManager);
-                RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
-                Path involved;
-                try {
-                    involved = Qualifiers.getAudit2ImageId(configuration, pattern, null);
-                } catch (ServiceException exception) {
-                    throw new RuntimeServiceException(exception);
-                }
-                List<?> involvements = extent.refGetAll(
-                    new Filter(
-                        new IsInstanceOfCondition(
-                            "org:openmdx:audit2:Involvement"
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS,
-                            SystemAttributes.OBJECT_IDENTITY,
-                            true,
-                            ExtentCollection.toIdentityPattern(
-                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                            )
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS,
-                            "afterImage",
-                            false,
-                            involved
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS,
-                            "beforeImage",
-                            true,
-                            involved
-                        )
-                    )
-                );
-                Involvements: for(Object i : involvements) {
-                    Involvement involvement = (Involvement) i;
-                    if(new Path(involvement.getObjectId()).isLike(pattern)){
-                        UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                        if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
-                        ){
-                            unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
-                        }
-                        continue Involvements;
-                    }
-                }
-                return unitsOfWork.values();
+                default: 
+                    throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
             }
         } else {
             throw BasicException.initHolder(
@@ -733,7 +422,7 @@ public class AuditQueries {
                         BasicException.Code.BAD_PARAMETER
                     )
                 )
-             );
+            );
         }
     }
 
@@ -755,73 +444,20 @@ public class AuditQueries {
     ){
         PersistenceManager persistenceManager = getPersistenceManager(createdObjects);
         Configuration configuration = getConfiguration(persistenceManager);
-        if(configuration.isAudit1Persistence()) {  
-            throw BasicException.initHolder(
-                new UnsupportedOperationException(
-                    "audit1 persistence ignores object creation",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.NOT_SUPPORTED
-                    )
-                )
-            );
-        } else {
-            SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
-            Object[] involved = new Path[createdObjects.length];
-            for(
-                int i = 0;
-                i < createdObjects.length;
-                i++
-            ) try {
-                involved[i] = Qualifiers.getAudit2ImageId(configuration,createdObjects[i].refGetPath(), null);
-            } catch (ServiceException exception) {
-                throw new RuntimeServiceException(exception);
-            }
-            Segment auditSegment = getAuditSegment(persistenceManager);
-            RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
-            List<?> involvements = extent.refGetAll(
-                new Filter(
-                    new IsInstanceOfCondition(
-                        "org:openmdx:audit2:Involvement"
-                    ),
-                    new IsLikeCondition(
-                        Quantifier.THERE_EXISTS,
-                        SystemAttributes.OBJECT_IDENTITY,
-                        true,
-                        ExtentCollection.toIdentityPattern(
-                            auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
+        switch(configuration.getPersistenceMode()) {
+            case EMBEDDED: {
+                throw BasicException.initHolder(
+                    new UnsupportedOperationException(
+                        "EMBEDDED persistence ignores object creation",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED
                         )
-                    ),
-                    new IsInCondition(
-                        Quantifier.FOR_ALL,
-                        "beforeImage",
-                        true
-                    ),
-                    new IsLikeCondition(
-                        Quantifier.THERE_EXISTS,
-                        "afterImage",
-                        true,
-                        involved
                     )
-                )
-            );
-            Involvements: for(Object i : involvements) {
-                Involvement involvement = (Involvement) i;
-                String xri = involvement.getObjectId();
-                for(Modifiable createdObject : createdObjects){
-                    if(createdObject.refMofId().equals(xri)){
-                        UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                        if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
-                        ){
-                            unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
-                        }
-                        continue Involvements;
-                    }
-                }
+                );
             }
-            return unitsOfWork.values();
+            default: 
+                throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
         }
     }
 
@@ -847,67 +483,20 @@ public class AuditQueries {
             ExtentCollection<?> extentCollection = (ExtentCollection<?>) modifiable;
             PersistenceManager persistenceManager = extentCollection.getExtent().getPersistenceManager();
             Configuration configuration = getConfiguration(persistenceManager);
-            if(configuration.isAudit1Persistence()) { 
-                throw BasicException.initHolder(
-                    new UnsupportedOperationException(
-                        "audit1 persistence ignores object creation",
-                        BasicException.newEmbeddedExceptionStack(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.NOT_SUPPORTED
-                        )
-                    )
-                );
-            } else {
-                Path pattern = extentCollection.getPattern();
-                SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
-                Segment auditSegment = getAuditSegment(persistenceManager);
-                RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
-                Path involved;
-                try {
-                    involved = Qualifiers.getAudit2ImageId(configuration, pattern, null);
-                } catch (ServiceException exception) {
-                    throw new RuntimeServiceException(exception);
-                }
-                List<?> involvements = extent.refGetAll(
-                    new Filter(
-                        new IsInstanceOfCondition(
-                            "org:openmdx:audit2:Involvement"
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS,
-                            SystemAttributes.OBJECT_IDENTITY,
-                            true,
-                            ExtentCollection.toIdentityPattern(
-                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
+            switch(configuration.getPersistenceMode()) {
+                case EMBEDDED: {
+                    throw BasicException.initHolder(
+                        new UnsupportedOperationException(
+                            "EMBEDDED persistence ignores object creation",
+                            BasicException.newEmbeddedExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.NOT_SUPPORTED
                             )
-                        ),
-                        new IsInCondition(
-                            Quantifier.FOR_ALL,
-                            "beforeImage",
-                            true
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS,
-                            "afterImage",
-                            true,
-                            involved
                         )
-                    )
-                );
-                Involvements: for(Object i : involvements) {
-                    Involvement involvement = (Involvement) i;
-                    if(new Path(involvement.getObjectId()).isLike(pattern)){
-                        UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                        if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
-                        ){
-                            unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
-                        }
-                        continue Involvements;
-                    }
+                    );
                 }
-                return unitsOfWork.values();
+                default: 
+                    throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
             }
         } else {
             throw BasicException.initHolder(
@@ -918,7 +507,7 @@ public class AuditQueries {
                         BasicException.Code.BAD_PARAMETER
                     )
                 )
-             );
+            );
         }
     }
 
@@ -940,75 +529,22 @@ public class AuditQueries {
     ){
         PersistenceManager persistenceManager = getPersistenceManager(removedObjects);
         Configuration configuration = getConfiguration(persistenceManager);
-        if(configuration.isAudit1Persistence()) { 
-            Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
-            Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, removedObjects)) {
-                for(Modifiable touchedObject : removedObjects) {
-                    Involvement involvement = candidate.getInvolvement(touchedObject.refGetPath().toString());
-                    if(involvement != null && involvement.getAfterImage() == null) {
-                        unitsOfWork.add(candidate);
-                        continue Candidate;
-                    }
-                }
-            }
-            return unitsOfWork;
-        } else {
-            SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
-            Object[] involved = new Path[removedObjects.length];
-            for(
-                int i = 0;
-                i < removedObjects.length;
-                i++
-            ) try {
-                involved[i] = Qualifiers.getAudit2ImageId(configuration, removedObjects[i].refGetPath(), null);
-            } catch (ServiceException exception) {
-                throw new RuntimeServiceException(exception);
-            }
-            Segment auditSegment = getAuditSegment(persistenceManager);
-            RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
-            List<?> involvements = extent.refGetAll(
-                new Filter(
-                    new IsInstanceOfCondition(
-                        "org:openmdx:audit2:Involvement"
-                    ),
-                    new IsLikeCondition(
-                        Quantifier.THERE_EXISTS,
-                        SystemAttributes.OBJECT_IDENTITY,
-                        true,
-                        ExtentCollection.toIdentityPattern(
-                            auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                        )
-                    ),
-                    new IsInCondition(
-                        Quantifier.FOR_ALL,
-                        "afterImage",
-                        true
-                    ),
-                    new IsLikeCondition(
-                        Quantifier.THERE_EXISTS,
-                        "beforeImage",
-                        true,
-                        involved
-                    )
-                )
-            );
-            Involvements: for(Object i : involvements) {
-                Involvement involvement = (Involvement) i;
-                String xri = involvement.getObjectId();
-                for(Modifiable removedObject : removedObjects){
-                    if(removedObject.refMofId().equals(xri)){
-                        UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                        if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
-                        ){
-                            unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
+        switch(configuration.getPersistenceMode()) {
+            case EMBEDDED: {
+                Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
+                Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, removedObjects)) {
+                    for(Modifiable touchedObject : removedObjects) {
+                        Involvement involvement = candidate.getInvolvement(touchedObject.refGetPath().toString());
+                        if(involvement != null && involvement.getAfterImage() == null) {
+                            unitsOfWork.add(candidate);
+                            continue Candidate;
                         }
-                        continue Involvements;
                     }
                 }
+                return unitsOfWork;
             }
-            return unitsOfWork.values();
+            default: 
+                throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
         }
     }
 
@@ -1035,70 +571,24 @@ public class AuditQueries {
             PersistenceManager persistenceManager = extentCollection.getExtent().getPersistenceManager();
             Configuration configuration = getConfiguration(persistenceManager);
             Path pattern = extentCollection.getPattern();
-            if(configuration.isAudit1Persistence()) { 
-                Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
-                Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, modifiable)) {
-                    for(Involvement involvement : candidate.<Involvement>getInvolvement()) {
-                        if(
-                            new Path(involvement.getObjectId()).isLike(pattern) &&
-                            involvement.getAfterImage() == null
-                        ) {
-                            unitsOfWork.add(candidate);
-                            continue Candidate;
+            switch(configuration.getPersistenceMode()) {
+                case EMBEDDED: {
+                    Collection<UnitOfWork> unitsOfWork = new ArrayList<UnitOfWork>();
+                    Candidate: for(UnitOfWork candidate : getUnitOfWorkInvolvingObject(from, to, modifiable)) {
+                        for(Involvement involvement : candidate.<Involvement>getInvolvement()) {
+                            if(
+                                new Path(involvement.getObjectId()).isLike(pattern) &&
+                                involvement.getAfterImage() == null
+                            ) {
+                                unitsOfWork.add(candidate);
+                                continue Candidate;
+                            }
                         }
                     }
+                    return unitsOfWork;
                 }
-                return unitsOfWork;
-            } else {
-                SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
-                Segment auditSegment = getAuditSegment(persistenceManager);
-                RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
-                Path involved;
-                try {
-                    involved = Qualifiers.getAudit2ImageId(configuration, pattern, null);
-                } catch (ServiceException exception) {
-                    throw new RuntimeServiceException(exception);
-                }
-                List<?> involvements = extent.refGetAll(
-                    new Filter(
-                        new IsInstanceOfCondition(
-                            "org:openmdx:audit2:Involvement"
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS,
-                            SystemAttributes.OBJECT_IDENTITY,
-                            true,
-                            ExtentCollection.toIdentityPattern(
-                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                            )
-                        ),
-                        new IsInCondition(
-                            Quantifier.FOR_ALL,
-                            "afterImage",
-                            true
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS,
-                            "beforeImage",
-                            true,
-                            involved
-                        )
-                    )
-                );
-                Involvements: for(Object i : involvements) {
-                    Involvement involvement = (Involvement) i;
-                    if(new Path(involvement.getObjectId()).isLike(pattern)){
-                        UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                        if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
-                        ){
-                            unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
-                        }
-                        continue Involvements;
-                    }
-                }
-                return unitsOfWork.values();
+                default: 
+                    throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
             }
         } else {
             throw BasicException.initHolder(
@@ -1109,7 +599,7 @@ public class AuditQueries {
                         BasicException.Code.BAD_PARAMETER
                     )
                 )
-             );
+            );
         }
     }
 
@@ -1130,11 +620,11 @@ public class AuditQueries {
         query.orderByCreatedAt();
         return getAuditSegment(persistenceManager).getUnitOfWork(query);
     }
-    
+
     /**
      * Retrieve the units of work within a given time range
      * 
-     * @param persistenceManager the persistence manager ot be used
+     * @param persistenceManager the persistence manager to be used
      * @param from earlier units of works are excluded unless <code>from</code>
      * is <code>null</code> 
      * @param to later units of works are excluded unless <code>to</code>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.12 2010/08/23 10:44:43 wfro Exp $
+ * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.17 2010/11/09 23:54:23 hburger Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/23 10:44:43 $
+ * Date:        $Date: 2010/11/09 23:54:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,6 +62,7 @@ import java.util.List;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
+import org.openmdx.application.dataprovider.spi.ResourceHelper;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -267,7 +268,7 @@ extends SlicedDbObject
         !"object_id".equalsIgnoreCase(columnName) &&
         !this.database.OBJECT_IDX.equalsIgnoreCase(columnName) &&
         !columnName.toLowerCase().startsWith(this.database.privateAttributesPrefix) &&
-        !columnName.endsWith("_");
+        !columnName.endsWith(AbstractDatabase_1.SIZE_SUFFIX);
     }
 
     //---------------------------------------------------------------------------  
@@ -402,19 +403,19 @@ extends SlicedDbObject
                 new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
                 new BasicException.Parameter("sqlState", ex.getSQLState())
             );
-        }
-        catch(ServiceException e) {
-            throw e;
-        }
-        catch(Exception ex) {
+        } catch(ServiceException exception) {
+            throw exception;
+        } catch(NullPointerException exception) {
+            exception.printStackTrace();
+            throw new ServiceException(exception);
+        } catch(Exception exception) {
             throw new ServiceException(
-                ex, 
+                exception, 
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC, 
-                ex.toString()
+                exception.toString()
             );
-        }
-        finally {
+        } finally {
             try {
                 if(ps != null) ps.close();
             } catch(Throwable ex) {
@@ -427,7 +428,7 @@ extends SlicedDbObject
     @SuppressWarnings("unchecked")
     @Override
     public MappedRecord[] sliceAndNormalizeObject(
-        MappedRecord object
+        MappedRecord object, boolean discardValuesProvidedByView
     ) throws ServiceException {
         DbObjectConfiguration dbObjectConfiguration = this.getConfiguration();    
         Object_2Facade facade = null;
@@ -463,21 +464,15 @@ extends SlicedDbObject
                     !this.database.nonPersistentFeatures.contains(featureQualifiedName)
                 ) {                
                     String multiplicity = ModelUtils.getMultiplicity(feature);
-                    boolean isChangeable = model.isReferenceType(feature) ? (
-                        !model.referenceIsDerived(feature) 
-                    ) : (
-                        !((Boolean)feature.objGetValue("isDerived")).booleanValue() && 
-                        ((Boolean)feature.objGetValue("isChangeable")).booleanValue()
-                    );
                     if(
-                        isChangeable &&
+                        ModelUtils.isChangeable(feature) &&
                         (Multiplicities.MULTI_VALUE.equals(multiplicity) ||
                         Multiplicities.LIST.equals(multiplicity) ||
                         Multiplicities.SET.equals(multiplicity) ||
                         Multiplicities.SPARSEARRAY.equals(multiplicity))                    
                     ) {
                         Object source = facade.getAttributeValues(featureName); 
-                        List target = facade.attributeValuesAsList(featureName + "_");
+                        List target = facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX);
                         target.clear();
                         target.add(
                             source instanceof SparseArray ?
@@ -493,8 +488,8 @@ extends SlicedDbObject
             if(model.isSubtypeOf(classDef, "org:openmdx:base:BasicObject")) {
                 String featureName = SystemAttributes.CREATED_BY;
                 Object values = facade.getAttributeValues(featureName);
-                facade.attributeValuesAsList(featureName + "_").clear();
-                facade.attributeValuesAsList(featureName + "_").add(
+                facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX).clear();
+                facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX).add(
                     values instanceof SparseArray ?
                         ((SparseArray)values).size() :
                             values instanceof List ?
@@ -503,8 +498,8 @@ extends SlicedDbObject
                 );
                 featureName = SystemAttributes.MODIFIED_BY;
                 values = facade.getAttributeValues(featureName);
-                facade.attributeValuesAsList(featureName + "_").clear();
-                facade.attributeValuesAsList(featureName + "_").add(
+                facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX).clear();
+                facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX).add(
                     values instanceof SparseArray ?
                         ((SparseArray)values).size() :
                             values instanceof List ?
@@ -619,16 +614,11 @@ extends SlicedDbObject
                 }
                 // Embedded features are mapped to slice 0
                 if(this.database.embeddedFeatures.containsKey(attributeName)) {                    
-                    try {
-                        Object_2Facade.newInstance(slices[0]).attributeValuesAsList(
-                            attributeName + "_" + j
-                        ).add(
-                            facade.attributeValuesAsList(attributeName).get(j)
-                        );
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
+                    ResourceHelper.getObjectFacade(slices[0]).attributeValuesAsList(
+                        attributeName + AbstractDatabase_1.SIZE_SUFFIX + j
+                    ).add(
+                        facade.attributeValuesAsList(attributeName).get(j)
+                    );
                 }
                 // Map to slice with corresponding index
                 else {               

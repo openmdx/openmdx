@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ApplicationContext.java,v 1.108 2010/07/22 23:18:23 wfro Exp $
+ * Name:        $Id: ApplicationContext.java,v 1.111 2010/10/25 14:38:23 wfro Exp $
  * Description: ApplicationContext
- * Revision:    $Revision: 1.108 $
+ * Revision:    $Revision: 1.111 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/22 23:18:23 $
+ * Date:        $Date: 2010/10/25 14:38:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -76,7 +76,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jmi.reflect.RefObject;
@@ -249,15 +248,16 @@ public final class ApplicationContext
                     this.pmData.currentTransaction().rollback();
                 } 
                 catch(Exception e0) {}
-                new ServiceException(e).log();
+                SysLog.info("Unable to set last login date. For more info see detail log", e.getMessage());
+                SysLog.detail(e.getMessage(), e.getCause());
             }
         }      
         this.loadUserHome();
         this.loadSettings();
         // Init locale
-        if(this.getSettings().getProperty(PROPERTY_LOCALE_NAME) != null) {
+        if(this.getSettings().getProperty(UserSettings.LOCALE_NAME) != null) {
             this.setCurrentLocale(
-                this.getSettings().getProperty(PROPERTY_LOCALE_NAME)
+                this.getSettings().getProperty(UserSettings.LOCALE_NAME)
             );
         }
         else {
@@ -266,9 +266,9 @@ public final class ApplicationContext
             );
         }
         // Init TimeZone
-        if(this.getSettings().getProperty(PROPERTY_TIMEZONE_NAME) != null) {
+        if(this.getSettings().getProperty(UserSettings.TIMEZONE_NAME) != null) {
             this.setCurrentTimeZone(
-                this.getSettings().getProperty(PROPERTY_TIMEZONE_NAME)
+                this.getSettings().getProperty(UserSettings.TIMEZONE_NAME)
             );
         }
         else {
@@ -277,9 +277,9 @@ public final class ApplicationContext
             );
         }
         // Init Perspective
-        if(this.getSettings().getProperty(PROPERTY_PERSPECTIVE_ID) != null) {
+        if(this.getSettings().getProperty(UserSettings.PERSPECTIVE_ID) != null) {
             this.setCurrentPerspective(
-                Integer.valueOf(this.getSettings().getProperty(PROPERTY_PERSPECTIVE_ID))
+                Integer.valueOf(this.getSettings().getProperty(UserSettings.PERSPECTIVE_ID))
             );
         }
         else {
@@ -543,7 +543,6 @@ public final class ApplicationContext
         if(this.userHome != null) {
             boolean saveSettings = true;
             try {
-            	JDOHelper.getPersistenceManager(this.userHome).refresh(this.userHome);
                 if(logoff) {
                     Boolean storeSettingsOnLogoff = (Boolean)this.userHome.refGetValue("storeSettingsOnLogoff");
                     saveSettings = (storeSettingsOnLogoff == null) || storeSettingsOnLogoff.booleanValue();
@@ -560,7 +559,7 @@ public final class ApplicationContext
     private void storeSettings(
     ) {
         if(this.userHome != null) {
-            PersistenceManager pm = JDOHelper.getPersistenceManager(this.userHome);
+            PersistenceManager pm = this.getNewPmData();
             try {                  
                 ByteArrayOutputStream bs = new ByteArrayOutputStream();
                 if(this.settings == null) {
@@ -568,11 +567,12 @@ public final class ApplicationContext
                 }
                 this.settings.store(
                     bs,
-                    "settings of user " + this.userHome.refMofId() 
+                    "Settings of user " + this.userHome.refMofId() 
                 );
-                bs.close();
+                bs.close();                
+                RefObject_1_0 userHome = (RefObject_1_0)pm.getObjectById(this.userHome.refGetPath());
                 pm.currentTransaction().begin();
-                this.userHome.refSetValue(
+                userHome.refSetValue(
                     "settings",
                     bs.toString("UTF-8")
                 );
@@ -585,6 +585,11 @@ public final class ApplicationContext
                     pm.currentTransaction().rollback();
                 } 
                 catch(Exception e0) {}
+            }
+            finally {
+            	if(pm != null) {
+            		pm.close();
+            	}
             }
         }
     }
@@ -869,7 +874,7 @@ public final class ApplicationContext
         }
         // Save in settings
         this.getSettings().setProperty(
-            PROPERTY_TIMEZONE_NAME,
+            UserSettings.TIMEZONE_NAME,
             this.currentTimeZone
         );
         // actions are locale-specific. Invalidate
@@ -901,7 +906,7 @@ public final class ApplicationContext
         }
         // Save in settings
         this.getSettings().setProperty(
-            PROPERTY_LOCALE_NAME,
+            UserSettings.LOCALE_NAME,
             this.currentLocaleAsString
         );
         // actions are locale-specific. Invalidate
@@ -1330,7 +1335,7 @@ public final class ApplicationContext
         this.currentPerspective = perspective;
         // Save in settings
         this.getSettings().setProperty(
-            PROPERTY_PERSPECTIVE_ID,
+            UserSettings.PERSPECTIVE_ID,
             Integer.toString(this.currentPerspective)
         );        
     }
@@ -1471,10 +1476,6 @@ public final class ApplicationContext
     // Members
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = -8690003081285454886L;
-
-    public static final String PROPERTY_LOCALE_NAME = "Locale.Name";
-    public static final String PROPERTY_TIMEZONE_NAME = "TimeZone.Name";
-    public static final String PROPERTY_PERSPECTIVE_ID = "Perspective.ID";
 
     private ApplicationContextConfiguration configuration;
     private RefObject_1_0 userHome = null;

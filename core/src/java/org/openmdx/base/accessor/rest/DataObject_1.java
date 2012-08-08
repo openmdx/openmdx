@@ -1,9 +1,9 @@
 /*
  * ====================================================================
  * Description: Object_1 class
- * Revision:    $Revision: 1.108 $
+ * Revision:    $Revision: 1.123 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/26 15:53:52 $
+ * Date:        $Date: 2010/12/22 09:23:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -82,6 +82,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
@@ -125,10 +126,12 @@ import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.collection.PopulationMap;
+import org.openmdx.base.collection.Sets;
 import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
@@ -137,6 +140,7 @@ import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsInCondition;
@@ -154,12 +158,14 @@ import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.w3c.cci2.LargeObject;
+import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 
 /**
@@ -179,27 +185,32 @@ public class DataObject_1
         this.identity = identity;
         this.transientObjectId = null;
         this.detached = true;
+        this.untouchable = false;
         this.digest = version;
     }
     
     /**
      * Constructor 
-     *
-     * @param manager
+     * 
      * @param identity
      * @param transientObjectId 
+     * @param untouchable 
+     * @param dataObjectManager
+     *
      * @throws ServiceException  
      */
     private DataObject_1(
         DataObjectManager_1 dataObjectManager,
         Path identity, 
-        UUID transientObjectId
+        UUID transientObjectId, 
+        boolean untouchable
     ) throws ServiceException {
         this.dataObjectManager = dataObjectManager;
         this.identity = identity;
         this.transientObjectId = transientObjectId == null ? UUIDs.newUUID() : transientObjectId;
         this.transientValues = identity == null ? new HashMap<String,Object>() : null;
         this.detached = false;
+        this.untouchable = untouchable;
         dataObjectManager.putUnlessPresent(
             this.transientObjectId,  
             this
@@ -213,6 +224,7 @@ public class DataObject_1
      * @param identity 
      * @param transientObjectId 
      * @param objectClass
+     * @param frozen 
      * 
      * @throws ServiceException
      */
@@ -220,12 +232,14 @@ public class DataObject_1
         DataObjectManager_1 manager,
         Path identity, 
         UUID transientObjectId, 
-        String objectClass
+        String objectClass, 
+        boolean frozen
     ) throws ServiceException{
         this(
             manager,
             identity, 
-            transientObjectId
+            transientObjectId, 
+            frozen
         );
         if(objectClass == null && identity == null) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
@@ -238,28 +252,31 @@ public class DataObject_1
         }
     }
 
-    /**
+	/**
      * Constructor
      * 
      * @param that
      * @param beforeImage <code>true</code> if the before-image shall be cloned
      * @param identity 
-
+     * @parame exclude the features not to be cloned
      * @throws ServiceException
      */
     @SuppressWarnings("unchecked")
     private DataObject_1(
         DataObject_1 that, 
         boolean beforeImage, 
-        Path identity
+        Path identity, 
+        String... exclude
     ) throws ServiceException{
         this(
             that.dataObjectManager,
             identity,
             null, // transientObjectId 
-            DataObject_1.getRecordName(that)
+            DataObject_1.getRecordName(that), 
+            beforeImage
         );
         this.digest = null;
+        Set<String> notToBeCloned = Sets.asSet(exclude);
         // 
         // Persistent Values
         //
@@ -271,8 +288,12 @@ public class DataObject_1
         } catch (ResourceException exception) {
             throw new ServiceException(exception);
         }
+        
         if(!that.objIsHollow()) {
-            this.persistentValues.putAll(that.persistentValues);
+        	Feature: for(Map.Entry<?,?> e: ((Map<?,?>)that.persistentValues).entrySet()) {
+                if(notToBeCloned.contains(e.getKey())) continue Feature;
+    			this.persistentValues.put(e.getKey(), e.getValue());
+        	}
         }
         TransactionalState_1 thisState = this.getState(false);
         Set<String> thisDirty;
@@ -293,8 +314,9 @@ public class DataObject_1
             //
             TransactionalState_1 thatState = that.getState(true);
             if(thatState != null) {
-                for(Map.Entry<String,Object> e : thatState.values(true).entrySet()){
+                Feature: for(Map.Entry<String,Object> e : thatState.values(true).entrySet()){
                     String feature = e.getKey();
+                    if(notToBeCloned.contains(feature)) continue Feature;
                     Object candidate = e.getValue();
                     if(candidate instanceof Set) {
                         Set<Object> target = this.objGetSet(feature);
@@ -320,16 +342,21 @@ public class DataObject_1
                 that.transientValues != null &&
                 this.transientValues != null
              ) {
-                for(Map.Entry<String,Object> e : that.transientValues.entrySet()){
+                Feature: for(Map.Entry<String,Object> e : that.transientValues.entrySet()){
                     String feature = e.getKey();
+                    if(notToBeCloned.contains(feature)) continue Feature;
                     Object candidate = e.getValue();
-                    this.transientValues.put(feature, candidate);
                     if(candidate instanceof Set) {
+                        this.transientValues.put(feature, new HashSet<Object>((Set<?>)candidate));
                         this.objGetSet(feature);
                     } else if (candidate instanceof List) {
+                        this.transientValues.put(feature, new ArrayList<Object>((List<?>)candidate));
                         this.objGetList(feature);
                     } else if (candidate instanceof SortedMap) {
+                        this.transientValues.put(feature, new TreeMap<Integer,Object>((SortedMap<Integer,Object>)candidate));
                         this.objGetSparseArray(feature);
+                    } else {
+                        this.transientValues.put(feature, candidate);
                     }
                 }
             } 
@@ -419,6 +446,11 @@ public class DataObject_1
      */
     private final boolean detached;
     
+    /**
+     * The read-only flag is true in case of before images
+     */
+    private final boolean untouchable;
+
     /**
      *
      */
@@ -838,7 +870,7 @@ public class DataObject_1
     /**
      * Evict the data object
      */
-    void unconditionalEvict(
+    public void unconditionalEvict(
     ){
         TransactionalState_1 state = this.getState(true);
         if(state != null) {
@@ -1064,15 +1096,19 @@ public class DataObject_1
     /**
      * This method clones this data object
      *
+     * @parame exclude the features not to be cloned
+     *
      * @return the clone
      */
     public DataObject_1_0 openmdxjdoClone(
+    	String... exclude
     ) {
         try {
             return new DataObject_1(
                 this, 
                 false, // beforeImage
-                null // identity
+                null, // identity
+                exclude
             );
         } catch(Exception e) {
             throw new JDOUserException(
@@ -1133,15 +1169,37 @@ public class DataObject_1
             for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
                 qualifier = plugIn.getQualifier(this, qualifier);
             }
-            if(qualifier == null) throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "No plug-in did provide the object id's last XRI segment",
-                ExceptionHelper.newObjectIdParameter("id", this),
-                new BasicException.Parameter("criteria", criteria)
-            );
+            if(qualifier == null) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "No plug-in did provide the object id's last XRI segment",
+                    ExceptionHelper.newObjectIdParameter("id", this),
+                    new BasicException.Parameter("criteria", criteria)
+                );
+            }
             Path identity = this.container.openmdxjdoGetContainerId().getChild(qualifier);
-            if(this.dataObjectManager.containsKey(identity)) {
+            boolean flushed = false;
+            if(PathComponent.isPlaceHolder(qualifier)) {
+                if(isProxy()) {
+                    this.objMakeTransactional();
+                    TransactionalState_1 state = this.getState(false);
+                    state.setLifeCycleEventPending(true);
+                    this.identity = identity;
+                    this.created = true;
+                    this.dataObjectManager.currentTransaction().flush(false);
+                    flushed = true;
+                } else {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        "The qualifier must be neither null nor a place holder unless the container is a proxy",
+                        new BasicException.Parameter("container",container.openmdxjdoGetContainerId()),
+                        new BasicException.Parameter("qualifier",qualifier),
+                        new BasicException.Parameter("proxy",Boolean.FALSE)
+                    );
+                }
+            } else if(this.dataObjectManager.containsKey(identity)) {
                 DataObject_1_0 collision = this.dataObjectManager.getObjectById(identity, false);
                 if(collision != this) {
                     try {
@@ -1167,7 +1225,10 @@ public class DataObject_1
             ); 
             parent.objMakeTransactional();
             parent.setExistence(identity, true);
-            this.makePersistent(identity, true);
+            this.makePersistent(
+                identity, 
+                flushed // already flushed
+            );
             for(Flushable flushable : this.flushableValues.values()){
                 if(flushable instanceof Container_1){
                     this.makePersistent(
@@ -1218,25 +1279,28 @@ public class DataObject_1
      * Make an object persistent ignoring its container and callbacks
      * 
      * @param identity the object id
-     * @param callback 
-     * 
+     * @param flushed <code>true</code> if the object is alread flushed
      * @throws ServiceException  
      */
     public void makePersistent(
         Path identity, 
-        boolean callback
+        boolean flushed
     ) throws ServiceException {
-        TransactionalState_1 state = this.getState(false);
-        state.setLifeCycleEventPending(true);
-        this.created = true;
-        this.identity = identity;
+        if(!flushed){
+            TransactionalState_1 state = this.getState(false);
+            state.setLifeCycleEventPending(true);
+            this.created = true;
+            this.identity = identity;
+        }
         if(this.transientObjectId == null) {
             this.dataObjectManager.putUnlessPresent(identity, this);
         }  else {
             this.dataObjectManager.move(this.transientObjectId,identity);
         }
-        this.objMakeTransactional();
-        if(callback) {
+        if(!flushed){
+            this.objMakeTransactional();
+        }
+        if(!this.untouchable) {
             this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.CREATE, false);
         }
     }
@@ -1287,22 +1351,21 @@ public class DataObject_1
      * @exception   ServiceException
      *              if the object can't be removed
      */
+    @SuppressWarnings("unchecked")
     void objRemove(
         boolean updateCache
     ) throws ServiceException {
+        Model_1_0 model = this.dataObjectManager.getModel();
+        //
+        // Cascade Removal To Children
+        //
         if(!this.jdoIsPersistent()) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
                 "Attempt to remove a transient object"
             );
-        }
-        this.objMakeTransactional();
-        this.dataObjectManager.getObjectById(
-            this.identity.getPrefix(this.identity.size()-2)
-        ).objMakeTransactional();
-        this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.DELETE, false);
-        if(this.jdoIsNew()) {
+        } else if(this.jdoIsNew()) {
             for(Flushable flushable : this.flushableValues.values()) {
                 if(flushable instanceof Container_1) {
                     this.dataObjectManager.deletePersistentAll(
@@ -1310,9 +1373,43 @@ public class DataObject_1
                     );
                 }
             }
+        } else {
+            CascadeDelete: for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
+                if(plugIn.requiresCallbackOnCascadedDelete(this)) {
+                    for(Map.Entry<String, ModelElement_1_0> e : ((Map<String, ModelElement_1_0>)model.getElement(this.objGetClass()).objGetValue("allFeature")).entrySet()){
+                        ModelElement_1_0 featureDef = e.getValue();
+                        if(model.isReferenceType(featureDef)) {
+                            if(AggregationKind.COMPOSITE.equals(model.getElement(featureDef.objGetValue("referencedEnd")).objGetValue("aggregation"))){
+                                this.dataObjectManager.deletePersistentAll(
+                                    this.objGetContainer(e.getKey()).values()
+                                );
+//                                this.objGetContainer(e.getKey()).clear();
+                            }
+                        }
+                    }
+                    break CascadeDelete;
+                }
+            }
         }
+        //
+        // Remove Object Itself
+        //
+        this.objMakeTransactional();
+        this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.DELETE, false);
         this.deleted = true;
         this.getState(false).setLifeCycleEventPending(true);
+        //
+        // Cascade Removal To Aspects
+        //
+        if(
+            model.isInstanceof(this, "org:openmdx:base:AspectCapable") &&
+            !model.isInstanceof(this, "org:openmdx:base:Aspect")
+        ){
+            this.getAspects().clear();
+        }
+        //
+        // Cache management
+        //
         if(updateCache) {
             Container_1 container = this.getContainer(true);
             if(container != null) {
@@ -1328,7 +1425,7 @@ public class DataObject_1
      * @throws ServiceException
      */
     void prepare() throws ServiceException {
-        if(this.jdoIsDirty() && !this.jdoIsDeleted()) {
+        if(!this.untouchable && this.jdoIsDirty() && !this.jdoIsDeleted()) {
             this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.STORE, false);
         }
         this.getState(false).setPrepared(true);
@@ -1368,7 +1465,7 @@ public class DataObject_1
             }
         }        
     }
- 
+
     /**
      * Flush the state of the instance to its provider.
      * 
@@ -1408,9 +1505,7 @@ public class DataObject_1
                     }
                 }
                 Object_2Facade input = Object_2Facade.newInstance();
-                input.setPath(
-                    this.jdoIsPersistent() ? (Path)this.jdoGetObjectId() : new Path(this.jdoGetTransactionalObjectId())
-                );
+                input.setPath(new Path(this.jdoGetTransactionalObjectId()));
                 input.setVersion(this.jdoGetVersion());
                 input.setValue(this.persistentValues);                
                 interaction.execute(
@@ -1444,44 +1539,69 @@ public class DataObject_1
                     String feature = e.getKey();
                     Object source = e.getValue();
                     Flushable flushable = this.flushableValues.get(feature);
-                    if(flushable != null) {
+                    if(flushable == null) {
+                        this.persistentValues.put(
+                            feature,
+                            source == null ? null : this.getMarshaller(feature).unmarshal(source)
+                        );                    
+                    } else {
                         try {
                             flushable.flush();
                         } catch (IOException exception) {
                             throw new ServiceException(exception);
                         }
-                    } else {
-                        this.persistentValues.put(
-                            feature,
-                            source == null ? null : this.getMarshaller(feature).unmarshal(source)
-                        );                    
                     }
                 }
                 Object_2Facade input = Object_2Facade.newInstance();
-                input.setPath(this.identity);
                 input.setVersion(this.jdoGetVersion());
                 input.setValue(this.persistentValues);
                 if(this.isProxy()) {
-                    interaction.execute(
-                        this.dataObjectManager.getInteractionSpecs().PUT,
-                        input.getDelegate()
-                    );
-                    state.setFlushed(true);
-                } else if(state.isFlushed()) {
-                    interaction.execute(
-                        this.dataObjectManager.getInteractionSpecs().PUT,
-                        Records.getRecordFactory().singletonMappedRecord(
-                            "map", 
-                            null, // recordShortDescription
-                            this.transientObjectId, 
+                    if(PathComponent.isPlaceHolder(this.identity.getBase())) {
+                        input.setPath(new Path(this.jdoGetTransactionalObjectId()));
+                        interaction.execute(
+                            this.dataObjectManager.getInteractionSpecs().CREATE,
                             input.getDelegate()
-                        )
-                    );
-                } else {
-                    interaction.execute(
-                        this.dataObjectManager.getInteractionSpecs().CREATE,
-                        input.getDelegate()
-                    );
+                        );
+                        input.setPath(this.identity);
+                        Record reply = interaction.execute(
+                            this.dataObjectManager.getInteractionSpecs().MOVE,
+                            Records.getRecordFactory().singletonMappedRecord(
+                                "map", 
+                                null, // recordShortDescription
+                                this.transientObjectId, 
+                                input.getDelegate()
+                            )
+                        );
+                        Object_2Facade persistent = Object_2Facade.newInstance(
+                            (MappedRecord)((IndexedRecord)reply).get(0)
+                        );
+                        this.identity.setTo(persistent.getPath());
+                    } else {
+                        input.setPath(this.identity);
+                        interaction.execute(
+                            this.dataObjectManager.getInteractionSpecs().PUT,
+                            input.getDelegate()
+                        );
+                    }
+                    state.setFlushed(true);
+                } else { 
+                    input.setPath(this.identity);
+                    if(state.isFlushed()) {
+                        interaction.execute(
+                            this.dataObjectManager.getInteractionSpecs().PUT,
+                            Records.getRecordFactory().singletonMappedRecord(
+                                "map", 
+                                null, // recordShortDescription
+                                this.transientObjectId, 
+                                input.getDelegate()
+                            )
+                        );
+                    } else {
+                        interaction.execute(
+                            this.dataObjectManager.getInteractionSpecs().CREATE,
+                            input.getDelegate()
+                        );
+                    }
                 }
                 this.transientOnRollback = true;
                 state.setLifeCycleEventPending(false);
@@ -1552,37 +1672,13 @@ public class DataObject_1
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void addModifiedFeaturesTo(
-        Set<Object> to
-    ) throws ServiceException {
-        TransactionalState_1 state = this.getState(false);
-        ModelElement_1_0 classDef = this.dataObjectManager.getModel().getElement(
-            this.transactionalValuesRecordName
-        );
-        Map<String,ModelElement_1_0> attributes = (Map<String, ModelElement_1_0>) classDef.objGetValue("attribute");
-        for(
-            Iterator<String> i = state.dirtyFeatures(true).iterator();
-            i.hasNext();
-        ){
-            ModelElement_1_0 attribute = attributes.get(i.next());
-            if(this.isFeatureModified(attribute)) {
-                if(!Boolean.TRUE.equals(attribute.objGetValue("isDerived"))){
-                    to.add(attribute.objGetValue("qualifiedName"));
-                }
-            } else {
-                i.remove();
-            }
-        }
-    }
 
     /**
-     * 
+     * Tells whether the given feature has been modified
      * 
      * @param feature
-     * @param beforeImage
      * 
-     * @return <code>true</code> if the feature had been modified
+     * @return <code>true</code> if the feature has been modified
      * 
      * @throws ServiceException
      */
@@ -1605,7 +1701,7 @@ public class DataObject_1
             left = this.beforeImage.objGetValue(featureName);
             right = this.objGetValue(featureName);
         } else if (
-            Multiplicities.LIST.equals(multiplicity) 
+            Multiplicities.LIST.equals(multiplicity)
         ){
             left = this.beforeImage.objGetList(featureName);
             right = this.objGetList(featureName);
@@ -1619,10 +1715,50 @@ public class DataObject_1
         ){
             left = this.beforeImage.objGetSparseArray(featureName);
             right = this.objGetSparseArray(featureName);
+        } else if (Multiplicities.STREAM.equals(multiplicity)) {
+            return true; // do not compare large objects 
         } else {
-            return true; // to be on the secure side
+            SysLog.log(
+                Level.FINE, 
+                "Unsupported Multiplicity {0}, treat the feature {1} in the object {2} as dirty", 
+                multiplicity, 
+                featureName, 
+                this.jdoIsPersistent() ? this.jdoGetObjectId().toXRI() : this.jdoGetTransactionalObjectId()
+            );
+            return true;
         }
         return left == null ? right != null : !left.equals(right);
+    }
+    
+    /**
+     * Tests whether some non-derived features have been modified
+     * 
+     * @return <code>true</code> if some non-derived features have been modified
+     * 
+     * @throws ServiceException
+     */
+    public boolean objIsModified() throws ServiceException{
+        TransactionalState_1 state = this.getState(false);
+        @SuppressWarnings("unchecked")
+        Map<String,ModelElement_1_0> attributes = (Map<String, ModelElement_1_0>) this.dataObjectManager.getModel().getElement(
+            this.transactionalValuesRecordName
+        ).objGetValue("attribute");
+        boolean modified = false;
+        Set<String> dirtyFeatures = state.dirtyFeatures(true); 
+        for(
+            Iterator<String> i = dirtyFeatures.iterator(); 
+            i.hasNext();
+        ){
+            ModelElement_1_0 attribute = attributes.get(i.next());
+            if(!Boolean.TRUE.equals(attribute.objGetValue("isDerived"))){
+                if(this.isFeatureModified(attribute)) {
+                    modified = true;
+                } else {
+                    i.remove();
+                }
+            }
+        }
+        return modified;
     }
     
     /**
@@ -1661,16 +1797,12 @@ public class DataObject_1
                     }
                     this.deleted = false;
                     this.identity = null;
-                } else if(!this.dataObjectManager.isRetainValues()) {
-                    this.evict(); 
                 }
                 break;
             case javax.transaction.Status.STATUS_ROLLEDBACK:
                 this.getState(false).setLifeCycleEventPending(false);
                 if(this.jdoIsDeleted()){
                     this.deleted = false;
-                } else if(!this.dataObjectManager.isRetainValues()) {
-                    this.evict(); //... depending on configuration
                 }
                 if(this.transientOnRollback || this.jdoIsNew()){
                     if(this.dataObjectManager != null) {
@@ -1699,7 +1831,7 @@ public class DataObject_1
      */
     void evict(
     ){
-        if(jdoIsPersistent()) {
+        if(jdoIsPersistent() && !jdoIsDirty()) {
             try {
                 this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.CLEAR, true);
             } catch (ServiceException exception) {
@@ -1713,6 +1845,11 @@ public class DataObject_1
                 Flushable value = entry.getValue();
                 if(value instanceof ManagedAspect) {
                     ((ManagedAspect)value).evict();
+                } else if (value instanceof PersistenceCapableCollection) {
+                    ((PersistenceCapableCollection)value).openmdxjdoEvict(
+                        false, // allMembers
+                        true // allSubSets
+                     );
                 }
             }
         }
@@ -1818,7 +1955,7 @@ public class DataObject_1
      * 
      * @return <code>true</code> if this object is a proxy
      */
-    private boolean isProxy(
+    public boolean isProxy(
     ){
         return this.dataObjectManager.isProxy();
     }
@@ -2036,141 +2173,136 @@ public class DataObject_1
         String multiplicity, 
         boolean clear
     ) throws ServiceException {
-        Object persistentValue;
-        if(!clear && this.attributeMustBeLoaded(name)) try {
-            persistentValue = this.persistentValues.get(name);
-            if(
-                persistentValue == null &&
-                !this.persistentValues.containsKey(name)
-            ) {
-                MappedRecord persistentValues = Records.getRecordFactory().createMappedRecord(this.persistentValues.getRecordName());
-                persistentValues.putAll(this.persistentValues);
-                Filter attributeSpecifier = new Filter(
-                    null, // condition
-                    Collections.singletonList(
-                        new OrderSpecifier(name, SortOrder.UNSORTED)
-                    ),
-                    null // extension
-                );
-                Query_2Facade input = this.jdoIsPersistent() ? Query_2Facade.newInstance(
-                    this.jdoGetObjectId()
-                ) : Query_2Facade.newInstance(
-                    this.jdoGetTransactionalObjectId()
-                );
-                input.setQuery(JavaBeans.toXML(attributeSpecifier));
-                IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
-                    this.dataObjectManager.getInteractionSpecs().GET,
-                    input.getDelegate()
-                );
-                if(indexedRecord.isEmpty()) throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_FOUND,
-                    "Could not fetch attribute",
-                    ExceptionHelper.newObjectIdParameter("id", this),
-                    new BasicException.Parameter("feature", name)
-                );
-                Object_2Facade output = Object_2Facade.newInstance(
-                    (MappedRecord)indexedRecord.get(0)
-                );                
-                persistentValues.putAll(
-                    output.getValue()
-                );
-                persistentValue = stream ? persistentValues.remove(name) : persistentValues.get(name);
-                this.persistentValues = persistentValues;
+        Object rawValue;
+        //
+        // Retrieve
+        //
+        if(!clear && this.attributeMustBeLoaded(name)) {
+            try {
+                rawValue = this.persistentValues.get(name);
+                if(
+                    rawValue == null &&
+                    !this.persistentValues.containsKey(name)
+                ) {
+                    MappedRecord persistentValues = Records.getRecordFactory().createMappedRecord(this.persistentValues.getRecordName());
+                    persistentValues.putAll(this.persistentValues);
+                    Filter attributeSpecifier = new Filter(
+                        null, // condition
+                        Collections.singletonList(
+                            new OrderSpecifier(name, SortOrder.UNSORTED)
+                        ),
+                        null // extension
+                    );
+                    Query_2Facade input = this.jdoIsPersistent() ? Query_2Facade.newInstance(
+                        this.jdoGetObjectId()
+                    ) : Query_2Facade.newInstance(
+                        this.jdoGetTransactionalObjectId()
+                    );
+                    input.setQuery(JavaBeans.toXML(attributeSpecifier));
+                    IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
+                        this.dataObjectManager.getInteractionSpecs().GET,
+                        input.getDelegate()
+                    );
+                    if(indexedRecord.isEmpty()) throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_FOUND,
+                        "Could not fetch attribute",
+                        ExceptionHelper.newObjectIdParameter("id", this),
+                        new BasicException.Parameter("feature", name)
+                    );
+                    Object_2Facade output = Object_2Facade.newInstance(
+                        (MappedRecord)indexedRecord.get(0)
+                    );                
+                    persistentValues.putAll(
+                        output.getValue()
+                    );
+                    rawValue = stream ? persistentValues.remove(name) : persistentValues.get(name);
+                    this.persistentValues = persistentValues;
+                }
+            } catch (ResourceException exception) {
+                throw new ServiceException(exception);
             }
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
+        } else if (this.persistentValues == null) {
+            rawValue = null;
+        } else {    
+            rawValue = this.persistentValues.get(name);
         }
-        else if (this.persistentValues == null) {
-            persistentValue = null;
-        } 
-        else {    
-            persistentValue = this.persistentValues.get(name);
-        }
+        //
+        // Normalize 
+        //
+        Object normalizedValue = rawValue;
         if(
             Multiplicities.SINGLE_VALUE.equals(multiplicity) || 
             Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
         ) {
-            if(persistentValue instanceof List) {
-                persistentValue = ((List<?>)persistentValue).get(0);
-                if(this.persistentValues != null) {
-                    this.persistentValues.put(
-                        name,
-                        persistentValue
-                    );
+            if(rawValue instanceof List) {
+                List<?> source = (List<?>)rawValue;
+                normalizedValue = source.isEmpty() ? null : source.get(0);
+            }
+        } else if (
+            Multiplicities.LIST.equals(multiplicity) || 
+            Multiplicities.SET.equals(multiplicity) ||
+            Multiplicities.MULTI_VALUE.equals(multiplicity)
+        ){
+            if(rawValue instanceof List<?>) {
+                if(clear){
+                    ((Collection<?>)rawValue).clear();
                 }
-            }
-            // Do not cache streams
-            if(stream && this.persistentValues != null) {
-                this.persistentValues.remove(name);
-            }
-        } 
-        else if (persistentValue instanceof List) {
-            if(clear) {
-                ((List<?>)persistentValue).clear();
-            }
-        } 
-        else if (persistentValue instanceof SparseArray) {
-            if(clear) {
-                ((SparseArray<?>)persistentValue).clear();
-            }
-        } 
-        else if(persistentValue instanceof IndexedRecord) {
-            persistentValue = clear ? new ArrayList() : new ArrayList((IndexedRecord)persistentValue);
-            if(this.persistentValues != null) {
-                this.persistentValues.put(
-                    name,
-                    persistentValue
-                );
-            }
-        }
-        else if(persistentValue instanceof MappedRecord) {
-            if(Multiplicities.SPARSEARRAY.equals(multiplicity)) {
-                SparseArray target = new TreeSparseArray(
-                    (MappedRecord) persistentValue
-                );
-                persistentValue = target;
-            }
-            else {
-                List target = new ArrayList(); 
-                if(!clear) {
-                    Map<?,?> source = (MappedRecord) persistentValue;
-                    for(Map.Entry<?, ?> e : source.entrySet()) {
-                        target.set((Integer)e.getKey(), e.getValue());
+            } else {
+                List target = new ArrayList();
+                if(!clear){
+                    if (rawValue instanceof Collection<?>) {
+                        target.addAll((Collection<?>)rawValue);
+                    } else if (rawValue instanceof Map<?,?>) {
+                        target.addAll(
+                            SortedMaps.asSparseArray(
+                                rawValue instanceof SortedMap<?,?> ? (SortedMap<?,?>) rawValue : new TreeMap((Map<?,?>)rawValue)
+                            ).asList()
+                        );
+                    } else if(rawValue != null) {
+                        target.add(rawValue);
                     }
                 }
-                persistentValue = target;
+                normalizedValue = target;
             }
-            if(this.persistentValues != null) {
-                this.persistentValues.put(
-                    name,
-                    persistentValue
-                );
-            }
-        }
-        else {
-            if(Multiplicities.SPARSEARRAY.equals(multiplicity)) {
-                SparseArray target = new TreeSparseArray();
-                if(!clear) {
-                    target.put(0, persistentValue);
+        } else if (
+            Multiplicities.SPARSEARRAY.equals(multiplicity)
+        ){
+            if(rawValue instanceof SparseArray<?>) {
+                if(clear) {
+                    ((SparseArray<?>)rawValue).clear();
                 }
-                persistentValue = target;
+            } else {
+                SparseArray target = new TreeSparseArray();
+                if(!clear){
+                    if(rawValue instanceof Map<?,?>) {
+                        target.putAll((Map) rawValue);
+                    } else if(rawValue instanceof Collection<?>) {
+                        int i = 0;
+                        for(Object value : (Collection<?>)rawValue) {
+                            target.put(i++, value);
+                        }
+                    } else if (rawValue != null) {
+                        target.put(0, rawValue);
+                    }
+                }
+                normalizedValue = target;
             }
-            else {
-                persistentValue = new ArrayList(
-                    clear || persistentValue == null ? 
-                        Collections.emptyList() : 
-                            Collections.singletonList(persistentValue)
-                );
-            }
-            if(this.persistentValues != null) {
+        }
+        //
+        // Cache
+        //
+        if(this.persistentValues != null) {
+            if(stream) {
+                this.persistentValues.remove(name);
+            } else if(rawValue != normalizedValue){
                 this.persistentValues.put(
                     name,
-                    persistentValue
+                    normalizedValue
                 );
             }
         }
-        return persistentValue;
+        return normalizedValue;
     }
 
     /**
@@ -2220,20 +2352,11 @@ public class DataObject_1
     ) throws ServiceException {
         this.assertSingleValued(to);
         UnitOfWork_1 unitOfWork = this.getUnitOfWorkIfTransactional(feature);
-        Object value;
-        try {
-            value = 
-                to instanceof BinaryLargeObject ? ((BinaryLargeObject)to).getContent() :
-                to instanceof CharacterLargeObject ? ((CharacterLargeObject)to).getContent() :
-                to;
-        } catch (IOException exception) {
-            throw new ServiceException(exception);
-        }
         (
             unitOfWork == null ? this.transientValues : unitOfWork.getState(this,false).values(false)
         ).put(
             feature, 
-            value
+            to
         );
         if(to != null && this.isAspectHasCore(feature)) {
             for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
@@ -2262,15 +2385,86 @@ public class DataObject_1
             false // clear
         );
         if(PrimitiveTypes.BINARY.equals(type)) {
-            return persistentValue instanceof BinaryLargeObject ? (BinaryLargeObject) persistentValue : new BinaryLargeObjects.StreamLargeObject(
-                (InputStream) persistentValue
-            ) {
+            InputStream value;
+            Long length;
+            if(persistentValue instanceof InputStream) {
+                //
+                // Compatibility Mode
+                //
+                value = (InputStream) persistentValue;
+                length = null;
+            } else try {
+                //
+                // Native Mode
+                //
+                BinaryLargeObject object = (BinaryLargeObject) persistentValue;
+                value = object.getContent();
+                length = object.getLength();
+            } catch (IOException exception) {
+               throw new ServiceException(exception); 
+            }
+            return new BinaryLargeObjects.StreamLargeObject(value, length) {
                 
+                private static final long serialVersionUID = 6010313705463030648L;
+
                 @Override
                 protected InputStream newContent(
                 ) throws IOException {
+                    Object persistentValue;
                     try {
-                        return (InputStream) DataObject_1.this.getPersistentAttribute(
+                        persistentValue = DataObject_1.this.getPersistentAttribute(
+                            featureName, 
+                            true, // stream 
+                            Multiplicities.SINGLE_VALUE, 
+                            false // clear
+                        );
+                    } catch (ServiceException exception) {
+                        BasicException cause = exception.getCause();
+                        throw (IOException) new IOException(cause.getDescription()).initCause(cause);
+                    }
+                    if(persistentValue instanceof InputStream) {
+                        //
+                        // Compatibility Mode
+                        //
+                        return (InputStream) persistentValue;
+                    } else {
+                        //
+                        // Native Mode
+                        //
+                        return ((BinaryLargeObject)persistentValue).getContent();
+                    }
+                }
+                
+            }; 
+        } else if (PrimitiveTypes.STRING.equals(type)) {
+            Reader value;
+            Long length;
+            if(persistentValue instanceof Reader) {
+                //
+                // Compatibility Mode
+                //
+                value = (Reader) persistentValue;
+                length = null;
+            } else try {
+                //
+                // Native Mode
+                //
+                CharacterLargeObject object = (CharacterLargeObject) persistentValue;
+                value = object.getContent();
+                length = object.getLength();
+            } catch (IOException exception) {
+               throw new ServiceException(exception); 
+            }
+            return new CharacterLargeObjects.StreamLargeObject(value,length){
+                
+                private static final long serialVersionUID = -6402214529785948658L;
+
+                @Override
+                protected Reader newContent(
+                ) throws IOException {
+                    Object persistentValue;
+                    try {
+                        persistentValue = DataObject_1.this.getPersistentAttribute(
                             featureName, 
                             true, // stream 
                             Multiplicities.SINGLE_VALUE, 
@@ -2280,27 +2474,16 @@ public class DataObject_1
                     	BasicException cause = exception.getCause();
                     	throw (IOException) new IOException(cause.getDescription()).initCause(cause);
                     }
-                }
-                
-            }; 
-        } else if (PrimitiveTypes.STRING.equals(type)) {
-            return persistentValue instanceof CharacterLargeObject ? (CharacterLargeObject) persistentValue : new CharacterLargeObjects.StreamLargeObject(
-                (Reader) persistentValue
-            ) {
-                
-                @Override
-                protected Reader newContent(
-                ) throws IOException {
-                    try {
-                        return (Reader) DataObject_1.this.getPersistentAttribute(
-                            featureName, 
-                            true, // stream 
-                            Multiplicities.SINGLE_VALUE, 
-                            false // clear
-                        );
-                    } catch (ServiceException exception) {
-                    	BasicException cause = exception.getCause();
-                    	throw (IOException) new IOException(cause.getDescription()).initCause(cause);
+                    if(persistentValue instanceof Reader) {
+                        //
+                        // Compatibility Mode
+                        //
+                        return (Reader) persistentValue;
+                    } else {
+                        //
+                        // Native Mode
+                        //
+                        return ((CharacterLargeObject)persistentValue).getContent();
                     }
                 }
                 

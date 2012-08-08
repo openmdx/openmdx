@@ -1,15 +1,15 @@
 /*
  * ====================================================================
- * Name:        $Id: AbstractDatabase_1.java,v 1.75 2010/09/03 09:08:42 wfro Exp $
+ * Name:        $Id: AbstractDatabase_1.java,v 1.103 2010/12/23 15:52:18 hburger Exp $
  * Description: AbstractDatabase_1 plugin
- * Revision:    $Revision: 1.75 $
+ * Revision:    $Revision: 1.103 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/03 09:08:42 $
+ * Date:        $Date: 2010/12/23 15:52:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -60,6 +60,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.net.URL;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -86,11 +87,11 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 import javax.resource.ResourceException;
@@ -114,7 +115,9 @@ import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.dataprovider.layer.persistence.common.AbstractPersistence_1;
 import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
+import org.openmdx.application.dataprovider.spi.ResourceHelper;
 import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.accessor.spi.URIMarshaller;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -208,13 +211,15 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
      * positioning if lastRowCount != -1 and lastPosition != -1 and the driver/
      * database support absolute positioning. The object at lastPosition starts
      * at row lastRowCount. 
+     * @param absolutePositioningDisabled TODO
      */
     abstract FastResultSet setPosition(
         ResultSet rs,
         int position,
         int lastPosition,
         int lastRowCount,
-        boolean isIndexed
+        boolean isIndexed, 
+        boolean absolutePositioningDisabled
     ) throws ServiceException, SQLException;
 
     //---------------------------------------------------------------------------
@@ -234,7 +239,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
 
         SysLog.detail(
             "activating", 
-            "$Id: AbstractDatabase_1.java,v 1.75 2010/09/03 09:08:42 wfro Exp $"
+            "$Id: AbstractDatabase_1.java,v 1.103 2010/12/23 15:52:18 hburger Exp $"
         );
 
         super.activate( 
@@ -311,6 +316,12 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             DEFAULT_RID_SUFFIX
         );
 
+        // referenceIdAttributesSuffix    
+        this.referenceIdSuffixAttributesSuffix = getConfigurationValue(
+            LayerConfigurationEntries.REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX,
+            DEFAULT_RID_SUFFIX
+        );
+        
         // privateAttributesPrefix
         this.privateAttributesPrefix = getConfigurationValue(
             LayerConfigurationEntries.PRIVATE_ATTRIBUTES_PREFIX,
@@ -324,12 +335,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         );
         OBJECT_RID = this.toRid("object");
         OBJECT_ID = this.toId("object");
-
-        // batchSize
-        this.batchSize = getConfigurationValue(
-            SharedConfigurationEntries.BATCH_SIZE,
-            DEFAULT_BATCH_SIZE // LayerConfigurationEntries.BATCH_SIZE configuration was mandatory before
-        );
 
         // Result set type
         this.resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -380,9 +385,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         }
 
         // Non-persistent features
-        this.nonPersistentFeatures = new TreeSet();
-        this.nonPersistentFeatures.addAll(
-            configuration.values(LayerConfigurationEntries.NON_PERSISTENT_FEATURE).values()
+        this.nonPersistentFeatures = new HashSet<String>(
+            configuration.<String>values(LayerConfigurationEntries.NON_PERSISTENT_FEATURE).values()
         );
 
         // nullAsCharacter
@@ -508,9 +512,11 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             this.referenceIdFormat,
             this.useNormalizedReferences,
             configuration.isOn(LayerConfigurationEntries.USE_NORMALIZED_OBJECT_IDS),
+            configuration.isNotDisabled(LayerConfigurationEntries.USE_VIEWS_FOR_REDUNDANT_COLUMNS),
+            configuration.isNotDisabled(LayerConfigurationEntries.USE_PREFERENCES_TABLE), 
+            configuration.isNotDisabled(LayerConfigurationEntries.CASCADE_DELETES), 
             // The database configuration is always retrieved from the first configured connection manager
-            this.dataSources.isEmpty() ? null : this.dataSources.get(0), 
-            configuration
+            this.dataSources.isEmpty() ? null : this.dataSources.get(0), configuration
         );
     }
 
@@ -1094,9 +1100,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         Path pattern,
         List<Object> statementParameters
     ) throws ServiceException {
-        Path referencePattern = pattern.size() % 2 == 1
-        ? pattern.getParent()
-            : pattern;
+        Path referencePattern = pattern.size() % 2 == 1 ? pattern.getParent() : pattern;
         if(LayerConfigurationEntries.REFERENCE_ID_FORMAT_REF_TABLE.equals(this.getReferenceIdFormat())) {
             return
             "IN (" + 
@@ -1260,19 +1264,19 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
                 new BasicException.Parameter("sqlState", ex.getSQLState())
            );
-        }
-        catch(ServiceException e) {
-            throw e;
-        }
-        catch(Exception ex) {
+        } catch(ServiceException exception) {
+            throw exception;
+        } catch(NullPointerException exception) {
+            exception.printStackTrace();
+            throw new ServiceException(exception);
+        } catch(Exception exception) {
             throw new ServiceException(
-                ex, 
+                exception, 
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC, 
-                ex.toString()
+                exception.toString()
             );
-        }
-        finally {
+        } finally {
             try {
                 if(ps != null) ps.close();
             } catch(Throwable ex) {
@@ -1572,19 +1576,19 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
                 new BasicException.Parameter("sqlState", ex.getSQLState())
             );
-        }
-        catch(ServiceException e) {
-            throw e;
-        }
-        catch(Exception ex) {
+        } catch(ServiceException exception) {
+            throw exception;
+        } catch(NullPointerException exception) {
+            exception.printStackTrace();
+            throw new ServiceException(exception);
+        } catch(Exception exception) {
             throw new ServiceException(
-                ex, 
+                exception, 
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC, 
-                ex.toString()
+                exception.toString()
             );
-        }
-        finally {
+        } finally {
             try {
                 if(ps != null) ps.close();
             } catch(Throwable ex) {
@@ -1719,19 +1723,19 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 new BasicException.Parameter("sqlErrorCode", ex.getErrorCode()), 
                 new BasicException.Parameter("sqlState", ex.getSQLState())
             );
-        }
-        catch(ServiceException e) {
-            throw e;
-        }
-        catch(Exception ex) {
+        } catch(ServiceException exception) {
+            throw exception;
+        } catch(NullPointerException exception) {
+            exception.printStackTrace();
+            throw new ServiceException(exception);
+        } catch(Exception exception) {
             throw new ServiceException(
-                ex, 
+                exception, 
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC, 
-                ex.toString()
+                exception.toString()
             );
-        }
-        finally {
+        } finally {
             try {
                 if(rs != null) rs.close();
             } catch(Throwable ex) {
@@ -1946,7 +1950,13 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 DateTimeFormat.EXTENDED_UTC_FORMAT.format((java.util.Date)value)
             );
         }
-        if(value instanceof Short) {
+        if( value instanceof URI) {
+            ps.setString(
+                position, 
+                value.toString()
+            );
+        }
+        else if(value instanceof Short) {
             ps.setShort(
                 position, 
                 ((Short)value).shortValue()
@@ -2148,13 +2158,17 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             objectClass
         );
         if(objects.size() != 1) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_FOUND, 
-                objects.size() == 0 ? "No object found" : "Exactly one object expected",
-                new BasicException.Parameter("request-path", path),
-                new BasicException.Parameter("cardinality", objects.size())
-            );
+        	if(checkIdentity || !objects.isEmpty()) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND, 
+                    objects.isEmpty() ? "No object found" : "Exactly one object expected",
+                    new BasicException.Parameter("request-path", path),
+                    new BasicException.Parameter("cardinality", objects.size())
+                );
+        	} else {
+        		return null;
+        	}
         }
         MappedRecord object = objects.get(0);
         if(checkIdentity && !Object_2Facade.getPath(object).startsWith(path)) {
@@ -2180,13 +2194,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         MappedRecord object,
         String featureName
     ) throws ServiceException {
-        Object_2Facade facade = null;
-        try {
-            facade = Object_2Facade.newInstance(object);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade facade = ResourceHelper.getObjectFacade(object);
         if(facade.getObjectClass() != null) {
             ModelElement_1_0 classDef = null;
             try {
@@ -2203,7 +2211,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     featureDef != null && (
                         ((this.getModel().isAttributeType(featureDef) && (
                              !((Boolean)featureDef.objGetValue("isDerived")).booleanValue() ||
-                             Arrays.binarySearch(QUALIFIED_SYSTEM_ATTRIBUTES, featureDef.objGetValue("qualifiedName")) >= 0
+                             QUALIFIED_SYSTEM_ATTRIBUTES.contains(featureDef.objGetValue("qualifiedName"))
                          )) || 
                         (this.getModel().isReferenceType(featureDef) && getModel().referenceIsStoredAsAttribute(featureDef) && !getModel().referenceIsDerived(featureDef)))
                     )
@@ -2266,7 +2274,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             position,
             lastPosition,
             lastRowCount,
-            dbObject.getIndexColumn() != null
+            dbObject.getIndexColumn() != null, 
+            dbObject.getConfiguration().isAbsolutePositioningDisabled()
         );
         boolean hasMore = frs != null;
         // get objects
@@ -2332,13 +2341,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             }
             // Duplicate indices are allowed. However, they are skipped
             if(!processedIdxs.contains(Integer.valueOf(idx))) {
-                Object_2Facade currentFacade = null;
-                try {
-                    currentFacade = Object_2Facade.newInstance(current);
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                Object_2Facade currentFacade = ResourceHelper.getObjectFacade(current);
                 // Iterate through object attributes and add values
                 for(
                     Iterator<String> i = frs.getColumnNames().iterator();
@@ -2367,7 +2370,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                 break;
                             case AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES:
                                 // check for system attributes
-                                if(Arrays.binarySearch(SYSTEM_ATTRIBUTES, featureName) >= 0) {
+                                if(SYSTEM_ATTRIBUTES.contains(featureName)) {
                                     addValue = true;
                                 }
                                 else {
@@ -2382,12 +2385,23 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
 
                         // add value
                         if(addValue) {
-                            String featureType = featureDef == null ? 
-                                null : 
-                                    (String)getModel().getElementType(featureDef).objGetValue("qualifiedName");
+                            String featureType;
+                            if(featureDef == null) {
+                                featureType = null;
+                            } else try {
+                                featureType = (String)getModel().getElementType(featureDef).objGetValue("qualifiedName");
+                            } catch (Exception exception) {
+                                throw new ServiceException(
+                                    exception,
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.INVALID_CONFIGURATION,
+                                    "Unable to determine the element type",
+                                    new BasicException.Parameter("feature", featureDef.jdoGetObjectId())
+                                );
+                            }
                             String multiplicity = featureDef == null ?
                                 null :
-                                    (String)featureDef.objGetValue("multiplicity");
+                                    ModelUtils.getMultiplicity(featureDef);
                             Object val = frs.getObject(columnName);
                             // Embedded attribute? If yes derive idx from column name suffix (instead of slice index)
                             int valueIdx = idx;
@@ -2618,7 +2632,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             else {
                                 this.setValue(
                                     conn,
-                                    currentFacade.attributeValues(featureName),
+                                    currentFacade.attributeValues(featureName, multiplicity),
                                     valueIdx,
                                     val,
                                     featureType,
@@ -2733,6 +2747,17 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 isEmbedded
             );
         } 
+        //
+        // URIs
+        //
+        else if (PrimitiveTypes.ANYURI.equals(featureType)) {
+            this.setValue(
+                target, 
+                index, 
+                URIMarshaller.NORMALIZE.marshal(val),
+                isEmbedded
+            );
+        }
         //
         // openMDX 1 clients expect all numbers to be returned 
         // as BigIntegers
@@ -3111,7 +3136,18 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     ) {
                         Model_1_0 model = this.getModel();
                         if(filterPropertyDef.isReferenceType()) {
-                            ModelElement_1_0 referencedType = model.getElementType(filterPropertyDef);
+                            ModelElement_1_0 referencedType;
+                            try {
+                                referencedType = model.getElementType(filterPropertyDef);
+                            } catch (Exception exception) {
+                                throw new ServiceException(
+                                    exception,
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.INVALID_CONFIGURATION,
+                                    "Unable to retrieve the element type",
+                                    new BasicException.Parameter("filterProperty", filterPropertyDef.jdoGetObjectId())
+                                );
+                            }
                             String joinColumn = null;
                             DbObject dbObject = null;
                             if(model.referenceIsStoredAsAttribute(filterPropertyDef)) {
@@ -3248,8 +3284,30 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             );
                         }
                     }
-                    // Scalar filter value
-                    else {
+                    else if (
+                        filterPropertyDef != null && // TODO should the switch be generalized?
+                        "org:openmdx:audit2:Involvement:object".equals(filterPropertyDef.objGetValue("qualifiedName"))
+                    ) { 
+                        //
+                        // Use RID and OID for query
+                        //
+                        int pos = columnName.indexOf('.') + 1;
+                        String ridColumn = columnName.substring(0, pos) + this.toRid(this.privateAttributesPrefix + columnName.substring(pos) + "_");
+                        String oidColumn = columnName.substring(0, pos) + this.toOid(this.privateAttributesPrefix + columnName.substring(pos) + "_");
+                        String separator = "(";
+                        String entry = "(" + ridColumn + " = ? AND " + oidColumn + " = ?)";
+                        for(Object value : filterProperty.getValues()) {
+                            clause += separator + entry;
+                            separator = " OR ";
+                            Path uri = new Path(this.externalizePathValue(conn,(Path)value));
+                            clauseValues.add(uri.getParent().toString());
+                            clauseValues.add(uri.getBase());
+                        }
+                        clause += ")";
+                    } else {
+                        //
+                        // Scalar filter value
+                        //
                         clause += "(" + columnName + " IN (?";
                         clauseValues.add(
                             this.externalizeStringValue(
@@ -3316,14 +3374,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         boolean includeSubTree = "%".equals(vp.getBase());
                         // If path ends with % get the set of matching types
                         if(includeSubTree) {
-                            vp.remove(vp.size()-1);
+                            vp = vp.getParent();
                             for(
                                 Iterator<DbObjectConfiguration> k = this.configuration.getDbObjectConfigurations().iterator(); 
                                 k.hasNext(); 
                             ) {
                                 DbObjectConfiguration dbObjectConfiguration = k.next();
                                 if(
-                                    (dbObjectConfiguration.getType().size() > vp.size()) &&
+                                    (dbObjectConfiguration.getType().size() >= vp.size()) &&
                                     vp.isLike(dbObjectConfiguration.getType().getPrefix(vp.size()))
                                 ) {
                                     // Replace type pattern by filter value pattern
@@ -3345,6 +3403,9 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             matchingPatterns.add(vp);           
                         }
                         // LIKE clause for each path pattern
+                        boolean useRidAndOidForQuery = "org:openmdx:audit2:Involvement:object".equals(
+                            filterPropertyDef.objGetValue("qualifiedName")
+                        ); // TODO should this mode be generalized?
                         int ii = 0;
                         for(
                             Iterator<Path> i = matchingPatterns.iterator();
@@ -3354,49 +3415,88 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             Path pattern = i.next();
                             if(ii > 0) {
                                 clause += " OR ";
-                            }
-                            clause += "(" + columnName + " LIKE ? " + getEscapeClause(conn) + ")";              
+                            } 
                             String externalized = this.externalizePathValue(
                                 conn, 
-                                new Path(vp).addAll(pattern.getSuffix(vp.size()))
+                                vp.getDescendant(pattern.getSuffix(vp.size()))
                             );
-                            int pos = externalized.indexOf("%");
-                            if(pos >= 0) {
-                                externalized = externalized.substring(0, pos+1);
-                            }
-                            if(externalized.startsWith("xri:")) {
-                                if(externalized.endsWith("***")) {
-                                    externalized = externalized.substring(0, externalized.length()-3) + "%";
+                            if(useRidAndOidForQuery) {
+                                int cPos = columnName.indexOf('.') + 1;
+                                String ridColumn = columnName.substring(0, cPos) + this.toRid(this.privateAttributesPrefix + columnName.substring(cPos) + "_");
+                                String escapeClause = getEscapeClause(conn) ;
+                                Path uri = new Path(externalized);
+                                String oidValue = uri.getBase();
+                                String ridValue = uri.getParent().toString();
+                                int rPos = ridValue.indexOf('%');
+                                if("%".equals(oidValue)) {
+                                    if(rPos < 0) {
+                                        clause += "(" + ridColumn + " = ?)";              
+                                        clauseValues.add(ridValue);
+                                    } else {
+                                        clause += "(" + ridColumn + " LIKE ? " + escapeClause + ")";              
+                                        clauseValues.add(ridValue.substring(0, rPos + 1));
+                                    }
+                                } else {
+                                    String oidColumn = columnName.substring(0, cPos) + this.toOid(this.privateAttributesPrefix + columnName.substring(cPos) + "_");
+                                    int oPos = oidValue.indexOf('%');
+                                    clause += "((";
+                                    if(rPos < 0) {
+                                        clause += ridColumn + " = ?";              
+                                        clauseValues.add(ridValue);
+                                    } else {
+                                        clause += ridColumn + " LIKE ? " + escapeClause;              
+                                        clauseValues.add(ridValue.substring(0, rPos + 1));
+                                    }
+                                    clause += ") AND (";
+                                    if(oPos < 0) {
+                                        clause += oidColumn + " = ?";              
+                                        clauseValues.add(oidValue);
+                                    } else {
+                                        clause += oidColumn + " LIKE ? " + escapeClause;              
+                                        clauseValues.add(oidValue.substring(0, oPos + 1));
+                                    }
+                                    clause += "))";
                                 }
-                                pos = externalized.indexOf("**");
+                            } else {
+                                clause += "(" + columnName + " LIKE ? " + getEscapeClause(conn) + ")";              
+                                int pos = externalized.indexOf("%");
                                 if(pos >= 0) {
-                                    if(includeSubTree && pos == externalized.length() - 2) {
-                                        externalized = externalized.substring(0, pos) + "%";
-                                    } else throw new ServiceException(
-                                        BasicException.Code.DEFAULT_DOMAIN,
-                                        BasicException.Code.NOT_SUPPORTED, 
-                                        "only (***|%) wildcards at the end supported",
-                                        new BasicException.Parameter("value", v),
-                                        new BasicException.Parameter("path", externalized),
-                                        new BasicException.Parameter("position", pos)                          
-                                    );
+                                    externalized = externalized.substring(0, pos+1);
                                 }
-                            }
-                            else if(externalized.startsWith("spice:")) {
-                                for(int k = 0; k < ((Path)v).size(); k++) {
-                                    String c = ((Path)v).get(k);
-                                    if(c.startsWith(":") && c.endsWith("*")) {
-                                        throw new ServiceException(
+                                if(externalized.startsWith("xri:")) {
+                                    if(externalized.endsWith("***")) {
+                                        externalized = externalized.substring(0, externalized.length()-3) + "%";
+                                    }
+                                    pos = externalized.indexOf("**");
+                                    if(pos >= 0) {
+                                        if(includeSubTree && pos == externalized.length() - 2) {
+                                            externalized = externalized.substring(0, pos) + "%";
+                                        } else throw new ServiceException(
                                             BasicException.Code.DEFAULT_DOMAIN,
                                             BasicException.Code.NOT_SUPPORTED, 
-                                            "path component pattern ':<pattern>*' not supported",
+                                            "only (***|%) wildcards at the end supported",
+                                            new BasicException.Parameter("value", v),
                                             new BasicException.Parameter("path", externalized),
-                                            new BasicException.Parameter("position", i)                          
+                                            new BasicException.Parameter("position", pos)                          
                                         );
                                     }
                                 }
+                                else if(externalized.startsWith("spice:")) {
+                                    for(int k = 0; k < ((Path)v).size(); k++) {
+                                        String c = ((Path)v).get(k);
+                                        if(c.startsWith(":") && c.endsWith("*")) {
+                                            throw new ServiceException(
+                                                BasicException.Code.DEFAULT_DOMAIN,
+                                                BasicException.Code.NOT_SUPPORTED, 
+                                                "path component pattern ':<pattern>*' not supported",
+                                                new BasicException.Parameter("path", externalized),
+                                                new BasicException.Parameter("position", i)                          
+                                            );
+                                        }
+                                    }
+                                }
+                                clauseValues.add(externalized);
                             }
-                            clauseValues.add(externalized);
                         }
                     }
                     else {
@@ -3613,7 +3713,9 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 }
             }
         }
-        catch(Exception e) {}
+        catch(Exception e) {
+            // ignore
+        }
         loopFilterProperties: for(FilterProperty p: filterProperties) {
             try {
                 if(referencedTypes != null) {
@@ -3694,21 +3796,79 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     protected void removePrivateAttributes(
         MappedRecord object
     ) throws ServiceException {
-        Object_2Facade facade = null;
-        try {
-            facade = Object_2Facade.newInstance(object);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
+        this.removeAttributes(
+            object, 
+            true, // removPrivate
+            false, // removeNonPersistent
+            true // removeSize
+        );
+    }
+
+    //------------------------------------------------------------------------
+    protected void removeAttributes(
+        MappedRecord object, 
+        boolean removePrivate, 
+        boolean removeNonPersistent, 
+        boolean removeSize
+    ) throws ServiceException {
+        Object_2Facade facade = ResourceHelper.getObjectFacade(object);
+        MappedRecord value = facade.getValue();
+        ModelElement_1_0 classifierDef = null;
+        classifierDef = this.getModel().findElement(value.getRecordName());
+        if(classifierDef == null) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE, 
+                "No classifier definition found",
+                new BasicException.Parameter("object", value)
+            );
         }
-        // remove attributes with private prefix
-        for(
+        Features: for(
             Iterator<String> i = facade.getValue().keySet().iterator();
             i.hasNext();
         ) {
             String attributeName = i.next();
+            // Private attributes
             if(attributeName.startsWith(this.privateAttributesPrefix)) {
-                i.remove();
+                if(removePrivate) {
+                    i.remove();
+                }
+            }   
+            // Size attributes
+            else if(attributeName.endsWith(SIZE_SUFFIX)) {
+                if(removeSize) {
+                    i.remove();
+                }               
+            }
+            // Application attributes
+            else {
+                if(SystemAttributes.OBJECT_CLASS.equals(attributeName)) continue Features;
+                ModelElement_1_0 featureDef;
+                if(classifierDef == null){
+                    featureDef = null;
+                } else {
+                    featureDef = classifierDef.getModel().getFeatureDef(
+                        classifierDef, 
+                        attributeName, 
+                        true // includeSubtypes
+                    ); 
+                    if(featureDef == null) {
+                        SysLog.log(Level.FINE, "Sys|No feature definition found|{0}#{1}", value.getRecordName(), attributeName);
+                    }
+                }
+                String featureName;
+                if(featureDef == null) {
+                    featureName = null;
+                    if(SYSTEM_ATTRIBUTES.contains(attributeName)) continue Features;
+                } else {
+                    featureName = (String) featureDef.objGetValue("qualifiedName"); 
+                }
+                if(
+                    (removeNonPersistent && this.nonPersistentFeatures.contains(featureName)) ||
+                    (featureDef == null)
+                ){
+                    i.remove();
+                }
             }
         }    
     }
@@ -3717,12 +3877,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     protected void normalizeDateTimeValues(
         MappedRecord object
     ) throws ServiceException {
-        Object_2Facade facade = null;
-        try {
-            facade = Object_2Facade.newInstance(object);
-        }  catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade facade = ResourceHelper.getObjectFacade(object);
         // replace values if necessary
         for(
             Iterator<String> i = facade.getValue().keySet().iterator();
@@ -3765,17 +3920,13 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     private void setLockAssertion(
         MappedRecord object
     ) throws ServiceException{
-        try {
-            Object_2Facade facade = Object_2Facade.newInstance(object);
-            String objectClass = facade.getObjectClass();
-            Model_1_0 model = getModel();
-            if(model.isSubtypeOf(objectClass, "org:openmdx:base:Removable")) {
-                setLockAssertion(facade, "removedAt");
-            } else if(model.isSubtypeOf(objectClass, "org:openmdx:base:Modifiable")) {
-                setLockAssertion(facade, "modifiedAt");
-            }
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
+        Object_2Facade facade = ResourceHelper.getObjectFacade(object);
+        String objectClass = facade.getObjectClass();
+        Model_1_0 model = getModel();
+        if(model.isSubtypeOf(objectClass, "org:openmdx:base:Removable")) {
+            setLockAssertion(facade, "removedAt");
+        } else if(model.isSubtypeOf(objectClass, "org:openmdx:base:Modifiable")) {
+            setLockAssertion(facade, "modifiedAt");
         }
     }
     
@@ -3804,15 +3955,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         MappedRecord obj,
         MappedRecord beforeImage
     ) throws ServiceException {
-        Object_2Facade objFacade = null;
-        Object_2Facade beforeImageFacade = null;       
-        try {
-            objFacade = Object_2Facade.newInstance(obj);
-            beforeImageFacade = Object_2Facade.newInstance(beforeImage);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade objFacade = ResourceHelper.getObjectFacade(obj);
+        Object_2Facade beforeImageFacade = ResourceHelper.getObjectFacade(beforeImage);
         for(
             Iterator<String> i = beforeImageFacade.getValue().keySet().iterator();
             i.hasNext();
@@ -4288,23 +4432,26 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     false, // primaryColumns
                     Object_2Facade.getObjectClass(replyObj)
                 );
-                Object_2Facade.getValue(replyObj2).keySet().removeAll(
-                    Object_2Facade.getValue(replyObj).keySet()
-                );
-                Object_2Facade.getValue(replyObj).putAll(
-                    Object_2Facade.getValue(replyObj2)
-                );
+                if(replyObj2 != null) {
+	                Object_2Facade.getValue(replyObj2).keySet().removeAll(
+	                    Object_2Facade.getValue(replyObj).keySet()
+	                );
+	                Object_2Facade.getValue(replyObj).putAll(
+	                    Object_2Facade.getValue(replyObj2)
+	                );
+                }
             }
-        }
-        catch(ServiceException e) {
-            throw e;
-        }
-        catch(Exception ex) {
+        } catch(ServiceException exception) {
+            throw exception;
+        } catch(NullPointerException exception) {
+            exception.printStackTrace();
+            throw new ServiceException(exception);
+        } catch(Exception exception) {
             throw new ServiceException(
-                ex, 
+                exception, 
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC, 
-                ex.toString()
+                exception.toString()
             );
         }
         reply.getResult().add(replyObj);
@@ -4380,9 +4527,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 request.path(),
                 false
             );
-            MappedRecord[] partitionedObjects = dbObject.sliceAndNormalizeObject(
-                Object_2Facade.cloneObject(request.object())
+            MappedRecord clone = Object_2Facade.cloneObject(request.object());
+            this.removeAttributes(
+                clone, 
+                false, // removePrivate
+                true, // removeNonPersistent
+                true // removeSize
             );
+            MappedRecord[] partitionedObjects = dbObject.sliceAndNormalizeObject(clone, true);            
             for(
                 int i = 0; 
                 i < partitionedObjects.length;
@@ -4404,14 +4556,17 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     request.object()
                 );
             }
-        } catch(ServiceException e) {
-            throw e;
-        } catch(Exception ex) {
+        } catch(ServiceException exception) {
+            throw exception;
+        } catch(NullPointerException exception) {
+            exception.printStackTrace();
+            throw new ServiceException(exception);
+        } catch(Exception exception) {
             throw new ServiceException(
-                ex, 
+                exception, 
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC, 
-                ex.toString()
+                exception.toString()
             );
         }
     }
@@ -4964,13 +5119,11 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 );
                 // get selected objects
                 List<MappedRecord> objects = new ArrayList<MappedRecord>();
-                int replySize = (request.size() >= BATCH_MODE_SIZE_MIN) && (request.size() <= BATCH_MODE_SIZE_MAX) ? 
-                    request.size() : 
-                        java.lang.Math.min(request.size(), AbstractDatabase_1.this.batchSize);
+                int requestedSize = request.size();
                 int replyPosition = request.position();
                 if(request.direction() == SortOrder.DESCENDING.code()) {
-                    if(replySize > replyPosition) replySize = replyPosition + 1;
-                    replyPosition = replyPosition + 1 - replySize;
+                    if(requestedSize > replyPosition) requestedSize = replyPosition + 1;
+                    replyPosition = replyPosition + 1 - requestedSize;
                 }
                 boolean hasMore = AbstractDatabase_1.this.getObjects(
                     conn,
@@ -4983,13 +5136,12 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     replyPosition,
                     lastPosition,
                     lastRowCount,
-                    replySize,
+                    requestedSize,
                     null
                 );
                 // Complete requested attributes
                 if(!objects.isEmpty()) {
-                    MappedRecord first = objects.get(0);
-                    Object_2Facade facade2 = Object_2Facade.newInstance(first);
+                    Object_2Facade facade2 = ResourceHelper.getObjectFacade(objects.get(0));
                     boolean fetchAll = false;          
                     if(request.attributeSelector() == AttributeSelectors.ALL_ATTRIBUTES) {
                         fetchAll = true;
@@ -5067,7 +5219,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             AttributeSelectors.ALL_ATTRIBUTES,
                             Collections.EMPTY_MAP,
                             false, // objectClassAsAttribute
-                            0, -1, -1, replySize,
+                            0, -1, -1, requestedSize,
                             facade2.getObjectClass()
                         );
                         // Add attributes of objects2 to objects
@@ -5415,28 +5567,17 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     ).getObject();
                     MappedRecord oldValue = Object_2Facade.getValue(obj);
                     MappedRecord beforeImage = Object_2Facade.cloneObject(obj);
-                    if(newValue.isEmpty()) {
-                        byte[] actualVersion = getVersion(obj);
-                        if(Arrays.equals(expectedVersion, actualVersion)) {
-                            removePrivateAttributes(obj);
-                        } 
-                        else {
-                            throw new ServiceException(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-                                "The object has been modified in the meanwhile",
-                                new BasicException.Parameter("path", Object_2Facade.getPath(object)),
-                                new BasicException.Parameter("expected", expectedVersion),
-                                new BasicException.Parameter("actual", actualVersion)
-                            );
-                        }
-                    } 
-                    else {
-                        MappedRecord[] oldSlices = dbObject.sliceAndNormalizeObject(obj);
+                    if(!newValue.isEmpty()) {
+                        MappedRecord[] oldSlices = dbObject.sliceAndNormalizeObject(obj, false);
                         // Replace attribute values
                         oldValue.putAll(newValue);
-                        AbstractDatabase_1.this.removePrivateAttributes(obj);
-                        MappedRecord[] newSlices = dbObject.sliceAndNormalizeObject(obj);
+                        AbstractDatabase_1.this.removeAttributes(
+                            obj, 
+                            true, // removePrivate
+                            true, // removeNonPersistent
+                            true // removeSize
+                        );
+                        MappedRecord[] newSlices = dbObject.sliceAndNormalizeObject(obj, true);
                         // Replace existing slices
                         for(
                             int i = 0; 
@@ -5521,6 +5662,20 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                     newSlices[i]
                                 );
                             }
+                        }
+                    } else if(expectedVersion != null){
+                        byte[] actualVersion = getVersion(obj);
+                        if(Arrays.equals(expectedVersion, actualVersion)) {
+                            removePrivateAttributes(obj);
+                        } else {
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                                "The object has been modified in the meanwhile",
+                                new BasicException.Parameter("path", Object_2Facade.getPath(object)),
+                                new BasicException.Parameter("expected", expectedVersion),
+                                new BasicException.Parameter("actual", actualVersion)
+                            );
                         }
                     }
                     if(reply.getResult() != null) {
@@ -5847,14 +6002,15 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 subClasses.toArray()
             );
     };
-    
+
     //---------------------------------------------------------------------------
     // Variables
     //---------------------------------------------------------------------------
 
     protected static final String T_REF = "REF";
     protected static final String UNDEF_OBJECT_CLASS = "#undef";
-
+    protected static final String SIZE_SUFFIX = "_";
+    
     protected BooleanMarshaller booleanMarshaller;
     protected Marshaller durationMarshaller;
     protected XMLGregorianCalendarMarshaller calendarMarshaller;
@@ -5876,40 +6032,40 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     protected static final short VIEW_MODE_ADD_MIXIN_COLUMNS_TO_PRIMARY = 0;
     protected static final short VIEW_MODE_SECONDARY_COLUMNS = 1;
 
-    /**
-     * Request size range triggering batch mode (overrides configured batchSize)
-     */
-    protected static final int BATCH_MODE_SIZE_MIN = 500;
-    protected static final int BATCH_MODE_SIZE_MAX = 2000;
+    protected static final Set<String> SYSTEM_ATTRIBUTES = new HashSet<String>(
+        Arrays.asList(
+            SystemAttributes.OBJECT_CLASS, 
+            SystemAttributes.CREATED_AT,
+            SystemAttributes.CREATED_BY, 
+            SystemAttributes.MODIFIED_BY, 
+            SystemAttributes.MODIFIED_AT,
+            SystemAttributes.REMOVED_AT,
+            SystemAttributes.REMOVED_BY,
+            "stateVersion"
+        )
+    );
 
-    // sort for binary search later 
-    protected static final String[] SYSTEM_ATTRIBUTES = new String[] {
-        SystemAttributes.OBJECT_CLASS, 
-        SystemAttributes.CREATED_AT,
-        SystemAttributes.CREATED_BY, 
-        SystemAttributes.MODIFIED_BY, 
-        SystemAttributes.MODIFIED_AT,
-        SystemAttributes.REMOVED_AT,
-        SystemAttributes.REMOVED_BY
-    };
-
-    // sort for binary search later 
-    protected static final String[] QUALIFIED_SYSTEM_ATTRIBUTES = new String[] {
-        "org:openmdx:base:Creatable:" + SystemAttributes.CREATED_AT,
-        "org:openmdx:base:Creatable:" + SystemAttributes.CREATED_BY,
-        "org:openmdx:base:Modifiable:" + SystemAttributes.MODIFIED_AT,
-        "org:openmdx:base:Modifiable:" + SystemAttributes.MODIFIED_BY,
-        "org:openmdx:base:Removable:" + SystemAttributes.REMOVED_AT,
-        "org:openmdx:base:Removable:" + SystemAttributes.REMOVED_BY
-    };
+    protected static final Set<String> QUALIFIED_SYSTEM_ATTRIBUTES = new HashSet<String>(
+        Arrays.asList(
+            "org:openmdx:base:Creatable:" + SystemAttributes.CREATED_AT,
+            "org:openmdx:base:Creatable:" + SystemAttributes.CREATED_BY,
+            "org:openmdx:base:Modifiable:" + SystemAttributes.MODIFIED_AT,
+            "org:openmdx:base:Modifiable:" + SystemAttributes.MODIFIED_BY,
+            "org:openmdx:base:Removable:" + SystemAttributes.REMOVED_AT,
+            "org:openmdx:base:Removable:" + SystemAttributes.REMOVED_BY,
+            "org:openmdx:state2:StateCapable:stateVersion"
+        )
+    );
     
     protected static final int DEFAULT_BATCH_SIZE = 50;
     protected static final String DEFAULT_OID_SUFFIX = "_objectid";
     protected static final String DEFAULT_RID_SUFFIX = "_referenceid";
+    protected static final String DEFAULT_RSX_SUFFIX = "_referenceIdSuffix";
     protected static final String DEFAULT_COLUMN_SELECTOR = "v.*";
     protected String privateAttributesPrefix;
     protected String objectIdAttributesSuffix;
     protected String referenceIdAttributesSuffix;
+    protected String referenceIdSuffixAttributesSuffix;
 
     // Reserved words
     protected static final Set<String> RESERVED_WORDS_HSQLDB = new HashSet<String>(
@@ -5941,7 +6097,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
      * attributes in specifiers
      */
     protected String namespaceId;
-    protected int batchSize;
 
     /**
      * List of DbConnectionManagers. getConnection() returns as default
@@ -5985,9 +6140,9 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     protected Map embeddedFeatures;
 
     /**
-     * Set of fully qualified model names of non-persistent features.
+     * Fully qualified model names of non-persistent features.
      */
-    protected Set nonPersistentFeatures;
+    protected Set<String> nonPersistentFeatures;
 
     /**
      * macros
@@ -6054,12 +6209,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
 
     protected final SQLWildcards sqlWildacrds = new SQLWildcards('\\');
     
-    static {
-        // must guarantee sort order for binary search access
-        Arrays.sort(SYSTEM_ATTRIBUTES);
-        Arrays.sort(QUALIFIED_SYSTEM_ATTRIBUTES);
-    }
-
 }
 
 //---End of File -------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Configuration.java,v 1.8 2010/08/06 12:26:25 hburger Exp $
+ * Name:        $Id: Configuration.java,v 1.9 2010/10/11 21:58:24 hburger Exp $
  * Description: Configuration
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:26:25 $
+ * Date:        $Date: 2010/10/11 21:58:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -143,22 +143,49 @@ public class Configuration
         return this.entries.containsKey(entryName);
     } 
 
+    private boolean isEnabled(
+        String entryName,
+        boolean defaultValue
+    ){
+        if (containsEntry(entryName)) {
+	        final Object value = values(entryName).get(0);
+	        if(value instanceof Boolean) {
+	        	return ((Boolean)value).booleanValue();
+	        }
+	        if (value instanceof String) {
+	        	String stringValue = ((String)value).trim();
+	        	if(!"".equals(stringValue)) {
+		        	return Boolean.parseBoolean((String)value); 
+	        	}
+	        }
+        }
+        return defaultValue;
+    }
+    
     /**
-     * Returns true if the named flag is set.
+     * Returns <code>true</code> if the named flag is enabled.
      *
-     * @return      true if this configuration contains an entry for the
-     *              specified name and its value is true
+     * @return <code>true</code> if this configuration contains an entry for 
+     *         the specified name and its value is <code>true</code>
      */
     public boolean isOn(
         String entryName
     ){
-        if (! containsEntry(entryName)) return false;
-        final Object value = values(entryName).get(0);
-        return (
-            value instanceof Boolean && ((Boolean)value).booleanValue() 
-        ) || "true".equalsIgnoreCase(value.toString());
+    	return isEnabled(entryName, false);
     } 
 
+    /**
+     * Returns <code>true</code> if the named flag is not disabled.
+     *
+     * @return <code>true</code> if this configuration contains no entry for 
+     *         the specified name or its value is <code>true</code>
+     */
+    public boolean isNotDisabled(
+        String entryName
+    ){
+    	return isEnabled(entryName, true);
+    } 
+    
     /**
      * Returns the modifiable attribute value list.
      * This method never returns null.

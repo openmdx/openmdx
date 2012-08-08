@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: QueryRecord.java,v 1.3 2010/06/02 13:45:10 hburger Exp $
+ * Name:        $Id: QueryRecord.java,v 1.4 2010/11/23 17:34:52 wfro Exp $
  * Description: Query Record 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:10 $
+ * Date:        $Date: 2010/11/23 17:34:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -99,7 +99,6 @@ public class QueryRecord
      * Alphabetically ordered keys
      */
     private static final String[] KEYS = {
-        "group",
         "groups",
         "parameters",
         "path",
@@ -116,11 +115,6 @@ public class QueryRecord
         FetchPlan.DEFAULT
     };
 
-    /**
-     * The fields included in the active fetch groups
-     */
-    private String[] group;
-    
     /**
      * The fetch groups
      */
@@ -155,25 +149,6 @@ public class QueryRecord
      * 
      */
     private Long size;    
-    
-    /**
-     * Retrieve group.
-     *
-     * @return Returns the group.
-     */
-    public Set<String> getGroup() {
-        return Sets.asSet(this.group);
-    }
-    
-    /**
-     * Set group.
-     * 
-     * @param group The group to set.
-     */
-    public void setGroup(Set<String> group) {
-        this.group = toArray(group);
-    }
-
     
     /**
      * Retrieve groups.
@@ -329,14 +304,13 @@ public class QueryRecord
         int index
     ){
         switch(index) {
-            case 0: return asSet(this.group);
-            case 1: return asSet(this.groups);
-            case 2: return this.parameters;
-            case 3: return this.path;
-            case 4: return this.position;
-            case 5: return this.query;
-            case 6: return this.queryType;
-            case 7: return this.size;
+            case 0: return asSet(this.groups);
+            case 1: return this.parameters;
+            case 2: return this.path;
+            case 3: return this.position;
+            case 4: return this.query;
+            case 5: return this.queryType;
+            case 6: return this.size;
             default: return null;
         }
     }
@@ -355,28 +329,25 @@ public class QueryRecord
         Object value
     ){
         switch(index) {
-            case 0:
-                this.group = toArray(value);
-                break;
-            case 1: 
+            case 0: 
                 this.groups = toArray(value);
                 break;
-            case 2:
+            case 1:
                 this.parameters = (Record) value;
                 break;
-            case 3:
+            case 2:
                 this.path = toPath(value);
                 break;
-            case 4:
+            case 3:
                 this.position = toLong(value);
                 break;
-            case 5:
+            case 4:
                 this.query = (String) value;
                 break;
-            case 6:
+            case 5:
                 this.queryType = (String) value;
                 break;
-            case 7: 
+            case 6: 
                 this.size = toLong(value);
                 break;
         }

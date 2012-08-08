@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractPersistenceManagerFactory.java,v 1.26 2010/08/09 13:14:27 hburger Exp $
+ * Name:        $Id: AbstractPersistenceManagerFactory.java,v 1.31 2010/11/18 17:36:42 hburger Exp $
  * Description: Abstract Manager Factory
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:14:27 $
+ * Date:        $Date: 2010/11/18 17:36:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -101,6 +101,7 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
         this.setNontransactionalWrite(getFlag(configuration,ConfigurableProperty.NontransactionalWrite));
         this.setMultithreaded(getFlag(configuration,ConfigurableProperty.Multithreaded));
         this.setCopyOnAttach(getFlag(configuration,ConfigurableProperty.CopyOnAttach));
+        this.setContainerManaged(getFlag(configuration,ConfigurableProperty.ContainerManaged));
         if(configuration.containsKey(ConfigurableProperty.ConnectionUserName.qualifiedName())) this.setConnectionUserName(
             (String)configuration.get(ConfigurableProperty.ConnectionUserName.qualifiedName())
         );
@@ -128,7 +129,9 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
         if(configuration.containsKey(ConfigurableProperty.TransactionType.qualifiedName())) this.setTransactionType(
             (String)configuration.get(ConfigurableProperty.TransactionType.qualifiedName())
         );
-        
+        if(configuration.containsKey(ConfigurableProperty.ConnectionDriverName.qualifiedName())) this.setConnectionDriverName(
+            (String)configuration.get(ConfigurableProperty.ConnectionDriverName.qualifiedName())
+        );
     }
     
     /**
@@ -398,8 +401,8 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
     protected void initialize(
         PersistenceManager persistenceManager
     ){
-        if(persistenceManager instanceof Connection_2) {
-            ((Connection_2)persistenceManager).setPersistenceManagerFactory(this);
+        if(persistenceManager instanceof AbstractPersistenceManager) {
+            AbstractPersistenceManager.class.cast(persistenceManager).setPersistenceManagerFactory(this);
         }
         this.instanceLifecycleListenerRegistry.propagateTo(persistenceManager);
     }
@@ -778,6 +781,24 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
         return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.IgnoreCache));
     }
 
+    /**
+     * Define whether the transaction is container managed
+     * 
+     * @param flag the container managed transaction flag
+     */
+    public void setContainerManaged(boolean flag){
+        this.setProperty(ConfigurableProperty.ContainerManaged, Boolean.valueOf(flag));
+    }
+    
+    /**
+     * Tell whether the transaction is container managed 
+     * 
+     * @return <code>true</code> if the transaction is container managed
+     */
+    public boolean getContainerManaged(){
+        return Boolean.TRUE.equals(this.configurableProperties.get(ConfigurableProperty.ContainerManaged));
+    }
+    
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManagerFactory#getProperties()
      */
@@ -945,6 +966,23 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
             name
         );
     }    
+
+    /**
+     * Tells whether the transactions are container managed
+     * 
+     * @param persistenceManagerFactory
+     * 
+     * @return <code>true</code> if the persistenceManagerFactory is an instance of
+     * <code>AbstractPersistenceManagerFactory</code> and its transactions are 
+     * container managed
+     */
+    public static boolean isTransactionContainerManaged(
+    	PersistenceManagerFactory persistenceManagerFactory
+    ){
+    	return 
+	    	persistenceManagerFactory instanceof AbstractPersistenceManagerFactory<?> &&
+	    	((AbstractPersistenceManagerFactory<?>)persistenceManagerFactory).getContainerManaged();
+    }
     
     static {
         AbstractPersistenceManagerFactory.NON_CONFIGURABLE_PROPERTIES.setProperty(

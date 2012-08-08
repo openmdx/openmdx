@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingPersistenceManagerFactory.java,v 1.1 2010/08/09 13:14:27 hburger Exp $
+ * Name:        $Id: DelegatingPersistenceManagerFactory.java,v 1.2 2010/11/18 17:36:42 hburger Exp $
  * Description: Delegating Persistence Manager Factory 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:14:27 $
+ * Date:        $Date: 2010/11/18 17:36:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,6 +59,8 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.datastore.DataStoreCache;
 import javax.jdo.listener.InstanceLifecycleListener;
+
+import org.openmdx.base.accessor.view.ViewManagerFactory_1;
 
 /**
  * Delegating Persistence Manager Factory
@@ -566,6 +568,25 @@ public abstract class DelegatingPersistenceManagerFactory
      */
     public void setTransactionType(String name) {
         delegate().setTransactionType(name);
+    }
+    
+    /**
+     * Tells whether the transactions are container managed
+     * 
+     * @param persistenceManagerFactory
+     * 
+     * @return <code>true</code> if the persistenceManagerFactory is an instance of
+     * <code>AbstractPersistenceManagerFactory</code> and its transactions are 
+     * container managed
+     */
+    public static boolean isTransactionContainerManaged(
+        PersistenceManagerFactory persistenceManagerFactory
+    ){
+        PersistenceManagerFactory current = persistenceManagerFactory;
+        while(current instanceof DelegatingPersistenceManagerFactory) {
+            current = ((DelegatingPersistenceManagerFactory)current).delegate();
+        }
+        return ViewManagerFactory_1.isTransactionContainerManaged(current); 
     }
     
 }

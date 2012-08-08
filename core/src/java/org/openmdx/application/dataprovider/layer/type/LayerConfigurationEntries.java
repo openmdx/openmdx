@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.4 2009/12/14 14:47:52 wfro Exp $
+ * Name:        $Id: LayerConfigurationEntries.java,v 1.5 2010/12/09 15:14:50 hburger Exp $
  * Description: TYPE layer configuration entries
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/14 14:47:52 $
+ * Date:        $Date: 2010/12/09 15:14:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,23 +69,5 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
    * Application Layer is responsible for handling these objects. 
    */
   static public final String GENERIC_TYPE_PATH = "genericTypePath";
-
-  /**
-   * org::openmdx::state2::StateCapable::validTimeUnique value
-   * <p><em>
-   * Note:<br>
-   * This value is not stored in the database but configured for the provider.
-   * </em>
-   */
-  static public final String VALID_TIME_UNIQUE = "validTimeUnique";
-  
-  /**
-   * org::openmdx::state2::StateCapable::transactionTimeUnique value
-   * <p><em>
-   * Note:<br>
-   * This value is not stored in the database but configured for the provider.
-   * </em>
-   */
-  static public final String TRANSACTION_TIME_UNIQUE = "transactionTimeUnique";
 
 }

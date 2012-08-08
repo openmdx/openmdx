@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractRestInteraction.java,v 1.23 2010/08/09 13:14:53 hburger Exp $
+ * Name:        $Id: AbstractRestInteraction.java,v 1.26 2010/11/18 08:18:25 hburger Exp $
  * Description: Abstract REST Interaction
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:14:53 $
+ * Date:        $Date: 2010/11/18 08:18:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -654,7 +654,9 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
                         "This interaction is not supported",
                         BasicException.newEmbeddedExceptionStack(
                             BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.NOT_SUPPORTED
+                            BasicException.Code.NOT_SUPPORTED,
+                            new BasicException.Parameter("interactionSpec", interactionSpec),
+                            new BasicException.Parameter("input", input)
                         )
                     )
                 );

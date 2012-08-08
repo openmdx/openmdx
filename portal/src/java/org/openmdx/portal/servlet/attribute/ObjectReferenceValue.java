@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReferenceValue.java,v 1.70 2010/04/27 12:21:07 wfro Exp $
+ * Name:        $Id: ObjectReferenceValue.java,v 1.71 2010/09/08 09:41:09 wfro Exp $
  * Description: ObjectReferenceValue 
- * Revision:    $Revision: 1.70 $
+ * Revision:    $Revision: 1.71 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 12:21:07 $
+ * Date:        $Date: 2010/09/08 09:41:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -339,13 +339,14 @@ implements Serializable {
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();                
         View view = p.getView();
         label = this.getLabel(attribute, p, label);
+        String title = this.getTitle(attribute, label);
         if(forEditing && this.isSingleValued()) {
             String feature = this.getName();
             ObjectReference objectReference = (ObjectReference)this.getValue(false);
             id = (id == null) || (id.length() == 0) ? 
                 feature + "[" + tabIndex + "]" : 
                 id;
-            p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             p.write("<td ", rowSpanModifier, ">");
             // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
             // Show drop-down instead of input field

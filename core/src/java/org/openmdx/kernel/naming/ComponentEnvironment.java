@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ComponentEnvironment.java,v 1.1 2009/05/20 15:59:18 hburger Exp $
- * Description: ComponentEnvironment 
- * Revision:    $Revision: 1.1 $
+ * Name:        $Id: ComponentEnvironment.java,v 1.5 2010/10/16 18:14:31 hburger Exp $
+ * Description: Component Environment 
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/20 15:59:18 $
+ * Date:        $Date: 2010/10/16 18:14:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,27 +50,36 @@
  */
 package org.openmdx.kernel.naming;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.jdo.JDOFatalUserException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.Factory;
 
 /**
- * ComponentEnvironment
+ * Component Environment
  */
 public class ComponentEnvironment {
 
     /**
      * Constructor 
      */
-    protected ComponentEnvironment() {
+    private ComponentEnvironment() {
         // Avoid instantiation
     }
 
     /**
-     * Retrieve an object registered in the component's JNDI context
+     * The factory registry
+     */
+    private static Map<Class<?>, Factory<?>> registry = new HashMap<Class<?>, Factory<?>>();
+    
+    /**
+     * Retrieve an object registered in the registry or the component's JNDI context
      * 
      * @param name the objects JNDI name
      * 
@@ -79,28 +88,54 @@ public class ComponentEnvironment {
      * 
      * @exception JDOFatalUserException if the object's acquisition fails
      */
-    @SuppressWarnings("unchecked")
     public static <T> T lookup(
         Class<T> objectClass
     ) throws BasicException{
-        String jndiName = "java:comp/" + objectClass.getSimpleName();
-        try {
-            Context context = new InitialContext();
+        Factory<?> factory = registry.get(objectClass);
+        if(factory == null) {
+            String jndiName = "java:comp/" + objectClass.getSimpleName();
             try {
-                return (T) context.lookup(jndiName);
-            } finally {
-                context.close();
+                Context context = new InitialContext();
+                try {
+                    return objectClass.cast(context.lookup(jndiName));
+                } finally {
+                    context.close();
+                }
+            } catch (NamingException exception) {
+                throw BasicException.newStandAloneExceptionStack(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_RESOURCE,
+                    "Unable to retrieve object from JNDI",
+                    new BasicException.Parameter("class", objectClass.getName()),
+                    new BasicException.Parameter("name", jndiName)
+                );
             }
-        } catch (NamingException exception) {
-            throw BasicException.newStandAloneExceptionStack(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_RESOURCE,
-                "Unable to retrieve object from JNDI",
-                new BasicException.Parameter("class", objectClass.getName()),
-                new BasicException.Parameter("name", jndiName)
-            );
+        } else {
+            try {
+                return objectClass.cast(factory.instantiate());
+            } catch (RuntimeException exception) {
+                throw BasicException.newStandAloneExceptionStack(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BAD_RESOURCE,
+                    "Unable to retrieve object from registered factory",
+                    new BasicException.Parameter("class", objectClass.getName()),
+                    new BasicException.Parameter("factoryClass", factory.getClass().getName())
+                );
+            }
         }
+    }
+
+    /**
+     * Register a component object
+     * 
+     * @param factory a factory returning the registration <em>Interface</em> as instance class.
+     */
+    public static synchronized <T> void register (
+        Factory<?> factory
+    ){
+        registry.put(factory.getInstanceClass(), factory);
     }
 
 }

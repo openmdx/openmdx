@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn.java,v 1.6 2010/03/09 18:47:18 hburger Exp $
+ * Name:        $Id: PlugIn.java,v 1.7 2010/09/13 16:46:29 hburger Exp $
  * Description: WAP XML Plug-In
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/09 18:47:18 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD licensev as listed below.
@@ -55,7 +55,6 @@ import java.nio.ByteBuffer;
 import javax.xml.namespace.NamespaceContext;
 
 import org.openmdx.base.exception.ServiceException;
-import org.xml.sax.SAXException;
 
 
 /**
@@ -184,7 +183,7 @@ public interface PlugIn {
      * 
      * @param set if <code>true</code> the complete value is set, 
      * otherwise the best match is returned, which may be <code>null</code>
-     * @param namespaceURI TODO
+     * @param namespaceURI 
      * @param value the attribute value
      * @return the requested token, or <code>null</code> if no such token is available 
      */

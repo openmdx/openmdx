@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UUIDConversion.java,v 1.10 2010/01/21 17:36:09 hburger Exp $
+ * Name:        $Id: UUIDConversion.java,v 1.11 2010/10/24 08:57:05 hburger Exp $
  * Description: UUID conversion
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/21 17:36:09 $
+ * Date:        $Date: 2010/10/24 08:57:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -98,24 +98,12 @@ public class UUIDConversion {
         if(uuid == null) {
             return null;
         } else switch(uuid.length()){
-            case LEGACY_FORMAT: return fromBinary(
-                Base64.decode(
-                    uuid.replace(
-                        '-',
-                        '/'
-                    ).replace(
-                        '.',
-                        '+'
-                    ) + "=="
-                )
-            );
+            case LEGACY_FORMAT: return UUIDConversion.fromBinary(Base64.decode(URLTransformation.toBase64(uuid + "__")));
             case UID_FORMAT: return UUIDConversion.fromUID(uuid);
             case UUID_FORMAT: return UUID.fromString(uuid);
             case URN_FORMAT: return UUID.fromString(uuid.substring(9));
             case XRI_FORMAT: return UUID.fromString(uuid.substring(14));
-            default: throw new IllegalArgumentException(
-                "Invalid UUID string: " + uuid
-            );
+            default: throw new IllegalArgumentException("Invalid UUID string: " + uuid);
         }
     }
 

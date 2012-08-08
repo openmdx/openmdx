@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractTransaction_1.java,v 1.3 2010/08/09 13:13:35 hburger Exp $
+ * Name:        $Id: AbstractTransaction_1.java,v 1.7 2010/12/23 17:42:52 hburger Exp $
  * Description: AbstractTransaction_1 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:13:35 $
+ * Date:        $Date: 2010/12/23 17:42:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -88,38 +88,54 @@ public abstract class AbstractTransaction_1
         } else {
             JDOException target = source;
             Object failedObject = source.getFailedObject();
-            if(failedObject instanceof PersistenceCapable) try {
-                target = source.getClass().getConstructor(
-                    String.class,
-                    Throwable[].class,
-                    Object.class
-                ).newInstance(
-                    source.getMessage(),
-                    source.getNestedExceptions(),
-                    getPersistenceManager().getObjectById(
-                        JDOHelper.getObjectId(failedObject)
-                    )
-                );
-            } catch (Exception exception) {
-                throw BasicException.initHolder(
-                    new JDOFatalInternalException(
-                        "Could not marshal JDOException with failed object",
-                        BasicException.newEmbeddedExceptionStack(
-                            source,
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.TRANSFORMATION_FAILURE
-                        )
-                   )
-                );
+            if(failedObject instanceof PersistenceCapable) {
+                Object objectId = JDOHelper.getObjectId(failedObject);
+                try {
+                    target = source.getClass().getConstructor(
+                        String.class,
+                        Throwable[].class,
+                        Object.class
+                    ).newInstance(
+                        source.getMessage(),
+                        source.getNestedExceptions(),
+                        getPersistenceManager().getObjectById(objectId)
+                    );
+                } catch (Exception exception) {
+                    try {
+                        target = source.getClass().getConstructor(
+                            String.class,
+                            Throwable[].class
+                        ).newInstance(
+                            source.getMessage() + " (" + objectId + ")",
+                            source.getNestedExceptions()
+                        );
+                    } catch (Exception retry) {
+                        throw BasicException.initHolder(
+                            new JDOFatalInternalException(
+                                "Could not marshal JDOException with failed object",
+                                BasicException.newEmbeddedExceptionStack(
+                                    source,
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.TRANSFORMATION_FAILURE,
+                                    new BasicException.Parameter("objectId", objectId)
+                                )
+                           )
+                        );
+                    }
+                }
             }
             Throwable[] nestedExceptions = target.getNestedExceptions();
             if(nestedExceptions != null) {
                 for(int i = 0; i < nestedExceptions.length; i++) {
                     Throwable nestedSource = nestedExceptions[i];
                     if(nestedSource instanceof JDOException) {
-                        JDOException nestedTarget = marshal((JDOException)nestedSource);
-                        if(nestedTarget != nestedSource) {
-                            nestedExceptions[i] = nestedTarget;
+                        try {
+                            JDOException nestedTarget = marshal((JDOException)nestedSource);
+                            if(nestedTarget != nestedSource) {
+                                nestedExceptions[i] = nestedTarget;
+                            }
+                        } catch (Exception forget) {
+                            marshal((JDOException)nestedSource);
                         }
                     }
                 }
@@ -242,12 +258,14 @@ public abstract class AbstractTransaction_1
     // Synchronization
     //-----------------------------------------------------------------------
     
+//  @Override
     public void afterCompletion(
         int status
     ) {
         ((Synchronization)this.getDelegate()).afterCompletion(status);        
     }
 
+//  @Override
     public void beforeCompletion(
     ) {
         ((Synchronization)this.getDelegate()).beforeCompletion();                
@@ -261,9 +279,17 @@ public abstract class AbstractTransaction_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.Synchronization_2_0#afterBegin()
      */
-    @Override
+//  @Override
     public void afterBegin() {
         ((Synchronization_2_0)this.getDelegate()).afterBegin();                
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.rest.spi.Synchronization_2_0#clear()
+     */
+//  @Override
+    public void clear() {
+        ((Synchronization_2_0)this.getDelegate()).clear();                
     }
 
 }

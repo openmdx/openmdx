@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ObjectInvocationHandler.java,v 1.143 2010/08/30 15:40:57 wfro Exp $
+ * Name:        $Id: Jmi1ObjectInvocationHandler.java,v 1.146 2010/12/16 12:48:15 hburger Exp $
  * Description: JMI 1 Object Invocation Handler 
- * Revision:    $Revision: 1.143 $
+ * Revision:    $Revision: 1.146 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/30 15:40:57 $
+ * Date:        $Date: 2010/12/16 12:48:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,12 +58,10 @@ import java.io.Writer;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -80,7 +78,6 @@ import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
-import javax.resource.cci.Record;
 
 import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.Identifier;
@@ -90,17 +87,11 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
-import org.openmdx.base.collection.MarshallingList;
-import org.openmdx.base.collection.MarshallingSequentialList;
-import org.openmdx.base.collection.MarshallingSet;
-import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.jdo.listener.ConstructCallback;
 import org.openmdx.kernel.exception.BasicException;
@@ -113,7 +104,6 @@ import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.Container;
 import org.w3c.cci2.LargeObject;
 import org.w3c.cci2.SortedMaps;
-import org.w3c.cci2.SparseArray;
 
 /**
  * JMI 1 Object Invocation Handler
@@ -159,6 +149,10 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     private final Object[] aspectImplementationInstances;
     private transient FeatureMapper featureMapper;
     private final ClassMapping_1_0 mapping;
+    
+    ValidatingMarshaller getValidator(){
+        return ((RefRootPackage_1)this.refClass.refOutermostPackage()).validatingMarshaller;
+    }
     
     /**
      * Retrieve the mapping
@@ -583,10 +577,10 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.Cloneable#openmdxjdoClone()
          */
-        public RefObject openmdxjdoClone() {
+        public RefObject openmdxjdoClone(String... exclude) {
             return this.refClass.refCreateInstance(
                 Collections.singletonList(
-                    PersistenceHelper.clone(this.cciDelegate)
+            		((org.openmdx.base.persistence.spi.Cloneable<?>)this.cciDelegate).openmdxjdoClone(exclude)	
                 )
             );
         }
@@ -722,18 +716,28 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                 Object value = this.refDelegate.refGetValue(
                                     featureName
                                 );
-                                return value instanceof InputStream ? new Jmi1BinaryLargeObject(
-                                    featureName, 
-                                    (InputStream)value
-                                ) : value instanceof SortedMap ? SortedMaps.asSparseArray(
-                                    (SortedMap<Integer,?>)value
-                                ) : value instanceof RefContainer ? Classes.newProxyInstance(
-                                    new Jmi1ContainerInvocationHandler((Marshaller)null, (RefContainer)value),
-                                    method.getReturnType(), 
-                                    RefContainer.class, 
-                                    PersistenceCapableCollection.class,
-                                    Serializable.class
-                                ) : value;
+                                if(value instanceof InputStream){
+                                	return new Jmi1BinaryLargeObject(
+	                                    featureName, 
+	                                    (InputStream)value
+	                                );
+                                }
+                                if(value instanceof SortedMap) { 
+                                	return SortedMaps.asSparseArray(
+	                                    (SortedMap<Integer,?>)value
+	                                );
+                                }
+                                if(value instanceof RefContainer){
+                                	return Classes.newProxyInstance(
+	                                    new Jmi1ContainerInvocationHandler(this.getValidator(), (RefContainer)value),
+	                                    method.getReturnType(), 
+	                                    RefContainer.class, 
+	                                    PersistenceCapableCollection.class,
+	                                    Serializable.class
+	                                );
+                                }
+                                getValidator().validate(value);
+                                return value;
                             }
                             // Query
                             else if(
@@ -775,9 +779,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             if((args != null) && (args.length == 1)) {                      
                                 this.refDelegate.refSetValue(
                                     featureName,
-                                    args[0] instanceof BinaryLargeObject ? 
-                                        ((BinaryLargeObject)args[0]).getContent() : 
-                                        args[0]
+                                    args[0]
                                 );
                                 return null;
                             }
@@ -1242,7 +1244,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             if(reply instanceof Container<?> && !(reply instanceof RefContainer<?>)) {
                 return Classes.newProxyInstance(
                     new Jmi1ContainerInvocationHandler(
-                        null, // marshaller
+                        this.getValidator(), // marshaller
                         (Container<?>) reply
                     ),
                     method.getReturnType(), 
@@ -1257,209 +1259,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     }
 
     
-    /**
-     * Class StandardMarshaller
-     */
-    public static class StandardMarshaller implements Marshaller {
-
-        StandardMarshaller(
-            RefRootPackage_1 delegate
-        ){
-            this.delegate = delegate;
-        }
-
-        private static final long serialVersionUID = 3399640551686160240L;
-        private final RefRootPackage_1 delegate;
-
-        /**
-         * Retrieve the marshaller's delegate
-         * 
-         * @return the outermost package
-         */
-        Jmi1Package_1_0 getOutermostPackage(){
-            return this.delegate;
-        }
-        
-        /* (non-Javadoc)
-         * @see org.openmdx.base.persistence.spi.Marshaller#unmarshal(java.lang.Object)
-         */
-        public Object unmarshal(
-            Object source
-        ){
-            try {
-                return 
-                    source instanceof RefStruct_1_0 ? ((RefStruct_1_0)source).refDelegate() :  
-                    source instanceof Object[] ? unmarshal((Object[])source) : 
-                    this.delegate.unmarshal(source);
-            } catch (ServiceException exception) {
-                throw new RuntimeServiceException(exception);
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.persistence.spi.Marshaller#marshal(java.lang.Object)
-         */
-        @SuppressWarnings("unchecked")
-        public Object marshal(
-            Object source
-        ){
-            try {
-                return source instanceof Object[] ? marshal(
-                    (Object[])source
-                ) : source instanceof PersistenceCapable ? this.delegate.marshal(
-                    source
-                ) : source instanceof List ? marshal(
-                    (List)source
-                ) : source instanceof Set ? new MarshallingSet(
-                    this, 
-                    (Set)source
-                ) : source instanceof SparseArray ? SortedMaps.asSparseArray(
-                    new MarshallingSortedMap(this, (SparseArray)source)
-                ) : source instanceof Iterator ? new MarshallingIterator(
-                    (Iterator)source
-                ) : source instanceof Container ? Classes.newProxyInstance(
-                    new Jmi1ContainerInvocationHandler(this, (Container)source),
-                    source.getClass().getInterfaces()[0], 
-                    RefContainer.class, 
-                    PersistenceCapableCollection.class,
-                    Serializable.class 
-                ) : source instanceof Record ? delegate.refCreateStruct(
-                    (Record)source
-                ) : source;
-            }  catch (ServiceException exception) {
-                throw new RuntimeServiceException(exception);
-            }
-        }
-
-        @SuppressWarnings("unchecked")
-        public final List marshal(
-            List source
-        ){
-            return source instanceof AbstractSequentialList ? new MarshallingSequentialList(
-                this,
-                source
-            ) : new MarshallingList(
-                this, 
-                source
-            );
-        }
-
-        /**
-         * Unmarshal an array of objects
-         * 
-         * @param source
-         * 
-         * @return an array containing the unmarshalled objects
-         */
-        public final Object[] unmarshal(
-            Object[] source
-        ){
-            if(source != null && source.length > 0) {
-                for(
-                    int i = 0, l = source.length;
-                    i < l;
-                    i++
-                ){ 
-                    Object s = source[i];
-                    Object t = unmarshal(s);
-                    if(s != t) {
-                        Object[] target = new Object[source.length];
-                        System.arraycopy(source, 0, target, 0, i);
-                        target[i] = t;
-                        for(
-                            int j = i + 1;
-                            j < l;
-                            j++
-                        ){
-                            target[j] = unmarshal(source[j]);
-                        }
-                        return target;
-                    }
-                }
-            }
-            return source;
-        }
-
-        /**
-         * Marshal an array of objects
-         * 
-         * @param source
-         * 
-         * @return an array containing the marshalled objects
-         */
-        public final Object[] marshal(
-            Object[] source
-        ){
-            if(source != null && source.length > 0) {
-                for(
-                    int i = 0, l = source.length;
-                    i < l;
-                    i++
-                ){ 
-                    Object s = source[i];
-                    Object t = marshal(s);
-                    if(s != t) {
-                        Object[] target = new Object[source.length];
-                        System.arraycopy(source, 0, target, 0, i);
-                        target[i] = t;
-                        for(
-                            int j = i + 1;
-                            j < l;
-                            j++
-                        ){
-                            target[j] = marshal(source[j]);
-                        }
-                        return target;
-                    }
-                }
-            }
-            return source;
-        }
-
-        /**
-         * MarshallingIterator
-         */
-        class MarshallingIterator<T> implements Iterator<T> {
-
-            /**
-             * Constructor 
-             *
-             * @param delegate
-             */
-            MarshallingIterator(
-                Iterator<?> delegate
-            ){
-                this.delegate = delegate;
-            }
-
-            private final Iterator<?> delegate;
-
-            /* (non-Javadoc)
-             * @see java.util.Iterator#hasNext()
-             */
-            public boolean hasNext() {
-                return this.delegate.hasNext();
-            }
-
-            /* (non-Javadoc)
-             * @see java.util.Iterator#next()
-             */
-            @SuppressWarnings("unchecked")
-            public T next() {
-                return (T) marshal(this.delegate.next());
-            }
-
-            /* (non-Javadoc)
-             * @see java.util.Iterator#remove()
-             */
-            public void remove() {
-                this.delegate.remove();
-            }
-
-        }
-
-    }
-
     /**
      * 
      */

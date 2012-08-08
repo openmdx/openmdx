@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SpecificationMapping_1.java,v 1.4 2010/08/06 12:23:42 hburger Exp $
+ * Name:        $Id: SpecificationMapping_1.java,v 1.5 2010/09/13 16:46:29 hburger Exp $
  * Description: Implementation Mapper 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:23:42 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,6 @@ import javax.jmi.reflect.RefStruct;
 
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;

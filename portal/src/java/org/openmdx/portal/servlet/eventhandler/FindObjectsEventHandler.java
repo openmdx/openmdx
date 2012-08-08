@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsEventHandler.java,v 1.32 2010/06/01 09:11:32 hburger Exp $
+ * Name:        $Id: FindObjectsEventHandler.java,v 1.33 2010/11/01 13:41:49 wfro Exp $
  * Description: FindObjectsEventHandler 
- * Revision:    $Revision: 1.32 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 09:11:32 $
+ * Date:        $Date: 2010/11/01 13:41:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -215,6 +215,7 @@ public class FindObjectsEventHandler {
                     obj, 
                     application.getCurrentLocaleAsIndex(), 
                     application.getCurrentLocaleAsString(), 
+                    false, // asShortTitle
                     application
                 );
                 if(filterByFeature.length() > 0) {

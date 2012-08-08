@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractContainer_1.java,v 1.8 2010/08/06 12:15:13 hburger Exp $
+ * Name:        $Id: AbstractContainer_1.java,v 1.13 2010/12/23 17:42:50 hburger Exp $
  * Description: Container_1 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:15:13 $
+ * Date:        $Date: 2010/12/23 17:42:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -194,7 +194,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetPersistenceManager()
      */
 //  @Override
-    public abstract DataObjectManager_1 openmdxjdoGetPersistenceManager();
+    public abstract DataObjectManager_1 openmdxjdoGetDataObjectManager();
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#container()
@@ -278,7 +278,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         DataObject_1_0 value = get(key);
         if(value != null) {
             if(value.jdoIsPersistent()) {
-                this.openmdxjdoGetPersistenceManager().deletePersistent(value);
+                this.openmdxjdoGetDataObjectManager().deletePersistent(value);
             } else {
                 container().getCache().remove(key);
             }
@@ -322,11 +322,12 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     
 //  @Override
     public List<DataObject_1_0> values(
+        FetchPlan fetchPlan, 
         OrderSpecifier... criteria
     ) {
         return new OrderedValues(
             ObjectComparator.getInstance(criteria), 
-            StandardFetchPlan.DEFAULT_GROUPS
+            fetchPlan == null ? StandardFetchPlan.newInstance(null) : fetchPlan
         );
     }
 
@@ -355,7 +356,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
     protected void evictMembers(
     ){
         for(
-            Object candidate : (Set<?>) this.openmdxjdoGetPersistenceManager().getManagedObjects(
+            Object candidate : (Set<?>) this.openmdxjdoGetDataObjectManager().getManagedObjects(
                 EnumSet.of(ObjectState.PERSISTENT_CLEAN, ObjectState.PERSISTENT_DIRTY)
             )
         ) {
@@ -470,8 +471,8 @@ abstract class AbstractContainer_1 implements Container_1_0 {
 //  @Override
     public void openmdxjdoRefresh(
     ) {
-        PersistenceManager persistenceManager = this.openmdxjdoGetPersistenceManager();
-        for(DataObject_1 candidate : this.openmdxjdoGetPersistenceManager().currentTransaction().getMembers()) {
+        PersistenceManager persistenceManager = this.openmdxjdoGetDataObjectManager();
+        for(DataObject_1 candidate : this.openmdxjdoGetDataObjectManager().currentTransaction().getMembers()) {
             if(this.containsValue(candidate)) {
                 persistenceManager.refresh(candidate);
             }
@@ -501,23 +502,24 @@ abstract class AbstractContainer_1 implements Container_1_0 {
          */
         OrderedValues(
             ObjectComparator comparator, 
-            Set<String> fetchGroups
+            FetchPlan fetchPlan
         ){
             this.comparator = comparator;
-            this.fetchGroups = fetchGroups;
+            this.fetchPlan = fetchPlan;
         }
 
         private final ObjectComparator comparator;
-        protected final Set<String> fetchGroups;
+        protected final FetchPlan fetchPlan;
         
         private List<DataObject_1_0> persistent;
         private BatchingList stored;
         
+        @SuppressWarnings("unchecked")
         private BatchingList getStored(){
             if(this.stored == null) {
                 this.stored = AbstractContainer_1.this.getStored(
                     this.comparator, 
-                    this.fetchGroups
+                    this.fetchPlan.getGroups()
                 );
             } 
             return this.stored;
@@ -567,8 +569,11 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                     true
                 );    
             } else {
+                List<DataObject_1_0> persistent = getPersistent();
                 return new ValueIterator(
-                    this.getPersistent().listIterator(index),
+                    persistent instanceof ChainingList ? 
+                        ((ChainingList)persistent).listIterator(index, this.fetchPlan) : 
+                        persistent.listIterator(index),
                     false
                 );
             }
@@ -611,7 +616,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoEvict(boolean)
          */
-        @Override
+//      @Override
         public void openmdxjdoEvict(
             boolean allMembers, boolean allSubSets
          ) {
@@ -624,7 +629,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetContainerId()
          */
-        @Override
+//      @Override
         public Path openmdxjdoGetContainerId() {
             return AbstractContainer_1.this.openmdxjdoGetContainerId();
         }
@@ -632,15 +637,23 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetPersistenceManager()
          */
-        @Override
-        public PersistenceManager openmdxjdoGetPersistenceManager() {
-            return AbstractContainer_1.this.openmdxjdoGetPersistenceManager();
+//      @Override
+        public PersistenceManager openmdxjdoGetDataObjectManager() {
+            return AbstractContainer_1.this.openmdxjdoGetDataObjectManager();
         }
 
         /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+         */
+    //  @Override
+        public PersistenceManager openmdxjdoGetPersistenceManager(){
+        	return AbstractContainer_1.this.openmdxjdoGetPersistenceManager();
+        }
+        
+        /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetTransientContainerId()
          */
-        @Override
+//      @Override
         public TransientContainerId openmdxjdoGetTransientContainerId() {
             return AbstractContainer_1.this.openmdxjdoGetTransientContainerId();
         }
@@ -648,7 +661,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoIsPersistent()
          */
-        @Override
+//      @Override
         public boolean openmdxjdoIsPersistent() {
             return AbstractContainer_1.this.openmdxjdoIsPersistent();
         }
@@ -656,7 +669,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRefresh()
          */
-        @Override
+//      @Override
         public void openmdxjdoRefresh() {
             if(this.stored != null) {
                 this.stored.evict();
@@ -667,7 +680,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRetrieve(javax.jdo.FetchPlan)
          */
-        @Override
+//      @Override
         public void openmdxjdoRetrieve(FetchPlan fetchPlan) {
             AbstractContainer_1.this.openmdxjdoRetrieve(fetchPlan);
         }
@@ -1181,7 +1194,12 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                     throw new IllegalStateException("No current element");
                 }
                 try {
-                    ((DataObject_1)this.current.getValue()).objRemove(false);
+                    DataObject_1 object = (DataObject_1)this.current.getValue();
+                    if(object.jdoIsPersistent()) {
+                        object.objRemove(false);
+                    } else {
+                        container().getCache().values().remove(object);
+                    }
                 } catch (ServiceException exception) {
                     throw new RuntimeServiceException(exception);
                 } finally {
@@ -1250,7 +1268,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 if(this.current == null) {
                     throw new IllegalStateException("No current element");
                 } else {
-                    AbstractContainer_1.this.openmdxjdoGetPersistenceManager().deletePersistent(this.current);
+                    AbstractContainer_1.this.openmdxjdoGetDataObjectManager().deletePersistent(this.current);
                 }
             }
 
@@ -1310,7 +1328,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         /**
          * Retrieve the collection
          * 
-         * @param fetchPlan TODO to be take into consideration
+         * @param fetchPlan 
          */
         synchronized void retrieveAll(
             FetchPlan fetchPlan
@@ -1318,7 +1336,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             if(!this.isRetrieved()) {
                 List<DataObject_1_0> allCache = new ArrayList<DataObject_1_0>();
                 for(
-                    Iterator<DataObject_1_0> i = this.listIterator(0, null);
+                    Iterator<DataObject_1_0> i = this.listIterator(0, fetchPlan);
                     i.hasNext();
                 ){
                     allCache.add(i.next());
@@ -1449,7 +1467,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             Integer total = this.getTotal();
             return 
                 total != null && 
-                total.intValue() < AbstractContainer_1.this.openmdxjdoGetPersistenceManager().getCacheThreshold();
+                total.intValue() < AbstractContainer_1.this.openmdxjdoGetDataObjectManager().getCacheThreshold();
         }
 
         @Override
@@ -1507,6 +1525,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
              * @param fetchPlan
              * @param index
              */
+            @SuppressWarnings("unchecked")
             BatchingIterator(
                 int index,
                 FetchPlan fetchPlan 
@@ -1514,16 +1533,18 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 this.nextIndex = index;
                 this.previousIndex = index - 1;
                 if(fetchPlan == null) {
-                    this.batchSize = AbstractContainer_1.this.openmdxjdoGetPersistenceManager().getOptimalFetchSize();
+                    this.batchSize = AbstractContainer_1.this.openmdxjdoGetDataObjectManager().getOptimalFetchSize();
+                    this.fetchGroupNames = null;
                 } else {
                     int fetchSize = fetchPlan.getFetchSize();
                     if(fetchSize == FetchPlan.FETCH_SIZE_OPTIMAL) {
-                        this.batchSize = AbstractContainer_1.this.openmdxjdoGetPersistenceManager().getOptimalFetchSize();
+                        this.batchSize = AbstractContainer_1.this.openmdxjdoGetDataObjectManager().getOptimalFetchSize();
                     } else if (fetchSize == FetchPlan.FETCH_SIZE_GREEDY) {
                         this.batchSize = AbstractContainer_1.BATCH_SIZE_GREEDY;
                     } else {
                         this.batchSize = fetchSize;
                     }
+                    this.fetchGroupNames = fetchPlan.getGroups();
                  }
             }
 
@@ -1531,6 +1552,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             private int previousIndex;
             private int nextIndex;
             private int highWaterMark = 0;
+            private final Set<String> fetchGroupNames;
             private DataObjectSlice slice;
 
             /**
@@ -1593,8 +1615,11 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                         Query_2Facade facade = BatchingList.this.newQuery();
                         facade.setPosition(ascending ? index : -(index+1));
                         facade.setSize(this.batchSize);
-                        IndexedRecord cache = (IndexedRecord) AbstractContainer_1.this.openmdxjdoGetPersistenceManager().getInteraction().execute(
-                            AbstractContainer_1.this.openmdxjdoGetPersistenceManager().getInteractionSpecs().GET,
+                        if(this.fetchGroupNames != null) {
+                            facade.setGroups(this.fetchGroupNames);
+                        }
+                        IndexedRecord cache = (IndexedRecord) AbstractContainer_1.this.openmdxjdoGetDataObjectManager().getInteraction().execute(
+                            AbstractContainer_1.this.openmdxjdoGetDataObjectManager().getInteractionSpecs().GET,
                             facade.getDelegate()
                         );
                         this.slice = new DataObjectSlice(ascending ? index : (index-cache.size()+1));
@@ -1628,7 +1653,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                             this.highWaterMark = highWaterMark.intValue();
                         }
                         for(Object o : cache) {
-                            this.slice.add(AbstractContainer_1.this.openmdxjdoGetPersistenceManager().receive((MappedRecord) o));
+                            this.slice.add(AbstractContainer_1.this.openmdxjdoGetDataObjectManager().receive((MappedRecord) o));
                         }
                         boolean loaded = !this.slice.isEmpty(); 
                         if(loaded && !AbstractContainer_1.this.isIgnoreCache()) {
@@ -1799,7 +1824,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         @Override
         final protected List<? extends DataObject_1_0> getSource(
         ){
-            return AbstractContainer_1.this.openmdxjdoGetPersistenceManager().currentTransaction().getMembers();
+            return AbstractContainer_1.this.openmdxjdoGetDataObjectManager().currentTransaction().getMembers();
         }
 
         /**
@@ -2535,9 +2560,16 @@ abstract class AbstractContainer_1 implements Container_1_0 {
         public ListIterator<DataObject_1_0> listIterator(
             int index
         ) {
-            return new ChainingIterator(index);
+            return listIterator(index, null);
         }
 
+        public ListIterator<DataObject_1_0> listIterator(
+            int index,
+            FetchPlan fetchPlan
+        ) {
+            return new ChainingIterator(index, fetchPlan);
+        }
+        
         /**
          * Chaining Iterator
          */
@@ -2547,10 +2579,13 @@ abstract class AbstractContainer_1 implements Container_1_0 {
              * Constructor 
              *
              * @param index
+             * @param fetchPlan
              */
             ChainingIterator (
-                int index
+                int index, 
+                FetchPlan fetchPlan
             ){
+                this.fetchPlan = fetchPlan;
                 this.nextIndex = index;
                 this.previousIndex = index - 1;
                 this.dirtySize = ChainingList.this.included.size();
@@ -2563,6 +2598,7 @@ abstract class AbstractContainer_1 implements Container_1_0 {
             private ListIterator<DataObject_1_0> dirtyIterator = null;
             private ListIterator<DataObject_1_0> cleanIterator = null;
             private ListIterator<DataObject_1_0> currentIterator = null;
+            private final FetchPlan fetchPlan;
 
             private ListIterator<DataObject_1_0> getIterator(
                 int index
@@ -2575,10 +2611,14 @@ abstract class AbstractContainer_1 implements Container_1_0 {
                 } else {
                     if(this.cleanIterator == null){
                         this.cleanIterator = ChainingList.this.excluded.isEmpty() ? stored.listIterator(
-                            this.nextIndex - this.dirtySize
+                            this.nextIndex - this.dirtySize,
+                            this.fetchPlan
                         ) : new CleanIterator(
                             ChainingList.this.excluded, 
-                            ChainingList.this.stored.listIterator(0), 
+                            ChainingList.this.stored.listIterator(
+                                0, 
+                                this.fetchPlan
+                            ), 
                             this.nextIndex - this.dirtySize
                         );
                     }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObject.java,v 1.6 2010/06/21 09:48:40 hburger Exp $
+ * Name:        $Id: DbObject.java,v 1.7 2010/10/12 16:53:00 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 09:48:40 $
+ * Date:        $Date: 2010/10/12 16:53:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -479,7 +479,8 @@ public abstract class DbObject
    * containing the reference and object ids of the path.
    */
   abstract public MappedRecord[] sliceAndNormalizeObject(
-    MappedRecord object
+    MappedRecord object, 
+    boolean removeValuesProvidedByView
   ) throws ServiceException;
   
   /**

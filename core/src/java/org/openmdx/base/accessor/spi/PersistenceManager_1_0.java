@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceManager_1_0.java,v 1.2 2010/01/21 17:25:17 hburger Exp $
+ * Name:        $Id: PersistenceManager_1_0.java,v 1.4 2010/12/02 08:56:44 hburger Exp $
  * Description: Persistence Manager Interface 2.0
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/21 17:25:17 $
+ * Date:        $Date: 2010/12/02 08:56:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,8 +55,6 @@ import java.util.UUID;
 import javax.jdo.PersistenceManager;
 import javax.resource.cci.InteractionSpec;
 
-import org.openmdx.base.persistence.cci.PersistenceHelper;
-
 /**
  * Persistence Manager Interface 1.0
  */
@@ -81,7 +79,7 @@ public interface PersistenceManager_1_0 extends PersistenceManager {
      * 
      * @return the value where each object is replaced by its id
      * 
-     * @see PersistenceHelper#getFeatureReplacingObjectById(Object, String)
+     * @see org.openmdx.base.persistence.cci.PersistenceHelper#getFeatureReplacingObjectById(Object, String)
      */
     Object getFeatureReplacingObjectById(
         UUID transientObjectId,

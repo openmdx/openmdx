@@ -1,15 +1,15 @@
 /*
  * ====================================================================
- * Name:        $Id: AbstractPersistenceManager.java,v 1.16 2010/06/02 15:10:21 hburger Exp $
+ * Name:        $Id: AbstractPersistenceManager.java,v 1.18 2010/10/23 21:45:01 hburger Exp $
  * Description: Abstract PersistenceManager
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 15:10:21 $
+ * Date:        $Date: 2010/10/23 21:45:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2009, OMEX AG, Switzerland
+ * Copyright (c) 2005-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,30 +57,38 @@ import javax.jdo.Extent;
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
+import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.listener.InstanceLifecycleListener;
+
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.resource.spi.CloseCallback;
 
 /**
  * Abstract PersistenceManager
  *
  * @since openMDX 2.0
  */
-@SuppressWarnings("unchecked")
-public abstract class AbstractPersistenceManager extends Connection_2  {
+public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     /**
      * Constructor 
      *
-     * @param factory
-     * @param delegate 
+     * @param factory the factory which creates this persistence manager
+     * @param instanceLifecycleListener the instance life cycle listener has to be provided by the subclass
      */
     protected AbstractPersistenceManager(
         PersistenceManagerFactory factory, 
         MarshallingInstanceLifecycleListener instanceLifecycleListener
     ){
-        super(factory);
+        this.persistenceManagerFactory = factory;
         this.instanceLifecycleListener = instanceLifecycleListener;
     }
+
+    /**
+     * The connection factory
+     */
+    private PersistenceManagerFactory persistenceManagerFactory;
 
     /**
      * 
@@ -110,11 +118,10 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
     /* (non-Javadoc)
      * @see org.openmdx.kernel.persistence.resource.Connection_2#setPersistenceManagerFactory(javax.jdo.PersistenceManagerFactory)
      */
-    @Override
     public void setPersistenceManagerFactory(
         PersistenceManagerFactory persistenceManagerFactory
     ) {
-        super.setPersistenceManagerFactory(persistenceManagerFactory);
+        this.persistenceManagerFactory = persistenceManagerFactory;
         this.setIgnoreCache(persistenceManagerFactory.getIgnoreCache());
         this.setMultithreaded(persistenceManagerFactory.getMultithreaded());
         this.setDetachAllOnCommit(persistenceManagerFactory.getDetachAllOnCommit());
@@ -122,26 +129,74 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
     }
 
     /* (non-Javadoc)
-     * @see javax.jdo.PersistenceManager#close()
+     * @see javax.jdo.PersistenceManager#getPersistenceManagerFactory()
      */
-    @Override
-    public void close() {
-        if(!this.isClosed()) {
-            if(this.currentTransaction().isActive()) throw new JDOUserException(
-                "Persistence manager with an active unit of work can't be closed"
+//  @Override
+    public PersistenceManagerFactory getPersistenceManagerFactory() {
+        if(this.persistenceManagerFactory == null) {
+            throw BasicException.initHolder(
+                new JDOUserException(
+                    "The persistence manager is closed",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ILLEGAL_STATE,
+                        new BasicException.Parameter("persistenceManagerFactory")
+                    )
+                )
             );
-            this.instanceLifecycleListener.close();
-            this.instanceLifecycleListener = null;
-            this.userObjects.clear();
-            this.userObjects = null;
-            super.close();
         }
+        return this.persistenceManagerFactory;
     }
 
+    /**
+     * Tells whether the tarnsactions are container managed
+     * 
+     * @return <code>true</code> if the transactions are container managed
+     */
+    protected boolean isTransactionContainerManaged(){
+    	return false;
+    }
+    
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#close()
+     */
+//  @Override
+    public void close() {
+        if(!this.isTransactionContainerManaged() && this.currentTransaction().isActive()) throw new JDOUserException(
+            "Persistence manager with an active unit of work can't be closed unless they are container managed"
+        );
+        this.instanceLifecycleListener.close();
+        this.instanceLifecycleListener = null;
+        this.userObjects.clear();
+        this.userObjects = null;
+        if(this.persistenceManagerFactory instanceof CloseCallback) {
+            ((CloseCallback)this.persistenceManagerFactory).postClose(this);
+        }
+        this.persistenceManagerFactory = null;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#isClosed()
+     */
+//  @Override
+    public boolean isClosed() {
+        return this.persistenceManagerFactory == null;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#finalize()
+     */
+    @Override
+    protected void finalize(
+    ) throws Throwable {
+        close();
+    }
+    
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#evictAll(java.util.Collection)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void evictAll(Collection pcs) {
         PersistenceManagers.evictAll(this, pcs);
     }
@@ -150,6 +205,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#refreshAll(java.util.Collection)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void refreshAll(Collection pcs) {
         PersistenceManagers.refreshAll(this, pcs);
     }
@@ -166,6 +222,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Class, java.lang.Object)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public <T> T getObjectById(Class<T> cls, Object key) {
         return (T) this.getObjectById(
             this.newObjectIdInstance(cls, key)
@@ -176,6 +233,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection, boolean)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public Collection getObjectsById(Collection oids, boolean validate) {
         return PersistenceManagers.getObjectsById(this, validate, oids);
     }
@@ -184,6 +242,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public Collection getObjectsById(Collection oids) {
         return this.getObjectsById(oids, true);
     }
@@ -216,6 +275,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#deletePersistentAll(java.util.Collection)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void deletePersistentAll(Collection pcs) {
         PersistenceManagers.deletePersistentAll(this, pcs);
     }
@@ -232,6 +292,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection, boolean)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void makeTransientAll(Collection pcs, boolean useFetchPlan) {
         PersistenceManagers.makeTransientAll(this, pcs, useFetchPlan);
     }
@@ -248,6 +309,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void makeTransientAll(Collection pcs) {
         this.makeTransientAll(pcs, false);
     }
@@ -256,6 +318,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#makeTransactionalAll(java.util.Collection)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void makeTransactionalAll(Collection pcs) {
         PersistenceManagers.makeTransactionalAll(this, pcs);
     }
@@ -264,6 +327,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#makeNontransactionalAll(java.util.Collection)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void makeNontransactionalAll(Collection pcs) {
         PersistenceManagers.makeNontransactionalAll(this, pcs);
     }
@@ -280,6 +344,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void retrieveAll(Collection pcs) {
         this.retrieveAll(false, pcs);
     }
@@ -288,6 +353,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection, boolean)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void retrieveAll(Collection pcs, boolean useFetchPlan) {
         PersistenceManagers.retrieveAll(this, useFetchPlan, pcs);
     }
@@ -408,6 +474,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#addInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener, java.lang.Class[])
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
         Class... classes
@@ -437,6 +504,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#evictAll(boolean, java.lang.Class)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public void evictAll(boolean subclasses, Class pcClass) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -445,6 +513,7 @@ public abstract class AbstractPersistenceManager extends Connection_2  {
      * @see javax.jdo.PersistenceManager#getFetchGroup(java.lang.Class, java.lang.String)
      */
 //  @Override
+    @SuppressWarnings("unchecked")
     public FetchGroup getFetchGroup(Class arg0, String arg1) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }

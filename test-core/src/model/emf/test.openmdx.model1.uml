@@ -294,7 +294,7 @@
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </qualifier>
           </ownedAttribute>
-          <ownedAttribute xmi:id="_3C7B8A60016D3DAC18AD0215" name="illegalAttributes" type="_3C7B8A60016D3DAC17C00323" isUnique="false" aggregation="composite" association="_3C7B8A60016D3DAC18AA01AD">
+          <ownedAttribute xmi:id="_3C7B8A60016D3DAC18AD0215" name="enum" type="_3C7B8A60016D3DAC17C00323" isUnique="false" aggregation="composite" association="_3C7B8A60016D3DAC18AA01AD">
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_q77zQN7CEdmkJO73lqONhA" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_q77zP97CEdmkJO73lqONhA"/>
             <qualifier xmi:id="_3C7B8A60016D3DAC18DC01AF" name="id" visibility="private">
@@ -3044,6 +3044,9 @@
             <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3CC6A34B0011"/>
             <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_q0xbRN7CEdmkJO73lqONhA" value="1"/>
             <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_q0xbQ97CEdmkJO73lqONhA" value="1"/>
+          </ownedAttribute>
+          <ownedAttribute xmi:id="_Buq18NL1Ed-RgPzeinICcg" name="enum" aggregation="composite">
+            <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
           </ownedAttribute>
         </packagedElement>
         <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D3DAE7E4F0364" name="ClassContainingNonChangeableAttributes">

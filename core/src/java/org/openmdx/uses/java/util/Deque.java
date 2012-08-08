@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Deque.java,v 1.1 2010/06/01 12:13:53 hburger Exp $
+ * Name:        $Id: Deque.java,v 1.2 2010/09/13 16:46:29 hburger Exp $
  * Description: Deque 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 12:13:53 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
@@ -13,12 +13,8 @@
  */
 package org.openmdx.uses.java.util;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.Stack;
 
 /**
  * A linear collection that supports element insertion and removal at

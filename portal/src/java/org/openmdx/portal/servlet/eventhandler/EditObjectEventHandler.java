@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectEventHandler.java,v 1.40 2010/05/12 13:14:45 wfro Exp $
+ * Name:        $Id: EditObjectEventHandler.java,v 1.42 2010/09/24 16:02:57 wfro Exp $
  * Description: EditObjectEventHandler 
- * Revision:    $Revision: 1.40 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/12 13:14:45 $
+ * Date:        $Date: 2010/09/24 16:02:57 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -160,26 +160,30 @@ public class EditObjectEventHandler {
                 }
                 else {
                     nextView = currentView.getPreviousView(showViewsCache);
-                    if(!currentView.isEditMode() && (nextView instanceof ShowObjectView)) {
-                        // Refresh derived attributes of newly created objects
-                    	RefObject_1_0 pcView = currentView.getRefObject();
-                        JDOHelper.getPersistenceManager(pcView).refresh(pcView);
-                        // Set created object as result if next view is ShowObjectView
-                        // This shows the reference to the newly created object the same
-                        // way as an operation result
-                        ObjectReference createdObject =
-                            new ObjectReference(
-                                currentView.getRefObject(),
-                                application
-                            );                    
-                        ((ShowObjectView)nextView).setCreateObjectResult(
-                            new ObjectCreationResult(
-                                currentView.getRefObject().refMofId(),
-                                createdObject.getLabel(),
-                                createdObject.getTitle(),
-                                createdObject.getIconKey()
-                            )
-                        );
+                    if(nextView instanceof ShowObjectView) {
+	                    if(!currentView.isEditMode()) {
+	                        // Set created object as result if next view is ShowObjectView
+	                        // This shows the reference to the newly created object the same
+	                        // way as an operation result
+	                        ObjectReference createdObject =
+	                            new ObjectReference(
+	                                currentView.getRefObject(),
+	                                application
+	                            );                    
+	                        ((ShowObjectView)nextView).setCreateObjectResult(
+	                            new ObjectCreationResult(
+	                                currentView.getRefObject().refMofId(),
+	                                createdObject.getLabel(),
+	                                createdObject.getTitle(),
+	                                createdObject.getIconKey()
+	                            )
+	                        );
+	                    }
+                    	try {
+                    		nextView.refresh(true);
+                    	} catch(Exception e) {
+                    		new ServiceException(e).log();
+                    	}                    	
                     }
                     // Object is saved. EditObjectView is not required any more. Remove 
                     // it from the set of open EditObjectViews.
@@ -188,12 +192,6 @@ public class EditObjectEventHandler {
                     );
                     // Paint attributes if view is embedded
                     if(currentView.getMode() == ViewMode.EMBEDDED) {
-                        try {
-                            nextView.refresh(true);
-                        }
-                        catch(Exception e) {
-                            new ServiceException(e).log();
-                        }
                         nextViewPortType = ViewPort.Type.EMBEDDED;
                     }
                 }

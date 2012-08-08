@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingContainer_1.java,v 1.14 2010/07/01 15:56:13 hburger Exp $
+ * Name:        $Id: MarshallingContainer_1.java,v 1.17 2010/12/18 18:40:48 hburger Exp $
  * Description: Marshalling Filterable Map
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/01 15:56:13 $
+ * Date:        $Date: 2010/12/18 18:40:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -130,11 +130,11 @@ public class MarshallingContainer_1
     
 //  @Override
     public List<DataObject_1_0> values(
-        OrderSpecifier... criteria
+        FetchPlan fetchPlan, OrderSpecifier... criteria
     ) {
         return new MarshallingSequentialList<DataObject_1_0>(
             super.marshaller,
-            this.getDelegate().values(criteria)
+            this.getDelegate().values(fetchPlan, criteria)
         );
     }
     
@@ -155,8 +155,16 @@ public class MarshallingContainer_1
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
 //  @Override
-    public PersistenceManager openmdxjdoGetPersistenceManager() {
-        return this.getDelegate().openmdxjdoGetPersistenceManager();
+    public PersistenceManager openmdxjdoGetDataObjectManager() {
+        return this.getDelegate().openmdxjdoGetDataObjectManager();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+     */
+//  @Override
+    public PersistenceManager openmdxjdoGetPersistenceManager(){
+    	return this.persistenceManager;
     }
 
     //  @Override
@@ -180,7 +188,7 @@ public class MarshallingContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoEvict()
      */
-    @Override
+//  @Override
     public void openmdxjdoEvict(boolean allMembers, boolean allSubSets) {
         this.getDelegate().openmdxjdoEvict(allMembers, allSubSets);
     }

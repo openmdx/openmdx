@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UserObjects.java,v 1.10 2010/07/08 15:10:44 hburger Exp $
+ * Name:        $Id: UserObjects.java,v 1.11 2010/09/27 11:46:45 hburger Exp $
  * Description: UserObjects 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/08 15:10:44 $
+ * Date:        $Date: 2010/09/27 11:46:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -118,6 +118,32 @@ public class UserObjects extends SharedObjects {
         Factory<Date> transactionTime
     ){
         SharedObjects.sharedObjects(persistenceManager).setTransactionTime(transactionTime);
+    }
+
+    /**
+     * Replaces the tenant information
+     * 
+     * @param persistenceManager
+     * @param tenant
+     */
+    public static void setTenant(
+        PersistenceManager persistenceManager,
+        Object tenant
+    ){
+        SharedObjects.sharedObjects(persistenceManager).setTenant(tenant);
+    }
+
+    /**
+     * Retrieve the tenant information
+     * 
+     * @param persistenceManager
+     * 
+     * @return the tenant information
+     */
+    public static Object getTenant(
+        PersistenceManager persistenceManager
+    ){
+        return SharedObjects.sharedObjects(persistenceManager).getTenant();
     }
 
 }

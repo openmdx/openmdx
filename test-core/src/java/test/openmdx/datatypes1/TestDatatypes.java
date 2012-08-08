@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestDatatypes.java,v 1.6 2010/01/03 15:15:27 wfro Exp $
+ * Name:        $Id: TestDatatypes.java,v 1.9 2010/11/10 16:54:57 hburger Exp $
  * Description: Test Oracle
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 15:15:27 $
+ * Date:        $Date: 2010/11/10 16:54:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2008, OMEX AG, Switzerland
+ * Copyright (c) 2007-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,10 +54,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -78,7 +80,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.openmdx.application.xml.Exporter;
+import org.openmdx.application.xml.Importer;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
@@ -280,6 +285,10 @@ public class TestDatatypes  {
         try {
             storeDatatypes("Persistent", "Default");
             retrieveDatatypes("Persistent", "Default");
+            exportDatatypes("Persistent", "Default");
+            importDatatypes("Persistent", "Default");
+            removeOptionalData("Persistent", "Default");
+            retrieveOptionalData("Persistent", "Default");
         } catch(Exception exception) {
             SysLog.error("Exception", exception);
             throw exception;
@@ -292,18 +301,23 @@ public class TestDatatypes  {
         try {
             storeDatatypes("Persistent", "Numeric");
             retrieveDatatypes("Persistent", "Numeric");
+            removeOptionalData("Persistent", "Numeric");
+            retrieveOptionalData("Persistent", "Numeric");
         } catch(Exception exception) {
             SysLog.error("Exception", exception);
             throw exception;
         }
     }
 
+    @Ignore // TODO re-activate  
     @Test
     public void testNative(
     ) throws Exception{
         try {
             storeDatatypes("Persistent", "Native");
             retrieveDatatypes("Persistent", "Native");
+            removeOptionalData("Persistent", "Native");
+            retrieveOptionalData("Persistent", "Native");
         } catch(Exception exception) {
             SysLog.error("Exception", exception);
             throw exception;
@@ -375,6 +389,70 @@ public class TestDatatypes  {
     }
 
     /**
+     * Clear and Populate
+     * 
+     * @param providerName
+     * @param segmentName
+     * 
+     * @throws Exception
+     */
+    protected void removeOptionalData(
+        String providerName, 
+        String segmentName
+    ) throws Exception {
+        System.out.println("Acquire persistence manager...");
+        PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
+        Transaction unitOfWork = persistenceManager.currentTransaction();
+        Authority authority = (Authority) persistenceManager.getObjectById(
+            Authority.class,
+            Datatypes1Package.AUTHORITY_XRI
+        );
+        //
+        // Reset workshop1 segment
+        //
+        Provider provider = authority.getProvider(providerName);
+        System.out.println("Creating datatypes1 Segment...");
+        Segment segment = (Segment) provider.getSegment(segmentName);
+        NonStated nonStated = segment.getNonStated("0");
+        this.validateOptionalData(nonStated, false);
+        unitOfWork.begin();
+        this.clearOptionalValues(nonStated);
+        this.validateOptionalData(nonStated, true);
+        unitOfWork.commit();
+        this.validateOptionalData(nonStated, true);
+        
+    }
+
+    /**
+     * Clear and Populate
+     * 
+     * @param providerName
+     * @param segmentName
+     * 
+     * @throws Exception
+     */
+    protected void retrieveOptionalData(
+        String providerName, 
+        String segmentName
+    ) throws Exception {
+        System.out.println("Acquire persistence manager...");
+        PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
+        Authority authority = (Authority) persistenceManager.getObjectById(
+            Authority.class,
+            Datatypes1Package.AUTHORITY_XRI
+        );
+        //
+        // Reset workshop1 segment
+        //
+        Provider provider = authority.getProvider(providerName);
+        System.out.println("Creating datatypes1 Segment...");
+        Segment segment = (Segment) provider.getSegment(segmentName);
+        NonStated nonStated = segment.getNonStated("0");
+        this.validateOptionalData(nonStated, true);
+    }
+    
+    
+    /**
      * Populate Data objects
      * 
      * @param data
@@ -397,14 +475,20 @@ public class TestDatatypes  {
         data.setValue11a((Duration)source[VALUE11A]);
         data.setValue11b((Duration)source[VALUE11B]);
     }
-    
+
     /**
-     * Clear and Populate
+     * Clear the optional values
      * 
-     * @param providerName
-     * @param segmentName
-     * @throws Exception
+     * @param data
      */
+    protected void clearOptionalValues(
+        Data data
+    ){
+        data.setValue4(null);
+        data.setValue9(null);
+        data.setValue11a(null);
+    }
+    
     protected void retrieveDatatypes(
         String providerName, 
         String segmentName
@@ -438,12 +522,45 @@ public class TestDatatypes  {
         }
     }
 
-    /**
-     * Populate Data objects
-     * 
-     * @param data
-     * @param source
-     */
+    protected void exportDatatypes(
+        String providerName, 
+        String segmentName
+    ) throws Exception {
+        System.out.println("Acquire persistence manager...");
+        PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
+        Authority authority = (Authority) persistenceManager.getObjectById(
+            Authority.class,
+            Datatypes1Package.AUTHORITY_XRI
+        );
+        Provider provider = authority.getProvider(providerName);
+        Segment segment = (Segment) provider.getSegment(segmentName);
+        File file = File.createTempFile("data", ".zip");
+        Exporter.export(
+            Exporter.asTarget(file, Exporter.MIME_TYPE_XML),
+            persistenceManager,
+            null,
+            segment.refGetPath()
+        );
+        System.out.println(segment.refGetPath().toXRI() + " exported to " + file);
+    }
+
+    protected void importDatatypes(
+        String providerName, 
+        String segmentName
+    ) throws Exception {
+        System.out.println("Acquire persistence manager...");
+        PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
+        persistenceManager.currentTransaction().begin();
+        Importer.importObjects(
+            Importer.asTarget(persistenceManager),
+            Importer.asSource(
+                new URL("xri://+resource/test/openmdx/datatypes1/data.xml")
+            )
+        );
+        persistenceManager.currentTransaction().rollback();
+    }
+    
+    
     protected void validateData(
         Data data,
         Object[] source
@@ -485,6 +602,15 @@ public class TestDatatypes  {
         assertEquals("value11a", (Duration)source[VALUE11a], data.getValue11a());
         assertEquals("value11b", (Duration)source[VALUE11b], data.getValue11b());
     }
+
+    protected void validateOptionalData(
+        Data data,
+        boolean empty
+    ){
+        assertEquals("value4", empty, data.getValue4() == null);
+        assertEquals("value9", empty, data.getValue4() == null);
+        assertEquals("value11a", empty, data.getValue11a() == null);
+    }
     
     @AfterClass
     public static void closePersistenceManagerFactory(
@@ -492,6 +618,20 @@ public class TestDatatypes  {
         if(entityManagerFactory instanceof Closeable) {
             ((Closeable)entityManagerFactory).close();
         }
+    }
+
+    @Test
+    public void testDuration(){
+        Duration t = DatatypeFactories.xmlDatatypeFactory().newDuration(
+            true, 
+            0, // years 
+            0, // months
+            0, // days
+            0, // hours
+            70, // minutes
+            0 // seconds
+        );
+        System.out.println("70 min: " + t);
     }
 
 }

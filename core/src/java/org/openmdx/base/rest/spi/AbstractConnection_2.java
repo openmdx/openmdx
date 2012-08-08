@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractConnection_2.java,v 1.9 2010/06/02 13:45:10 hburger Exp $
+ * Name:        $Id: AbstractConnection_2.java,v 1.11 2010/09/13 16:19:31 hburger Exp $
  * Description: Abstract Connectoon
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:10 $
+ * Date:        $Date: 2010/09/13 16:19:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -48,10 +48,8 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.rest.spi;
 
-import javax.jmi.reflect.RefException;
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
@@ -61,7 +59,6 @@ import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.RestFunction;
 import org.openmdx.base.resource.spi.AbstractInteraction;
@@ -118,8 +115,6 @@ public abstract class AbstractConnection_2 extends AbstractConnection {
      * @param request the request's data object facade
      * @param replies the reply holder, or <code>null</code> if the interaction verb is {@link InteractionSpec#SYNC_SEND}
      * 
-     * @throws ServiceException
-     * @throws RefException
      * @throws ResourceException
      */
     protected abstract void handle(
@@ -135,8 +130,6 @@ public abstract class AbstractConnection_2 extends AbstractConnection {
      * @param request the request's data object facade
      * @param replies the reply holder, or <code>null</code> if the interaction verb is {@link InteractionSpec#SYNC_SEND}
      * 
-     * @throws ServiceException
-     * @throws RefException
      * @throws ResourceException
      */
     protected abstract void handle(

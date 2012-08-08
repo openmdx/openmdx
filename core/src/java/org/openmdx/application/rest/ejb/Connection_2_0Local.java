@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection_2_0Local.java,v 1.7 2009/10/01 16:12:01 hburger Exp $
+ * Name:        $Id: Connection_2_0Local.java,v 1.8 2010/09/13 16:46:29 hburger Exp $
  * Description: Connection 2.0 Local Interface
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/01 16:12:01 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,7 +51,6 @@
 package org.openmdx.application.rest.ejb;
 
 import javax.ejb.EJBLocalObject;
-import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;

@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: TestMain.java,v 1.50 2010/08/09 13:20:38 hburger Exp $
+ * Name:        $Id: TestMain.java,v 1.66 2010/12/22 10:05:03 hburger Exp $
  * Description: Unit test for model app1
- * Revision:    $Revision: 1.50 $
+ * Revision:    $Revision: 1.66 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:20:38 $
+ * Date:        $Date: 2010/12/22 10:05:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,6 +68,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -83,8 +84,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import javax.ejb.TransactionAttributeType;
 import javax.jdo.Constants;
+import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOHelper;
@@ -124,6 +125,7 @@ import org.openmdx.audit2.jmi1.Audit2Package;
 import org.openmdx.audit2.jmi1.Involvement;
 import org.openmdx.audit2.jmi1.UnitOfWork;
 import org.openmdx.audit2.spi.Configuration;
+import org.openmdx.audit2.spi.InvolvementPersistence;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
@@ -133,6 +135,7 @@ import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
 import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
+import org.openmdx.base.cci2.ExtentCapable;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
@@ -147,17 +150,23 @@ import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
+import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.generic1.cci2.PropertyQuery;
+import org.openmdx.generic1.cci2.StringProperty;
+import org.openmdx.generic1.cci2.UriPropertyQuery;
 import org.openmdx.generic1.jmi1.BooleanProperty;
 import org.openmdx.generic1.jmi1.DecimalProperty;
 import org.openmdx.generic1.jmi1.Generic1Package;
 import org.openmdx.generic1.jmi1.IntegerProperty;
 import org.openmdx.generic1.jmi1.Property;
+import org.openmdx.generic1.jmi1.UriProperty;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.naming.ComponentEnvironment;
 import org.w3c.cci2.BinaryLargeObject;
+import org.w3c.cci2.BinaryLargeObjects;
+import org.w3c.cci2.Container;
 import org.w3c.cci2.SparseArray;
 import org.w3c.cci2.StringTypePredicate;
 import org.w3c.format.DateTimeFormat;
@@ -225,11 +234,18 @@ public class TestMain {
 
     protected static final boolean DUMP = false;
     protected static final String AUDIT_PROVIDER_NAME = "Audit";
-    protected static final String DATA_PROVIDER_NAME = "JmiJdbc";
-    protected static final String DATA_SEGMENT_NAME = "Standard";
-    protected static final String AUDIT_SEGMENT_NAME = DATA_PROVIDER_NAME;
+    protected static final String DATA_PROVIDER_NAME = "Data";
+    protected static final String SEGMENT_NAME = "Standard";
     protected static PersistenceManagerFactory entityManagerFactory = null;
 
+    protected static final Path DATA_SEGMENT_ID = new Path(
+        "xri://@openmdx*test.openmdx.app1/provider"
+    ).getDescendant(
+        DATA_PROVIDER_NAME,
+        "segment",
+        SEGMENT_NAME
+    ).lock();
+    
     @BeforeClass
     public static void initialize(
     ) throws NamingException{
@@ -375,6 +391,10 @@ public class TestMain {
         }
         
         protected void testCR20018667(){
+            final Path PERSON_AND_DESCENDANTS = DATA_SEGMENT_ID.getDescendant(
+                "person",
+                "%"
+            ).lock();
             {
                 //
                 // An audit1 query 
@@ -385,7 +405,7 @@ public class TestMain {
                 query.thereExistsInvolved().elementOf(
                     PersistenceHelper.getCandidates(
                         entityManager.getExtent(Person.class),
-                        "xri://@openmdx*test.openmdx.app1/provider/JmiJdbc/segment/Standard/person/($...)"
+                        PERSON_AND_DESCENDANTS
                     )
                 );
             }
@@ -399,7 +419,7 @@ public class TestMain {
                 query.thereExistsInvolved().notAnElementOf(
                     PersistenceHelper.getCandidates(
                         entityManager.getExtent(Person.class),
-                        "xri://@openmdx*test.openmdx.app1/provider/JmiJdbc/segment/Standard/person/($...)"
+                        PERSON_AND_DESCENDANTS
                     )
                 );
             }
@@ -409,7 +429,7 @@ public class TestMain {
         ) throws ServiceException{
             try {
                 super.taskId = "CR20018726";
-                test.openmdx.app1.jmi1.Segment segment = (test.openmdx.app1.jmi1.Segment) provider.getSegment(DATA_SEGMENT_NAME);
+                test.openmdx.app1.jmi1.Segment segment = (test.openmdx.app1.jmi1.Segment) provider.getSegment(SEGMENT_NAME);
                 List<Address> addresses = segment.getAddress((AddressQuery)null);
                 for(Address address : addresses) {
                     System.out.println("1st display of " + JDOHelper.getObjectId(address));
@@ -417,6 +437,24 @@ public class TestMain {
                 for(Address address : addresses) {
                     System.out.println("2nd display of " + JDOHelper.getObjectId(address));
                 }
+            } finally {
+                super.taskId = null;
+            }
+        }
+
+        @SuppressWarnings("deprecation")
+        protected void testCR20019462(
+        ) throws ServiceException{
+            try {
+                super.taskId = "CR20019462";
+                Invoice invoice = this.entityManager.newInstance(Invoice.class);
+                InvoicePosition position = this.entityManager.newInstance(InvoicePosition.class);
+                Container<InvoicePosition> positions = invoice.getInvoicePosition();
+                assertTrue(positions.isEmpty());
+                invoice.addInvoicePosition(position);
+                assertEquals(1, positions.size());
+                positions.remove(position);
+                assertTrue(positions.isEmpty());
             } finally {
                 super.taskId = null;
             }
@@ -459,22 +497,16 @@ public class TestMain {
             );
             org.openmdx.audit2.jmi1.Segment segment = (org.openmdx.audit2.jmi1.Segment) provider.getSegment(
                 false, 
-                AUDIT_SEGMENT_NAME
+                TestMain.SEGMENT_NAME
             );
             if(segment != null) {
                 this.begin();
                 segment.refDelete();
                 this.commit();
             }
-            segment = this.entityManager.newInstance(
-                SharedObjects.getPlugInObject(
-                    this.entityManager, Configuration.class
-                ).isAudit1Persistence() ?
-                    org.openmdx.compatibility.audit1.jmi1.Segment.class :
-                    org.openmdx.audit2.jmi1.Segment.class
-            );
+            segment = this.entityManager.newInstance(org.openmdx.audit2.jmi1.Segment.class);
             this.begin();
-            provider.addSegment(false, AUDIT_SEGMENT_NAME, segment);
+            provider.addSegment(false, TestMain.SEGMENT_NAME, segment);
             this.commit();
         }
 
@@ -482,7 +514,7 @@ public class TestMain {
         ){
             test.openmdx.app1.jmi1.Segment segment = (test.openmdx.app1.jmi1.Segment) provider.getSegment(
                 false, 
-                DATA_SEGMENT_NAME
+                SEGMENT_NAME
             );
             if(segment != null) {
                 this.begin();
@@ -491,7 +523,7 @@ public class TestMain {
             }
             segment = this.entityManager.newInstance(test.openmdx.app1.jmi1.Segment.class);
             this.begin();
-            provider.addSegment(false, DATA_SEGMENT_NAME, segment);
+            provider.addSegment(false, SEGMENT_NAME, segment);
             this.commit();
         }
 
@@ -553,7 +585,7 @@ public class TestMain {
 
             // segment
             Provider provider = app1.getProvider(false, DATA_PROVIDER_NAME);
-            test.openmdx.app1.jmi1.Segment segment = (test.openmdx.app1.jmi1.Segment) provider.getSegment(DATA_SEGMENT_NAME);
+            test.openmdx.app1.jmi1.Segment segment = (test.openmdx.app1.jmi1.Segment) provider.getSegment(SEGMENT_NAME);
             long startedAt = 0;
 
             //
@@ -607,8 +639,8 @@ public class TestMain {
                 invoice.addProperty(false, "flag", booleanProperty);
 
                 this.begin();
-
                 refInvoices.refAdd(RefContainer.REASSIGNABLE, nextId(), invoice);
+                // this.invoiceId = invoice.refGetPath();
                 assertNotNull("CR0003551", refGetPath(invoice));
                 for(int i = 0; i < 10; i++) {
                     InvoicePosition invoicePosition = invoicePositionClass.createInvoicePosition();
@@ -619,17 +651,67 @@ public class TestMain {
                     assertNotNull("CR0003551", refGetPath(invoicePosition));
                 }
                 this.commit();
-
-                synchronized(this) {
-                    try {
-                        System.out.println("Wait 5 sec");
-                        Thread.yield();
-                        wait(5000);
-                        System.out.println("...done");
-                    } catch (InterruptedException exception) {
-                        System.out.println("...interrupted");
+                
+                //
+                // CR20019372
+                //
+                try {
+                    this.taskId = "CR20019372";
+                    this.begin();
+                    Invoice auditInvoice = this.entityManager.newInstance(Invoice.class);
+                    auditInvoice.setDescription("An invoice for audit tests");
+                    auditInvoice.setProductGroupId("PG0");
+                    StringProperty stringProperty = this.entityManager.newInstance(StringProperty.class);
+                    stringProperty.setDescription("Non-application id");
+                    stringProperty.getStringValue().put(1, "CR20019479");
+                    auditInvoice.getProperty().add(stringProperty);
+                    segment.addInvoice("CR20019372", auditInvoice);
+                    UriProperty uriProperty = this.entityManager.newInstance(UriProperty.class);
+                    uriProperty.setDescription("Non-application id");
+                    uriProperty.getUriValue().put(2, URI.create("xri://+ChangeRequest/20019533"));
+                    auditInvoice.getProperty().add(uriProperty);
+                    for(int i = 0; i < 5; i++){
+                        InvoicePosition auditPosition = this.entityManager.newInstance(InvoicePosition.class);
+                        auditPosition.setDescription("An invoice position for audit tests");
+                        auditPosition.setProductId("P" + i);
+                        auditInvoice.addInvoicePosition("IP" + i, auditPosition);
                     }
+                    this.commit();
+                    this.begin();
+                    auditInvoice.setDescription("Invoice CR20019372");
+                    for(int i = 0; i < 5; i+=2){
+                        InvoicePosition auditPosition = auditInvoice.getInvoicePosition("IP" + i);
+                        auditPosition.setDescription("P" + i + ", an invoice position for audit tests");
+                    }
+                    this.commit();
+                } finally {
+                    super.taskId = null;
                 }
+                
+                //
+                // CR20019533
+                //
+                try {
+                    this.taskId = "CR20019533";
+                    UriPropertyQuery query = (UriPropertyQuery) this.entityManager.newQuery(UriProperty.class);
+                    query.thereExistsUriValue().equalTo(URI.create("xri://+ChangeRequest/20019533"));
+                    List<UriProperty> properties = segment.getInvoice("CR20019372").<UriProperty>getProperty(query);
+                    assertEquals(1, properties.size());
+                    assertFalse("Plug-in-provided id", properties.get(0).refGetPath().getLastComponent().isPlaceHolder());
+                } finally {
+                    super.taskId = null;
+                }
+                
+//                synchronized(this) {
+//                    try {
+//                        System.out.println("Wait 5 sec");
+//                        Thread.yield();
+//                        wait(5000);
+//                        System.out.println("...done");
+//                    } catch (InterruptedException exception) {
+//                        System.out.println("...interrupted");
+//                    }
+//                }
 
                 {
                     System.out.println("Invoice instanceof " + Arrays.toString(invoice.getClass().getInterfaces()));
@@ -672,9 +754,9 @@ public class TestMain {
                         xriPattern
                     );
                     List<InvoicePosition> invoicePositions = segment.getExtent(invoicePositionQuery);
-                    assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(9).hasNext());
-                    assertFalse("Invoice Positions: Last", invoicePositions.listIterator(10).hasNext());
-                    assertEquals("Invoice Positions: Size", 10,invoicePositions.size());
+                    assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(14).hasNext());
+                    assertFalse("Invoice Positions: Last", invoicePositions.listIterator(15).hasNext());
+                    assertEquals("Invoice Positions: Size", 15,invoicePositions.size());
                 }
                 {
                     //
@@ -687,9 +769,9 @@ public class TestMain {
                     );
                     query.setCandidates(segment.getExtent());                
                     List<InvoicePosition> invoicePositions = (List<InvoicePosition>) query.execute();
-                    assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(9).hasNext());
-                    assertFalse("Invoice Positions: Last", invoicePositions.listIterator(10).hasNext());
-                    assertEquals("Invoice Positions: Size", 10,invoicePositions.size());
+                    assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(14).hasNext());
+                    assertFalse("Invoice Positions: Last", invoicePositions.listIterator(15).hasNext());
+                    assertEquals("Invoice Positions: Size", 15,invoicePositions.size());
                 }
                 {
                     InvoicePositionQuery invoicePositionQuery = app1Package.createInvoicePositionQuery();
@@ -743,9 +825,18 @@ public class TestMain {
              * Test Address
              */
             // get AddressFormat
-            Collection<AddressFormat> addressFormats = segment.getAddressFormat();
-            for(AddressFormat addressFormat : addressFormats) {
-                System.out.println("addressFormat=" + addressFormat);
+            try {
+                super.taskId = "CR20019366";
+                PersistenceManager segmentManager = JDOHelper.getPersistenceManager(segment).getPersistenceManagerFactory().getPersistenceManager();
+                
+                Collection<AddressFormat> addressFormats = ((test.openmdx.app1.jmi1.Segment)segmentManager.getObjectById(JDOHelper.getObjectId(segment))).getAddressFormat();
+                for(AddressFormat addressFormat : addressFormats) {
+                    PersistenceManager formatManager = JDOHelper.getPersistenceManager(addressFormat);
+                    assertSame("cci2.getContainer()", segmentManager, formatManager);
+                    System.out.println("addressFormat=" + addressFormat);
+                }
+            } finally {
+                super.taskId = null;
             }
 
             // get NameFormat
@@ -907,7 +998,7 @@ public class TestMain {
                     refGetPath(segment).getSuffix(
                         refGetPath(segment).size() - 2
                     ),
-                    new String[]{"segment",DATA_SEGMENT_NAME}
+                    new String[]{"segment",SEGMENT_NAME}
                 )
             );
 
@@ -961,6 +1052,23 @@ public class TestMain {
                 "Identity should be available after unit of work failure",
                 emailAddress.getIdentity().endsWith("/segment/Standard/address/0002")
             );
+            //
+            // CR220019366 Missing implementation
+            // 
+            try {
+                super.taskId = "CR220019366";
+                Address original = segment.getAddress("0001");
+                assertEquals("Address.id()", "0001", original.getId());
+                PersistenceManager sibling = TestMain.entityManagerFactory.getPersistenceManager();
+                Path xri = new Path(original.refMofId()); 
+                RefContainer<Address> container = (RefContainer<Address>) sibling.getObjectById(xri.getParent());
+                Address copy = container.refGet(RefContainer.REASSIGNABLE, xri.getBase());
+                assertEquals("Address.id()", "0001", copy.getId());
+                assertNotSame(original, copy);
+                assertEquals(original, copy);
+            } finally {
+                super.taskId = null;
+            }
             //
             // CR20018768 refresh
             // 
@@ -1055,6 +1163,21 @@ public class TestMain {
             // create a person without qualifier
             Person person;
 
+            //
+            // CR20019366 Marshalling
+            //
+            try {
+                super.taskId = "CR20019366";
+                Collection<Person> people = segment.getPerson();
+                Person aPerson = people.iterator().next();
+                assertSame(
+                    "segment.getPerson()",
+                    JDOHelper.getPersistenceManager(segment),
+                    JDOHelper.getPersistenceManager(aPerson)
+                );
+            } finally {
+                super.taskId = null;
+            }
 
             //
             // CR0003390 Code Accessor
@@ -1314,10 +1437,14 @@ public class TestMain {
                 assertTrue("Persistent", JDOHelper.isPersistent(additionalAddress));
                 assertTrue("Deleted", JDOHelper.isDeleted(additionalAddress));
                 assertNotNull("Object Id", JDOHelper.getObjectId(additionalAddress));
+                Address a = segment.getAddress("CR0002096");
+                assertNotNull("Deleted additional address", a);
+                assertSame("Deleted additional address", additionalAddress, a);
                 this.commit();
                 assertFalse("Persistent", JDOHelper.isPersistent(additionalAddress));
                 assertNull("Object Id", JDOHelper.getObjectId(additionalAddress));
                 assertNotNull("Transactional Object Id", JDOHelper.getTransactionalObjectId(additionalAddress));
+                assertNull("Deleted additional address", segment.getAddress("CR0002096"));
             } finally {
                 super.taskId = null;
             }
@@ -1643,30 +1770,40 @@ public class TestMain {
             segment.getPerson(false, "TRANSIENT").refDelete(); // get and remove it in same unit of work
             this.commit();
 
+            PersonGroup g0;
+            PersonGroup g1;
+            PersonGroup g2;
+            //
             // create some PersonGroups
-            this.begin();
-            PersonGroup g0 = personGroupClass.createPersonGroup();
-            g0.setName("Group 0");
-            segment.addPersonGroup(
-                false,
-                "g0",
-                g0
-            );
-            PersonGroup g1 = personGroupClass.createPersonGroup();
-            g1.setName("Group 1");
-            segment.addPersonGroup(
-                false,
-                "g1",
-                g1
-            );
-            PersonGroup g2 = personGroupClass.createPersonGroup();
-            g2.setName("Group 2");
-            segment.addPersonGroup(
-                false,
-                "g2",
-                g2
-            );
-            this.commit();
+            //
+            try {
+                super.taskId = "CR20019430";
+                this.begin();
+                g0 = personGroupClass.createPersonGroup();
+                segment.addPersonGroup(
+                    false,
+                    "g0",
+                    g0
+                );
+                g1 = personGroupClass.createPersonGroup();
+                segment.addPersonGroup(
+                    false,
+                    "g1",
+                    g1
+                );
+                g2 = personGroupClass.createPersonGroup();
+                g2.setName("Group 2");
+                segment.addPersonGroup(
+                    false,
+                    "g2",
+                    g2
+                );
+                this.entityManager.flush();
+                g1.setName("Group 1");
+                this.commit();
+            } finally {
+                super.taskId = null;
+            }
 
             // create some Persons
             this.begin();
@@ -1834,24 +1971,54 @@ public class TestMain {
                 new Date()
             );
             personQuery.orderByCreatedAt().ascending();
-            SegmentHasPerson.Person<Person> personCollection = segment.getPerson();
-            for(
+            SegmentHasPerson.Person<Person> personCollection;
+            List<Person> personList;
+            try {
+                super.taskId = "CR20019366";
+                personCollection = segment.getPerson();
+                Person[] personArray = new Person[personCollection.size()];
+                personCollection.toArray(personArray);
+                for(Person person20019366 : personArray) {
+                    if(this instanceof ProxyConnectionTest) {
+                        assertFalse("Person Proxy", person20019366 instanceof NaturalPerson);
+                    } else {
+                        assertTrue("Person", person20019366 instanceof NaturalPerson);
+                        assertFalse("Person", ((NaturalPerson)person20019366).isRetired());
+                    }
+                }
+                personList = segment.getPerson((PersonQuery)null);
+                Iterator<Person> containerIterator = personCollection.iterator();
+                Iterator<Person> listIterator = personList.iterator();
+                Person containerElement = containerIterator.next();
+                Person listElement = listIterator.next();
+                if(this instanceof ProxyConnectionTest) {
+                    assertFalse("listElement", listElement instanceof NaturalPerson);
+                    assertFalse("containerElement", containerElement instanceof NaturalPerson);
+                } else {
+                    assertTrue("listElement", listElement instanceof NaturalPerson);
+                    assertFalse("listElement", ((NaturalPerson)listElement).isRetired());
+                    assertTrue("containerElement", containerElement instanceof NaturalPerson);
+                    assertFalse("containerElement", ((NaturalPerson)containerElement).isRetired());
+                }
+                for(
                     Iterator<Person> i = personCollection.iterator();
                     i.hasNext();
-            ){
-                Person p = i.next();
-                PersistenceManager m = JDOHelper.getPersistenceManager(p);
-                assertSame(
-                    "Query result marshalling", 
-                    persistenceManager, 
-                    m
-                );
-                break; // Test at least one persistence manager
+                ){
+                    Person p = i.next();
+                    PersistenceManager m = JDOHelper.getPersistenceManager(p);
+                    assertSame(
+                        "Query result marshalling", 
+                        persistenceManager, 
+                        m
+                    );
+                    break; // Test at least one persistence manager
+                }
+            } finally {
+                super.taskId = null;
             }
 
-            //          List<Person> personList = personCollection.getAll(personQuery);
-
-            List<Person> personList = segment.getPerson(personQuery);
+            // personList = personCollection.getAll(personQuery);
+            personList = segment.getPerson(personQuery);
             boolean nobodyOutThere = personList.isEmpty();
             System.out.println("There are " + (nobodyOutThere ? "no" : "some") + " people");
             assertFalse("Anybody out there", nobodyOutThere);
@@ -1965,12 +2132,22 @@ public class TestMain {
                 super.taskId = null;
             }
             
+            //
             // find persons with assigned address
-            personQuery = app1Package.createPersonQuery();
-            personQuery.thereExistsAssignedAddress().equalTo(postalAddress);
-            personCollection = segment.getPerson();
-            for(Person p : personCollection.getAll(personQuery)) {
-                SysLog.trace("person", p);
+            //
+            try {
+                super.taskId = "CR20019482";
+                personQuery = app1Package.createPersonQuery();
+                personQuery.thereExistsAssignedAddress().equalTo(postalAddress);
+                personCollection = segment.getPerson();
+                FetchPlan fetchPlan = ((Query)personQuery).getFetchPlan(); 
+                fetchPlan.setGroup(FetchPlan.ALL);
+                fetchPlan.setFetchSize(47);
+                for(Person p : personCollection.getAll(personQuery)) {
+                    SysLog.trace("person", p);
+                }
+            } finally {
+                super.taskId = null;
             }
 
             // find persons with empty filter
@@ -2011,19 +2188,44 @@ public class TestMain {
             } finally {
                 super.taskId = null;
             }
-
+            //
             // modify given name
-            this.begin();
-            person.setGivenName(new String[]{"Heiri"});
-            System.out.println("person modified givenName=" + person.getGivenName().get(0));
-            this.commit();
-            assertEquals("giveName", "Heiri", person.getGivenName().get(0));
+            //
+            try {
+                super.taskId = "CR20019430";
+                this.begin();
+                assertFalse("Pre-modify state", JDOHelper.isDirty(person));
+                person.getGivenName().clear();
+                assertTrue("Pre-flush state", JDOHelper.isDirty(person));
+                assertTrue("pre-flush attribute retrieval", person.getGivenName().isEmpty());
+                this.entityManager.flush();
+                assertTrue("Post-flush state", JDOHelper.isDirty(person));
+                assertTrue("Post-flush attribute retrieval", person.getGivenName().isEmpty());
+                person.setGivenName(new String[]{"Heiri"});
+                this.commit();
+                assertEquals("givenName", Collections.singletonList("Heiri"), person.getGivenName());
+                assertFalse("Post-commit state", JDOHelper.isDirty(person));
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // keep given name
+            //
+            try {
+                super.taskId = "CR20019472";
+                this.begin();
+                List<String> givenName = person.getGivenName();
+                givenName.set(0, new String(givenName.get(0)));
+                assertTrue("Phantom modification", JDOHelper.isDirty(person));
+                this.commit();
+            } finally {
+                super.taskId = null;
+            }
 
             this.begin();
             person.getGivenName().clear();
             assertTrue("No givenName", person.getGivenName().isEmpty());
             this.commit();
-            assertTrue("No givenName", person.getGivenName().isEmpty());
             assertTrue("No givenName", person.getGivenName().isEmpty());
 
             // person.formatAs
@@ -2286,7 +2488,7 @@ public class TestMain {
             Document document = documentClass.createDocument();
 
             document.setContent(
-                org.w3c.cci2.BinaryLargeObjects.valueOf(content)
+                BinaryLargeObjects.valueOf(content)
             );
             document.setDescription(
                 "a random document"
@@ -2362,7 +2564,7 @@ public class TestMain {
                     content[i] = (byte)((short)(i % 137));
                 }
                 document.setContent(
-                    org.w3c.cci2.BinaryLargeObjects.valueOf(content)
+                    BinaryLargeObjects.valueOf(content)
                 );
                 this.commit();
             }
@@ -2622,8 +2824,14 @@ public class TestMain {
             Person person = (Person) super.entityManager.getObjectById(
                 super.entityManager.newObjectIdInstance(
                     Person.class, 
-                    "xri://@openmdx*test.openmdx.app1/provider/JmiJdbc/segment/Standard/person/ID500012"
+                    DATA_SEGMENT_ID.getDescendant("person","ID500012")
                 )
+            );
+            Invoice invoice = (Invoice) super.entityManager.getObjectById(
+                super.entityManager.newObjectIdInstance(
+                    Invoice.class,
+                    DATA_SEGMENT_ID.getDescendant("invoice","CR20019372")
+               )
             );
             //
             // Touch
@@ -2645,22 +2853,55 @@ public class TestMain {
             //
             testAudit(person, run, false);
             testAudit(person, run, true);
+            //
+            // With Children
+            //
+            testAudit(invoice, run, false);
+            testAudit(invoice, run, true);
         }
 
+        private void testAudit(
+            Invoice invoice,
+            int run,
+            boolean scoped
+        ){
+            int factor = scoped ? 1 : run;
+            int create = SharedObjects.getPlugInObject(this.entityManager, Configuration.class).getPersistenceMode() == InvolvementPersistence.EMBEDDED ? 0 : 1;
+            String scope = scoped ? " (run " + run + ")" : " (run 1.." + run + ")";
+            Date from = scoped ? super.getStart() : null;
+            Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, invoice); 
+            String id = "Involve InvoicePosition CR20019372.";            
+            dumpTask(id + scope, task);
+            assertEquals(id + scope, (1 * create + 1) * factor, task.size());
+            id = "Involve InvoicePosition... CR20019372.";            
+            Collection<ExtentCapable> tree = PersistenceHelper.getCandidates(
+                this.entityManager.getExtent(ExtentCapable.class, true),
+                invoice.refMofId() + "/($...)"
+            );
+            task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, tree); 
+            assertEquals(id + scope, (1 * create + 1) * factor, task.size());
+            for(UnitOfWork unitOfWork : task) {
+                for(Iterator<Involvement> i = unitOfWork.<Involvement>getInvolvement().iterator(); i.hasNext();) {
+                    Involvement involvement = i.next();
+                    Modifiable modifiable = involvement.getBeforeImage();
+                    System.out.println(modifiable.refMofId());
+                }
+            }
+        }
+        
         private void testAudit(
             Person person,
             int run,
             boolean scoped
         ){
             int factor = scoped ? 1 : run;
-            int create = SharedObjects.getPlugInObject(this.entityManager, Configuration.class).isAudit1Persistence() ? 0 : 1;
+            int create = SharedObjects.getPlugInObject(this.entityManager, Configuration.class).getPersistenceMode() == InvolvementPersistence.EMBEDDED ? 0 : 1;
             String scope = scoped ? " (run " + run + ")" : " (run 1.." + run + ")";
             Date from = scoped ? super.getStart() : null;
             Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, person); 
             String id = "involve Person # ID500012";            
             dumpTask(id + scope, task);
             assertEquals(id + scope, (1 * create + 4) * factor, task.size());
-            task = AuditQueries.getUnitOfWorkInvolvingObject(from, null, person);
             if(scoped || run == 1) {
                 Modifiable lastImage = null;
                 for(UnitOfWork unitOfWork : task){
@@ -2678,7 +2919,7 @@ public class TestMain {
             if(create == 0) {
                 try {
                     task = AuditQueries.getUnitOfWorkCreatingObject(from, null, person); 
-                    fail("Create not audited in audit1 mode");
+                    fail("Create not audited in EMBEDDED mode");
                 } catch (UnsupportedOperationException exception) {
                     // Create not audited in audit1 mode
                 }
@@ -2717,20 +2958,20 @@ public class TestMain {
             id = "all units of work"; 
             task = AuditQueries.getUnitOfWorkForTimeRange(super.entityManager, from, null);
             dumpTask(id + scope, task);
-            assertEquals(id + scope, (10 * create + 17) * factor, task.size());
+            assertEquals(id + scope, (16 * create + 18) * factor, task.size());
             id = "units of work involving people"; 
             task = AuditQueries.getUnitOfWorkInvolvingObject(
                 from, 
                 null, 
                 PersistenceHelper.getCandidates(
                     super.entityManager.getExtent(Person.class),
-                    "xri://@openmdx*test.openmdx.app1/provider/JmiJdbc/segment/Standard/person/($...)"
+                    DATA_SEGMENT_ID.getDescendant("person", "%")
                 )
             );
             dumpTask(id + scope, task);
             assertEquals(id + scope, (3 * create + 9) * factor, task.size());
             id = "units of work involving deleted object";
-            Path addressId = new Path("xri://@openmdx*test.openmdx.app1/provider/JmiJdbc/segment/Standard/address/CR0002096"); 
+            Path addressId = DATA_SEGMENT_ID.getDescendant("address","CR0002096"); 
             task = AuditQueries.getUnitOfWorkInvolvingObject(
                 from, 
                 null, 
@@ -2887,8 +3128,7 @@ public class TestMain {
         protected test.openmdx.app1.jmi1.Segment getSegment(
         ) throws ServiceException{
             return (test.openmdx.app1.jmi1.Segment) super.entityManager.getObjectById(
-                test.openmdx.app1.jmi1.Segment.class,
-                App1Package.AUTHORITY_XRI + "/provider/" + DATA_PROVIDER_NAME + "/segment/" + DATA_SEGMENT_NAME
+                DATA_SEGMENT_ID
             );
         }
 
@@ -2933,6 +3173,7 @@ public class TestMain {
 //          super.testInMemoryProvider();
             super.resetAuditSegment();
             super.resetDataSegment();
+            super.testCR20019462();
             super.testCR20018726();
             super.testCR20018667();
             super.testCR20019014();
@@ -3025,7 +3266,7 @@ public class TestMain {
          * 
          * @return <code>true</code> if the unit of work is optimistic
          */
-        protected abstract boolean isOptimistic();
+        protected abstract Boolean isOptimistic();
         
         /**
          * Switch container managed transaction set-up
@@ -3041,8 +3282,12 @@ public class TestMain {
                 Constants.JTA
             );
             override.put(
+                ConfigurableProperty.ContainerManaged.qualifiedName(),
+                Boolean.TRUE.toString()
+            );
+            override.put(
                 ConfigurableProperty.Optimistic.qualifiedName(),
-                this.isOptimistic()
+                this.isOptimistic().toString()
             );
             entityManagerFactory = JDOHelper.getPersistenceManagerFactory(
                 override,
@@ -3065,8 +3310,8 @@ public class TestMain {
          * @see test.openmdx.app1.TestMain.AbstractContainerManagedTransactionSetUp#isOptimistic()
          */
         @Override
-        protected boolean isOptimistic() {
-            return true;
+        protected Boolean isOptimistic() {
+            return Boolean.TRUE;
         }
      
         
@@ -3085,8 +3330,8 @@ public class TestMain {
          * @see test.openmdx.app1.TestMain.AbstractContainerManagedTransactionSetUp#isOptimistic()
          */
         @Override
-        protected boolean isOptimistic() {
-            return false;
+        protected Boolean isOptimistic() {
+            return Boolean.FALSE;
         }
      
         
@@ -3112,6 +3357,7 @@ public class TestMain {
             this.userTransaction.begin();
             super.resetAuditSegment();
             super.resetDataSegment();
+            super.testCR20019462();
             super.testCR20018726();
             super.testCR20018667();
             super.testCR20019014();
@@ -3214,6 +3460,7 @@ public class TestMain {
         ) throws Exception{
             super.resetDataSegment();
             super.testPackageAcquisition();
+            super.testCR20019462();
             super.testCR20018800();
             super.testMain();
 // TODO     super.testAudit(2);

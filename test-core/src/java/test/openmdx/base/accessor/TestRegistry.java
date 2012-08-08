@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestRegistry.java,v 1.2 2010/06/24 16:54:15 hburger Exp $
+ * Name:        $Id: TestRegistry.java,v 1.3 2010/09/13 16:55:00 hburger Exp $
  * Description: Registry Test 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/24 16:54:15 $
+ * Date:        $Date: 2010/09/13 16:55:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -172,7 +172,7 @@ public class TestRegistry {
          * @seetest.openmdx.base.accessor.TestRegistry.PersistenceCapable#
          * jdoGetPersistentObjectId()
          */
-        @Override
+//      @Override
         public Path getPersistentObjectId() {
             return this.persistentObjectId;
         }
@@ -183,7 +183,7 @@ public class TestRegistry {
          * @seetest.openmdx.base.accessor.TestRegistry.PersistenceCapable#
          * jdoGetTransientObjectId()
          */
-        @Override
+//      @Override
         public UUID getTransientObjectId() {
             return this.transientObjectId;
         }
@@ -260,7 +260,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#newInstance()
          */
-        @Override
+//      @Override
         public PersistenceCapable newInstance() {
             PersistenceCapable nextInstance = this.delegate.newInstance();
             PersistenceCapable thisInstance = new DelegatingObject(nextInstance);
@@ -274,7 +274,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#clear()
          */
-        @Override
+//      @Override
         public void clear() {
             this.delegate.clear();
             this.registry.clear();
@@ -283,7 +283,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#close()
          */
-        @Override
+//      @Override
         public void close() {
             this.registry.clear();
             this.delegate.close();
@@ -294,7 +294,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#size()
          */
-        @Override
+//      @Override
         public int[] size() {
             int[] others = this.delegate.size();
             int[] sizes = new int[others.length + 1];
@@ -316,7 +316,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#newInstance()
          */
-        @Override
+//      @Override
         public PersistenceCapable newInstance(
         ) {
             PersistenceCapable instance = new DataObject();
@@ -328,7 +328,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#clear()
          */
-        @Override
+//      @Override
         public void clear() {
             this.persistentRegistry.clear();
             this.transientRegistry.clear();
@@ -337,7 +337,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#close()
          */
-        @Override
+//      @Override
         public void close() {
             clear();
             this.persistentRegistry = null;
@@ -347,7 +347,7 @@ public class TestRegistry {
         /* (non-Javadoc)
          * @see test.openmdx.base.accessor.TestRegistry.Manager#size()
          */
-        @Override
+//      @Override
         public int[] size() {
             return new int[]{
                 this.transientRegistry.values().size(),

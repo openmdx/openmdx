@@ -1,6 +1,6 @@
 Distribution Name: openMDX/Core
-Release Date: 2010-08-30
-Implementation Version: 2.7.0
+Release Date: 2010-12-27
+Implementation Version: 2.8.0
 
 ---------------------------------------------------------------------
 Notes:
@@ -49,17 +49,1220 @@ Notes:
 
 0.    SUMMARY
 
-      * Support for Eclipse EMF / UML2 Tools
-      * REST transport for intra-JVM and inter-JVM communication
-      * WbXML encoder / decoder
       * Improvements persistence manager
-      * Refactoring XML importer / exporter
+      * Reduce EJB dependencies (to package org.openmdx.application.rest.ejb) 
+      * Large object support for EJB connections
+      * EMBEDDED involvement persistence mode for org::openmdx::audit2 added
       * Clean up
-      * Fixed bugs      
-      * JRE 5.0 support
-      * RSM 7.5 support
+      * Fixed bugs
 
-                  
+==============================================================================
+Version 2.8.0                                                       2010-12-27
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+      none
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.7.26                                                      2010-12-23
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019534
+      TransactionAttributeType
+      
+      Copy javax.ejb.TransactionAttributeType to org.openmdx.base.transaction
+      in order to get rod of openMDX' EJB dependency.
+                        
+2.1.  FIXED BUGS
+
+      CR20019533
+      URI Marshalling
+      
+      URI marshalling fails
+      * for remote client calls
+      * for typed queries      
+      
+      CR20019482
+      Fetch plan propagation
+
+      A query's fetch plan has to be propagated down to the persistence layer
+      (even when used in an entity manager proxy).      
+
+      CR20019535
+      Transient Qualifier
+      
+      The standard plug-in does not replace transient qualifiers in case of 
+      optimistic persistence managers.
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.25                                                      2010-12-17
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019519
+      EJB Connection does not support CharacterLargeObjects
+            
+2.1.  FIXED BUGS
+
+      CR20019525
+      Multi-object state retrieval
+
+      For a given view context only the state of one object is returned.      
+
+      CR20019519
+      EJB Connection does not support BinaryLargeObjects
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.24                                                      2010-12-14
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      
+      CR20019526
+      Audit entries' unit of work id
+      
+      Audit entries' unit of work id must not be propagated to all multi-value 
+      slices.
+      
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.23                                                      2010-12-13
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019479
+      Non-application id
+      
+      The RestFormat.Target's HREF prefix starts with a slash ('/') but does
+      not end with a slash ('/') in accordance with the Servlet specification.
+      
+2.1.  FIXED BUGS
+      
+      CR20019479
+      Non-application id
+      
+      Fails in case of proxy connections.
+      
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.22                                                      2010-12-09
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019448
+      Auto-Commit
+      
+      A new manager shall be used by the REST-Servlet's in AUTO-COMMIT mode.      
+      
+2.1.  FIXED BUGS
+      
+      CR20019523
+      Persistent-Dirty-NonTransactional
+      
+      Allocation of a new view manager made objects non-transactional.
+      
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+
+      CR20019449
+      setGroup() vs. setGroups(). Query_2Facade.setGroup() and .getGroup() not
+      used so far. The methods are removed.
+
+
+==============================================================================
+Version 2.7.21                                                      2010-12-09
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019523
+      Persistent-Dirty-NonTransactional
+
+      Log statements and recovery code added.
+
+      CR20019522
+      Non-persistent features
+
+      Allow system attributes to be made non-persistent.
+      
+2.1.  FIXED BUGS
+      
+      CR20019510
+      No Multivalue Slices
+
+      The database plug-in fails if there are no multivalue slices at all for
+      a given object.
+
+      CR20019508
+      PersistenceHelper.getFeatureReplacingObjectById
+      
+      Enable getFeatureReplacingObjectById for BasicState instances
+
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.20                                                      2010-12-07
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      
+      CR20019517	 
+      DateStateViews.getViewForPropagatedState()
+
+      State cloning is implemented erroneously.
+
+      CR20019516
+      DateStateViews.getStates() with boolean arguments
+      
+      The DateStateViews.getStates(StateCapable,boolean,boolean) method is 
+      incorrectly implemented.
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.19                                                      2010-12-02
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019507
+      DateState_1 Equality
+      
+      duration.equals(null) fails with Apache's lightweight duration 
+      implementation.
+            
+2.1.  FIXED BUGS
+      
+      CR20019512
+      View For Propagated State
+      
+      The method getViewForPropagatedState() fails when nothing is overridden.
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.18                                                      2010-12-01
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019507
+      DateStateViews Assertions
+      
+      Assert reasonable time ranges: At the moment its possible to use a 
+      stateValiTo which is less than the stateValidFrom.
+            
+2.1.  FIXED BUGS
+      none
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.17                                                      2010-11-30
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+            
+2.1.  FIXED BUGS
+      
+      CR20019480
+      Missing audit entries
+      
+      A flush()/beforeCompletion() sequence spared dirty objects from being
+      audited.
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.16                                                      2010-11-29
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      
+      CR20019497      
+      Erroneous Finalization
+      
+      Finalization of an container managed entity manager leads to flushing
+      unless openMDX has been notified about the rollback-only.
+      
+2.2.  DEPRECATED FEATURES
+      
+      CR20019449
+      setGroup() vs. setGroups(). Query_2Facade.setGroup() and .getGroup() not
+      used so far. The methods are removed.
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.15                                                      2010-11-22
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+
+      CR20019480
+      Missing audit entries
+      
+      Improve dirty/clean handling
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.14                                                      2010-11-18
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019478
+      Absolute Positioning
+      
+      The DB object configuration entry "disableAbsolutePositioning" with the 
+      default value "(java.lang.Boolean)false" allows to disable absolute 
+      positioning for the given DB object.
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019445
+      Premature finalization under WebSphere
+      
+      Protect the persistence manager's flush against premature finalization.
+      
+      Use close() to complete the work instead of afterBegin() and 
+      beforeCompletion() if ContainerManagedtransaction is true. 
+      
+      CR20019473
+      Long URLs
+      
+      The HTTP Port has to be changed the following way:
+      * Query requests use POST instead of GET
+      * Delete requests use PUT with a "?FunctionName=DELETE" suffix
+      
+      CR20019473
+      REST Queries
+      
+      REST connections use POST instead of GET now.
+      
+      CR20019472
+      Dirty objects without "really" modified features
+      
+      If modfiedAt and modifiedBy are cleared if they are the only modified
+      features unless the object is an instance of 
+      org::openmdx::base::AspectCapable.
+      
+2.1.  FIXED BUGS
+
+      CR20019437
+      Remote client MIME type
+      
+      The REMOTE client may now use text or binary format:
+      * application/xml
+      * application/vnd.openmdx.wbxml
+      
+      CR20019439
+      Connection URL
+      
+      The cnnection URL's query parameters shall be encoded.
+      
+      CR20019433
+      View For Time-Range Without Holes
+      
+      Creates erroneously overlapping states.
+
+      CR20019472
+      "Empty" audit entries
+  
+      org::openmdx::state2 erroneously treats them as removed.
+  
+      CR20019430
+      flush
+      
+      Flush leaves dirty objects in an erroneous state:
+      * Atttributes are somtime unreadable
+      * Committing of persistent-new instances fails with a concurrent 
+        modification exception
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.13                                                      2010-11-12
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019469
+      Connection 2
+      
+      The try/catch sequences for connection 2 have been improved.
+      
+      CR20019435
+      Duration and URI import
+      
+      Duration and URI character sequences are not marshaled to their 
+      appropriate class
+      
+      CR20019431
+      Queries in TIME-RANGE view
+      
+      Queries for BasicState instances are disallowed in TIME-RANGE views.
+      
+2.1.  FIXED BUGS
+
+      CR20019467	 
+      Incorrect Flush Order
+      
+      Children must be deleted before their parents
+      
+      CR20019431
+      Queries in TIME-POINT view
+      
+      The returned views had state IDs instead of object IDs
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.12                                                      2010-11-10
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019395	 
+      Ability To Disable Core Object Removal
+            
+      The aop0 state plug-in has a new configuration option 
+      'stateCapableDeletable' which enables the deletion of state
+      capable objects. Its default value is 'false'.
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019461
+      Involvement Query Optimization
+      
+      Replace "LIKE" by "=" where appropriate.
+      
+2.1.  FIXED BUGS
+      
+      CR20019465
+      ForeignLogRecord
+      
+      The foreign log record's logger field is empty.
+      
+      CR20019462
+      Removing transient objects from container
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.11                                                      2010-11-07
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019455
+      Single State Views
+ 
+      The method DateStateViews.representsSingleState() tells whether the
+      view refers to a single state.
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+
+      CR20019452
+      Optimistic locking for stated objects
+      
+      The request is twofold
+      1. modifiedAt/modifiedBy shall be updated
+         * when a core attribute is modified
+         * when a state is created or removed 
+      2. modifiedAt/modifiedBy shall not be propagated from the core object 
+         to the states 
+            
+      CR20019454
+      Properties Configuration
+      
+      The PropertiesConfiguration shall close its streams in order to avoid
+      running out of file handles.
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      
+      CR20019455
+      objIsRemoved
+      
+      aop1's objIsRemoved() method was unreferenced and has therefore been 
+      removed,
+
+
+==============================================================================
+Version 2.7.10                                                      2010-11-03
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019413
+      PREFERENCES Table
+ 
+      Allow PREFERENCES table lookup to be disabled:
+        PERSISTENCE/usePreferencesTable=(java.lang.Boolean)false
+      while it still defaults to 
+        PERSISTENCE/usePreferencesTable=(java.lang.Boolean)true
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+     
+      CR20019322
+      Removal refers to an object's parent
+      
+      Do not add the parent to the unit of work.
+      * An object to be removed should not refer to its parent especially in 
+        the case of before images.      
+       
+      CR20019424
+      A StateCapable's stateVersion attribute
+      
+      The 'stateVersion' attribute
+      * shall not be propagated to the states
+      * shall not affect 'modifiedAt' and 'modifiedBy'
+      
+2.1.  FIXED BUGS
+      
+      CR20019322
+      ModelAwareFilter
+      
+      The method isCoreInstance() is not implemented correctly.
+      
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.9                                                       2010-10-31
+==============================================================================
+
+1.    NEW FEATURES
+      none
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      
+      CR20019418
+      Overlapping state
+
+      Disable the creation of overlapping states
+
+      CR20019443	 
+      validTimeUnique fallback
+      
+      he validTimeUnique fallback algorithm has to check the object's type for 
+      org::openmdx::base::Aspect before accessing its "core" feature
+      
+      CR20019440 
+      JavaBeans
+      
+      The DefaultPersistenceDelegate should avoid invocation of the standard 
+      initialize() method. 
+      
+      CR20019417
+      Batching failure
+      
+      The first element of the next batch is the same as the last element of 
+      the previous batch in case of non-index tables or views.
+      
+      CR20019438
+      AspectCapable filter optimization
+      
+      The AspectCapable filter optimization may lead to a NullPointerException. 
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      
+      CR20019441
+      State_1 TYPE plug-in
+      
+      Thus plug-in should be removed as it leads to an erroneous behaviour.
+
+
+==============================================================================
+Version 2.7.8                                                       2010-10-29
+==============================================================================
+
+1.    NEW FEATURES
+      none
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019360	 
+      Basic Authentication
+      
+      Use "Basic " instead of "BASIC " as authorization value prefix.      
+      
+2.1.  FIXED BUGS
+      
+      CR20019366
+      "Reduced" JMI delegation stack
+      
+      There exists a JUnit-Test
+      * where plug-in layers are missing when a plain container is retrieved
+	  * where no plug-in layers are missing when an (even null) query is 
+	    supplied
+
+      Container.toArray(Object[]) has to be corrected.
+      
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.7                                                       2010-10-27
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019433
+      View For Time-Range Without Holes
+      
+      The method getViewForTimeRangeWithoutHoles() fills the holes in the
+      given time-range but leaves existing states before returning a view for 
+      the given time-range.
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019366
+      "Reduced" JMI delegation stack
+      
+      Some marshalling assertions added.
+      
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.7.6                                                       2010-10-26
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019424
+      RefInitializeOnCreate
+      
+      The "org.openmdx.jmi.option.RefInitializeOnCreate" option may be used to 
+      activate this feature.
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019424
+      RefInitializeOnCreate
+      
+      The "org.openmdx.jmi.option.RefInitializeOnCreate" option's default 
+      value is now "false" (as opposed to its former implicit "true").
+
+      CR20019396
+      Multivalued State Retrieval
+      
+      Allow the qualifier specification to be multivalued.
+      
+      CR20019402
+      DateStateViews.getStates()
+      
+      Accept Container<? extends StateCapable> as argument. There is no need
+      to restrict container arguments to Container<? extends DateState>.
+      
+      CR20019411
+      stateVersion v/s stateNumber
+      
+      Semantic
+      * state1's stateNumber stores the last state number created by the 
+        state1 API
+      * state2's stateVersion stores the number of states which have been 
+        created through the state2 API
+        
+      In order to be able to rename stateNumber to stateVersion without data 
+      conversion we have to get rid of the semantic change.
+      
+      CR20019415
+      refDelete()
+      
+      refDelete() shall throw a JmiServiceException instead of a 
+      RuntimeServiceException in case of failure.
+      
+      
+2.1.  FIXED BUGS
+
+      CR20019424
+      Applying refInitialize() on an object with user defined primitive types 
+      shall give a warning instead of an exception.
+
+      CR20019417
+      Batching Failure
+      
+      Batching didn't work for some views.
+      Resolved now for non-sliced views.
+            
+
+2.2.  DEPRECATED FEATURES
+
+      CR20019396
+      Multivalued State Retrieval
+      
+      Some of the state retrieval methods have been deprecated.
+
+2.3.  REMOVED FEATURES
+      
+      CR20019402
+      DateStateViews
+      
+      The deprecated getStates() and getView() methods have been removed.
+
+
+==============================================================================
+Version 2.7.5                                                       2010-10-24
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019372
+      audit2 Extension
+ 
+      audit2 provides the following involvement persistence flavour:
+      * EMBEDDED
+        The involvement is embedded in the before image.
+        An org::openmdx::audit2::UnitOfWork does not remember the object 
+        creation involvements in this mode.
+
+      Use the following entry to activate the embedded mode:
+        <property 
+          name="org.openmdx.audit2.PlugIn.involvementPersistence" 
+          value="EMBEDDED"
+        />      
+
+      CR20019407
+      toAnyURI
+      
+      toAnyURI() generates an AnyURI representation of a path
+      
+      Reserved characters in cross-references are percent-encoded: 
+      * All percent "%" characters are percent-encoded as "%25" across the 
+        entire XRI reference.
+      * All number sign "#" characters that appear within a cross-reference 
+        are percent-encoded as "%23".
+      * All question mark "?" characters that appear within a cross-reference 
+        are percent encoded as "%3F".
+      * All slash "/" characters that appear within a cross-reference are
+        percent encoded as "%2F".
+
+      toIRI() and toAnyURI are synonyms.
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019413
+      PREFERENCES Table
+ 
+      Allow PREFERENCES table lookup to be disabled:
+        PERSISTENCE/usePreferencesTable=(java.lang.Boolean)false
+      
+      CR20019415
+      refDelete()
+      
+      efDelete shall throw a JmiServiceException instead of a runtim service 
+      exception in case of failure.
+      
+2.1.  FIXED BUGS
+      
+      CR20019360
+      Remote Client
+
+      Be prepared for body retrievall failures.
+
+      CR20019347
+      Container Managed Persistence Manager
+
+      Take persistence manager factory configuration into consideration. The
+      setting of the "org.openmdx.jdo.option.ContainerManaged" option is 
+      ignored at the moment.
+
+      Enable a persistence manager with container managed transactions to be
+      closed while its unit of work is still active.
+
+2.2.  DEPRECATED FEATURES
+
+      CR20019372
+      audit2 Extension
+      
+      The org::openmdx::compatobility::audit1 model is deprecated and will be 
+      removed in the next release. 
+
+      CR20019360
+      HttpCookie
+
+      Support dot-less domain matching.
+
+2.3.  REMOVED FEATURES
+
+      CR20019372
+      audit2 Extension
+      
+      The org::openmdx::compatibility::audit1 support has been removed.
+
+      The following configuration entries must no longer be used:      
+        <property 
+          name="org.openmdx.audit2.PlugIn.modifiedFeaturePersistent" 
+          value="(java.lang.Boolean)false"
+        />
+        <property 
+          name="org.openmdx.audit2.PlugIn.audit1Persistence" 
+          value="(java.lang.Boolean)true"
+        />
+
+
+==============================================================================
+Version 2.7.4                                                       2010-10-11
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019394
+      Avoid redundant core reference columns
+      
+      This feature is supported by sliced db objects and controlled by 
+      PERSISTENCE/useViewsForRedundantColumns which defaults to 
+      (java.lang.Boolean)true.
+      
+      It expects the following columns being provided by a view:
+      * CORE
+      * P$$CORE__RID
+      * P$$CORE_PARENT__RID
+      * P$$CORE_PARENT__OI
+
+      CR20019346
+      NonManaged JNDI Context Extensions
+      
+      Two new JNDI URL protocols have been added:
+      * _new:
+        The "_new" protocol registers a JavaBean factory in the JNDI context.
+        The URL
+            _new:test.openmdx.kernel.lightweight.naming.JavaBean?string=aStrin
+            g &integer=(java.lang.Integer)-1"
+        for example creates a java bean factory which instantiates  
+        test.openmdx.kernel.lightweight.naming.JavaBean and sets the 
+        properties "string" and "integer" to "aString" and -1, respectively.
+      * jndi:
+        The "jndi" protocol registers a link to a foreign JNDI context.
+        The URL
+            jndi:a.websphere.entry?java.naming.factory.initial=com.ibm.websphe
+            re.naming.WsnInitialContextFactory&java.naming.provider.url=corbal
+            oc:iiop:myhost.mycompany.com:2809 
+        for example creates a link to the WebSphere JNDI name 
+        "a.websphere.entry".   
+        Note: 
+            '/' characters in the foreign JNDI name must be escaped ("%2F")
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019387
+      Path.lock()
+      
+      lock() should return the path itself
+
+2.1.  FIXED BUGS
+      
+      CR20019397
+      URI Marshaller
+      
+      Ability to handle null values
+      
+      CR20019363
+      Container.clear()
+
+      The clear() method should work for state capable collections as well.
+
+      CR20019388
+      enum as reference
+      
+      Reserved identifiers used as reference names are escaped in the cci2 
+      mapping but noty yet in the jmi1 mapping.
+      
+      CR20019357	 
+      Multitenancy
+      
+      audit2-aop0-PlugIn_1 must always use the accessor in order to retrieve
+      the audit segment id.
+
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 2.7.3                                                       2010-10-07
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019369	 
+      TransactionManager
+      
+      Add a register() method to the ComponentEnvironment.
+      Objects will be taken created by the factory if one is registered for
+      the given object class.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019386
+      afterCompletion
+      
+      After completion all objects (not only dirty ones) are evicted unless
+      retainValues is on.
+      
+      CR20019364
+      AbstractRestInteraction
+      
+      Improve error message for unsupported interactions.
+      
+      CR20019383
+      PersistenceManager.evictAll()
+      
+      The evictAll() method should affect containers as well. At the moment 
+      only objects are evicted while containers remain stale.
+      
+      In future a PersistenceCapable's evict() method will evict the 
+      containers as well (which in turn changes evictAll()'s behaviour 
+      accordingly).
+
+2.1.  FIXED BUGS
+      
+      CR20019385
+      Unit Of Work Member Re-ordering
+      
+      The erroneous algorithm has been replaced.
+      
+      CR20019373
+      Invalid queries for getStates(container,query)
+      
+      DateStatViews amends the query with illegal conditions leading in case 
+      of open ended time range which results in null values being applied to
+      the SQL statements.
+
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+
+      CR20019373
+      DateStateContexts
+      
+      The remaining methods of DateStateContexts have been moved to another
+      appropriate place and the class itself has been removed.
+
+
+==============================================================================
+Version 2.7.1                                                       2010-09-26
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019357
+      Multitenancy
+      
+      Add tenant support
+      
+      There are two additional static methods in the UserObjects class:
+      * setTenant(PersistenceManager,Object)
+      * Object getTenant(PersistenceManager()
+      
+      The getTenant() method could be used for example in an 
+      org.openmdx.audit2.aop0.PlugIn_1 extension to override the
+      getAuditSegmentId(PersistenceManager) method.
+      
+      CR20019347
+      Container Managed PMs
+      
+      The option org.openmdx.jdo.option.ContainerManaged activates the 
+      following behaviour:
+      * auto-start on creation
+      * auto-flush on close
+      * exclusive lock for close and flush
+      
+      CR20019343
+      Configuration Properties
+      
+      Example:
+        defaults=xri://+resource/META-INF/...
+        include[0]=http://...
+        include[1]=file:/...
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019338
+      Model_1Factory
+      
+      Throw a runtime exception instead of returning null in case of failure.
+      
+      CR20019344
+      Non-persistent features
+      
+      Exclude non-changeable features from being updated.
+      
+      CR20019340
+      StateCapable should extend ContextCapable
+      
+      StateCapable objects should be ContextCapable      
+
+2.1.  FIXED BUGS
+      
+      CR20019356
+      Remove aspects with core object
+      
+      CR20019355
+      Audit cascaded deletes
+      
+      CR20019323
+      NOT_FOUND exceptions at meta data level must be remapped
+      
+      NOT_FOUND exceptions at meta data level are for example silently 
+      converted to "return null" when occuring during an object retrieval 
+      through the container API.
+      
+      CR20019349
+      Entity Manager Manager Proxy
+      
+      Propagate Configuration Entries
+      * javax.jdo.option.ConnectionDriverName
+      * javax.jdo.option.ConnectionURL
+      
+      CR20019344
+      Non-persistent features
+      
+      Take the "nonPersistentFeature" configuration into consideration.
+      
+      CR20019339
+      SparseArray
+      
+      SparseArray retrieval leads to ClassCastException or 
+      IndexOutOfBoundException.	 
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+      
 ==============================================================================
 Version 2.7.0                                                       2010-08-30
 ==============================================================================
@@ -111,547 +1314,4 @@ Version 2.7.0                                                       2010-08-30
 2.3.  REMOVED FEATURES
       none
       
-      
-==============================================================================
-Version 2.6.5                                                       2010-08-16
-==============================================================================
-
-1.    NEW FEATURES
-      none 
-
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-
-      CR20019303
-      Provider configuration
-      
-      Accept each resource URL once only.
-
-2.1.  FIXED BUGS
-      none
-            
-2.2.  DEPRECATED FEATURES
-      none
-      
-2.3.  REMOVED FEATURES
-      none
-      
-      
-==============================================================================
-Version 2.6.4                                                       2010-08-09
-==============================================================================
-
-1.    NEW FEATURES
-
-      CR20019285
-      Container Managed Transaction Support
-      
-      An inbound connection shall support
-      * RESOURCE_LOCAL transactions 
-      * JTA transactions 
-
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      none
-      
-2.1.  FIXED BUGS
-      none
-            
-2.2.  DEPRECATED FEATURES
-      none
-      
-2.3.  REMOVED FEATURES
-      none
-      
-      
-==============================================================================
-Version 2.6.3                                                       2010-07-13
-==============================================================================
-
-1.    NEW FEATURES
-
-      CR20019259
-      Time-range view readability
-      
-      Asserts that only single-state views allow to read stated attributes if
-      and only if org.openmdx.state2.spi.Parameters.STRICT_QUERY is true.
-      
-      Single-state time-range views are created in one of the following ways:
-      * PersistenceManager.newInstance() and its JMI correspondents
-      * DateStateViews.createStatedObject()
-      * DateStateViews.createStated()
-      * DateStateViews.getViewForInitializedState()
-      * DateStateViews.getViewForPropagatedSstate()
-      * DateStateViews.getStates()
-      * DateStateViews.getValidStates()
-      * DateStateViews.getCroppedStates()
-      Even such a view may become unreadable when the underlying state is 
-      affected through other views. 
-
-      CR20019261
-      Core attributes 
-      
-      Make the core attributes modifiable 
-      
-      There are two possible implementations:
-      * normalized: The core attributes are stored in the core object only.
-        (This mode is incompatible with RID/OID usage and therefore not yet
-        suported)
-      * de-normalized: The core attributes are (redundantly) propagated into 
-        all states. (This mode is implemented in order to continue RID/OID 
-        support)
-      
-      CR20019262 
-      Transaction Time Factory 
-      
-      The method UserObjects.setTransactionTime(Factory<Date>) allows to 
-      override the implicit transaction time acquisition (new Date()).
-       
-      CR20019257
-      DateStateViews
-      
-      DateStateViews has been amended by a number of public static methods.
-      
-      CR20018768
-      Persistence Capable Collections
-      
-      Support
-      * persistenceManager.retrieveAll(Collection)
-      * persistenceManager.evictAll(Collection)
-      * persistenceManager.refreshAll(Collection)
-      for
-      * RefContainer instance 
-      * Query result Lists
-      * other java.util.Collections
-      
-      CR20019228
-      Unescape Path(String) argument 
-
-      Escaped dots may be replaced by the method 
-      SpecialResourceIdentifiers.unescapeResourceIdentifier(String). 
-
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      
-      CR20019259
-      Time-point view
-      
-      The validFor of time-points view for invalidated states which are open
-      at both ends has has changed from their creation date to 2000-01-01:
-      
-      From now on use the following priorities to define the validFor of a 
-      time-point view for in invalidated state:
-      1. stateValidFrom unless it is null
-      2. stateValidTo unless it is null
-      3. 2000-01-01    
-       
-      CR20019228
-      Unescape Path(String) argument 
-      
-      Replace escaped dots for the following formats
-      * XRI 1
-      * XRI 2
-      
-      CR20018768 	
-      refresh 
-
-      To be JDO compliant
-      * shall the parameterless method refreshAll() do nothing when invoked 
-        outside of a transaction.
-      * shall the parameterless method evictAll() ignore dirty instances
-      
-2.1.  FIXED BUGS
-      
-      CR20019263
-      openmdxjdoClone
-      
-      PersistenceHelper.clone must not ignore attributes missing in the current 
-      fetch group. 
-      
-      CR20018837
-      Persistent-new-deleted
-      
-      Main issues
-      * The removal of a persistent-new object has to be propagated to its children
-      * An entity manager proxy has to take care whether a persistent-new object's
-        removal has to be propagated or not
-      * A removed object must keep its manager
-      
-      CR20019245
-      ClassCastException in container.getX(xQuery)
-      
-      container.getX(xQuery) throws a ClassCastException in an EntityManager-
-      Proxy if xQuery is null.  
-            
-2.2.  DEPRECATED FEATURES
-      none
-      
-2.3.  REMOVED FEATURES
-
-      CR20019228
-      Unescape Path(String) argument 
-
-      The method AbstractDatabase_1.toPattern(String) has been removed in 
-      favour of SpecialResourceIdentifiers.unescapeResourceIdentifier(String).
-
-      CR20018768 	
-      Evictable 
-
-      The interface org.openmdx.base.accessor.rest.Evictable could be
-      eliminated.
-      
-      
-==============================================================================
-Version 2.6.2                                                       2010-06-24
-==============================================================================
-
-1.    NEW FEATURES
-      none
-
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      
-      CR20019225
-      Rational Rose Support
-
-      Rational Rose models brought up to date.
-
-      CR20018768
-      Containment Associations
-      
-      The container interfaces have been standardized:
-      * org.w3c.cci2.Container<E> is generic CCI level interface extending
-        java.util.Collection<E>
-      * org.oasisopen.jmi1.RefContainer<E><E> is generic JMI level interface 
-        extending org.w3c.cci2.Container<E>
-      * org.openmdx.base.persistence.spi.PersistenceCapableContainer is
-        an interface used the the implementation only. It should not be used
-        in an application program.
-      
-      CR20019223
-      Amend RSM importer
-      
-      Improve RSM 7.5 support: 
-      * local forward references
-      * references into other EMX files 
-      * uml:Package
-      
-2.1.  FIXED BUGS
-      none
-      
-2.2.  DEPRECATED FEATURES
-      none
-      
-2.3.  REMOVED FEATURES
-      
-      CR20019198
-      org::openmdx::base::Context 
-      
-      Get rid of unused model classes such as
-      * org::openmdx::base::Context
-      * org::openmdx::base::ViewCapable
-      but leave
-      * org::openmdx::base::ContextCapable
-
-      CR20019197
-      org::openmdx::compatibility::datastore1  
-      
-      Get rid of unused model package
-      * org::openmdx::compatibility::datastore1 
-      
-      
-==============================================================================
-Version 2.6.1                                                       2010-06-04
-==============================================================================
-
-1.    NEW FEATURES
-      
-      CR20019195
-      JRE 5.0
-      
-      openMDX 2.6 is now JRE 5.0 enabled. 
-      
-      CR20019136
-      JDO Data Store Cache
-      
-      The managed connection cache consists of the following three levels.
-      The second level cache is automatically evicted after commit on any
-      of its connections.
-      
-      1. BASIC (default for a data manager proxy's connections)
-         
-         The basic cache is required as it allows to sow virtual objects.
-         
-         * It is supported by the org.openmdx.base.accessor.rest.spi.BasicCache_2
-           plug-in, which can be configured explicitly through the data manager's
-           "cachePlugIn" property.
-         * "timeToLive" defines the number of seconds between a caches last touch() 
-            and its  expiration. The default value is 3600 seconds, a value less
-            or equals to 0 inhibits expiration.
-         * The "sowAllPattern"/"sowAllClass" configuration value pairs allow to
-           define the object class for any matching pattern, i.e. a matching
-           object id never leads to a NOT_FOUND exception.
-        
-      2. PINNING (default for a data manager's connections)
-      
-         Pinning can be configured either through configuration or through 
-         the javax.jdo.datastore.DataStoreCache API,
-         
-         * It is supported by the org.openmdx.base.accessor.rest.spi.PinningCache_2
-           plug-in, which can be configured explicitly through the data manager's
-           cachePlugIn property.
-         * Setting "pinningCacheFactory" to a non-null non-empty value overrides
-           CacheManager.getCacheFactory()
-         * Setting "pinningCacheName" to a non-null non-empty value forces the
-           cache to be registered and shared by different data manager factories.
-         * "pinningCacheConfiguration" defines an URL used to load the the properties
-           to be passed to javax.cache.CacheFactory.createCache()
-         * "pinId" proposes objects with the given id to be pinned
-         * "pinAllPattern" proposes objects matching the given pattern to be pinned
-         * "pinAllClass" proposes objects of the given class to be pinned
-         * "pinAllType" proposes objects of the given class or any of its 
-            subclasses to be pinned
-         
-      3. AUTOMATIC
-
-         Automatic caching may be configured to cache any object.
-                  
-         * It is supported by the org.openmdx.base.accessor.rest.spi.AutomaticCache_2
-           plug-in, which can be configured explicitly through the data manager's
-           cachePlugIn property.
-         * Setting "automaticCacheFactory" to a non-null non-empty value overrides
-           CacheManager.getCacheFactory()
-         * Setting "automaticCacheName" to a non-null non-empty value forces the
-           cache to be registered and shared by different data manager factories.
-         * "automaticCacheConfiguration" defines an URL used to load the the properties
-           to be passed to javax.cache.CacheFactory.createCache()           
-
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      
-      CR20019200
-      container.isEmpty(
-      
-      The configuration value
-      * MODEL/disableStateFilterSubstitution=(java.lang.Boolean)true
-      has been replaced by
-      * PERSISTENCE/disableStateFilterSubstitution=(java.lang.Boolean)true
-            
-      CR20019192 
-      UnsupportedOperationException in JMI collection delegate calls 
-
-      UnsupportedOperationException in JMI collection delegate calls shall be 
-      mapped to InvalidCallException.       
-      
-      CR20019189
-      RefQuery_1 mapping 
-      
-      Avoid static map by applying the standard mapping pattern.       
-      
-      CR20018664 	
-      FilterProperty 
-      
-      FilterProperty & AttributeSpecifier are now used by dataprovider classes only.
-      That's why they have been moved to the package
-      org.openmdx.application.dataprovider.cci.
-      
-      CR20019186 	
-      REST DELETE Request
-      
-      A DELETE request URL's query string shall be used as URL encoded REST 
-      request in absence of a "Content-Type" header. 
-       
-      CR20019181 
-      REST GET Request
-      
-      A GET request URL's query string shall be used as URL encoded REST 
-      request in absence of a "Content-Type" header. 
-      
-2.1.  FIXED BUGS
-     
-      CR20019200
-      container.isEmpty(
-      
-      Is sometimes true when it should be false.
-
-      CR20019195
-      Mix-in interfaces
-      
-      Mix-in interfaces had been swallowed by layers without aspect 
-      implementations such as the sentinel layer.
-      
-      CR20019182
-      equals() does not work 
-      
-      obectA.equals(objectB) returned false if objectA was retrieved by 
-      persistenceManagerA and objectB by persistenceManagerB even if the 
-      identities of obectA and objectB were equal. 
-
-      Now the corresponding equal() method
-      1. compares the object identities if both objects are persistent
-      2. compares the transactional object identities if neither of the 
-         two objects is persistent
-      3. returns false otherwise
-      
-      CR20019188
-      Simple Port Accept Header
-      
-      The Accept header must be set by the SimplePort.      
-      
-      CR20019186 	
-      Simple Port MIME Type
-      
-      The Simple Port must support other MIME types beside its "text/xml" 
-      default.
-      
-      
-      A DELETE request URL's query string shall be used as URL encoded REST 
-      request in absence of a "Content-Type" header. 
-
-      CR20019183
-      Cookie Manager
-      
-      Correct the cookie manager's behaviour in respect of "Cookie" and 
-      "Cookie2" requests.
-      
-      CR20019184
-      Special Characters In Path Segment 
-      
-      Correct the URLs containing Case-Exact-String-Subsegments which are used 
-      when a qualifier contains such characters as '+'.
-      
-      CR20019164
-      RestServlet throws NullPointer
-      
-      This request includes the following fixes:
-      
-      * MIME type extraction     
-        The MIME type is now extracted from the content type in 
-        ServletTarget.newWriter().
-        RestFormat.getOutputFactory(mimeType) on the other hand expects to 
-        receive a pure MIME type now. 
-         
-      * ServletResponse ContentType
-        Include the character encoding in the servlet response's content type attribute 
-       
-      * HttpHeaderFieldValue
-      
-        The HttpHeaderFieldValue erroneously expects comma separated values to 
-        be delivered in separate enumeration elements.        
-      	
-      CR20019180
-      XMLOutputFactories
-      
-      XMLOutputFactories.isSupported() must use all configured MIME types.
-      It must not be restricted to the already loaded classes.
-      
-      
-      CR20019048
-      VarableSizeMappedRecord
-      
-      VarableSizeMappedRecord is not de-serializable 
-      
-      The record's deserialized keys are not internalized, i.e. lookup fails. 
-      
-      CR20019179
-      Cloned object is not flushable
-      
-      Missing flushable entries: 
-      Transient multivalued attributes lack their corresponding flushable 
-      entries. 
-      
-2.2.  DEPRECATED FEATURES
-
-      CR0002764
-      Filter Operators 
-      
-      Replace some generated short constant classes by enums:
-      * Directions & Orders -> SortOrder
-      * FilterOperators -> ConditionType
-      
-      The deprecated classes are moved to the package
-      org.openmdx.application.dataprovider.cci.
-      
-2.3.  REMOVED FEATURES
-      
-      CR20019191
-      org.w3c.cci2.MultivaluedTypeOrder
-      
-      Get rid of unsupported interface.
-      
-      CR20019190
-      QuerySpec
-      
-      Get rid of the unused interface.
-
-      
-==============================================================================
-Version 2.6.0                                                       2010-05-01
-==============================================================================
-
-1.    NEW FEATURES
-      
-      CR20019135
-      Support for Eclipse EMF / UML2 Tools. openMDX models migrated to EMF / 
-      UML2 Tools models. The .uml files are located in src/model/emf. Eclipse EMF
-      replaces RSM as primary modeling tool for openMDX based applications.  
-
-2.    CHANGES  
-     
-2.0.  CHANGED FEATURES
-      
-      CR20019124
-      REST Exceptions
-      
-      * A REST exception's stack trace is included even if it has to be 
-        prepared.
-      * Resource Exceptions are logged at Level.FINE.
-        Internal Server Errors are logged at Level.SEVERE.
-         
-      CR20019076
-      JDO callbacks 
-      
-      * All matching implementation classes are now taken into consideration 
-        for lazy instantiation and feature dispatching, not only the most and 
-        least derived ones.
-      * Super-classes of matching implementation classes are excluded from the 
-        set of classes to be potentially instantiated.
-      * Callbacks are dispatched to all classes of this set implementing the
-        given callback interface.
-         
-      CR20019122
-      REST Servlet Behaviour
-      
-      * The REST Servlets default MIME type is "application/xml;charset=UTF-8".
-      * CREATE and UPDATE reply objects are re-fetched after auto-commit. 
-      
-2.1.  FIXED BUGS
-      
-      CR20019123
-      commit() behaviour 
-      
-      The unit of work of a persistence manager proxy re-orders persistent-new 
-      objects before propagation if necessary.
-      
-2.2.  DEPRECATED FEATURES
-      none
-      
-2.3.  REMOVED FEATURES
-
-      20019090
-      Remove SLF4 from openMDX/Core 
-
-      Remove SLF4J from
-      * openMDX/Core
-      * openMDX/Extension
-
-      Restrict its usage to dependent projects such us
-      * openMDX Thrirtparty OpenEJB
-      * openMDX Platform OpenEJB 
-
 ---

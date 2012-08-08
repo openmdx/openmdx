@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Involvement_1.java,v 1.6 2010/06/18 12:57:46 hburger Exp $
+ * Name:        $Id: Involvement_1.java,v 1.8 2010/10/25 09:35:21 hburger Exp $
  * Description: Involvement_1 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/18 12:57:46 $
+ * Date:        $Date: 2010/10/25 09:35:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,6 +51,7 @@
 package org.openmdx.audit2.aop1;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +59,10 @@ import java.util.Set;
 import javax.jdo.JDOObjectNotFoundException;
 
 import org.openmdx.audit2.spi.Configuration;
+import org.openmdx.audit2.spi.InvolvementPersistence;
+import org.openmdx.base.accessor.cci.Container_1_0;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -65,7 +70,13 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.spi.ExtentCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
+import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.IsInCondition;
+import org.openmdx.base.query.IsInstanceOfCondition;
+import org.openmdx.base.query.IsLikeCondition;
+import org.openmdx.base.query.Quantifier;
 
 
 /**
@@ -113,7 +124,7 @@ public class Involvement_1 extends Interceptor_1 {
         if(beforeImage == null || afterImage == null){
             return Collections.emptySet();
         }
-        if(SharedObjects.getPlugInObject(self.jdoGetPersistenceManager(), Configuration.class).isModifiedFeaturePersistent()) {
+        if(SharedObjects.getPlugInObject(self.jdoGetPersistenceManager(), Configuration.class).getPersistenceMode() == InvolvementPersistence.EXTENDED) {
             return super.objGetSet("modifiedFeature");
         }
         ModelElement_1_0 classDef = self.getModel().getElement(beforeImage.objGetClass());
@@ -169,6 +180,7 @@ public class Involvement_1 extends Interceptor_1 {
         }
         return left == null ? right != null : !left.equals(right);
     }
+
     
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.DelegatingObject_1#objGetSet(java.lang.String)
@@ -220,6 +232,16 @@ public class Involvement_1 extends Interceptor_1 {
     }
 
     /**
+     * Derive involvement pattern
+     * 
+     * @return the involvements own pattern
+     */
+    protected Path getInvolvementPattern(
+    ){
+        return self.jdoGetObjectId().getPrefix(6).getDescendant(":*", "involvement", ":*");
+    }
+    
+    /**
      * Derive the unit of work id
      * 
      * @return the unit of work id
@@ -241,6 +263,59 @@ public class Involvement_1 extends Interceptor_1 {
             getUnitOfWorkPath()
         );
     }
+
+    protected Container_1_0 getExtent() throws ServiceException{
+        ObjectView_1_0 segment = (ObjectView_1_0) self.jdoGetPersistenceManager().getObjectById(
+            self.jdoGetObjectId().getPrefix(5)
+        );
+        return segment.objGetContainer("extent");
+    }
+    
+    protected ObjectView_1_0 getAfterImage() throws ServiceException{
+        Path xri = this.getObjectPath();
+        Container_1_0 involvements = getExtent().subMap(
+            new Filter(
+                new IsInstanceOfCondition(
+                    "org:openmdx:audit2:Involvement"
+                ),
+                new IsLikeCondition(
+                    Quantifier.THERE_EXISTS,
+                    SystemAttributes.OBJECT_IDENTITY,
+                    true,
+                    ExtentCollection.toIdentityPattern(
+                        this.getInvolvementPattern()
+                    )
+                ),
+                new IsInCondition(
+                    Quantifier.THERE_EXISTS,
+                    "object",
+                    true,
+                    xri
+                )
+            )
+        );
+        Date expected = (Date) getUnitOfWork().objGetValue(SystemAttributes.CREATED_AT);
+        for(DataObject_1_0 involvement : involvements.values()) {
+            DataObject_1_0 beforeImage = (DataObject_1_0) involvement.objGetValue("beforeImage");
+            if(equal(beforeImage.jdoGetObjectId(),expected,(Date)beforeImage.objGetValue(SystemAttributes.MODIFIED_AT))) {
+                return (ObjectView_1_0) beforeImage;
+            }
+        }
+        try {
+            ObjectView_1_0 afterImage = (ObjectView_1_0) self.jdoGetPersistenceManager().getObjectById(xri);
+            if(afterImage.jdoIsDeleted() || !equal(xri,expected,(Date)afterImage.objGetValue(SystemAttributes.MODIFIED_AT))){
+                return null;
+            } else {
+                return afterImage;
+            }
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+    
+    private static boolean equal(Path xri, Date left, Date right){
+        return left == null ? right == null : left.equals(right);
+    }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.DelegatingObject_1#objGetValue(java.lang.String)
@@ -255,6 +330,7 @@ public class Involvement_1 extends Interceptor_1 {
             "taskId".equals(feature) ? getUnitOfWork().objGetValue("taskId") :
             "unitOfWork".equals(feature) ? getUnitOfWork() :
             "unitOfWorkId".equals(feature) ? getUnitOfWorkPath().getBase() :
+            "afterImage".equals(feature) ? getAfterImage() :    
             super.objGetValue(feature);
     }
     

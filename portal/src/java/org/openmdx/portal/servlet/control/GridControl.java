@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: GridControl.java,v 1.46 2010/07/21 09:16:38 wfro Exp $
+ * Name:        $Id: GridControl.java,v 1.47 2010/09/17 10:59:45 wfro Exp $
  * Description: GridControlDef
- * Revision:    $Revision: 1.46 $
+ * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/21 09:16:38 $
+ * Date:        $Date: 2010/09/17 10:59:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -347,9 +347,6 @@ public class GridControl
     //-----------------------------------------------------------------------   
     private static final long serialVersionUID = 4049361894123256118L;
     
-    public static final String PROPERTY_DEFAULT_FILTER = "Filter.Default";  
-    public static final String PROPERTY_PAGE_SIZE = "Page.Size";
-      
     private final org.openmdx.ui1.jmi1.ObjectContainer objectContainer;
     private final Action[] columnFilterSetActions;
     private final Action[] columnFilterAddActions;

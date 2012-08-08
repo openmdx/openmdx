@@ -8,7 +8,7 @@
             <generalization xmi:id="_3C7B8A60016D41816AD6002A">
               <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
             </generalization>
-            <ownedAttribute xmi:id="_3C7B8A60016D7F469DFC033C" name="name" isReadOnly="true">
+            <ownedAttribute xmi:id="_3C7B8A60016D7F469DFC033C" name="name">
               <ownedComment xmi:id="_hVO7dt6-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D7F469DFC033C">
                 <body>This attribute is usually derived from the Attribute's ObjectId.</body>
               </ownedComment>
@@ -38,7 +38,7 @@
             <generalization xmi:id="_3C7B8A60016D41823E5E0328">
               <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
             </generalization>
-            <ownedAttribute xmi:id="_3C7B8A60016D4182C67101F0" name="name" isReadOnly="true">
+            <ownedAttribute xmi:id="_3C7B8A60016D4182C67101F0" name="name">
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </ownedAttribute>
             <ownedAttribute xmi:id="_3C7B8A60016D414A72160018" name="description">
@@ -62,7 +62,7 @@
             <generalization xmi:id="_3C7B8A60016D406C1ED7014A">
               <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
             </generalization>
-            <ownedAttribute xmi:id="_3C7B8A60016D3FC470890069" name="name" isReadOnly="true">
+            <ownedAttribute xmi:id="_3C7B8A60016D3FC470890069" name="name">
               <ownedComment xmi:id="_hV5p2N6-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D3FC470890069">
                 <body>This attribute is usually derived from the Principal's ObjectId.</body>
               </ownedComment>
@@ -120,7 +120,7 @@
             <generalization xmi:id="_3C7B8A60016D41816AD30242">
               <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
             </generalization>
-            <ownedAttribute xmi:id="_3C7B8A60016D3FC375A100CA" name="name" isReadOnly="true">
+            <ownedAttribute xmi:id="_3C7B8A60016D3FC375A100CA" name="name">
               <ownedComment xmi:id="_hV5p5t6-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D3FC375A100CA">
                 <body>This attribute is usually derived from the Attribute's ObjectId.</body>
               </ownedComment>
@@ -186,7 +186,7 @@
             <eAnnotations xmi:id="_hWL9vt6-EdmkJO73lqONhA" source="http://www.eclipse.org/uml2/2.0.0/UML">
               <details xmi:id="_hWL9v96-EdmkJO73lqONhA" key="root"/>
             </eAnnotations>
-            <ownedAttribute xmi:id="_3C7B8A60016D4183BB7003D0" name="name" isReadOnly="true">
+            <ownedAttribute xmi:id="_3C7B8A60016D4183BB7003D0" name="name">
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </ownedAttribute>
             <ownedAttribute xmi:id="_3C7B8A60016D4183BB830355" name="description">
@@ -236,7 +236,7 @@
             <generalization xmi:id="_3C7B8A60016D41816AD80181">
               <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
             </generalization>
-            <ownedAttribute xmi:id="_3C7B8A60016D417E24110333" name="name" isReadOnly="true">
+            <ownedAttribute xmi:id="_3C7B8A60016D417E24110333" name="name">
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </ownedAttribute>
             <ownedAttribute xmi:id="_3C7B8A60016D417E2411033D" name="action">

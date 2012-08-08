@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CharacterLargeObjects.java,v 1.15 2010/02/10 16:05:15 hburger Exp $
+ * Name:        $Id: CharacterLargeObjects.java,v 1.17 2010/12/23 17:38:00 hburger Exp $
  * Description: Object Relational Mapping 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/10 16:05:15 $
+ * Date:        $Date: 2010/12/23 17:38:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,13 +51,17 @@
 package org.w3c.cci2;
 
 import java.io.CharArrayReader;
+import java.io.CharArrayWriter;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.io.Writer;
 import java.net.URL;
@@ -193,10 +197,7 @@ public class CharacterLargeObjects {
             source.skip(position);
         }
         long count = 0l;
-        for(
-            int i = source.read(buffer);
-            i >= 0;
-        ){
+        for(int i; (i = source.read(buffer)) >= 0;){
             count += i;
             target.write(buffer, 0, i);
         }
@@ -265,7 +266,7 @@ public class CharacterLargeObjects {
     /**
      * Array CLOB
      */
-    private static class ArrayLargeObject implements CharacterLargeObject {
+    private static class ArrayLargeObject implements CharacterLargeObject, Serializable {
         
         /**
          * Constructor 
@@ -275,6 +276,11 @@ public class CharacterLargeObjects {
         public ArrayLargeObject(final char[] value) {
             this.value = value;
         }
+
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = -9096693393561649452L;
 
         /**
          * 
@@ -315,13 +321,98 @@ public class CharacterLargeObjects {
     
 
     //------------------------------------------------------------------------
+    // Class AbstractLargeObject
+    //------------------------------------------------------------------------
+
+    /**
+     * The underlying stream may be retrieved once only
+     */
+    private static abstract class AbstractLargeObject implements CharacterLargeObject, Serializable {
+        
+        /**
+         * Constructor 
+         *
+         * @param stream
+         */
+        protected AbstractLargeObject(
+            Long length
+        ){
+            this.length = length;
+        }
+
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = -5837819381102619869L;
+
+        private transient char[] value;
+        private transient Long length;
+
+        /**
+         * Provide the input stream content
+         * 
+         * @return the content
+         * 
+         * @throws IOException
+         */
+        protected Reader newContent(
+        ) throws IOException {
+            return this.value == null ? null : new CharArrayReader(this.value);
+        }
+        
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
+         */
+        public void getContent(
+            Writer stream, 
+            long position
+        ) throws IOException {
+            Long length = position + streamCopy(
+                getContent(),
+                position,
+                stream
+            );
+            this.length = length;
+        }
+
+        /* (non-Javadoc)
+         * @see org.w3c.cci2.LargeObject#getLength()
+         */
+        public Long getLength(
+        ) throws IOException {
+            return this.length;
+        }
+        
+        private void writeObject(
+            ObjectOutputStream stream
+        ) throws IOException {
+            if(value == null) {
+                CharArrayWriter buffer = new CharArrayWriter();
+                getContent(buffer, 0);
+                stream.writeObject(buffer.toCharArray());
+            } else {
+                stream.writeObject(this.value);
+            }
+        }
+        
+        private void readObject(
+            ObjectInputStream stream
+        ) throws IOException, ClassNotFoundException {
+            this.value = (char[]) stream.readObject();
+            this.length = Long.valueOf(value.length);
+        }
+        
+    }
+    
+     
+    //------------------------------------------------------------------------
     // Class URLLargeObject
     //------------------------------------------------------------------------
     
     /**
      * URL CLOB
      */
-    private static class URLLargeObject implements CharacterLargeObject {
+    private static class URLLargeObject extends AbstractLargeObject {
         
         /**
          * Constructor 
@@ -329,45 +420,43 @@ public class CharacterLargeObjects {
          * @param value
          */
         public URLLargeObject(final URL url) {
+            super(null);
             this.url = url;
         }
 
         /**
          * 
          */
-        private final URL url;
+        private static final long serialVersionUID = -4494073113239913907L;
+
+        /**
+         * 
+         */
+        private transient URL url;
 
         /**
          * 
          */
         private transient URLConnection connection;
         
-        /**
-         * 
-         */
-        private transient Long length;
-        
         /* (non-Javadoc)
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
          */
+//      @Override
         public Reader getContent() throws IOException {
-            URLConnection connection = getConnection();
-            String encoding = connection.getContentEncoding();
-            InputStream stream = connection.getInputStream();
-            return encoding == null ? new InputStreamReader(
-                stream
-            ) : new InputStreamReader(
-                stream,
-                encoding
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.LargeObject#getLength()
-         */
-        public Long getLength(
-        ){
-            return this.length;
+            if(this.url == null) {
+                return newContent();
+            } else {
+                URLConnection connection = getConnection();
+                String encoding = connection.getContentEncoding();
+                InputStream stream = connection.getInputStream();
+                return encoding == null ? new InputStreamReader(
+                    stream
+                ) : new InputStreamReader(
+                    stream,
+                    encoding
+                );
+            }
         }
 
         /**
@@ -378,25 +467,12 @@ public class CharacterLargeObjects {
          * @throws IOException
          */
         protected URLConnection getConnection() throws IOException{
-            return this.connection == null ?
-                this.connection = url.openConnection() :
-                this.connection;
+            if(this.connection == null){
+                this.connection = url.openConnection();
+            }
+            return this.connection;
         }
 
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
-         */
-        public void getContent(
-            Writer writer, 
-            long position
-        ) throws IOException {
-            this.length = position + streamCopy(
-                getContent(),
-                position,
-                writer
-            );
-        }
-        
     }
 
 
@@ -407,7 +483,7 @@ public class CharacterLargeObjects {
     /**
      * File CLOB
      */
-    private static class FileLargeObject implements CharacterLargeObject {
+    private static class FileLargeObject extends AbstractLargeObject {
         
         /**
          * Constructor 
@@ -415,50 +491,29 @@ public class CharacterLargeObjects {
          * @param value
          */
         public FileLargeObject(final File file) {
+            super(null);
             this.file = file;
         }
 
         /**
          * 
          */
-        private final File file;
-        
+        private static final long serialVersionUID = 2452652537639826230L;
+
         /**
          * 
          */
-        private transient Long length = null;
-
+        private transient File file;
+        
         /* (non-Javadoc)
          * @see org.w3c.cci2.CharacterLargeObject#getContent()
          */
         public Reader getContent(
         ) throws IOException {
-            return new InputStreamReader(
+            return this.file != null ? new InputStreamReader(
                 new FileInputStream(this.file),
                 "UTF-8"
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.LargeObject#getLength()
-         */
-        public Long getLength(
-        ){
-            return this.length;
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
-         */
-        public void getContent(
-            Writer writer, 
-            long position
-        ) throws IOException {
-            this.length = position + streamCopy(
-                getContent(),
-                position,
-                writer
-            );
+            ) : this.newContent();
         }
 
     }
@@ -471,7 +526,7 @@ public class CharacterLargeObjects {
    /**
      * The underlying stream may be retrieved once only
      */
-    public static class StreamLargeObject implements CharacterLargeObject {
+    public static class StreamLargeObject extends AbstractLargeObject {
         
         /**
          * Constructor 
@@ -489,36 +544,24 @@ public class CharacterLargeObjects {
          *
          * @param stream
          */
-        StreamLargeObject(
+        protected StreamLargeObject(
             final Reader stream,
             Long length
         ){
+            super(length);
             this.stream = stream;
-            this.length = length;
         }
         
         /**
          * 
          */
-        private Reader stream;
+        private static final long serialVersionUID = -7462838546162808783L;
 
         /**
          * 
          */
-        private Long length;
+        private transient Reader stream;
 
-        /**
-         * Provide the input stream content
-         * 
-         * @return the content
-         * 
-         * @throws IOException
-         */
-        protected Reader newContent(
-        ) throws IOException {
-            throw new IllegalStateException("The content may be retrieved once only");
-        }
-        
         /* (non-Javadoc)
          * @see org.w3c.cci2.BinaryLargeObject#getContent()
          */
@@ -533,28 +576,6 @@ public class CharacterLargeObjects {
             }
         }
 
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
-         */
-        public void getContent(
-            Writer stream, 
-            long position
-        ) throws IOException {
-            this.length = position + streamCopy(
-                getContent(),
-                position,
-                stream
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.LargeObject#getLength()
-         */
-        public Long getLength(
-        ) throws IOException {
-            return this.length;
-        }
-        
     }
     
 }

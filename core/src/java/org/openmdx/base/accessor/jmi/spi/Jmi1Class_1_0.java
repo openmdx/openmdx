@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1Class_1_0.java,v 1.7 2010/08/19 15:15:32 wfro Exp $
+ * Name:        $Id: Jmi1Class_1_0.java,v 1.9 2010/10/28 06:44:01 hburger Exp $
  * Description: Jmi1Class_1_0 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/19 15:15:32 $
+ * Date:        $Date: 2010/10/28 06:44:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -49,13 +49,10 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.accessor.jmi.spi;
 
 import javax.jdo.JDOFatalUserException;
 import javax.jmi.reflect.RefClass;
-
-import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectInvocationHandler.StandardMarshaller;
 
 /**
  * Jmi1Class

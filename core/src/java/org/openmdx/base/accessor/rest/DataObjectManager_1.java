@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObjectManager_1.java,v 1.65 2010/08/06 12:15:13 hburger Exp $
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: DataObjectManager_1.java,v 1.71 2010/11/30 14:11:42 hburger Exp $
  * Description: Data Object Manager
- * Revision:    $Revision: 1.65 $
+ * Revision:    $Revision: 1.71 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:15:13 $
+ * Date:        $Date: 2010/11/30 14:11:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -106,6 +106,7 @@ import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.persistence.spi.InstanceLifecycleListenerRegistry;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.PersistenceManagers;
@@ -115,6 +116,7 @@ import org.openmdx.base.persistence.spi.StandardFetchPlan;
 import org.openmdx.base.persistence.spi.SharedObjects.Aspects;
 import org.openmdx.base.query.Selector;
 import org.openmdx.base.resource.InteractionSpecs;
+import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
@@ -136,6 +138,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @param plugIns 
      * @param optimalFetchSize
      * @param cacheThreshold
+     * @param connectionSpec 
      * @throws ResourceException 
      */
     public DataObjectManager_1(
@@ -146,7 +149,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         Connection connection2,
         PlugIn_1_0[] plugIns, 
         Integer optimalFetchSize, 
-        Integer cacheThreshold
+        Integer cacheThreshold, 
+        RestConnectionSpec connectionSpec
     ) throws ResourceException {
         super();
         this.factory = factory;
@@ -176,7 +180,13 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         setCopyOnAttach(factory.getCopyOnAttach());
         setDetachAllOnCommit(factory.getDetachAllOnCommit());
         setIgnoreCache(factory.getIgnoreCache());
+        this.connectionSpec = connectionSpec;
     }
+    
+    /**
+     * The REST Connection Spec
+     */
+    private final RestConnectionSpec connectionSpec; 
     
     /**
      * Tells, whether the data objects are proxies or not
@@ -323,6 +333,11 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * The transaction time factory may be set by an application
      */
     protected Factory<Date> transactionTime;
+
+    /**
+     * Multitenancy support is opaque to the persistence manager
+     */
+    protected Object tenant = null;
     
     /**
      * The plug-ins
@@ -339,30 +354,53 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      */
     private final SharedObjects.Accessor sharedObjects = new SharedObjects.Accessor(){
 
+//      @Override
         public Aspects aspectObjects() {
             return DataObjectManager_1.this.aspectSpecificContexts;
         }
 
+//      @Override
         public List<String> getPrincipalChain() {
             return DataObjectManager_1.this.principalChain;
         }
 
+//      @Override
         public Object getTaskIdentifier() {
             return DataObjectManager_1.this.taskIdentifier;
         }
 
+//      @Override
         public void setTaskIdentifier(
             Object taskIdentifier
         ) {
             DataObjectManager_1.this.taskIdentifier = taskIdentifier;
         }
 
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.SharedObjects.Accessor#getTenant()
+         */
+//      @Override
+        public Object getTenant(
+        ) {
+            return DataObjectManager_1.this.tenant;
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.SharedObjects.Accessor#setTenant(java.lang.Object)
+         */
+//      @Override
+        public void setTenant(Object tenant) {
+            DataObjectManager_1.this.tenant = tenant;
+        }
+
+//      @Override
         public Object getPlugInObject(
             Object key
         ){
             return DataObjectManager_1.this.getPlugInObject(key);
         }
 
+//      @Override
         public String getUnitOfWorkIdentifier() {
             return DataObjectManager_1.this.currentTransaction().getUnitOfWorkIdentifier();
         }
@@ -370,7 +408,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.SharedObjects.Accessor#getTransactionTime()
          */
-    //  @Override
+//      @Override
         public Factory<Date> getTransactionTime() {
             return DataObjectManager_1.this.transactionTime;
         }
@@ -378,7 +416,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.SharedObjects.Accessor#setTransactionTime(org.openmdx.kernel.loading.Factory)
          */
-    //  @Override
+//      @Override
         public void setTransactionTime(Factory<Date> transactionTime) {
             DataObjectManager_1.this.transactionTime = transactionTime;
         }
@@ -405,9 +443,9 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         Interaction transactionalInteraction = currentTransaction().getInteraction();
         if(transactionalInteraction == null) {
             if(this.interaction == null) {
-                this.interaction = (
+                this.interaction = this.newInteraction(
                     this.connection2 == null ? this.connection : this.connection2
-               ).createInteraction();
+               );
             }
             return this.interaction;
         } else {
@@ -415,6 +453,22 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         }
     }
 
+    /**
+     * Create an interaction and sets the tenant
+     * 
+     * @param connection
+     * 
+     * @return a new interaction
+     * 
+     * @throws ResourceException
+     */
+    protected Interaction newInteraction(
+    	Connection connection
+    ) throws ResourceException {
+        this.connectionSpec.setTenant(UserObjects.getTenant(this));
+    	return connection.createInteraction();
+    }
+    
     /**
      * Retrieve the interaction specifications
      * 
@@ -482,11 +536,14 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @throws ServiceException
      */
     void fireInstanceCallback (
-        DataObject_1_0 source,
+        DataObject_1 source,
         int type,
         boolean lenient
     ) throws ServiceException{ 
-        if(!source.objIsInaccessible()) try {
+        if(
+            !source.objIsInaccessible() &&
+            (type != InstanceLifecycleEvent.CLEAR || !source.objIsHollow())
+        ) try {
             source.objGetClass(); // avoid lazy loading
             switch(type) {
                 case InstanceLifecycleEvent.CREATE:
@@ -582,9 +639,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     public void evictAll(
     ){
         for(DataObject_1 pc : this.persistentRegistry.values()) {
-            if(pc.jdoIsPersistent() && !pc.jdoIsDirty()) {
-                pc.evict();
-            }
+            pc.evict();
         }
     }
 
@@ -1604,7 +1659,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                         this,
                         xri,
                         null, // transientObjectId
-                        null // objectClass
+                        null, // objectClass
+                        false // untouchable
                     );
                     DataObject_1 newObject = validate ? object.objRetrieve(false, this.getFetchPlan()) : object;
                     if(object == newObject) {
@@ -1662,7 +1718,13 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         UUID transientObjectId
     ) throws ServiceException {
         validateState();
-        return new DataObject_1(this, null, transientObjectId, objectClass);
+        return new DataObject_1(
+            this, 
+            null, 
+            transientObjectId, 
+            objectClass, 
+            false // untouchable
+        );
     }
 
 

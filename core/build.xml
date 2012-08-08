@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.238 2010/09/06 20:13:37 wfro Exp $
+= Name:        $Id: build.xml,v 1.241 2010/12/20 13:18:46 wfro Exp $
 = Description: openMDX/Core Build File
-= Revision:    $Revision: 1.238 $
-= Date:        $Date: 2010/09/06 20:13:37 $
+= Revision:    $Revision: 1.241 $
+= Date:        $Date: 2010/12/20 13:18:46 $
 = Copyright:   (c) 2003-2010 OMEX AG
 =======================================================================
 =
@@ -64,9 +64,8 @@
 	<import file="../ant/etc/ant/build-library.xml"/>
 
 	<path id="project.lib.classpath">
-	    <path refid="java2.enterprise.lib"/>
-	    <path refid="java2.extension.lib"/>
-		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/openxri-syntax.jar"/>
+	    <path refid="osgi.enterprise.lib"/>
+	    <path refid="osgi.extension.lib"/>
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="openmdx.core.bin"/>
@@ -153,37 +152,107 @@
 			<param name="preprocess-jt.target" value="java"/>
 		</antcall>
 		<fail message="JRE ${build.target.jre} not found" unless="build.target.jre.found"/>
-		<javac 
-			destdir="${build.dir}/bin" 
-			debug="${build.debug}" 
-			optimize="${build.optimize}" 
-			fork="true" 
-			memoryMaximumSize="256m" 
-			classpathref="project.lib.classpath"
-			source="${build.source.version}"
-			target="${build.target.version}"
-			bootclasspath="${build.target.jre}/lib/rt.jar"
-			extdirs="${build.target.jre}/ext"
-			includeantruntime="false"			
-		>
-			<src path="${build.dir}/src/java"/>
-			<src path="${basedir}/src/java"/>		    
-			<include name="javax/jmi/**/*.java"/>
-			<include name="org/openmdx/base/**/*.java"/>
-			<include name="org/openmdx/kernel/**/*.java"/>
-			<include name="org/openmdx/uses/**/*.java"/>
-			<include name="org/openmdx/compatibility/kernel/**/*.java"/>
-			<include name="org/openmdx/application/mof/**/*.java"/>
-			<include name="org/openmdx/application/xml/spi/*.java"/>
-			<exclude name="org/openmdx/base/accessor/jmi/**/*.java"/>
-			<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
-			<exclude name="org/openmdx/base/accessor/rest/**/*.java"/>
-			<exclude name="org/openmdx/base/accessor/view/**/*.java"/>
-			<exclude name="org/openmdx/base/persistence/**/*.java"/>
-			<exclude name="org/openmdx/base/rest/**/*.java"/>
-			<exclude name="org/openmdx/base/aop2/*.java"/>
-			<patternset refid="build.exclude"/>
-		</javac>
+		<antcontrib:if>
+			<istrue value="${build.compile.without.bootclasspath}"/>
+			<antcontrib:then>
+				<javac 
+					destdir="${build.dir}/bin" 
+					debug="${build.debug}" 
+					optimize="${build.optimize}" 
+					fork="true" 
+					memoryMaximumSize="256m" 
+					classpathref="project.lib.classpath"
+					source="${build.source.version}"
+					target="${build.target.version}"
+					extdirs="${build.target.jre}/ext"
+					includeantruntime="${build.include.ant.runtime}"
+				>
+					<src path="${build.dir}/src/java"/>
+					<src path="${basedir}/src/java"/>		    
+					<include name="javax/jmi/**/*.java"/>
+					<include name="org/openmdx/base/**/*.java"/>
+					<include name="org/openmdx/kernel/**/*.java"/>
+					<include name="org/openmdx/uses/**/*.java"/>
+					<include name="org/openmdx/compatibility/kernel/**/*.java"/>
+					<include name="org/openmdx/application/mof/**/*.java"/>
+					<include name="org/openmdx/application/xml/spi/*.java"/>
+					<exclude name="org/openmdx/base/accessor/jmi/**/*.java"/>
+					<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
+					<exclude name="org/openmdx/base/accessor/rest/**/*.java"/>
+					<exclude name="org/openmdx/base/accessor/view/**/*.java"/>
+					<exclude name="org/openmdx/base/persistence/**/*.java"/>
+					<exclude name="org/openmdx/base/rest/**/*.java"/>
+					<exclude name="org/openmdx/base/aop2/*.java"/>
+					<patternset refid="build.exclude"/>
+				</javac>
+			</antcontrib:then>
+			<antcontrib:elseif>
+				<istrue value="${build.compile.without.bootclasspath+compliance-level}"/>
+				<antcontrib:then>
+					<javac 
+						destdir="${build.dir}/bin" 
+						debug="${build.debug}" 
+						optimize="${build.optimize}" 
+						fork="true" 
+						memoryMaximumSize="256m" 
+						classpathref="project.lib.classpath"
+						extdirs="${build.target.jre}/ext"
+						includeantruntime="${build.include.ant.runtime}"
+					>
+						<src path="${build.dir}/src/java"/>
+						<src path="${basedir}/src/java"/>		    
+						<include name="javax/jmi/**/*.java"/>
+						<include name="org/openmdx/base/**/*.java"/>
+						<include name="org/openmdx/kernel/**/*.java"/>
+						<include name="org/openmdx/uses/**/*.java"/>
+						<include name="org/openmdx/compatibility/kernel/**/*.java"/>
+						<include name="org/openmdx/application/mof/**/*.java"/>
+						<include name="org/openmdx/application/xml/spi/*.java"/>
+						<exclude name="org/openmdx/base/accessor/jmi/**/*.java"/>
+						<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
+						<exclude name="org/openmdx/base/accessor/rest/**/*.java"/>
+						<exclude name="org/openmdx/base/accessor/view/**/*.java"/>
+						<exclude name="org/openmdx/base/persistence/**/*.java"/>
+						<exclude name="org/openmdx/base/rest/**/*.java"/>
+						<exclude name="org/openmdx/base/aop2/*.java"/>
+						<patternset refid="build.exclude"/>
+					</javac>
+				</antcontrib:then>
+			</antcontrib:elseif>
+			<antcontrib:else>
+				<javac 
+					destdir="${build.dir}/bin" 
+					debug="${build.debug}" 
+					optimize="${build.optimize}" 
+					fork="true" 
+					memoryMaximumSize="256m" 
+					classpathref="project.lib.classpath"
+					source="${build.source.version}"
+					target="${build.target.version}"
+					bootclasspath="${build.target.jre}/${build.compile.bootclasspath}"
+					extdirs="${build.target.jre}/ext"
+					includeantruntime="${build.include.ant.runtime}"
+				>
+					<src path="${build.dir}/src/java"/>
+					<src path="${basedir}/src/java"/>		    
+					<include name="javax/jmi/**/*.java"/>
+					<include name="org/openmdx/base/**/*.java"/>
+					<include name="org/openmdx/kernel/**/*.java"/>
+					<include name="org/openmdx/uses/**/*.java"/>
+					<include name="org/openmdx/compatibility/kernel/**/*.java"/>
+					<include name="org/openmdx/application/mof/**/*.java"/>
+					<include name="org/openmdx/application/xml/spi/*.java"/>
+					<exclude name="org/openmdx/base/accessor/jmi/**/*.java"/>
+					<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
+					<exclude name="org/openmdx/base/accessor/rest/**/*.java"/>
+					<exclude name="org/openmdx/base/accessor/view/**/*.java"/>
+					<exclude name="org/openmdx/base/persistence/**/*.java"/>
+					<exclude name="org/openmdx/base/rest/**/*.java"/>
+					<exclude name="org/openmdx/base/aop2/*.java"/>
+					<patternset refid="build.exclude"/>
+				</javac>
+			</antcontrib:else>
+		</antcontrib:if>
 		<available 
 			file="${openmdx.home}/ant/build.xml" 
 			type="file" 
@@ -257,10 +326,10 @@
 			<openmdx:archivefileset src="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
 				<patternset refid="openmdx-base.jar.content"/>
 			</openmdx:archivefileset>						
-			<openmdx:archivefileset src="${openmdx.home}/java2/${build.target.platform}/extension/lib/jdo2-api.jar">
+			<openmdx:archivefileset src="${openmdx.home}/osgi/${build.target.platform}/extension/lib/jdo2-api.jar">
 				<patternset refid="jdo-api.content"/>
 			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${openmdx.home}/java2/${build.target.platform}/extension/lib/jcache.jar">
+			<openmdx:archivefileset src="${openmdx.home}/osgi/${build.target.platform}/extension/lib/jcache.jar">
 				<patternset refid="jcache.content"/>
 			</openmdx:archivefileset>
 		</openmdx:archive>
@@ -299,7 +368,7 @@
 			<openmdx:archivefileset dir="src/war/openmdx-junit.war"/>
 			<openmdx:archivefileset
 				prefix="WEB-INF/lib"
-				dir="${openmdx.home}/java2/${build.target.platform}/extension"
+				dir="${openmdx.home}/osgi/${build.target.platform}/extension"
 			>
 				<include name="junit.jar"/>
 			</openmdx:archivefileset>
@@ -370,8 +439,8 @@
 				<include name="${build.target.platform}/ant/lib/*"/>
 				<include name="ant/etc/ant/*"/>
 				<include name="apache/jre-1.2/contribution/lib/*"/>
-				<include name="java2/${build.target.platform}/**"/>
-				<exclude name="java2/${build.target.platform}/**/.settings/*"/>
+				<include name="osgi/${build.target.platform}/**"/>
+				<exclude name="osgi/${build.target.platform}/**/.settings/*"/>
 				<include name="apache/${build.target.platform}/ant/**"/>
 				<include name="apache/${build.target.platform}/tomcat/**"/>
 				<include name="apache/${build.target.platform}/openejb/**"/>
@@ -384,7 +453,7 @@
 				<include name="${build.target.platform}/${base.dir.name}/**"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 
-				dir="${project.home}/${base.dir.name}" 
+				dir="${basedir}" 
 				prefix="${project.implementation.prefix}-${project.implementation.version}/${base.dir.name}/"
 			>
 				<include name=".classpath"/>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ConnectorContext.java,v 1.6 2010/08/03 14:02:01 hburger Exp $
+ * Name:        $Id: ConnectorContext.java,v 1.7 2010/10/11 06:46:24 hburger Exp $
  * Description: DataSource Context 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/03 14:02:01 $
+ * Date:        $Date: 2010/10/11 06:46:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,10 +50,7 @@
  */
 package org.openmdx.kernel.lightweight.naming.eis;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.naming.NamingException;
 import javax.resource.ResourceException;
@@ -118,62 +115,14 @@ class ConnectorContext extends ResourceContext {
         String uri
     ) throws ResourceException{
         int q = uri.indexOf('?');
-        String managedConnectionFactoryClass = uri.substring(
-            4, // "eis" scheme specific part
-            q < 0 ? uri.length() : q
-        );
-        Map<String,Object> configuration = new HashMap<String,Object>();
-        if(q > 0) {
-            for(String c : uri.substring(q + 1).split("&")) {
-                int e = c.indexOf('=');
-                if(e < 0) {
-                    configuration.put(c, null);
-                } else {
-                    configuration.put(
-                        c.substring(0, e),
-                        decode(c.substring(e + 1))
-                    );
-                }
-            }
-        }
-        Factory<ManagedConnectionFactory> managedConnectionFactoryBuilder = BeanFactory.newInstance(
-            managedConnectionFactoryClass,
-            configuration
+        Factory<ManagedConnectionFactory> managedConnectionFactoryBuilder = q < 0 ? BeanFactory.<ManagedConnectionFactory>newInstance(
+            uri.substring(4),
+            new HashMap<String, Object>()
+        ) : BeanFactory.<ManagedConnectionFactory>newInstance(
+            uri.substring(4, q),
+            getParameters(uri.substring(q + 1))
         );
         return managedConnectionFactoryBuilder.instantiate();
     }
     
-    /**
-     * Decode url property values
-     * 
-     * @param encodedValue
-     * 
-     * @return the native value
-     */
-    private static Object decode(
-        String encodedValue
-    ){
-        if(encodedValue.startsWith("(java.lang.Boolean)")) {
-            return Boolean.valueOf(encodedValue.substring(19));
-        } else if(encodedValue.startsWith("(java.lang.Integer)")){
-            return Integer.valueOf(encodedValue.substring(19));
-        } else if (encodedValue.startsWith("(java.lang.Long)")){
-            return Long.valueOf(encodedValue.substring(16));
-        } else if (encodedValue.startsWith("(java.lang.Short)")){
-            return Short.valueOf(encodedValue.substring(17));
-        } else if (encodedValue.startsWith("(java.lang.Byte)")){
-            return Byte.valueOf(encodedValue.substring(16));
-        } else if (encodedValue.startsWith("(java.lang.String)")){
-            return encodedValue.substring(18);
-        } else if (encodedValue.startsWith("(java.math.BigInteger)")){
-            return new BigInteger(encodedValue.substring(22));
-        } else if (encodedValue.startsWith("(java.math.BigDecimal)")){
-            return new BigDecimal(encodedValue.substring(22));
-//      } else if(encodedValue.indexOf('%') >= 0) {
-//          return URITransformation.decode(encodedValue);
-        } else {
-            return encodedValue;
-        }
-    }
-     
 }

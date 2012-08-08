@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI1ReferenceResolver.java,v 1.2 2010/06/18 13:09:46 hburger Exp $
+ * Name:        $Id: XMI1ReferenceResolver.java,v 1.3 2010/09/21 16:32:46 hburger Exp $
  * Description: XMI1 Reference Resolver
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/18 13:09:46 $
+ * Date:        $Date: 2010/09/21 16:32:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -177,7 +177,7 @@ public class XMI1ReferenceResolver
           "",
           "",
           UML1VisibilityKind.PUBLIC,
-          new Boolean(atts.getValue("isSpecification")).booleanValue()
+          Boolean.parseBoolean(atts.getValue("isSpecification"))
         );
         // parent maybe defined as XML attribute
         if (atts.getValue("parent") != null)

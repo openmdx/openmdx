@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePaneControl.java,v 1.195 2010/07/22 23:18:23 wfro Exp $
+ * Name:        $Id: ReferencePaneControl.java,v 1.198 2010/10/25 08:58:47 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.195 $
+ * Revision:    $Revision: 1.198 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/22 23:18:23 $
+ * Date:        $Date: 2010/10/25 08:58:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,7 +71,6 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
@@ -299,6 +298,7 @@ public class ReferencePaneControl
     	Texts_1_0 texts = app.getTexts();
     	GridControl gridControl = grid.getGridControl();
     	boolean isMobile = p.getViewPortType() == ViewPort.Type.MOBILE;
+        boolean showSearchFormOnInit = app.getPortalExtension().showSearchForm(gridControl, app);    	
     	p.write("  <div id=\"", SEARCH_FORM_NAME, id, "\" class=\"dialog\" style=\"", formStyle, "\">");
     	if(isMobile) {
     		p.write("    <fieldset>");
@@ -350,8 +350,11 @@ public class ReferencePaneControl
     		p.write("      <p>");        	
             p.write("    ", p.getImg("class=\"popUpButton\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_HELP, "\" border=\"0\" alt=\"?\" align=\"top\" onclick=\"javascript:void(window.open('helpSearch_", app.getCurrentLocaleAsString(), ".html', 'Help', 'fullscreen=no,toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=yes,directories=no,location=no,width=400'));\""));    		        	
     		p.write("      &nbsp;&nbsp;&nbsp;&nbsp;");        	
+            String fieldIdShowSearchFormOnInit = SEARCH_FORM_NAME + id + "." + WebKeys.REQUEST_PARAMETER_SHOW_SEARCH_FORM;
+            searchParams += "+'&" + WebKeys.REQUEST_PARAMETER_SHOW_SEARCH_FORM + "='+encodeURIComponent($F('" + fieldIdShowSearchFormOnInit + "'))";
             p.write("      <a type=\"submit\" class=\"abutton\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), searchParams, updateTabScriptletPost, ";\">&nbsp;&nbsp;&nbsp;", texts.getOkTitle(), "&nbsp;&nbsp;&nbsp;</a>");
             p.write("      <a type=\"submit\" class=\"abutton\" onclick=\"javascript:$('", FILTER_AREA_NAME, id, "').style.display='none';return false;\">", texts.getCancelTitle(), "</a>");
+            p.write("      &nbsp;&nbsp;&nbsp;&nbsp;<input type=\"checkbox\" id=\"", fieldIdShowSearchFormOnInit, "\" name=\"", fieldIdShowSearchFormOnInit, "\" ", (showSearchFormOnInit ? "checked" : ""), " value=\"true\">&nbsp;", texts.getShowTitle(), "</input><br />");
 	        p.write("      </td></tr>");        	
     		p.write("    </table>");
     		// Key listeners for Enter and Escape
@@ -415,20 +418,26 @@ public class ReferencePaneControl
 	                String tabId = view.getContainerElementId() == null ? 
 	                	Integer.toString(tabIndex) : 
 	                	view.getContainerElementId() + "-" + Integer.toString(tabIndex);                                    
-	                String tabTitle = action.getTitle();
-	                boolean isGroupTab = tabTitle.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
-	                if(isGroupTab) tabTitle = tabTitle.substring(1);
-	                String encodedTabTitle = htmlEncoder.encode(tabTitle, false);
+	                String tabLabel = action.getTitle();
+	                boolean isGroupTab = tabLabel.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
+	                if(isGroupTab) tabLabel = tabLabel.substring(1);
+	                String encodedTabLabel = htmlEncoder.encode(tabLabel, false);
+	                String encodedTabTitle = action.getToolTip() == null ?
+	                	null :
+	                		htmlEncoder.encode(
+	                			action.getToolTip().startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? action.getToolTip().substring(1) : action.getToolTip(),   
+	                			false
+	                		);
 	                if(!isGroupTabActive && isGroupTab) {
 	                    isGroupTabActive = true;
 	                    if(isFirstGroupTab) {
 	                    	if(p.getViewPortType() == ViewPort.Type.MOBILE) {	 
 	                    		if(nReferences > 1) {
 					                p.write("    </ul>");
-					                p.write("    <ul id=\"gridHead", Integer.toString(paneIndex), "\" title=\"", encodedTabTitle, "\" selected=\"true\" style=\"position:relative;top:auto;min-height:0px;\" onclick=\"javascript:var e=document.getElementById('gridPanel", Integer.toString(paneIndex), "');if(e.style.display=='block'){e.style.display='none';}else{e.style.display='block';};\">");
-					                p.write("      <li class=\"group\" style=\"height:40px;\"><div style=\"padding-top:10px;\">", WebKeys.TAB_GROUPING_CHARACTER, "&nbsp;", encodedTabTitle, "...</div></li>");
+					                p.write("    <ul id=\"gridHead", Integer.toString(paneIndex), "\" title=\"", encodedTabLabel, "\" selected=\"true\" style=\"position:relative;top:auto;min-height:0px;\" onclick=\"javascript:var e=document.getElementById('gridPanel", Integer.toString(paneIndex), "');if(e.style.display=='block'){e.style.display='none';}else{e.style.display='block';};\">");
+					                p.write("      <li class=\"group\" style=\"height:40px;\"><div style=\"padding-top:10px;\">", WebKeys.TAB_GROUPING_CHARACTER, "&nbsp;", encodedTabLabel, "...</div></li>");
 					                p.write("    </ul>");
-					                p.write("    <ul id=\"gridPanel", Integer.toString(paneIndex), "\" title=\"", encodedTabTitle, "\" selected=\"true\" style=\"display:none;position:relative;top:auto;min-height:0\">");
+					                p.write("    <ul id=\"gridPanel", Integer.toString(paneIndex), "\" title=\"", encodedTabLabel, "\" selected=\"true\" style=\"display:none;position:relative;top:auto;min-height:0\">");
 	                    		}
 	                    	}
 			                isFirstGroupTab = false;
@@ -447,13 +456,13 @@ public class ReferencePaneControl
 	                		"";
 	            	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
 	            		p.write("      <li>");
-	            		p.write("        <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:var c=$('gridContent", tabId, "');if(c.style.display=='block'){c.style.display='none';}else{c.style.display='block';new Ajax.Updater('gridContent", tabId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true});};return false;\">", encodedTabTitle, "</a>");
+	            		p.write("        <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:var c=$('gridContent", tabId, "');if(c.style.display=='block'){c.style.display='none';}else{c.style.display='block';new Ajax.Updater('gridContent", tabId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true});};return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a>");
 			            p.write("        <div id=\"gridContent", tabId, "\">");
 			            p.write("        </div>");                
 	            		p.write("      </li>");
 	            	}
 	            	else {
-	            		p.write("  <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:gTabSelect(this);new Ajax.Updater('", containerId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});return false;\">", encodedTabTitle, "</a>");
+	            		p.write("  <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:gTabSelect(this);new Ajax.Updater('", containerId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a>");
 	            	}
 	            }
 	            if(p.getViewPortType() == ViewPort.Type.MOBILE) {
@@ -800,10 +809,8 @@ public class ReferencePaneControl
 	                }
                 }
                 else {
-	                // TODO: should filter area be shown when the search form is filled?	                
-	                boolean showFilterArea = false; 
-	                // grid.getCurrentFilterValue() != null) &&  (grid.getCurrentFilterValue().trim().length() > 0));
-	                p.write("<div id=\"", FILTER_AREA_NAME, tabId, "\" style=\"display:", (showFilterArea ? "block" : "none"), ";\">");
+	                boolean showSearchFormOnInit = app.getPortalExtension().showSearchForm(gridControl, app);
+	                p.write("<div id=\"", FILTER_AREA_NAME, tabId, "\" style=\"display:", (showSearchFormOnInit ? "block" : "none"), ";\">");
 	                p.write("  <div id=\"customFilterArea", tabId, "\"></div>");                
 	                if(filters.length > 1) {
 	                    p.write("  <div id=\"defaultFilterArea", tabId, "\">");                
@@ -823,7 +830,7 @@ public class ReferencePaneControl
 	                        	updateTabScriptletPre, 
 	                        	updateTabScriptletPost
 	                        );
-	                    }                  
+	                    }
 	                    p.write("        </td>");
 	                    p.write("      </tr>");
 	                    p.write("    </table>");
@@ -917,17 +924,11 @@ public class ReferencePaneControl
                 	SysLog.detail("grid row", Integer.toString(j));
                     long rowId = ReferencePaneControl.currentRowId++;                    
                     Object[] row = (Object[])rows[j];    
+                    ObjectReference objRow = (ObjectReference)((AttributeValue)row[0]).getValue(true);
                     // row color
-                    String rowColor = null;
-                    String rowBackColor = null;
-                    if(app.getPortalExtension().hasGridColours(gridControl.getObjectContainer().getReferencedTypeName())) {
-                        for(int k = 0; k < gridControl.getShowMaxMember(); k++) { // to color based on ALL cells, use row.length instead of grid.getShowMaxMember()
-                            if((rowBackColor = ((AttributeValue)row[k]).getBackColor()) != null) {
-                                rowColor = ((AttributeValue)row[k]).getColor();
-                                break;
-                            }
-                        }
-                    }                    
+                    String[] gridRowColors = app.getPortalExtension().getGridRowColors(objRow.getObject());
+                    String rowColor = gridRowColors == null ? null : gridRowColors[0];
+                    String rowBackColor = gridRowColors == null ? null : gridRowColors[1];
                     // style modifier
                     String styleModifier = "";
                     styleModifier += (rowColor == null) || "inherit".equals(rowColor) ? 
@@ -939,7 +940,6 @@ public class ReferencePaneControl
                     styleModifier = styleModifier.length() == 0 ? 
                     	styleModifier : 
                     		"style=\"" + styleModifier + "\"";                    
-                    ObjectReference objRow = (ObjectReference)((AttributeValue)row[0]).getValue(true);
                     if(p.getViewPortType() == ViewPort.Type.MOBILE) {
                     	if(j % 2 == 0) {
                     		p.write("        <tr class=\"reg\">");                    		
@@ -1791,7 +1791,6 @@ public class ReferencePaneControl
 
     public static final String SEARCH_FORM_NAME = "searchForm";
     public static final String FILTER_AREA_NAME = "filterArea";
-    
     public static final int[] DEFAULT_PAGE_SIZES = new int[]{5, 10, 20, 50, 100, 200, 500};  
 
     // Unique number for each generated row allows to generate unique id tags 

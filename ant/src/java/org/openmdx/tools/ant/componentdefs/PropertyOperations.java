@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Ant, http://www.openmdx.org/
- * Name:        $Id: PropertyOperations.java,v 1.1 2010/08/04 19:50:24 hburger Exp $
+ * Name:        $Id: PropertyOperations.java,v 1.2 2010/09/13 09:44:35 hburger Exp $
  * Description: Ant Property Operations
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/04 19:50:24 $
+ * Date:        $Date: 2010/09/13 09:44:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,7 @@ import org.apache.tools.ant.property.NullReturn;
  */
 public class PropertyOperations implements PropertyEvaluator {
 
-	@Override
+//	@Override
 	public Object evaluate(
 		String property, 
 		PropertyHelper propertyHelper

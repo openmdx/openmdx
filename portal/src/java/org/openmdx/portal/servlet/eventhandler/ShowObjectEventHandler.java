@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectEventHandler.java,v 1.65 2010/04/23 13:24:20 wfro Exp $
+ * Name:        $Id: ShowObjectEventHandler.java,v 1.66 2010/09/28 09:39:01 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.65 $
+ * Revision:    $Revision: 1.66 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/23 13:24:20 $
+ * Date:        $Date: 2010/09/28 09:39:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,7 +72,6 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefStruct;
 import javax.servlet.http.HttpSession;
 
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -586,8 +585,9 @@ public class ShowObjectEventHandler {
                                         result
                                     );
                                     if(newTarget == null) {
-                                        // Move values from param/result struct to OperationTabControl
                                         try {
+                                            nextView.refresh(true);
+                                            currentView.setOperationTabResult(tab);
                                             currentView.structToMap(
                                                 param, 
                                                 (Map)tab.getFieldGroup()[0].getObject(), 
@@ -599,22 +599,14 @@ public class ShowObjectEventHandler {
                                                 model.getElement(result.refTypeName())
                                             );
                                         }
-                                        catch (JmiServiceException e) {
-                                        	SysLog.warning(e.getMessage(), e.getCause());
-                                            application.addErrorMessage(
-                                                application.getTexts().getErrorTextCanNotSetOperationResult(), new String[] {currentView.getRefObject().refMofId(), tab.getOperationTabControl().getOperationName(), e.getMessage() }
-                                            );
-                                        }
-                                        try {
-                                            nextView.refresh(true);
-                                            tab.getFieldGroup()[0].refresh(false);
-                                            tab.getFieldGroup()[1].refresh(false);
-                                            currentView.setOperationTabResult(tab);
-                                        }
                                         // As fallback go back to returnToView in case the refresh fails
                                         // for the object the operation was invoked on. This is
                                         // typically the case when the object was removed/moved by the operation
                                         catch (Exception e) {
+                                        	SysLog.warning(e.getMessage(), e.getCause());
+                                            application.addErrorMessage(
+                                                application.getTexts().getErrorTextCanNotSetOperationResult(), new String[] {currentView.getRefObject().refMofId(), tab.getOperationTabControl().getOperationName(), e.getMessage() }
+                                            );
                                             nextView = currentView.getPreviousView(null);
                                             nextView.refresh(true);
                                         }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: NumberValue.java,v 1.49 2010/04/27 08:28:06 wfro Exp $
+ * Name:        $Id: NumberValue.java,v 1.50 2010/09/08 09:41:08 wfro Exp $
  * Description: NumberValue
- * Revision:    $Revision: 1.49 $
+ * Revision:    $Revision: 1.50 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 08:28:06 $
+ * Date:        $Date: 2010/09/08 09:41:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -247,12 +247,13 @@ public class NumberValue
     ) throws ServiceException {
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();       
         label = this.getLabel(attribute, p, label);
+        String title = this.getTitle(attribute, label);
         if(forEditing) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0) ? 
                 feature + "[" + Integer.toString(tabIndex) + "]" : 
                 id;            
-            p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {
                 p.write("<td ", rowSpanModifier, ">");
                 Autocompleter_1_0 autocompleter = this.getAutocompleter(

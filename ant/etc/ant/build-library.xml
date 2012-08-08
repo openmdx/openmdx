@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-library.xml,v 1.168 2010/08/04 19:51:10 hburger Exp $
+= Name:        $Id: build-library.xml,v 1.171 2010/12/20 13:48:32 wfro Exp $
 = Description: openMDX Build Library
-= Revision:    $Revision: 1.168 $
-= Date:        $Date: 2010/08/04 19:51:10 $
+= Revision:    $Revision: 1.171 $
+= Date:        $Date: 2010/12/20 13:48:32 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -123,6 +123,8 @@
 	<target name="config" description="Print project configuration information" depends="init">
 		<available file="${user.build.properties}" type="file" value="+" property="user.build.properties.are.present"/>
 		<property name="user.build.properties.are.present" value="-"/>
+		<available file="${java.vendor.properties}" type="file" value="+" property="java.vendor.properties.are.present"/>
+		<property name="java.vendor.properties.are.present" value="-"/>
 		<available file="${target.platform.properties}" type="file" value="+" property="target.platform.properties.are.present"/>
 		<property name="target.platform.properties.are.present" value="-"/>
 		<available file="${java.platform.properties}" type="file" value="+" property="java.platform.properties.are.present"/>
@@ -181,6 +183,7 @@
 		</condition>
 		<property name="source.distribution.is-set" value="not set"/>
 		<echo message="user.build.properties          = [${user.build.properties.are.present}] ${user.build.properties}"/>
+		<echo message="java.vendor.properties         = [${java.vendor.properties.are.present}] ${java.vendor.properties}"/>
 		<echo message="target.platform.properties     = [${target.platform.properties.are.present}] ${target.platform.properties}"/>
 		<echo message="java.platform.properties       = [${java.platform.properties.are.present}] ${java.platform.properties}"/>
 		<echo message="project.build.properties       = [${project.build.properties.are.present}] ${project.build.properties}"/>
@@ -196,6 +199,7 @@
 		<echo message="JRE_13                         = ${JRE_13.info}"/>
 		<echo message="JRE_14                         = ${JRE_14.info}"/>
 		<echo message="JRE_15                         = ${JRE_15.info}"/>
+		<echo message="JRE_16                         = ${JRE_16.info}"/>
 		<echo/>
 		<echo message="ant.version                    = ${ant.version}"/>
 		<echo message="ant.java.version               = ${ant.java.version}"/>
@@ -806,7 +810,7 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 			maxmemory="${build.memory.limit}" 
 			tempdir="${tmp.dir}"
 		>
-			<jvmarg value="-Djava.endorsed.dirs=${openmdx.home}/java2/${build.java.platform}/endorsed/lib"/>
+			<jvmarg value="-Djava.endorsed.dirs=${openmdx.home}/osgi/${build.java.platform}/endorsed/lib"/>
 			<jvmarg value="-Xmx200M" />
 			<classpath refid="project.bin.classpath"/>
 			<formatter type="xml"/>
@@ -921,7 +925,7 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 			<patternset refid="project.rmi.jrmp.classes"
 		/>
 			<compilerarg value="-bootclasspath"/>
-			<compilerarg file="${build.target.jre}/lib/rt.jar"/>
+			<compilerarg file="${build.target.jre}/${build.compile.bootclasspath}"/>
 		</rmic>
 		<rmic 
 			iiop="true" 
@@ -934,7 +938,7 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 		>
 			<patternset refid="project.rmi.iiop.classes"/>
 			<compilerarg value="-bootclasspath"/>
-			<compilerarg file="${build.target.jre}/lib/rt.jar"/>
+			<compilerarg file="${build.target.jre}/${build.compile.bootclasspath}"/>
 		</rmic>
 		<property name="eclipse.rmi" location="${basedir}/build/${build.target.platform}/eclipse/bin"/>
 		<mkdir dir="${build.dir}/lib"/>
@@ -954,40 +958,16 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 				<antcontrib:if>
 					<available file="java" filepath="${build.dir}/src" type="dir"/>
 					<antcontrib:then>
-						<javac destdir="${build.dir}/bin" debug="${build.debug}" optimize="${build.optimize}" fork="true" memoryMaximumSize="${build.memory.limit}" classpathref="project.lib.classpath" source="${build.source.version}" target="${build.target.version}">
-							<src>
-								<pathelement location="${build.dir}/src/java"/>
-								<pathelement location="${basedir}/src/java"/>
-							</src>
-							<patternset refid="build.exclude"/>
-						</javac>
-					</antcontrib:then>
-					<antcontrib:else>
-						<javac destdir="${build.dir}/bin" debug="${build.debug}" optimize="${build.optimize}" fork="true" memoryMaximumSize="${build.memory.limit}" classpathref="project.lib.classpath" source="${build.source.version}" target="${build.target.version}">
-							<src>
-								<pathelement location="${basedir}/src/java"/>
-							</src>
-							<patternset refid="build.exclude"/>
-						</javac>
-					</antcontrib:else>
-				</antcontrib:if>
-			</antcontrib:then>
-			<antcontrib:else>
-				<fail message="JRE ${build.target.jre} not found" unless="build.target.jre.found"/>
-				<antcontrib:if>
-					<available file="java" filepath="${build.dir}/src" type="dir"/>
-					<antcontrib:then>
 						<javac 
 							destdir="${build.dir}/bin" 
 							debug="${build.debug}" 
 							optimize="${build.optimize}" 
-							fork="true" memoryMaximumSize="${build.memory.limit}" 
+							fork="true" 
+							memoryMaximumSize="${build.memory.limit}" 
 							classpathref="project.lib.classpath" 
 							source="${build.source.version}" 
-							target="${build.target.version}" 
-							bootclasspath="${build.target.jre}/lib/rt.jar" 
-							extdirs="${build.target.jre}/ext"
-							includeantruntime="false"
+							target="${build.target.version}"
+							includeantruntime="${build.include.ant.runtime}"
 						>
 							<src>
 								<pathelement location="${build.dir}/src/java"/>
@@ -1005,16 +985,149 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 							memoryMaximumSize="${build.memory.limit}" 
 							classpathref="project.lib.classpath" 
 							source="${build.source.version}" 
-							target="${build.target.version}" 
-							bootclasspath="${build.target.jre}/lib/rt.jar" 
-							extdirs="${build.target.jre}/ext"
-							includeantruntime="true"
+							target="${build.target.version}"
+							includeantruntime="${build.include.ant.runtime}"
 						>
 							<src>
 								<pathelement location="${basedir}/src/java"/>
 							</src>
 							<patternset refid="build.exclude"/>
 						</javac>
+					</antcontrib:else>
+				</antcontrib:if>
+			</antcontrib:then>
+			<antcontrib:else>
+				<fail message="JRE ${build.target.jre} not found" unless="build.target.jre.found"/>
+				<antcontrib:if>
+					<available file="java" filepath="${build.dir}/src" type="dir"/>
+					<antcontrib:then>
+						<antcontrib:if>
+							<istrue value="${build.compile.without.bootclasspath}"/>
+							<antcontrib:then>
+								<javac 
+									destdir="${build.dir}/bin" 
+									debug="${build.debug}" 
+									optimize="${build.optimize}" 
+									fork="true" memoryMaximumSize="${build.memory.limit}" 
+									classpathref="project.lib.classpath" 
+									source="${build.source.version}" 
+									target="${build.target.version}" 
+									extdirs="${build.target.jre}/ext"
+									includeantruntime="${build.include.ant.runtime}"
+								>
+									<src>
+										<pathelement location="${build.dir}/src/java"/>
+										<pathelement location="${basedir}/src/java"/>
+									</src>
+									<patternset refid="build.exclude"/>
+								</javac>
+							</antcontrib:then>
+							<antcontrib:elseif>
+								<istrue value="${build.compile.without.bootclasspath+compliance-level}"/>
+								<antcontrib:then>
+									<javac 
+										destdir="${build.dir}/bin" 
+										debug="${build.debug}" 
+										optimize="${build.optimize}" 
+										fork="true" 
+										memoryMaximumSize="${build.memory.limit}" 
+										classpathref="project.lib.classpath" 
+										extdirs="${build.target.jre}/ext"
+										includeantruntime="${build.include.ant.runtime}"
+									>
+										<src>
+											<pathelement location="${build.dir}/src/java"/>
+											<pathelement location="${basedir}/src/java"/>
+										</src>
+										<patternset refid="build.exclude"/>
+									</javac>
+								</antcontrib:then>
+							</antcontrib:elseif>
+							<antcontrib:else>
+								<javac 
+									destdir="${build.dir}/bin" 
+									debug="${build.debug}" 
+									optimize="${build.optimize}" 
+									fork="true" memoryMaximumSize="${build.memory.limit}" 
+									classpathref="project.lib.classpath" 
+									source="${build.source.version}" 
+									target="${build.target.version}" 
+									bootclasspath="${build.target.jre}/${build.compile.bootclasspath}" 
+									extdirs="${build.target.jre}/ext"
+									includeantruntime="${build.include.ant.runtime}"
+								>
+									<src>
+										<pathelement location="${build.dir}/src/java"/>
+										<pathelement location="${basedir}/src/java"/>
+									</src>
+									<patternset refid="build.exclude"/>
+								</javac>
+							</antcontrib:else>
+						</antcontrib:if>
+					</antcontrib:then>
+					<antcontrib:else>
+						<antcontrib:if>
+							<istrue value="${build.compile.without.bootclasspath}"/>
+							<antcontrib:then>
+								<javac 
+									destdir="${build.dir}/bin" 
+									debug="${build.debug}" 
+									optimize="${build.optimize}" 
+									fork="true" 
+									memoryMaximumSize="${build.memory.limit}" 
+									classpathref="project.lib.classpath" 
+									source="${build.source.version}" 
+									target="${build.target.version}" 
+									extdirs="${build.target.jre}/ext"
+									includeantruntime="${build.include.ant.runtime}"
+								>
+									<src>
+										<pathelement location="${basedir}/src/java"/>
+									</src>
+									<patternset refid="build.exclude"/>
+								</javac>
+							</antcontrib:then>
+							<antcontrib:elseif>
+								<istrue value="${build.compile.without.bootclasspath+compliance-level}"/>
+								<antcontrib:then>
+									<javac 
+										destdir="${build.dir}/bin" 
+										debug="${build.debug}" 
+										optimize="${build.optimize}" 
+										fork="true" memoryMaximumSize="${build.memory.limit}" 
+										classpathref="project.lib.classpath" 
+										extdirs="${build.target.jre}/ext"
+										includeantruntime="${build.include.ant.runtime}"
+									>
+										<src>
+											<pathelement location="${basedir}/src/java"/>
+										</src>
+										<patternset refid="build.exclude"/>
+									</javac>
+								</antcontrib:then>
+							</antcontrib:elseif>
+							<antcontrib:else>
+								<echo>JAVAC:standard</echo>
+								<javac 
+									destdir="${build.dir}/bin" 
+									debug="${build.debug}" 
+									optimize="${build.optimize}" 
+									fork="true" 
+									memoryMaximumSize="${build.memory.limit}" 
+									classpathref="project.lib.classpath" 
+									source="${build.source.version}" 
+									target="${build.target.version}" 
+									bootclasspath="${build.target.jre}/${build.compile.bootclasspath}" 
+									extdirs="${build.target.jre}/ext"
+									includeantruntime="${build.include.ant.runtime}"
+								>
+									<src>
+										<pathelement location="${basedir}/src/java"/>
+									</src>
+									<patternset refid="build.exclude"/>
+								</javac>
+							</antcontrib:else>
+						</antcontrib:if>
 					</antcontrib:else>
 				</antcontrib:if>
 			</antcontrib:else>
@@ -1492,8 +1605,14 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 			delimiter="/"
 		/>
 	</target>
-	<target name="-platform-" unless="build.exclude.${build.target.platform}">
-		<antcall target="platform" inheritAll="false">
+	<target 
+		name="-platform-" 
+		unless="build.exclude.${build.target.platform}"
+	>
+		<antcall 
+			target="platform" 
+			inheritAll="false"
+		>
 			<param name="build.target.platform" value="${build.target.platform}"/>
 		</antcall>
 	</target>
@@ -1518,7 +1637,7 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 			<and>
 				<equals arg1="${build.target.platform}" arg2="jre-1.5" />
 				<not>
-					<available file="${env.JRE_15}/lib/rt.jar"/>
+					<available file="${env.JRE_15}/${build.compile.bootclasspath}"/> 
 				</not>
 			</and>
 		</condition>

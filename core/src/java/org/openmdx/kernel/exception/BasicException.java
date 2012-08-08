@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicException.java,v 1.43 2010/06/02 13:45:39 hburger Exp $
+ * Name:        $Id: BasicException.java,v 1.44 2010/11/10 06:30:03 hburger Exp $
  * Description: Basic Exception
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:39 $
+ * Date:        $Date: 2010/11/10 06:30:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -363,10 +363,12 @@ public final class BasicException extends Exception {
     ){
         if(logger.isLoggable(Level.WARNING)) {
             LogRecord record = new ForeignLogRecord(
+                logger.getName(), 
                 holder.getClass().getName(), 
                 Level.WARNING, 
                 holder.getCause().getDescription()
             );
+            // If we used resource bundles we would them set here
             record.setThrown((Throwable)holder);
             logger.log(record);
         }

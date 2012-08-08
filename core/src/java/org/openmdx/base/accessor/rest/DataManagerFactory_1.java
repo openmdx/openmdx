@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataManagerFactory_1.java,v 1.23 2010/08/09 13:13:21 hburger Exp $
+ * Name:        $Id: DataManagerFactory_1.java,v 1.25 2010/12/22 00:14:00 hburger Exp $
  * Description: Data Object Manager Factory
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:13:21 $
+ * Date:        $Date: 2010/12/22 00:14:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.ejb.TransactionAttributeType;
 import javax.jdo.Constants;
 import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOFatalDataStoreException;
@@ -86,6 +85,7 @@ import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
+import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Classes;
@@ -364,7 +364,7 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
         String password
     ) {
         try {
-            RestConnectionSpec restConnectionSpec = new RestConnectionSpec(
+            RestConnectionSpec connectionSpec = new RestConnectionSpec(
                 userid,
                 password
             );
@@ -372,11 +372,12 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
                 this,
                 false,
                 userid == null ? null : PersistenceManagers.toPrincipalChain(userid),
-                this.connectionFactory.getConnection(restConnectionSpec),
-                getOptimistic() && this.connectionFactory2 != null ? this.connectionFactory2.getConnection(restConnectionSpec) : null,
+                this.connectionFactory.getConnection(connectionSpec),
+                getOptimistic() && this.connectionFactory2 != null ? this.connectionFactory2.getConnection(connectionSpec) : null,
                 this.plugIns, 
                 this.optimalFetchSize, 
-                this.cacheThreshold  
+                this.cacheThreshold, 
+                connectionSpec  
             );
         } catch (ResourceException exception) {
             throw BasicException.initHolder(

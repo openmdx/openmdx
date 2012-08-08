@@ -1,3 +1,4 @@
+DROP TABLE prefs_Preference;
 CREATE TABLE prefs_Preference(
     object_rid varchar(100) NOT NULL,
     object_oid varchar(200) NOT NULL,
@@ -9,12 +10,13 @@ CREATE TABLE prefs_Preference(
     parent varchar(100) NULL,
     string_value text NULL,
     integer_value integer NULL,
-    boolean_value varchar(10) NULL,
+    boolean_value boolean NULL,
     uri_value varchar(200) NULL,
     decimal_value decimal(18,9) NULL,
     PRIMARY KEY (object_rid, object_oid, object_idx)
 );
 
+DROP SEQUENCE app1_ref_seq;
 CREATE SEQUENCE app1_ref_seq
   INCREMENT 1
   MINVALUE 1
@@ -22,6 +24,7 @@ CREATE SEQUENCE app1_ref_seq
   START 100000
   CACHE 1;
   
+DROP SEQUENCE audit_ref_seq;
 CREATE SEQUENCE audit_ref_seq
   INCREMENT 1
   MINVALUE 1
@@ -29,6 +32,7 @@ CREATE SEQUENCE audit_ref_seq
   START 100000
   CACHE 1;
   
+DROP SEQUENCE test_ref_seq;
 CREATE SEQUENCE test_ref_seq
   INCREMENT 1
   MINVALUE 1
@@ -38,326 +42,327 @@ CREATE SEQUENCE test_ref_seq
 
 
 
-CREATE TABLE app1_Address (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	object__class varchar (200) NULL ,
-	description varchar (200) NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	postal_code varchar (100) NULL ,
-	street varchar (100) NULL ,
-	country varchar (100) NULL ,
-	city varchar (100) NULL ,
-	house_number varchar (100) NULL ,
-	address varchar (100) NULL 
-)
-;
+/*  Test test::openmdx::app1 */
 
-CREATE TABLE app1_Address_N (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	modified_by varchar (50) NULL ,
-	created_by varchar (50) NULL ,
-	address_line varchar (100) NULL
-)
-;
+  DROP TABLE app1_Address;
+  CREATE TABLE app1_Address (
+    object_rid VARCHAR (100) NULL ,
+    p$$object_rsx VARCHAR (100)  NULL ,
+    object_oid VARCHAR (100) NULL ,
+    p$$object_oid$0 VARCHAR (100)  NULL ,
+    p$$object_oid$1 VARCHAR (100)  NULL ,
+    p$$object_parent__rid VARCHAR (100)  NULL ,
+    p$$object_parent__oid VARCHAR (100)  NULL ,
+    object__class VARCHAR (200) NULL ,
+    p$$unit_of_work__rid VARCHAR (100)  NULL,
+    description VARCHAR (200) NULL ,
+    created_at TIMESTAMP (3) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
+    postal_code VARCHAR (100) NULL ,
+    street VARCHAR (100) NULL ,
+    country VARCHAR (100) NULL ,
+    city VARCHAR (100) NULL ,
+    house_number VARCHAR (100) NULL ,
+    address VARCHAR (100) NULL
+  );
+  
+  DROP TABLE app1_Address_N;
+  CREATE TABLE app1_Address_N (
+    object_rid VARCHAR (100) NULL ,
+    p$$object_rsx VARCHAR (100) NULL ,
+    object_oid VARCHAR (100) NULL ,
+    p$$object_oid$0 VARCHAR (100)  NULL ,
+    p$$object_oid$1 VARCHAR (100)  NULL ,
+    object_idx INTEGER NOT NULL ,
+    p$$object_parent__rid VARCHAR (100)  NULL ,
+    p$$object_parent__oid VARCHAR (100)  NULL ,
+    object__class VARCHAR (200) NULL ,
+    p$$unit_of_work__rid VARCHAR (100)  NULL,
+    modified_by VARCHAR (50) NULL ,
+    created_by VARCHAR (50) NULL ,
+    address_line VARCHAR (100) NULL
+  );
+  
+  DROP TABLE app1_DOC;
+  CREATE TABLE app1_DOC (
+    object_rid VARCHAR (100) NULL ,
+    p$$object_rsx VARCHAR (100)  NULL ,
+    object_oid VARCHAR (100) NULL ,
+    p$$object_oid$0 VARCHAR (100)  NULL ,
+    p$$object_oid$1 VARCHAR (100)  NULL ,
+    object_idx INTEGER NOT NULL ,
+    p$$object_parent__rid VARCHAR (100)  NULL ,
+    p$$object_parent__oid VARCHAR (100)  NULL ,
+    object__class VARCHAR (200) NULL ,
+    p$$unit_of_work__rid VARCHAR (100)  NULL,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    created_by VARCHAR (200) NULL ,
+    modified_by VARCHAR (200) NULL ,
+    description VARCHAR (100) NULL ,
+    content bytea NULL ,
+    keyword VARCHAR (32) NULL
+  );
+  
+  DROP TABLE app1_Invoice;
+  CREATE TABLE app1_Invoice (
+    object_rid VARCHAR (100) NULL ,
+    p$$object_rsx VARCHAR (100)  NULL ,
+    object_oid VARCHAR (100) NULL ,
+    p$$object_oid$0 VARCHAR (100)  NULL ,
+    p$$object_oid$1 VARCHAR (100)  NULL ,
+    object_idx INTEGER NOT NULL ,
+    p$$object_parent__rid VARCHAR (100)  NULL ,
+    p$$object_parent__oid VARCHAR (100)  NULL ,
+    object__class VARCHAR (200) NULL ,
+    p$$unit_of_work__rid VARCHAR (100)  NULL,
+    description VARCHAR (200) NULL ,
+    product_group_id VARCHAR (100) NULL ,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    created_by VARCHAR (100) NULL ,
+    modified_by VARCHAR (100) NULL
+  );
+  
+  DROP TABLE app1_InvoicePosition;
+  CREATE TABLE app1_InvoicePosition (
+    object_rid VARCHAR (100) NULL ,
+    p$$object_rsx VARCHAR (100)  NULL ,
+    object_oid VARCHAR (100) NULL ,
+    p$$object_oid$0 VARCHAR (100)  NULL ,
+    p$$object_oid$1 VARCHAR (100)  NULL ,
+    object_idx INTEGER NOT NULL ,
+    p$$object_parent__rid VARCHAR (100)  NULL ,
+    p$$object_parent__oid VARCHAR (100)  NULL ,
+    object__class VARCHAR (200) NULL ,
+    p$$unit_of_work__rid VARCHAR (100)  NULL,
+    description VARCHAR (200) NULL ,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    created_by VARCHAR (100) NULL ,
+    modified_by VARCHAR (100) NULL ,
+    product_id VARCHAR (50) NULL
+  );
+  
+  DROP TABLE app1_Member;
+  CREATE TABLE app1_Member (
+    object_rid VARCHAR (100) NULL ,
+    p$$object_rsx VARCHAR (100)  NULL ,
+    object_oid VARCHAR (100) NULL ,
+    p$$object_oid$0 VARCHAR (100)  NULL ,
+    p$$object_oid$1 VARCHAR (100)  NULL ,
+    object_idx INTEGER NOT NULL ,
+    p$$object_parent__rid VARCHAR (100)  NULL ,
+    p$$object_parent__oid VARCHAR (100)  NULL ,
+    object__class VARCHAR (200) NULL ,
+    p$$unit_of_work__rid VARCHAR (100)  NULL,
+    description VARCHAR (200) NULL ,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_by VARCHAR (50) NULL ,
+    created_by VARCHAR (50) NULL ,
+    m1 VARCHAR (200) NULL ,
+    p$$m1__rid VARCHAR (200) NULL ,
+    p$$m1__oid VARCHAR (200) NULL ,
+    m2 VARCHAR (200) NULL ,
+    p$$m2__rid VARCHAR (200) NULL ,
+    p$$m2__oid VARCHAR (200) NULL
+  );
+  
+  DROP TABLE app1_PersonGroup;
+  CREATE TABLE app1_PersonGroup (
+    object_rid VARCHAR (100) NULL ,
+    p$$object_rsx VARCHAR (100)  NULL ,
+    object_oid VARCHAR (100) NULL ,
+    p$$object_oid$0 VARCHAR (100)  NULL ,
+    p$$object_oid$1 VARCHAR (100)  NULL ,
+    object_idx INTEGER NULL ,
+    p$$object_parent__rid VARCHAR (100)  NULL ,
+    p$$object_parent__oid VARCHAR (100)  NULL ,
+    object__class VARCHAR (200) NULL ,
+    p$$unit_of_work__rid VARCHAR (100)  NULL,
+    description VARCHAR (200) NULL ,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_by VARCHAR (50) NULL ,
+    created_by VARCHAR (50) NULL ,
+    name VARCHAR (100) NULL
+  );
+  
+  DROP TABLE app1_SLICED;
+  CREATE TABLE app1_SLICED (
+    object_rid VARCHAR (100) NULL ,
+    p$$object_rsx VARCHAR (100)  NULL ,
+    object_oid VARCHAR (100) NULL ,
+    p$$object_oid$0 VARCHAR (100)  NULL ,
+    p$$object_oid$1 VARCHAR (100)  NULL ,
+    object_idx INTEGER NOT NULL ,
+    p$$object_parent__rid VARCHAR (100)  NULL ,
+    p$$object_parent__oid VARCHAR (100)  NULL ,
+    object__class VARCHAR (200) NULL ,
+    p$$unit_of_work__rid VARCHAR (100)  NULL,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    created_by VARCHAR (200) NULL ,
+    modified_by VARCHAR (200) NULL ,
+    m1 VARCHAR (200) NULL ,
+    last_name VARCHAR (200) NULL ,
+    house_number VARCHAR (200) NULL ,
+    city VARCHAR (200) NULL ,
+    foreign_id VARCHAR (200) NULL ,
+    postal_code VARCHAR (200) NULL ,
+    description VARCHAR (200) NULL ,
+    assigned_address VARCHAR (200) NULL ,
+    p$$assigned_address__rid VARCHAR (200) NULL ,
+    p$$assigned_address__oid VARCHAR (200) NULL ,
+    product_id VARCHAR (200) NULL ,
+    salutation VARCHAR (200) NULL ,
+    street VARCHAR (200) NULL ,
+    address_line VARCHAR (200) NULL ,
+    address VARCHAR (200) NULL ,
+    text VARCHAR (200) NULL ,
+    birthdate DATE NULL ,
+    member_of_group VARCHAR (200) NULL ,
+    birthdate_as_date_time TIMESTAMP (6) WITH TIME ZONE NULL,
+    person_group VARCHAR (200) NULL ,
+    p$$person_group__rid VARCHAR (200) NULL ,
+    p$$person_group__oid VARCHAR (200) NULL ,
+    country VARCHAR (200) NULL ,
+    sex INTEGER NULL ,
+    given_name VARCHAR (200) NULL ,
+    product_group_id VARCHAR (200) NULL ,
+    place_of_birth VARCHAR (200) NULL ,
+    additional_info VARCHAR (200) NULL
+  );
+  
+  DROP TABLE app1_Segment;
+  CREATE TABLE app1_Segment (
+    object_rid VARCHAR (200) NOT NULL ,
+    object_oid VARCHAR (200) NOT NULL ,
+    object_idx INTEGER NOT NULL ,
+    p$$object_parent__rid VARCHAR (200)  NULL ,
+    p$$object_parent__oid VARCHAR (200)  NULL ,
+    object__class VARCHAR (200) NULL ,
+    description VARCHAR (200) NULL 
+  );
+  
+  DROP TABLE app1_MessageTemplate;
+  CREATE TABLE app1_MessageTemplate (
+    object_rid VARCHAR (200) NOT NULL ,
+    p$$object_rsx VARCHAR (100)  NULL ,
+    object_oid VARCHAR (200) NOT NULL ,
+    p$$object_oid$0 VARCHAR (100)  NULL ,
+    p$$object_oid$1 VARCHAR (100)  NULL ,
+    object_idx INTEGER NOT NULL ,
+    p$$object_parent__rid VARCHAR (200)  NULL ,
+    p$$object_parent__oid VARCHAR (200)  NULL ,
+    object__class VARCHAR (200) NULL ,
+    p$$unit_of_work__rid VARCHAR (100)  NULL,
+    text VARCHAR (200) NULL ,
+    description VARCHAR (200) NULL ,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    created_by VARCHAR (100) NULL ,
+    modified_by VARCHAR (100) NULL
+  );
+  
+  DROP TABLE audit2_UnitOfWork;
+  CREATE TABLE audit2_UnitOfWork (
+    object_rid VARCHAR (200) NOT NULL ,
+    object_oid VARCHAR (200) NOT NULL ,
+    p$$object_parent__rid VARCHAR (200)  NULL ,
+    p$$object_parent__oid VARCHAR (200)  NULL ,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    object__class VARCHAR (60) NULL ,
+    task_id VARCHAR (200) NULL
+  );
+  
+  DROP TABLE audit2_UnitOfWork_;
+  CREATE TABLE audit2_UnitOfWork_ (
+    object_rid VARCHAR (200) NOT NULL ,
+    object_oid VARCHAR (200) NOT NULL ,
+    object_idx INTEGER NOT NULL ,
+    created_by VARCHAR (200) NULL ,
+    involved VARCHAR (200) NULL ,
+    p$$involved__rid VARCHAR (200) NULL ,
+    p$$involved__oid VARCHAR (200) NULL
+  );
 
-CREATE TABLE app1_DOC (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	created_by varchar (200) NULL ,
-	modified_by varchar (200) NULL ,
-	object__class varchar (60) NULL ,
-	description varchar (100) NULL ,
-	content bytea NULL ,
-	keyword varchar (32) NULL 
-)
-;
+  DROP TABLE audit2_Involvement;
+  CREATE TABLE audit2_Involvement (
+    object_rid VARCHAR (200) NOT NULL ,
+    object_oid VARCHAR (200) NOT NULL ,
+    p$$object_parent__rid VARCHAR (200)  NULL ,
+    p$$object_parent__oid VARCHAR (200)  NULL ,
+    object__class VARCHAR (60) NULL ,
+    before_image VARCHAR (200) NULL,
+    p$$before_image__rid VARCHAR (200) NULL ,
+    p$$before_image__oid VARCHAR (200) NULL ,
+    after_image VARCHAR (200) NULL,
+    p$$after_image__rid VARCHAR (200) NULL ,
+    p$$after_image__oid VARCHAR (200) NULL
+  );
 
-CREATE TABLE app1_Invoice (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	p$$object_parent__rid varchar (200) NOT NULL ,
-	p$$object_parent__oid varchar (200) NOT NULL ,
-	object__class varchar (200) NULL ,
-	description varchar (200) NULL ,
-	product_group_id varchar (100) NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	created_by varchar (100) NULL ,
-	modified_by varchar (100) NULL 
-)
-;
+  DROP TABLE audit2_Involvement_;
+  CREATE TABLE audit2_Involvement_ (
+    object_rid VARCHAR (200) NOT NULL ,
+    object_oid VARCHAR (200) NOT NULL ,
+    object_idx INTEGER NOT NULL ,
+    modified_feature VARCHAR (60) NULL
+  );
 
-CREATE TABLE app1_InvoicePosition (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	object__class varchar (200) NULL ,
-	description varchar (200) NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	created_by varchar (100) NULL ,
-	modified_by varchar (100) NULL ,
-	product_id varchar (50) NULL 
-)
-;
+/*  Test Booking */
 
-CREATE TABLE app1_Member (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	object__class varchar (200) NULL ,
-	description varchar (200) NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_by varchar (50) NULL ,
-	created_by varchar (50) NULL ,
-	m1 varchar (200) NULL ,
-	p$$m1__rid varchar (200) NULL ,
-	p$$m1__oid varchar (200) NULL ,
-	m2 varchar (200) NULL ,
-	p$$m2__rid varchar (200) NULL ,
-	p$$m2__oid varchar (200) NULL 
-)
-;
+  DROP TABLE test_CB_SLICED;
+  CREATE TABLE test_CB_SLICED (
+    object_rid VARCHAR (200) NOT NULL ,
+    object_oid VARCHAR (200) NOT NULL ,
+    object_idx INTEGER NOT NULL ,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    created_by VARCHAR (200) NULL ,
+    modified_by VARCHAR (200) NULL ,
+    object__class VARCHAR (60) NULL ,
+    cb_type VARCHAR (10) NULL ,
+    advice_text VARCHAR (200) NULL ,
+    cancels_c_b VARCHAR (512) NULL 
+  );
 
-CREATE TABLE app1_PersonGroup (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	object__class varchar (200) NULL ,
-	description varchar (200) NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_by varchar (50) NULL ,
-	created_by varchar (50) NULL ,
-	name varchar (100) NULL 
-)
-;
+  DROP TABLE test_SLB_SLICED;
+  CREATE TABLE test_SLB_SLICED (
+    object_rid VARCHAR (200) NOT NULL ,
+    object_oid VARCHAR (200) NOT NULL ,
+    object_idx INTEGER NOT NULL ,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    created_by VARCHAR (200) NULL ,
+    modified_by VARCHAR (200) NULL ,
+    object__class VARCHAR (60) NULL ,
+    slb_type VARCHAR (10) NULL ,
+    pos VARCHAR (512) NULL ,
+    price DECIMAL(18, 9) NULL ,
+    is_debit DECIMAL(18, 9) NULL ,
+    is_long DECIMAL(18, 9) NULL ,
+    price_currency VARCHAR(10) NULL ,
+    value_date VARCHAR(20) NULL ,
+    booking_date VARCHAR (20) NULL ,
+    quantity DECIMAL(18, 9) NULL ,
+    quantity_absolute DECIMAL(18, 9) NULL ,
+    visibility VARCHAR (10) NULL ,
+    admin_descr VARCHAR (100) NULL ,
+    description VARCHAR (200) NULL ,
+    cred_value bytea NULL ,
+    p$$object_parent__oid VARCHAR (20) NULL ,
+    p$$object_parent__rid INTEGER NULL ,
+    p$$pos__oid VARCHAR (20) NULL ,
+    p$$pos__rid INTEGER NULL ,
+    p$$pos_parent__oid VARCHAR (50) NULL ,
+    p$$pos_parent__rid INTEGER NULL 
+  );
 
-CREATE TABLE app1_SLICED (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	object_idx INTEGER NOT NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	created_by varchar (200) NULL ,
-	modified_by varchar (200) NULL ,
-	object__class varchar (60) NULL ,
-	m1 varchar (200) NULL ,
-	last_name varchar (200) NULL ,
-	house_number varchar (200) NULL ,
-	city varchar (200) NULL ,
-	foreign_id varchar (200) NULL ,
-	postal_code varchar (200) NULL ,
-	description varchar (200) NULL ,
-	assigned_address varchar (200) NULL ,
-	p$$assigned_address__rid varchar (200) NULL ,
-	p$$assigned_address__oid varchar (200) NULL ,
-	product_id varchar (200) NULL ,
-	salutation varchar (200) NULL ,
-	street varchar (200) NULL ,
-	address_line varchar (200) NULL ,
-	address varchar (200) NULL ,
-	text varchar (200) NULL ,
-	birthdate DATE NULL ,
-	member_of_group varchar (200) NULL ,
-	birthdate_as_date_time TIMESTAMP (3) WITH TIME ZONE NULL,
-	person_group varchar (200) NULL ,
-	p$$person_group__rid varchar (200) NULL ,
-	p$$person_group__oid varchar (200) NULL ,
-	country varchar (200) NULL ,
-	sex INTEGER NULL ,
-	given_name varchar (200) NULL ,
-	product_group_id varchar (200) NULL ,
-	place_of_birth varchar (200) NULL,
-	additional_info varchar (200) NULL
-)
-;
+/*  Test Extension */
 
-CREATE TABLE app1_Segment (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	object__class varchar (200) NULL ,
-	description varchar (200) NULL 
-)
-;
-
-CREATE TABLE audit1_Segment (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	object__class varchar (200) NULL ,
-	description varchar (200) NULL
-)
-;
-
-CREATE TABLE audit_SLICED (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	created_by varchar (200) NULL ,
-	modified_by varchar (200) NULL ,
-	object__class varchar (60) NULL ,
-	m1 varchar (200) NULL ,
-	last_name varchar (200) NULL ,
-	house_number varchar (200) NULL ,
-	city varchar (200) NULL ,
-	foreign_id varchar (200) NULL ,
-	postal_code varchar (200) NULL ,
-	description varchar (200) NULL ,
-	assigned_address varchar (200) NULL ,
-	product_id varchar (200) NULL ,
-	salutation varchar (200) NULL ,
-	street varchar (200) NULL ,
-	address_line varchar (200) NULL ,
-	address varchar (200) NULL ,
-	text varchar (200) NULL ,
-	birthdate varchar (200) NULL ,
-	member_of_group varchar (200) NULL ,
-	birthdate_as_date_time varchar (200) NULL ,
-	person_group varchar (200) NULL ,
-	country varchar (200) NULL ,
-	sex INTEGER NULL ,
-	given_name varchar (200) NULL ,
-	product_group_id varchar (200) NULL ,
-	involved varchar (200) NULL ,
-	place_of_birth varchar (200) NULL
-)
-;
-
-CREATE TABLE test_CB_SLICED (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	created_by varchar (200) NULL ,
-	modified_by varchar (200) NULL ,
-	object__class varchar (60) NULL ,
-	cb_type varchar (10) NULL ,
-	advice_text varchar (200) NULL ,
-	cancels_c_b varchar (512) NULL 
-)
-;
-
-CREATE TABLE test_SLB_SLICED (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	created_by varchar (200) NULL ,
-	modified_by varchar (200) NULL ,
-	object__class varchar (60) NULL ,
-	slb_type varchar (10) NULL ,
-	pos varchar (512) NULL ,
-	price decimal(18, 9) NULL ,
-	is_debit decimal(18, 9) NULL ,
-	is_long decimal(18, 9) NULL ,
-	price_currency varchar (10) NULL ,
-	value_date varchar (20) NULL ,
-	booking_date varchar (20) NULL ,
-	quantity decimal(18, 9) NULL ,
-	quantity_absolute decimal(18, 9) NULL ,
-	visibility varchar (10) NULL ,
-	admin_descr varchar (100) NULL ,
-	description varchar (200) NULL ,
-	cred_value bytea NULL ,
-	p$$object_parent__oid varchar (20) NULL ,
-	p$$object_parent__rid INTEGER NULL ,
-	p$$pos__oid varchar (20) NULL ,
-	p$$pos__rid INTEGER NULL ,
-	p$$pos_parent__oid varchar (50) NULL ,
-	p$$pos_parent__rid INTEGER NULL 
-)
-;
-
-CREATE TABLE app1_MessageTemplate (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	object__class varchar (200) NULL ,
-	text varchar (200) NULL ,
-	description varchar (200) NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	created_by varchar (100) NULL ,
-	modified_by varchar (100) NULL
-)
-;
-
-CREATE TABLE audit2_UnitOfWork (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-	object__class varchar (60) NULL ,
-	task_id varchar (200) NULL
-) ;
-
-CREATE TABLE audit2_UnitOfWork_ (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	created_by varchar (200) NULL ,
-	involved varchar (200) NULL ,
-	p$$involved__rid varchar (200) NULL ,
-	p$$involved__oid varchar (200) NULL
-) ;
-
-CREATE TABLE audit2_Involvement (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	p$$object_parent__rid varchar (200)  NULL ,
-	p$$object_parent__oid varchar (200)  NULL ,
-	object__class varchar (60) NULL ,
-	task_id varchar (200) NULL,
-	object_id varchar (200) NULL,
-	before_image varchar (200) NULL,
-	p$$before_image__rid varchar (200) NULL ,
-	p$$before_image__oid varchar (200) NULL ,
-	after_image varchar (200) NULL,
-	p$$after_image__rid varchar (200) NULL ,
-	p$$after_image__oid varchar (200) NULL
-) ;
-
-CREATE TABLE audit2_Involvement_ (
-	object_rid varchar (200) NOT NULL ,
-	object_oid varchar (200) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	modified_feature varchar (60) NULL
-) ;
-
+  DROP TABLE EXTENSION_DEFAULT;
   CREATE TABLE EXTENSION_DEFAULT (	
     OBJECT_RID varchar(200) NOT NULL, 
 	  OBJECT_OID varchar(200) NOT NULL, 
@@ -387,6 +392,7 @@ CREATE TABLE audit2_Involvement_ (
 	  VALUE8 varchar(8)
   ) ;
 
+  DROP TABLE EXTENSION_NATIVE;
   CREATE TABLE EXTENSION_NATIVE (
     OBJECT_RID varchar(200) NOT NULL, 
  	  OBJECT_OID varchar(200) NOT NULL, 
@@ -418,6 +424,7 @@ CREATE TABLE audit2_Involvement_ (
 	  VALUE8 DATE
   ) ;
 
+  DROP TABLE EXTENSION_NUMERIC;
   CREATE TABLE EXTENSION_NUMERIC (	
     OBJECT_RID varchar(200) NOT NULL, 
 	  OBJECT_OID varchar(200) NOT NULL, 
@@ -438,7 +445,7 @@ CREATE TABLE audit2_Involvement_ (
 	  VALUE5 decimal, 
 	  VALUE9 varchar(200), 
 	  VALUE10 bytea, 
-	  VALUE11A varchar(10),
+	  VALUE11A integer,
 	  VALUE11B decimal(12,3),
 	  P$$SEGMENT_parent__rid varchar(200),
 	  P$$SEGMENT_parent__oid varchar(200),
@@ -447,14 +454,53 @@ CREATE TABLE audit2_Involvement_ (
 	  VALUE8 varchar(8)
   ) ;
 
+  DROP TABLE EXTENSION_SEGMENT ;
   CREATE TABLE EXTENSION_SEGMENT (
-    OBJECT_RID varchar(200) NOT NULL,
-	  OBJECT_OID varchar(200) NOT NULL,
-	  OBJECT_IDX integer NOT NULL,
-	  OBJECT__CLASS varchar(200),
-	  DESCRIPTION varchar(200)
+    OBJECT_RID VARCHAR(200) NOT NULL,
+	  OBJECT_OID VARCHAR(200) NOT NULL,
+	  OBJECT_IDX INTEGER NOT NULL,
+	  OBJECT__CLASS VARCHAR(200),
+	  DESCRIPTION VARCHAR(200)
   ) ;
 
+
+/*  Test org::openmdx::base::Aspect */
+
+  DROP TABLE aspect_Segment;
+  CREATE TABLE aspect_Segment (
+    object_id VARCHAR (100) NOT NULL ,
+    object__class VARCHAR (100) NULL ,
+    description VARCHAR (200) NULL
+  );
+ 
+  DROP TABLE aspect_Object;
+  CREATE TABLE aspect_Object (
+    object_id VARCHAR (100) NOT NULL ,
+    object__class VARCHAR (100) NULL ,
+    core VARCHAR (100) NULL ,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL ,
+    created_by_ DECIMAL(10, 0) NULL ,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL ,
+    modified_by_ DECIMAL(10, 0) NULL ,
+    string VARCHAR (200) NULL ,
+    prime_ DECIMAL(10, 0) NULL ,
+    url VARCHAR (200) NULL
+  );
+
+  DROP TABLE aspect_Object_;
+  CREATE TABLE aspect_Object_ (
+    object_id VARCHAR (100) NOT NULL ,
+    object_idx INTEGER NOT NULL ,
+    object__class VARCHAR (100) NULL ,
+    created_by VARCHAR (200) NULL ,
+    modified_by VARCHAR (200) NULL ,
+    prime DECIMAL(10, 0) NULL
+  );
+
+
+/*  org::openmdx::state2 */
+
+  DROP TABLE datestate_NATIVE;
   CREATE TABLE datestate_NATIVE (
 	OBJECT_ID varchar(200) NOT NULL, 
   	OBJECT__CLASS varchar(200) NOT NULL,
@@ -482,6 +528,7 @@ CREATE TABLE audit2_Involvement_ (
     CONSTRAINT PK_datestate_NATIVE PRIMARY KEY (OBJECT_ID)
   ) ;
 
+  DROP TABLE datestate_NATIVE_;
   CREATE TABLE datestate_NATIVE_ (
 	OBJECT_ID varchar(200) NOT NULL, 
 	OBJECT_IDX decimal(5,0) NOT NULL,
@@ -494,37 +541,7 @@ CREATE TABLE audit2_Involvement_ (
     CONSTRAINT PK_datestate_NATIVE_ PRIMARY KEY (OBJECT_ID,OBJECT_IDX)
   ) ;
 
- CREATE TABLE aspect_Segment (
-	object_id varchar (100) NOT NULL ,
-	object__class varchar (100) NULL ,
-	description varchar (200) NULL
-  )
-  ;
-
-  CREATE TABLE aspect_Object (
-	object_id varchar (100) NOT NULL ,
-	object__class varchar (100) NULL ,
-	core varchar (100) NULL ,
-	created_at TIMESTAMP (3) WITH TIME ZONE NULL ,
-	created_by_ decimal(10, 0) NULL ,
-	modified_at TIMESTAMP (3) WITH TIME ZONE NULL ,
-	modified_by_ decimal(10, 0) NULL ,
-	string varchar (200) NULL ,
-	prime_ decimal(10, 0) NULL ,
-	url varchar (200) NULL
-  )
-  ;
-
-  CREATE TABLE aspect_Object_ (
-	object_id varchar (100) NOT NULL ,
-	object_idx INTEGER NOT NULL ,
-	object__class varchar (100) NULL ,
-	created_by varchar (200) NULL ,
-	modified_by varchar (200) NULL ,
-	prime decimal(10, 0) NULL
-  )
-  ;
-
+  DROP TABLE state2_NATIVE ;
   CREATE TABLE state2_NATIVE (
 	object_id varchar (100) NOT NULL ,
 	object__class varchar (100) NULL ,
@@ -551,6 +568,7 @@ CREATE TABLE audit2_Involvement_ (
 	short_value decimal(10, 0) NULL
   );
 
+  DROP TABLE state2_NATIVE_;
   CREATE TABLE state2_NATIVE_ (
 	object_id varchar (100) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
@@ -563,17 +581,22 @@ CREATE TABLE audit2_Involvement_ (
 	state_c varchar (256) NULL
   );
 
- CREATE TABLE generic1_Property (
-	object_rid varchar(100) NOT NULL,
-	object_oid varchar(200) NOT NULL,
-	p$$object_parent__rid varchar(100) NULL, 
-	p$$object_parent__oid varchar(200) NULL,
-	object__class varchar(200) NULL ,
-	description varchar(200) NULL ,
-    created_at TIMESTAMP (3) WITH TIME ZONE NULL,
-    modified_at TIMESTAMP (3) WITH TIME ZONE NULL
- );
 
+/*  Test org::openmdx::generic1 */
+
+  DROP TABLE generic1_Property ;
+  CREATE TABLE generic1_Property (
+    object_rid VARCHAR(100) NOT NULL,
+    object_oid VARCHAR(200) NOT NULL,
+    p$$object_parent__rid VARCHAR(100) NULL, 
+    p$$object_parent__oid VARCHAR(200) NULL,
+    object__class VARCHAR(200) NULL ,
+    description VARCHAR(200) NULL ,
+    created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL
+  );
+
+  DROP TABLE generic1_Property_N ;
  CREATE TABLE generic1_Property_N (
 	object_rid varchar(100) NOT NULL,
 	object_oid varchar(200) NOT NULL,

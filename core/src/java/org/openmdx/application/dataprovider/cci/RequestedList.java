@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX http://www.openmdx.org/
- * Name:        $Id: RequestedList.java,v 1.8 2010/06/02 13:39:35 hburger Exp $
+ * Name:        $Id: RequestedList.java,v 1.10 2010/10/21 17:16:54 wfro Exp $
  * Description: RequestedList class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:39:35 $
+ * Date:        $Date: 2010/10/21 17:16:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,6 @@ import java.io.Serializable;
 import java.util.AbstractSequentialList;
 import java.util.Arrays;
 import java.util.ListIterator;
-import java.util.NoSuchElementException;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -324,8 +323,33 @@ public class RequestedList
                     direction,
                     this
                 );
+                if(this.reply == null) {
+                    if(RequestedList.this.exception != null) {
+                        throw new RuntimeServiceException(
+                            RequestedList.this.exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.COMMUNICATION_FAILURE,
+                            "Unable to retrieve objects",
+                            new BasicException.Parameter("referenceFilter", RequestedList.this.referenceFilter),
+                            new BasicException.Parameter("attributeFilter", (Object[])RequestedList.this.attributeFilter),
+                            new BasicException.Parameter("attributeSelector", RequestedList.this.attributeSelector),
+                            new BasicException.Parameter("attributeSpecifiers", (Object[])RequestedList.this.attributeSpecifiers)                            
+                        );
+                    } 
+                    else {
+                        throw new RuntimeServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "Unable to retrieve objects. However, no exception was reported by processor",
+                            new BasicException.Parameter("referenceFilter", RequestedList.this.referenceFilter),
+                            new BasicException.Parameter("attributeFilter", (Object[])RequestedList.this.attributeFilter),
+                            new BasicException.Parameter("attributeSelector", RequestedList.this.attributeSelector),
+                            new BasicException.Parameter("attributeSpecifiers", (Object[])RequestedList.this.attributeSpecifiers)                            
+                        );
+                    }
+                }
                 return Arrays.asList(
-                    (Object[])reply.getObjects()
+                    (Object[])this.reply.getObjects()
                 ).listIterator(
                     direction == SortOrder.ASCENDING.code() ? 0 : reply.getObjects().length
                 );

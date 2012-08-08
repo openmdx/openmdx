@@ -1,10 +1,10 @@
 /*
  * ==================================================================== 
- * Name: $Id: RefObject_1.java,v 1.134 2010/06/22 07:13:54 hburger Exp $ 
+ * Name: $Id: RefObject_1.java,v 1.139 2010/12/22 09:39:43 hburger Exp $ 
  * Description: RefObject_1 class 
- * Revision: $Revision: 1.134 $ 
+ * Revision: $Revision: 1.139 $ 
  * Owner: OMEX AG, Switzerland, http://www.omex.ch 
- * Date: $Date: 2010/06/22 07:13:54 $
+ * Date: $Date: 2010/12/22 09:39:43 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -63,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.logging.Level;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
@@ -359,7 +361,7 @@ class RefObject_1
                     return DateMarshaller.NORMALIZE.marshal(value);
                 } 
                 else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
-                    return URIMarshaller.STRING_TO_URI.marshal(value);
+                    return URIMarshaller.NORMALIZE.marshal(value);
                 } 
                 else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
                     return DurationMarshaller.NORMALIZE.marshal(value);
@@ -422,7 +424,7 @@ class RefObject_1
                 } 
                 else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
                     return new MarshallingList(
-                        URIMarshaller.STRING_TO_URI,
+                        URIMarshaller.NORMALIZE,
                         values
                     );
                 }                 
@@ -477,7 +479,7 @@ class RefObject_1
                 } 
                 else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
                     return new MarshallingSet(
-                        URIMarshaller.STRING_TO_URI,
+                        URIMarshaller.NORMALIZE,
                         values
                     );
                 } 
@@ -532,7 +534,7 @@ class RefObject_1
                     return new MarshallingSortedMap(DateMarshaller.NORMALIZE, values);
                 } 
                 else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
-                    return new MarshallingSortedMap(URIMarshaller.STRING_TO_URI, values);
+                    return new MarshallingSortedMap(URIMarshaller.NORMALIZE, values);
                 } 
                 else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
                     return new MarshallingSortedMap(DurationMarshaller.NORMALIZE, values);
@@ -698,11 +700,6 @@ class RefObject_1
         Object value, 
         long position
     ) throws ServiceException {
-
-        // SysLog.trace("refMofId", refMofId());
-        // SysLog.trace("feature", featureDef);
-        // SysLog.trace("qualifier", qualifier);
-
         boolean isAttribute = this.object.getModel().isAttributeType(featureDef);
         if (!isAttribute) { 
             throw new ServiceException(
@@ -712,7 +709,6 @@ class RefObject_1
                 new BasicException.Parameter("model element", featureDef)
             ); 
         }
-
         ModelElement_1_0 type = this.getType(featureDef);
         String qualifiedTypeName = (String) type.objGetValue("qualifiedName");
         String multiplicity = (String) featureDef.objGetValue("multiplicity");
@@ -795,7 +791,7 @@ class RefObject_1
                 else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
                     this.object.objSetValue(
                         featureName, 
-                        URIMarshaller.STRING_TO_URI.unmarshal(value)
+                        URIMarshaller.NORMALIZE.unmarshal(value)
                     );
                 } 
                 else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
@@ -940,11 +936,6 @@ class RefObject_1
         Object newValue,
         long length
     ) throws ServiceException {
-
-        // SysLog.trace("refMofId", refMofId());
-        // SysLog.trace("feature", featureDef);
-        // SysLog.trace("qualifier", qualifier);
-
         boolean isAttribute = this.object.getModel().isAttributeType(featureDef);
         if (!isAttribute) { 
             throw new ServiceException(
@@ -1007,11 +998,7 @@ class RefObject_1
         ModelElement_1_0 featureDef, 
         List<?> args
     ) throws ServiceException {
-
-        SysLog.trace("refMofId", this.object.jdoGetObjectId());
-        SysLog.trace("feature", featureDef);
-        SysLog.trace("args", args);
-
+        SysLog.log(Level.FINEST, "Sys|refMofId={0},featureDef={1}|args={2}", this.object.jdoGetObjectId(), featureDef, args);
         this.assertOperation(featureDef);
 
         // get the type names of 'in' parameter and 'result'
@@ -1481,7 +1468,7 @@ class RefObject_1
             JDOHelper.getPersistenceManager(this.object).deletePersistent(this.object);
         } 
         catch(Exception e) {
-            throw new RuntimeServiceException(e);
+            throw new JmiServiceException(e);
         } 
     }
 
@@ -1824,10 +1811,7 @@ class RefObject_1
                                 );
                             } 
                             else if (PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
-                                this.setValue(
-                                    featureDef, 
-                                    URIMarshaller.STRING_TO_URI.marshal("20000101")
-                                );
+                                this.setValue(featureDef, URI.create("xri://+null"));
                             } 
                             else if (PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
                                 this.setValue(
@@ -1852,15 +1836,20 @@ class RefObject_1
                             } 
                             else if (this.object.getModel().isStructureType(type)) {
                                 throw new UnsupportedOperationException(
-                                    "initializing of structs not supported"
+                                    "Initialization of structs not supported"
                                 );
                             } 
                             else if (
                                     this.object.getModel().isClassType(type) || 
                                     PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
                             ) {
-                                SysLog.detail("initializing of object references not supported", featureDef);
+                                SysLog.detail("Initialization of object references not supported", featureDef);
                             } 
+                            else if(
+                                "org:omg:model1:PrimitiveType".equals(qualifiedTypeName)
+                            ) {
+                                SysLog.detail("Initialization of user defined primitive types not supported", featureDef);  
+                            }
                             else {
                                 throw new UnsupportedOperationException(
                                     "unsupported type " + type
@@ -2394,11 +2383,11 @@ class RefObject_1
      * @see org.openmdx.base.persistence.spi.Cloneable#openmdxjdoClone()
      */
 //  @Override
-    public RefObject openmdxjdoClone() {
+    public RefObject openmdxjdoClone(String... exclude) {
         try {
             return this.refClass().refCreateInstance(
                 Collections.singletonList(
-                    this.refDelegate().openmdxjdoClone()
+                    this.refDelegate().openmdxjdoClone(exclude)
                 )
             );
         } catch (Exception exception) {

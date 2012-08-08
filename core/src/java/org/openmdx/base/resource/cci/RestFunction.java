@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestFunction.java,v 1.8 2010/02/16 18:39:10 hburger Exp $
+ * Name:        $Id: RestFunction.java,v 1.9 2010/09/13 16:46:29 hburger Exp $
  * Description: REST Functions
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/16 18:39:10 $
+ * Date:        $Date: 2010/09/13 16:46:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,10 +49,6 @@
  * listed in the NOTICE file.
  */
 package org.openmdx.base.resource.cci;
-
-import javax.resource.cci.InteractionSpec;
-
-import org.openmdx.base.persistence.cci.Queries;
 
 /**
  * REST Functions

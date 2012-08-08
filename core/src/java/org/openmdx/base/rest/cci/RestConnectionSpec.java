@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestConnectionSpec.java,v 1.4 2010/04/28 12:49:48 hburger Exp $
+ * Name:        $Id: RestConnectionSpec.java,v 1.5 2010/10/24 21:46:37 hburger Exp $
  * Description: REST Connection Specification
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/28 12:49:48 $
+ * Date:        $Date: 2010/10/24 21:46:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,8 +64,7 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
      */
     public RestConnectionSpec(
     ){
-        this.userName = null;
-        this.password = null;
+    	this(null, null, null);
     }
     
     /**
@@ -78,19 +77,39 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
         String user,
         String password
     ){
+    	this(user, password, null);
+    }
+
+    /**
+     * Constructor 
+     *
+     * @param user
+     * @param password
+     */
+    public RestConnectionSpec(
+        String user,
+        String password,
+        Object tenant
+    ){
         this.userName = user;
         this.password = password;
+        this.tenant = tenant;
     }
     
     /**
-     * JCA's standard property 'UserName'
+     * @serial JCA's standard property 'UserName'
      */
     private String userName;
     
     /**
-     * JCA's standard property 'Password'
+     * @serial JCA's standard property 'Password'
      */
     private String password;
+
+    /**
+     * @serial The 'Tenant' property
+     */
+    private Object tenant;
     
     /**
      * Implements <code>Serializable</code>
@@ -133,7 +152,26 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
         return this.password;
     }
 
-    /* (non-Javadoc)
+    
+    /**
+     * Retrieve the tenant
+     * 
+     * @return the tenant
+     */
+    public Object getTenant() {
+		return tenant;
+	}
+
+    /**
+     * Set the tenant
+     * 
+     * @param tenant
+     */
+	public void setTenant(Object tenant) {
+		this.tenant = tenant;
+	}
+
+	/* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override

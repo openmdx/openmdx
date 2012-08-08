@@ -23,5 +23,5 @@
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="test.openmdx.app1.TestMain"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="openMDX 2 ~ Test Core (jre-1.6)"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djava.protocol.handler.pkgs=org.openmdx.kernel.url.protocol&#10;-Duser.timezone=${openmdx-test.core.timezone}&#13;-Dorg.openmdx.comp.env.jdbc.DataSource=${openmdx-test.core.datasource}"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djava.protocol.handler.pkgs=org.openmdx.kernel.url.protocol&#10;-Duser.timezone=${openmdx-test.core.timezone}&#13;-Dorg.openmdx.comp.env.jdbc.DataSource=${openmdx-test.core.datasource}&#10;-Djavax.xml.datatype.DatatypeFactory=org.apache.xerces.jaxp.datatype.DatatypeFactoryImpl"/>
 </launchConfiguration>

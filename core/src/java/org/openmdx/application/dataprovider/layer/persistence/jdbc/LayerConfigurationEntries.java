@@ -2,8 +2,8 @@
  * ==================================================================== Project:
  * openmdx, http://www.openmdx.org/ Name: $Id: LayerConfigurationEntries.java,v
  * 1.37 2006/11/17 16:55:57 hburger Exp $ Description: Generated constants for
- * LayerConfigurationEntries Revision: $Revision: 1.5 $ Owner: OMEX AG,
- * Switzerland, http://www.omex.ch Date: $Date: 2010/06/04 19:32:05 $
+ * LayerConfigurationEntries Revision: $Revision: 1.11 $ Owner: OMEX AG,
+ * Switzerland, http://www.omex.ch Date: $Date: 2010/11/18 15:44:34 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -236,18 +236,25 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
 
   /**
      * The OBJECT_ID_ATTRIBUTES_SUFFIX defines the suffix which is added to
-     * attributes which are object id's. Default value is 'objectId'. Typical
-     * value is 'oid'.
+     * attributes which are object id's. Default value is '_objectId'. Typical
+     * value is '_oid'.
      */
   static public final String OBJECT_ID_ATTRIBUTES_SUFFIX = "objectIdAttributesSuffix";
 
   /**
      * The REFERENCE_ID_ATTRIBUTES_SUFFIX defines the suffix which is added to
-     * attributes which are reference id's. Default value is 'referenceId'.
-     * Typical value is 'rid'.
+     * attributes which are reference id's. Default value is '_referenceId'.
+     * Typical value is '_rid'.
      */
   static public final String REFERENCE_ID_ATTRIBUTES_SUFFIX = "referenceIdAttributesSuffix";
 
+  /**
+   * The REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX defines the suffix which is added to
+   * attributes which are reference id suffixes. Default value is '_referenceIdSuffix'.
+   * Typical value is '_rsx'.
+   */
+static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdSuffixAttributesSuffix";
+  
   /**
      * Attributes which are used privately by the plugin are prefixed with the
      * specified prefix. Default value is 'p$$'.
@@ -267,9 +274,9 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
      * <li>1 - add parent --> adds the attributes p$$object_parent_refId,
      * p$$object_parent_objId</li>
      * <li>2 - normalize object paths --> level 1 plus adds the attributes
-     * p$$\u00aba\u00bb_objId, p$$\u00aba\u00bb_refId</li>
+     * p$$&lang;a&rang;_objId, p$$&lang;a&rang;_refId</li>
      * <li>3 - normalize object parent paths --> level 2 plus adds the
-     * attributes p$$\u00aba\u00bb_parent_objId, p$$\u00aba\u00bb_parent_refId</li>
+     * attributes p$$&lang;a&rang;_parent_objId, p$$&lang;a&rang;_parent_refId</li>
      * </ul>
      */
   static public final String PATH_NORMALIZE_LEVEL = "pathNormalizeLevel";
@@ -326,9 +333,9 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
      * <li>without objectIdPattern
      * 
      * <pre>
-     *  SELECT v1.*, v2.\u00abmixin attributes\u00bb FROM
-     *  (SELECT * FROM \u00abdb object\u00bb) v1,
-     *  (SELECT object_oid, object_rid, \u00abmixin attributes\u00bb FROM \u00abdb object\u00bb) v2
+     *  SELECT v1.*, v2.&lang;mixin attributes&rang; FROM
+     *  (SELECT * FROM &lang;db object&rang;) v1,
+     *  (SELECT object_oid, object_rid, &lang;mixin attributes&rang; FROM &lang;db object&rang;) v2
      *  WHERE
      *  v1.object_rid = v2.object_rid AND
      *  v1.object_oid = v2.object_oid
@@ -338,9 +345,9 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
      * <li>with objectIdPattern
      * 
      * <pre>
-     *  SELECT v1.*, v2.\u00abmixin attributes\u00bb FROM
-     *  (SELECT * FROM \u00abdb object\u00bb) v1,
-     *  (SELECT object_oid, object_rid, \u00abmixin attributes\u00bb FROM \u00abdb object) v2
+     *  SELECT v1.*, v2.&lang;mixin attributes&rang; FROM
+     *  (SELECT * FROM &lang;db object&rang;) v1,
+     *  (SELECT object_oid, object_rid, &lang;mixin attributes&rang; FROM &lang;db object) v2
      *  WHERE
      *  v1.object_rid = v2.object_rid AND
      *  v1.p$$object_oid$0 = v2.p$$object_oid$0 AND v1.p$$object_oid$1 = v2.p$$object_oid$1
@@ -350,7 +357,7 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
      * </ul>
      * <p>
      * p$$object_oid$0, $1, etc. represent the object_oid of the underlying
-     * \u00abdb object\u00bb parsed into object components.
+     * &lang;db object&rang; parsed into object components.
      */
   static public final String OBJECT_ID_PATTERN = "objectIdPattern";
 
@@ -749,5 +756,39 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
    * core filter properties.
    */
   static public final String DISABLE_STATE_FILTER_SUBSTITUATION = "disableStateFilterSubstitution";
+
+  /**
+   * Tells whether views shall be used to retrieve redundant columns.<br>
+   * Defaults to <code>true</code>.
+   */
+  static public final String USE_VIEWS_FOR_REDUNDANT_COLUMNS = "useViewsForRedundantColumns";
+  
+  /**
+   * Tells whether the preferences table shall be used to amend the configuration.<br>
+   * Defaults to <code>true</code>.
+   */
+  static public final String USE_PREFERENCES_TABLE = "usePreferencesTable";
+
+  /**
+   * If views are used for redundant columns and a removable reference id prefix is specified then
+   * the suffix is put into the object's reference id suffix column.
+   */
+  static public final String REMOVABLE_REFERENCE_ID_PREFIX = "removableReferenceIdPrefix";
+
+  /**
+   * Do not try absolute positioning for the given DB object
+   */
+  static public final String DISABLE_ABSOLUTE_POSITIONING = "disableAbsolutePositioning"; 
+      
+  /**
+   * The unit of work's parent RID is set if its provider is specified
+   */
+  static public final String UNIT_OF_WORK_PROVIDER = "unitOfWorkProvider";
+  
+  /**
+   * Tells whether descendants shall be deleted by the persistence layer.<br>
+   * Defaults to <code>true</code>.
+   */
+  static public final String CASCADE_DELETES = "cascadeDeletes";
 
 }

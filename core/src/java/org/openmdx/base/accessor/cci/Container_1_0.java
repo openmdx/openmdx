@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Container_1_0.java,v 1.12 2010/06/30 12:49:16 hburger Exp $
+ * Name:        $Id: Container_1_0.java,v 1.13 2010/12/18 18:37:38 hburger Exp $
  * Description: Container_1_0 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 12:49:16 $
+ * Date:        $Date: 2010/12/18 18:37:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,8 @@ package org.openmdx.base.accessor.cci;
 import java.util.List;
 import java.util.Map;
 
+import javax.jdo.FetchPlan;
+
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.OrderSpecifier;
@@ -94,7 +96,8 @@ public interface Container_1_0
     /**
      * Applies given criteria to the elements of the container and returns the
      * result as list.
-     *
+     * 
+     * @param fetchPlan 
      * @param       criteria
      *                The criteria to be applied to objects of this container;
      *                or <code>null</code> for all the container's elements in
@@ -108,6 +111,7 @@ public interface Container_1_0
      *                  being applied to this container's elements.
      */
     List<DataObject_1_0> values(
+        FetchPlan fetchPlan, 
         OrderSpecifier... criteria
     );
 

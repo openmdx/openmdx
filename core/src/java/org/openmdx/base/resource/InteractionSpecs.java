@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InteractionSpecs.java,v 1.10 2010/02/10 16:06:33 hburger Exp $
+ * Name:        $Id: InteractionSpecs.java,v 1.11 2010/12/13 15:48:23 hburger Exp $
  * Description: InteractionSpecs 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/10 16:06:33 $
+ * Date:        $Date: 2010/12/13 15:48:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -91,6 +91,10 @@ public class InteractionSpecs {
             RestFunction.PUT,
             retainValues ? InteractionSpec.SYNC_SEND_RECEIVE : InteractionSpec.SYNC_SEND
         );
+        this.MOVE = new RestInteractionSpec(
+            RestFunction.PUT,
+            InteractionSpec.SYNC_SEND_RECEIVE
+        );
         this.DELETE = new RestInteractionSpec(
             RestFunction.DELETE,
             InteractionSpec.SYNC_SEND
@@ -121,6 +125,11 @@ public class InteractionSpecs {
      * A {@link RestFunction#PUT} Object Update Interaction Specification
      */
     public final RestInteractionSpec PUT;
+
+    /**
+     * A {@link RestFunction#PUT} Object Update Interaction Specification
+     */
+    public final RestInteractionSpec MOVE;    
     
     /**
      * A {@link RestFunction#DELETE} Object Removal Interaction Specification
